@@ -1,0 +1,34 @@
+
+html {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+
+.node-map-main-wrapper {
+  width: 1500px;
+  background-color: #f8f8f8;
+  padding: 20px;
+  border-radius: 2%;
+}
+
+.node-map-main-content {
+  width: 100%;
+}
+
+.node-map-svg-wrapper {
+  width: 100%;
+}
+
+.node-map-svg-wrapper {
+  fill: #ececec;
+  stroke: black;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 0.5;
+}
