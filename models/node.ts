@@ -1,7 +1,6 @@
 
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import Location from './location.js';
-import HostingService from './hostingService.js';
+import { pubkeyToAddress } from "@cosmjs/tendermint-rpc";
 
 import { 
   CreateNewNodeInterface,
@@ -9,6 +8,8 @@ import {
   NodeByIdInterface
  } from "../interfaces/node.js";
 import { CreateOrUpdateLocationInterface } from '../interfaces/location.js';
+
+import { uint8ArrayToIPv4, ipv4ToUint8Array } from '../utils/ipAddressTypeConversions.js';
 
 /* 
 
@@ -42,20 +43,25 @@ const nodeSchema = new Schema<Node>({
 nodeSchema.statics.createNewNode = function (body: CreateNewNodeInterface, callback)
 {
 
-  Node.findOne({ address: body.address, deletedAt: null }, (err: Error, node: Node) => {
+  const ipAddressV4String = uint8ArrayToIPv4(body.address);
+  const publicKeyString = pubkeyToAddress(body.pubkey.algorithm, body.pubkey.data).toString();
+  const votingPowerString = body.votingPower.toString();
+
+  Node.findOne({ address: ipAddressV4String, deletedAt: null }, (err: Error, node: Node) => {
     if (err) return callback(err);
 
     if (node) return callback('duplicate_node_ip_address');
   
-    Node.findOne({ pubkey: body.pubkey, deletedAt: null }, (err: Error, node: Node) => {
+    Node.findOne({ pubkey: publicKeyString, deletedAt: null }, (err: Error, node: Node) => {
+      
       if (err) return callback(err);
 
       if (node) return callback('duplicate_node_public_key');
 
       const newNode = new Node({
-        pubkey: body.pubkey.toString(),
-        votingPower: body.votingPower.toString(),
-        address: body.address.toString()
+        pubkey: publicKeyString,
+        votingPower: votingPowerString,
+        address: ipAddressV4String
       });
 
       if (newNode) {        

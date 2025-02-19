@@ -1,6 +1,6 @@
 
 
-import { Tendermint34Client, ValidatorsResponse } from "@cosmjs/tendermint-rpc";
+import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
 
 
 export const fetchIpAddresses = async function getPeers(): Promise<any> {
