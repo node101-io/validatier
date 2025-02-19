@@ -1,6 +1,8 @@
 
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import Location from './location.js';
+import HostingService from './hostingService.js';
+
 import { 
   CreateNewNodeInterface,
   DeleteNodeInterface,
@@ -8,10 +10,16 @@ import {
  } from "../interfaces/node.js";
 import { CreateOrUpdateLocationInterface } from '../interfaces/location.js';
 
+/* 
+
+ Name, ip, hosting attributeları için historical değişim tablosu
+
+*/
+
 interface Node extends Document {
-  name: string;  
-  ipAddress: string;
-  hostingServiceId: string; 
+  pubkey: string;
+  address: string;
+  votingPower: string;
   createdAt: Date;
   deletedAt: Date;
 }
@@ -23,9 +31,9 @@ interface NodeModel extends Model<Node> {
 }
 
 const nodeSchema = new Schema<Node>({
-  name: { type: String, required: true },
-  ipAddress: { type: String, required: true },
-  hostingServiceId: { type: String, required: true },
+  pubkey: { type: String, required: true },
+  address: { type: String, required: true },
+  votingPower: { type: String, required: true },
   createdAt: { type: Date, default: Date.now() },
   deletedAt: { type: Date, default: null }
 });
@@ -33,29 +41,30 @@ const nodeSchema = new Schema<Node>({
 
 nodeSchema.statics.createNewNode = function (body: CreateNewNodeInterface, callback)
 {
-  Node.findOne({ name: body.name, deletedAt: null }, (err: Error, node: Node) => {
+
+  Node.findOne({ address: body.address, deletedAt: null }, (err: Error, node: Node) => {
     if (err) return callback(err);
 
-    if (node) return callback('There is already a node with the provided name!');
-    
-    const newNode = new Node({
-      name: body.name,
-      ipAddress: body.ipAddress,
-      hostingServiceId: body.hostingServiceId
-    });
+    if (node) return callback('duplicate_node_ip_address');
+  
+    Node.findOne({ pubkey: body.pubkey, deletedAt: null }, (err: Error, node: Node) => {
+      if (err) return callback(err);
 
-    if (newNode) {
+      if (node) return callback('duplicate_node_public_key');
 
-      return Location.createNodeLocation(body.location, (err: Error, location: CreateOrUpdateLocationInterface) => {
-        if (err) return callback(err);
+      const newNode = new Node({
+        pubkey: body.pubkey.toString(),
+        votingPower: body.votingPower.toString(),
+        address: body.address.toString()
+      });
 
-        if (location) {
-          newNode.save();
-          return callback(null, newNode);  
-        }
-      })
-    }
-    return callback('Couldn\'t create node, please try again!');
+      if (newNode) {        
+        newNode.save();
+        return callback(null, newNode);
+      } else {
+        return callback('creation_error_node');
+      }      
+    })
   })
 }
 

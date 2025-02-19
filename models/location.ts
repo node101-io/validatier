@@ -50,9 +50,9 @@ locationSchema.statics.getNodeLocationHistoryByNodeId = function (body: NodeLoca
 
 locationSchema.statics.createNodeLocation = function(body: CreateOrUpdateLocationInterface, callback) 
 {
-  Location.find({ nodeId: body.nodeId }, (err: Error, locations: Location[]) => {
+  Location.findOne({ nodeId: body.nodeId, deprecatedAt: null }, (err: Error, location: Location) => {
     if (err) return callback(err, null);
-    if (locations.length > 0) return callback('A location for the node already exists!');
+    if (location) return callback('A location for the node already exists!');
     
     const newLocationRecord = new Location({
       nodeId: body.nodeId,

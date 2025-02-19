@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 
+import { Job_SaveNodes } from './cron/Job_SaveNodes.js';
+
 
 import indexRouter from './routes/indexRouter.js';
 import nodeRouter from './routes/nodeRouter.js';
@@ -27,13 +29,7 @@ const __dirname = path.dirname(__filename);
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
-mongoose.connect('mongodb://localhost:27017/nodeServerLogs')
-  .then(() => {
-    console.log('Connected to MongoDB');
-  })
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
-  });
+const mongooseConnection = mongoose.connect('mongodb://127.0.0.1:27017/validator-timeline');
 
 
 // Middleware
@@ -61,6 +57,16 @@ app.use('/hostingService', hostingServiceRouter);
 
 // Start server
 app.listen(PORT, () => {
+
+  Job_SaveNodes();
+
+  mongooseConnection.then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+  });
+
   console.log(`Server running at PORT ${PORT}`);
 });
 

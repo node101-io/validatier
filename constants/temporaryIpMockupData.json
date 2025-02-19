@@ -1,0 +1,38 @@
+[
+  {
+    "name": "walrus-prod.blockscope.net",
+    "publicKey": "key1",
+    "ipAddress": "ip1",
+    "hostingServiceName": "TeraSwitch Networks Inc.",
+    "location": {
+      "latitude": 37.7749,   
+      "longitude": -122.4194, 
+      "region": "North America", 
+      "altitude": 10
+    }
+  },
+  {
+    "name": "walrus-testnet.blockscope.net",
+    "publicKey": "key2",
+    "ipAddress": "ip2",
+    "hostingServiceName": "Comvive Servidores S.L.",
+    "location": {
+      "latitude": 40.7128,   
+      "longitude": -74.0060, 
+      "region": "Europe",    
+      "altitude": 5
+    }
+  },
+  {
+    "name": "153-gb3-val-walrus-aggregator.stakesquid.com",
+    "publicKey": "key3",
+    "ipAddress": "ip3",
+    "hostingServiceName": "DIGI ROMANIA S.A.",
+    "location": {
+      "latitude": 44.4268,   
+      "longitude": 26.1025,  
+      "region": "Eastern Europe",
+      "altitude": 20
+    }
+  }
+]

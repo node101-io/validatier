@@ -27,7 +27,7 @@ hostingServiceSchema.statics.createNewHostingService = function (body: CreateNew
   HostingService.findOne({ name: body.name, deletedAt: null }, (err: Error, hostingService: HostingService) => {
     if (err) return callback(err);
 
-    if (hostingService) return callback('There is already a hosting service with the provided name!');
+    if (hostingService) return callback('duplicate_key_hosting_service_key', hostingService);
     
     const newHostingService = new HostingService({
       name: body.name
@@ -37,7 +37,7 @@ hostingServiceSchema.statics.createNewHostingService = function (body: CreateNew
       newHostingService.save();
       return callback(null, newHostingService);
     }
-    return callback('Couldn\'t create hosting service, please try again!');
+    return callback('creation_error');
   })
 }
 

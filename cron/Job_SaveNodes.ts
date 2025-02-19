@@ -1,8 +1,31 @@
 import cron from 'node-cron';
+import { fetchIpAddresses } from "./functions/fetchIpAddresses.js";
+import Node from '../models/node.js';
+import async from 'async';
+
+const DEVELOPMENT_FIVE_SECOND_REGEX_STRING = '*/5 * * * * *';
+const EVERY_HOUR_REGEX_STRING = '0 * * * *';
+
+const ERROR_NOT_LOG_LIST: String[] = [
+  "duplicate_node_ip_address",
+  "duplicate_node_public_key",
+];
 
 export const Job_SaveNodes = () => {
-  
-  cron.schedule('0 * * * *', () => {
-    
+
+  cron.schedule(DEVELOPMENT_FIVE_SECOND_REGEX_STRING, async () => {
+    const result = await fetchIpAddresses()
+
+    async.timesSeries(result.validators.length, (i, next) => {
+      const eachNodeBody = result.validators[i];
+      
+      Node.createNewNode(eachNodeBody, (err: String, newNode: Node) => {
+        if (
+          err != null
+          && !ERROR_NOT_LOG_LIST.includes(err)
+        ) console.error(`${Date.now()} | Error: ${err}`); 
+      })
+      return next();
+    })
   });
 };
