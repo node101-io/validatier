@@ -1,16 +1,13 @@
 
 import cron from 'node-cron';
-import { getIpLookupData } from "./functions/getIpLookupData.js";
+import { getIpLookupData } from "../functions/getIpLookupData.js";
 import async from 'async';
 
-import CacheServer from "../models/cacheServer.js";
-import HostName from "../models/hostName.js";
-import HostingService from "../models/hostingService.js";
-import Location from "../models/location.js";
-import NodeDataLog from "../models/nodeDataLog.js";
-
-const DEVELOPMENT_SIX_SECOND_REGEX_STRING = '*/6 * * * * *';
-const EVERY_HOUR_REGEX_STRING = '0 * * * *';
+import CacheServer from "../../models/CacheServer.js";
+import HostName from "../../models/HostName.js";
+import HostingService from "../../models/HostingService.js";
+import Location from "../../models/Location.js";
+import NodeDataLog from "../../models/NodeDataLog.js";
 
 // This comes from the Host model, which will be formed by the first cron job
 const MOCKUP_HOST_ARRAY = [
@@ -29,9 +26,9 @@ const MOCKUP_HOST_ARRAY = [
 ];
 
 
-export const Job_SaveChangesAndDataLogs = () => {
+export const Job_SaveChangesAndDataLogs = (INTERVAL_TIME_REGEX_STRING: string) => {
 
-  cron.schedule(DEVELOPMENT_SIX_SECOND_REGEX_STRING, async () => {
+  cron.schedule(INTERVAL_TIME_REGEX_STRING, async () => {
     getIpLookupData(MOCKUP_HOST_ARRAY, (err, ipLookupDataArray) => {
       if (err) console.error(`${new Date()} | Error: ${err}`);
   

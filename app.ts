@@ -6,8 +6,7 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 
-import { Job_SaveNodes } from './cron/Job_SaveNodes.js';
-
+import { startCronJobs } from './cron/startCronJobs.js';
 
 import indexRouter from './routes/indexRouter.js';
 import nodeRouter from './routes/nodeRouter.js';
@@ -27,8 +26,9 @@ const __dirname = path.dirname(__filename);
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
-const mongooseConnection = mongoose.connect('mongodb://127.0.0.1:27017/validator-timeline');
-
+mongoose.connect('mongodb://127.0.0.1:27017/validator-timeline')
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // Middleware
 app.use(express.static(path.join(__dirname, 'public')));
@@ -51,18 +51,14 @@ app.use('/', indexRouter);
 app.use('/node', nodeRouter);
 app.use('/nodeDataLog', nodeDataLogRouter);
 
-import { getIpLookupData } from './cron/functions/getIpLookupData.js';
+const DEVELOPMENT_FIVE_SECOND_REGEX_STRING = '*/5 * * * * *';
+const EVERY_HOUR_REGEX_STRING = '0 * * * *';
 
-// Start server
 app.listen(PORT, () => {
 
-  // Job_SaveNodes();
-
-  mongooseConnection.then(() => {
-    console.log('Connected to MongoDB');
-  })
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
+  startCronJobs({
+    Job_SaveNodes: DEVELOPMENT_FIVE_SECOND_REGEX_STRING,
+    Job_SaveChangesAndDataLogs: DEVELOPMENT_FIVE_SECOND_REGEX_STRING,
   });
 
   console.log(`Server running at PORT ${PORT}`);

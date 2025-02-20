@@ -7,6 +7,11 @@ export interface Host extends Document {
 }
 
 export interface HostModel extends Model<Host> {
-  saveHost: (body: Host, callback: any) => any;
+  saveHost: (body: SaveHostInterface, callback: any) => any;
+}
+
+export interface SaveHostInterface {
+  ipAddress: string;
+  nodePubkey: string;
 }
 

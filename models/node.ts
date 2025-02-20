@@ -43,7 +43,7 @@ nodeSchema.statics.createNewNode = function (body: CreateNewNodeInterface, callb
       
       if (err) return callback(err);
 
-      if (node) return callback('duplicate_node_public_key');
+      if (node) return callback(null, node);
 
       const newNode = new Node({
         pubkey: publicKeyString,

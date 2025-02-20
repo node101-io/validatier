@@ -2,7 +2,8 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import { 
   Host,
-  HostModel
+  HostModel,
+  SaveHostInterface
 } from "../interfaces/host.js";
 
 import { isRecordChanged } from '../utils/isRecordChanged.js';
@@ -14,7 +15,7 @@ const hostSchema = new Schema<Host>({
 });
 
 
-hostSchema.statics.saveHost = function (body: Host, callback)
+hostSchema.statics.saveHost = function (body: SaveHostInterface, callback)
 {
   Host.findOne({ nodePubkey: body.nodePubkey, deprecatedAt: null }, (err: Error, host: any) => {
     if (err) return callback(err);
