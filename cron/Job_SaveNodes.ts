@@ -7,7 +7,7 @@ const DEVELOPMENT_FIVE_SECOND_REGEX_STRING = '*/5 * * * * *';
 const EVERY_HOUR_REGEX_STRING = '0 * * * *';
 
 const ERROR_NOT_LOG_LIST: String[] = [
-  "duplicate_node_ip_address",
+  "duplicate_node_address",
   "duplicate_node_public_key",
 ];
 

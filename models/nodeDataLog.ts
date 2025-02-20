@@ -8,10 +8,14 @@ import {
 
 interface NodeDataLog extends Document {
   timestamp: Date;
-  details: string;  
-  nodeId: string; 
+  ipAddress: string;
+  nodeId: string;
+  nodeName: string;
   latency: number;
   cache: string;
+  region: string;
+  latitude: number;  
+  longitude: number;  
 }
 
 interface NodeDataLogModel extends Model<NodeDataLog> {
@@ -22,10 +26,14 @@ interface NodeDataLogModel extends Model<NodeDataLog> {
 
 const nodeDataLogSchema = new Schema<NodeDataLog>({
   timestamp: { type: Date, default: Date.now() },
-  details: { type: String, required: true },
+  ipAddress: { type: String, required: true },
   nodeId: { type: String, required: true },
+  nodeName: { type: String, required: true },
   latency: { type: Number, required: true },
-  cache: { type: String, required: false, default: 'N/A' }
+  cache: { type: String, required: false },
+  region: { type: String, required: true },
+  latitude: { type: Number, required: true },
+  longitude: { type: Number, required: true }
 });
 
 

@@ -12,8 +12,6 @@ import { Job_SaveNodes } from './cron/Job_SaveNodes.js';
 import indexRouter from './routes/indexRouter.js';
 import nodeRouter from './routes/nodeRouter.js';
 import nodeDataLogRouter from './routes/nodeDataLogRouter.js';
-import locationRouter from './routes/locationRouter.js';
-import hostingServiceRouter from './routes/hostingServiceRouter.js';
 
 
 dotenv.config();
@@ -52,13 +50,13 @@ app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.i
 app.use('/', indexRouter);
 app.use('/node', nodeRouter);
 app.use('/nodeDataLog', nodeDataLogRouter);
-app.use('/location', locationRouter);
-app.use('/hostingService', hostingServiceRouter);
+
+import { getIpLookupData } from './cron/functions/getIpLookupData.js';
 
 // Start server
 app.listen(PORT, () => {
 
-  Job_SaveNodes();
+  // Job_SaveNodes();
 
   mongooseConnection.then(() => {
     console.log('Connected to MongoDB');
@@ -66,6 +64,15 @@ app.listen(PORT, () => {
   .catch(err => {
     console.error('MongoDB connection error:', err);
   });
+
+
+  const ipAddresses = [
+    "172.67.207.44",
+    "104.26.3.94",
+    "13.35.78.113"
+  ];
+
+  // getIpLookupData(ipAddresses);
 
   console.log(`Server running at PORT ${PORT}`);
 });

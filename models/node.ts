@@ -7,9 +7,8 @@ import {
   DeleteNodeInterface,
   NodeByIdInterface
  } from "../interfaces/node.js";
-import { CreateOrUpdateLocationInterface } from '../interfaces/location.js';
 
-import { uint8ArrayToIPv4, ipv4ToUint8Array } from '../utils/ipAddressTypeConversions.js';
+import { ed25519PubKeyToHex } from '../utils/addressConversion.js';
 
 /* 
 
@@ -43,14 +42,14 @@ const nodeSchema = new Schema<Node>({
 nodeSchema.statics.createNewNode = function (body: CreateNewNodeInterface, callback)
 {
 
-  const ipAddressV4String = uint8ArrayToIPv4(body.address);
-  const publicKeyString = pubkeyToAddress(body.pubkey.algorithm, body.pubkey.data).toString();
+  const addressString = '0x' + pubkeyToAddress(body.pubkey.algorithm, body.pubkey.data).toString();
+  const publicKeyString = ed25519PubKeyToHex(body.pubkey.data);
   const votingPowerString = body.votingPower.toString();
 
-  Node.findOne({ address: ipAddressV4String, deletedAt: null }, (err: Error, node: Node) => {
+  Node.findOne({ address: addressString, deletedAt: null }, (err: Error, node: Node) => {
     if (err) return callback(err);
 
-    if (node) return callback('duplicate_node_ip_address');
+    if (node) return callback('duplicate_node_address');
   
     Node.findOne({ pubkey: publicKeyString, deletedAt: null }, (err: Error, node: Node) => {
       
@@ -61,7 +60,7 @@ nodeSchema.statics.createNewNode = function (body: CreateNewNodeInterface, callb
       const newNode = new Node({
         pubkey: publicKeyString,
         votingPower: votingPowerString,
-        address: ipAddressV4String
+        address: addressString
       });
 
       if (newNode) {        

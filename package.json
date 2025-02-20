@@ -11,7 +11,9 @@
   "author": "Dogu Boran Senturk",
   "license": "ISC",
   "dependencies": {
+    "@cosmjs/stargate": "^0.33.0",
     "@cosmjs/tendermint-rpc": "^0.33.0",
+    "@types/ping": "^0.4.4",
     "async": "^3.2.6",
     "axios": "^1.7.9",
     "bcryptjs": "^3.0.0",
@@ -21,7 +23,9 @@
     "express-session": "^1.18.1",
     "mongodb": "^6.13.0",
     "mongoose": "^6.9.2",
+    "node-cache": "^5.1.2",
     "node-cron": "^3.0.3",
+    "ping": "^0.4.4",
     "pug": "^3.0.3"
   },
   "devDependencies": {
