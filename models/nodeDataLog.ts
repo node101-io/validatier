@@ -1,56 +1,31 @@
 
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import { 
+  NodeDataLog,
+  NodeDataLogModel,
   CreateNodeDataLogInterface,
   NodeDataLogById,
   NodeDataLogArrayByNodeId
 } from "../interfaces/nodeDataLog.js";
 
-interface NodeDataLog extends Document {
-  timestamp: Date;
-  ipAddress: string;
-  nodeId: string;
-  nodeName: string;
-  latency: number;
-  cache: string;
-  region: string;
-  latitude: number;  
-  longitude: number;  
-}
-
-interface NodeDataLogModel extends Model<NodeDataLog> {
-  CreateNodeDataLogInterface: (body: CreateNodeDataLogInterface, callback: any) => any;
-  getNodeDataLogById: (body: CreateNodeDataLogInterface, callback: any) => any;
-  getNodeDataLogArrayByNodeId: (body: NodeDataLogArrayByNodeId, callback: any) => any;
-}
-
 const nodeDataLogSchema = new Schema<NodeDataLog>({
   timestamp: { type: Date, default: Date.now() },
-  ipAddress: { type: String, required: true },
-  nodeId: { type: String, required: true },
-  nodeName: { type: String, required: true },
+  nodePubkey: { type: String, required: true },
   latency: { type: Number, required: true },
-  cache: { type: String, required: false },
-  region: { type: String, required: true },
-  latitude: { type: Number, required: true },
-  longitude: { type: Number, required: true }
 });
 
 
 nodeDataLogSchema.statics.createNodeDataLog = function (body: CreateNodeDataLogInterface, callback)
 {
   const newNodeDataLog = new NodeDataLog({
-    details: body.details,
-    nodeId: body.nodeId,
+    nodePubkey: body.nodePubkey,
     latency: body.latency,
-    cache: body.cache
   });
 
   if (newNodeDataLog) {
     newNodeDataLog.save();
     return callback(null, newNodeDataLog);
-  }
-  return callback('Could not create node data log, please try again!');
+  } else return callback('creation_error');
 }
 
 
