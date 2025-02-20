@@ -11,5 +11,14 @@ export interface Location extends Document {
 }
 
 export interface LocationModel extends Model<Location> {
-  saveIpAddressLocation: (body: Location, callback: any) => any;
+  saveIpAddressLocation: (body: SaveIpAddressLocationInterface, callback: any) => any;
+}
+
+export interface SaveIpAddressLocationInterface {
+  ipAddress: string;
+  region: string;
+  country: string;
+  city: string;
+  loc: string;
+  postal: string;
 }

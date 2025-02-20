@@ -6,6 +6,11 @@ export interface CacheServer extends Document {
   deprecatedAt: Date;
 }
 
+export interface SaveCacheServerInterface {
+  ipAddress: string;
+  cacheServerName: string;
+}
+
 export interface CacheServerModel extends Model<CacheServer> {
-  saveIpAddressCacheServer: (body: CacheServer, callback: any) => any;
+  saveIpAddressCacheServer: (body: SaveCacheServerInterface, callback: any) => any;
 }

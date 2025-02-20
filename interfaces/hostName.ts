@@ -7,5 +7,10 @@ export interface HostName extends Document {
 }
 
 export interface HostNameModel extends Model<HostName> {
-  saveIpAddressHostName: (body: HostName, callback: any) => any;
+  saveIpAddressHostName: (body: SaveIpAddressHostNameInterface, callback: any) => any;
+}
+
+export interface SaveIpAddressHostNameInterface {
+  ipAddress: string;
+  hostName: string;
 }

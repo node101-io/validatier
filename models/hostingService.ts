@@ -2,7 +2,8 @@
 import mongoose, { Schema } from 'mongoose';
 import { 
   HostingService,
-  HostingServiceModel
+  HostingServiceModel,
+  SaveIpAddressHostingServiceInterface
 } from "../interfaces/hostingService.js";
 
 import { isRecordChanged } from '../utils/isRecordChanged.js';
@@ -14,7 +15,7 @@ const hostingServiceSchema = new Schema<HostingService>({
 });
 
 
-hostingServiceSchema.statics.saveIpAddressHostingService = function (body: HostingService, callback)
+hostingServiceSchema.statics.saveIpAddressHostingService = function (body: SaveIpAddressHostingServiceInterface, callback)
 {
   HostingService.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: Error, hostingService: any) => {
     if (err) return callback(err);

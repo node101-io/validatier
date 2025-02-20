@@ -4,12 +4,11 @@ import {
   NodeDataLog,
   NodeDataLogModel,
   CreateNodeDataLogInterface,
-  NodeDataLogById,
-  NodeDataLogArrayByNodeId
+  NodeDataLogHistoryByNodePubkeyInterface
 } from "../interfaces/nodeDataLog.js";
 
 const nodeDataLogSchema = new Schema<NodeDataLog>({
-  timestamp: { type: Date, default: Date.now() },
+  timestamp: { type: Date, default: new Date() },
   nodePubkey: { type: String, required: true },
   latency: { type: Number, required: true },
 });
@@ -28,21 +27,14 @@ nodeDataLogSchema.statics.createNodeDataLog = function (body: CreateNodeDataLogI
   } else return callback('creation_error');
 }
 
-
-nodeDataLogSchema.statics.getNodeDataLogById = function(body: NodeDataLogById, callback)
+nodeDataLogSchema.statics.getNodeDataLogoHistory = function(body: NodeDataLogHistoryByNodePubkeyInterface, callback)
 {
-  NodeDataLog.findById(body.id, (err: Error, nodeDataLog: NodeDataLog) => {
-    if (err) return callback(err);
-    return callback(null, nodeDataLog);
-  })
-}
-
-nodeDataLogSchema.statics.getNodeDataLogArrayByNodeId = function(body: NodeDataLogArrayByNodeId, callback)
-{
-  NodeDataLog.find({ nodeId: body.nodeId }, (err: Error, nodeDataLogsArray: NodeDataLog[]) => {
-    if (err) return callback(err);
-    return callback(null, nodeDataLogsArray);
-  })
+  NodeDataLog.find({ nodePubkey: body.nodePubkey })
+    .sort({ timestamp: -1 })
+    .exec((err, NodeDataLogs) => {
+      if (err) return callback(err);
+      return callback(null, NodeDataLogs);
+    });
 }
 
 const NodeDataLog = mongoose.model<NodeDataLog, NodeDataLogModel>('NodeDataLogs', nodeDataLogSchema);

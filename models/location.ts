@@ -2,7 +2,8 @@
 import mongoose, { Schema } from 'mongoose';
 import { 
   Location,
-  LocationModel
+  LocationModel,
+  SaveIpAddressLocationInterface
 } from "../interfaces/location.js";
 
 import { isRecordChanged } from '../utils/isRecordChanged.js';
@@ -17,7 +18,7 @@ const locationSchema = new Schema<Location>({
   deprecatedAt: { type: Date, default: null },
 });
 
-locationSchema.statics.saveIpAddressLocation = function (body: Location, callback)
+locationSchema.statics.saveIpAddressLocation = function (body: SaveIpAddressLocationInterface, callback)
 {
   Location.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: Error, location: any) => {
     if (err) return callback(err);

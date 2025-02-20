@@ -2,7 +2,8 @@
 import mongoose, { Schema } from 'mongoose';
 import { 
   CacheServer,
-  CacheServerModel
+  CacheServerModel,
+  SaveCacheServerInterface
 } from "../interfaces/cacheServer.js";
 
 import { isRecordChanged } from '../utils/isRecordChanged.js';
@@ -14,7 +15,7 @@ const cacheServerSchema = new Schema<CacheServer>({
 });
 
 
-cacheServerSchema.statics.saveIpAddressCacheServer = function (body: CacheServer, callback)
+cacheServerSchema.statics.saveIpAddressCacheServer = function (body: SaveCacheServerInterface, callback)
 {
   CacheServer.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: Error, cacheServer: any) => {
     if (err) return callback(err);

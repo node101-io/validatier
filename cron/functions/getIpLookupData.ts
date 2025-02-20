@@ -3,11 +3,19 @@ import async from "async";
 import ping from "ping";
 import { getCacheServerNameFromHeaders } from "../../utils/getCacheServerNameFromHeaders.js";
 
-export const getIpLookupData = (ipAddresses: string[]) => {
-  
-  async.timesSeries(ipAddresses.length, async (i: number): Promise<void> => {
+interface HostsInterface {
+  ipAddress: string;
+  nodePubkey: string;
+}
 
-    const eachIpAddress = ipAddresses[i];
+export const getIpLookupData = (hosts: HostsInterface[], callback: (err: any, ipLookupDataArray: any[] | any) => any) => {
+  
+  const ipLookupDataArray: any[] = [];
+
+  async.timesSeries(hosts.length, async (i: number): Promise<void> => {
+
+    const nodePubkey = hosts[i].nodePubkey;
+    const eachIpAddress = hosts[i].ipAddress;
 
     const request = await fetch(`https://ipinfo.io/${eachIpAddress}/json?token=${process.env.IP_LOOKUP_API_KEY}`);
     const ipLookupJsonResponse = await request.json();
@@ -23,9 +31,8 @@ export const getIpLookupData = (ipAddresses: string[]) => {
           if (err) return console.log(err);
 
           const dataLogRecordToSave = {
-            timestamp: Date.now(),
+            nodePubkey: nodePubkey,
             ipAddress: ipLookupJsonResponse.ip,
-            nodePubkey: "merabe",
             hostname: ipLookupJsonResponse.hostname,
             latency: latency,
             cache: cacheServerName,
@@ -37,12 +44,12 @@ export const getIpLookupData = (ipAddresses: string[]) => {
             org: ipLookupJsonResponse.org
           }
 
-
-          console.log(dataLogRecordToSave)
+          ipLookupDataArray.push(dataLogRecordToSave);
         });
-        
       })
-      .catch(err => console.error("err"));
-
+      .catch(err => callback(err, null));
+  }, (err) => {
+    if (err) return callback(err, null);
+    return callback(null, ipLookupDataArray);
   })
 }

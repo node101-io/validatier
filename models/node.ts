@@ -22,7 +22,7 @@ const nodeSchema = new Schema<Node>({
   pubkey: { type: String, required: true },
   address: { type: String, required: true },
   votingPower: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now() },
+  createdAt: { type: Date, default: new Date() },
   deletedAt: { type: Date, default: null }
 });
 
@@ -65,7 +65,7 @@ nodeSchema.statics.deleteNode = function (body: DeleteNodeInterface, callback)
 {
   Node.findByIdAndUpdate(
     body.id,
-    { deletedAt: Date.now() },
+    { deletedAt: new Date() },
     (err: Error, node: Node) => {
       if (err) return callback(err);
       return callback(null, node);

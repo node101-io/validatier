@@ -1,7 +1,8 @@
 import cron from 'node-cron';
 import { fetchIpAddresses } from "./functions/fetchIpAddresses.js";
-import Node from '../models/node.js';
 import async from 'async';
+
+import Node from '../models/node.js';
 
 const DEVELOPMENT_FIVE_SECOND_REGEX_STRING = '*/5 * * * * *';
 const EVERY_HOUR_REGEX_STRING = '0 * * * *';
@@ -23,7 +24,7 @@ export const Job_SaveNodes = () => {
         if (
           err != null
           && !ERROR_NOT_LOG_LIST.includes(err)
-        ) console.error(`${Date.now()} | Error: ${err}`); 
+        ) console.error(`${new Date()} | Error: ${err}`); 
       })
       return next();
     })

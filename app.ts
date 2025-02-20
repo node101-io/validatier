@@ -65,15 +65,6 @@ app.listen(PORT, () => {
     console.error('MongoDB connection error:', err);
   });
 
-
-  const ipAddresses = [
-    "172.67.207.44",
-    "104.26.3.94",
-    "13.35.78.113"
-  ];
-
-  // getIpLookupData(ipAddresses);
-
   console.log(`Server running at PORT ${PORT}`);
 });
 

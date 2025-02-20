@@ -7,5 +7,10 @@ export interface HostingService extends Document {
 }
 
 export interface HostingServiceModel extends Model<HostingService> {
-  saveIpAddressHostingService: (body: HostingService, callback: any) => any;
+  saveIpAddressHostingService: (body: SaveIpAddressHostingServiceInterface, callback: any) => any;
+}
+
+export interface SaveIpAddressHostingServiceInterface {
+  ipAddress: string;
+  hostingServiceName: string;
 }
