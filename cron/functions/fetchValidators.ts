@@ -1,19 +1,19 @@
 
 
-import { Tendermint34Client } from "@cosmjs/tendermint-rpc";
+import { Tendermint34Client, ValidatorsParams, ValidatorsResponse } from "@cosmjs/tendermint-rpc";
 
-
-export const fetchIpAddresses = async function getPeers(): Promise<any> {
+export const fetchIpAddresses = async function getPeers(): Promise<ValidatorsResponse | null> {
   try {
       const rpcEndpoint: string = "https://cosmos-rpc.publicnode.com";
       
       const client: Tendermint34Client = await Tendermint34Client.connect(rpcEndpoint);
 
-      const params: any = [];
-      const validatorsMasterRawResponse = await client.validators(params);
+      const params: ValidatorsParams = {};
+      const validatorsMasterRawResponse: ValidatorsResponse = await client.validators(params);
       return validatorsMasterRawResponse;
 
   } catch (error) {
-      return console.error("Hata oluştu:", error);
+      console.log(`${new Date()} | Error: ${error}`);
+      return null;
   }
 }

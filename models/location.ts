@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 import { isRecordChanged } from '../utils/isRecordChanged.js';
 
-interface Location extends Document {
+export interface LocationInterface extends Document {
   ipAddress: string;
   region: string;
   country: string;
@@ -13,8 +13,8 @@ interface Location extends Document {
   deprecatedAt: Date;
 }
 
-interface LocationModel extends Model<Location> {
-  saveIpAddressLocation: (body: SaveIpAddressLocationInterface, callback: any) => any;
+interface LocationModel extends Model<LocationInterface> {
+  saveIpAddressLocation: (body: SaveIpAddressLocationInterface, callback: (err: string, location: LocationInterface) => any) => any;
 }
 
 interface SaveIpAddressLocationInterface {
@@ -27,7 +27,7 @@ interface SaveIpAddressLocationInterface {
 }
 
 
-const locationSchema = new Schema<Location>({
+const locationSchema = new Schema<LocationInterface>({
   ipAddress: { type: String, required: true },
   region: { type: String, required: true },
   country: { type: String, required: true },
@@ -39,7 +39,7 @@ const locationSchema = new Schema<Location>({
 
 locationSchema.statics.saveIpAddressLocation = function (body: SaveIpAddressLocationInterface, callback)
 {
-  Location.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: Error, location: any) => {
+  Location.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: string, location: LocationInterface) => {
     if (err) return callback(err);
 
     isRecordChanged(location, body, ["region", "country", "city", "loc", "postal"], (err, isChangeHappened) => {
@@ -69,6 +69,6 @@ locationSchema.statics.saveIpAddressLocation = function (body: SaveIpAddressLoca
 }
 
 
-const Location = mongoose.model<Location, LocationModel>('Locations', locationSchema);
+const Location = mongoose.model<LocationInterface, LocationModel>('Locations', locationSchema);
 
 export default Location;

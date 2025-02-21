@@ -3,14 +3,14 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 import { isRecordChanged } from '../utils/isRecordChanged.js';
 
-interface Host extends Document {
+export interface HostInterface extends Document {
   ipAddress: string;  // primary key
   nodePubkey: string;  // foreign key
   deprecatedAt: Date;
 }
 
-interface HostModel extends Model<Host> {
-  saveHost: (body: SaveHostInterface, callback: any) => any;
+interface HostModel extends Model<HostInterface> {
+  saveHost: (body: SaveHostInterface, callback: (err: string, host: HostInterface) => any) => any;
 }
 
 interface SaveHostInterface {
@@ -19,7 +19,7 @@ interface SaveHostInterface {
 }
 
 
-const hostSchema = new Schema<Host>({
+const hostSchema = new Schema<HostInterface>({
   ipAddress: { type: String, required: true },
   nodePubkey: { type: String, required: true },
   deprecatedAt: { type: Date, default: null },
@@ -28,7 +28,7 @@ const hostSchema = new Schema<Host>({
 
 hostSchema.statics.saveHost = function (body: SaveHostInterface, callback)
 {
-  Host.findOne({ nodePubkey: body.nodePubkey, deprecatedAt: null }, (err: Error, host: any) => {
+  Host.findOne({ nodePubkey: body.nodePubkey, deprecatedAt: null }, (err: string, host: HostInterface) => {
     if (err) return callback(err);
     
     isRecordChanged(host, body, ["ipAddress"], (err, isChangeHappened) => {
@@ -53,6 +53,6 @@ hostSchema.statics.saveHost = function (body: SaveHostInterface, callback)
   })
 }
 
-const Host = mongoose.model<Host, HostModel>('Hosts', hostSchema);
+const Host = mongoose.model<HostInterface, HostModel>('Hosts', hostSchema);
 
 export default Host;

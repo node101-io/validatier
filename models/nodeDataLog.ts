@@ -1,10 +1,10 @@
 
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
-interface NodeDataLog extends Document {
+export interface NodeDataLogInterface extends Document {
   timestamp: Date;
   nodePubkey: string;
-  latency: number;
+  latency: number | unknown;
   /* 
     Aklıma gelen diğer özellikler:
       - Saatlik istek sayısı
@@ -13,14 +13,14 @@ interface NodeDataLog extends Document {
   */
 }
 
-interface NodeDataLogModel extends Model<NodeDataLog> {
-  createNodeDataLog: (body: CreateNodeDataLogInterface, callback: any) => any;
-  getNodeDataLogoHistory: (body: NodeDataLogHistoryByNodePubkeyInterface, callback: any) => any;
+interface NodeDataLogModel extends Model<NodeDataLogInterface> {
+  createNodeDataLog: (body: CreateNodeDataLogInterface, callback: (err: string, nodeDataLog: NodeDataLogInterface) => any) => any;
+  getNodeDataLogoHistory: (body: NodeDataLogHistoryByNodePubkeyInterface, callback: (err: string, nodeDataLog: NodeDataLogInterface) => any) => any;
 }
 
 interface CreateNodeDataLogInterface {
   nodePubkey: string; 
-  latency: number;
+  latency: number | unknown;
 }
 
 interface NodeDataLogHistoryByNodePubkeyInterface {
@@ -28,7 +28,7 @@ interface NodeDataLogHistoryByNodePubkeyInterface {
 }
 
 
-const nodeDataLogSchema = new Schema<NodeDataLog>({
+const nodeDataLogSchema = new Schema<NodeDataLogInterface>({
   timestamp: { type: Date, default: new Date() },
   nodePubkey: { type: String, required: true },
   latency: { type: Number, required: true },
@@ -58,6 +58,6 @@ nodeDataLogSchema.statics.getNodeDataLogoHistory = function(body: NodeDataLogHis
     });
 }
 
-const NodeDataLog = mongoose.model<NodeDataLog, NodeDataLogModel>('NodeDataLogs', nodeDataLogSchema);
+const NodeDataLog = mongoose.model<NodeDataLogInterface, NodeDataLogModel>('NodeDataLogs', nodeDataLogSchema);
 
 export default NodeDataLog;

@@ -3,11 +3,11 @@ import cron from 'node-cron';
 import { getIpLookupData } from "../functions/getIpLookupData.js";
 import async from 'async';
 
-import CacheServer from "../../models/CacheServer.js";
-import HostName from "../../models/HostName.js";
-import HostingService from "../../models/HostingService.js";
-import Location from "../../models/Location.js";
-import NodeDataLog from "../../models/NodeDataLog.js";
+import CacheServer, { CacheServerInterface } from "../../models/CacheServer.js";
+import HostName, { HostNameInterface } from "../../models/HostName.js";
+import HostingService, { HostingServiceInterface } from "../../models/HostingService.js";
+import Location, { LocationInterface } from "../../models/Location.js";
+import NodeDataLog, { NodeDataLogInterface } from "../../models/NodeDataLog.js";
 
 // This comes from the Host model, which will be formed by the first cron job
 const MOCKUP_HOST_ARRAY = [
@@ -30,21 +30,22 @@ export const Job_SaveChangesAndDataLogs = (INTERVAL_TIME_REGEX_STRING: string) =
 
   cron.schedule(INTERVAL_TIME_REGEX_STRING, async () => {
     getIpLookupData(MOCKUP_HOST_ARRAY, (err, ipLookupDataArray) => {
-      if (err) console.error(`${new Date()} | Error: ${err}`);
-  
-      async.timesSeries(ipLookupDataArray, (i, next) => {
+      if (err) return console.error(`${new Date()} | Error: ${err}`);
+      if (!ipLookupDataArray) return console.error(`${new Date()} | empty_ipLookupDataArray`); 
+
+      async.timesSeries(ipLookupDataArray.length, (i, next) => {
         const eachIpLookupResult = ipLookupDataArray[i];
         const { ipAddress, hostname, latency, cache, region, country, city, loc, postal, org, nodePubkey } = eachIpLookupResult;
 
-        CacheServer.saveIpAddressCacheServer({ ipAddress: ipAddress, cacheServerName: cache }, (err: any, cacheServer: any) => {
+        CacheServer.saveIpAddressCacheServer({ ipAddress: ipAddress, cacheServerName: cache }, (err: string, cacheServer: CacheServerInterface) => {
           if (err) return console.error(`${new Date()} | Error: ${err}`); 
-          HostName.saveIpAddressHostName({ ipAddress: ipAddress, hostName: hostname }, (err: any, hostName: any) => {
+          HostName.saveIpAddressHostName({ ipAddress: ipAddress, hostName: hostname }, (err: string, hostName: HostNameInterface) => {
             if (err) return console.error(`${new Date()} | Error: ${err}`); 
-            HostingService.saveIpAddressHostingService({ ipAddress: ipAddress, hostingServiceName: org }, (err: any, hostingService: any) => {
+            HostingService.saveIpAddressHostingService({ ipAddress: ipAddress, hostingServiceName: org }, (err: string, hostingService: HostingServiceInterface) => {
               if (err) return console.error(`${new Date()} | Error: ${err}`); 
-              Location.saveIpAddressLocation({ ipAddress: ipAddress, region: region, country: country, city: city, loc: loc, postal: postal }, (err: any, location: any) => {
+              Location.saveIpAddressLocation({ ipAddress: ipAddress, region: region, country: country, city: city, loc: loc, postal: postal }, (err: string, location: LocationInterface) => {
                 if (err) return console.error(`${new Date()} | Error: ${err}`); 
-                NodeDataLog.createNodeDataLog({ nodePubkey: nodePubkey, latency: latency }, (err: any, nodeDataLog: any) => {
+                NodeDataLog.createNodeDataLog({ nodePubkey: nodePubkey, latency: latency }, (err: string, nodeDataLog: NodeDataLogInterface) => {
                   if (err) return console.error(`${new Date()} | Error: ${err}`); 
                 })
               })

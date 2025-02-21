@@ -3,14 +3,28 @@ import async from "async";
 import ping from "ping";
 import { getCacheServerNameFromHeaders } from "../../utils/getCacheServerNameFromHeaders.js";
 
+interface IpLookupInterface {
+  nodePubkey: string,
+  ipAddress: string;
+  hostname: string;
+  latency: number | unknown;
+  cache: string;
+  region: string;
+  country: string;
+  city: string;
+  loc: string;
+  postal: string;
+  org: string;
+}
+
 interface HostsInterface {
   ipAddress: string;
   nodePubkey: string;
 }
 
-export const getIpLookupData = (hosts: HostsInterface[], callback: (err: any, ipLookupDataArray: any[] | any) => any) => {
+export const getIpLookupData = (hosts: HostsInterface[], callback: (err: string, ipLookupDataArray: IpLookupInterface[] | null) => any) => {
   
-  const ipLookupDataArray: any[] = [];
+  const ipLookupDataArray: IpLookupInterface[] = [];
 
   async.timesSeries(hosts.length, async (i: number): Promise<void> => {
 
@@ -22,7 +36,7 @@ export const getIpLookupData = (hosts: HostsInterface[], callback: (err: any, ip
     console.log(ipLookupJsonResponse)
 
     const pingRes = await ping.promise.probe(eachIpAddress);
-    const latency = pingRes.time;
+    const latency: Number | unknown = pingRes.time;
 
     fetch("http://" + eachIpAddress)
       .then(async (response) => {
@@ -30,7 +44,7 @@ export const getIpLookupData = (hosts: HostsInterface[], callback: (err: any, ip
         getCacheServerNameFromHeaders(response.headers, (err, cacheServerName) => {
           if (err) return console.log(err);
 
-          const dataLogRecordToSave = {
+          const dataLogRecordToSave: IpLookupInterface = {
             nodePubkey: nodePubkey,
             ipAddress: ipLookupJsonResponse.ip,
             hostname: ipLookupJsonResponse.hostname,
@@ -49,7 +63,7 @@ export const getIpLookupData = (hosts: HostsInterface[], callback: (err: any, ip
       })
       .catch(err => callback(err, null));
   }, (err) => {
-    if (err) return callback(err, null);
-    return callback(null, ipLookupDataArray);
+    if (err) return callback("", null);
+    return callback("", ipLookupDataArray);
   })
 }

@@ -3,14 +3,14 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 import { isRecordChanged } from '../utils/isRecordChanged.js';
 
-interface HostName extends Document {
+export interface HostNameInterface extends Document {
   ipAddress: string;
   hostName: string;
   deprecatedAt: Date;
 }
 
-interface HostNameModel extends Model<HostName> {
-  saveIpAddressHostName: (body: SaveIpAddressHostNameInterface, callback: any) => any;
+interface HostNameModel extends Model<HostNameInterface> {
+  saveIpAddressHostName: (body: SaveIpAddressHostNameInterface, callback: (err: string, hostName: HostNameInterface) => any) => any;
 }
 
 interface SaveIpAddressHostNameInterface {
@@ -19,7 +19,7 @@ interface SaveIpAddressHostNameInterface {
 }
 
 
-const hostNameSchema = new Schema<HostName>({
+const hostNameSchema = new Schema<HostNameInterface>({
   ipAddress: { type: String, required: true },
   hostName: { type: String, required: true },
   deprecatedAt: { type: Date, default: null },
@@ -28,7 +28,7 @@ const hostNameSchema = new Schema<HostName>({
 
 hostNameSchema.statics.saveIpAddressHostName = function (body: SaveIpAddressHostNameInterface, callback)
 {
-  HostName.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: Error, hostName: any) => {
+  HostName.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: string, hostName: HostNameInterface) => {
     if (err) return callback(err);
 
     isRecordChanged(hostName, body, ["hostingServiceName"], (err, isChangeHappened) => {
@@ -54,6 +54,6 @@ hostNameSchema.statics.saveIpAddressHostName = function (body: SaveIpAddressHost
 }
 
 
-const HostName = mongoose.model<HostName, HostNameModel>('HostNames', hostNameSchema);
+const HostName = mongoose.model<HostNameInterface, HostNameModel>('HostNames', hostNameSchema);
 
 export default HostName;

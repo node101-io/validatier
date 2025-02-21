@@ -3,14 +3,14 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 import { isRecordChanged } from '../utils/isRecordChanged.js';
 
-interface HostingService extends Document {
+export interface HostingServiceInterface extends Document {
   ipAddress: string;
   hostingServiceName: string;
   deprecatedAt: Date;
 }
 
-interface HostingServiceModel extends Model<HostingService> {
-  saveIpAddressHostingService: (body: SaveIpAddressHostingServiceInterface, callback: any) => any;
+interface HostingServiceModel extends Model<HostingServiceInterface> {
+  saveIpAddressHostingService: (body: SaveIpAddressHostingServiceInterface, callback: (err: string, hostingService: HostingServiceInterface) => any) => any;
 }
 
 interface SaveIpAddressHostingServiceInterface {
@@ -18,7 +18,7 @@ interface SaveIpAddressHostingServiceInterface {
   hostingServiceName: string;
 }
 
-const hostingServiceSchema = new Schema<HostingService>({
+const hostingServiceSchema = new Schema<HostingServiceInterface>({
   ipAddress: { type: String, required: true },
   hostingServiceName: { type: String, required: true },
   deprecatedAt: { type: Date, default: null },
@@ -27,7 +27,7 @@ const hostingServiceSchema = new Schema<HostingService>({
 
 hostingServiceSchema.statics.saveIpAddressHostingService = function (body: SaveIpAddressHostingServiceInterface, callback)
 {
-  HostingService.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: Error, hostingService: any) => {
+  HostingService.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: string, hostingService: HostingServiceInterface) => {
     if (err) return callback(err);
 
     isRecordChanged(hostingService, body, ["hostingServiceName"], (err, isChangeHappened) => {
@@ -53,6 +53,6 @@ hostingServiceSchema.statics.saveIpAddressHostingService = function (body: SaveI
 }
 
 
-const HostingService = mongoose.model<HostingService, HostingServiceModel>('HostingServices', hostingServiceSchema);
+const HostingService = mongoose.model<HostingServiceInterface, HostingServiceModel>('HostingServices', hostingServiceSchema);
 
 export default HostingService;

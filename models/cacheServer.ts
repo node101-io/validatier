@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 import { isRecordChanged } from '../utils/isRecordChanged.js';
 
-interface CacheServer extends Document {
+export interface CacheServerInterface extends Document {
   ipAddress: string;
   cacheServerName: string;
   deprecatedAt: Date;
@@ -14,12 +14,12 @@ interface SaveCacheServerInterface {
   cacheServerName: string;
 }
 
-interface CacheServerModel extends Model<CacheServer> {
-  saveIpAddressCacheServer: (body: SaveCacheServerInterface, callback: any) => any;
+interface CacheServerModel extends Model<CacheServerInterface> {
+  saveIpAddressCacheServer: (body: SaveCacheServerInterface, callback: (err: string, cacheServer: CacheServerInterface) => any) => any;
 }
 
 
-const cacheServerSchema = new Schema<CacheServer>({
+const cacheServerSchema = new Schema<CacheServerInterface>({
   ipAddress: { type: String, required: true },
   cacheServerName: { type: String, required: true },
   deprecatedAt: { type: Date, default: null },
@@ -28,7 +28,7 @@ const cacheServerSchema = new Schema<CacheServer>({
 
 cacheServerSchema.statics.saveIpAddressCacheServer = function (body: SaveCacheServerInterface, callback)
 {
-  CacheServer.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: Error, cacheServer: any) => {
+  CacheServer.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: Error, cacheServer: CacheServerInterface) => {
     if (err) return callback(err);
 
     isRecordChanged(cacheServer, body, ["cacheServerName"], (err, isChangeHappened) => {
@@ -54,6 +54,6 @@ cacheServerSchema.statics.saveIpAddressCacheServer = function (body: SaveCacheSe
 }
 
 
-const CacheServer = mongoose.model<CacheServer, CacheServerModel>('CacheServers', cacheServerSchema);
+const CacheServer = mongoose.model<CacheServerInterface, CacheServerModel>('CacheServers', cacheServerSchema);
 
 export default CacheServer;
