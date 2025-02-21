@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { fetchIpAddresses } from "../functions/fetchValidators.js";
+import { fetchValidators } from "../functions/fetchValidators.js";
 import { fetchValidatorIpAddress } from '../functions/fetchValidatorIpAddress.js';
 import async from 'async';
 
@@ -9,7 +9,7 @@ import Host, { HostInterface } from '../../models/Host.js';
 export const Job_SaveNodes = (INTERVAL_TIME_REGEX_STRING: string) => {
 
   cron.schedule(INTERVAL_TIME_REGEX_STRING, async () => {
-    const result = await fetchIpAddresses()
+    const result = await fetchValidators()
     if (!result) return;
 
     async.timesSeries(result.validators.length, (i, next) => {

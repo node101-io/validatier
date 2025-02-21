@@ -5,6 +5,7 @@ export interface NodeDataLogInterface extends Document {
   timestamp: Date;
   nodePubkey: string;
   latency: number | unknown;
+  votingPower: string;
   /* 
     Aklıma gelen diğer özellikler:
       - Saatlik istek sayısı
@@ -21,6 +22,7 @@ interface NodeDataLogModel extends Model<NodeDataLogInterface> {
 interface CreateNodeDataLogInterface {
   nodePubkey: string; 
   latency: number | unknown;
+  votingPower: string;
 }
 
 interface NodeDataLogHistoryByNodePubkeyInterface {
@@ -32,6 +34,7 @@ const nodeDataLogSchema = new Schema<NodeDataLogInterface>({
   timestamp: { type: Date, default: new Date() },
   nodePubkey: { type: String, required: true },
   latency: { type: Number, required: true },
+  votingPower: { type: String, required: true }
 });
 
 
@@ -40,6 +43,7 @@ nodeDataLogSchema.statics.createNodeDataLog = function (body: CreateNodeDataLogI
   NodeDataLog.create({
     nodePubkey: body.nodePubkey,
     latency: body.latency,
+    votingPower: body.votingPower
   }, (err, newNodeDataLog) => {
     if (err || !newNodeDataLog) return callback('creation_error');
     return callback(null, newNodeDataLog);

@@ -7,7 +7,6 @@ import { ed25519PubKeyToHex } from '../utils/addressConversion.js';
 export interface NodeInterface extends Document {
   pubkey: string;  // onchain public key
   address: string;  // onchain address
-  votingPower: string;
   createdAt: Date;
   deletedAt: Date;
 }
@@ -28,7 +27,6 @@ interface NodeByIdInterface {
 const nodeSchema = new Schema<NodeInterface>({
   pubkey: { type: String, required: true },
   address: { type: String, required: true },
-  votingPower: { type: String, required: true },
   createdAt: { type: Date, default: new Date() },
   deletedAt: { type: Date, default: null }
 });
@@ -40,7 +38,6 @@ nodeSchema.statics.createNewNode = function (body: Validator, callback)
   
   const addressString = pubkeyToAddress(body.pubkey?.algorithm, body.pubkey?.data).toString();
   const publicKeyString = ed25519PubKeyToHex(body.pubkey?.data);
-  const votingPowerString = body.votingPower.toString();
 
   Node.findOne(
     { $or: [ 
@@ -54,7 +51,6 @@ nodeSchema.statics.createNewNode = function (body: Validator, callback)
 
       Node.create({
         pubkey: publicKeyString,
-        votingPower: votingPowerString,
         address: addressString
       }, (err, newNode) => {
         if (err || !newNode) return callback('creation_error_node');

@@ -2,12 +2,14 @@
 import async from "async";
 import ping from "ping";
 import { getCacheServerNameFromHeaders } from "../../utils/getCacheServerNameFromHeaders.js";
+import { getValidatorVotingPower } from "./fetchValidators.js";
 
 interface IpLookupInterface {
   nodePubkey: string,
   ipAddress: string;
   hostname: string;
   latency: number | unknown;
+  votingPower: string;
   cache: string;
   region: string;
   country: string;
@@ -44,21 +46,26 @@ export const getIpLookupData = (hosts: HostsInterface[], callback: (err: string,
         getCacheServerNameFromHeaders(response.headers, (err, cacheServerName) => {
           if (err) return console.log(err);
 
-          const dataLogRecordToSave: IpLookupInterface = {
-            nodePubkey: nodePubkey,
-            ipAddress: ipLookupJsonResponse.ip,
-            hostname: ipLookupJsonResponse.hostname,
-            latency: latency,
-            cache: cacheServerName,
-            region: ipLookupJsonResponse.region,
-            country: ipLookupJsonResponse.country,
-            city: ipLookupJsonResponse.city,
-            loc: ipLookupJsonResponse.loc,
-            postal: ipLookupJsonResponse.postal,
-            org: ipLookupJsonResponse.org
-          }
+          getValidatorVotingPower(nodePubkey, (err, votingPower) => {
+            if (err) return console.log(err);
 
-          ipLookupDataArray.push(dataLogRecordToSave);
+            const dataLogRecordToSave: IpLookupInterface = {
+              nodePubkey: nodePubkey,
+              ipAddress: ipLookupJsonResponse.ip,
+              hostname: ipLookupJsonResponse.hostname,
+              latency: latency,
+              votingPower: votingPower,
+              cache: cacheServerName,
+              region: ipLookupJsonResponse.region,
+              country: ipLookupJsonResponse.country,
+              city: ipLookupJsonResponse.city,
+              loc: ipLookupJsonResponse.loc,
+              postal: ipLookupJsonResponse.postal,
+              org: ipLookupJsonResponse.org
+            }
+
+            ipLookupDataArray.push(dataLogRecordToSave);
+          })
         });
       })
       .catch(err => callback(err, null));

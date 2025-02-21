@@ -35,7 +35,7 @@ export const Job_SaveChangesAndDataLogs = (INTERVAL_TIME_REGEX_STRING: string) =
 
       async.timesSeries(ipLookupDataArray.length, (i, next) => {
         const eachIpLookupResult = ipLookupDataArray[i];
-        const { ipAddress, hostname, latency, cache, region, country, city, loc, postal, org, nodePubkey } = eachIpLookupResult;
+        const { ipAddress, hostname, latency, cache, region, country, city, loc, postal, org, nodePubkey, votingPower } = eachIpLookupResult;
 
         CacheServer.saveIpAddressCacheServer({ ipAddress: ipAddress, cacheServerName: cache }, (err: string, cacheServer: CacheServerInterface) => {
           if (err) return console.error(`${new Date()} | Error: ${err}`); 
@@ -45,7 +45,7 @@ export const Job_SaveChangesAndDataLogs = (INTERVAL_TIME_REGEX_STRING: string) =
               if (err) return console.error(`${new Date()} | Error: ${err}`); 
               Location.saveIpAddressLocation({ ipAddress: ipAddress, region: region, country: country, city: city, loc: loc, postal: postal }, (err: string, location: LocationInterface) => {
                 if (err) return console.error(`${new Date()} | Error: ${err}`); 
-                NodeDataLog.createNodeDataLog({ nodePubkey: nodePubkey, latency: latency }, (err: string, nodeDataLog: NodeDataLogInterface) => {
+                NodeDataLog.createNodeDataLog({ nodePubkey: nodePubkey, latency: latency, votingPower: votingPower }, (err: string, nodeDataLog: NodeDataLogInterface) => {
                   if (err) return console.error(`${new Date()} | Error: ${err}`); 
                 })
               })
