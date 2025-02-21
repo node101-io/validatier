@@ -49,15 +49,14 @@ nodeSchema.statics.createNewNode = function (body: CreateNewNodeInterface, callb
   const publicKeyString = ed25519PubKeyToHex(body.pubkey.data);
   const votingPowerString = body.votingPower.toString();
 
-  Node.findOne({ address: addressString, deletedAt: null }, (err: Error, node: Node) => {
-    if (err) return callback(err);
+  Node.findOne(
+    { $or: [ 
+      { address: addressString, deletedAt: null },
+      { pubkey: publicKeyString, deletedAt: null }
+    ]}, 
+    (err: Error, node: Node) => {
 
-    if (node) return callback(null, node);
-  
-    Node.findOne({ pubkey: publicKeyString, deletedAt: null }, (err: Error, node: Node) => {
-      
       if (err) return callback(err);
-
       if (node) return callback(null, node);
 
       const newNode = new Node({
@@ -71,9 +70,9 @@ nodeSchema.statics.createNewNode = function (body: CreateNewNodeInterface, callb
         return callback(null, newNode);
       } else {
         return callback('creation_error_node');
-      }      
-    })
-  })
+      }
+    }
+  )
 }
 
 nodeSchema.statics.deleteNode = function (body: DeleteNodeInterface, callback)
