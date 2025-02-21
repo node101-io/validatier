@@ -33,29 +33,22 @@ hostNameSchema.statics.saveIpAddressHostName = function (body: SaveIpAddressHost
 
     isRecordChanged(hostName, body, ["hostingServiceName"], (err, isChangeHappened) => {
       if (err) return callback(err);
+      if (!isChangeHappened) return callback(null, hostName); 
 
-      if (isChangeHappened) {
-
-        if (hostName) {
-          hostName.deprecatedAt = new Date();
-          hostName.save();
-        }
-
-        const newHostName = new HostName({
-          ipAddress: body.ipAddress,
-          hostName: body.hostName
-        });
-    
-        if (newHostName) {
-          
-          newHostName.save();
-          return callback(null, newHostName);
-
-        } else return callback("creation_error");
-        
-      } else {
-        return callback(null, hostName);
+      if (hostName) {
+        hostName.deprecatedAt = new Date();
+        hostName.save();
       }
+      
+      const newHostName = new HostName({
+        ipAddress: body.ipAddress,
+        hostName: body.hostName
+      });
+  
+      if (!newHostName) return callback("creation_error"); 
+      
+      newHostName.save();
+      return callback(null, newHostName);
     })
   })
 }

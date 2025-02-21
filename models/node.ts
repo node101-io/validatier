@@ -65,12 +65,10 @@ nodeSchema.statics.createNewNode = function (body: CreateNewNodeInterface, callb
         address: addressString
       });
 
-      if (newNode) {        
-        newNode.save();
-        return callback(null, newNode);
-      } else {
-        return callback('creation_error_node');
-      }
+      if (!newNode) return callback('creation_error_node');
+    
+      newNode.save();
+      return callback(null, newNode);
     }
   )
 }

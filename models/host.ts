@@ -33,29 +33,22 @@ hostSchema.statics.saveHost = function (body: SaveHostInterface, callback)
     
     isRecordChanged(host, body, ["ipAddress"], (err, isChangeHappened) => {
       if (err) return callback(err);
+      if (!isChangeHappened) return callback(null, host);
 
-      if (isChangeHappened) {
-
-        if (host) {
-          host.deprecatedAt = new Date();
-          host.save();
-        }
-
-        const newHost = new Host({
-          nodePubkey: body.nodePubkey,
-          ipAddress: body.ipAddress
-        });
-    
-        if (newHost) {
-          
-          newHost.save();
-          return callback(null, newHost);
-
-        } else return callback("creation_error");
-        
-      } else {
-        return callback(null, host);
+      if (host) {
+        host.deprecatedAt = new Date();
+        host.save();
       }
+      
+      const newHost = new Host({
+        nodePubkey: body.nodePubkey,
+        ipAddress: body.ipAddress
+      });
+  
+      if (!newHost) return callback("creation_error");
+        
+      newHost.save();
+      return callback(null, newHost);
     })
   })
 }

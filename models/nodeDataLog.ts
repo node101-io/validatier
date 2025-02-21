@@ -42,10 +42,10 @@ nodeDataLogSchema.statics.createNodeDataLog = function (body: CreateNodeDataLogI
     latency: body.latency,
   });
 
-  if (newNodeDataLog) {
-    newNodeDataLog.save();
-    return callback(null, newNodeDataLog);
-  } else return callback('creation_error');
+  if (!newNodeDataLog) return callback('creation_error');
+  
+  newNodeDataLog.save();
+  return callback(null, newNodeDataLog);
 }
 
 nodeDataLogSchema.statics.getNodeDataLogoHistory = function(body: NodeDataLogHistoryByNodePubkeyInterface, callback)

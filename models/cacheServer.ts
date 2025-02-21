@@ -33,29 +33,22 @@ cacheServerSchema.statics.saveIpAddressCacheServer = function (body: SaveCacheSe
 
     isRecordChanged(cacheServer, body, ["cacheServerName"], (err, isChangeHappened) => {
       if (err) return callback(err);
+      if (!isChangeHappened) return callback(null, cacheServer);
 
-      if (isChangeHappened) {
-
-        if (cacheServer) {
-          cacheServer.deprecatedAt = new Date();
-          cacheServer.save();
-        }
-
-        const newCacheServer = new CacheServer({
-          ipAddress: body.ipAddress,
-          cacheServerSchema: body.cacheServerName
-        });
-    
-        if (newCacheServer) {
-          
-          newCacheServer.save()
-          return callback(null, newCacheServer);
-
-        } else return callback("creation_error")
-        
-      } else {
-        return callback(null, cacheServer);
+      if (cacheServer) {
+        cacheServer.deprecatedAt = new Date();
+        cacheServer.save();
       }
+
+      const newCacheServer = new CacheServer({
+        ipAddress: body.ipAddress,
+        cacheServerSchema: body.cacheServerName
+      });
+
+      if(!newCacheServer) return callback("creation_error")
+      
+      newCacheServer.save()
+      return callback(null, newCacheServer);
     })
   })
 }

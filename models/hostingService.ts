@@ -32,29 +32,21 @@ hostingServiceSchema.statics.saveIpAddressHostingService = function (body: SaveI
 
     isRecordChanged(hostingService, body, ["hostingServiceName"], (err, isChangeHappened) => {
       if (err) return callback(err);
+      if (!isChangeHappened) return callback(null, hostingService);
 
-      if (isChangeHappened) {
-
-        if (hostingService) {
-          hostingService.deprecatedAt = new Date();
-          hostingService.save();
-        }
-
-        const newHostingService = new HostingService({
-          ipAddress: body.ipAddress,
-          hostingServiceName: body.hostingServiceName
-        });
-    
-        if (newHostingService) {
-          
-          newHostingService.save();
-          return callback(null, newHostingService);
-
-        } else return callback("creation_error");
-        
-      } else {
-        return callback(null, hostingService);
+      if (hostingService) {
+        hostingService.deprecatedAt = new Date();
+        hostingService.save();
       }
+      const newHostingService = new HostingService({
+        ipAddress: body.ipAddress,
+        hostingServiceName: body.hostingServiceName
+      });
+
+      if (!newHostingService) return callback("creation_error");
+  
+      newHostingService.save();
+      return callback(null, newHostingService);
     })
 
   })

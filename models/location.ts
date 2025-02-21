@@ -44,33 +44,26 @@ locationSchema.statics.saveIpAddressLocation = function (body: SaveIpAddressLoca
 
     isRecordChanged(location, body, ["region", "country", "city", "loc", "postal"], (err, isChangeHappened) => {
       if (err) return callback(err);
-
-      if (isChangeHappened) {
-
-        if (location) {
-          location.deprecatedAt = new Date();
-          location.save();
-        }
-
-        const newLocation = new Location({
-          ipAddress: body.ipAddress,
-          region: body.region,
-          country: body.country,
-          city: body.city,
-          loc: body.loc,
-          postal: body.postal
-        });
-    
-        if (newLocation) {
-          
-          newLocation.save();
-          return callback(null, newLocation);
-
-        } else return callback("creation_error");
-        
-      } else {
-        return callback(null, location);
+      if (!isChangeHappened) return callback(null, location);
+      
+      if (location) {
+        location.deprecatedAt = new Date();
+        location.save();
       }
+
+      const newLocation = new Location({
+        ipAddress: body.ipAddress,
+        region: body.region,
+        country: body.country,
+        city: body.city,
+        loc: body.loc,
+        postal: body.postal
+      });
+    
+      if (!newLocation) return callback("creation_error");
+          
+      newLocation.save();
+      return callback(null, newLocation);
     })
   })
 }
