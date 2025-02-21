@@ -37,15 +37,13 @@ const nodeDataLogSchema = new Schema<NodeDataLogInterface>({
 
 nodeDataLogSchema.statics.createNodeDataLog = function (body: CreateNodeDataLogInterface, callback)
 {
-  const newNodeDataLog = new NodeDataLog({
+  NodeDataLog.create({
     nodePubkey: body.nodePubkey,
     latency: body.latency,
-  });
-
-  if (!newNodeDataLog) return callback('creation_error');
-  
-  newNodeDataLog.save();
-  return callback(null, newNodeDataLog);
+  }, (err, newNodeDataLog) => {
+    if (err || !newNodeDataLog) return callback('creation_error');
+    return callback(null, newNodeDataLog);
+  })
 }
 
 nodeDataLogSchema.statics.getNodeDataLogoHistory = function(body: NodeDataLogHistoryByNodePubkeyInterface, callback)

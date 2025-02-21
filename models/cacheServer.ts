@@ -40,15 +40,10 @@ cacheServerSchema.statics.saveIpAddressCacheServer = function (body: SaveCacheSe
         cacheServer.save();
       }
 
-      const newCacheServer = new CacheServer({
-        ipAddress: body.ipAddress,
-        cacheServerSchema: body.cacheServerName
-      });
-
-      if(!newCacheServer) return callback("creation_error")
-      
-      newCacheServer.save()
-      return callback(null, newCacheServer);
+      CacheServer.create({ ipAddress: body.ipAddress, cacheServerSchema: body.cacheServerName }, (err, newCacheServer) => {
+        if (err || !newCacheServer) return callback("creation_error")
+        return callback(null, newCacheServer);
+      })
     })
   })
 }

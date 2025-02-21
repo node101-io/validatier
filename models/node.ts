@@ -52,16 +52,14 @@ nodeSchema.statics.createNewNode = function (body: Validator, callback)
       if (err) return callback(err);
       if (node) return callback(null, node);
 
-      const newNode = new Node({
+      Node.create({
         pubkey: publicKeyString,
         votingPower: votingPowerString,
         address: addressString
-      });
-
-      if (!newNode) return callback('creation_error_node');
-    
-      newNode.save();
-      return callback(null, newNode);
+      }, (err, newNode) => {
+        if (err || !newNode) return callback('creation_error_node');
+        return callback(null, newNode);
+      })
     }
   )
 }

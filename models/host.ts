@@ -39,16 +39,11 @@ hostSchema.statics.saveHost = function (body: SaveHostInterface, callback)
         host.deprecatedAt = new Date();
         host.save();
       }
-      
-      const newHost = new Host({
-        nodePubkey: body.nodePubkey,
-        ipAddress: body.ipAddress
-      });
-  
-      if (!newHost) return callback("creation_error");
-        
-      newHost.save();
-      return callback(null, newHost);
+
+      Host.create({ nodePubkey: body.nodePubkey, ipAddress: body.ipAddress }, (err, newHost) => {
+        if (err || !newHost) return callback("creation_error");
+        return callback(null, newHost);
+      })
     })
   })
 }

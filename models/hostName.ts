@@ -40,15 +40,10 @@ hostNameSchema.statics.saveIpAddressHostName = function (body: SaveIpAddressHost
         hostName.save();
       }
       
-      const newHostName = new HostName({
-        ipAddress: body.ipAddress,
-        hostName: body.hostName
-      });
-  
-      if (!newHostName) return callback("creation_error"); 
-      
-      newHostName.save();
-      return callback(null, newHostName);
+      HostName.create({ ipAddress: body.ipAddress, hostName: body.hostName }, (err, newHostName) => {
+        if (err || !newHostName) return callback("creation_error");
+        return callback(null, newHostName);
+      })
     })
   })
 }

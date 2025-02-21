@@ -51,19 +51,17 @@ locationSchema.statics.saveIpAddressLocation = function (body: SaveIpAddressLoca
         location.save();
       }
 
-      const newLocation = new Location({
+      Location.create({
         ipAddress: body.ipAddress,
         region: body.region,
         country: body.country,
         city: body.city,
         loc: body.loc,
         postal: body.postal
-      });
-    
-      if (!newLocation) return callback("creation_error");
-          
-      newLocation.save();
-      return callback(null, newLocation);
+      }, (err, newLocation) => {
+        if (err || !newLocation) return callback("creation_error");
+        return callback(null, newLocation);
+      })
     })
   })
 }

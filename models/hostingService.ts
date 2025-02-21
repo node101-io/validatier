@@ -38,17 +38,12 @@ hostingServiceSchema.statics.saveIpAddressHostingService = function (body: SaveI
         hostingService.deprecatedAt = new Date();
         hostingService.save();
       }
-      const newHostingService = new HostingService({
-        ipAddress: body.ipAddress,
-        hostingServiceName: body.hostingServiceName
-      });
 
-      if (!newHostingService) return callback("creation_error");
-  
-      newHostingService.save();
-      return callback(null, newHostingService);
+      HostingService.create({ ipAddress: body.ipAddress, hostingServiceName: body.hostingServiceName }, (err, newHostingService) => {
+        if (err || !newHostingService) return callback("creation_error");
+        return callback(null, newHostingService);
+      })
     })
-
   })
 }
 
