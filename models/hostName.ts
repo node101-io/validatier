@@ -11,6 +11,7 @@ export interface HostNameInterface extends Document {
 
 interface HostNameModel extends Model<HostNameInterface> {
   saveIpAddressHostName: (body: SaveIpAddressHostNameInterface, callback: (err: string, hostName: HostNameInterface) => any) => any;
+  markOldHostNameAsDeprecated: (body: HostNameInterface, callback: (err: string, oldHostNameDeprecated: HostNameInterface) => any) => any;
 }
 
 interface SaveIpAddressHostNameInterface {
@@ -28,26 +29,38 @@ const hostNameSchema = new Schema<HostNameInterface>({
 
 hostNameSchema.statics.saveIpAddressHostName = function (body: SaveIpAddressHostNameInterface, callback)
 {
-  HostName.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: string, hostName: HostNameInterface) => {
+  HostName.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: string, oldHostName: HostNameInterface) => {
     if (err) return callback(err);
 
-    isRecordChanged(hostName, body, ["hostingServiceName"], (err, isChangeHappened) => {
+    isRecordChanged(oldHostName, body, ["hostingServiceName"], (err, isChangeHappened) => {
       if (err) return callback(err);
-      if (!isChangeHappened) return callback(null, hostName); 
-
-      if (hostName) {
-        hostName.deprecatedAt = new Date();
-        hostName.save();
-      }
+      if (!isChangeHappened) return callback(null, oldHostName); 
       
       HostName.create({ ipAddress: body.ipAddress, hostName: body.hostName }, (err, newHostName) => {
         if (err || !newHostName) return callback("creation_error");
-        return callback(null, newHostName);
+        if (!oldHostName) return callback(null, newHostName);
+
+        HostName.markOldHostNameAsDeprecated(oldHostName, (err: string, oldHostNameDeprecated: HostNameInterface) => {
+          if (err || !oldHostNameDeprecated) return callback("mark_as_deprecated_error");
+          if (!oldHostName) return callback(null, newHostName);
+        })
       })
     })
   })
 }
 
+
+hostNameSchema.statics.markOldHostNameAsDeprecated = function (body: HostNameInterface, callback) {
+
+  HostName.findOneAndUpdate(
+    { ipAddress: body.ipAddress, deprecatedAt: null }, 
+    { deprecatedAt: new Date() }, 
+    (err: string, oldHostNameDeprecated: HostNameInterface) => {
+      if (err) return callback(err);
+      return callback(null, oldHostNameDeprecated)
+    }
+  )
+}
 
 const HostName = mongoose.model<HostNameInterface, HostNameModel>('HostNames', hostNameSchema);
 

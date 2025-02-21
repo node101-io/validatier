@@ -15,6 +15,7 @@ export interface LocationInterface extends Document {
 
 interface LocationModel extends Model<LocationInterface> {
   saveIpAddressLocation: (body: SaveIpAddressLocationInterface, callback: (err: string, location: LocationInterface) => any) => any;
+  markOldLocationAsDeprecated: (body: LocationInterface, callback: (err: string, oldLocationDeprecated: LocationInterface) => any) => any;
 }
 
 interface SaveIpAddressLocationInterface {
@@ -39,17 +40,12 @@ const locationSchema = new Schema<LocationInterface>({
 
 locationSchema.statics.saveIpAddressLocation = function (body: SaveIpAddressLocationInterface, callback)
 {
-  Location.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: string, location: LocationInterface) => {
+  Location.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: string, oldLocation: LocationInterface) => {
     if (err) return callback(err);
 
-    isRecordChanged(location, body, ["region", "country", "city", "loc", "postal"], (err, isChangeHappened) => {
+    isRecordChanged(oldLocation, body, ["region", "country", "city", "loc", "postal"], (err, isChangeHappened) => {
       if (err) return callback(err);
-      if (!isChangeHappened) return callback(null, location);
-      
-      if (location) {
-        location.deprecatedAt = new Date();
-        location.save();
-      }
+      if (!isChangeHappened) return callback(null, oldLocation);
 
       Location.create({
         ipAddress: body.ipAddress,
@@ -60,10 +56,28 @@ locationSchema.statics.saveIpAddressLocation = function (body: SaveIpAddressLoca
         postal: body.postal
       }, (err, newLocation) => {
         if (err || !newLocation) return callback("creation_error");
-        return callback(null, newLocation);
+        if (!oldLocation) return callback(null, newLocation);
+
+        Location.markOldLocationAsDeprecated(oldLocation, (err: string, oldLocationDeprecated: LocationInterface) => {
+          if (err || !oldLocationDeprecated) return callback("mark_as_deprecated_error");
+          return callback(null, newLocation);
+        })
       })
     })
   })
+}
+
+
+locationSchema.statics.markOldLocationAsDeprecated = function (body: LocationInterface, callback) {
+
+  Location.findOneAndUpdate(
+    { ipAddress: body.ipAddress, deprecatedAt: null }, 
+    { deprecatedAt: new Date() }, 
+    (err: string, oldLocationDeprecated: LocationInterface) => {
+      if (err) return callback(err);
+      return callback(null, oldLocationDeprecated)
+    }
+  )
 }
 
 

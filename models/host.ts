@@ -11,6 +11,7 @@ export interface HostInterface extends Document {
 
 interface HostModel extends Model<HostInterface> {
   saveHost: (body: SaveHostInterface, callback: (err: string, host: HostInterface) => any) => any;
+  markOldCacheServerAsDeprecated: (body: HostInterface, callback: (err: string, oldHostDeprecated: HostInterface) => any) => any;
 }
 
 interface SaveHostInterface {
@@ -28,25 +29,39 @@ const hostSchema = new Schema<HostInterface>({
 
 hostSchema.statics.saveHost = function (body: SaveHostInterface, callback)
 {
-  Host.findOne({ nodePubkey: body.nodePubkey, deprecatedAt: null }, (err: string, host: HostInterface) => {
+  Host.findOne({ nodePubkey: body.nodePubkey, deprecatedAt: null }, (err: string, oldHost: HostInterface) => {
     if (err) return callback(err);
     
-    isRecordChanged(host, body, ["ipAddress"], (err, isChangeHappened) => {
+    isRecordChanged(oldHost, body, ["ipAddress"], (err, isChangeHappened) => {
       if (err) return callback(err);
-      if (!isChangeHappened) return callback(null, host);
-
-      if (host) {
-        host.deprecatedAt = new Date();
-        host.save();
-      }
+      if (!isChangeHappened) return callback(null, oldHost);
 
       Host.create({ nodePubkey: body.nodePubkey, ipAddress: body.ipAddress }, (err, newHost) => {
         if (err || !newHost) return callback("creation_error");
-        return callback(null, newHost);
+        if (!oldHost) return callback(null, newHost);
+
+        Host.markOldCacheServerAsDeprecated(oldHost, (err: string, oldHostDeprecated: HostInterface) => {
+          if (err || !oldHostDeprecated) return callback("mark_as_deprecated_error")
+          return callback(null, newHost);
+        })
       })
     })
   })
 }
+
+
+hostSchema.statics.markOldHostAsDeprecated = function (body: HostInterface, callback) {
+
+  Host.findOneAndUpdate(
+    { nodePubkey: body.nodePubkey, deprecatedAt: null }, 
+    { deprecatedAt: new Date() }, 
+    (err: string, oldHostDeprecated: HostInterface) => {
+      if (err) return callback(err);
+      return callback(null, oldHostDeprecated)
+    }
+  )
+}
+
 
 const Host = mongoose.model<HostInterface, HostModel>('Hosts', hostSchema);
 
