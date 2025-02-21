@@ -11,8 +11,7 @@ const client: Tendermint34Client = await Tendermint34Client.connect(rpcEndpoint)
 
 export const fetchValidators = async function (): Promise<ValidatorsResponse | null> {
   try {
-      const params: ValidatorsParams = {};
-      const validatorsMasterRawResponse: ValidatorsResponse = await client.validators(params);
+      const validatorsMasterRawResponse: ValidatorsResponse = await client.validatorsAll();
       return validatorsMasterRawResponse;
   } catch (error) {
       console.log(`${new Date()} | Error: ${error}`);
@@ -23,8 +22,7 @@ export const fetchValidators = async function (): Promise<ValidatorsResponse | n
 export const getValidatorVotingPower = async function (pubkey: string, callback: (err: string | null, votingPower: string) => any)  {
   
   try {
-    const params: ValidatorsParams = {};
-    const validatorsMasterRawResponse: ValidatorsResponse = await client.validators(params);
+    const validatorsMasterRawResponse: ValidatorsResponse = await client.validatorsAll();
 
     async.timesSeries(validatorsMasterRawResponse.validators.length, (i, next) => {
       const eachValidator: Validator = validatorsMasterRawResponse.validators[i];

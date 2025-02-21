@@ -47,28 +47,9 @@ app.use('/', indexRouter);
 app.use('/node', nodeRouter);
 app.use('/nodeDataLog', nodeDataLogRouter);
 
-import { Tendermint34Client, Validator, ValidatorsParams, ValidatorsResponse, pubkeyToAddress } from '@cosmjs/tendermint-rpc';
-import async from 'async';
-
 app.listen(PORT, async () => {
 
-  // startCronJobs();
-
-  const rpcEndpoint: string = 'https://cosmos-rpc.publicnode.com';
-      
-  const client: Tendermint34Client = await Tendermint34Client.connect(rpcEndpoint);
-  try {
-    const validatorsMasterRawResponse = await client.validatorsAll();
-    async.timesSeries(validatorsMasterRawResponse.validators.length, (i, next) => {
-      if (!validatorsMasterRawResponse.validators[i].pubkey) return ('node_pubkey_not_found');
-
-      console.log(pubkeyToAddress(validatorsMasterRawResponse.validators[i].pubkey?.algorithm, validatorsMasterRawResponse.validators[i].pubkey?.data))
-      next();
-    })
-  } catch (error) {
-      console.log(`${new Date()} | Error: ${error}`);
-      return null;
-  }
+  startCronJobs();
 
   console.log(`Server running at PORT ${PORT}`);
 });
