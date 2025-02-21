@@ -51,15 +51,9 @@ app.use('/', indexRouter);
 app.use('/node', nodeRouter);
 app.use('/nodeDataLog', nodeDataLogRouter);
 
-const DEVELOPMENT_FIVE_SECOND_REGEX_STRING = '*/5 * * * * *';
-const EVERY_HOUR_REGEX_STRING = '0 * * * *';
-
 app.listen(PORT, () => {
 
-  startCronJobs({
-    Job_SaveNodes: DEVELOPMENT_FIVE_SECOND_REGEX_STRING,
-    Job_SaveChangesAndDataLogs: DEVELOPMENT_FIVE_SECOND_REGEX_STRING,
-  });
+  startCronJobs();
 
   console.log(`Server running at PORT ${PORT}`);
 });

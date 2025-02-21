@@ -30,14 +30,14 @@ const nodeSchema = new Schema<Node>({
 nodeSchema.statics.createNewNode = function (body: CreateNewNodeInterface, callback)
 {
 
-  const addressString = '0x' + pubkeyToAddress(body.pubkey.algorithm, body.pubkey.data).toString();
+  const addressString = pubkeyToAddress(body.pubkey.algorithm, body.pubkey.data).toString();
   const publicKeyString = ed25519PubKeyToHex(body.pubkey.data);
   const votingPowerString = body.votingPower.toString();
 
   Node.findOne({ address: addressString, deletedAt: null }, (err: Error, node: Node) => {
     if (err) return callback(err);
 
-    if (node) return callback('duplicate_node_address');
+    if (node) return callback(null, node);
   
     Node.findOne({ pubkey: publicKeyString, deletedAt: null }, (err: Error, node: Node) => {
       
