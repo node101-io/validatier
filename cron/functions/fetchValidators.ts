@@ -1,11 +1,11 @@
 
 
-import { Tendermint34Client, Validator, ValidatorsParams, ValidatorsResponse, pubkeyToAddress } from "@cosmjs/tendermint-rpc";
-import { ed25519PubKeyToHex } from "../../utils/addressConversion.js";
-import async from "async";
+import { Tendermint34Client, Validator, ValidatorsParams, ValidatorsResponse, pubkeyToAddress } from '@cosmjs/tendermint-rpc';
+import { ed25519PubKeyToHex } from '../../utils/addressConversion.js';
+import async from 'async';
 
 
-const rpcEndpoint: string = "https://cosmos-rpc.publicnode.com";
+const rpcEndpoint: string = 'https://cosmos-rpc.publicnode.com';
       
 const client: Tendermint34Client = await Tendermint34Client.connect(rpcEndpoint);
 
@@ -31,9 +31,9 @@ export const getValidatorVotingPower = async function (pubkey: string, callback:
       if (eachValidator.pubkey && ed25519PubKeyToHex(eachValidator.pubkey?.data) == pubkey) return callback(null, eachValidator.votingPower.toString());
       next();
     }, (err) => {
-      return callback("not_found", "N/A");
+      return callback('not_found', 'N/A');
     })
   } catch (error) {
-    return callback("could_not_get_voting_power", "N/A");
+    return callback('could_not_get_voting_power', 'N/A');
   }
 }

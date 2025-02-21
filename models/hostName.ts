@@ -32,16 +32,16 @@ hostNameSchema.statics.saveIpAddressHostName = function (body: SaveIpAddressHost
   HostName.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: string, oldHostName: HostNameInterface) => {
     if (err) return callback(err);
 
-    isRecordChanged(oldHostName, body, ["hostingServiceName"], (err, isChangeHappened) => {
+    isRecordChanged(oldHostName, body, ['hostingServiceName'], (err, isChangeHappened) => {
       if (err) return callback(err);
       if (!isChangeHappened) return callback(null, oldHostName); 
       
       HostName.create({ ipAddress: body.ipAddress, hostName: body.hostName }, (err, newHostName) => {
-        if (err || !newHostName) return callback("creation_error");
+        if (err || !newHostName) return callback('creation_error');
         if (!oldHostName) return callback(null, newHostName);
 
         HostName.markOldHostNameAsDeprecated(oldHostName, (err: string, oldHostNameDeprecated: HostNameInterface) => {
-          if (err || !oldHostNameDeprecated) return callback("mark_as_deprecated_error");
+          if (err || !oldHostNameDeprecated) return callback('mark_as_deprecated_error');
           if (!oldHostName) return callback(null, newHostName);
         })
       })

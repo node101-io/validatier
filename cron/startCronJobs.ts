@@ -1,6 +1,6 @@
 
-import { Job_SaveNodes } from "./jobs/Job_SaveNodes.js";
-import { Job_SaveChangesAndDataLogs } from "./jobs/Job_SaveChangesAndDataLogs.js";
+import { Job_SaveNodes } from './jobs/Job_SaveNodes.js';
+import { Job_SaveChangesAndDataLogs } from './jobs/Job_SaveChangesAndDataLogs.js';
 
 interface IntervalRegexStringParamsInterface { 
   Job_SaveNodes: string;

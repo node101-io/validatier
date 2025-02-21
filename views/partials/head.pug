@@ -3,23 +3,23 @@ html(lang='tr')
   head
     meta(name='viewport', content='width=device-width, initial-scale=1.0, shrink-to-fit=no, maximum-scale=1.0, user-scalable=0')
     title #{title}
-    link(rel="stylesheet", href="https://unpkg.com/leaflet/dist/leaflet.css")
-    script(src="https://unpkg.com/leaflet/dist/leaflet.js")
+    link(rel='stylesheet', href='https://unpkg.com/leaflet/dist/leaflet.css')
+    script(src='https://unpkg.com/leaflet/dist/leaflet.js')
     link(href='https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900' rel='stylesheet')
     if includes && includes.external
       if includes.external.css
         if includes.external.css.includes('page')
           link(rel='stylesheet' href=`/css/${page}.css`)
         if includes.external.css.includes('general')
-          link(rel='stylesheet' href=`/css/${page.split("/")[0]}/general.css`)
+          link(rel='stylesheet' href=`/css/${page.split('/')[0]}/general.css`)
         if includes.external.css.includes('index')
-          link(rel='stylesheet' href=`/css/${page.split("/")[0]}/index.css`)
+          link(rel='stylesheet' href=`/css/${page.split('/')[0]}/index.css`)
       if includes.external.js 
         if includes.external.js.includes('page')
           script(src=`/js/${page}.js`)
         if includes.external.js.includes('functions')
           script(src=`/js/functions/httpRequest.js`)
-        script(src="https://kit.fontawesome.com/e47420f551.js" crossorigin="anonymous")
+        script(src='https://kit.fontawesome.com/e47420f551.js' crossorigin='anonymous')
   body
     block content
   footer 

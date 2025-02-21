@@ -31,16 +31,16 @@ hostingServiceSchema.statics.saveIpAddressHostingService = function (body: SaveI
   HostingService.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: string, oldHostingService: HostingServiceInterface) => {
     if (err) return callback(err);
 
-    isRecordChanged(oldHostingService, body, ["hostingServiceName"], (err, isChangeHappened) => {
+    isRecordChanged(oldHostingService, body, ['hostingServiceName'], (err, isChangeHappened) => {
       if (err) return callback(err);
       if (!isChangeHappened) return callback(null, oldHostingService);
 
       HostingService.create({ ipAddress: body.ipAddress, hostingServiceName: body.hostingServiceName }, (err, newHostingService) => {
-        if (err || !newHostingService) return callback("creation_error");
+        if (err || !newHostingService) return callback('creation_error');
         if (!oldHostingService) return callback(null, newHostingService);
 
         HostingService.markOldHostingServiceAsDeprecated(oldHostingService, (err: string, oldHostingServiceDeprecated: HostingServiceInterface) => {
-          if (err || !oldHostingServiceDeprecated) return callback("mark_as_deprecated_error");
+          if (err || !oldHostingServiceDeprecated) return callback('mark_as_deprecated_error');
           return callback(null, newHostingService);
         })
       })

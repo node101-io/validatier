@@ -1,27 +1,27 @@
 
 import cron from 'node-cron';
-import { getIpLookupData } from "../functions/getIpLookupData.js";
+import { getIpLookupData } from '../functions/getIpLookupData.js';
 import async from 'async';
 
-import CacheServer, { CacheServerInterface } from "../../models/CacheServer.js";
-import HostName, { HostNameInterface } from "../../models/HostName.js";
-import HostingService, { HostingServiceInterface } from "../../models/HostingService.js";
-import Location, { LocationInterface } from "../../models/Location.js";
-import NodeDataLog, { NodeDataLogInterface } from "../../models/NodeDataLog.js";
+import CacheServer, { CacheServerInterface } from '../../models/CacheServer.js';
+import HostName, { HostNameInterface } from '../../models/HostName.js';
+import HostingService, { HostingServiceInterface } from '../../models/HostingService.js';
+import Location, { LocationInterface } from '../../models/Location.js';
+import NodeDataLog, { NodeDataLogInterface } from '../../models/NodeDataLog.js';
 
 // This comes from the Host model, which will be formed by the first cron job
 const MOCKUP_HOST_ARRAY = [
   {
-    nodePubkey: "0x7b705e8671089465009c9627f55f20057b8c878b573bcc71971c970f500f1b29",
-    ipAddress: "172.67.207.44"
+    nodePubkey: '0x7b705e8671089465009c9627f55f20057b8c878b573bcc71971c970f500f1b29',
+    ipAddress: '172.67.207.44'
   },
   {
-    nodePubkey: "0x20ff28bc773c52abed7c4ecdc472e4e0f85fe112ec8a4c0e8286f20fe7ba8290",
-    ipAddress: "104.26.3.94"
+    nodePubkey: '0x20ff28bc773c52abed7c4ecdc472e4e0f85fe112ec8a4c0e8286f20fe7ba8290',
+    ipAddress: '104.26.3.94'
   },
   {
-    nodePubkey: "0xfaf9ba6df6256ab0103dbb8839369c3dca519f7d108320c02dabe51655f6238e",
-    ipAddress: "13.35.78.113"
+    nodePubkey: '0xfaf9ba6df6256ab0103dbb8839369c3dca519f7d108320c02dabe51655f6238e',
+    ipAddress: '13.35.78.113'
   }
 ];
 

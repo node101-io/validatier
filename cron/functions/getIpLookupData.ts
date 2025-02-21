@@ -1,8 +1,8 @@
 
-import async from "async";
-import ping from "ping";
-import { getCacheServerNameFromHeaders } from "../../utils/getCacheServerNameFromHeaders.js";
-import { getValidatorVotingPower } from "./fetchValidators.js";
+import async from 'async';
+import ping from 'ping';
+import { getCacheServerNameFromHeaders } from '../../utils/getCacheServerNameFromHeaders.js';
+import { getValidatorVotingPower } from './fetchValidators.js';
 
 interface IpLookupInterface {
   nodePubkey: string,
@@ -40,7 +40,7 @@ export const getIpLookupData = (hosts: HostsInterface[], callback: (err: string,
     const pingRes = await ping.promise.probe(eachIpAddress);
     const latency: Number | unknown = pingRes.time;
 
-    fetch("http://" + eachIpAddress)
+    fetch('http://' + eachIpAddress)
       .then(async (response) => {
 
         getCacheServerNameFromHeaders(response.headers, (err, cacheServerName) => {
@@ -70,7 +70,7 @@ export const getIpLookupData = (hosts: HostsInterface[], callback: (err: string,
       })
       .catch(err => callback(err, null));
   }, (err) => {
-    if (err) return callback("", null);
-    return callback("", ipLookupDataArray);
+    if (err) return callback('', null);
+    return callback('', ipLookupDataArray);
   })
 }

@@ -43,7 +43,7 @@ locationSchema.statics.saveIpAddressLocation = function (body: SaveIpAddressLoca
   Location.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: string, oldLocation: LocationInterface) => {
     if (err) return callback(err);
 
-    isRecordChanged(oldLocation, body, ["region", "country", "city", "loc", "postal"], (err, isChangeHappened) => {
+    isRecordChanged(oldLocation, body, ['region', 'country', 'city', 'loc', 'postal'], (err, isChangeHappened) => {
       if (err) return callback(err);
       if (!isChangeHappened) return callback(null, oldLocation);
 
@@ -55,11 +55,11 @@ locationSchema.statics.saveIpAddressLocation = function (body: SaveIpAddressLoca
         loc: body.loc,
         postal: body.postal
       }, (err, newLocation) => {
-        if (err || !newLocation) return callback("creation_error");
+        if (err || !newLocation) return callback('creation_error');
         if (!oldLocation) return callback(null, newLocation);
 
         Location.markOldLocationAsDeprecated(oldLocation, (err: string, oldLocationDeprecated: LocationInterface) => {
-          if (err || !oldLocationDeprecated) return callback("mark_as_deprecated_error");
+          if (err || !oldLocationDeprecated) return callback('mark_as_deprecated_error');
           return callback(null, newLocation);
         })
       })

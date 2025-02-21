@@ -1,5 +1,5 @@
 
-import async from "async";
+import async from 'async';
 
 export const isRecordChanged = function (oldBody: any, newBody: any, attributesToCompare: String[], callback: (err: string | unknown, isChangeHappenedFlag: Boolean | null) => any) {
 
@@ -17,6 +17,6 @@ export const isRecordChanged = function (oldBody: any, newBody: any, attributesT
     next();
   }, (err: string | unknown) => {
     if (err) return callback(err, null);
-    return callback("", isChangeHappenedFlag)
+    return callback('', isChangeHappenedFlag)
   })
 }

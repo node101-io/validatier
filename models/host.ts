@@ -32,16 +32,16 @@ hostSchema.statics.saveHost = function (body: SaveHostInterface, callback)
   Host.findOne({ nodePubkey: body.nodePubkey, deprecatedAt: null }, (err: string, oldHost: HostInterface) => {
     if (err) return callback(err);
     
-    isRecordChanged(oldHost, body, ["ipAddress"], (err, isChangeHappened) => {
+    isRecordChanged(oldHost, body, ['ipAddress'], (err, isChangeHappened) => {
       if (err) return callback(err);
       if (!isChangeHappened) return callback(null, oldHost);
 
       Host.create({ nodePubkey: body.nodePubkey, ipAddress: body.ipAddress }, (err, newHost) => {
-        if (err || !newHost) return callback("creation_error");
+        if (err || !newHost) return callback('creation_error');
         if (!oldHost) return callback(null, newHost);
 
         Host.markOldCacheServerAsDeprecated(oldHost, (err: string, oldHostDeprecated: HostInterface) => {
-          if (err || !oldHostDeprecated) return callback("mark_as_deprecated_error")
+          if (err || !oldHostDeprecated) return callback('mark_as_deprecated_error')
           return callback(null, newHost);
         })
       })

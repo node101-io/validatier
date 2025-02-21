@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { fetchValidators } from "../functions/fetchValidators.js";
+import { fetchValidators } from '../functions/fetchValidators.js';
 import { fetchValidatorIpAddress } from '../functions/fetchValidatorIpAddress.js';
 import async from 'async';
 

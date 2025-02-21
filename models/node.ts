@@ -1,6 +1,6 @@
 
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { Validator, pubkeyToAddress } from "@cosmjs/tendermint-rpc";
+import { Validator, pubkeyToAddress } from '@cosmjs/tendermint-rpc';
 
 import { ed25519PubKeyToHex } from '../utils/addressConversion.js';
 
@@ -34,7 +34,7 @@ const nodeSchema = new Schema<NodeInterface>({
 
 nodeSchema.statics.createNewNode = function (body: Validator, callback)
 {
-  if (!body.pubkey) return callback("node_pubkey_not_found");
+  if (!body.pubkey) return callback('node_pubkey_not_found');
   
   const addressString = pubkeyToAddress(body.pubkey?.algorithm, body.pubkey?.data).toString();
   const publicKeyString = ed25519PubKeyToHex(body.pubkey?.data);

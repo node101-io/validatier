@@ -32,16 +32,16 @@ cacheServerSchema.statics.saveIpAddressCacheServer = function (body: SaveCacheSe
   CacheServer.findOne({ ipAddress: body.ipAddress, deprecatedAt: null }, (err: Error, oldCacheServer: CacheServerInterface) => {
     if (err) return callback(err);
 
-    isRecordChanged(oldCacheServer, body, ["cacheServerName"], (err, isChangeHappened) => {
+    isRecordChanged(oldCacheServer, body, ['cacheServerName'], (err, isChangeHappened) => {
       if (err) return callback(err);
       if (!isChangeHappened) return callback(null, oldCacheServer);
 
       CacheServer.create({ ipAddress: body.ipAddress, cacheServerSchema: body.cacheServerName }, (err, newCacheServer) => {
-        if (err || !newCacheServer) return callback("creation_error")
+        if (err || !newCacheServer) return callback('creation_error')
         if (!oldCacheServer) return callback(null, newCacheServer);
 
         CacheServer.markOldCacheServerAsDeprecated(oldCacheServer, (err: string, oldCacheServerDeprecated: CacheServerInterface) => {
-          if (err || !oldCacheServerDeprecated) return callback("mark_as_deprecated_error")
+          if (err || !oldCacheServerDeprecated) return callback('mark_as_deprecated_error')
           return callback(null, newCacheServer);
         })
       })

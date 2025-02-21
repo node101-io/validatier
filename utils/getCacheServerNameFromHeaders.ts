@@ -1,5 +1,5 @@
 
-import async from "async";
+import async from 'async';
 
 export const getCacheServerNameFromHeaders = function (headers: any, callback: (err: string, cacheServerName: string) => any) {
   const headersArray: any = [...headers];
@@ -8,7 +8,7 @@ export const getCacheServerNameFromHeaders = function (headers: any, callback: (
 
     const headersArrayEachAttributeTuple = headersArray[i];
 
-    if (headersArrayEachAttributeTuple[0] == "server") callback("", headersArrayEachAttributeTuple[1])
+    if (headersArrayEachAttributeTuple[0] == 'server') callback('', headersArrayEachAttributeTuple[1])
     next();
   })
 }
