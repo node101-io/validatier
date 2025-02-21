@@ -1,12 +1,22 @@
 
-import mongoose, { Schema } from 'mongoose';
-import { 
-  HostingService,
-  HostingServiceModel,
-  SaveIpAddressHostingServiceInterface
-} from "../interfaces/hostingService.js";
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 import { isRecordChanged } from '../utils/isRecordChanged.js';
+
+interface HostingService extends Document {
+  ipAddress: string;
+  hostingServiceName: string;
+  deprecatedAt: Date;
+}
+
+interface HostingServiceModel extends Model<HostingService> {
+  saveIpAddressHostingService: (body: SaveIpAddressHostingServiceInterface, callback: any) => any;
+}
+
+interface SaveIpAddressHostingServiceInterface {
+  ipAddress: string;
+  hostingServiceName: string;
+}
 
 const hostingServiceSchema = new Schema<HostingService>({
   ipAddress: { type: String, required: true },

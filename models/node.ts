@@ -2,21 +2,36 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import { pubkeyToAddress } from "@cosmjs/tendermint-rpc";
 
-import {
-  Node,
-  NodeModel,
-  CreateNewNodeInterface,
-  DeleteNodeInterface,
-  NodeByIdInterface
- } from "../interfaces/node.js";
-
 import { ed25519PubKeyToHex } from '../utils/addressConversion.js';
 
-/* 
+interface Node extends Document {
+  pubkey: string;  // onchain public key
+  address: string;  // onchain address
+  votingPower: string;
+  createdAt: Date;
+  deletedAt: Date;
+}
 
- Name, ip, hosting attributeları için historical değişim tablosu
+interface NodeModel extends Model<Node> {
+  createNewNode: (body: CreateNewNodeInterface, callback: any) => any;
+  deleteNode: (body: DeleteNodeInterface, callback: any) => any;
+  getNodeById: (body: NodeByIdInterface, callback: any) => any;
+}
 
-*/
+interface CreateNewNodeInterface {
+  pubkey: {
+    algorithm: "ed25519";
+    data: Uint8Array;
+  };
+  votingPower: any;
+  address: Uint8Array;
+}
+interface DeleteNodeInterface {
+  id: string;
+}
+interface NodeByIdInterface {
+  id: string;
+}
 
 const nodeSchema = new Schema<Node>({
   pubkey: { type: String, required: true },

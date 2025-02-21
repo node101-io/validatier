@@ -1,12 +1,31 @@
 
-import mongoose, { Schema } from 'mongoose';
-import { 
-  Location,
-  LocationModel,
-  SaveIpAddressLocationInterface
-} from "../interfaces/location.js";
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 import { isRecordChanged } from '../utils/isRecordChanged.js';
+
+interface Location extends Document {
+  ipAddress: string;
+  region: string;
+  country: string;
+  city: string;
+  loc: string;
+  postal: string;
+  deprecatedAt: Date;
+}
+
+interface LocationModel extends Model<Location> {
+  saveIpAddressLocation: (body: SaveIpAddressLocationInterface, callback: any) => any;
+}
+
+interface SaveIpAddressLocationInterface {
+  ipAddress: string;
+  region: string;
+  country: string;
+  city: string;
+  loc: string;
+  postal: string;
+}
+
 
 const locationSchema = new Schema<Location>({
   ipAddress: { type: String, required: true },

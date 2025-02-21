@@ -1,12 +1,23 @@
 
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { 
-  Host,
-  HostModel,
-  SaveHostInterface
-} from "../interfaces/host.js";
 
 import { isRecordChanged } from '../utils/isRecordChanged.js';
+
+interface Host extends Document {
+  ipAddress: string;  // primary key
+  nodePubkey: string;  // foreign key
+  deprecatedAt: Date;
+}
+
+interface HostModel extends Model<Host> {
+  saveHost: (body: SaveHostInterface, callback: any) => any;
+}
+
+interface SaveHostInterface {
+  ipAddress: string;
+  nodePubkey: string;
+}
+
 
 const hostSchema = new Schema<Host>({
   ipAddress: { type: String, required: true },

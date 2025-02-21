@@ -1,12 +1,23 @@
 
-import mongoose, { Schema } from 'mongoose';
-import { 
-  CacheServer,
-  CacheServerModel,
-  SaveCacheServerInterface
-} from "../interfaces/cacheServer.js";
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 import { isRecordChanged } from '../utils/isRecordChanged.js';
+
+interface CacheServer extends Document {
+  ipAddress: string;
+  cacheServerName: string;
+  deprecatedAt: Date;
+}
+
+interface SaveCacheServerInterface {
+  ipAddress: string;
+  cacheServerName: string;
+}
+
+interface CacheServerModel extends Model<CacheServer> {
+  saveIpAddressCacheServer: (body: SaveCacheServerInterface, callback: any) => any;
+}
+
 
 const cacheServerSchema = new Schema<CacheServer>({
   ipAddress: { type: String, required: true },

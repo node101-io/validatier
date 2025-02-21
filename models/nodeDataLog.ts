@@ -1,11 +1,32 @@
 
 import mongoose, { Schema, Document, Model } from 'mongoose';
-import { 
-  NodeDataLog,
-  NodeDataLogModel,
-  CreateNodeDataLogInterface,
-  NodeDataLogHistoryByNodePubkeyInterface
-} from "../interfaces/nodeDataLog.js";
+
+interface NodeDataLog extends Document {
+  timestamp: Date;
+  nodePubkey: string;
+  latency: number;
+  /* 
+    Aklıma gelen diğer özellikler:
+      - Saatlik istek sayısı
+      - Başarılı / başarısız istek sayıları
+      - CPU RAM verileri
+  */
+}
+
+interface NodeDataLogModel extends Model<NodeDataLog> {
+  createNodeDataLog: (body: CreateNodeDataLogInterface, callback: any) => any;
+  getNodeDataLogoHistory: (body: NodeDataLogHistoryByNodePubkeyInterface, callback: any) => any;
+}
+
+interface CreateNodeDataLogInterface {
+  nodePubkey: string; 
+  latency: number;
+}
+
+interface NodeDataLogHistoryByNodePubkeyInterface {
+  nodePubkey: string;
+}
+
 
 const nodeDataLogSchema = new Schema<NodeDataLog>({
   timestamp: { type: Date, default: new Date() },

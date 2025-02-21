@@ -1,12 +1,23 @@
 
-import mongoose, { Schema } from 'mongoose';
-import { 
-  HostName,
-  HostNameModel,
-  SaveIpAddressHostNameInterface
-} from "../interfaces/hostName.js";
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
 import { isRecordChanged } from '../utils/isRecordChanged.js';
+
+interface HostName extends Document {
+  ipAddress: string;
+  hostName: string;
+  deprecatedAt: Date;
+}
+
+interface HostNameModel extends Model<HostName> {
+  saveIpAddressHostName: (body: SaveIpAddressHostNameInterface, callback: any) => any;
+}
+
+interface SaveIpAddressHostNameInterface {
+  ipAddress: string;
+  hostName: string;
+}
+
 
 const hostNameSchema = new Schema<HostName>({
   ipAddress: { type: String, required: true },
