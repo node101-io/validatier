@@ -11,6 +11,8 @@ import { startCronJobs } from './cron/startCronJobs.js';
 import indexRouter from './routes/indexRouter.js';
 import nodeRouter from './routes/nodeRouter.js';
 import nodeDataLogRouter from './routes/nodeDataLogRouter.js';
+import { listenEvents } from './utils/listenForEvents.js';
+import { getActiveValidators } from './utils/getActiveValidators.js';
 
 
 dotenv.config();
@@ -48,8 +50,11 @@ app.use('/node', nodeRouter);
 app.use('/nodeDataLog', nodeDataLogRouter);
 
 app.listen(PORT, async () => {
+  // startCronJobs();
 
-  startCronJobs();
+  getActiveValidators((validators) => {
+    console.log(validators.slice(0,5))
+  })
 
   console.log(`Server running at PORT ${PORT}`);
 });

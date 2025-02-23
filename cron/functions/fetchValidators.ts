@@ -1,6 +1,6 @@
 
 
-import { Tendermint34Client, Validator, ValidatorsParams, ValidatorsResponse, pubkeyToAddress } from '@cosmjs/tendermint-rpc';
+import { Tendermint34Client, Validator, ValidatorsResponse } from '@cosmjs/tendermint-rpc';
 import { ed25519PubKeyToHex } from '../../utils/addressConversion.js';
 import async from 'async';
 
