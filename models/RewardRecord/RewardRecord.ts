@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface RewardRecordEventInterface extends Document {
   timestamp: Date;
-  operation_address: string;
+  operator_address: string;
   rewardsDenomArray: string[];
   rewardsAmountArray: string[];
   comissionsDenomArray: string[];
@@ -15,7 +15,7 @@ interface RewardRecordEventModel extends Model<RewardRecordEventInterface> {
 }
 
 interface SaveRewardRecordEventInterface {
-  operation_address: string;
+  operator_address: string;
   rewardsDenomArray: string[];
   rewardsAmountArray: string[];
   comissionsDenomArray: string[];
@@ -25,7 +25,7 @@ interface SaveRewardRecordEventInterface {
 
 const RewardRecordEventSchema = new Schema<RewardRecordEventInterface>({
   timestamp: { type: Date, default: new Date() },
-  operation_address: { type: String, required: true },
+  operator_address: { type: String, required: true },
   rewardsDenomArray: { type: [String], required: true },
   rewardsAmountArray: { type: [String], required: true },
   comissionsDenomArray: { type: [String], required: true },
@@ -36,10 +36,10 @@ const RewardRecordEventSchema = new Schema<RewardRecordEventInterface>({
 RewardRecordEventSchema.statics.saveRewardRecordEvent = function (body: SaveRewardRecordEventInterface, callback)
 {
 
-  const { operation_address, rewardsDenomArray, rewardsAmountArray, comissionsDenomArray, comissionsAmountArray } = body;
+  const { operator_address, rewardsDenomArray, rewardsAmountArray, comissionsDenomArray, comissionsAmountArray } = body;
 
   RewardRecordEvent.create({ 
-    operation_address: operation_address,
+    operator_address: operator_address,
     rewardsDenomArray: rewardsDenomArray,
     rewardsAmountArray: rewardsAmountArray,
     comissionsDenomArray: comissionsDenomArray,

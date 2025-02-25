@@ -6,7 +6,7 @@ import { generateChangeObjectToSave } from '../../utils/generateChangeObjectToSa
 
 export interface ValidatorChangeEventInterface extends Document {
   timestamp: Date;
-  operation_address: string;
+  operator_address: string;
   changedAttributes: string[];
   oldValues: string[];
   newValues: string[];
@@ -17,7 +17,7 @@ interface ValidatorChangeEventModel extends Model<ValidatorChangeEventInterface>
 }
 
 export interface SaveValidatorChangeEventInterface {
-  operation_address: string;
+  operator_address: string;
   moniker: string;
   commission_rate: string;
   bond_shares: string;
@@ -27,7 +27,7 @@ export interface SaveValidatorChangeEventInterface {
 
 const validatorChangeEventSchema = new Schema<ValidatorChangeEventInterface>({
   timestamp: { type: Date, default: new Date() },
-  operation_address: { type: String, required: true },
+  operator_address: { type: String, required: true },
   changedAttributes: { type: [String], required: true },
   oldValues: { type: [String], required: true },
   newValues: { type: [String], required: true },
@@ -37,9 +37,9 @@ const validatorChangeEventSchema = new Schema<ValidatorChangeEventInterface>({
 validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (body: SaveValidatorChangeEventInterface, callback)
 {
 
-  const { operation_address, moniker, commission_rate, bond_shares, liquid_shares } = body;
+  const { operator_address } = body;
 
-  Validator.findOne({ operation_address: operation_address }, (err: string, validator: ValidatorInterface) => {
+  Validator.findOne({ operator_address: operator_address }, (err: string, validator: ValidatorInterface) => {
     
     if (err || !validator) return callback("fetch_error");
 
@@ -51,7 +51,7 @@ validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (body: Sa
         if (err) return callback("conversion_error", null);
 
         ValidatorChangeEvent.create({
-          operation_address: operation_address,
+          operator_address: operator_address,
           changedAttributes: changedAttributes,
           oldValues: result?.oldBody,
           newValues: result?.newBody

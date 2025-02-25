@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface BalanceRecordEventInterface extends Document {
   timestamp: Date;
-  operation_address: string;
+  operator_address: string;
   denomArray: string[];
   balanceArray: string[];
 }
@@ -13,7 +13,7 @@ interface BalanceRecordEventModel extends Model<BalanceRecordEventInterface> {
 }
 
 interface SaveBalanceRecordEventInterface {
-  operation_address: string;
+  operator_address: string;
   denomArray: string[];
   balanceArray: string[];
 }
@@ -21,7 +21,7 @@ interface SaveBalanceRecordEventInterface {
 
 const balanceRecordEventSchema = new Schema<BalanceRecordEventInterface>({
   timestamp: { type: Date, default: new Date() },
-  operation_address: { type: String, required: true },
+  operator_address: { type: String, required: true },
   denomArray: { type: [String], required: true },
   balanceArray: { type: [String], required: true }
 });
@@ -30,10 +30,10 @@ const balanceRecordEventSchema = new Schema<BalanceRecordEventInterface>({
 balanceRecordEventSchema.statics.saveBalanceRecordEvent = function (body: SaveBalanceRecordEventInterface, callback)
 {
 
-  const { operation_address, denomArray, balanceArray } = body;
+  const { operator_address, denomArray, balanceArray } = body;
 
   BalanceRecordEvent.create({ 
-    operation_address: operation_address,
+    operator_address: operator_address,
     denomArray: denomArray,
     balanceArray: balanceArray
   }, (err, newBalanceRecordEvent) => {

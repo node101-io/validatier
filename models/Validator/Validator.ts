@@ -1,9 +1,10 @@
 
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import ValidatorChangeEvent from '../ValidatorChangeEvent/ValidatorChangeEvent.js';
 
 export interface ValidatorInterface extends Document {
   pubkey: string;
-  operation_address: string;
+  operator_address: string;
   moniker: string;
   commission_rate: string;
   bond_shares: string;
@@ -13,14 +14,23 @@ export interface ValidatorInterface extends Document {
 }
 
 interface ValidatorModel extends Model<ValidatorInterface> {
-  createNewValidator: (body: CreateNewValidatorInterface, callback: (err: string, newValidator: ValidatorInterface) => any) => any;
+  saveValidator: (body: SaveNewValidatorInterface, callback: (err: string, newValidator: ValidatorInterface) => any) => any;
+  updateValidator: (body: UpdateValidatorInterface, callback: (err: string, updatedValidator: ValidatorInterface) => any) => any;
   deleteValidator: (body: DeleteValidatorInterface, callback: (err: string, Validator: ValidatorInterface) => any) => any;
   getValidatorById: (body: ValidatorByIdInterface, callback: (err: string, Validator: ValidatorInterface) => any) => any;
 }
 
-interface CreateNewValidatorInterface {
+interface UpdateValidatorInterface {
+  operator_address: string;
+  moniker: string;
+  commission_rate: string;
+  bond_shares: string;
+  liquid_shares: string;
+}
+
+interface SaveNewValidatorInterface {
   pubkey: string;
-  operation_address: string;
+  operator_address: string;
   moniker: string;
   commission_rate: string;
   bond_shares: string;
@@ -34,9 +44,9 @@ interface ValidatorByIdInterface {
   id: string;
 }
 
-const ValidatorSchema = new Schema<ValidatorInterface>({
+const validatorSchema = new Schema<ValidatorInterface>({
   pubkey: { type: String, required: true },
-  operation_address: { type: String, required: true },
+  operator_address: { type: String, required: true },
   moniker: { type: String, required: true },
   commission_rate: { type: String, required: true },
   bond_shares: { type: String, required: true },
@@ -46,38 +56,63 @@ const ValidatorSchema = new Schema<ValidatorInterface>({
 });
 
 
-ValidatorSchema.statics.createNewValidator = function (body: CreateNewValidatorInterface, callback: (err: string | null, newValidator: ValidatorInterface | null) => any)
+validatorSchema.statics.saveValidator = function (body: SaveNewValidatorInterface, callback: (err: string | null, newValidator: ValidatorInterface | null) => any)
 {
   if (!body.pubkey) return callback('Validator_pubkey_not_found', null);
 
-  const { pubkey, operation_address, moniker, commission_rate, bond_shares, liquid_shares } = body;
+  const { pubkey, operator_address, moniker, commission_rate, bond_shares, liquid_shares } = body;
 
   Validator.findOne(
     { $or: [ 
-      { operation_address: operation_address, deletedAt: null },
+      { operator_address: operator_address, deletedAt: null },
       { pubkey: pubkey, deletedAt: null }
     ]}, 
     (err: string, oldValidator: ValidatorInterface) => {
 
       if (err) return callback(err, null);
-      if (oldValidator) return callback(null, oldValidator);
+      if (!oldValidator) return Validator.create(body, (err, newValidator: ValidatorInterface) => {
+        if (err || !newValidator) return callback('creation_error_validator', null);
+        return callback(null, newValidator);
+      })
 
-      Validator.create({
-        pubkey: pubkey,
-        operation_address: operation_address,
+
+      const updateAndChangeValidatorBody = {
+        operator_address: operator_address,
         moniker: moniker,
         commission_rate: commission_rate,
         bond_shares: bond_shares,
-        liquid_shares: liquid_shares,
-      }, (err, newValidator: ValidatorInterface) => {
-        if (err || !newValidator) return callback('creation_error_Validator', null);
-        return callback(null, newValidator);
+        liquid_shares: liquid_shares
+      }
+
+      ValidatorChangeEvent.saveValidatorChangeEvent(updateAndChangeValidatorBody, (err, newValidatorChangeEvent) => {
+        if (err || !newValidatorChangeEvent) return callback('change_error_validator', null);
+
+        Validator.updateValidator(updateAndChangeValidatorBody, (err, updatedValidator) => {
+          if (err) return callback('update_error_validator', null);
+          return callback(null, updatedValidator);
+        })
       })
     }
   )
 }
 
-ValidatorSchema.statics.deleteValidator = function (body: DeleteValidatorInterface, callback)
+
+validatorSchema.statics.updateValidator = function (body: UpdateValidatorInterface, callback) {
+  
+  const { operator_address, moniker, commission_rate, bond_shares, liquid_shares } = body;
+  
+  Validator.findOneAndUpdate(
+    { operator_address: operator_address },
+    { moniker: moniker, commission_rate: commission_rate, bond_shares: bond_shares, liquid_shares: liquid_shares },
+    (err: string, updatedValidator: ValidatorInterface) => {
+      if (err) return callback(err, null);
+      return callback(null, updatedValidator);
+    }
+  )
+}
+
+
+validatorSchema.statics.deleteValidator = function (body: DeleteValidatorInterface, callback)
 {
   Validator.findByIdAndUpdate(
     body.id,
@@ -90,7 +125,7 @@ ValidatorSchema.statics.deleteValidator = function (body: DeleteValidatorInterfa
 }
 
 
-ValidatorSchema.statics.getValidatorById = function (body: ValidatorByIdInterface, callback)
+validatorSchema.statics.getValidatorById = function (body: ValidatorByIdInterface, callback)
 {
   Validator.findOne({ id: body.id, deleted_at: null }, (err: string, Validator: ValidatorInterface) => {
     if (err) return callback(err);
@@ -99,6 +134,6 @@ ValidatorSchema.statics.getValidatorById = function (body: ValidatorByIdInterfac
 }
 
 
-const Validator = mongoose.model<ValidatorInterface, ValidatorModel>('Validators', ValidatorSchema);
+const Validator = mongoose.model<ValidatorInterface, ValidatorModel>('Validators', validatorSchema);
 
 export default Validator;

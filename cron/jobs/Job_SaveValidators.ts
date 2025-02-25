@@ -23,7 +23,7 @@ export const Job_SaveValidators = (INTERVAL_TIME_REGEX_STRING: string, callback:
           liquid_shares: eachValidator.liquid_shares,
         }
 
-        Validator.createNewValidator(validatorSaveObject, (err, newValidator) => {
+        Validator.saveValidator(validatorSaveObject, (err, newValidator) => {
           if (err) return callback(err, false);
 
           if (newValidator) next();

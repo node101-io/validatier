@@ -13,11 +13,11 @@ export const Job_RecordValidatorRewards = function (callback: (err: string | nul
     async.timesSeries(validators.length, (i, next) => {
       const eachValidator = validators[i];
 
-      getValidatorUnclaimedRewardsAndComission(eachValidator.operation_address, (err, validatorRewardsAndComissions) => {
+      getValidatorUnclaimedRewardsAndComission(eachValidator.operator_address, (err, validatorRewardsAndComissions) => {
         if (err || !validatorRewardsAndComissions) return callback("fetch_error", false);
 
         const saveRewardRecordEventObject = {
-          operation_address: eachValidator.operation_address,
+          operator_address: eachValidator.operator_address,
           rewardsDenomArray: [""],
           rewardsAmountArray: [""],
           comissionsDenomArray: [""],

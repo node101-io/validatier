@@ -7,7 +7,7 @@ export interface GeneralRewardObjectInterface {
 }
 
 interface ValidatorUnclaimedRewardsAndComissionsInterface {
-  operation_address: string;
+  operator_address: string;
   self_bond_rewards: [
     rewardObject: GeneralRewardObjectInterface
   ];

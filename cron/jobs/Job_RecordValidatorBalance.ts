@@ -13,14 +13,14 @@ export const Job_RecordValidatorBalance = function (callback: (err: string | nul
     async.timesSeries(validators.length, (i, next) => {
       const eachValidator = validators[i];
 
-      getValidatorSpendableBalance(eachValidator.operation_address, (err, validatorBalances) => {
+      getValidatorSpendableBalance(eachValidator.operator_address, (err, validatorBalances) => {
         if (err || !validatorBalances) return callback("fetch_error", false);
         changeDenomAmountObjectToTwoArrayFormat(validatorBalances, (err, response) => {
 
           if (err || !response?.denomsArray || !response?.amountsArray) return callback("conversion_error", false);
 
           BalanceRecordEvent.saveBalanceRecordEvent({
-            operation_address: eachValidator.operation_address,
+            operator_address: eachValidator.operator_address,
             denomArray: response.denomsArray,
             balanceArray: response.amountsArray
           }, (err, newBalanceRecordEvent) => {
