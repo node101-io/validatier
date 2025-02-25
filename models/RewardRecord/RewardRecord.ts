@@ -3,9 +3,11 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface RewardRecordEventInterface extends Document {
   timestamp: Date;
-  operator_address: string;
-  rewardAmount: string;
-  commissionAmount: string;
+  operation_address: string;
+  rewardsDenomArray: string[];
+  rewardsAmountArray: string[];
+  comissionsDenomArray: string[];
+  comissionsAmountArray: string[];
 }
 
 interface RewardRecordEventModel extends Model<RewardRecordEventInterface> {
@@ -13,29 +15,35 @@ interface RewardRecordEventModel extends Model<RewardRecordEventInterface> {
 }
 
 interface SaveRewardRecordEventInterface {
-  operator_address: string;
-  rewardAmount: string;
-  commissionAmount: string;
+  operation_address: string;
+  rewardsDenomArray: string[];
+  rewardsAmountArray: string[];
+  comissionsDenomArray: string[];
+  comissionsAmountArray: string[];
 }
 
 
 const RewardRecordEventSchema = new Schema<RewardRecordEventInterface>({
   timestamp: { type: Date, default: new Date() },
-  operator_address: { type: String, required: true },
-  rewardAmount: { type: String, required: true },
-  commissionAmount: { type: String, required: true }
+  operation_address: { type: String, required: true },
+  rewardsDenomArray: { type: [String], required: true },
+  rewardsAmountArray: { type: [String], required: true },
+  comissionsDenomArray: { type: [String], required: true },
+  comissionsAmountArray: { type: [String], required: true }
 });
 
 
 RewardRecordEventSchema.statics.saveRewardRecordEvent = function (body: SaveRewardRecordEventInterface, callback)
 {
 
-  const { operator_address, rewardAmount, commissionAmount } = body;
+  const { operation_address, rewardsDenomArray, rewardsAmountArray, comissionsDenomArray, comissionsAmountArray } = body;
 
   RewardRecordEvent.create({ 
-    operator_address: operator_address,
-    rewardAmount: rewardAmount,
-    commissionAmount: commissionAmount
+    operation_address: operation_address,
+    rewardsDenomArray: rewardsDenomArray,
+    rewardsAmountArray: rewardsAmountArray,
+    comissionsDenomArray: comissionsDenomArray,
+    comissionsAmountArray: comissionsAmountArray
   }, (err, newRewardRecordEvent) => {
     if (err || !newRewardRecordEvent) return callback('creation_error');
   })

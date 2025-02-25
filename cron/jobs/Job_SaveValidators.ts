@@ -4,7 +4,7 @@ import Validator from '../../models/Validator/Validator.js';
 import { getActiveValidators, ValidatorResponse } from '../functions/getActiveValidators.js';
 import async from "async";
 
-export const Job_SaveNodes = (INTERVAL_TIME_REGEX_STRING: string, callback: (err: string, success: Boolean) => any) => {
+export const Job_SaveValidators = (INTERVAL_TIME_REGEX_STRING: string, callback: (err: string, success: Boolean) => any) => {
 
   cron.schedule(INTERVAL_TIME_REGEX_STRING, async () => {
     getActiveValidators((validators: ValidatorResponse[]) => {

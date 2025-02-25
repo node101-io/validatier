@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface ValidatorInterface extends Document {
   pubkey: string;
-  operator_address: string;
+  operation_address: string;
   moniker: string;
   commission_rate: string;
   bond_shares: string;
@@ -20,7 +20,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
 
 interface CreateNewValidatorInterface {
   pubkey: string;
-  operator_address: string;
+  operation_address: string;
   moniker: string;
   commission_rate: string;
   bond_shares: string;
@@ -36,7 +36,7 @@ interface ValidatorByIdInterface {
 
 const ValidatorSchema = new Schema<ValidatorInterface>({
   pubkey: { type: String, required: true },
-  operator_address: { type: String, required: true },
+  operation_address: { type: String, required: true },
   moniker: { type: String, required: true },
   commission_rate: { type: String, required: true },
   bond_shares: { type: String, required: true },
@@ -50,11 +50,11 @@ ValidatorSchema.statics.createNewValidator = function (body: CreateNewValidatorI
 {
   if (!body.pubkey) return callback('Validator_pubkey_not_found', null);
 
-  const { pubkey, operator_address, moniker, commission_rate, bond_shares, liquid_shares } = body;
+  const { pubkey, operation_address, moniker, commission_rate, bond_shares, liquid_shares } = body;
 
   Validator.findOne(
     { $or: [ 
-      { operator_address: operator_address, deletedAt: null },
+      { operation_address: operation_address, deletedAt: null },
       { pubkey: pubkey, deletedAt: null }
     ]}, 
     (err: string, oldValidator: ValidatorInterface) => {
@@ -64,7 +64,7 @@ ValidatorSchema.statics.createNewValidator = function (body: CreateNewValidatorI
 
       Validator.create({
         pubkey: pubkey,
-        operator_address: operator_address,
+        operation_address: operation_address,
         moniker: moniker,
         commission_rate: commission_rate,
         bond_shares: bond_shares,

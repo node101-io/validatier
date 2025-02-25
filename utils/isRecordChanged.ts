@@ -1,22 +1,22 @@
 
 import async from 'async';
 
-export const isRecordChanged = function (oldBody: any, newBody: any, attributesToCompare: String[], callback: (err: string | unknown, isChangeHappenedFlag: Boolean | null) => any) {
+export const isRecordChanged = function (oldBody: any, newBody: any, attributesToCompare: string[], callback: (err: string | unknown, changedAttributes: string[] | null) => any) {
 
   if (!oldBody) return true;
 
-  let isChangeHappenedFlag = false;
+  const changedAttributes: string[] = [];
 
   async.timesSeries(attributesToCompare.length, (i, next) => {
     
-    const eachAttribute = attributesToCompare[i];
+    const eachAttribute: string = attributesToCompare[i];
 
     if (oldBody[`${eachAttribute}`] != newBody[`${eachAttribute}`]) {
-      isChangeHappenedFlag = true;
+      changedAttributes.push(eachAttribute);
     }
     next();
   }, (err: string | unknown) => {
     if (err) return callback(err, null);
-    return callback('', isChangeHappenedFlag)
+    return callback('', changedAttributes)
   })
 }
