@@ -38,6 +38,7 @@ balanceRecordEventSchema.statics.saveBalanceRecordEvent = function (body: SaveBa
     balanceArray: balanceArray
   }, (err, newBalanceRecordEvent) => {
     if (err || !newBalanceRecordEvent) return callback('creation_error');
+    return callback(null, newBalanceRecordEvent);
   })
 }
 

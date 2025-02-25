@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
 import indexRouter from './routes/indexRouter.js';
 import nodeRouter from './routes/nodeRouter.js';
 import nodeDataLogRouter from './routes/nodeDataLogRouter.js';
+import { startCronJobs } from './cron/startCronJobs.js';
 
 
 dotenv.config();
@@ -46,6 +47,8 @@ app.use('/node', nodeRouter);
 app.use('/nodeDataLog', nodeDataLogRouter);
 
 app.listen(PORT, async () => {
+
+  startCronJobs();
 
   console.log(`Server running at PORT ${PORT}`);
 });
