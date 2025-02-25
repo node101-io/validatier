@@ -3,11 +3,11 @@ import cron from 'node-cron';
 import { getIpLookupData } from '../functions/getIpLookupData.js';
 import async from 'async';
 
-import CacheServer, { CacheServerInterface } from '../../models/CacheServer.js';
-import HostName, { HostNameInterface } from '../../models/HostName.js';
-import HostingService, { HostingServiceInterface } from '../../models/HostingService.js';
-import Location, { LocationInterface } from '../../models/Location.js';
-import NodeDataLog, { NodeDataLogInterface } from '../../models/NodeDataLog.js';
+import CacheServer, { CacheServerInterface } from '../../obsoleteModels/CacheServer.js';
+import HostName, { HostNameInterface } from '../../obsoleteModels/HostName.js';
+import HostingService, { HostingServiceInterface } from '../../obsoleteModels/HostingService.js';
+import Location, { LocationInterface } from '../../obsoleteModels/Location.js';
+import NodeDataLog, { NodeDataLogInterface } from '../../obsoleteModels/NodeDataLog.js';
 
 // This comes from the Host model, which will be formed by the first cron job
 const MOCKUP_HOST_ARRAY = [

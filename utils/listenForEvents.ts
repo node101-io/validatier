@@ -10,7 +10,7 @@ export const listenEvents = async function() {
         const subscribeMsg = {
             jsonrpc: "2.0",
             method: "subscribe",
-            id: 1,
+            id: 0,
             params: { query: "tm.event='Tx'" }
         };
         ws.send(JSON.stringify(subscribeMsg));
@@ -18,15 +18,7 @@ export const listenEvents = async function() {
 
     ws.on("message", (data) => {
       const responseJson = JSON.parse(data.toString());
-      const events = responseJson.result.events;
-      if (events && events["message.action"].includes("/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward")) {
-        console.log({
-          "transfer.recipient": events["transfer.recipient"][0],
-          "transfer.sender": events["transfer.sender"][0],
-          "withdraw_rewards.validator": events["withdraw_rewards.validator"][0],
-          "withdraw_rewards.delegator": events["withdraw_rewards.delegator"][0],
-        })
-      }      
+      console.log(responseJson)  
     });
 
     ws.on("error", (err) => {

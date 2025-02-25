@@ -1,33 +1,34 @@
 import cron from 'node-cron';
-import { fetchValidators } from '../functions/fetchValidators.js';
-import { fetchValidatorIpAddress } from '../functions/fetchValidatorIpAddress.js';
-import async from 'async';
 
-import Node, { NodeInterface } from '../../models/Node.js';
-import Host, { HostInterface } from '../../models/Host.js';
+import Validator from '../../models/Validator/Validator.js';
+import { getActiveValidators, ValidatorResponse } from '../functions/getActiveValidators.js';
+import async from "async";
 
-export const Job_SaveNodes = (INTERVAL_TIME_REGEX_STRING: string) => {
+export const Job_SaveNodes = (INTERVAL_TIME_REGEX_STRING: string, callback: (err: string, success: Boolean) => any) => {
 
   cron.schedule(INTERVAL_TIME_REGEX_STRING, async () => {
-    const result = await fetchValidators()
-    if (!result) return;
+    getActiveValidators((validators: ValidatorResponse[]) => {
 
-    async.timesSeries(result.validators.length, (i, next) => {
-      const eachNodeBody = result.validators[i];
-      
-      Node.createNewNode(eachNodeBody, (err: String, node: NodeInterface) => {
-        if (err) console.error(`${new Date()} | Error: ${err}`); 
+      if (!validators) return callback("validator_count_zero", false);
 
-        if (node) {
-          fetchValidatorIpAddress(node, (err: string, ipAddress: string) => {
-            if (err) console.error(`${new Date()} | Error: ${err}`); 
-            Host.saveHost({ nodePubkey: node.pubkey, ipAddress: ipAddress }, (err: string, host: HostInterface) => {
-              if (err) console.error(`${new Date()} | Error: ${err}`); 
-            })
-          })
+      async.timesSeries(validators.length, (i, next) => {
+        const eachValidator = validators[i];
+
+        const validatorSaveObject = {
+          pubkey: eachValidator.consensus_pubkey.key,
+          operator_address: eachValidator.operator_address,
+          moniker: eachValidator.description.moniker,
+          commission_rate: eachValidator.commission.commission_rates.rate,
+          bond_shares: eachValidator.validator_bond_shares,
+          liquid_shares: eachValidator.liquid_shares,
         }
+
+        Validator.createNewValidator(validatorSaveObject, (err, newValidator) => {
+          if (err) return callback(err, false);
+
+          if (newValidator) next();
+        })
       })
-      return next();
     })
   });
 };
