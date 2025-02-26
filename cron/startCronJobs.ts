@@ -12,7 +12,7 @@ const EVERY_HOUR_REGEX_STRING = '0 * * * *';
 
 export const startCronJobs = () => {
 
-  cron.schedule(TEST_TIME_INTERVAL_REGEX, () => {
+  cron.schedule(EVERY_HOUR_REGEX_STRING, () => {
     console.log(SEPERATOR_LINE);
     Job_SaveValidators((err, success) => {
       if (err && !success) return console.error(err + " | " + new Date())

@@ -10,6 +10,7 @@ import indexRouter from './routes/indexRouter.js';
 import nodeRouter from './routes/nodeRouter.js';
 import nodeDataLogRouter from './routes/nodeDataLogRouter.js';
 import { startCronJobs } from './cron/startCronJobs.js';
+import { listenEvents } from './utils/listenForEvents.js';
 
 
 dotenv.config();
@@ -46,10 +47,11 @@ app.use('/', indexRouter);
 app.use('/node', nodeRouter);
 app.use('/nodeDataLog', nodeDataLogRouter);
 
-app.listen(PORT, async () => {
+app.listen(PORT, () => {
 
-  startCronJobs();
+  // startCronJobs();
 
   console.log(`Server running at PORT ${PORT}`);
+  listenEvents();
 });
 
