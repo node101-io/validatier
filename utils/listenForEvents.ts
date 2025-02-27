@@ -6,6 +6,8 @@ const WEBSOCKET_URL = "wss://cosmoshub.tendermintrpc.lava.build/websocket";
 
 import axios from "axios";
 import StakeRecordEvent from "../models/StakeRecord/StakeRecord.js";
+import { getRewardOrCommissionArraysFromEvents } from "./getRewardOrCommissionArraysFromEvent.js";
+import WithdrawRecordEvent from "../models/WithdrawRecord/WithdrawRecord.js";
 
 interface GetTransactionInfoInterface {
     tx: {
@@ -69,12 +71,35 @@ export const listenEvents = () => {
                                         amount: eachMessage["amount"]["amount"],
                                     }, (err, newStakeRecordEvent) => {
                                         if (err) return console.log(err + " | " + new Date());
-                                        return next();
                                     })
                                 }
                             } else if (eachMessage["@type"] == "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission") {
                                 
-                                console.log(eachMessage)
+
+                            } else if (eachMessage["@type"] == "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward") {
+                                
+                                const events = txRawResult.tx_response.events;
+                                events.forEach((eachEvent: any) => {
+                                    if (eachEvent.type == "withdraw_rewards") {
+                                        const attributes = eachEvent.attributes;
+                                        attributes.forEach((withdrawEventEachAttribute: any) => {
+                                            if (withdrawEventEachAttribute.key == "amount") {
+                                                getRewardOrCommissionArraysFromEvents(withdrawEventEachAttribute.value, (err, rewardOrCommissionObject) => {
+                                                    if (err) return console.log(err + " | " + new Date());
+
+                                                    WithdrawRecordEvent.saveWithdrawRecordEvent({
+                                                        operator_address: eachMessage["validator_address"],
+                                                        withdrawType: "reward",
+                                                        denomsArray: rewardOrCommissionObject.denomsArray,
+                                                        amountsArray: rewardOrCommissionObject.amountsArray
+                                                    }, (err, newWithdrawRecordEvent) => {
+                                                        if (err) return console.log(err + " | " + new Date());
+                                                    })
+                                                })
+                                            }
+                                        });
+                                    }
+                                });
                             }
                             next();
                         })

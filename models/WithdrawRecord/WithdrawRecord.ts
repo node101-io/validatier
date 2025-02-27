@@ -1,4 +1,3 @@
-
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export enum WithdrawType {
@@ -9,8 +8,8 @@ export enum WithdrawType {
 export interface WithdrawRecordEventInterface extends Document {
   timestamp: Date;
   operator_address: string;
-  denom: string;
-  amount: string;
+  denomsArray: string[];
+  amountsArray: string[];
   withdrawType: WithdrawType;
 }
 
@@ -20,18 +19,17 @@ interface WithdrawRecordEventModel extends Model<WithdrawRecordEventInterface> {
 
 interface SaveWithdrawRecordEventInterface {
   operator_address: string;
-  denom: string;
-  amount: string;
+  denomsArray: string[];
+  amountsArray: string[];
   withdrawType: string;
 }
-
 
 const withdrawRecordEventSchema: Schema = new Schema<WithdrawRecordEventInterface>(
   {
     timestamp: { type: Date, default: new Date() },
     operator_address: { type: String, required: true },
-    denom: { type: String, required: true },
-    amount: { type: String, required: true },
+    denomsArray: { type: [String], required: true },
+    amountsArray: { type: [String], required: true },
     withdrawType: {
       type: String,
       required: true,
@@ -40,24 +38,19 @@ const withdrawRecordEventSchema: Schema = new Schema<WithdrawRecordEventInterfac
   }
 );
 
-
-
-withdrawRecordEventSchema.statics.saveWithdrawRecordEvent = function (body: SaveWithdrawRecordEventInterface, callback)
-{
-
-  const { operator_address, denom, amount, withdrawType } = body;
+withdrawRecordEventSchema.statics.saveWithdrawRecordEvent = function (body: SaveWithdrawRecordEventInterface, callback) {
+  const { operator_address, denomsArray, amountsArray, withdrawType } = body;
 
   WithdrawRecordEvent.create({ 
     operator_address: operator_address,
-    denom: denom,
-    amount: amount,
+    denomsArray: denomsArray,
+    amountsArray: amountsArray,
     withdrawType: withdrawType
   }, (err, newWithdrawRecordEvent) => {
     if (err || !newWithdrawRecordEvent) return callback('creation_error');
     return callback(null, newWithdrawRecordEvent);
-  })
+  });
 }
-
 
 const WithdrawRecordEvent = mongoose.model<WithdrawRecordEventInterface, WithdrawRecordEventModel>('WithdrawRecordEvents', withdrawRecordEventSchema);
 
