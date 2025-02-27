@@ -75,31 +75,33 @@ export const listenEvents = () => {
                                 }
                             } else if (eachMessage["@type"] == "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission") {
                                 
-
+                                console.log(txRawResult);
                             } else if (eachMessage["@type"] == "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward") {
                                 
                                 const events = txRawResult.tx_response.events;
-                                events.forEach((eachEvent: any) => {
-                                    if (eachEvent.type == "withdraw_rewards") {
-                                        const attributes = eachEvent.attributes;
-                                        attributes.forEach((withdrawEventEachAttribute: any) => {
-                                            if (withdrawEventEachAttribute.key == "amount") {
-                                                getRewardOrCommissionArraysFromEvents(withdrawEventEachAttribute.value, (err, rewardOrCommissionObject) => {
-                                                    if (err) return console.log(err + " | " + new Date());
-
-                                                    WithdrawRecordEvent.saveWithdrawRecordEvent({
-                                                        operator_address: eachMessage["validator_address"],
-                                                        withdrawType: "reward",
-                                                        denomsArray: rewardOrCommissionObject.denomsArray,
-                                                        amountsArray: rewardOrCommissionObject.amountsArray
-                                                    }, (err, newWithdrawRecordEvent) => {
+                                if (eachMessage["delegator_address"] == bech32ValidatorAddress) {
+                                    events.forEach((eachEvent: any) => {
+                                        if (eachEvent.type == "withdraw_rewards") {
+                                            const attributes = eachEvent.attributes;
+                                            attributes.forEach((withdrawEventEachAttribute: any) => {
+                                                if (withdrawEventEachAttribute.key == "amount") {
+                                                    getRewardOrCommissionArraysFromEvents(withdrawEventEachAttribute.value, (err, rewardOrCommissionObject) => {
                                                         if (err) return console.log(err + " | " + new Date());
+    
+                                                        WithdrawRecordEvent.saveWithdrawRecordEvent({
+                                                            operator_address: eachMessage["validator_address"],
+                                                            withdrawType: "reward",
+                                                            denomsArray: rewardOrCommissionObject.denomsArray,
+                                                            amountsArray: rewardOrCommissionObject.amountsArray
+                                                        }, (err, newWithdrawRecordEvent) => {
+                                                            if (err) return console.log(err + " | " + new Date());
+                                                        })
                                                     })
-                                                })
-                                            }
-                                        });
-                                    }
-                                });
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
                             }
                             next();
                         })
