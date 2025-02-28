@@ -45,7 +45,7 @@ RewardRecordEventSchema.statics.saveRewardRecordEvent = function (body: SaveRewa
     comissionsDenomArray: comissionsDenomArray,
     comissionsAmountArray: comissionsAmountArray
   }, (err, newRewardRecordEvent) => {
-    if (err || !newRewardRecordEvent) return callback('creation_error');
+    if (err) return callback('creation_error');
     return callback(null, newRewardRecordEvent);
   })
 }

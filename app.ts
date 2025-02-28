@@ -11,7 +11,6 @@ import nodeRouter from './routes/nodeRouter.js';
 import nodeDataLogRouter from './routes/nodeDataLogRouter.js';
 import { startCronJobs } from './cron/startCronJobs.js';
 import { listenEvents } from './utils/listenForEvents.js';
-import { getRewardOrCommissionArraysFromEvents } from './utils/getRewardOrCommissionArraysFromEvent.js';
 
 
 dotenv.config();

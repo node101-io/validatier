@@ -8,9 +8,10 @@ export enum WithdrawType {
 export interface WithdrawRecordEventInterface extends Document {
   timestamp: Date;
   operator_address: string;
-  denomsArray: string[];
-  amountsArray: string[];
+  denom: string;
+  amount: string;
   withdrawType: WithdrawType;
+  txHash: string;
 }
 
 interface WithdrawRecordEventModel extends Model<WithdrawRecordEventInterface> {
@@ -19,35 +20,38 @@ interface WithdrawRecordEventModel extends Model<WithdrawRecordEventInterface> {
 
 interface SaveWithdrawRecordEventInterface {
   operator_address: string;
-  denomsArray: string[];
-  amountsArray: string[];
+  denom: string;
+  amount: string;
   withdrawType: string;
+  txHash: string;
 }
 
 const withdrawRecordEventSchema: Schema = new Schema<WithdrawRecordEventInterface>(
   {
     timestamp: { type: Date, default: new Date() },
     operator_address: { type: String, required: true },
-    denomsArray: { type: [String], required: true },
-    amountsArray: { type: [String], required: true },
+    denom: { type: String, required: true },
+    amount: { type: String, required: true },
     withdrawType: {
       type: String,
       required: true,
       enum: [WithdrawType.Commission, WithdrawType.Reward],
-    }
+    },
+    txHash: { type: String, required: true }
   }
 );
 
 withdrawRecordEventSchema.statics.saveWithdrawRecordEvent = function (body: SaveWithdrawRecordEventInterface, callback) {
-  const { operator_address, denomsArray, amountsArray, withdrawType } = body;
+  const { operator_address, denom, amount, withdrawType, txHash } = body;
 
   WithdrawRecordEvent.create({ 
     operator_address: operator_address,
-    denomsArray: denomsArray,
-    amountsArray: amountsArray,
-    withdrawType: withdrawType
+    denom: denom,
+    amountsArray: amount,
+    withdrawType: withdrawType,
+    txHash: txHash
   }, (err, newWithdrawRecordEvent) => {
-    if (err || !newWithdrawRecordEvent) return callback('creation_error');
+    if (err) return callback('creation_error');
     return callback(null, newWithdrawRecordEvent);
   });
 }

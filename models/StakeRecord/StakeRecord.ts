@@ -6,6 +6,7 @@ export interface StakeRecordEventInterface extends Document {
   operator_address: string;
   denom: string;
   amount: string;
+  txHash: string;
 }
 
 interface StakeRecordEventModel extends Model<StakeRecordEventInterface> {
@@ -16,6 +17,7 @@ interface SaveStakeRecordEventInterface {
   operator_address: string;
   denom: string;
   amount: string;
+  txHash: string;
 }
 
 
@@ -23,21 +25,23 @@ const stakeRecordEventSchema = new Schema<StakeRecordEventInterface>({
   timestamp: { type: Date, default: new Date() },
   operator_address: { type: String, required: true },
   denom: { type: String, required: true },
-  amount: { type: String, required: true }
+  amount: { type: String, required: true },
+  txHash: { type: String, required: true }
 });
 
 
 stakeRecordEventSchema.statics.saveStakeRecordEvent = function (body: SaveStakeRecordEventInterface, callback)
 {
 
-  const { operator_address, denom, amount } = body;
+  const { operator_address, denom, amount, txHash } = body;
 
   StakeRecordEvent.create({ 
     operator_address: operator_address,
     denom: denom,
-    amount: amount
+    amount: amount,
+    txHash: txHash
   }, (err, newStakeRecordEvent) => {
-    if (err || !newStakeRecordEvent) return callback('creation_error');
+    if (err) return callback('creation_error');
     return callback(null, newStakeRecordEvent);
   })
 }

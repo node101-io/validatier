@@ -1,13 +1,13 @@
 import WebSocket from "ws";
 import async from "async";
-import { convertOperationAddressToBech32 } from "./convertOperationAddressToBech32.js";
-
-const WEBSOCKET_URL = "wss://cosmoshub.tendermintrpc.lava.build/websocket";
-
 import axios from "axios";
 import StakeRecordEvent from "../models/StakeRecord/StakeRecord.js";
-import { getRewardOrCommissionArraysFromEvents } from "./getRewardOrCommissionArraysFromEvent.js";
 import WithdrawRecordEvent from "../models/WithdrawRecord/WithdrawRecord.js";
+import { convertOperationAddressToBech32 } from "./convertOperationAddressToBech32.js";
+import { getOnlyNativeTokenValueFromCommissionOrRewardEvent } from "./getRewardOrCommissionArraysFromEvent.js";
+import { getSpecificAttributeOfAnEventFromTxEventsArray } from "./getSpecificAttributeOfAnEventFromTxEventsArray.js";
+
+const WEBSOCKET_URL = "wss://cosmoshub.tendermintrpc.lava.build/websocket";
 
 interface GetTransactionInfoInterface {
     tx: {
@@ -44,7 +44,7 @@ export const listenEvents = () => {
             }
         };
         ws.send(JSON.stringify(subscribeMsg));
-        console.log("📩 Subscribed to new blocks");
+        console.log("📩 Subscribed to events:\n - MsgDelegate \n - MsgWithdrawDelegatorRewards \n - MsgWithdrawValidatorCommission");
     });
 
     ws.on("message", async (data) => {
@@ -57,55 +57,75 @@ export const listenEvents = () => {
                 const txResult = txRawResult.tx.body;
                 
                 if (txResult && txResult.messages) {
-                    async.timesSeries(txResult.messages.length, (i, next) => {
+                    for (let i = 0; i < txResult.messages.length; i++) {
                         const eachMessage = txResult.messages[i];
+
                         convertOperationAddressToBech32(eachMessage["validator_address"], (err, bech32ValidatorAddress) => {
-                            if (err) return next();
+                            if (err) return;
 
-                            if (eachMessage["@type"] == "/cosmos.staking.v1beta1.MsgDelegate" && eachMessage["validator_address"]) {
+                            const events = txRawResult.tx_response.events;
 
-                                if (eachMessage["delegator_address"] == bech32ValidatorAddress) {
-                                    StakeRecordEvent.saveStakeRecordEvent({
-                                        operator_address: eachMessage["validator_address"],
-                                        denom: eachMessage["amount"]["denom"],
-                                        amount: eachMessage["amount"]["amount"],
-                                    }, (err, newStakeRecordEvent) => {
-                                        if (err) return console.log(err + " | " + new Date());
-                                    })
-                                }
-                            } else if (eachMessage["@type"] == "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission") {
-                                
-                                console.log(txRawResult);
-                            } else if (eachMessage["@type"] == "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward") {
-                                
-                                const events = txRawResult.tx_response.events;
-                                if (eachMessage["delegator_address"] == bech32ValidatorAddress) {
-                                    events.forEach((eachEvent: any) => {
-                                        if (eachEvent.type == "withdraw_rewards") {
-                                            const attributes = eachEvent.attributes;
-                                            attributes.forEach((withdrawEventEachAttribute: any) => {
-                                                if (withdrawEventEachAttribute.key == "amount") {
-                                                    getRewardOrCommissionArraysFromEvents(withdrawEventEachAttribute.value, (err, rewardOrCommissionObject) => {
-                                                        if (err) return console.log(err + " | " + new Date());
-    
-                                                        WithdrawRecordEvent.saveWithdrawRecordEvent({
-                                                            operator_address: eachMessage["validator_address"],
-                                                            withdrawType: "reward",
-                                                            denomsArray: rewardOrCommissionObject.denomsArray,
-                                                            amountsArray: rewardOrCommissionObject.amountsArray
-                                                        }, (err, newWithdrawRecordEvent) => {
-                                                            if (err) return console.log(err + " | " + new Date());
-                                                        })
-                                                    })
-                                                }
-                                            });
-                                        }
-                                    });
-                                }
+                            if (eachMessage["@type"] == "/cosmos.staking.v1beta1.MsgDelegate" && eachMessage["validator_address"] && eachMessage["delegator_address"] == bech32ValidatorAddress) {
+                                StakeRecordEvent.saveStakeRecordEvent({
+                                    operator_address: eachMessage["validator_address"],
+                                    denom: eachMessage["amount"]["denom"],
+                                    amount: eachMessage["amount"]["amount"],
+                                    txHash: events["tx.hash"][0]
+                                }, (err, newStakeRecordEvent) => {
+                                    if (err) return console.log(err + " | " + new Date());
+                                    console.log("Stake event saved for validator: " + newStakeRecordEvent.operator_address + " | " + new Date());
+                                    return;
+                                })
                             }
-                            next();
+                            
+                            else if (eachMessage["@type"] == "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission") {
+
+                                getSpecificAttributeOfAnEventFromTxEventsArray(events, "withdraw_commission", "amount", (err, specificAttributeValue) => {
+                                    if (err || !specificAttributeValue) return console.log(err + " | " + new Date());
+
+                                    getOnlyNativeTokenValueFromCommissionOrRewardEvent(specificAttributeValue, (err, nativeRewardOrCommissionValue) => {
+                                        if (err || !nativeRewardOrCommissionValue) return console.log(err + " | " + new Date())
+                                        WithdrawRecordEvent.saveWithdrawRecordEvent({
+                                            operator_address: eachMessage["validator_address"],
+                                            withdrawType: "commission",
+                                            denom: "uatom",
+                                            amount: nativeRewardOrCommissionValue,
+                                            txHash: events["tx.hash"][0]
+                                        }, (err, newWithdrawRecordEvent) => {
+                                            if (err) return console.log(err + " | " + new Date());
+                                            console.log("Commission withdraw event saved for validator: " + newWithdrawRecordEvent.operator_address + " | " + new Date());
+                                            return;
+                                        })
+                                    })
+                                })
+                                
+                            }
+                            
+                            else if (eachMessage["@type"] == "/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward" && eachMessage["delegator_address"] == bech32ValidatorAddress) {
+                                
+                                getSpecificAttributeOfAnEventFromTxEventsArray(events, "withdraw_rewards", "amount", (err, specificAttributeValue) => {
+                                    if (err || !specificAttributeValue) return console.log(err + " | " + new Date());
+
+                                    getOnlyNativeTokenValueFromCommissionOrRewardEvent(specificAttributeValue, (err, nativeRewardOrCommissionValue) => {
+                                        if (err || !nativeRewardOrCommissionValue) return console.log(err + " | " + new Date());
+
+                                        WithdrawRecordEvent.saveWithdrawRecordEvent({
+                                            operator_address: eachMessage["validator_address"],
+                                            withdrawType: "reward",
+                                            denom: "uatom",
+                                            amount: nativeRewardOrCommissionValue,
+                                            txHash: events["tx.hash"][0]
+                                        }, (err, newWithdrawRecordEvent) => {
+                                            if (err) return console.log(err + " | " + new Date());
+                                            console.log("Reward withdraw event saved for validator: " + newWithdrawRecordEvent.operator_address + " | " + new Date());
+                                            return;
+                                        })
+                                    })
+                                })
+                                
+                            } else return;
                         })
-                    })
+                    }
                 }
             }
         }
@@ -120,4 +140,3 @@ export const listenEvents = () => {
         setTimeout(listenEvents, 5000);
     });
 };
-
