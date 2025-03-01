@@ -47,7 +47,7 @@ withdrawRecordEventSchema.statics.saveWithdrawRecordEvent = function (body: Save
   WithdrawRecordEvent.create({ 
     operator_address: operator_address,
     denom: denom,
-    amountsArray: amount,
+    amount: amount,
     withdrawType: withdrawType,
     txHash: txHash
   }, (err, newWithdrawRecordEvent) => {

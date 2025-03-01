@@ -1,28 +1,23 @@
 
-import async from "async";
-
 interface EventInterface {
   type: string,
   attributes: any[]
 }
 
-export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: EventInterface[], specificEventType: string, specificAttributeKey: string, callback: (err: string | null, specificAttributeValue: string | null) => any) {
+export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: EventInterface[], specificEventType: string, specificAttributeKey: string, callback: (err: string | null, specificAttributeValue: any) => any) {
   
-  async.timesSeries(events.length, (i, next) => {
-    const eachEvent: EventInterface = events[i];
+  for (let i = 0; i < events.length; i++) {
+    const eachEvent = events[i];
 
-    if (eachEvent.type == specificEventType) {
-      const attributes = eachEvent.attributes;
-      attributes.forEach(eachAttribute => {
-        if (eachAttribute.key == specificAttributeKey) {
-          return callback(null, eachAttribute.value);
-        } else {
-          next();
-        }
-      })
+    if (eachEvent.type != specificEventType) continue;
+ 
+    const attributes = eachEvent.attributes;
+    for (let j = 0; j < attributes.length; j++) {
+      const eachAttribute: {key: string, value: string} = attributes[j];
+          
+      if (eachAttribute.key != specificAttributeKey) continue;
+      return callback(null, eachAttribute.value); 
     }
-
-  }, (err) => {
-    return callback("not_found", null);
-  });
+  };
+  return callback("not_found", null);
 }
