@@ -1,7 +1,9 @@
 import async from 'async';
 import axios from 'axios';
-import StakeRecordEvent from '../models/StakeRecord/StakeRecord.js';
 import WebSocket from 'ws';
+
+import CompositeEventBlock from '../models/CompositeEventBlock/CompositeEventBlock.js';
+import StakeRecordEvent from '../models/StakeRecord/StakeRecord.js';
 import WithdrawRecordEvent from '../models/WithdrawRecord/WithdrawRecord.js';
 
 import { convertOperationAddressToBech32 } from './convertOperationAddressToBech32.js';
@@ -45,7 +47,7 @@ export const listenEvents = () => {
       id: 1,
       method: 'subscribe',
       params: {
-        query: 'tm.event='Tx''
+        query: 'tm.event=\'Tx\''
       }
     };
     ws.send(JSON.stringify(subscribeMsg));
@@ -54,8 +56,9 @@ export const listenEvents = () => {
 
   ws.on('message', async (data) => {
     const events = JSON.parse(data.toString()).result.events;
-    if (!events || !events['message.module'] || !events['message.action'] || !events['tx.hash'] || !events['tx.hash'][0]) return;
+    if (!events || !events['message.module'] || !events['message.action'] || !events['tx.hash'] || !events['tx.hash'][0] || !events['tx.height'] || !events['tx.height'][0]) return;
 
+    const blockHeight = events['tx.height'][0];
     const txHash = events['tx.hash'][0];
 
     getTransactionInfo(txHash, (err, txRawResult) => {
@@ -81,9 +84,19 @@ export const listenEvents = () => {
                 amount: eachMessage['amount']['amount'],
                 txHash: txHash
               }, (err, newStakeRecordEvent) => {
-                if (err) return console.log(err + ' | ' + new Date());
-                console.log('Stake event saved for validator: ' + newStakeRecordEvent.operator_address + ' | ' + new Date());
-                return next();
+                if (err || typeof parseInt(blockHeight) != "number" || typeof parseInt(eachMessage['amount']['amount']) != "number") return console.log('bad_request | ' + new Date());
+
+                CompositeEventBlock.saveCompositeEventBlock({
+                  block_height: parseInt(blockHeight),
+                  operator_address: eachMessage['validator_address'],
+                  denom: "uatom",
+                  self_stake: parseInt(eachMessage['amount']['amount'])
+                }, (err, newCompositeEventBlock) => {
+                  if (err) return console.log(err + ' | ' + new Date());
+
+                  console.log('Stake event saved for validator: ' + newStakeRecordEvent.operator_address + ' | Composite block saved with block_height: ' + newCompositeEventBlock.block_height + ' | ' + new Date());
+                  return next();
+                });
               });
             } else if (eachMessage['@type'] == '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission') {
               getSpecificAttributeOfAnEventFromTxEventsArray(txRawResult.tx_response.events, 'withdraw_commission', 'amount', (err, specificAttributeValue) => {
@@ -98,8 +111,17 @@ export const listenEvents = () => {
                     txHash: txHash
                   }, (err, newWithdrawRecordEvent) => {
                     if (err) return console.log(err + ' | ' + new Date());
-                    console.log('Commission withdraw event saved for validator: ' + newWithdrawRecordEvent.operator_address + ' | ' + new Date());
-                    return next();
+                    CompositeEventBlock.saveCompositeEventBlock({
+                      block_height: parseInt(blockHeight),
+                      operator_address: eachMessage['validator_address'],
+                      denom: "uatom",
+                      reward: parseInt(nativeRewardOrCommissionValue)
+                    }, (err, newCompositeEventBlock) => {
+                      if (err) return console.log(err + ' | ' + new Date());
+    
+                      console.log('Commission withdraw saved for validator: ' + newWithdrawRecordEvent.operator_address + ' | Composite block saved with block_height: ' + newCompositeEventBlock.block_height + ' | ' + new Date());
+                      return next();
+                    });
                   });
                 });
               });
@@ -116,8 +138,17 @@ export const listenEvents = () => {
                     txHash: txHash
                   }, (err, newWithdrawRecordEvent) => {
                     if (err || !newWithdrawRecordEvent) return console.log(err + ' | ' + new Date());
-                    console.log('Reward withdraw event saved for validator: ' + newWithdrawRecordEvent.operator_address + ' | ' + new Date());
-                    return next();
+                    CompositeEventBlock.saveCompositeEventBlock({
+                      block_height: parseInt(blockHeight),
+                      operator_address: eachMessage['validator_address'],
+                      denom: "uatom",
+                      reward: parseInt(nativeRewardOrCommissionValue)
+                    }, (err, newCompositeEventBlock) => {
+                      if (err) return console.log(err + ' | ' + new Date());
+    
+                      console.log('Reward withdraw saved for validator: ' + newWithdrawRecordEvent.operator_address + ' | Composite block saved with block_height: ' + newCompositeEventBlock.block_height + ' | ' + new Date());
+                      return next();
+                    });
                   });
                 });
               });

@@ -13,13 +13,29 @@ export interface CompositeEventBlockInterface {
 }
 
 interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
+  checkIfBlockExistsAndUpdate: (
+    body: {
+      operator_address: string;
+      block_height: number;
+      update_body: {
+        reward?: number;
+        self_stake?: number;
+        reward_prefix_sum?: number;
+        self_stake_prefix_sum?: number;
+      }
+    },
+    callback: (
+      err: string | null,
+      updatedCompositeBlockEvent: CompositeEventBlockInterface | null
+    ) => any
+  ) => any;
   saveCompositeEventBlock: (
     body: {
       block_height: number;
       operator_address: string;
-      denom: string;
-      reward: number;
-      self_stake: number;
+      denom?: string;
+      reward?: number;
+      self_stake?: number;
     }, 
     callback: (
       err: string,
@@ -60,13 +76,15 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
   },
   reward: { 
     type: Number, 
-    required: true,
-    trim: true
+    required: false,
+    trim: true,
+    default: 0
   },
   self_stake: { 
     type: Number, 
-    required: true,
-    unique: true
+    required: false,
+    unique: true,
+    default: 0
   },
   reward_prefix_sum: {
     type: Number, 
@@ -107,13 +125,46 @@ compositeEventBlockSchema.statics.searchTillExists = function (
   search(block_height);
 }
 
+compositeEventBlockSchema.statics.checkIfBlockExistsAndUpdate = function (
+  body: {
+    operator_address: string;
+    block_height: number;
+    update_body: {
+      reward?: number;
+      self_stake?: number;
+      reward_prefix_sum?: number;
+      self_stake_prefix_sum?: number;
+    }
+  },
+  callback: (
+    err: string | null,
+    updatedCompositeBlockEvent: CompositeEventBlockInterface | null
+  ) => any
+) {
+
+  const { operator_address, block_height, update_body } = body;
+
+  if (!update_body.reward) delete update_body.reward;
+  if (!update_body.self_stake) delete update_body.self_stake;
+  if (!update_body.reward_prefix_sum) delete update_body.reward_prefix_sum;
+  if (!update_body.self_stake_prefix_sum) delete update_body.self_stake_prefix_sum;
+
+  CompositeEventBlock.findOneAndUpdate(
+    { operator_address: operator_address, block_height: block_height }, 
+    update_body,
+    (err: string | null, updatedCompositeEventBlock: CompositeEventBlockInterface | null) => {
+    if (err) return callback(err, null);
+    return callback(null, updatedCompositeEventBlock);
+  })
+}
+
 compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
   body: {  
     block_height: number;
     operator_address: string;
     denom: string;
-    reward: number;
-    self_stake: number;
+    reward?: number;
+    self_stake?: number;
   },
   callback: (
     err: string | null,
@@ -130,11 +181,24 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
       step: -1 
     }, 
     (err, foundCompositeBlockEvent) => {
-      if (err) return callback(err, null);
+      if (err) return callback(err, null); 
 
-      const reward_prefix_sum = foundCompositeBlockEvent ? foundCompositeBlockEvent.reward_prefix_sum + reward : reward;
-      const self_stake_prefix_sum = foundCompositeBlockEvent ? foundCompositeBlockEvent.self_stake_prefix_sum + self_stake : self_stake;
-      
+      const reward_prefix_sum = foundCompositeBlockEvent ? (reward ? foundCompositeBlockEvent.reward_prefix_sum + reward : undefined) : reward;
+      const self_stake_prefix_sum = foundCompositeBlockEvent ? (self_stake ? foundCompositeBlockEvent.self_stake_prefix_sum + self_stake : undefined) : self_stake;
+
+      CompositeEventBlock.checkIfBlockExistsAndUpdate({
+        operator_address: operator_address,
+        block_height: block_height,
+        update_body: {
+          reward: reward ? reward : 0,
+          self_stake: self_stake ? self_stake : 0,
+          reward_prefix_sum: reward_prefix_sum ? reward_prefix_sum : 0,
+          self_stake_prefix_sum: self_stake_prefix_sum ? self_stake_prefix_sum : 0,
+        }
+      }, (err, updatedCompositeEventBlock) => {
+
+      })
+
       CompositeEventBlock.create(
         {
           operator_address: operator_address,
