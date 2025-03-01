@@ -1,0 +1,44 @@
+
+Reward için node101 için
+
+array: [1, 5, 2, 4, 9, 10, 1, 3, 5]
+prefixsum: [1, 6, 8, 12, 21, 31, 32, 35, 40]
+
+prefixsum[i] = prefixsum[i-1] + array[i]
+prefixsum[0] = array[0]
+
+Query: [i, j] => i ve j blokları arasındaki (i ve j dahil) reward toplamı kaç?
+
+prefixsum[j] - prefixsum[i] + array[i]
+
+Document: {
+  block_height: integer,
+  validator: id, // ayrı bir validator modelimiz var
+  reward: integer,
+  self_stake: integer,
+  reward_prefix_sum: integer
+  self_stake_prefix_sum: integer
+}
+
+Her blokta her validator self stake ve reward yok?
+
+o validator için TX olmayan doküman nasıl görünür?
+{
+  block_height: integer,
+  validator: id,
+  reward: 0,
+  self_stake: 0,
+  reward_prefix_sum: bir önceki blokun reward_prefix_sum + 0
+  self_stake_prefix_sum: bir önceki blokun self_stake_prefix_sum + 0
+}
+
+=> sparse
+
+nasıl bu kadar boş dokümanı tutmadan query'lere cevap veririz?
+
+Örnek Problem: Ben 100. ve 200. bloklarda reward ekledim. Ama arasında hiçbir şey yok.
+  [110, 130] query'sine nasıl boş blok yaratmadan cevap verirsin? Cevabı 0
+  [110, 210] query'sine nasıl boş blok yaratmadan cevap verirsin? Cevabı [200, 210] ile aynı
+
+150, 210
+block(100), block(200), block(201), block(202), block(203), block(204)

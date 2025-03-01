@@ -54,8 +54,10 @@ export const listenEvents = () => {
   ws.on("message", async (data) => {
     const events = JSON.parse(data.toString()).result.events;
     if (!events || !events["message.module"] || !events["message.action"] || !events["tx.hash"] || !events["tx.hash"][0]) return;
-    
-    getTransactionInfo(events["tx.hash"][0], (err, txRawResult) => {
+
+    const txHash = events["tx.hash"][0];
+
+    getTransactionInfo(txHash, (err, txRawResult) => {
       if (err || !txRawResult) return;
 
       const txResult = txRawResult.tx.body;
@@ -74,7 +76,7 @@ export const listenEvents = () => {
               operator_address: eachMessage["validator_address"],
               denom: eachMessage["amount"]["denom"],
               amount: eachMessage["amount"]["amount"],
-              txHash: events["tx.hash"][0]
+              txHash: txHash
             }, (err, newStakeRecordEvent) => {
               if (err) return console.log(err + " | " + new Date());
               console.log("Stake event saved for validator: " + newStakeRecordEvent.operator_address + " | " + new Date());
@@ -90,7 +92,7 @@ export const listenEvents = () => {
                   withdrawType: "commission",
                   denom: "uatom",
                   amount: nativeRewardOrCommissionValue,
-                  txHash: events["tx.hash"][0]
+                  txHash: txHash
                 }, (err, newWithdrawRecordEvent) => {
                   if (err) return console.log(err + " | " + new Date());
                   console.log("Commission withdraw event saved for validator: " + newWithdrawRecordEvent.operator_address + " | " + new Date());
@@ -108,7 +110,7 @@ export const listenEvents = () => {
                   withdrawType: "reward",
                   denom: "uatom",
                   amount: nativeRewardOrCommissionValue,
-                  txHash: events["tx.hash"][0]
+                  txHash: txHash
                 }, (err, newWithdrawRecordEvent) => {
                   if (err || !newWithdrawRecordEvent) return console.log(err + " | " + new Date());
                   console.log("Reward withdraw event saved for validator: " + newWithdrawRecordEvent.operator_address + " | " + new Date());
@@ -116,7 +118,7 @@ export const listenEvents = () => {
                 });
               });
             });
-          }
+          } else return console.error("impossible_error");
         });
       }, (err, result) => {});
     });
