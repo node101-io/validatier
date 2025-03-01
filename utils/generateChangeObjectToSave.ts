@@ -13,23 +13,27 @@ export const generateChangeObjectToSave = function (changedAttributes: string[],
   let newBodyResult: string[] = [];
 
   if (!changedAttributes) return callback("no_change_occured", null);
-  async.timesSeries(changedAttributes.length, (i, next) => {
+  async.timesSeries(
+    changedAttributes.length, 
+    (i, next) => {
 
-    const changedAttribute: string = changedAttributes[i];
+      const changedAttribute: string = changedAttributes[i];
 
-    const oldValue: string = oldBody[changedAttribute];
-    const newValue: string = newBody[changedAttribute];
+      const oldValue: string = oldBody[changedAttribute];
+      const newValue: string = newBody[changedAttribute];
 
-    oldBodyResult.push(oldValue);
-    newBodyResult.push(newValue);
+      oldBodyResult.push(oldValue);
+      newBodyResult.push(newValue);
 
-    next();
-  }, (err) => {
-    if (err) return callback(err, null);
-    return callback(null, {
-      changedAttributes: changedAttributes,
-      oldBody: oldBodyResult,
-      newBody: newBodyResult
-    })
-  })
+      next();
+    }, 
+    (err) => {
+      if (err) return callback(err, null);
+      return callback(null, {
+        changedAttributes: changedAttributes,
+        oldBody: oldBodyResult,
+        newBody: newBodyResult
+      })
+    }
+  )
 }

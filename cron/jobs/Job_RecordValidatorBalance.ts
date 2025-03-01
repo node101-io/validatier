@@ -12,29 +12,33 @@ export const Job_RecordValidatorBalance = function (callback: (err: string | nul
   Validator.find({}, (err: string, validators: ValidatorInterface[]) => {
     if (err) return callback(err, false);
 
-    async.timesSeries(validators.length, (i, next) => {
-      const eachValidator = validators[i];
+    async.timesSeries(
+      validators.length, 
+      (i, next) => {
+        const eachValidator = validators[i];
 
-      getValidatorSpendableBalance(eachValidator.operator_address, (err, validatorBalances) => {
-        if (err || !validatorBalances) return callback("fetch_error", false);
-        changeDenomAmountObjectToTwoArrayFormat(validatorBalances, (err, response) => {
+        getValidatorSpendableBalance(eachValidator.operator_address, (err, validatorBalances) => {
+          if (err || !validatorBalances) return callback("fetch_error", false);
+          changeDenomAmountObjectToTwoArrayFormat(validatorBalances, (err, response) => {
 
-          if (err || !response?.denomsArray || !response?.amountsArray) return callback("conversion_error", false);
+            if (err || !response?.denomsArray || !response?.amountsArray) return callback("conversion_error", false);
 
-          BalanceRecordEvent.saveBalanceRecordEvent({
-            operator_address: eachValidator.operator_address,
-            denomArray: response.denomsArray,
-            balanceArray: response.amountsArray
-          }, (err, newBalanceRecordEvent) => {
-            if (err || !newBalanceRecordEvent) return callback("save_error", false);
-            next();
+            BalanceRecordEvent.saveBalanceRecordEvent({
+              operator_address: eachValidator.operator_address,
+              denomArray: response.denomsArray,
+              balanceArray: response.amountsArray
+            }, (err, newBalanceRecordEvent) => {
+              if (err || !newBalanceRecordEvent) return callback("save_error", false);
+              next();
+            })
           })
-        })
-      })      
-    }, (err) => {
-      if (err) return callback("async_error", false);
-      return callback(null, true);
-    })
+        })      
+      }, 
+      (err) => {
+        if (err) return callback("async_error", false);
+        return callback(null, true);
+      }
+    )
   })
 }
 

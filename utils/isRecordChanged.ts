@@ -7,16 +7,20 @@ export const isRecordChanged = function (oldBody: any, newBody: any, attributesT
 
   const changedAttributes: string[] = [];
 
-  async.timesSeries(attributesToCompare.length, (i, next) => {
+  async.timesSeries(
+    attributesToCompare.length, 
+    (i, next) => {
     
-    const eachAttribute: string = attributesToCompare[i];
+      const eachAttribute: string = attributesToCompare[i];
 
-    if (oldBody[`${eachAttribute}`] != newBody[`${eachAttribute}`]) {
-      changedAttributes.push(eachAttribute);
+      if (oldBody[`${eachAttribute}`] != newBody[`${eachAttribute}`]) {
+        changedAttributes.push(eachAttribute);
+      }
+      next();
+    }, 
+    (err) => {
+      if (err) return callback("async_error", null);
+      return callback('', changedAttributes)
     }
-    next();
-  }, (err) => {
-    if (err) return callback("async_error", null);
-    return callback('', changedAttributes)
-  })
+  )
 }

@@ -12,16 +12,20 @@ export const changeDenomAmountObjectToTwoArrayFormat = function (objectArray: Ge
   let denomsArray: string[] = [];
   let amountsArray: string[] = [];
   
-  async.timesSeries(objectArray.length, (i, next) => {
-    const eachObject = objectArray[i];
-    denomsArray.push(eachObject.denom);
-    amountsArray.push(eachObject.amount);
-    next();
-  }, (err) => {
-    if (err) return callback(err, null);
-    return callback(null, {
-      denomsArray: denomsArray,
-      amountsArray: amountsArray
-    })
-  })
+  async.timesSeries(
+    objectArray.length, 
+    (i, next) => {
+      const eachObject = objectArray[i];
+      denomsArray.push(eachObject.denom);
+      amountsArray.push(eachObject.amount);
+      next();
+    }, 
+    (err) => {
+      if (err) return callback(err, null);
+      return callback(null, {
+        denomsArray: denomsArray,
+        amountsArray: amountsArray
+      })
+    }
+  )
 }

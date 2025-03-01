@@ -1,14 +1,20 @@
 
 import async from 'async';
 
-export const getCacheServerNameFromHeaders = function (headers: any, callback: (err: string, cacheServerName: string) => any) {
+export const getCacheServerNameFromHeaders = function (headers: any, callback: (err: string, cacheServerName: string | null) => any) {
   const headersArray: any = [...headers];
 
-  async.timesSeries(headersArray.length, (i, next) => {
+  async.timesSeries(
+    headersArray.length, 
+    (i, next) => {
 
-    const headersArrayEachAttributeTuple = headersArray[i];
+      const headersArrayEachAttributeTuple = headersArray[i];
 
-    if (headersArrayEachAttributeTuple[0] == 'server') callback('', headersArrayEachAttributeTuple[1])
-    next();
-  })
+      if (headersArrayEachAttributeTuple[0] == 'server') callback('', headersArrayEachAttributeTuple[1])
+      next();
+    }, 
+    (err) => {
+      return callback("bad_request", null);
+    } 
+  )
 }
