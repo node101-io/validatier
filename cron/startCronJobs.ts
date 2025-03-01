@@ -12,6 +12,8 @@ const EVERY_HOUR_REGEX_STRING = '0 * * * *';
 
 export const startCronJobs = () => {
 
+  console.log("👔 Cron jobs started with the time interval regex of " + EVERY_HOUR_REGEX_STRING);
+
   cron.schedule(EVERY_HOUR_REGEX_STRING, () => {
     console.log(SEPERATOR_LINE);
     Job_SaveValidators((err, success) => {

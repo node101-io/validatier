@@ -1,12 +1,14 @@
-import WebSocket from "ws";
 import async from "async";
 import axios from "axios";
 import StakeRecordEvent from "../models/StakeRecord/StakeRecord.js";
+import WebSocket from "ws";
 import WithdrawRecordEvent from "../models/WithdrawRecord/WithdrawRecord.js";
+
 import { convertOperationAddressToBech32 } from "./convertOperationAddressToBech32.js";
 import { getOnlyNativeTokenValueFromCommissionOrRewardEvent } from "./getRewardOrCommissionArraysFromEvent.js";
 import { getSpecificAttributeOfAnEventFromTxEventsArray } from "./getSpecificAttributeOfAnEventFromTxEventsArray.js";
 
+const TENDERMINT_RPC_URL = "https://rest.cosmos.directory/cosmoshub/cosmos/tx/v1beta1/txs/";
 const WEBSOCKET_URL = "wss://cosmoshub.tendermintrpc.lava.build/websocket";
 
 interface GetTransactionInfoInterface {
@@ -17,8 +19,6 @@ interface GetTransactionInfoInterface {
     },
     tx_response: any
 }
-
-const TENDERMINT_RPC_URL = "https://rest.cosmos.directory/cosmoshub/cosmos/tx/v1beta1/txs/";
 
 function getTransactionInfo(txHash: string, callback: (err: string, data: {tx: any, tx_response: any} | null) => any) {
 
@@ -52,7 +52,7 @@ export const listenEvents = () => {
         if (!events || !events["message.module"] || !events["message.action"] || !events["tx.hash"] || !events["tx.hash"][0]) return console.log("bad_request");
         
         getTransactionInfo(events["tx.hash"][0], (err, txRawResult) => {
-            if (err || !txRawResult) return console.log("tx_not_found")
+            if (err || !txRawResult) return console.log("tx_not_found");
 
             const txResult = txRawResult.tx.body;
             
@@ -107,8 +107,6 @@ export const listenEvents = () => {
                         
                         getSpecificAttributeOfAnEventFromTxEventsArray(txRawResult.tx_response.events, "withdraw_rewards", "amount", (err, specificAttributeValue) => {
                             if (err || !specificAttributeValue) return console.log(err + " | " + new Date());
-                            
-                            console.log(specificAttributeValue)
 
                             getOnlyNativeTokenValueFromCommissionOrRewardEvent(specificAttributeValue, (err, nativeRewardOrCommissionValue) => {
                                 if (err || !nativeRewardOrCommissionValue) return console.log(err + " | " + new Date());

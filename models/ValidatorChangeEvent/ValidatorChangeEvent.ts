@@ -45,7 +45,7 @@ validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (body: Sa
 
     isRecordChanged(validator, body, ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares'], (err, changedAttributes) => {
       if (err) return callback(err);
-      if (!changedAttributes) return callback('no_change_occured', null); 
+      if (!changedAttributes || changedAttributes.length <= 0) return callback(null, "no_change_occured"); 
 
       generateChangeObjectToSave(changedAttributes, validator, body, (err, result) => {
         if (err) return callback("conversion_error", null);

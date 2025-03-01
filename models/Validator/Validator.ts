@@ -85,7 +85,7 @@ validatorSchema.statics.saveValidator = function (body: SaveNewValidatorInterfac
       }
 
       ValidatorChangeEvent.saveValidatorChangeEvent(updateAndChangeValidatorBody, (err, newValidatorChangeEvent) => {
-        if (err || !newValidatorChangeEvent) return callback('change_error_validator', null);
+        if (err || !newValidatorChangeEvent) return callback(err, null);
 
         Validator.updateValidator(updateAndChangeValidatorBody, (err, updatedValidator) => {
           if (err) return callback('update_error_validator', null);

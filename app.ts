@@ -1,10 +1,10 @@
-import express, { Express } from 'express';
-import path from 'path';
 import bodyParser from 'body-parser';
-import session from 'express-session';
 import dotenv from 'dotenv';
+import express, { Express } from 'express';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
+import path from 'path';
+import session from 'express-session';
 
 import indexRouter from './routes/indexRouter.js';
 import nodeRouter from './routes/nodeRouter.js';
@@ -49,9 +49,9 @@ app.use('/nodeDataLog', nodeDataLogRouter);
 
 app.listen(PORT, () => {
 
-  // startCronJobs();
+  startCronJobs();
+  listenEvents();
 
   console.log(`Server running at PORT ${PORT}`);
-  listenEvents();
 });
 
