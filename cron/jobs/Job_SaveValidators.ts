@@ -1,7 +1,7 @@
+import async from "async";
 
 import Validator from '../../models/Validator/Validator.js';
 import { getActiveValidators, ValidatorResponse } from '../functions/getActiveValidators.js';
-import async from "async";
 
 export const Job_SaveValidators = (callback: (err: string | unknown | null, success: Boolean) => any) => {
 

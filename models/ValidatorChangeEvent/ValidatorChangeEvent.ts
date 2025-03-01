@@ -1,10 +1,10 @@
 
-import mongoose, { Schema, Document, Model } from 'mongoose';
-import { isRecordChanged } from '../../utils/isRecordChanged.js';
+import mongoose, { Schema, Model } from 'mongoose';
 import Validator, { ValidatorInterface } from '../Validator/Validator.js';
+import { isRecordChanged } from '../../utils/isRecordChanged.js';
 import { generateChangeObjectToSave } from '../../utils/generateChangeObjectToSave.js';
 
-export interface ValidatorChangeEventInterface extends Document {
+export interface ValidatorChangeEventInterface {
   timestamp: Date;
   operator_address: string;
   changedAttributes: string[];
@@ -13,38 +13,69 @@ export interface ValidatorChangeEventInterface extends Document {
 }
 
 interface ValidatorChangeEventModel extends Model<ValidatorChangeEventInterface> {
-  saveValidatorChangeEvent: (body: SaveValidatorChangeEventInterface, callback: (err: string, ValidatorChangeEvent: ValidatorChangeEventInterface) => any) => any;
+  saveValidatorChangeEvent: (
+    body: {
+      operator_address: string;
+      moniker: string;
+      commission_rate: string;
+      bond_shares: string;
+      liquid_shares: string;
+    }, 
+    callback: (
+      err: string, 
+      ValidatorChangeEvent: ValidatorChangeEventInterface
+    ) => any
+  ) => any;
 }
-
-export interface SaveValidatorChangeEventInterface {
-  operator_address: string;
-  moniker: string;
-  commission_rate: string;
-  bond_shares: string;
-  liquid_shares: string;
-}
-
 
 const validatorChangeEventSchema = new Schema<ValidatorChangeEventInterface>({
-  timestamp: { type: Date, default: new Date() },
-  operator_address: { type: String, required: true },
-  changedAttributes: { type: [String], required: true },
-  oldValues: { type: [String], required: true },
-  newValues: { type: [String], required: true },
+  timestamp: { 
+    type: Date, 
+    default: new Date(),
+    trim: true
+  },
+  operator_address: { 
+    type: String, 
+    required: true, 
+    trim: true
+  },
+  changedAttributes: { 
+    type: [String], 
+    required: true
+  },
+  oldValues: { 
+    type: [String], 
+    required: true,
+  },
+  newValues: { 
+    type: [String], 
+    required: true 
+  },
 });
 
 
-validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (body: SaveValidatorChangeEventInterface, callback)
-{
+validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (
+  body: {
+    operator_address: string;
+    moniker: string;
+    commission_rate: string;
+    bond_shares: string;
+    liquid_shares: string;
+  }, 
+  callback: (
+    err: string | null,
+    newValidatorChangeEvent: ValidatorChangeEventInterface | string | null
+  ) => any
+) {
 
   const { operator_address } = body;
 
   Validator.findOne({ operator_address: operator_address }, (err: string, validator: ValidatorInterface) => {
     
-    if (err || !validator) return callback("fetch_error");
+    if (err || !validator) return callback("fetch_error", null);
 
-    isRecordChanged(validator, body, ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares'], (err, changedAttributes) => {
-      if (err) return callback(err);
+    isRecordChanged(validator, body, ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares'], (err: string, changedAttributes) => {
+      if (err) return callback(err, null);
       if (!changedAttributes || changedAttributes.length <= 0) return callback(null, "no_change_occured"); 
 
       generateChangeObjectToSave(changedAttributes, validator, body, (err, result) => {

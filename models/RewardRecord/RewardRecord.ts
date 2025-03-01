@@ -1,7 +1,7 @@
 
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Model } from 'mongoose';
 
-export interface RewardRecordEventInterface extends Document {
+export interface RewardRecordEventInterface {
   timestamp: Date;
   operator_address: string;
   rewardsDenomArray: string[];
@@ -11,30 +11,63 @@ export interface RewardRecordEventInterface extends Document {
 }
 
 interface RewardRecordEventModel extends Model<RewardRecordEventInterface> {
-  saveRewardRecordEvent: (body: SaveRewardRecordEventInterface, callback: (err: string, newRewardRecordEvent: RewardRecordEventInterface) => any) => any;
-}
-
-interface SaveRewardRecordEventInterface {
-  operator_address: string;
-  rewardsDenomArray: string[];
-  rewardsAmountArray: string[];
-  comissionsDenomArray: string[];
-  comissionsAmountArray: string[];
+  saveRewardRecordEvent: (
+    body: {  
+      operator_address: string;
+      rewardsDenomArray: string[];
+      rewardsAmountArray: string[];
+      comissionsDenomArray: string[];
+      comissionsAmountArray: string[];
+    }, 
+    callback: (
+      err: string, 
+      newRewardRecordEvent: RewardRecordEventInterface
+    ) => any
+  ) => any;
 }
 
 
 const RewardRecordEventSchema = new Schema<RewardRecordEventInterface>({
-  timestamp: { type: Date, default: new Date() },
-  operator_address: { type: String, required: true },
-  rewardsDenomArray: { type: [String], required: true },
-  rewardsAmountArray: { type: [String], required: true },
-  comissionsDenomArray: { type: [String], required: true },
-  comissionsAmountArray: { type: [String], required: true }
+  timestamp: { 
+    type: Date, 
+    default: new Date() 
+  },
+  operator_address: { 
+    type: String, 
+    required: true 
+  },
+  rewardsDenomArray: { 
+    type: [String], 
+    required: true 
+  },
+  rewardsAmountArray: { 
+    type: [String], 
+    required: true 
+  },
+  comissionsDenomArray: { 
+    type: [String], 
+    required: true
+  },
+  comissionsAmountArray: { 
+    type: [String], 
+    required: true 
+  }
 });
 
 
-RewardRecordEventSchema.statics.saveRewardRecordEvent = function (body: SaveRewardRecordEventInterface, callback)
-{
+RewardRecordEventSchema.statics.saveRewardRecordEvent = function (
+  body: {  
+    operator_address: string;
+    rewardsDenomArray: string[];
+    rewardsAmountArray: string[];
+    comissionsDenomArray: string[];
+    comissionsAmountArray: string[];
+  }, 
+  callback: (
+    err: string | null,
+    newRewardRecordEvent: RewardRecordEventInterface | null
+  ) => any
+) {
 
   const { operator_address, rewardsDenomArray, rewardsAmountArray, comissionsDenomArray, comissionsAmountArray } = body;
 
@@ -44,8 +77,8 @@ RewardRecordEventSchema.statics.saveRewardRecordEvent = function (body: SaveRewa
     rewardsAmountArray: rewardsAmountArray,
     comissionsDenomArray: comissionsDenomArray,
     comissionsAmountArray: comissionsAmountArray
-  }, (err, newRewardRecordEvent) => {
-    if (err) return callback('creation_error');
+  }, (err, newRewardRecordEvent: RewardRecordEventInterface) => {
+    if (err) return callback('creation_error', null);
     return callback(null, newRewardRecordEvent);
   })
 }

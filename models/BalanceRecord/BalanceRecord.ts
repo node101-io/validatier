@@ -1,7 +1,7 @@
 
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Model } from 'mongoose';
 
-export interface BalanceRecordEventInterface extends Document {
+export interface BalanceRecordEventInterface {
   timestamp: Date;
   operator_address: string;
   denomArray: string[];
@@ -9,26 +9,50 @@ export interface BalanceRecordEventInterface extends Document {
 }
 
 interface BalanceRecordEventModel extends Model<BalanceRecordEventInterface> {
-  saveBalanceRecordEvent: (body: SaveBalanceRecordEventInterface, callback: (err: string, newBalanceRecordEvent: BalanceRecordEventInterface) => any) => any;
+  saveBalanceRecordEvent: (
+    body: {
+      operator_address: string;
+      denomArray: string[];
+      balanceArray: string[];
+    }, 
+    callback: (
+      err: string, 
+      newBalanceRecordEvent: BalanceRecordEventInterface
+    ) => any
+  ) => any;
 }
-
-interface SaveBalanceRecordEventInterface {
-  operator_address: string;
-  denomArray: string[];
-  balanceArray: string[];
-}
-
 
 const balanceRecordEventSchema = new Schema<BalanceRecordEventInterface>({
-  timestamp: { type: Date, default: new Date() },
-  operator_address: { type: String, required: true },
-  denomArray: { type: [String], required: true },
-  balanceArray: { type: [String], required: true }
+  timestamp: { 
+    type: Date,
+    default: new Date()
+  },
+  operator_address: { 
+    type: String, 
+    required: true 
+  },
+  denomArray: { 
+    type: [String], 
+    required: true 
+  },
+  balanceArray: { 
+    type: [String], 
+    required: true 
+  }
 });
 
 
-balanceRecordEventSchema.statics.saveBalanceRecordEvent = function (body: SaveBalanceRecordEventInterface, callback)
-{
+balanceRecordEventSchema.statics.saveBalanceRecordEvent = function (
+  body: {
+    operator_address: string;
+    denomArray: string[];
+    balanceArray: string[];
+  }, 
+  callback: (
+    err: string | null,
+    newBalanceRecordEvent: BalanceRecordEventInterface | null
+  ) => any
+) {
 
   const { operator_address, denomArray, balanceArray } = body;
 
@@ -36,8 +60,8 @@ balanceRecordEventSchema.statics.saveBalanceRecordEvent = function (body: SaveBa
     operator_address: operator_address,
     denomArray: denomArray,
     balanceArray: balanceArray
-  }, (err, newBalanceRecordEvent) => {
-    if (err || !newBalanceRecordEvent) return callback('creation_error');
+  }, (err, newBalanceRecordEvent: BalanceRecordEventInterface) => {
+    if (err || !newBalanceRecordEvent) return callback('creation_error', null);
     return callback(null, newBalanceRecordEvent);
   })
 }

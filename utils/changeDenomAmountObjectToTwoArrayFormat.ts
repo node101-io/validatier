@@ -1,5 +1,5 @@
 
-import async, { each } from "async";
+import async from "async";
 import { GeneralRewardObjectInterface } from "../cron/functions/getValidatorUnclaimedRewardsAndComission.js";
 
 interface responseObject {

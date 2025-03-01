@@ -1,9 +1,8 @@
+import cron from 'node-cron';
 
 import { Job_RecordValidatorBalance } from './jobs/Job_RecordValidatorBalance.js';
 import { Job_RecordValidatorRewards } from './jobs/Job_RecordValidatorRewards.js';
 import { Job_SaveValidators } from './jobs/Job_SaveValidators.js';
-
-import cron from 'node-cron';
 
 const SEPERATOR_LINE = "---------------------------------------------------";
 const TEST_TIME_INTERVAL_REGEX = '*/5 * * * * *';

@@ -1,7 +1,7 @@
 
 import async from 'async';
 
-export const isRecordChanged = function (oldBody: any, newBody: any, attributesToCompare: string[], callback: (err: string | unknown, changedAttributes: string[] | null) => any) {
+export const isRecordChanged = function (oldBody: any, newBody: any, attributesToCompare: string[], callback: (err: string, changedAttributes: string[] | null) => any) {
 
   if (!oldBody) return true;
 
@@ -15,8 +15,8 @@ export const isRecordChanged = function (oldBody: any, newBody: any, attributesT
       changedAttributes.push(eachAttribute);
     }
     next();
-  }, (err: string | unknown) => {
-    if (err) return callback(err, null);
+  }, (err) => {
+    if (err) return callback("async_error", null);
     return callback('', changedAttributes)
   })
 }

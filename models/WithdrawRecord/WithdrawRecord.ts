@@ -1,11 +1,11 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Model } from 'mongoose';
 
 export enum WithdrawType {
   Commission = "commission",
   Reward = "reward"
 }
 
-export interface WithdrawRecordEventInterface extends Document {
+export interface WithdrawRecordEventInterface {
   timestamp: Date;
   operator_address: string;
   denom: string;
@@ -15,15 +15,19 @@ export interface WithdrawRecordEventInterface extends Document {
 }
 
 interface WithdrawRecordEventModel extends Model<WithdrawRecordEventInterface> {
-  saveWithdrawRecordEvent: (body: SaveWithdrawRecordEventInterface, callback: (err: string, newWithdrawRecordEvent: WithdrawRecordEventInterface) => any) => any;
-}
-
-interface SaveWithdrawRecordEventInterface {
-  operator_address: string;
-  denom: string;
-  amount: string;
-  withdrawType: string;
-  txHash: string;
+  saveWithdrawRecordEvent: (
+    body: {  
+      operator_address: string;
+      denom: string;
+      amount: string;
+      withdrawType: string;
+      txHash: string;
+    }, 
+    callback: (
+      err: string, 
+      newWithdrawRecordEvent: WithdrawRecordEventInterface
+    ) => any
+  ) => any;
 }
 
 const withdrawRecordEventSchema: Schema = new Schema<WithdrawRecordEventInterface>(
@@ -41,7 +45,19 @@ const withdrawRecordEventSchema: Schema = new Schema<WithdrawRecordEventInterfac
   }
 );
 
-withdrawRecordEventSchema.statics.saveWithdrawRecordEvent = function (body: SaveWithdrawRecordEventInterface, callback) {
+withdrawRecordEventSchema.statics.saveWithdrawRecordEvent = function (
+  body: {  
+    operator_address: string;
+    denom: string;
+    amount: string;
+    withdrawType: string;
+    txHash: string;
+  }, 
+  callback: (
+    err: string | null,
+    newWithdrawRecordEvent: WithdrawRecordEventInterface | null
+  ) => any
+) {
   const { operator_address, denom, amount, withdrawType, txHash } = body;
 
   WithdrawRecordEvent.create({ 
@@ -51,7 +67,7 @@ withdrawRecordEventSchema.statics.saveWithdrawRecordEvent = function (body: Save
     withdrawType: withdrawType,
     txHash: txHash
   }, (err, newWithdrawRecordEvent) => {
-    if (err) return callback('creation_error');
+    if (err) return callback('creation_error', null);
     return callback(null, newWithdrawRecordEvent);
   });
 }

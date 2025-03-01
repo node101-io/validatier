@@ -1,6 +1,9 @@
 
 import axios from "axios";
 
+const REST_API_BASE_URL = 'https://rest.cosmos.directory/cosmoshub';
+const REST_API_ENDPOINT = "cosmos/distribution/v1beta1/validators";
+
 export interface GeneralRewardObjectInterface {
   denom: string;
   amount: string;
@@ -15,9 +18,6 @@ interface ValidatorUnclaimedRewardsAndComissionsInterface {
     comissionObject: GeneralRewardObjectInterface
   ];
 }
-
-const REST_API_BASE_URL = 'https://rest.cosmos.directory/cosmoshub';
-const REST_API_ENDPOINT = "cosmos/distribution/v1beta1/validators";
 
 export const getValidatorUnclaimedRewardsAndComission = function (operation_id: string, callback: (err: string | null, ValidatorUnclaimedRewardsAndComissions: ValidatorUnclaimedRewardsAndComissionsInterface | null) => any) {
   axios.get(`${REST_API_BASE_URL}/${REST_API_ENDPOINT}/${operation_id}`)

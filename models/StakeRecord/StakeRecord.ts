@@ -1,7 +1,7 @@
 
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Model } from 'mongoose';
 
-export interface StakeRecordEventInterface extends Document {
+export interface StakeRecordEventInterface {
   timestamp: Date;
   operator_address: string;
   denom: string;
@@ -10,28 +10,60 @@ export interface StakeRecordEventInterface extends Document {
 }
 
 interface StakeRecordEventModel extends Model<StakeRecordEventInterface> {
-  saveStakeRecordEvent: (body: SaveStakeRecordEventInterface, callback: (err: string, newStakeRecordEvent: StakeRecordEventInterface) => any) => any;
-}
-
-interface SaveStakeRecordEventInterface {
-  operator_address: string;
-  denom: string;
-  amount: string;
-  txHash: string;
+  saveStakeRecordEvent: (
+    body: {
+      operator_address: string;
+      denom: string;
+      amount: string;
+      txHash: string;
+    }, 
+    callback: (
+      err: string,
+      newStakeRecordEvent: StakeRecordEventInterface
+    ) => any
+  ) => any;
 }
 
 
 const stakeRecordEventSchema = new Schema<StakeRecordEventInterface>({
-  timestamp: { type: Date, default: new Date() },
-  operator_address: { type: String, required: true },
-  denom: { type: String, required: true },
-  amount: { type: String, required: true },
-  txHash: { type: String, required: true }
+  timestamp: { 
+    type: Date, 
+    default: new Date() 
+  },
+  operator_address: { 
+    type: String, 
+    required: true 
+  },
+  denom: { 
+    type: String, 
+    required: true,
+    trim: true
+  },
+  amount: { 
+    type: String, 
+    required: true,
+    trim: true
+  },
+  txHash: { 
+    type: String, 
+    required: true,
+    unique: true
+  }
 });
 
 
-stakeRecordEventSchema.statics.saveStakeRecordEvent = function (body: SaveStakeRecordEventInterface, callback)
-{
+stakeRecordEventSchema.statics.saveStakeRecordEvent = function (
+  body: {  
+    operator_address: string;
+    denom: string;
+    amount: string;
+    txHash: string;
+  },
+  callback: (
+    err: string | null,
+    newStakeRecordEvent: StakeRecordEventInterface | null
+  ) => any
+) {
 
   const { operator_address, denom, amount, txHash } = body;
 
@@ -40,8 +72,8 @@ stakeRecordEventSchema.statics.saveStakeRecordEvent = function (body: SaveStakeR
     denom: denom,
     amount: amount,
     txHash: txHash
-  }, (err, newStakeRecordEvent) => {
-    if (err || !newStakeRecordEvent) return callback('creation_error');
+  }, (err, newStakeRecordEvent: StakeRecordEventInterface) => {
+    if (err || !newStakeRecordEvent) return callback('creation_error', null);
     return callback(null, newStakeRecordEvent);
   })
 }

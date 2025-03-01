@@ -1,8 +1,10 @@
 
 import async from "async";
-import Validator, { ValidatorInterface } from "../../models/Validator/Validator.js";
-import { changeDenomAmountObjectToTwoArrayFormat } from "../../utils/changeDenomAmountObjectToTwoArrayFormat.js";
+
 import RewardRecordEvent from "../../models/RewardRecord/RewardRecord.js";
+import Validator, { ValidatorInterface } from "../../models/Validator/Validator.js";
+
+import { changeDenomAmountObjectToTwoArrayFormat } from "../../utils/changeDenomAmountObjectToTwoArrayFormat.js";
 import { getValidatorUnclaimedRewardsAndComission } from "../functions/getValidatorUnclaimedRewardsAndComission.js";
 
 export const Job_RecordValidatorRewards = function (callback: (err: string | null, success: Boolean) => any) {
