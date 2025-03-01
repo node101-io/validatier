@@ -72,7 +72,7 @@ const validatorSchema = new Schema<ValidatorInterface>({
         const requiredLength = 44;
         return value.length === requiredLength;
       },
-      message: "invalid_length",
+      message: 'invalid_length',
     },
   },
   operator_address: { 
@@ -83,9 +83,9 @@ const validatorSchema = new Schema<ValidatorInterface>({
     validate: {
       validator: function (value: string): boolean {
         const requiredLength = 52;
-        return value.includes("cosmosvaloper1") && value.length === requiredLength;
+        return value.includes('cosmosvaloper1') && value.length === requiredLength;
       },
-      message: "invalid_length",
+      message: 'invalid_length',
     },
   },
   moniker: { 
@@ -133,7 +133,7 @@ validatorSchema.statics.saveValidator = function (
     newValidator: ValidatorInterface | null
   ) => any
 ) {
-  if (!body.pubkey) return callback('Validator_pubkey_not_found', null);
+  if (!body.pubkey) return callback('bad_request', null);
 
   const { pubkey, operator_address, moniker, commission_rate, bond_shares, liquid_shares } = body;
 
@@ -146,7 +146,7 @@ validatorSchema.statics.saveValidator = function (
 
       if (err) return callback(err, null);
       if (!oldValidator) return Validator.create(body, (err, newValidator: ValidatorInterface) => {
-        if (err || !newValidator) return callback('creation_error_validator', null);
+        if (err || !newValidator) return callback('creation_error', null);
         return callback(null, newValidator);
       })
 
@@ -163,7 +163,7 @@ validatorSchema.statics.saveValidator = function (
         if (err || !newValidatorChangeEvent) return callback(err, null);
 
         Validator.updateValidator(updateAndChangeValidatorBody, (err, updatedValidator) => {
-          if (err) return callback('update_error_validator', null);
+          if (err) return callback('bad_request', null);
           return callback(null, updatedValidator);
         })
       })

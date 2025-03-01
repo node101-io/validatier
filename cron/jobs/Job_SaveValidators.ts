@@ -1,4 +1,4 @@
-import async from "async";
+import async from 'async';
 
 import Validator from '../../models/Validator/Validator.js';
 import { getActiveValidators, ValidatorResponse } from '../functions/getActiveValidators.js';
@@ -7,7 +7,7 @@ export const Job_SaveValidators = (callback: (err: string | unknown | null, succ
 
   getActiveValidators((validators: ValidatorResponse[]) => {
 
-    if (!validators) return callback("validator_count_zero", false);
+    if (!validators) return callback('validator_count_zero', false);
 
     async.timesSeries(
       validators.length, 
@@ -28,7 +28,7 @@ export const Job_SaveValidators = (callback: (err: string | unknown | null, succ
         })
       }, 
       (err) => {
-        if (err) return callback(err, false);
+        if (err) return callback('async_error', false);
         return callback(null, true);
       }
     )

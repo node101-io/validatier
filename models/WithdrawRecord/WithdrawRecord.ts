@@ -1,8 +1,8 @@
 import mongoose, { Schema, Model } from 'mongoose';
 
 export enum WithdrawType {
-  Commission = "commission",
-  Reward = "reward"
+  Commission = 'commission',
+  Reward = 'reward'
 }
 
 export interface WithdrawRecordEventInterface {

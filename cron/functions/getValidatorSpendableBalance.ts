@@ -1,11 +1,11 @@
 
-import axios from "axios";
+import axios from 'axios';
 
-import { convertOperationAddressToBech32 } from "../../utils/convertOperationAddressToBech32.js";
-import { GeneralRewardObjectInterface } from "./getValidatorUnclaimedRewardsAndComission.js"
+import { convertOperationAddressToBech32 } from '../../utils/convertOperationAddressToBech32.js';
+import { GeneralRewardObjectInterface } from './getValidatorUnclaimedRewardsAndComission.js'
 
 const REST_API_BASE_URL = 'https://rest.cosmos.directory/cosmoshub';
-const REST_API_ENDPOINT = "cosmos/bank/v1beta1/spendable_balances";
+const REST_API_ENDPOINT = 'cosmos/bank/v1beta1/spendable_balances';
 
 interface ValidatorBalancesInterface {
   balances: [

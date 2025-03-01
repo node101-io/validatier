@@ -1,6 +1,6 @@
 
-import async from "async";
-import { GeneralRewardObjectInterface } from "../cron/functions/getValidatorUnclaimedRewardsAndComission.js";
+import async from 'async';
+import { GeneralRewardObjectInterface } from '../cron/functions/getValidatorUnclaimedRewardsAndComission.js';
 
 interface responseObject {
   denomsArray: string[],
@@ -21,7 +21,7 @@ export const changeDenomAmountObjectToTwoArrayFormat = function (objectArray: Ge
       next();
     }, 
     (err) => {
-      if (err) return callback(err, null);
+      if (err) return callback('async_error', null);
       return callback(null, {
         denomsArray: denomsArray,
         amountsArray: amountsArray

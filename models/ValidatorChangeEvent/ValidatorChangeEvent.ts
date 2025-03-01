@@ -1,8 +1,8 @@
 
 import mongoose, { Schema, Model } from 'mongoose';
 import Validator, { ValidatorInterface } from '../Validator/Validator.js';
-import { isRecordChanged } from '../../utils/isRecordChanged.js';
-import { generateChangeObjectToSave } from '../../utils/generateChangeObjectToSave.js';
+import { isRecordChanged } from './functions/isRecordChanged.js';
+import { generateChangeObjectToSave } from './functions/generateChangeObjectToSave.js';
 
 export interface ValidatorChangeEventInterface {
   timestamp: Date;
@@ -72,14 +72,14 @@ validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (
 
   Validator.findOne({ operator_address: operator_address }, (err: string, validator: ValidatorInterface) => {
     
-    if (err || !validator) return callback("fetch_error", null);
+    if (err || !validator) return callback('fetch_error', null);
 
     isRecordChanged(validator, body, ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares'], (err: string, changedAttributes) => {
       if (err) return callback(err, null);
-      if (!changedAttributes || changedAttributes.length <= 0) return callback(null, "no_change_occured"); 
+      if (!changedAttributes || changedAttributes.length <= 0) return callback(null, 'no_change_occured'); 
 
       generateChangeObjectToSave(changedAttributes, validator, body, (err, result) => {
-        if (err) return callback("conversion_error", null);
+        if (err) return callback('bad_request', null);
 
         ValidatorChangeEvent.create({
           operator_address: operator_address,
@@ -87,7 +87,7 @@ validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (
           oldValues: result?.oldBody,
           newValues: result?.newBody
         }, (err, newValidatorChangeEvent) => {
-          if (err || !newValidatorChangeEvent) return callback("creation_error", null);
+          if (err || !newValidatorChangeEvent) return callback('creation_error', null);
           return callback(null, newValidatorChangeEvent);
         })
       })

@@ -19,5 +19,5 @@ export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: 
       return callback(null, eachAttribute.value); 
     }
   };
-  return callback("not_found", null);
+  return callback('not_found', null);
 }

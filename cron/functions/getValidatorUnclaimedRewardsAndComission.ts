@@ -1,8 +1,8 @@
 
-import axios from "axios";
+import axios from 'axios';
 
 const REST_API_BASE_URL = 'https://rest.cosmos.directory/cosmoshub';
-const REST_API_ENDPOINT = "cosmos/distribution/v1beta1/validators";
+const REST_API_ENDPOINT = 'cosmos/distribution/v1beta1/validators';
 
 export interface GeneralRewardObjectInterface {
   denom: string;

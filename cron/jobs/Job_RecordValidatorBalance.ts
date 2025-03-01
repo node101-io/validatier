@@ -1,11 +1,11 @@
 
-import async from "async";
+import async from 'async';
 
-import BalanceRecordEvent from "../../models/BalanceRecord/BalanceRecord.js";
-import Validator, { ValidatorInterface } from "../../models/Validator/Validator.js";
+import BalanceRecordEvent from '../../models/BalanceRecord/BalanceRecord.js';
+import Validator, { ValidatorInterface } from '../../models/Validator/Validator.js';
 
-import { getValidatorSpendableBalance } from "../functions/getValidatorSpendableBalance.js";
-import { changeDenomAmountObjectToTwoArrayFormat } from "../../utils/changeDenomAmountObjectToTwoArrayFormat.js";
+import { getValidatorSpendableBalance } from '../functions/getValidatorSpendableBalance.js';
+import { changeDenomAmountObjectToTwoArrayFormat } from '../../utils/changeDenomAmountObjectToTwoArrayFormat.js';
 
 export const Job_RecordValidatorBalance = function (callback: (err: string | null, success: Boolean) => any) {
 
@@ -18,24 +18,24 @@ export const Job_RecordValidatorBalance = function (callback: (err: string | nul
         const eachValidator = validators[i];
 
         getValidatorSpendableBalance(eachValidator.operator_address, (err, validatorBalances) => {
-          if (err || !validatorBalances) return callback("fetch_error", false);
+          if (err || !validatorBalances) return callback('fetch_error', false);
           changeDenomAmountObjectToTwoArrayFormat(validatorBalances, (err, response) => {
 
-            if (err || !response?.denomsArray || !response?.amountsArray) return callback("conversion_error", false);
+            if (err || !response?.denomsArray || !response?.amountsArray) return callback('conversion_error', false);
 
             BalanceRecordEvent.saveBalanceRecordEvent({
               operator_address: eachValidator.operator_address,
               denomArray: response.denomsArray,
               balanceArray: response.amountsArray
             }, (err, newBalanceRecordEvent) => {
-              if (err || !newBalanceRecordEvent) return callback("save_error", false);
+              if (err || !newBalanceRecordEvent) return callback('save_error', false);
               next();
             })
           })
         })      
       }, 
       (err) => {
-        if (err) return callback("async_error", false);
+        if (err) return callback('async_error', false);
         return callback(null, true);
       }
     )

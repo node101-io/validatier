@@ -95,10 +95,10 @@ compositeEventBlockSchema.statics.searchTillExists = function (
     if (blockHeight < 0) return callback(null, null);
 
     CompositeEventBlock.exists({ block_height: blockHeight }, (err, exists) => {
-      if (err) return callback("bad_request", null);
+      if (err) return callback('bad_request', null);
       if (!exists) return search(blockHeight + step);
       CompositeEventBlock.findOne({ operator_address: operator_address, block_height: blockHeight }, (err: string | null, foundCompositeBlockEvent: CompositeEventBlockInterface) => {
-        if (err) return callback("bad_request", null);
+        if (err) return callback('bad_request', null);
         return callback(null, foundCompositeBlockEvent);
       })
     })
@@ -146,7 +146,7 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
           self_stake_prefix_sum: self_stake_prefix_sum
         }, 
         (err, newCompositeEventBlock) => {
-          if (err) return callback("bad_request", null);
+          if (err) return callback('bad_request', null);
           return callback(null, newCompositeEventBlock);
         }
       )
@@ -179,7 +179,7 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
       step: 1
     },
     (err, bottomCompositeBlockEvent) => {
-      if (err) return callback("bad_request", null);
+      if (err) return callback('bad_request', null);
 
       CompositeEventBlock.searchTillExists(
         {
@@ -188,7 +188,7 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
           step: -1
         },
         (err, topCompositeBlockEvent) => {
-          if (err) return callback("bad_request", null);
+          if (err) return callback('bad_request', null);
 
           const bottomRewardPrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.reward_prefix_sum : 0;
           const bottomSelfStakePrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.self_stake_prefix_sum : 0;
@@ -202,7 +202,7 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
           const totalWithdraw = (topRewardPrefixSum - bottomRewardPrefixSum) + bottomReward;
           const totalStake = (topSelfStakePrefixSum - bottomSelfStakePrefixSum) + bottomSelfStake;
           
-          if (totalWithdraw < 0 || totalStake < 0) return callback("bad_request", null);
+          if (totalWithdraw < 0 || totalStake < 0) return callback('bad_request', null);
           return callback(
             null,
             {

@@ -1,11 +1,11 @@
 
-import async from "async";
+import async from 'async';
 
-import RewardRecordEvent from "../../models/RewardRecord/RewardRecord.js";
-import Validator, { ValidatorInterface } from "../../models/Validator/Validator.js";
+import RewardRecordEvent from '../../models/RewardRecord/RewardRecord.js';
+import Validator, { ValidatorInterface } from '../../models/Validator/Validator.js';
 
-import { changeDenomAmountObjectToTwoArrayFormat } from "../../utils/changeDenomAmountObjectToTwoArrayFormat.js";
-import { getValidatorUnclaimedRewardsAndComission } from "../functions/getValidatorUnclaimedRewardsAndComission.js";
+import { changeDenomAmountObjectToTwoArrayFormat } from '../../utils/changeDenomAmountObjectToTwoArrayFormat.js';
+import { getValidatorUnclaimedRewardsAndComission } from '../functions/getValidatorUnclaimedRewardsAndComission.js';
 
 export const Job_RecordValidatorRewards = function (callback: (err: string | null, success: Boolean) => any) {
 
@@ -18,32 +18,32 @@ export const Job_RecordValidatorRewards = function (callback: (err: string | nul
         const eachValidator = validators[i];
 
         getValidatorUnclaimedRewardsAndComission(eachValidator.operator_address, (err, validatorRewardsAndComissions) => {
-          if (err || !validatorRewardsAndComissions) return callback("fetch_error", false);
+          if (err || !validatorRewardsAndComissions) return callback('fetch_error', false);
 
           const saveRewardRecordEventObject = {
             operator_address: eachValidator.operator_address,
-            rewardsDenomArray: [""],
-            rewardsAmountArray: [""],
-            comissionsDenomArray: [""],
-            comissionsAmountArray: [""]
+            rewardsDenomArray: [''],
+            rewardsAmountArray: [''],
+            comissionsDenomArray: [''],
+            comissionsAmountArray: ['']
           }
 
           changeDenomAmountObjectToTwoArrayFormat(validatorRewardsAndComissions.self_bond_rewards, (err, responseSelfBondRewards) => {
 
-            if (err || !responseSelfBondRewards?.denomsArray || !responseSelfBondRewards?.amountsArray) return callback("conversion_error", false);
+            if (err || !responseSelfBondRewards?.denomsArray || !responseSelfBondRewards?.amountsArray) return callback('conversion_error', false);
 
             saveRewardRecordEventObject.rewardsDenomArray = responseSelfBondRewards.denomsArray;
             saveRewardRecordEventObject.rewardsAmountArray = responseSelfBondRewards.amountsArray;
 
             changeDenomAmountObjectToTwoArrayFormat(validatorRewardsAndComissions.commission, (err, responseComissions) => {
-              if (err || !responseComissions?.denomsArray || !responseComissions?.amountsArray) return callback("conversion_error", false);
+              if (err || !responseComissions?.denomsArray || !responseComissions?.amountsArray) return callback('conversion_error', false);
             
 
               saveRewardRecordEventObject.comissionsDenomArray = responseComissions.denomsArray;
               saveRewardRecordEventObject.comissionsAmountArray = responseComissions.amountsArray;
 
               RewardRecordEvent.saveRewardRecordEvent(saveRewardRecordEventObject, (err, newRewardsRecordEvent) => {
-                if (err || !newRewardsRecordEvent) callback("save_error", false);
+                if (err || !newRewardsRecordEvent) callback('save_error', false);
                 next();
               })
             })
@@ -51,7 +51,7 @@ export const Job_RecordValidatorRewards = function (callback: (err: string | nul
         })      
       }, 
       (err) => {
-        if (err) return callback("async_error", false);
+        if (err) return callback('async_error', false);
         return callback(null, true);
       }
     )
