@@ -27,10 +27,14 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
     ) => any
   ) => any;
   searchTillExists: (
-    body: { block_height: number; step: number },
+    body: {
+      operator_address: string;
+      block_height: number; 
+      step: number 
+    },
     callback: (
       err: string,
-      existingBlockHeight: number
+      foundCompositeBlockEvent: CompositeEventBlockInterface
     ) => any
   ) => any;
 }
@@ -77,23 +81,26 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
 });
 
 compositeEventBlockSchema.statics.searchTillExists = function (
-  body: { block_height: number, step: number },
+  body: { operator_address: string; block_height: number; step: number },
   callback: (
     err: string | null,
-    foundCompositeBlock: number | null
+    foundCompositeBlock: CompositeEventBlockInterface | null
   ) => any
 ) {
 
-  const { block_height, step } = body;
+  const { operator_address, block_height, step } = body;
 
   function search(blockHeight: number) {
 
-    if (blockHeight < 0) return callback(null, 0);
+    if (blockHeight < 0) return callback(null, null);
 
     CompositeEventBlock.exists({ block_height: blockHeight }, (err, exists) => {
       if (err) return callback("bad_request", null);
       if (!exists) return search(blockHeight + step);
-      return callback(null, blockHeight);
+      CompositeEventBlock.findOne({ operator_address: operator_address, block_height: blockHeight }, (err: string | null, foundCompositeBlockEvent: CompositeEventBlockInterface) => {
+        if (err) return callback("bad_request", null);
+        return callback(null, foundCompositeBlockEvent);
+      })
     })
   }
 
@@ -116,16 +123,18 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
 
   const { block_height, operator_address, denom, reward, self_stake } = body;
 
-  CompositeEventBlock.searchTillExists({ block_height: block_height, step: -1 }, (err, existingBlockHeight) => {
-    if (err) return callback(err, null);
-
-
-    CompositeEventBlock.findOne({ block_height: existingBlockHeight }, (err: string | null, previousCompositeEventBlock: CompositeEventBlockInterface) => {
+  CompositeEventBlock.searchTillExists(
+    {
+      operator_address: operator_address, 
+      block_height: block_height, 
+      step: -1 
+    }, 
+    (err, foundCompositeBlockEvent) => {
       if (err) return callback(err, null);
-      
-      const reward_prefix_sum = previousCompositeEventBlock ? previousCompositeEventBlock.reward_prefix_sum + reward : reward;
-      const self_stake_prefix_sum = previousCompositeEventBlock ? previousCompositeEventBlock.self_stake_prefix_sum + self_stake : self_stake;
 
+      const reward_prefix_sum = foundCompositeBlockEvent ? foundCompositeBlockEvent.reward_prefix_sum + reward : reward;
+      const self_stake_prefix_sum = foundCompositeBlockEvent ? foundCompositeBlockEvent.self_stake_prefix_sum + self_stake : self_stake;
+      
       CompositeEventBlock.create(
         {
           operator_address: operator_address,
@@ -141,8 +150,71 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
           return callback(null, newCompositeEventBlock);
         }
       )
-    })
-  })  
+      
+    }
+  )
+}
+
+
+compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = function (
+  body: {
+    operator_address: string;
+    bottomBlockHeight: number;
+    topBlockHeight: number;
+  },
+  callback: (
+    err: string | null,
+    totalPeriodicSelfStakeAndWithdraw: {
+      self_stake: number,
+      withdraw: number
+    } | null
+  ) => any
+) {
+  const { operator_address, bottomBlockHeight, topBlockHeight } = body;
+
+  CompositeEventBlock.searchTillExists(
+    {
+      operator_address: operator_address,
+      block_height: bottomBlockHeight,
+      step: 1
+    },
+    (err, bottomCompositeBlockEvent) => {
+      if (err) return callback("bad_request", null);
+
+      CompositeEventBlock.searchTillExists(
+        {
+          operator_address: operator_address,
+          block_height: topBlockHeight,
+          step: -1
+        },
+        (err, topCompositeBlockEvent) => {
+          if (err) return callback("bad_request", null);
+
+          const bottomRewardPrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.reward_prefix_sum : 0;
+          const bottomSelfStakePrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.self_stake_prefix_sum : 0;
+          
+          const bottomReward = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.reward : 0;
+          const bottomSelfStake = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.self_stake : 0;
+
+          const topRewardPrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.reward_prefix_sum : 0;
+          const topSelfStakePrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.self_stake_prefix_sum : 0;
+          
+          const totalWithdraw = (topRewardPrefixSum - bottomRewardPrefixSum) + bottomReward;
+          const totalStake = (topSelfStakePrefixSum - bottomSelfStakePrefixSum) + bottomSelfStake;
+          
+          if (totalWithdraw < 0 || totalStake < 0) return callback("bad_request", null);
+          return callback(
+            null,
+            {
+              self_stake: totalStake,
+              withdraw: totalWithdraw
+            }
+          );
+        }
+      )
+    }
+  )
+
 }
 
 
