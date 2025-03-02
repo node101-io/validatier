@@ -209,6 +209,7 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
             self_stake_prefix_sum: self_stake_prefix_sum ? self_stake_prefix_sum : 0
           }, 
           (err, newCompositeEventBlock) => {
+            if (err) console.log(err)
             if (err) return callback('bad_request', null);
             return callback(null, newCompositeEventBlock);
           }
