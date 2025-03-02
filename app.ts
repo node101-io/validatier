@@ -6,12 +6,11 @@ import mongoose from 'mongoose';
 import path from 'path';
 import session from 'express-session';
 
-import indexRouter from './routes/indexRouter.js';
 import compositeEventBlockRouter from './routes/compositeEventBlockRouter.js';
+import indexRouter from './routes/indexRouter.js';
 
 import { startCronJobs } from './cron/startCronJobs.js';
-import { listenEvents } from './utils/listenForEvents.js';
-
+import { listenEvents } from './listeners/listenForEvents.js';
 
 dotenv.config();
 
@@ -49,7 +48,7 @@ app.use('/composite_event_block', compositeEventBlockRouter)
 app.listen(PORT, () => {
   console.log(`Server running at PORT ${PORT}`);
 
-  // startCronJobs();
-  // listenEvents();
+  startCronJobs();
+  listenEvents();
 });
 

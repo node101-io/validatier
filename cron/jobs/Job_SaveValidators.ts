@@ -3,7 +3,7 @@ import async from 'async';
 import Validator from '../../models/Validator/Validator.js';
 import { getActiveValidators, ValidatorResponse } from '../functions/getActiveValidators.js';
 
-export const Job_SaveValidators = (callback: (err: string | unknown | null, success: Boolean) => any) => {
+export const Job_SaveValidators = (callback: (err: string | null, success: Boolean) => any) => {
 
   getActiveValidators((validators: ValidatorResponse[]) => {
 

@@ -1,1 +1,2 @@
-# validator-timeline
+# Node101 | CosmosHub Validator Timeline
+Node101's journey as a CosmosHub validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.

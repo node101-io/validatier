@@ -4,8 +4,8 @@ import async from 'async';
 import BalanceRecordEvent from '../../models/BalanceRecord/BalanceRecord.js';
 import Validator, { ValidatorInterface } from '../../models/Validator/Validator.js';
 
-import { getValidatorSpendableBalance } from '../functions/getValidatorSpendableBalance.js';
 import { changeDenomAmountObjectToTwoArrayFormat } from '../../utils/changeDenomAmountObjectToTwoArrayFormat.js';
+import { getValidatorSpendableBalance } from '../functions/getValidatorSpendableBalance.js';
 
 export const Job_RecordValidatorBalance = function (callback: (err: string | null, success: Boolean) => any) {
 

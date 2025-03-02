@@ -1,7 +1,7 @@
 
 import { bech32 } from 'bech32';
 
-export const convertOperationAddressToBech32 = function(operator_address: string, callback: (err: string | unknown | null, operator_address_bech_32: string | null) => any) {
+export const convertOperationAddressToBech32 = function(operator_address: string, callback: (err: string | null, operator_address_bech_32: string | null) => any) {
 
   try {
     const decoded = bech32.decode(operator_address);
@@ -10,6 +10,6 @@ export const convertOperationAddressToBech32 = function(operator_address: string
 
     return callback(null, bech32Address);
   } catch (err) {
-      return callback(err, null);
+      return callback('bad_request', null);
   }
 }

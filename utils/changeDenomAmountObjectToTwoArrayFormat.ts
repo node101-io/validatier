@@ -7,7 +7,7 @@ interface responseObject {
   amountsArray: string[]
 }
 
-export const changeDenomAmountObjectToTwoArrayFormat = function (objectArray: GeneralRewardObjectInterface[], callback: (err: string | unknown | null, response: responseObject | null) => any) {
+export const changeDenomAmountObjectToTwoArrayFormat = function (objectArray: GeneralRewardObjectInterface[], callback: (err: string | null, response: responseObject | null) => any) {
   
   let denomsArray: string[] = [];
   let amountsArray: string[] = [];

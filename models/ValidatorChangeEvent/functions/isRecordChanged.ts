@@ -1,9 +1,8 @@
 
-import async, { each } from 'async';
+import async from 'async';
+import { OldOrNewBodyInterface, ALLOWED_ATTRIBUTE_LIST } from './generateChangeObjectToSave.js';
 
-const ALLOWED_ATTRIBUTE_LIST = ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares'];
-
-export const isRecordChanged = function (oldBody: any, newBody: any, attributesToCompare: string[], callback: (err: string, changedAttributes: string[] | null) => any) {
+export const isRecordChanged = function (oldBody: OldOrNewBodyInterface, newBody: OldOrNewBodyInterface, attributesToCompare: string[], callback: (err: string, changedAttributes: string[] | null) => any) {
 
   if (!oldBody || !newBody || !attributesToCompare) return callback('impossible_error', null);  
 
@@ -17,7 +16,7 @@ export const isRecordChanged = function (oldBody: any, newBody: any, attributesT
 
       if (
         !ALLOWED_ATTRIBUTE_LIST.includes(eachAttribute) ||
-        oldBody[`${eachAttribute}`] == newBody[`${eachAttribute}`]
+        oldBody[eachAttribute as keyof typeof oldBody] == newBody[eachAttribute as keyof typeof newBody]
       ) return next();
 
       changedAttributes.push(eachAttribute);

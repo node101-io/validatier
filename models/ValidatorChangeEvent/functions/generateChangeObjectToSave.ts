@@ -1,13 +1,22 @@
 
 import async from 'async';
 
+export const ALLOWED_ATTRIBUTE_LIST = ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares'];
+
 export interface ChangeObjectResultInterface {
   changedAttributes: string[];
   oldBody: string[];
   newBody: string[];
 }
 
-export const generateChangeObjectToSave = function (changedAttributes: string[], oldBody: any, newBody: any, callback: (err: string | unknown | null, result: ChangeObjectResultInterface | null) => any) {
+export interface OldOrNewBodyInterface {
+  moniker?: string;
+  commission_rate?: string;
+  bond_shares?: string;
+  liquid_shares?: string;
+}
+
+export const generateChangeObjectToSave = function (changedAttributes: string[], oldBody: OldOrNewBodyInterface, newBody: OldOrNewBodyInterface, callback: (err: string | null, result: ChangeObjectResultInterface | null) => any) {
 
   let oldBodyResult: string[] = [];
   let newBodyResult: string[] = [];
@@ -17,15 +26,19 @@ export const generateChangeObjectToSave = function (changedAttributes: string[],
     changedAttributes.length, 
     (i, next) => {
 
-      const changedAttribute: string = changedAttributes[i];
+      let changedAttribute: string = changedAttributes[i];
+      
+      if (!ALLOWED_ATTRIBUTE_LIST.includes(changedAttribute)) return next();
 
-      const oldValue: string = oldBody[changedAttribute];
-      const newValue: string = newBody[changedAttribute];
+      const oldValue = oldBody[changedAttribute as keyof typeof oldBody];
+      const newValue = newBody[changedAttribute as keyof typeof oldBody];
+
+      if (!oldValue || !newValue) return next();
 
       oldBodyResult.push(oldValue);
       newBodyResult.push(newValue);
 
-      next();
+      return next();
     }, 
     (err) => {
       if (err) return callback('async_error', null);

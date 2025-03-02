@@ -1,10 +1,14 @@
 
 interface EventInterface {
-  type: string,
-  attributes: any[]
+  type: string;
+  attributes: {
+    key: string;
+    value: string;
+    index: boolean;
+  }[];
 }
 
-export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: EventInterface[], specificEventType: string, specificAttributeKey: string, callback: (err: string | null, specificAttributeValue: any) => any) {
+export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: EventInterface[], specificEventType: string, specificAttributeKey: string, callback: (err: string | null, specificAttributeValue: string | null) => any) {
   
   for (let i = 0; i < events.length; i++) {
     const eachEvent = events[i];

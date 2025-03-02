@@ -1,3 +1,4 @@
+
 import { Request, Response } from 'express';
 
 const indexGetController = (req: Request, res: Response): void => {
