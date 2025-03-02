@@ -1,5 +1,5 @@
 
-import mongoose, { Schema, Model } from 'mongoose';
+import mongoose, { Schema, Model, SortOrder } from 'mongoose';
 
 export interface CompositeEventBlockInterface {
   timestamp: Date;
@@ -46,7 +46,7 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
     body: {
       operator_address: string;
       block_height: number; 
-      step: number 
+      order: SortOrder 
     },
     callback: (
       err: string,
@@ -77,52 +77,50 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
   reward: { 
     type: Number, 
     required: false,
-    trim: true,
     default: 0
   },
   self_stake: { 
     type: Number, 
     required: false,
-    unique: true,
     default: 0
   },
   reward_prefix_sum: {
     type: Number, 
     required: true,
-    unique: true
   },
   self_stake_prefix_sum: {
     type: Number, 
-    required: true,
-    unique: true
+    required: true
   }
 });
 
 compositeEventBlockSchema.statics.searchTillExists = function (
-  body: { operator_address: string; block_height: number; step: number },
+  body: { operator_address: string; block_height: number; order: SortOrder },
   callback: (
     err: string | null,
     foundCompositeBlock: CompositeEventBlockInterface | null
   ) => any
 ) {
 
-  const { operator_address, block_height, step } = body;
+  const { operator_address, block_height, order } = body;
 
-  function search(blockHeight: number) {
+  if (order != "asc" && order != "desc") return callback("bad_request", null);
 
-    if (blockHeight < 0) return callback(null, null);
+  const blockHeightCondition = order === "asc" ? { $gt: block_height } : { $lt: block_height };
 
-    CompositeEventBlock.exists({ block_height: blockHeight }, (err, exists) => {
-      if (err) return callback('bad_request', null);
-      if (!exists) return search(blockHeight + step);
-      CompositeEventBlock.findOne({ operator_address: operator_address, block_height: blockHeight }, (err: string | null, foundCompositeBlockEvent: CompositeEventBlockInterface) => {
-        if (err) return callback('bad_request', null);
-        return callback(null, foundCompositeBlockEvent);
-      })
-    })
-  }
-
-  search(block_height);
+  CompositeEventBlock.find(
+    { 
+      operator_address: operator_address,
+      block_height: blockHeightCondition
+    }
+  )
+  .sort({ block_height: order })
+  .exec((err, compositeEventBlocksOfValidator: CompositeEventBlockInterface[]) => {
+    if (err) return callback("bad_request", null);
+    if (!compositeEventBlocksOfValidator) return callback(null, null);
+    const foundCompositeBlockEvent = compositeEventBlocksOfValidator[0];
+    return callback(null, foundCompositeBlockEvent);
+  });
 }
 
 compositeEventBlockSchema.statics.checkIfBlockExistsAndUpdate = function (
@@ -176,15 +174,15 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
 
   CompositeEventBlock.searchTillExists(
     {
-      operator_address: operator_address, 
-      block_height: block_height, 
-      step: -1 
+      operator_address: operator_address,
+      block_height: block_height,
+      order: "desc"
     }, 
     (err, foundCompositeBlockEvent) => {
       if (err) return callback(err, null); 
 
-      const reward_prefix_sum = foundCompositeBlockEvent ? (reward ? foundCompositeBlockEvent.reward_prefix_sum + reward : undefined) : reward;
-      const self_stake_prefix_sum = foundCompositeBlockEvent ? (self_stake ? foundCompositeBlockEvent.self_stake_prefix_sum + self_stake : undefined) : self_stake;
+      const reward_prefix_sum = foundCompositeBlockEvent ? (reward ? foundCompositeBlockEvent.reward_prefix_sum + reward : foundCompositeBlockEvent.reward_prefix_sum) : reward;
+      const self_stake_prefix_sum = foundCompositeBlockEvent ? (self_stake ? foundCompositeBlockEvent.self_stake_prefix_sum + self_stake : foundCompositeBlockEvent.self_stake_prefix_sum) : self_stake;
 
       CompositeEventBlock.checkIfBlockExistsAndUpdate({
         operator_address: operator_address,
@@ -197,24 +195,25 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
         }
       }, (err, updatedCompositeEventBlock) => {
 
-      })
+        if (err) return callback(err, null);
+        if (updatedCompositeEventBlock) return callback(null, updatedCompositeEventBlock);
 
-      CompositeEventBlock.create(
-        {
-          operator_address: operator_address,
-          block_height: block_height,
-          denom: denom,
-          reward: reward,
-          self_stake: self_stake,
-          reward_prefix_sum: reward_prefix_sum,
-          self_stake_prefix_sum: self_stake_prefix_sum
-        }, 
-        (err, newCompositeEventBlock) => {
-          if (err) return callback('bad_request', null);
-          return callback(null, newCompositeEventBlock);
-        }
-      )
-      
+        CompositeEventBlock.create(
+          {
+            operator_address: operator_address,
+            block_height: block_height,
+            denom: denom ? denom : "uatom",
+            reward: reward ? reward : 0,
+            self_stake: self_stake ? self_stake : 0,
+            reward_prefix_sum: reward_prefix_sum ? reward_prefix_sum : 0,
+            self_stake_prefix_sum: self_stake_prefix_sum ? self_stake_prefix_sum : 0
+          }, 
+          (err, newCompositeEventBlock) => {
+            if (err) return callback('bad_request', null);
+            return callback(null, newCompositeEventBlock);
+          }
+        )
+      })
     }
   )
 }
@@ -240,7 +239,7 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
     {
       operator_address: operator_address,
       block_height: bottomBlockHeight,
-      step: 1
+      order: "asc"
     },
     (err, bottomCompositeBlockEvent) => {
       if (err) return callback('bad_request', null);
@@ -249,7 +248,7 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
         {
           operator_address: operator_address,
           block_height: topBlockHeight,
-          step: -1
+          order: "desc"
         },
         (err, topCompositeBlockEvent) => {
           if (err) return callback('bad_request', null);
