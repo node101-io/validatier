@@ -123,19 +123,18 @@ compositeEventBlockSchema.statics.searchTillExists = function (
 
   const blockHeightCondition = order === 'asc' ? { $gt: block_height } : { $lt: block_height };
 
-  CompositeEventBlock.find(
-    { 
-      operator_address: operator_address,
-      block_height: blockHeightCondition
-    }
-  )
+  CompositeEventBlock.find({ 
+    operator_address: operator_address,
+    block_height: blockHeightCondition
+  })
   .sort({ block_height: order })
-  .exec((err, compositeEventBlocksOfValidator: CompositeEventBlockInterface[]) => {
-    if (err) return callback('bad_request', null);
-    if (!compositeEventBlocksOfValidator) return callback(null, null);
+  .exec()
+  .then((compositeEventBlocksOfValidator: CompositeEventBlockInterface[]) => {
+    if (!compositeEventBlocksOfValidator || compositeEventBlocksOfValidator.length <= 0) return callback(null, null);
     const foundCompositeBlockEvent = compositeEventBlocksOfValidator[0];
     return callback(null, foundCompositeBlockEvent);
-  });
+  })
+  .catch(err => callback('bad_request', null));
 }
 
 compositeEventBlockSchema.statics.checkIfBlockExistsAndUpdate = function (
@@ -222,12 +221,11 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
             self_stake: self_stake ? self_stake : 0,
             reward_prefix_sum: reward_prefix_sum ? reward_prefix_sum : 0,
             self_stake_prefix_sum: self_stake_prefix_sum ? self_stake_prefix_sum : 0
-          }, 
-          (err, newCompositeEventBlock) => {
-            if (err) return callback('bad_request', null);
+          })
+          .then((newCompositeEventBlock: CompositeEventBlockInterface) => { 
             return callback(null, newCompositeEventBlock);
-          }
-        )
+          })
+          .catch(err => callback('bad_request', null))
       })
     }
   )

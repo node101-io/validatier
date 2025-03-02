@@ -72,10 +72,12 @@ stakeRecordEventSchema.statics.saveStakeRecordEvent = function (
     denom: denom,
     amount: amount,
     txHash: txHash
-  }, (err, newStakeRecordEvent: StakeRecordEventInterface) => {
-    if (err || !newStakeRecordEvent) return callback('creation_error', null);
+  })
+  .then((newStakeRecordEvent: StakeRecordEventInterface) => {
+    if (!newStakeRecordEvent) return callback('creation_error', null);
     return callback(null, newStakeRecordEvent);
   })
+  .catch(err => callback('creation_error', null))
 }
 
 

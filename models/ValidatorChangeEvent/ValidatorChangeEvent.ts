@@ -86,10 +86,12 @@ validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (
           changedAttributes: changedAttributes,
           oldValues: result?.oldBody,
           newValues: result?.newBody
-        }, (err, newValidatorChangeEvent) => {
-          if (err || !newValidatorChangeEvent) return callback('creation_error', null);
+        })
+        .then((newValidatorChangeEvent: ValidatorChangeEventInterface) => {
+          if (!newValidatorChangeEvent) return callback('creation_error', null);
           return callback(null, newValidatorChangeEvent);
         })
+        .catch(err => callback('creation_error', null))
       })
     })
   })

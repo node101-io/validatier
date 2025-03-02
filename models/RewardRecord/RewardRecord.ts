@@ -77,10 +77,12 @@ RewardRecordEventSchema.statics.saveRewardRecordEvent = function (
     rewardsAmountArray: rewardsAmountArray,
     comissionsDenomArray: comissionsDenomArray,
     comissionsAmountArray: comissionsAmountArray
-  }, (err, newRewardRecordEvent: RewardRecordEventInterface) => {
-    if (err) return callback('creation_error', null);
+  })
+  .then((newRewardRecordEvent: RewardRecordEventInterface) => {
+    if (!newRewardRecordEvent) return callback('creation_error', null);
     return callback(null, newRewardRecordEvent);
   })
+  .catch(err => callback('creation_error', null))
 }
 
 

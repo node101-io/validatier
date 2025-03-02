@@ -60,10 +60,12 @@ balanceRecordEventSchema.statics.saveBalanceRecordEvent = function (
     operator_address: operator_address,
     denomArray: denomArray,
     balanceArray: balanceArray
-  }, (err, newBalanceRecordEvent: BalanceRecordEventInterface) => {
-    if (err || !newBalanceRecordEvent) return callback('creation_error', null);
+  })
+  .then((newBalanceRecordEvent: BalanceRecordEventInterface) => {
+    if (!newBalanceRecordEvent) return callback('creation_error', null);
     return callback(null, newBalanceRecordEvent);
   })
+  .catch(err => callback('creation_error', null))
 }
 
 

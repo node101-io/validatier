@@ -10,7 +10,6 @@ import { convertOperationAddressToBech32 } from './convertOperationAddressToBech
 import { getOnlyNativeTokenValueFromCommissionOrRewardEvent } from './getRewardOrCommissionArraysFromEvent.js';
 import { getSpecificAttributeOfAnEventFromTxEventsArray } from './getSpecificAttributeOfAnEventFromTxEventsArray.js';
 
-const MINIMAL_SEPERATOR = '--';
 const TENDERMINT_RPC_URL = 'https://rest.cosmos.directory/cosmoshub/cosmos/tx/v1beta1/txs/';
 const WEBSOCKET_URL = 'wss://cosmoshub.tendermintrpc.lava.build/websocket';
 const LISTENING_EVENTS = [

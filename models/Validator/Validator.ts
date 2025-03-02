@@ -145,10 +145,14 @@ validatorSchema.statics.saveValidator = function (
     (err: string, oldValidator: ValidatorInterface) => {
 
       if (err) return callback(err, null);
-      if (!oldValidator) return Validator.create(body, (err, newValidator: ValidatorInterface) => {
-        if (err || !newValidator) return callback('creation_error', null);
-        return callback(null, newValidator);
-      })
+      if (!oldValidator) {
+        Validator.create(body)
+        .then((newValidator: ValidatorInterface) => {
+          if (!newValidator) return callback('creation_error', null);
+          return callback(null, newValidator);
+        })
+        .catch(err => callback('creation_error', null))
+      }
 
 
       const updateAndChangeValidatorBody = {

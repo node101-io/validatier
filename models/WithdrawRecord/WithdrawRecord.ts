@@ -66,10 +66,12 @@ withdrawRecordEventSchema.statics.saveWithdrawRecordEvent = function (
     amount: amount,
     withdrawType: withdrawType,
     txHash: txHash
-  }, (err, newWithdrawRecordEvent) => {
-    if (err) return callback('creation_error', null);
+  })
+  .then((newWithdrawRecordEvent: WithdrawRecordEventInterface) => {
+    if (!newWithdrawRecordEvent) return callback('creation_error', null);
     return callback(null, newWithdrawRecordEvent);
-  });
+  })
+  .catch(err => callback('creation_error', null))
 }
 
 const WithdrawRecordEvent = mongoose.model<WithdrawRecordEventInterface, WithdrawRecordEventModel>('WithdrawRecordEvents', withdrawRecordEventSchema);
