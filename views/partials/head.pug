@@ -3,9 +3,7 @@ html(lang='tr')
   head
     meta(name='viewport', content='width=device-width, initial-scale=1.0, shrink-to-fit=no, maximum-scale=1.0, user-scalable=0')
     title #{title}
-    link(rel='stylesheet', href='https://unpkg.com/leaflet/dist/leaflet.css')
-    script(src='https://unpkg.com/leaflet/dist/leaflet.js')
-    link(href='https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900' rel='stylesheet')
+    link(href='https://fonts.googleapis.com/css?family=Poppins|Sofia|Inter' rel='stylesheet')
     if includes && includes.external
       if includes.external.css
         if includes.external.css.includes('page')
@@ -19,6 +17,8 @@ html(lang='tr')
           script(src=`/js/${page}.js`)
         if includes.external.js.includes('functions')
           script(src=`/js/functions/httpRequest.js`)
+          script(src=`/js/functions/changeInitialsFontFamily.js`)
+          script(src=`/js/functions/nativeCurrencyConversions.js`)
         script(src='https://kit.fontawesome.com/e47420f551.js' crossorigin='anonymous')
   body
     block content

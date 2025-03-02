@@ -1,5 +1,6 @@
 
 import mongoose, { Schema, Model, SortOrder } from 'mongoose';
+import { isOperatorAddressValid } from '../../utils/isOperatorAddressValid.js';
 
 export interface CompositeEventBlockInterface {
   timestamp: Date;
@@ -53,6 +54,20 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
       foundCompositeBlockEvent: CompositeEventBlockInterface
     ) => any
   ) => any;
+  getTotalPeriodicSelfStakeAndWithdraw: (
+    body: {
+      operator_address: string;
+      bottomBlockHeight: number;
+      topBlockHeight: number;
+    },
+    callback: (
+      err: string | null,
+      totalPeriodicSelfStakeAndWithdraw: {
+        self_stake: number,
+        withdraw: number
+      } | null
+    ) => any
+  ) => any
 }
 
 
@@ -119,7 +134,6 @@ compositeEventBlockSchema.statics.searchTillExists = function (
     if (err) return callback('bad_request', null);
     if (!compositeEventBlocksOfValidator) return callback(null, null);
     const foundCompositeBlockEvent = compositeEventBlocksOfValidator[0];
-    console.log(compositeEventBlocksOfValidator);
     return callback(null, foundCompositeBlockEvent);
   });
 }
@@ -236,6 +250,8 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
 ) {
   const { operator_address, bottomBlockHeight, topBlockHeight } = body;
 
+  if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
+
   CompositeEventBlock.searchTillExists(
     {
       operator_address: operator_address,
@@ -244,6 +260,8 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
     },
     (err, bottomCompositeBlockEvent) => {
       if (err) return callback('bad_request', null);
+
+      if (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.block_height > topBlockHeight) return callback(null, { self_stake: 0, withdraw: 0 });
 
       CompositeEventBlock.searchTillExists(
         {
@@ -254,6 +272,8 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
         (err, topCompositeBlockEvent) => {
           if (err) return callback('bad_request', null);
 
+          if (!topCompositeBlockEvent || topCompositeBlockEvent.block_height < bottomBlockHeight) return callback(null, { self_stake: 0, withdraw: 0 });
+
           const bottomRewardPrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.reward_prefix_sum : 0;
           const bottomSelfStakePrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.self_stake_prefix_sum : 0;
           
@@ -262,7 +282,7 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
 
           const topRewardPrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.reward_prefix_sum : 0;
           const topSelfStakePrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.self_stake_prefix_sum : 0;
-          
+
           const totalWithdraw = (topRewardPrefixSum - bottomRewardPrefixSum) + bottomReward;
           const totalStake = (topSelfStakePrefixSum - bottomSelfStakePrefixSum) + bottomSelfStake;
           
@@ -278,7 +298,6 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
       )
     }
   )
-
 }
 
 

@@ -1,7 +1,7 @@
 {
-  "name": "walrus-block-explorer",
+  "name": "cosmos-hub-validator-timeline",
   "version": "1.0.0",
-  "description": "",
+  "description": "Validator timeline for Cosmos Hub. Designed and developed by Node101.",
   "main": "app.ts",
   "scripts": {
     "build": "tsc",

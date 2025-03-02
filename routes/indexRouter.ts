@@ -3,6 +3,9 @@ import indexGetController from '../controllers/index/index/get.js';
 
 const router: Router = express.Router();
 
-router.get('/', indexGetController);
+router.get(
+  '/', 
+  indexGetController
+);
 
 export default router;

@@ -3,8 +3,33 @@ block content
   .all-main-wrapper 
     .header-main-wrapper 
     .inner-main-wrapper
-      div 
-        div 
-          .node-map-main-wrapper
-            .node-map-main-content
-              include ../partials/worldMap.html
+      .query-main-wrapper
+        .general-title-description-wrapper
+          h3 Node101 | CosmosHub Validator Timeline
+          p Node101's journey as a CosmosHub validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.
+          div(style='font-size: 10px; color: rgb(255,255,255,0.5)') 
+            div for demo:
+            div cosmosvaloper103agss48504gkk3la5xcg5kxplaf6ttnuv234h
+            div 24650515
+        .query-main-wrapper-input-wrapper
+          .each-input-wrapper 
+            span Validator operator_address
+            input(type='text' id='periodic-query-operator-address' placeholder='cosmosvaloper1...')
+          .each-input-wrapper 
+            span Bottom block_height
+            input(type='number' id='periodic-query-bottom-block-height')
+          .each-input-wrapper 
+            span Top block_height
+            input(type='number' id='periodic-query-top-block-height')
+        .query-main-wrapper-result-content
+          .submit-button#query-submit-button(style='color: var(--color-dark-violet); background-color: var(--color-powder-blue)') Get data
+          ul 
+            li
+              span Total self_stake: 
+              span#query-total-self-stake-result-content 0
+              span  ATOM
+            li
+              span Total withdraw: 
+              span#query-total-withdraw-result-content 0
+              span  ATOM
+          .general-single-line-request-result-display-content#general-single-line-request-result-display-content

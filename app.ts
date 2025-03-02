@@ -7,8 +7,8 @@ import path from 'path';
 import session from 'express-session';
 
 import indexRouter from './routes/indexRouter.js';
-import nodeRouter from './routes/nodeRouter.js';
-import nodeDataLogRouter from './routes/nodeDataLogRouter.js';
+import compositeEventBlockRouter from './routes/compositeEventBlockRouter.js';
+
 import { startCronJobs } from './cron/startCronJobs.js';
 import { listenEvents } from './utils/listenForEvents.js';
 
@@ -44,14 +44,12 @@ app.use(
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
 
 app.use('/', indexRouter);
-app.use('/node', nodeRouter);
-app.use('/nodeDataLog', nodeDataLogRouter);
+app.use('/composite_event_block', compositeEventBlockRouter)
 
 app.listen(PORT, () => {
-
-  startCronJobs();
-  listenEvents();
-
   console.log(`Server running at PORT ${PORT}`);
+
+  // startCronJobs();
+  // listenEvents();
 });
 

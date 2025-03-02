@@ -1,0 +1,17 @@
+
+.query-main-wrapper {
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 20px;
+  background-color: var(--color-dark-violet);
+  color: var(--color-powder-blue);
+  border-radius: 20px;
+}
+
+.query-main-wrapper-input-wrapper {
+  display: flex;
+  gap: 20px;
+}
+

@@ -1,4 +1,11 @@
 
+:root {
+  --color-powder-blue: rgb(224, 228, 255);
+  --color-dark-violet: rgb(44, 32, 43);
+  --color-pale-white: #f5f5f5;
+  --color-pale-black: #171717;
+}
+
 html {
   margin: 0;
   padding: 0;
@@ -7,28 +14,72 @@ html {
 body {
   margin: 0;
   padding: 0;
+  font-family: "Inter";
+  background-color: var(--color-pale-black);
 }
 
-
-.node-map-main-wrapper {
-  width: 1500px;
-  background-color: #f8f8f8;
-  padding: 20px;
-  border-radius: 2%;
+.each-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: #f9f9f9;
+  padding: 12px;
+  border-radius: 10px;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.1);
+  width: 220px;
+  text-align: center;
+  background-color: var(--color-powder-blue);
+  color: var(--color-dark-violet);
 }
 
-.node-map-main-content {
+.each-input-wrapper span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.each-input-wrapper input {
   width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: border 0.3s ease-in-out;
+  background-color: var(--color-pale-white);
 }
 
-.node-map-svg-wrapper {
-  width: 100%;
+.each-input-wrapper input:focus {
+  box-shadow: 0px 0px 5px var(--color-powder-blue);
 }
 
-.node-map-svg-wrapper {
-  fill: #ececec;
-  stroke: black;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 0.5;
+.submit-button {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out 0s;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: inline-block;
+}
+
+.submit-button:hover {
+  filter: brightness(0.8);
+  transform: translateY(-2px);
+  box-shadow: 4px 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.submit-button:active {
+  transform: translateY(1px);
+  box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.general-single-line-request-result-display-content {
+  font-size: 14px;
+  font-weight: 300;
 }
