@@ -104,9 +104,9 @@ compositeEventBlockSchema.statics.searchTillExists = function (
 
   const { operator_address, block_height, order } = body;
 
-  if (order != "asc" && order != "desc") return callback("bad_request", null);
+  if (order != 'asc' && order != 'desc') return callback('bad_request', null);
 
-  const blockHeightCondition = order === "asc" ? { $gt: block_height } : { $lt: block_height };
+  const blockHeightCondition = order === 'asc' ? { $gt: block_height } : { $lt: block_height };
 
   CompositeEventBlock.find(
     { 
@@ -116,9 +116,10 @@ compositeEventBlockSchema.statics.searchTillExists = function (
   )
   .sort({ block_height: order })
   .exec((err, compositeEventBlocksOfValidator: CompositeEventBlockInterface[]) => {
-    if (err) return callback("bad_request", null);
+    if (err) return callback('bad_request', null);
     if (!compositeEventBlocksOfValidator) return callback(null, null);
     const foundCompositeBlockEvent = compositeEventBlocksOfValidator[0];
+    console.log(compositeEventBlocksOfValidator);
     return callback(null, foundCompositeBlockEvent);
   });
 }
@@ -176,7 +177,7 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
     {
       operator_address: operator_address,
       block_height: block_height,
-      order: "desc"
+      order: 'desc'
     }, 
     (err, foundCompositeBlockEvent) => {
       if (err) return callback(err, null); 
@@ -202,14 +203,13 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
           {
             operator_address: operator_address,
             block_height: block_height,
-            denom: denom ? denom : "uatom",
+            denom: denom ? denom : 'uatom',
             reward: reward ? reward : 0,
             self_stake: self_stake ? self_stake : 0,
             reward_prefix_sum: reward_prefix_sum ? reward_prefix_sum : 0,
             self_stake_prefix_sum: self_stake_prefix_sum ? self_stake_prefix_sum : 0
           }, 
           (err, newCompositeEventBlock) => {
-            if (err) console.log(err)
             if (err) return callback('bad_request', null);
             return callback(null, newCompositeEventBlock);
           }
@@ -240,7 +240,7 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
     {
       operator_address: operator_address,
       block_height: bottomBlockHeight,
-      order: "asc"
+      order: 'asc'
     },
     (err, bottomCompositeBlockEvent) => {
       if (err) return callback('bad_request', null);
@@ -249,7 +249,7 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
         {
           operator_address: operator_address,
           block_height: topBlockHeight,
-          order: "desc"
+          order: 'desc'
         },
         (err, topCompositeBlockEvent) => {
           if (err) return callback('bad_request', null);

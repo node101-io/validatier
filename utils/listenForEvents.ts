@@ -84,12 +84,12 @@ export const listenEvents = () => {
                 amount: eachMessage['amount']['amount'],
                 txHash: txHash
               }, (err, newStakeRecordEvent) => {
-                if (err || typeof parseInt(blockHeight) != "number" || typeof parseFloat(eachMessage['amount']['amount']) != "number") return console.log('bad_request | ' + new Date());
+                if (err || typeof parseInt(blockHeight) != 'number' || typeof parseFloat(eachMessage['amount']['amount']) != 'number') return console.log('bad_request | ' + new Date());
 
                 CompositeEventBlock.saveCompositeEventBlock({
                   block_height: parseInt(blockHeight),
                   operator_address: eachMessage['validator_address'],
-                  denom: "uatom",
+                  denom: 'uatom',
                   self_stake: parseFloat(eachMessage['amount']['amount'])
                 }, (err, newCompositeEventBlock) => {
                   if (err) return console.log(err + ' | ' + new Date());
@@ -114,7 +114,7 @@ export const listenEvents = () => {
                     CompositeEventBlock.saveCompositeEventBlock({
                       block_height: parseInt(blockHeight),
                       operator_address: eachMessage['validator_address'],
-                      denom: "uatom",
+                      denom: 'uatom',
                       reward: parseInt(nativeRewardOrCommissionValue)
                     }, (err, newCompositeEventBlock) => {
                       if (err) return console.log(err + ' | ' + new Date());
@@ -141,7 +141,7 @@ export const listenEvents = () => {
                     CompositeEventBlock.saveCompositeEventBlock({
                       block_height: parseInt(blockHeight),
                       operator_address: eachMessage['validator_address'],
-                      denom: "uatom",
+                      denom: 'uatom',
                       reward: parseInt(nativeRewardOrCommissionValue)
                     }, (err, newCompositeEventBlock) => {
                       if (err) return console.log(err + ' | ' + new Date());
