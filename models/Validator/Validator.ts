@@ -2,7 +2,7 @@
 import mongoose, { Schema, Model } from 'mongoose';
 import ValidatorChangeEvent from '../ValidatorChangeEvent/ValidatorChangeEvent.js';
 
-import { isOperatorAddressValid, isPubkeyValid } from "../../utils/validationFunctions.js";
+import { isOperatorAddressValid, isPubkeyValid } from '../../utils/validationFunctions.js';
 
 export interface ValidatorInterface {
   pubkey: string;
