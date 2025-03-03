@@ -5,7 +5,7 @@ import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
 const MAX_DENOM_LENGTH = 68;
 
 export interface CompositeEventBlockInterface {
-  timestamp: Date;
+  timestamp: number;
   block_height: number;
   operator_address: string;
   denom: string;
@@ -75,8 +75,8 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
 
 const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
   timestamp: {
-    type: Date,
-    default: new Date()
+    type: Number,
+    default: Date.now()
   },
   block_height: { 
     type: Number, 

@@ -11,6 +11,7 @@ import indexRouter from './routes/indexRouter.js';
 
 import { startCronJobs } from './cron/startCronJobs.js';
 import { listenEvents } from './listeners/listenForEvents.js';
+import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
 
 dotenv.config();
 
@@ -46,10 +47,24 @@ app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.i
 app.use('/', indexRouter);
 app.use('/composite_event_block', compositeEventBlockRouter)
 
+import async from 'async';
+
 app.listen(PORT, () => {
   console.log(`Server running at PORT ${PORT}`);
 
-  startCronJobs();
-  listenEvents();
+  // startCronJobs();
+  // listenEvents();
+
+  CompositeEventBlock
+    .find({})
+    .then((composteEventBlocks) => {
+      async.timesSeries(composteEventBlocks.length, (i, next) => {
+        const eachElement = composteEventBlocks[i];
+        eachElement.timestamp = Date.now();
+        eachElement.save();
+      }, (err) => {
+        console.log('done')
+      })
+    })
 });
 
