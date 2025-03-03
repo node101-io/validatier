@@ -3,6 +3,7 @@ import mongoose, { Schema, Model } from 'mongoose';
 import Validator, { ValidatorInterface } from '../Validator/Validator.js';
 import { isRecordChanged } from './functions/isRecordChanged.js';
 import { generateChangeObjectToSave } from './functions/generateChangeObjectToSave.js';
+import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
 
 export interface ValidatorChangeEventInterface {
   timestamp: Date;
@@ -69,6 +70,8 @@ validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (
 ) {
 
   const { operator_address } = body;
+
+  if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
 
   Validator.findOne({ operator_address: operator_address }, (err: string, validator: ValidatorInterface) => {
     

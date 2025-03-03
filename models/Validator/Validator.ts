@@ -2,6 +2,8 @@
 import mongoose, { Schema, Model } from 'mongoose';
 import ValidatorChangeEvent from '../ValidatorChangeEvent/ValidatorChangeEvent.js';
 
+import { isOperatorAddressValid, isPubkeyValid } from "../../utils/validationFunctions.js";
+
 export interface ValidatorInterface {
   pubkey: string;
   operator_address: string;
@@ -136,6 +138,8 @@ validatorSchema.statics.saveValidator = function (
   if (!body.pubkey) return callback('bad_request', null);
 
   const { pubkey, operator_address, moniker, commission_rate, bond_shares, liquid_shares } = body;
+
+  if (!isOperatorAddressValid(operator_address) || !isPubkeyValid(pubkey)) return callback('format_error', null);
 
   Validator.findOne(
     { $or: [ 

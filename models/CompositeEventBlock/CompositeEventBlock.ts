@@ -1,6 +1,6 @@
 
 import mongoose, { Schema, Model, SortOrder } from 'mongoose';
-import { isOperatorAddressValid } from '../../utils/isOperatorAddressValid.js';
+import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
 
 export interface CompositeEventBlockInterface {
   timestamp: Date;

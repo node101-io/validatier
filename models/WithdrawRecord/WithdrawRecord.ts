@@ -1,4 +1,5 @@
 import mongoose, { Schema, Model } from 'mongoose';
+import { isOperatorAddressValid, isTxHashValid } from '../../utils/validationFunctions.js';
 
 export enum WithdrawType {
   Commission = 'commission',
@@ -59,6 +60,8 @@ withdrawRecordEventSchema.statics.saveWithdrawRecordEvent = function (
   ) => any
 ) {
   const { operator_address, denom, amount, withdrawType, txHash } = body;
+
+  if (!isOperatorAddressValid(operator_address) || !isTxHashValid(txHash)) return callback('format_error', null);
 
   WithdrawRecordEvent.create({ 
     operator_address: operator_address,

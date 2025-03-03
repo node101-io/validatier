@@ -1,5 +1,6 @@
 
 import mongoose, { Schema, Model } from 'mongoose';
+import { isOperatorAddressValid, isTxHashValid } from '../../utils/validationFunctions.js';
 
 export interface StakeRecordEventInterface {
   timestamp: Date;
@@ -66,6 +67,8 @@ stakeRecordEventSchema.statics.saveStakeRecordEvent = function (
 ) {
 
   const { operator_address, denom, amount, txHash } = body;
+
+  if (!isOperatorAddressValid(operator_address) || !isTxHashValid(txHash)) return callback('format_error', null);
 
   StakeRecordEvent.create({ 
     operator_address: operator_address,

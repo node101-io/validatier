@@ -1,5 +1,6 @@
 
 import mongoose, { Schema, Model } from 'mongoose';
+import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
 
 export interface BalanceRecordEventInterface {
   timestamp: Date;
@@ -55,6 +56,8 @@ balanceRecordEventSchema.statics.saveBalanceRecordEvent = function (
 ) {
 
   const { operator_address, denomArray, balanceArray } = body;
+
+  if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
 
   BalanceRecordEvent.create({ 
     operator_address: operator_address,

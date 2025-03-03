@@ -14,12 +14,12 @@ export const Job_SaveValidators = (callback: (err: string | null, success: Boole
       (i, next) => {
         const eachValidator = validators[i];
         const validatorSaveObject = {
-          pubkey: eachValidator.consensus_pubkey.key,
-          operator_address: eachValidator.operator_address,
-          moniker: eachValidator.description.moniker,
-          commission_rate: eachValidator.commission.commission_rates.rate,
-          bond_shares: eachValidator.validator_bond_shares,
-          liquid_shares: eachValidator.liquid_shares,
+          pubkey: eachValidator.consensus_pubkey.key ? eachValidator.consensus_pubkey.key : 'N/A',
+          operator_address: eachValidator.operator_address ? eachValidator.operator_address : 'N/A',
+          moniker: eachValidator.description.moniker ? eachValidator.description.moniker : 'N/A',
+          commission_rate: eachValidator.commission.commission_rates.rate ? eachValidator.commission.commission_rates.rate : 'N/A',
+          bond_shares: eachValidator.validator_bond_shares ? eachValidator.validator_bond_shares : 'N/A',
+          liquid_shares: eachValidator.liquid_shares ? eachValidator.liquid_shares : 'N/A',
         }
 
         Validator.saveValidator(validatorSaveObject, (err, newValidator) => {

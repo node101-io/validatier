@@ -1,5 +1,6 @@
 
 import mongoose, { Schema, Model } from 'mongoose';
+import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
 
 export interface RewardRecordEventInterface {
   timestamp: Date;
@@ -70,6 +71,8 @@ RewardRecordEventSchema.statics.saveRewardRecordEvent = function (
 ) {
 
   const { operator_address, rewardsDenomArray, rewardsAmountArray, comissionsDenomArray, comissionsAmountArray } = body;
+
+  if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
 
   RewardRecordEvent.create({ 
     operator_address: operator_address,
