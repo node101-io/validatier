@@ -62,6 +62,9 @@ window.onload = () => {
 
     const timestampBeforeRequest = Date.now();
 
+    console.log((new Date(bottomTimestamp.value)).getTime())
+    console.log((new Date(topTimestamp.value)).getTime())
+
     serverRequest(
       BASE_URL + GET_PERIODIC_DATA_API_ENDPOINT,
       'POST',

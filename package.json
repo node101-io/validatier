@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "ts-node-esm app.ts",
-    "dev": "nodemon --exec ts-node-esm app.ts"
+    "dev": "nodemon --exec ts-node-esm app.ts",
+    "test": "vitest"
   },
   "author": "Dogu Boran Senturk",
   "license": "ISC",
@@ -19,7 +20,6 @@
     "express": "^4.21.2",
     "express-session": "^1.18.1",
     "mongodb": "^6.13.0",
-    "mongoose": "^8.11.0",
     "node-cron": "^3.0.3",
     "pug": "^3.0.3",
     "socket.io-client": "^4.8.1",
@@ -32,10 +32,14 @@
     "@types/express": "^5.0.0",
     "@types/express-session": "^1.18.1",
     "@types/lodash": "^4.17.15",
+    "@types/mongoose": "^5.11.97",
     "@types/node": "^22.13.4",
     "@types/node-cron": "^3.0.11",
     "@types/ws": "^8.5.14",
-    "typescript": "^5.7.3"
+    "mongoose": "^8.12.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.7"
   },
   "type": "module"
 }

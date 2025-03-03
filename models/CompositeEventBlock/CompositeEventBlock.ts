@@ -290,7 +290,7 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
         ((searchBy == 'block_height' && topBlockHeight) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.block_height > topBlockHeight)) ||
         ((searchBy == 'timestamp' && topTimestamp) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.timestamp > topTimestamp))
       ) return callback(null, { self_stake: 0, withdraw: 0 });
-      
+
       CompositeEventBlock.searchTillExists(
         {
           operator_address: operator_address,
@@ -305,7 +305,7 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
           if (
             ((searchBy == 'block_height' && bottomBlockHeight) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.block_height < bottomBlockHeight)) ||
             ((searchBy == 'timestamp' && bottomTimestamp) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.timestamp < bottomTimestamp))
-          ) return callback('null', { self_stake: 0, withdraw: 0 });
+          ) return callback(null, { self_stake: 0, withdraw: 0 });
 
           const bottomRewardPrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.reward_prefix_sum : 0;
           const bottomSelfStakePrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.self_stake_prefix_sum : 0;
