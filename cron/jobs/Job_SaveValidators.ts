@@ -5,9 +5,9 @@ import { getActiveValidators, ValidatorResponse } from '../functions/getActiveVa
 
 export const Job_SaveValidators = (callback: (err: string | null, success: Boolean) => any) => {
 
-  getActiveValidators((validators: ValidatorResponse[]) => {
+  getActiveValidators((err: string | null, validators: ValidatorResponse[] | null) => {
 
-    if (!validators) return callback('validator_count_zero', false);
+    if (err || !validators) return callback('validator_count_zero', false);
 
     async.timesSeries(
       validators.length, 

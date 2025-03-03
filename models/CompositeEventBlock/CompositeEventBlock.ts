@@ -123,18 +123,19 @@ compositeEventBlockSchema.statics.searchTillExists = function (
 
   const blockHeightCondition = order === 'asc' ? { $gt: block_height } : { $lt: block_height };
 
-  CompositeEventBlock.find({ 
-    operator_address: operator_address,
-    block_height: blockHeightCondition
-  })
-  .sort({ block_height: order })
-  .exec()
-  .then((compositeEventBlocksOfValidator: CompositeEventBlockInterface[]) => {
-    if (!compositeEventBlocksOfValidator || compositeEventBlocksOfValidator.length <= 0) return callback(null, null);
-    const foundCompositeBlockEvent = compositeEventBlocksOfValidator[0];
-    return callback(null, foundCompositeBlockEvent);
-  })
-  .catch(err => callback('bad_request', null));
+  CompositeEventBlock
+    .find({ 
+      operator_address: operator_address,
+      block_height: blockHeightCondition
+    })
+    .sort({ block_height: order })
+    .exec()
+    .then((compositeEventBlocksOfValidator: CompositeEventBlockInterface[]) => {
+      if (!compositeEventBlocksOfValidator || compositeEventBlocksOfValidator.length <= 0) return callback(null, null);
+      const foundCompositeBlockEvent = compositeEventBlocksOfValidator[0];
+      return callback(null, foundCompositeBlockEvent);
+    })
+    .catch(err => callback('bad_request', null));
 }
 
 compositeEventBlockSchema.statics.checkIfBlockExistsAndUpdate = function (
@@ -212,8 +213,8 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
         if (err) return callback(err, null);
         if (updatedCompositeEventBlock) return callback(null, updatedCompositeEventBlock);
 
-        CompositeEventBlock.create(
-          {
+        CompositeEventBlock
+          .create({
             operator_address: operator_address,
             block_height: block_height,
             denom: denom ? denom : 'uatom',

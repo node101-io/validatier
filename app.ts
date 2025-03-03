@@ -23,7 +23,8 @@ const __dirname = path.dirname(__filename);
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
-mongoose.connect('mongodb://127.0.0.1:27017/validator-timeline')
+mongoose
+  .connect('mongodb://127.0.0.1:27017/validator-timeline')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 

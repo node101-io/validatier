@@ -20,12 +20,9 @@ export const getValidatorSpendableBalance = function (operator_address: string, 
 
   convertOperationAddressToBech32(operator_address, (err, validatorBech32Address) => {
     if (err) return callback('bad_request', null);
-    axios.get(`${REST_API_BASE_URL}/${REST_API_ENDPOINT}/${validatorBech32Address}`)
-      .then((response) => {
-
-        const data: ValidatorBalancesInterface = response.data;
-        callback(null, data.balances);  
-      
-      }).catch(err => callback(err, null))
+    axios
+      .get(`${REST_API_BASE_URL}/${REST_API_ENDPOINT}/${validatorBech32Address}`)
+      .then((response: { data: { balances: GeneralRewardObjectInterface[]} }) => callback(null, response.data.balances))
+      .catch(err => callback('bad_request', null))
   })
 }

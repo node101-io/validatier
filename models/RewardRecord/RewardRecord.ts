@@ -74,18 +74,19 @@ RewardRecordEventSchema.statics.saveRewardRecordEvent = function (
 
   if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
 
-  RewardRecordEvent.create({ 
-    operator_address: operator_address,
-    rewardsDenomArray: rewardsDenomArray,
-    rewardsAmountArray: rewardsAmountArray,
-    comissionsDenomArray: comissionsDenomArray,
-    comissionsAmountArray: comissionsAmountArray
-  })
-  .then((newRewardRecordEvent: RewardRecordEventInterface) => {
-    if (!newRewardRecordEvent) return callback('creation_error', null);
-    return callback(null, newRewardRecordEvent);
-  })
-  .catch(err => callback('creation_error', null))
+  RewardRecordEvent
+    .create({ 
+      operator_address: operator_address,
+      rewardsDenomArray: rewardsDenomArray,
+      rewardsAmountArray: rewardsAmountArray,
+      comissionsDenomArray: comissionsDenomArray,
+      comissionsAmountArray: comissionsAmountArray
+    })
+    .then((newRewardRecordEvent: RewardRecordEventInterface) => {
+      if (!newRewardRecordEvent) return callback('creation_error', null);
+      return callback(null, newRewardRecordEvent);
+    })
+    .catch(err => callback('creation_error', null))
 }
 
 

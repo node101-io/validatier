@@ -24,10 +24,8 @@ export const getValidatorUnclaimedRewardsAndComission = function (operator_addre
   
   if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
   
-  axios.get(`${REST_API_BASE_URL}/${REST_API_ENDPOINT}/${operator_address}`)
-    .then((response) => {
-    
-      callback(null, response.data);
-    
-    }).catch((err) => callback(err, null))
+  axios
+    .get(`${REST_API_BASE_URL}/${REST_API_ENDPOINT}/${operator_address}`)
+    .then((response: { data: ValidatorUnclaimedRewardsAndComissionsInterface } ) => callback(null, response.data))
+    .catch((err) => callback(err, null))
 }

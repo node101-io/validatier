@@ -20,19 +20,18 @@ const LISTENING_EVENTS = [
   '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward'
 ]
 
-function getTransactionInfo(txHash: string, callback: (err: string, data: CosmosTx | null) => any) {
-  axios.get(`${TENDERMINT_RPC_URL}/${txHash}`)
-    .then(response => {
-      const data: CosmosTx = response.data;
-      return callback('', data);
-    }).catch((err) => callback(err, null));
+function getTransactionInfo(txHash: string, callback: (err: string | null, data: CosmosTx | null) => any) {
+  axios
+    .get(`${TENDERMINT_RPC_URL}/${txHash}`)
+    .then((response: { data: CosmosTx }) => callback(null, response.data))
+    .catch((err) => callback('bad_request', null));
 }
 
 export const listenEvents = () => {
   const ws = new WebSocket(WEBSOCKET_URL);
 
   ws.on('open', () => {
-    console.log('✅ Connected to WebSocket!');
+    console.log('Connected to WebSocket!');
 
     const subscribeMsg = {
       jsonrpc: '2.0',
@@ -43,7 +42,7 @@ export const listenEvents = () => {
       }
     };
     ws.send(JSON.stringify(subscribeMsg));
-    console.log('📩 Subscribed to events:\n - MsgDelegate \n - MsgWithdrawDelegatorRewards \n - MsgWithdrawValidatorCommission');
+    console.log('Subscribed to events:\n - MsgDelegate \n - MsgWithdrawDelegatorRewards \n - MsgWithdrawValidatorCommission');
   });
 
   ws.on('message', async (data) => {
@@ -54,7 +53,7 @@ export const listenEvents = () => {
     const txHash = events['tx.hash'][0];
 
     getTransactionInfo(txHash, (err, txRawResult) => {
-      if (err || !txRawResult) return;
+      if (err || !txRawResult || !txRawResult.tx || !txRawResult.tx.body || txRawResult.tx_response) return;
 
       const txResult = txRawResult.tx.body;
       
@@ -69,7 +68,7 @@ export const listenEvents = () => {
           const validatorAddress = eachMessage['validator_address'];
           const delegatorAddress = eachMessage['delegator_address'];
 
-          if (!validatorAddress || !LISTENING_EVENTS.includes(messageType)) return next();
+          if (!validatorAddress || !delegatorAddress || !LISTENING_EVENTS.includes(messageType)) return next();
 
           convertOperationAddressToBech32(validatorAddress, (err, bech32ValidatorAddress) => {
             if (err) return console.log(err);
@@ -172,11 +171,11 @@ export const listenEvents = () => {
   });
 
   ws.on('error', (err) => {
-    console.error('⚠️ WebSocket error:', err);
+    console.error('WebSocket error:', err);
   });
 
   ws.on('close', () => {
-    console.warn('❌ WebSocket closed. Reconnecting...');
+    console.warn('WebSocket closed. Reconnecting...');
     setTimeout(listenEvents, 5000);
   });
 };

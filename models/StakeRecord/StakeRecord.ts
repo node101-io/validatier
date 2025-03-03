@@ -70,17 +70,18 @@ stakeRecordEventSchema.statics.saveStakeRecordEvent = function (
 
   if (!isOperatorAddressValid(operator_address) || !isTxHashValid(txHash)) return callback('format_error', null);
 
-  StakeRecordEvent.create({ 
-    operator_address: operator_address,
-    denom: denom,
-    amount: amount,
-    txHash: txHash
-  })
-  .then((newStakeRecordEvent: StakeRecordEventInterface) => {
-    if (!newStakeRecordEvent) return callback('creation_error', null);
-    return callback(null, newStakeRecordEvent);
-  })
-  .catch(err => callback('creation_error', null))
+  StakeRecordEvent
+    .create({ 
+      operator_address: operator_address,
+      denom: denom,
+      amount: amount,
+      txHash: txHash
+    })
+    .then((newStakeRecordEvent: StakeRecordEventInterface) => {
+      if (!newStakeRecordEvent) return callback('creation_error', null);
+      return callback(null, newStakeRecordEvent);
+    })
+    .catch(err => callback('creation_error', null))
 }
 
 

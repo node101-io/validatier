@@ -59,16 +59,17 @@ balanceRecordEventSchema.statics.saveBalanceRecordEvent = function (
 
   if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
 
-  BalanceRecordEvent.create({ 
-    operator_address: operator_address,
-    denomArray: denomArray,
-    balanceArray: balanceArray
-  })
-  .then((newBalanceRecordEvent: BalanceRecordEventInterface) => {
-    if (!newBalanceRecordEvent) return callback('creation_error', null);
-    return callback(null, newBalanceRecordEvent);
-  })
-  .catch(err => callback('creation_error', null))
+  BalanceRecordEvent
+    .create({ 
+      operator_address: operator_address,
+      denomArray: denomArray,
+      balanceArray: balanceArray
+    })
+    .then((newBalanceRecordEvent: BalanceRecordEventInterface) => {
+      if (!newBalanceRecordEvent) return callback('creation_error', null);
+      return callback(null, newBalanceRecordEvent);
+    })
+    .catch(err => callback('creation_error', null))
 }
 
 

@@ -57,13 +57,9 @@ const NUMBER_OF_ACTIVE_VALIDATORS_TO_BE_FETCHED = 5;
 const REST_API_BASE_URL = 'https://rest.cosmos.directory/cosmoshub';
 const REST_API_ENDPOINT = `cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=${NUMBER_OF_ACTIVE_VALIDATORS_TO_BE_FETCHED}`;
 
-export const getActiveValidators = (callback: (validators: ValidatorResponse[]) => any) => {
-  axios.get(`${REST_API_BASE_URL}/${REST_API_ENDPOINT}`)
-    .then((response) => {
-      const data: GetActiveValidatorsInterface = response.data;
-      return callback(data.validators);
-    })
-    .catch((error) => {
-      console.error('Error fetching data:', error);
-    });
+export const getActiveValidators = (callback: (err: string | null, validators: ValidatorResponse[] | null) => any) => {
+  axios
+    .get(`${REST_API_BASE_URL}/${REST_API_ENDPOINT}`)
+    .then((response: { data: { validators: ValidatorResponse[] } }) => callback(null, response.data.validators))
+    .catch((err) => callback('bad_request', null));
 }

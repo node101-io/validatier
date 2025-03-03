@@ -84,17 +84,18 @@ validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (
       generateChangeObjectToSave(changedAttributes, validator, body, (err, result) => {
         if (err) return callback('bad_request', null);
 
-        ValidatorChangeEvent.create({
-          operator_address: operator_address,
-          changedAttributes: changedAttributes,
-          oldValues: result?.oldBody,
-          newValues: result?.newBody
-        })
-        .then((newValidatorChangeEvent: ValidatorChangeEventInterface) => {
-          if (!newValidatorChangeEvent) return callback('creation_error', null);
-          return callback(null, newValidatorChangeEvent);
-        })
-        .catch(err => callback('creation_error', null))
+        ValidatorChangeEvent
+          .create({
+            operator_address: operator_address,
+            changedAttributes: changedAttributes,
+            oldValues: result?.oldBody,
+            newValues: result?.newBody
+          })
+          .then((newValidatorChangeEvent: ValidatorChangeEventInterface) => {
+            if (!newValidatorChangeEvent) return callback('creation_error', null);
+            return callback(null, newValidatorChangeEvent);
+          })
+          .catch(err => callback('creation_error', null))
       })
     })
   })

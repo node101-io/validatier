@@ -63,18 +63,19 @@ withdrawRecordEventSchema.statics.saveWithdrawRecordEvent = function (
 
   if (!isOperatorAddressValid(operator_address) || !isTxHashValid(txHash)) return callback('format_error', null);
 
-  WithdrawRecordEvent.create({ 
-    operator_address: operator_address,
-    denom: denom,
-    amount: amount,
-    withdrawType: withdrawType,
-    txHash: txHash
-  })
-  .then((newWithdrawRecordEvent: WithdrawRecordEventInterface) => {
-    if (!newWithdrawRecordEvent) return callback('creation_error', null);
-    return callback(null, newWithdrawRecordEvent);
-  })
-  .catch(err => callback('creation_error', null))
+  WithdrawRecordEvent
+    .create({ 
+      operator_address: operator_address,
+      denom: denom,
+      amount: amount,
+      withdrawType: withdrawType,
+      txHash: txHash
+    })
+    .then((newWithdrawRecordEvent: WithdrawRecordEventInterface) => {
+      if (!newWithdrawRecordEvent) return callback('creation_error', null);
+      return callback(null, newWithdrawRecordEvent);
+    })
+    .catch(err => callback('creation_error', null))
 }
 
 const WithdrawRecordEvent = mongoose.model<WithdrawRecordEventInterface, WithdrawRecordEventModel>('WithdrawRecordEvents', withdrawRecordEventSchema);
