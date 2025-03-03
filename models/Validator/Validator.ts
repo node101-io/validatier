@@ -4,6 +4,8 @@ import ValidatorChangeEvent from '../ValidatorChangeEvent/ValidatorChangeEvent.j
 
 import { isOperatorAddressValid, isPubkeyValid } from '../../utils/validationFunctions.js';
 
+const MAX_DATABASE_TEXT_FIELD_LENGTH = 1e4;
+
 export interface ValidatorInterface {
   pubkey: string;
   operator_address: string;
@@ -93,7 +95,10 @@ const validatorSchema = new Schema<ValidatorInterface>({
   moniker: { 
     type: String, 
     required: true,
-    trim: true
+    unique: true,
+    trim: true,
+    minlength: 1,
+    maxlength: MAX_DATABASE_TEXT_FIELD_LENGTH
   },
   commission_rate: { 
     type: String, 

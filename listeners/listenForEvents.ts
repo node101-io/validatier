@@ -12,6 +12,7 @@ import { getSpecificAttributeOfAnEventFromTxEventsArray } from '../utils/getSpec
 
 import { CosmosTx } from './interfaces/apiTxResultInterface.js';
 
+const RESTART_WAIT_INTERVAL = 5 * 1000;
 const TENDERMINT_RPC_URL = 'https://rest.cosmos.directory/cosmoshub/cosmos/tx/v1beta1/txs/';
 const WEBSOCKET_URL = 'wss://cosmoshub.tendermintrpc.lava.build/websocket';
 const LISTENING_EVENTS = [
@@ -176,6 +177,6 @@ export const listenEvents = () => {
 
   ws.on('close', () => {
     console.warn('WebSocket closed. Reconnecting...');
-    setTimeout(listenEvents, 5000);
+    setTimeout(listenEvents, RESTART_WAIT_INTERVAL);
   });
 };

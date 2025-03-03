@@ -1,6 +1,8 @@
 import mongoose, { Schema, Model } from 'mongoose';
 import { isOperatorAddressValid, isTxHashValid } from '../../utils/validationFunctions.js';
 
+const MAX_DENOM_LENGTH = 68;
+
 export enum WithdrawType {
   Commission = 'commission',
   Reward = 'reward'
@@ -31,20 +33,38 @@ interface WithdrawRecordEventModel extends Model<WithdrawRecordEventInterface> {
   ) => any;
 }
 
-const withdrawRecordEventSchema: Schema = new Schema<WithdrawRecordEventInterface>(
-  {
-    timestamp: { type: Date, default: new Date() },
-    operator_address: { type: String, required: true },
-    denom: { type: String, required: true },
-    amount: { type: String, required: true },
-    withdrawType: {
-      type: String,
-      required: true,
-      enum: [WithdrawType.Commission, WithdrawType.Reward],
-    },
-    txHash: { type: String, required: true }
+const withdrawRecordEventSchema: Schema = new Schema<WithdrawRecordEventInterface>({
+  timestamp: { 
+    type: Date, 
+    default: new Date() 
+  },
+  operator_address: { 
+    type: String,
+    required: true
+  },
+  denom: { 
+    type: String,
+    required: true,
+    trim: true,
+    minlength: 1,
+    maxlength: MAX_DENOM_LENGTH
+  },
+  amount: { 
+    type: String,
+    required: true
+  },
+  withdrawType: {
+    type: String,
+    required: true,
+    enum: [WithdrawType.Commission, WithdrawType.Reward],
+  },
+  txHash: { 
+    type: String,
+    required: true,
+    trim: true,
+    unique: true    
   }
-);
+});
 
 withdrawRecordEventSchema.statics.saveWithdrawRecordEvent = function (
   body: {  

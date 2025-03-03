@@ -36,21 +36,30 @@ const validatorChangeEventSchema = new Schema<ValidatorChangeEventInterface>({
     trim: true
   },
   operator_address: { 
-    type: String, 
+    type: String,
     required: true, 
     trim: true
   },
   changedAttributes: { 
-    type: [String], 
+    type: [{
+      type: String,
+      trim: true
+    }], 
     required: true
   },
   oldValues: { 
-    type: [String], 
-    required: true,
+    type: [{
+      type: String,
+      trim: true
+    }], 
+    required: true
   },
   newValues: { 
-    type: [String], 
-    required: true 
+    type: [{
+      type: String,
+      trim: true
+    }], 
+    required: true
   },
 });
 

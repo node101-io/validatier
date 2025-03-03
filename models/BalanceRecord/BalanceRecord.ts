@@ -2,6 +2,8 @@
 import mongoose, { Schema, Model } from 'mongoose';
 import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
 
+const MAX_DENOM_LENGTH = 68;
+
 export interface BalanceRecordEventInterface {
   timestamp: Date;
   operator_address: string;
@@ -28,16 +30,25 @@ const balanceRecordEventSchema = new Schema<BalanceRecordEventInterface>({
     type: Date,
     default: new Date()
   },
-  operator_address: { 
+  operator_address: {
     type: String, 
-    required: true 
+    required: true,
+    trim: true
   },
   denomArray: { 
-    type: [String], 
+    type: [{
+      type: String,
+      trim: true,
+      minlength: 1,
+      maxlength: MAX_DENOM_LENGTH
+    }],
     required: true 
   },
   balanceArray: { 
-    type: [String], 
+    type: [{
+      type: String,
+      trim: true
+    }],
     required: true 
   }
 });

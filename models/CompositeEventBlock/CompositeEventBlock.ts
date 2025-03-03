@@ -2,6 +2,8 @@
 import mongoose, { Schema, Model, SortOrder } from 'mongoose';
 import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
 
+const MAX_DENOM_LENGTH = 68;
+
 export interface CompositeEventBlockInterface {
   timestamp: Date;
   block_height: number;
@@ -78,16 +80,19 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
   },
   block_height: { 
     type: Number, 
-    required: true
+    required: true,
   },
-  operator_address: { 
-    type: String, 
-    required: true 
+  operator_address: {
+    type: String,
+    required: true,
+    trim: true
   },
   denom: { 
     type: String, 
     required: true,
-    trim: true
+    trim: true,
+    minlength: 1,
+    maxlength: MAX_DENOM_LENGTH
   },
   reward: { 
     type: Number, 

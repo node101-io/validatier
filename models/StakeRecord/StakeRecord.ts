@@ -2,6 +2,8 @@
 import mongoose, { Schema, Model } from 'mongoose';
 import { isOperatorAddressValid, isTxHashValid } from '../../utils/validationFunctions.js';
 
+const MAX_DENOM_LENGTH = 68;
+
 export interface StakeRecordEventInterface {
   timestamp: Date;
   operator_address: string;
@@ -33,12 +35,15 @@ const stakeRecordEventSchema = new Schema<StakeRecordEventInterface>({
   },
   operator_address: { 
     type: String, 
-    required: true 
+    required: true,
+    trim: true
   },
   denom: { 
     type: String, 
     required: true,
-    trim: true
+    trim: true,
+    minlength: 1,
+    maxlength: MAX_DENOM_LENGTH
   },
   amount: { 
     type: String, 
@@ -46,8 +51,9 @@ const stakeRecordEventSchema = new Schema<StakeRecordEventInterface>({
     trim: true
   },
   txHash: { 
-    type: String, 
+    type: String,
     required: true,
+    trim: true,
     unique: true
   }
 });

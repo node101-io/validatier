@@ -2,6 +2,8 @@
 import mongoose, { Schema, Model } from 'mongoose';
 import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
 
+const MAX_DENOM_LENGTH = 68
+
 export interface RewardRecordEventInterface {
   timestamp: Date;
   operator_address: string;
@@ -35,23 +37,40 @@ const RewardRecordEventSchema = new Schema<RewardRecordEventInterface>({
   },
   operator_address: { 
     type: String, 
-    required: true 
+    required: true,
+    trim: true
   },
   rewardsDenomArray: { 
-    type: [String], 
+    type: [{
+      type: String,
+      trim: true,
+      minlength: 1,
+      maxlength: MAX_DENOM_LENGTH
+    }],
     required: true 
   },
   rewardsAmountArray: { 
-    type: [String], 
-    required: true 
-  },
-  comissionsDenomArray: { 
-    type: [String], 
+    type: [{
+      type: String,
+      trim: true
+    }],
     required: true
   },
-  comissionsAmountArray: { 
-    type: [String], 
-    required: true 
+  comissionsDenomArray: {
+    type: [{
+      type: String,
+      trim: true,
+      minlength: 1,
+      maxlength: MAX_DENOM_LENGTH
+    }],
+    required: true
+  },
+  comissionsAmountArray: {
+    type: [{
+      type: String,
+      trim: true
+    }],
+    required: true
   }
 });
 
