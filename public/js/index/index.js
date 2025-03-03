@@ -3,34 +3,62 @@ const GET_PERIODIC_DATA_API_ENDPOINT = 'composite_event_block/get_total_periodic
 
 window.onload = () => {
 
-  /*
-    cosmosvaloper103agss48504gkk3la5xcg5kxplaf6ttnuv234h
-    24650515
-  */
-
   changeInitialsFontFamily('Sofia');
 
   const BASE_URL = window.location.href;
   
+  const searchBy = document.getElementById('query-search-by');
   const totalSelfStakeResult = document.getElementById('query-total-self-stake-result-content');
   const totalWithdrawResult = document.getElementById('query-total-withdraw-result-content');
   const submitButton = document.getElementById('query-submit-button');
   const operatorAddress = document.getElementById('periodic-query-operator-address');
   const bottomBlockHeight = document.getElementById('periodic-query-bottom-block-height');
   const topBlockHeight = document.getElementById('periodic-query-top-block-height');
+  const bottomTimestamp = document.getElementById('periodic-query-bottom-timestamp');
+  const topTimestamp = document.getElementById('periodic-query-top-timestamp');
   const requestResultDisplayContent = document.getElementById('general-single-line-request-result-display-content');
+
+  const blockHeightInputWrappers = document.querySelectorAll('.query-block-height-input');
+  const timestampInputWrappers = document.querySelectorAll('.query-timestamp-input');
+
+  searchBy.addEventListener('change', (event) => { 
+    if (searchBy.value == 'block_height') {
+      timestampInputWrappers.forEach(el => {
+        el.style.opacity = 0;
+        setTimeout(() => { el.style.display = 'none' }, 500);
+      });
+      blockHeightInputWrappers.forEach(el => {
+        setTimeout(() => {
+          el.style.display = 'flex'; 
+          setTimeout(() => {
+            el.style.opacity = 1;
+          }, 0)
+        }, 500);
+      });
+    } else {
+      blockHeightInputWrappers.forEach(el => {
+        el.style.opacity = 0;
+        setTimeout(() => { el.style.display = 'none' }, 500);
+      });
+      timestampInputWrappers.forEach(el => {
+        el.style.display = 'flex';
+        setTimeout(() => { el.style.opacity = 1 }, 500);
+      });  
+    }
+  })
 
   submitButton.addEventListener('click', (event) => {
 
     if (
+      !searchBy.value || (searchBy.value != 'block_height' && searchBy.value != 'timestamp') ||
       !operatorAddress.value || typeof operatorAddress.value != 'string' ||
-      !bottomBlockHeight.value || typeof parseInt(bottomBlockHeight.value) != 'number' ||
-      !topBlockHeight.value || typeof parseInt(topBlockHeight.value) != 'number' ||
-      bottomBlockHeight.value >= topBlockHeight.value
+      (searchBy.value == 'block_height' && (!bottomBlockHeight.value || !topBlockHeight.value)) ||
+      (searchBy.value == 'timestamp' && (!bottomTimestamp.value || !topTimestamp.value))
     ) {
       requestResultDisplayContent.style.color = 'goldenrod';
       return requestResultDisplayContent.innerHTML = 'Warning! Please provide input in the correct format.';
     };
+
 
     const timestampBeforeRequest = Date.now();
 
@@ -39,8 +67,11 @@ window.onload = () => {
       'POST',
       {
         operator_address: operatorAddress.value,
-        bottom_block_height: bottomBlockHeight.value,
-        top_block_height: topBlockHeight.value,
+        bottom_block_height: bottomBlockHeight ? bottomBlockHeight.value : -1,
+        top_block_height: topBlockHeight ? topBlockHeight.value : -1,
+        bottom_timestamp: bottomTimestamp ? (new Date(bottomTimestamp.value)).getTime() : -1,
+        top_timestamp: topTimestamp ? (new Date(topTimestamp.value)).getTime() : -1,
+        search_by: searchBy.value
       },
       (response) => {
 

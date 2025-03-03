@@ -31,6 +31,7 @@ body {
   text-align: center;
   background-color: var(--color-powder-blue);
   color: var(--color-dark-violet);
+  transition: all 0.5s ease-in-out 0s;
 }
 
 .each-input-wrapper span {
@@ -83,3 +84,36 @@ body {
   font-size: 14px;
   font-weight: 300;
 }
+
+select.general-select-content {
+  background-color: var(--color-powder-blue);
+  color: var(--color-dark-violet);
+  border: 2px solid var(--color-dark-violet);
+  border-radius: 8px;
+  padding: 10px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+select.general-select-content:hover {
+  background-color: var(--color-pale-white);
+  color: var(--color-dark-violet);
+}
+
+select.general-select-content:focus {
+  border-color: var(--color-pale-black);
+  box-shadow: 0 0 5px var(--color-dark-violet);
+}
+
+option {
+  background-color: var(--color-pale-white);
+  color: var(--color-dark-violet);
+  padding: 5px;
+}
+
+option:hover {
+  background-color: var(--color-powder-blue);
+}
+

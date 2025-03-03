@@ -16,16 +16,27 @@ block content
             div case4 0, 24650515
             div case5 24650415, 24650520
             div case6 0, 900000000000
+        .query-input-wrapper-header 
+          select.general-select-content#query-search-by
+            option(value="block_height") Block Height
+            option(value="timestamp") Timestamp
         .query-main-wrapper-input-wrapper
           .each-input-wrapper 
             span Validator operator_address
             input(type='text' id='periodic-query-operator-address' placeholder='cosmosvaloper1...')
-          .each-input-wrapper 
+          .each-input-wrapper(class='query-block-height-input')
             span Bottom block_height
             input(type='number' id='periodic-query-bottom-block-height')
-          .each-input-wrapper 
+          .each-input-wrapper(class='query-block-height-input')
             span Top block_height
             input(type='number' id='periodic-query-top-block-height')
+          .each-input-wrapper(class='query-timestamp-input')
+            span Bottom date
+            input(type='date' id='periodic-query-bottom-timestamp')
+          .each-input-wrapper(class='query-timestamp-input')
+            span Top date
+            input(type='date' id='periodic-query-top-timestamp')
+
         .query-main-wrapper-result-content
           .submit-button#query-submit-button(style='color: var(--color-dark-violet); background-color: var(--color-powder-blue)') Get data
           ul 

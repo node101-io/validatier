@@ -48,7 +48,9 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
   searchTillExists: (
     body: {
       operator_address: string;
-      block_height: number; 
+      block_height?: number;
+      timestamp?: number;
+      search_by: string;
       order: SortOrder 
     },
     callback: (
@@ -59,8 +61,11 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
   getTotalPeriodicSelfStakeAndWithdraw: (
     body: {
       operator_address: string;
-      bottomBlockHeight: number;
-      topBlockHeight: number;
+      bottomBlockHeight?: number;
+      topBlockHeight?: number;
+      bottomTimestamp?: number;
+      topTimestamp?: number;
+      searchBy: string;
     },
     callback: (
       err: string | null,
@@ -115,25 +120,35 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
 });
 
 compositeEventBlockSchema.statics.searchTillExists = function (
-  body: { operator_address: string; block_height: number; order: SortOrder },
+  body: { 
+    operator_address: string; 
+    block_height?: number; 
+    timestamp?: number;
+    search_by: string;
+    order: SortOrder;
+  },
   callback: (
     err: string | null,
     foundCompositeBlock: CompositeEventBlockInterface | null
   ) => any
 ) {
 
-  const { operator_address, block_height, order } = body;
+  const { operator_address, block_height, timestamp, search_by, order } = body;
 
-  if (order != 'asc' && order != 'desc') return callback('bad_request', null);
+  if ((order != 'asc' && order != 'desc') || (search_by != 'block_height' && search_by != 'timestamp')) return callback('bad_request', null);
 
-  const blockHeightCondition = order === 'asc' ? { $gt: block_height } : { $lt: block_height };
+  const condition = 
+    order == 'asc' 
+    ? (search_by == 'block_height' ? { $gt: block_height } : { $gt: timestamp }) 
+    : (search_by == 'block_height' ? { $lt: block_height } : { $lt: timestamp });
+
 
   CompositeEventBlock
     .find({ 
       operator_address: operator_address,
-      block_height: blockHeightCondition
+      [search_by]: condition
     })
-    .sort({ block_height: order })
+    .sort({ [search_by]: order })
     .exec()
     .then((compositeEventBlocksOfValidator: CompositeEventBlockInterface[]) => {
       if (!compositeEventBlocksOfValidator || compositeEventBlocksOfValidator.length <= 0) return callback(null, null);
@@ -196,6 +211,7 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
     {
       operator_address: operator_address,
       block_height: block_height,
+      search_by: 'block_height',
       order: 'desc'
     }, 
     (err, foundCompositeBlockEvent) => {
@@ -241,8 +257,11 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
 compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = function (
   body: {
     operator_address: string;
-    bottomBlockHeight: number;
-    topBlockHeight: number;
+    bottomBlockHeight?: number;
+    topBlockHeight?: number;
+    bottomTimestamp?: number;
+    topTimestamp?: number;
+    searchBy: string;
   },
   callback: (
     err: string | null,
@@ -252,31 +271,41 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
     } | null
   ) => any
 ) {
-  const { operator_address, bottomBlockHeight, topBlockHeight } = body;
+  const { operator_address, bottomBlockHeight, topBlockHeight, bottomTimestamp, topTimestamp, searchBy } = body;
 
   if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
 
   CompositeEventBlock.searchTillExists(
     {
       operator_address: operator_address,
-      block_height: bottomBlockHeight,
+      block_height: bottomBlockHeight ? bottomBlockHeight : -1,
+      timestamp: bottomTimestamp ? bottomTimestamp : -1,
+      search_by: searchBy,
       order: 'asc'
     },
     (err, bottomCompositeBlockEvent) => {
       if (err) return callback('bad_request', null);
 
-      if (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.block_height > topBlockHeight) return callback(null, { self_stake: 0, withdraw: 0 });
-
+      if (
+        ((searchBy == 'block_height' && topBlockHeight) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.block_height > topBlockHeight)) ||
+        ((searchBy == 'timestamp' && topTimestamp) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.timestamp > topTimestamp))
+      ) return callback(null, { self_stake: 0, withdraw: 0 });
+      
       CompositeEventBlock.searchTillExists(
         {
           operator_address: operator_address,
-          block_height: topBlockHeight,
+          block_height: topBlockHeight ? topBlockHeight : -1,
+          timestamp: topTimestamp ? topTimestamp : -1,
+          search_by: searchBy,
           order: 'desc'
         },
         (err, topCompositeBlockEvent) => {
           if (err) return callback('bad_request', null);
 
-          if (!topCompositeBlockEvent || topCompositeBlockEvent.block_height < bottomBlockHeight) return callback(null, { self_stake: 0, withdraw: 0 });
+          if (
+            ((searchBy == 'block_height' && bottomBlockHeight) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.block_height < bottomBlockHeight)) ||
+            ((searchBy == 'timestamp' && bottomTimestamp) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.timestamp < bottomTimestamp))
+          ) return callback('null', { self_stake: 0, withdraw: 0 });
 
           const bottomRewardPrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.reward_prefix_sum : 0;
           const bottomSelfStakePrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.self_stake_prefix_sum : 0;
