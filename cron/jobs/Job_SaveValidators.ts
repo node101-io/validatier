@@ -1,9 +1,11 @@
 import async from 'async';
 
-import Validator from '../../models/Validator/Validator.js';
+import Validator, { ValidatorInterface } from '../../models/Validator/Validator.js';
 import { getActiveValidators, ValidatorResponse } from '../functions/getActiveValidators.js';
 
 export const Job_SaveValidators = (callback: (err: string | null, success: Boolean) => any) => {
+
+  const visitedValidatorsOperatorAddresses: string[] | null = [];
 
   getActiveValidators((err: string | null, validators: ValidatorResponse[] | null) => {
 
@@ -24,12 +26,23 @@ export const Job_SaveValidators = (callback: (err: string | null, success: Boole
 
         Validator.saveValidator(validatorSaveObject, (err, newValidator) => {
           if (err) return callback(err, false);
-          if (newValidator) next();
+          if (newValidator) {
+            visitedValidatorsOperatorAddresses.push(newValidator.operator_address);
+            next()
+          };
         })
       }, 
       (err) => {
         if (err) return callback('async_error', false);
-        return callback(null, true);
+
+        if (!visitedValidatorsOperatorAddresses || visitedValidatorsOperatorAddresses.length < 0) return callback(null, true);
+
+        Validator.deleteValidatorsNotAppearingOnApiResponse(
+          { visitedValidatorsOperatorAddresses }, 
+          (err, validators) => {
+            if (err) return callback('async_error', false);
+            return callback(null, true);
+        })
       }
     )
   })

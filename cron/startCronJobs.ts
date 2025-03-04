@@ -11,22 +11,22 @@ const EVERY_HOUR_REGEX_STRING = '0 * * * *';
 
 export const startCronJobs = () => {
 
-  console.log('👔 Cron jobs started with the time interval regex of ' + EVERY_HOUR_REGEX_STRING);
+  console.log('👔 Cron jobs started with the time interval regex of ' + TEST_TIME_INTERVAL_REGEX);
 
-  cron.schedule(EVERY_HOUR_REGEX_STRING, () => {
+  cron.schedule(TEST_TIME_INTERVAL_REGEX, () => {
     console.log(SEPERATOR_LINE);
     Job_SaveValidators((err, success) => {
       if (err && !success) return console.error(err + ' | ' + new Date())
       console.info('Cron Job 1 executed successfully | ' + new Date());
-      Job_RecordValidatorBalance((err, success) => {
-        if (err && !success) return console.error(err + ' | ' + new Date())
-        console.info('Cron Job 2 executed successfully | ' + new Date());
-        Job_RecordValidatorRewards((err, success) => {
-          if (err && !success) return console.error(err + ' | ' + new Date())
-          console.info('Cron Job 3 executed successfully | ' + new Date());
-          console.log(SEPERATOR_LINE);
-        });
-      });
+      // Job_RecordValidatorBalance((err, success) => {
+      //   if (err && !success) return console.error(err + ' | ' + new Date())
+      //   console.info('Cron Job 2 executed successfully | ' + new Date());
+      //   Job_RecordValidatorRewards((err, success) => {
+      //     if (err && !success) return console.error(err + ' | ' + new Date())
+      //     console.info('Cron Job 3 executed successfully | ' + new Date());
+      //     console.log(SEPERATOR_LINE);
+      //   });
+      // });
     });
   })
 }

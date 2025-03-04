@@ -182,13 +182,15 @@ compositeEventBlockSchema.statics.checkIfBlockExistsAndUpdate = function (
   if (!update_body.reward_prefix_sum) delete update_body.reward_prefix_sum;
   if (!update_body.self_stake_prefix_sum) delete update_body.self_stake_prefix_sum;
 
-  CompositeEventBlock.findOneAndUpdate(
-    { operator_address: operator_address, block_height: block_height }, 
-    update_body,
-    (err: string | null, updatedCompositeEventBlock: CompositeEventBlockInterface | null) => {
-    if (err) return callback(err, null);
-    return callback(null, updatedCompositeEventBlock);
-  })
+  CompositeEventBlock
+    .findOneAndUpdate(
+      { operator_address: operator_address, block_height: block_height }, 
+      update_body,
+    )
+    .then((updatedCompositeEventBlock: CompositeEventBlockInterface | null) => {
+      return callback(null, updatedCompositeEventBlock);
+    })
+    .catch(err => callback(err, null))
 }
 
 compositeEventBlockSchema.statics.saveCompositeEventBlock = function (

@@ -82,32 +82,34 @@ validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (
 
   if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
 
-  Validator.findOne({ operator_address: operator_address }, (err: string, validator: ValidatorInterface) => {
-    
-    if (err || !validator) return callback('fetch_error', null);
+  Validator
+    .findOne({ operator_address: operator_address })
+    .then((validator) => {
+      if (!validator) return callback('fetch_error', null);
 
-    isRecordChanged(validator, body, ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares'], (err: string, changedAttributes) => {
-      if (err) return callback(err, null);
-      if (!changedAttributes || changedAttributes.length <= 0) return callback(null, 'no_change_occured'); 
+      isRecordChanged(validator, body, ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares'], (err: string, changedAttributes) => {
+        if (err) return callback(err, null);
+        if (!changedAttributes || changedAttributes.length <= 0) return callback(null, 'no_change_occured'); 
 
-      generateChangeObjectToSave(changedAttributes, validator, body, (err, result) => {
-        if (err) return callback('bad_request', null);
+        generateChangeObjectToSave(changedAttributes, validator, body, (err, result) => {
+          if (err) return callback('bad_request', null);
 
-        ValidatorChangeEvent
-          .create({
-            operator_address: operator_address,
-            changedAttributes: changedAttributes,
-            oldValues: result?.oldBody,
-            newValues: result?.newBody
-          })
-          .then((newValidatorChangeEvent: ValidatorChangeEventInterface) => {
-            if (!newValidatorChangeEvent) return callback('creation_error', null);
-            return callback(null, newValidatorChangeEvent);
-          })
-          .catch(err => callback('creation_error', null))
+          ValidatorChangeEvent
+            .create({
+              operator_address: operator_address,
+              changedAttributes: changedAttributes,
+              oldValues: result?.oldBody,
+              newValues: result?.newBody
+            })
+            .then((newValidatorChangeEvent: ValidatorChangeEventInterface) => {
+              if (!newValidatorChangeEvent) return callback('creation_error', null);
+              return callback(null, newValidatorChangeEvent);
+            })
+            .catch(err => callback('creation_error', null))
+        })
       })
     })
-  })
+    .catch(err => callback(err, null))
 }
 
 

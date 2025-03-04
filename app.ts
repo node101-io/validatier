@@ -8,6 +8,7 @@ import session from 'express-session';
 
 import compositeEventBlockRouter from './routes/compositeEventBlockRouter.js';
 import indexRouter from './routes/indexRouter.js';
+import validatorRouter from './routes/validatorRouter.js';
 
 import { startCronJobs } from './cron/startCronJobs.js';
 import { listenEvents } from './listeners/listenForEvents.js';
@@ -44,12 +45,13 @@ app.use(
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
 
 app.use('/', indexRouter);
-app.use('/composite_event_block', compositeEventBlockRouter)
+app.use('/composite_event_block', compositeEventBlockRouter);
+app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at PORT ${PORT}`);
 
-  // startCronJobs();
+  startCronJobs();
   // listenEvents();
 });
 
