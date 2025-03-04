@@ -197,6 +197,10 @@ body {
   gap: 10px;
 }
 
+td {
+  padding: 20px;
+}
+
 .validators-main-wrapper {
   border-radius: 10px;
   background-color: rgb(34, 33, 38);
@@ -204,8 +208,6 @@ body {
 }
 
 .each-validator-wrapper {
-  display: flex;
-  align-items: center;
   height: 40px;
   gap: 20px;
   padding: 10px;
@@ -215,7 +217,7 @@ body {
 }
 
 .validator-image {
-  height: 100%;
+  height: 40px;
   aspect-ratio: 1/1;
   border-radius: 100%;
   overflow: hidden;

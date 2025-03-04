@@ -91,7 +91,7 @@ export const listenEvents = () => {
                 amount: amount,
                 txHash: txHash
               }, (err, newStakeRecordEvent) => {
-                if (err || typeof parseInt(blockHeight) != 'number' || typeof parseFloat(amount) != 'number') return console.log('bad_request | ' + new Date());
+                if (err || !newStakeRecordEvent || typeof parseInt(blockHeight) != 'number' || typeof parseFloat(amount) != 'number') return console.log('bad_request | ' + new Date());
 
                 CompositeEventBlock.saveCompositeEventBlock({
                   block_height: parseInt(blockHeight),
@@ -99,7 +99,7 @@ export const listenEvents = () => {
                   denom: 'uatom',
                   self_stake: parseFloat(amount)
                 }, (err, newCompositeEventBlock) => {
-                  if (err) return console.log(err + ' | ' + new Date());
+                  if (err || !newCompositeEventBlock) return console.log(err + ' | ' + new Date());
 
                   console.log('Stake event saved for validator: ' + newStakeRecordEvent.operator_address + ' | Composite block saved with block_height: ' + newCompositeEventBlock.block_height + ' | ' + new Date());
                   return next();
@@ -118,14 +118,14 @@ export const listenEvents = () => {
                     amount: nativeRewardOrCommissionValue,
                     txHash: txHash
                   }, (err, newWithdrawRecordEvent) => {
-                    if (err) return console.log(err + ' | ' + new Date());
+                    if (err || !newWithdrawRecordEvent) return console.log(err + ' | ' + new Date());
                     CompositeEventBlock.saveCompositeEventBlock({
                       block_height: parseInt(blockHeight),
                       operator_address: validatorAddress,
                       denom: 'uatom',
                       reward: parseInt(nativeRewardOrCommissionValue)
                     }, (err, newCompositeEventBlock) => {
-                      if (err) return console.log(err + ' | ' + new Date());
+                      if (err || !newCompositeEventBlock) return console.log(err + ' | ' + new Date());
     
                       console.log('Commission withdraw saved for validator: ' + newWithdrawRecordEvent.operator_address + ' | Composite block saved with block_height: ' + newCompositeEventBlock.block_height + ' | ' + new Date());
                       return next();
@@ -152,7 +152,7 @@ export const listenEvents = () => {
                       denom: 'uatom',
                       reward: parseInt(nativeRewardOrCommissionValue)
                     }, (err, newCompositeEventBlock) => {
-                      if (err) return console.log(err + ' | ' + new Date());
+                      if (err || !newCompositeEventBlock) return console.log(err + ' | ' + new Date());
     
                       console.log('Reward withdraw saved for validator: ' + newWithdrawRecordEvent.operator_address + ' | Composite block saved with block_height: ' + newCompositeEventBlock.block_height + ' | ' + new Date());
                       return next();

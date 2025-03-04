@@ -1,7 +1,7 @@
 
 import async from 'async';
 
-export const ALLOWED_ATTRIBUTE_LIST = ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares'];
+export const ALLOWED_ATTRIBUTE_LIST = ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares', 'keybase_id'];
 
 export interface ChangeObjectResultInterface {
   changedAttributes: string[];

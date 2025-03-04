@@ -4,7 +4,7 @@ const GET_PERIODIC_DATA_API_ENDPOINT = 'composite_event_block/get_total_periodic
 window.onload = () => {
 
   handleCalendarEvents();
-  renderValidators();
+  // renderValidators();
   changeInitialsFontFamily('Sofia');
 
   const BASE_URL = window.location.href;

@@ -78,7 +78,7 @@ validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (
     .then((validator) => {
       if (!validator) return callback('fetch_error', null);
 
-      isRecordChanged(validator, body, ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares'], (err: string, changedAttributes) => {
+      isRecordChanged(validator, body, ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares', 'keybase_id'], (err: string, changedAttributes) => {
         if (err) return callback(err, null);
         if (!changedAttributes || changedAttributes.length <= 0) return callback(null, true); 
 

@@ -21,7 +21,6 @@ export const Job_RecordValidatorBalance = function (callback: (err: string | nul
           getValidatorSpendableBalance(eachValidator.operator_address, (err, validatorBalances) => {
             if (err || !validatorBalances) return callback('fetch_error', false);
             changeDenomAmountObjectToTwoArrayFormat(validatorBalances, (err, response) => {
-
               if (err || !response?.denomsArray || !response?.amountsArray) return callback('conversion_error', false);
 
               BalanceRecordEvent.saveBalanceRecordEvent({
@@ -33,7 +32,7 @@ export const Job_RecordValidatorBalance = function (callback: (err: string | nul
                 next();
               })
             })
-          })      
+          })
         }, 
         (err) => {
           if (err) return callback('async_error', false);

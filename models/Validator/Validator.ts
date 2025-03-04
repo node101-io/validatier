@@ -15,6 +15,8 @@ export interface ValidatorInterface {
   commission_rate: string;
   bond_shares: string;
   liquid_shares: string;
+  keybase_id: string;
+  temporary_image_uri: string;
   created_at: Date;
   deleted_at: Date;
 }
@@ -28,6 +30,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       commission_rate: string;
       bond_shares: string;
       liquid_shares: string;
+      keybase_id: string;
     }, 
     callback: (
       err: string | null,
@@ -85,7 +88,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
     },
     callback: (
       err: string | null, 
-      validatorsMarkedAsDeleted: string[] | null
+      validatorsMarkedAsDeleted: string[] | Boolean | null
     ) => any
   ) => any
 }
@@ -140,6 +143,15 @@ const validatorSchema = new Schema<ValidatorInterface>({
     required: true,
     trim: true
   },
+  keybase_id: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  temporary_image_uri: {
+    type: String,
+    required: false
+  },
   created_at: { 
     type: Date, 
     default: new Date() 
@@ -157,7 +169,7 @@ validatorSchema.statics.saveValidator = function (
 ) {
   if (!body.pubkey) return callback('bad_request', null);
 
-  const { pubkey, operator_address, moniker, commission_rate, bond_shares, liquid_shares } = body;
+  const { pubkey, operator_address, moniker, commission_rate, bond_shares, liquid_shares, keybase_id } = body;
 
   if (!isOperatorAddressValid(operator_address) || !isPubkeyValid(pubkey)) return callback('format_error', null);
 
@@ -168,27 +180,27 @@ validatorSchema.statics.saveValidator = function (
         { pubkey: pubkey, deletedAt: null }
       ]
     })
-    .then((oldValidator) => {
+    .then(oldValidator => { 
       if (!oldValidator) {
-        Validator
+        return Validator
           .create(body)
           .then((newValidator: ValidatorInterface) => {
             if (!newValidator) return callback('creation_error', null);
             return callback(null, newValidator);
           })
-          .catch(err => callback('creation_error', null))
+          .catch(err => callback(err, null))
       }
-
 
       const updateAndChangeValidatorBody = {
         operator_address: operator_address,
         moniker: moniker,
         commission_rate: commission_rate,
         bond_shares: bond_shares,
-        liquid_shares: liquid_shares
+        liquid_shares: liquid_shares,
+        keybase_id: keybase_id
       }
 
-      ValidatorChangeEvent.saveValidatorChangeEvent(updateAndChangeValidatorBody, (err, newValidatorChangeEvent) => {
+      return ValidatorChangeEvent.saveValidatorChangeEvent(updateAndChangeValidatorBody, (err, newValidatorChangeEvent) => {
         if (err || !newValidatorChangeEvent) return callback(err, null);
 
         Validator.updateValidator(updateAndChangeValidatorBody, (err, updatedValidator) => {
@@ -277,14 +289,13 @@ validatorSchema.statics.deleteValidatorsNotAppearingOnApiResponse = function (
   Validator
     .find({ operator_address: { $nin: visitedValidatorsOperatorAddresses } })
     .then(validators => {
-      if (!validators.length) callback(null, []);
+      if (!validators.length) return callback(null, true);
       async.timesSeries(
         validators.length,
         (i, next) => {
           const eachValidatorToBeDeleted = validators[i];
           Validator.deleteValidator({ operator_address: eachValidatorToBeDeleted.operator_address }, (err, validator) => {
-            if (err || !validator) return callback(err, null);
-            deletedValidatorsOperatorAddresses.push(validator.operator_address);
+            if (!err && validator) deletedValidatorsOperatorAddresses.push(validator.operator_address);
             return next();
           })
         },

@@ -43,7 +43,7 @@ export interface ValidatorResponse {
   liquid_shares: string;
 }
 
-const NUMBER_OF_ACTIVE_VALIDATORS_TO_BE_FETCHED = 5;
+const NUMBER_OF_ACTIVE_VALIDATORS_TO_BE_FETCHED = 200;
 const REST_API_BASE_URL = 'https://rest.cosmos.directory/cosmoshub';
 const REST_API_ENDPOINT = `cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=${NUMBER_OF_ACTIVE_VALIDATORS_TO_BE_FETCHED}`;
 

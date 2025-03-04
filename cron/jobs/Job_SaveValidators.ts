@@ -22,14 +22,13 @@ export const Job_SaveValidators = (callback: (err: string | null, success: Boole
           commission_rate: eachValidator.commission.commission_rates.rate ? eachValidator.commission.commission_rates.rate : 'N/A',
           bond_shares: eachValidator.validator_bond_shares ? eachValidator.validator_bond_shares : 'N/A',
           liquid_shares: eachValidator.liquid_shares ? eachValidator.liquid_shares : 'N/A',
+          keybase_id: eachValidator.description.identity.trim().length > 0 ? eachValidator.description.identity : 'N/A'
         }
-
+        
         Validator.saveValidator(validatorSaveObject, (err, newValidator) => {
           if (err) return callback(err, false);
-          if (newValidator) {
-            visitedValidatorsOperatorAddresses.push(newValidator.operator_address);
-            next()
-          };
+          if (newValidator) visitedValidatorsOperatorAddresses.push(newValidator.operator_address);
+          return next();
         })
       }, 
       (err) => {

@@ -12,7 +12,7 @@ import validatorRouter from './routes/validatorRouter.js';
 
 import { startCronJobs } from './cron/startCronJobs.js';
 import { listenEvents } from './listeners/listenForEvents.js';
-import { getKeybaseImageUriFromOperatorAddress } from './models/Validator/functions/getKeybaseImageUriFromOperatorAddress.js';
+import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsImageUri.js';
 
 dotenv.config();
 
@@ -51,10 +51,6 @@ app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at PORT ${PORT}`);
-
-  getKeybaseImageUriFromOperatorAddress('cosmosvaloper1lrzxwu4dmy8030waevcpft7rpxjjz26cpzvumd', (err, imageUri) => {
-    console.log(imageUri)
-  })
 
   // startCronJobs();
   // listenEvents();

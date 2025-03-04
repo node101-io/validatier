@@ -16,7 +16,23 @@ block content
             div case4 0, 24650515
             div case5 24650415, 24650520
             div case6 0, 900000000000
-        .validators-main-wrapper#validators-main-wrapper
+        table.validators-main-wrapper#validators-main-wrapper
+          tr 
+            td Validators 
+            td Self stake
+            td Withdraw
+            td Ratio 
+            td Commission rate 
+          each validator in validators
+            tr.each-validator-wrapper
+              td(style='display: flex; align-items: center; gap: 20px;')
+                .validator-image
+                  img(src=`${validator.temporary_image_uri}`)
+                .validator-moniker #{validator.moniker}
+              td.validator-each-numeric-info= (validator['self_stake'] / 1e6).toFixed(2) + ' ATOM'
+              td.validator-each-numeric-info= (validator['withdraw'] / 1e6).toFixed(2) + ' ATOM'
+              td.validator-each-numeric-info= (validator['ratio']).toFixed(2)
+              td.validator-each-numeric-info= (parseFloat(validator.commission_rate).toFixed(2)) * 100 + '%'
         .date-picker
           .selected-range 
             span.date-interval-description 
