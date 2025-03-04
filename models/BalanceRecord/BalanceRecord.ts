@@ -19,8 +19,8 @@ interface BalanceRecordEventModel extends Model<BalanceRecordEventInterface> {
       balanceArray: string[];
     }, 
     callback: (
-      err: string, 
-      newBalanceRecordEvent: BalanceRecordEventInterface
+      err: string | null, 
+      newBalanceRecordEvent: BalanceRecordEventInterface | null
     ) => any
   ) => any;
 }
@@ -55,15 +55,8 @@ const balanceRecordEventSchema = new Schema<BalanceRecordEventInterface>({
 
 
 balanceRecordEventSchema.statics.saveBalanceRecordEvent = function (
-  body: {
-    operator_address: string;
-    denomArray: string[];
-    balanceArray: string[];
-  }, 
-  callback: (
-    err: string | null,
-    newBalanceRecordEvent: BalanceRecordEventInterface | null
-  ) => any
+  body: Parameters<BalanceRecordEventModel['saveBalanceRecordEvent']>[0], 
+  callback: Parameters<BalanceRecordEventModel['saveBalanceRecordEvent']>[1] 
 ) {
 
   const { operator_address, denomArray, balanceArray } = body;

@@ -1,4 +1,4 @@
-import { describe, it, assert, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import CompositeEventBlock from '../models/CompositeEventBlock/CompositeEventBlock.js';
 import mongoose from 'mongoose';
 

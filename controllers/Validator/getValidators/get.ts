@@ -1,5 +1,5 @@
-import { Request, Response } from "express"
-import Validator from "../../../models/Validator/Validator.js"
+import { Request, Response } from 'express'
+import Validator from '../../../models/Validator/Validator.js'
 
 export default (req: Request, res: Response) => {
   Validator.getValidatorsByCustomFilter({}, (err, validators) => {

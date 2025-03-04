@@ -10,13 +10,13 @@ input {
   font-family: 'Inter';
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator {
+input[type='date']::-webkit-calendar-picker-indicator {
   display: none !important;
   -webkit-appearance: none !important;
 }
 
-input[type="date"]::-webkit-inner-spin-button,
-input[type="date"]::-webkit-calendar-picker-indicator {
+input[type='date']::-webkit-inner-spin-button,
+input[type='date']::-webkit-calendar-picker-indicator {
   display: none !important;
   -webkit-appearance: none !important;
   pointer-events: none !important;

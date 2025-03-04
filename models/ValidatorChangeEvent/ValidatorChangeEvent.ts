@@ -23,8 +23,8 @@ interface ValidatorChangeEventModel extends Model<ValidatorChangeEventInterface>
       liquid_shares: string;
     }, 
     callback: (
-      err: string, 
-      ValidatorChangeEvent: ValidatorChangeEventInterface
+      err: string | null,
+      ValidatorChangeEvent: ValidatorChangeEventInterface | true | null
     ) => any
   ) => any;
 }
@@ -65,17 +65,8 @@ const validatorChangeEventSchema = new Schema<ValidatorChangeEventInterface>({
 
 
 validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (
-  body: {
-    operator_address: string;
-    moniker: string;
-    commission_rate: string;
-    bond_shares: string;
-    liquid_shares: string;
-  }, 
-  callback: (
-    err: string | null,
-    newValidatorChangeEvent: ValidatorChangeEventInterface | string | null
-  ) => any
+  body: Parameters<ValidatorChangeEventModel['saveValidatorChangeEvent']>[0], 
+  callback: Parameters<ValidatorChangeEventModel['saveValidatorChangeEvent']>[1],
 ) {
 
   const { operator_address } = body;
@@ -89,7 +80,7 @@ validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (
 
       isRecordChanged(validator, body, ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares'], (err: string, changedAttributes) => {
         if (err) return callback(err, null);
-        if (!changedAttributes || changedAttributes.length <= 0) return callback(null, 'no_change_occured'); 
+        if (!changedAttributes || changedAttributes.length <= 0) return callback(null, true); 
 
         generateChangeObjectToSave(changedAttributes, validator, body, (err, result) => {
           if (err) return callback('bad_request', null);

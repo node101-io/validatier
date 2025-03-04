@@ -41,8 +41,8 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
       self_stake?: number;
     }, 
     callback: (
-      err: string,
-      newCompositeEventBlock: CompositeEventBlockInterface
+      err: string | null,
+      newCompositeEventBlock: CompositeEventBlockInterface | null
     ) => any
   ) => any;
   searchTillExists: (
@@ -50,12 +50,12 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
       operator_address: string;
       block_height?: number;
       timestamp?: number;
-      search_by: string;
+      search_by: 'block_height' | 'timestamp';
       order: SortOrder 
     },
     callback: (
-      err: string,
-      foundCompositeBlockEvent: CompositeEventBlockInterface
+      err: string | null,
+      foundCompositeBlockEvent: CompositeEventBlockInterface | null
     ) => any
   ) => any;
   getTotalPeriodicSelfStakeAndWithdraw: (
@@ -65,7 +65,7 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
       topBlockHeight?: number;
       bottomTimestamp?: number;
       topTimestamp?: number;
-      searchBy: string;
+      searchBy: 'block_height' | 'timestamp';
     },
     callback: (
       err: string | null,
@@ -120,17 +120,8 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
 });
 
 compositeEventBlockSchema.statics.searchTillExists = function (
-  body: { 
-    operator_address: string; 
-    block_height?: number; 
-    timestamp?: number;
-    search_by: string;
-    order: SortOrder;
-  },
-  callback: (
-    err: string | null,
-    foundCompositeBlock: CompositeEventBlockInterface | null
-  ) => any
+  body: Parameters<CompositeEventBlockModel['searchTillExists']>[0],
+  callback: Parameters<CompositeEventBlockModel['searchTillExists']>[1]
 ) {
 
   const { operator_address, block_height, timestamp, search_by, order } = body;
@@ -159,20 +150,8 @@ compositeEventBlockSchema.statics.searchTillExists = function (
 }
 
 compositeEventBlockSchema.statics.checkIfBlockExistsAndUpdate = function (
-  body: {
-    operator_address: string;
-    block_height: number;
-    update_body: {
-      reward?: number;
-      self_stake?: number;
-      reward_prefix_sum?: number;
-      self_stake_prefix_sum?: number;
-    }
-  },
-  callback: (
-    err: string | null,
-    updatedCompositeBlockEvent: CompositeEventBlockInterface | null
-  ) => any
+  body: Parameters<CompositeEventBlockModel['checkIfBlockExistsAndUpdate']>[0],
+  callback: Parameters<CompositeEventBlockModel['checkIfBlockExistsAndUpdate']>[1],
 ) {
 
   const { operator_address, block_height, update_body } = body;
@@ -194,17 +173,8 @@ compositeEventBlockSchema.statics.checkIfBlockExistsAndUpdate = function (
 }
 
 compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
-  body: {  
-    block_height: number;
-    operator_address: string;
-    denom: string;
-    reward?: number;
-    self_stake?: number;
-  },
-  callback: (
-    err: string | null,
-    newCompositeEventBlock: CompositeEventBlockInterface | null
-  ) => any
+  body: Parameters<CompositeEventBlockModel['saveCompositeEventBlock']>[0],
+  callback: Parameters<CompositeEventBlockModel['saveCompositeEventBlock']>[1]
 ) {
 
   const { block_height, operator_address, denom, reward, self_stake } = body;
@@ -257,21 +227,8 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
 
 
 compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = function (
-  body: {
-    operator_address: string;
-    bottomBlockHeight?: number;
-    topBlockHeight?: number;
-    bottomTimestamp?: number;
-    topTimestamp?: number;
-    searchBy: string;
-  },
-  callback: (
-    err: string | null,
-    totalPeriodicSelfStakeAndWithdraw: {
-      self_stake: number,
-      withdraw: number
-    } | null
-  ) => any
+  body: Parameters<CompositeEventBlockModel['getTotalPeriodicSelfStakeAndWithdraw']>[0],
+  callback: Parameters<CompositeEventBlockModel['getTotalPeriodicSelfStakeAndWithdraw']>[1]
 ) {
   const { operator_address, bottomBlockHeight, topBlockHeight, bottomTimestamp, topTimestamp, searchBy } = body;
 

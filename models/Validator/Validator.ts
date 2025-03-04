@@ -5,7 +5,6 @@ import mongoose, { Schema, Model, Validator } from 'mongoose';
 import ValidatorChangeEvent from '../ValidatorChangeEvent/ValidatorChangeEvent.js';
 
 import { isOperatorAddressValid, isPubkeyValid } from '../../utils/validationFunctions.js';
-import { ValidatorResponse } from '../../cron/functions/getActiveValidators.js';
 
 const MAX_DATABASE_TEXT_FIELD_LENGTH = 1e4;
 
@@ -31,8 +30,8 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       liquid_shares: string;
     }, 
     callback: (
-      err: string, 
-      newValidator: ValidatorInterface
+      err: string | null,
+      newValidator: ValidatorInterface | null
     ) => any
   ) => any;
   updateValidator: (
@@ -44,8 +43,8 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       liquid_shares: string;
     }, 
     callback: (
-      err: string, 
-      updatedValidator: ValidatorInterface
+      err: string | null,
+      updatedValidator: ValidatorInterface | null
     ) => any
   ) => any;
   deleteValidator: (
@@ -53,17 +52,17 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       operator_address: string
     }, 
     callback: (
-      err: string, 
-      validator: ValidatorInterface
+      err: string | null,
+      validator: ValidatorInterface | null
     ) => any
   ) => any;
-  getValidatorById: (
+  getValidatorByOperatorAddress: (
     body: {
       operator_address: string
     }, 
     callback: (
-      err: string, 
-      validator: ValidatorInterface
+      err: string | null,
+      validator: ValidatorInterface | null
     ) => any
   ) => any;
   getValidatorsByCustomFilter: (
@@ -86,7 +85,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
     },
     callback: (
       err: string | null, 
-      validatorsMarkedAsDeleted: ValidatorInterface[]
+      validatorsMarkedAsDeleted: string[] | null
     ) => any
   ) => any
 }
@@ -153,18 +152,8 @@ const validatorSchema = new Schema<ValidatorInterface>({
 
 
 validatorSchema.statics.saveValidator = function (
-  body: {
-    pubkey: string;
-    operator_address: string;
-    moniker: string;
-    commission_rate: string;
-    bond_shares: string;
-    liquid_shares: string;
-  }, 
-  callback: (
-    err: string | null, 
-    newValidator: ValidatorInterface | null
-  ) => any
+  body: Parameters<ValidatorModel['saveValidator']>[0], 
+  callback: Parameters<ValidatorModel['saveValidator']>[1],
 ) {
   if (!body.pubkey) return callback('bad_request', null);
 
@@ -213,17 +202,8 @@ validatorSchema.statics.saveValidator = function (
 
 
 validatorSchema.statics.updateValidator = function (
-  body: {
-    operator_address: string;
-    moniker: string;
-    commission_rate: string;
-    bond_shares: string;
-    liquid_shares: string;
-  }, 
-  callback: (
-    err: string | null,
-    updatedValidator: ValidatorInterface | null
-  ) => any
+  body: Parameters<ValidatorModel['updateValidator']>[0], 
+  callback: Parameters<ValidatorModel['updateValidator']>[1],
 ) {
   
   const { operator_address, moniker, commission_rate, bond_shares, liquid_shares } = body;
@@ -241,13 +221,8 @@ validatorSchema.statics.updateValidator = function (
 
 
 validatorSchema.statics.deleteValidator = function (
-  body: {
-    operator_address: string;
-  }, 
-  callback: (
-    err: string | null,
-    validator: ValidatorInterface | null
-  ) => any
+  body: Parameters<ValidatorModel['deleteValidator']>[0], 
+  callback: Parameters<ValidatorModel['deleteValidator']>[1],
 ) {
 
   const { operator_address } = body;
@@ -264,14 +239,9 @@ validatorSchema.statics.deleteValidator = function (
 }
 
 
-validatorSchema.statics.getValidatorOperatorAddress = function (
-  body: {
-    operator_address: string;
-  }, 
-  callback: (
-    err: string | null,
-    validator: ValidatorInterface | null
-  ) => any
+validatorSchema.statics.getValidatorByOperatorAddress = function (
+  body: Parameters<ValidatorModel['getValidatorByOperatorAddress']>[0], 
+  callback: Parameters<ValidatorModel['getValidatorByOperatorAddress']>[1],
 ) {
 
   const { operator_address } = body;
@@ -285,18 +255,8 @@ validatorSchema.statics.getValidatorOperatorAddress = function (
 }
 
 validatorSchema.statics.getValidatorsByCustomFilter = function (
-  body: {
-    minCommissionRate?: string;
-    maxCommissionRate?: string;
-    minBondShares?: string;
-    maxBondShares?: string;
-    minLiquidShares?: string;
-    maxLiquidShares?: string;
-  },
-  callback: (
-    err: string | null,
-    validators: ValidatorInterface[] | null
-  ) => any
+  body: Parameters<ValidatorModel['getValidatorsByCustomFilter']>[0], 
+  callback: Parameters<ValidatorModel['getValidatorsByCustomFilter']>[1],
 ) {
   Validator
     .find({})
@@ -306,13 +266,8 @@ validatorSchema.statics.getValidatorsByCustomFilter = function (
 
 
 validatorSchema.statics.deleteValidatorsNotAppearingOnApiResponse = function (
-  body: {
-    visitedValidatorsOperatorAddresses: string[]
-  },
-  callback: (
-    err: string | null, 
-    deletedValidatorsOperatorAddresses: string[] | null
-  ) => any
+  body: Parameters<ValidatorModel['deleteValidatorsNotAppearingOnApiResponse']>[0], 
+  callback: Parameters<ValidatorModel['deleteValidatorsNotAppearingOnApiResponse']>[1],
 ) {
 
   const { visitedValidatorsOperatorAddresses } = body;
@@ -328,7 +283,7 @@ validatorSchema.statics.deleteValidatorsNotAppearingOnApiResponse = function (
         (i, next) => {
           const eachValidatorToBeDeleted = validators[i];
           Validator.deleteValidator({ operator_address: eachValidatorToBeDeleted.operator_address }, (err, validator) => {
-            if (err) return callback(err, null);
+            if (err || !validator) return callback(err, null);
             deletedValidatorsOperatorAddresses.push(validator.operator_address);
             return next();
           })

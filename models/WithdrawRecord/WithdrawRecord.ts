@@ -27,8 +27,8 @@ interface WithdrawRecordEventModel extends Model<WithdrawRecordEventInterface> {
       txHash: string;
     }, 
     callback: (
-      err: string, 
-      newWithdrawRecordEvent: WithdrawRecordEventInterface
+      err: string | null,
+      newWithdrawRecordEvent: WithdrawRecordEventInterface | null
     ) => any
   ) => any;
 }
@@ -67,17 +67,8 @@ const withdrawRecordEventSchema: Schema = new Schema<WithdrawRecordEventInterfac
 });
 
 withdrawRecordEventSchema.statics.saveWithdrawRecordEvent = function (
-  body: {  
-    operator_address: string;
-    denom: string;
-    amount: string;
-    withdrawType: string;
-    txHash: string;
-  }, 
-  callback: (
-    err: string | null,
-    newWithdrawRecordEvent: WithdrawRecordEventInterface | null
-  ) => any
+  body: Parameters<WithdrawRecordEventModel['saveWithdrawRecordEvent']>[0], 
+  callback: Parameters<WithdrawRecordEventModel['saveWithdrawRecordEvent']>[1],
 ) {
   const { operator_address, denom, amount, withdrawType, txHash } = body;
 

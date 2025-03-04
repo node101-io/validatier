@@ -18,15 +18,15 @@ export const startCronJobs = () => {
     Job_SaveValidators((err, success) => {
       if (err && !success) return console.error(err + ' | ' + new Date())
       console.info('Cron Job 1 executed successfully | ' + new Date());
-      // Job_RecordValidatorBalance((err, success) => {
-      //   if (err && !success) return console.error(err + ' | ' + new Date())
-      //   console.info('Cron Job 2 executed successfully | ' + new Date());
-      //   Job_RecordValidatorRewards((err, success) => {
-      //     if (err && !success) return console.error(err + ' | ' + new Date())
-      //     console.info('Cron Job 3 executed successfully | ' + new Date());
-      //     console.log(SEPERATOR_LINE);
-      //   });
-      // });
+      Job_RecordValidatorBalance((err, success) => {
+        if (err && !success) return console.error(err + ' | ' + new Date())
+        console.info('Cron Job 2 executed successfully | ' + new Date());
+        Job_RecordValidatorRewards((err, success) => {
+          if (err && !success) return console.error(err + ' | ' + new Date())
+          console.info('Cron Job 3 executed successfully | ' + new Date());
+          console.log(SEPERATOR_LINE);
+        });
+      });
     });
   })
 }

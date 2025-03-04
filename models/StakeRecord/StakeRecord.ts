@@ -21,8 +21,8 @@ interface StakeRecordEventModel extends Model<StakeRecordEventInterface> {
       txHash: string;
     }, 
     callback: (
-      err: string,
-      newStakeRecordEvent: StakeRecordEventInterface
+      err: string | null,
+      newStakeRecordEvent: StakeRecordEventInterface | null
     ) => any
   ) => any;
 }
@@ -60,16 +60,8 @@ const stakeRecordEventSchema = new Schema<StakeRecordEventInterface>({
 
 
 stakeRecordEventSchema.statics.saveStakeRecordEvent = function (
-  body: {  
-    operator_address: string;
-    denom: string;
-    amount: string;
-    txHash: string;
-  },
-  callback: (
-    err: string | null,
-    newStakeRecordEvent: StakeRecordEventInterface | null
-  ) => any
+  body: Parameters<StakeRecordEventModel['saveStakeRecordEvent']>[0],
+  callback: Parameters<StakeRecordEventModel['saveStakeRecordEvent']>[1]
 ) {
 
   const { operator_address, denom, amount, txHash } = body;

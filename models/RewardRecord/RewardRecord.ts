@@ -23,8 +23,8 @@ interface RewardRecordEventModel extends Model<RewardRecordEventInterface> {
       comissionsAmountArray: string[];
     }, 
     callback: (
-      err: string, 
-      newRewardRecordEvent: RewardRecordEventInterface
+      err: string | null,
+      newRewardRecordEvent: RewardRecordEventInterface | null
     ) => any
   ) => any;
 }
@@ -76,17 +76,8 @@ const RewardRecordEventSchema = new Schema<RewardRecordEventInterface>({
 
 
 RewardRecordEventSchema.statics.saveRewardRecordEvent = function (
-  body: {  
-    operator_address: string;
-    rewardsDenomArray: string[];
-    rewardsAmountArray: string[];
-    comissionsDenomArray: string[];
-    comissionsAmountArray: string[];
-  }, 
-  callback: (
-    err: string | null,
-    newRewardRecordEvent: RewardRecordEventInterface | null
-  ) => any
+  body: Parameters<RewardRecordEventModel['saveRewardRecordEvent']>[0], 
+  callback: Parameters<RewardRecordEventModel['saveRewardRecordEvent']>[1]
 ) {
 
   const { operator_address, rewardsDenomArray, rewardsAmountArray, comissionsDenomArray, comissionsAmountArray } = body;
