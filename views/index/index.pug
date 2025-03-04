@@ -16,10 +16,52 @@ block content
             div case4 0, 24650515
             div case5 24650415, 24650520
             div case6 0, 900000000000
+        .date-picker
+          .selected-range 
+            span.date-interval-description 
+              include ../icons/calendar.pug
+              span All time
+            span.date-range Feb 1, 2019 - Jan 30, 2023
+            .dropdown-icon
+              include ../icons/chevron.pug
+          .picker-main-wrapper
+            .picker-content-wrapper
+              .left-wrapper
+                .dropdown
+                  ul
+                    li.left-wrapper-each-choice(class='selected') All time
+                      span.center#left-wrapper-selected-check-mark
+                        include ../icons/check.pug
+                    li.left-wrapper-each-choice This week
+                    li.left-wrapper-each-choice Last week
+                    li.left-wrapper-each-choice Last 7 days
+                    li.left-wrapper-each-choice Last 30 days
+                    li.left-wrapper-each-choice Last 90 days
+                    li.left-wrapper-each-choice This year (Jan - Today)
+                    li.left-wrapper-each-choice Last calendar year
+                    li.left-wrapper-each-choice Custom
+              .calendar-wrapper
+                .calendar
+                  div(style='font-size: 10px; margin-bottom: 5px;') Time frame
+                  .date-input
+                    input(type='date' id='periodic-query-bottom-timestamp')
+                    span —
+                    input(type='date' id='periodic-query-top-timestamp')
+                  .days(class='days-header-wrapper')
+                    each day in [ 'M', 'T', 'W', 'T', 'F', 'S', 'S' ]
+                      span.day= day
+                  .days
+                    each date in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+                      span.date(class='center')= date
+            .buttons
+              .cancel Cancel
+              .apply
+                span Apply
+                include ../icons/check.pug
         .query-input-wrapper-header 
           select.general-select-content#query-search-by
-            option(value="block_height") Block Height
-            option(value="timestamp") Timestamp
+            option(value='block_height') Block Height
+            option(value='timestamp') Timestamp
         .query-main-wrapper-input-wrapper
           .each-input-wrapper 
             span Validator operator_address
@@ -30,12 +72,6 @@ block content
           .each-input-wrapper(class='query-block-height-input')
             span Top block_height
             input(type='number' id='periodic-query-top-block-height')
-          .each-input-wrapper(class='query-timestamp-input')
-            span Bottom date
-            input(type='date' id='periodic-query-bottom-timestamp')
-          .each-input-wrapper(class='query-timestamp-input')
-            span Top date
-            input(type='date' id='periodic-query-top-timestamp')
 
         .query-main-wrapper-result-content
           .submit-button#query-submit-button(style='color: var(--color-dark-violet); background-color: var(--color-powder-blue)') Get data

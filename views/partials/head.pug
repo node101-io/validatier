@@ -16,9 +16,11 @@ html(lang='tr')
         if includes.external.js.includes('page')
           script(src=`/js/${page}.js`)
         if includes.external.js.includes('functions')
-          script(src=`/js/functions/httpRequest.js`)
           script(src=`/js/functions/changeInitialsFontFamily.js`)
+          script(src=`/js/functions/handleCalendarEvents.js`)
+          script(src=`/js/functions/httpRequest.js`) 
           script(src=`/js/functions/nativeCurrencyConversions.js`)
+          script(src=`/js/functions/renderValidators.js`)
         script(src='https://kit.fontawesome.com/e47420f551.js' crossorigin='anonymous')
   body
     block content

@@ -6,6 +6,22 @@
   --color-pale-black: #171717;
 }
 
+input {
+  font-family: 'Inter';
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none !important;
+  -webkit-appearance: none !important;
+}
+
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none !important;
+  -webkit-appearance: none !important;
+  pointer-events: none !important;
+}
+
 html {
   margin: 0;
   padding: 0;
@@ -16,6 +32,12 @@ body {
   padding: 0;
   font-family: 'Inter';
   background-color: var(--color-pale-black);
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .each-input-wrapper {

@@ -3,6 +3,8 @@ const GET_PERIODIC_DATA_API_ENDPOINT = 'composite_event_block/get_total_periodic
 
 window.onload = () => {
 
+  handleCalendarEvents();
+  renderValidators();
   changeInitialsFontFamily('Sofia');
 
   const BASE_URL = window.location.href;
@@ -17,35 +19,6 @@ window.onload = () => {
   const bottomTimestamp = document.getElementById('periodic-query-bottom-timestamp');
   const topTimestamp = document.getElementById('periodic-query-top-timestamp');
   const requestResultDisplayContent = document.getElementById('general-single-line-request-result-display-content');
-
-  const blockHeightInputWrappers = document.querySelectorAll('.query-block-height-input');
-  const timestampInputWrappers = document.querySelectorAll('.query-timestamp-input');
-
-  searchBy.addEventListener('change', (event) => { 
-    if (searchBy.value == 'block_height') {
-      timestampInputWrappers.forEach(el => {
-        el.style.opacity = 0;
-        setTimeout(() => { el.style.display = 'none' }, 500);
-      });
-      blockHeightInputWrappers.forEach(el => {
-        setTimeout(() => {
-          el.style.display = 'flex'; 
-          setTimeout(() => {
-            el.style.opacity = 1;
-          }, 0)
-        }, 500);
-      });
-    } else {
-      blockHeightInputWrappers.forEach(el => {
-        el.style.opacity = 0;
-        setTimeout(() => { el.style.display = 'none' }, 500);
-      });
-      timestampInputWrappers.forEach(el => {
-        el.style.display = 'flex';
-        setTimeout(() => { el.style.opacity = 1 }, 500);
-      });  
-    }
-  })
 
   submitButton.addEventListener('click', (event) => {
 
