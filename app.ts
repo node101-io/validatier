@@ -4,7 +4,7 @@ import express, { Express } from 'express';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import path from 'path';
-import rateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 import session from 'express-session';
 
 import compositeEventBlockRouter from './routes/compositeEventBlockRouter.js';
