@@ -7,33 +7,6 @@ block content
         .general-title-description-wrapper
           h3 Node101 | CosmosHub Validator Timeline
           p Node101's journey as a CosmosHub validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.
-          div(style='font-size: 10px; color: rgb(255,255,255,0.5)') 
-            div for demo:
-            div cosmosvaloper103agss48504gkk3la5xcg5kxplaf6ttnuv234h
-            div case1 0, 10
-            div case2 900000000000, 990000000000
-            div case3 24650515, 900000000000
-            div case4 0, 24650515
-            div case5 24650415, 24650520
-            div case6 0, 900000000000
-        table.validators-main-wrapper#validators-main-wrapper
-          tr 
-            td Validators 
-            td Self stake
-            td Withdraw
-            td Ratio 
-            td Commission rate 
-          each validator, index in validators
-            tr.each-validator-wrapper
-              td(style='display: flex; align-items: center; gap: 20px;')
-                .validator-image
-                  .absolute-ranking-number-content(class='center')= index + 1
-                  img(src=`${validator.temporary_image_uri ? validator.temporary_image_uri : '/res/images/default_validator_photo.png'}`)
-                .validator-moniker #{validator.moniker}
-              td.validator-each-numeric-info= (validator['self_stake'] / 1e6).toFixed(2) + ' ATOM'
-              td.validator-each-numeric-info= (validator['withdraw'] / 1e6).toFixed(2) + ' ATOM'
-              td.validator-each-numeric-info= (validator['ratio']).toFixed(2)
-              td.validator-each-numeric-info= (parseFloat(validator.commission_rate).toFixed(2)) * 100 + '%'
         .date-picker
           .selected-range 
             span.date-interval-description 
@@ -76,6 +49,26 @@ block content
               .apply
                 span Apply
                 include ../icons/check.pug
+        table.validators-main-wrapper#validators-main-wrapper
+          tr 
+            td Validators 
+            td Self stake
+            td Withdraw
+            td Ratio 
+            td Commission rate 
+          each validator, index in validators
+            tr.each-validator-wrapper
+              td(style='display: flex; align-items: center; gap: 20px;')
+                .validator-image
+                  .absolute-ranking-number-content(class='center')= index + 1
+                  img(src=`${validator.temporary_image_uri ? validator.temporary_image_uri : '/res/images/default_validator_photo.png'}`)
+                .validator-textual-info-wrapper 
+                  .validator-moniker #{validator.moniker}
+                  .validator-operator-address #{validator.operator_address}
+              td.validator-each-numeric-info= (validator['self_stake'] / 1e6).toFixed(2) + ' ATOM'
+              td.validator-each-numeric-info= (validator['withdraw'] / 1e6).toFixed(2) + ' ATOM'
+              td.validator-each-numeric-info= (validator['ratio']).toFixed(2)
+              td.validator-each-numeric-info= (parseFloat(validator.commission_rate).toFixed(2)) * 100 + '%'
         .query-input-wrapper-header 
           select.general-select-content#query-search-by
             option(value='block_height') Block Height
@@ -90,7 +83,6 @@ block content
           .each-input-wrapper(class='query-block-height-input')
             span Top block_height
             input(type='number' id='periodic-query-top-block-height')
-
         .query-main-wrapper-result-content
           .submit-button#query-submit-button(style='color: var(--color-dark-violet); background-color: var(--color-powder-blue)') Get data
           ul 
