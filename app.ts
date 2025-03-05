@@ -4,6 +4,7 @@ import express, { Express } from 'express';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import path from 'path';
+import rateLimit from 'express-rate-limit';
 import session from 'express-session';
 
 import compositeEventBlockRouter from './routes/compositeEventBlockRouter.js';
@@ -12,7 +13,6 @@ import validatorRouter from './routes/validatorRouter.js';
 
 import { startCronJobs } from './cron/startCronJobs.js';
 import { listenEvents } from './listeners/listenForEvents.js';
-import Validator, { ValidatorInterface } from './models/Validator/Validator.js';
 
 dotenv.config();
 
@@ -24,6 +24,12 @@ const __dirname = path.dirname(__filename);
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
+
+app.use(rateLimit({
+  windowMs: 1000,
+  max: 5,
+  message: 'maximum_request_per_second_reached',
+}));
 
 mongoose
   .connect('mongodb://127.0.0.1:27017/validator-timeline')
