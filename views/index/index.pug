@@ -11,8 +11,11 @@ block content
           .selected-range 
             span.date-interval-description 
               include ../icons/calendar.pug
-              span All time
-            span.date-range Feb 1, 2019 - Jan 30, 2023
+              span#header-selected-range-description All time
+            span.date-range
+              span#header-range-bottom-block Genesis
+              span  - 
+              span#header-range-top-block= new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
             .dropdown-icon
               include ../icons/chevron.pug
           .picker-main-wrapper
@@ -23,13 +26,13 @@ block content
                     li.left-wrapper-each-choice(class='selected') All time
                       span.center#left-wrapper-selected-check-mark
                         include ../icons/check.pug
-                    li.left-wrapper-each-choice This week
-                    li.left-wrapper-each-choice Last week
-                    li.left-wrapper-each-choice Last 7 days
-                    li.left-wrapper-each-choice Last 30 days
-                    li.left-wrapper-each-choice Last 90 days
-                    li.left-wrapper-each-choice This year (Jan - Today)
-                    li.left-wrapper-each-choice Last calendar year
+                    li.left-wrapper-each-choice#this-week This week
+                    li.left-wrapper-each-choice#last-week Last week
+                    li.left-wrapper-each-choice#last-7-days Last 7 days
+                    li.left-wrapper-each-choice#last-30-days Last 30 days
+                    li.left-wrapper-each-choice#last-90-days Last  90 days
+                    li.left-wrapper-each-choice#this-year This year (Jan - Today)
+                    li.left-wrapper-each-choice#last-calendar-year Last calendar year
                     li.left-wrapper-each-choice Custom
               .calendar-wrapper
                 .calendar
@@ -38,12 +41,17 @@ block content
                     input(type='date' id='periodic-query-bottom-timestamp')
                     span —
                     input(type='date' id='periodic-query-top-timestamp')
+                  .date-input-month-year-info-content
+                    div(style='transform: rotateZ(90deg)')#previous-month
+                      include ../icons/chevron_dark.pug
+                    div#current-month-and-year-display
+                    div(style='transform: rotateZ(-90deg)')#next-month
+                      include ../icons/chevron_dark.pug
                   .days(class='days-header-wrapper')
-                    each day in [ 'M', 'T', 'W', 'T', 'F', 'S', 'S' ]
+                    each day in [ 'S', 'M', 'T', 'W', 'T', 'F', 'S' ]
                       span.day= day
-                  .days
-                    each date in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
-                      span.date(class='center')= date
+                  .month-wrapper
+                    .days#month-wrapper    
             .buttons
               .cancel Cancel
               .apply

@@ -3,9 +3,14 @@ const GET_PERIODIC_DATA_API_ENDPOINT = 'composite_event_block/get_total_periodic
 
 window.onload = () => {
 
-  handleCalendarEvents();
+  const currentDate = new Date();
+  let currentYearValue = currentDate.getFullYear();
+  let currentMonthValue = (currentDate.getMonth() + 1);
+
+  handleCalendarEvents(currentYearValue, currentMonthValue);
+
   // renderValidators();
-  changeInitialsFontFamily('Sofia');
+  // changeInitialsFontFamily('Sofia');
 
   const BASE_URL = window.location.href;
   

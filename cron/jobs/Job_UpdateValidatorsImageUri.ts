@@ -5,7 +5,7 @@ import { getKeybasePicture } from "../../models/Validator/functions/getKeybasePi
 export const Job_UpdateValidatorsImageUri = (callback: (err: string | null, success: Boolean) => any) => {
   Validator.find({})
     .then((validators) => {
-      async.timesSeries(
+      async.times(
         validators.length,
         (i, next) => {
           console.log(i);
