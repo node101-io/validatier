@@ -23,6 +23,7 @@ export const Job_UpdateValidatorsImageUri = (callback: (err: string | null, succ
         },
         (err) => {
           if (err) return callback('async_error', false);
+          return callback(null, true);
         }
       );
     })

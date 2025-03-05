@@ -220,15 +220,30 @@ td {
   height: 40px;
   aspect-ratio: 1/1;
   border-radius: 100%;
-  overflow: hidden;
+  position: relative;
 }
 
 .validator-image img {
   width: 100%;
   height: 100%;
+  border-radius: 100%;
 }
 
 .validator-moniker {
   color: var(--color-powder-blue);
   font-size: 20px;
+}
+
+.absolute-ranking-number-content {
+  border-radius: 100%;
+  height: 25px;
+  aspect-ratio: 1/1;
+  position: absolute;
+  font-size: 12px;
+  font-weight: 800;
+  border: 2px solid rgb(54, 53, 58);
+  color: var(--color-dark-violet);
+  background-color: var(--color-powder-blue);
+  left: -15px;
+  top: -15px;
 }

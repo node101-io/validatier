@@ -97,8 +97,8 @@ const validatorSchema = new Schema<ValidatorInterface>({
   pubkey: { 
     type: String, 
     required: true,
-    unique: true,
     trim: true,
+    index: 1,
     validate: {
       validator: function (value: string): boolean {
         const requiredLength = 44;
@@ -109,9 +109,9 @@ const validatorSchema = new Schema<ValidatorInterface>({
   },
   operator_address: { 
     type: String, 
-    required: true,
-    unique: true,
+    required: true, 
     trim: true,
+    index: 1,
     validate: {
       validator: function (value: string): boolean {
         const requiredLength = 52;
@@ -123,8 +123,8 @@ const validatorSchema = new Schema<ValidatorInterface>({
   moniker: { 
     type: String, 
     required: true,
-    unique: true,
     trim: true,
+    index: 1,
     minlength: 1,
     maxlength: MAX_DATABASE_TEXT_FIELD_LENGTH
   },
@@ -158,9 +158,12 @@ const validatorSchema = new Schema<ValidatorInterface>({
   },
   deleted_at: { 
     type: Date, 
-    default: null 
+    index: 1,
+    default: null
   }
 });
+
+validatorSchema.index({ pubkey: 1, operator_address: 1, moniker: 1, deleted_at: 1 }, { unique: true });
 
 
 validatorSchema.statics.saveValidator = function (
@@ -174,11 +177,9 @@ validatorSchema.statics.saveValidator = function (
   if (!isOperatorAddressValid(operator_address) || !isPubkeyValid(pubkey)) return callback('format_error', null);
 
   Validator
-    .findOne(
-      { $or: [ 
-        { operator_address: operator_address, deletedAt: null },
-        { pubkey: pubkey, deletedAt: null }
-      ]
+    .findOne({
+      operator_address: operator_address,
+      deleted_at: null
     })
     .then(oldValidator => { 
       if (!oldValidator) {

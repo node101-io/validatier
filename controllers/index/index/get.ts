@@ -6,7 +6,7 @@ import CompositeEventBlock from '../../../models/CompositeEventBlock/CompositeEv
 const indexGetController = (req: Request, res: Response): void => {
 
   Validator
-    .find({})
+    .find({ deleted_at: null })
     .then((validators) => {
       async.timesSeries(
         validators.length,

@@ -23,11 +23,12 @@ block content
             td Withdraw
             td Ratio 
             td Commission rate 
-          each validator in validators
+          each validator, index in validators
             tr.each-validator-wrapper
               td(style='display: flex; align-items: center; gap: 20px;')
                 .validator-image
-                  img(src=`${validator.temporary_image_uri}`)
+                  .absolute-ranking-number-content(class='center')= index + 1
+                  img(src=`${validator.temporary_image_uri ? validator.temporary_image_uri : '/res/images/default_validator_photo.png'}`)
                 .validator-moniker #{validator.moniker}
               td.validator-each-numeric-info= (validator['self_stake'] / 1e6).toFixed(2) + ' ATOM'
               td.validator-each-numeric-info= (validator['withdraw'] / 1e6).toFixed(2) + ' ATOM'
