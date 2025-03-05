@@ -13,6 +13,7 @@ import validatorRouter from './routes/validatorRouter.js';
 import { startCronJobs } from './cron/startCronJobs.js';
 import { listenEvents } from './listeners/listenForEvents.js';
 import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsImageUri.js';
+import callbackVsThen from './playground/callbackVsThen.js';
 
 dotenv.config();
 
@@ -51,6 +52,8 @@ app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at PORT ${PORT}`);
+
+  callbackVsThen();
 
   // startCronJobs();
   // listenEvents();
