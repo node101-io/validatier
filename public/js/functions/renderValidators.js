@@ -1,4 +1,78 @@
 
+function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
+  if (response.err || !response.success) return;
+  const data = response.data; 
+
+  document.getElementById('validators-main-wrapper').innerHTML = '';
+  renderTableHeader(sort_by, sortOrderMapping[sort_by]);
+
+  for (let i = 0; i < data.length; i++) {
+
+    const validator = data[i];
+
+    const tr = document.createElement('tr');
+    tr.classList.add('each-validator-wrapper');
+    const tdInfo = document.createElement('td');
+    tdInfo.style.display = 'flex';
+    tdInfo.style.alignItems = 'center';
+    tdInfo.style.gap = '20px';
+  
+    const validatorImageDiv = document.createElement('div');
+    validatorImageDiv.classList.add('validator-image');
+
+    const rankingDiv = document.createElement('div');
+    rankingDiv.classList.add('absolute-ranking-number-content', 'center');
+    rankingDiv.textContent = i + 1;
+  
+    const img = document.createElement('img');
+    img.src = validator.temporary_image_uri
+      ? validator.temporary_image_uri
+      : '/res/images/default_validator_photo.png';
+  
+    validatorImageDiv.appendChild(rankingDiv);
+    validatorImageDiv.appendChild(img);
+  
+    const textualInfoWrapper = document.createElement('div');
+    textualInfoWrapper.classList.add('validator-textual-info-wrapper');
+  
+    const monikerDiv = document.createElement('div');
+    monikerDiv.classList.add('validator-moniker');
+    monikerDiv.textContent = validator.moniker;
+  
+    const operatorAddressDiv = document.createElement('div');
+    operatorAddressDiv.classList.add('validator-operator-address');
+    operatorAddressDiv.textContent = validator.operator_address;
+  
+    textualInfoWrapper.appendChild(monikerDiv);
+    textualInfoWrapper.appendChild(operatorAddressDiv);
+  
+    tdInfo.appendChild(validatorImageDiv);
+    tdInfo.appendChild(textualInfoWrapper);
+  
+    const createNumericTd = (value) => {
+      const td = document.createElement('td');
+      td.classList.add('validator-each-numeric-info');
+      td.textContent = value;
+      return td;
+    };
+  
+    const selfStakeTd = createNumericTd((validator.self_stake / 1e6).toFixed(2) + ' ATOM');
+    const withdrawTd = createNumericTd((validator.withdraw / 1e6).toFixed(2) + ' ATOM');
+    const ratioTd = createNumericTd(validator.ratio.toFixed(2));
+    const soldTd = createNumericTd((validator.sold / 1e6).toFixed(2) + ' ATOM');
+  
+    tr.appendChild(tdInfo);
+    tr.appendChild(selfStakeTd);
+    tr.appendChild(withdrawTd);
+    tr.appendChild(ratioTd);
+    tr.appendChild(soldTd);
+  
+    document.getElementById('validators-main-wrapper').appendChild(tr);
+  }
+}
+
+const rankingResponsesCache = {};
+
 function renderValidators() {
 
   const sortOrderMapping = {
@@ -6,7 +80,7 @@ function renderValidators() {
     withdraw: '',
     ratio: '',
     sold: ''
-  }
+  };
 
   document.addEventListener('click', (event) => {
     const isHeaderClickedChecker = event.target.classList.contains('each-table-header-wrapper') || event.target.parentNode.classList.contains('each-table-header-wrapper') || event.target.parentNode.parentNode.classList.contains('each-table-header-wrapper');
@@ -28,8 +102,6 @@ function renderValidators() {
     const GET_VALIDATORS_API_ENDPOINT = 'validator/rank_validators';
     const BASE_URL = window.location.href;
     
-    const validatorsWrapper = document.getElementById('validators-main-wrapper');
-
     document.getElementById('export-sort-by').innerHTML = sort_by;
     document.getElementById('export-order').innerHTML = sortOrderMapping[sort_by];
 
@@ -39,82 +111,21 @@ function renderValidators() {
     const bottomTimestamp = Math.floor(new Date(bottomDate).getTime() / 1000);
     const topTimestamp = Math.floor(new Date(topDate).getTime() / 1000);
 
+    const cacheResponse = rankingResponsesCache[bottomDate + '.' + topTimestamp];
+    if (cacheResponse) {
+      sortOrderMapping[sort_by] == 'desc'
+        ? cacheResponse.data.sort((a, b) => (b[sort_by] || 0) - (a[sort_by] || 0))
+        : cacheResponse.data.sort((a, b) => (a[sort_by] || 0) - (b[sort_by] || 0))
+      return generateValidatorRankingContent(cacheResponse, sort_by, sortOrderMapping)
+    };
+
     serverRequest(
       BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=${sort_by}&order=${sortOrderMapping[sort_by]}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&with_photos=true`,
       'GET',
       {},
       (response) => {
-        
-        if (response.err || !response.success) return;
-        const data = response.data;      
-
-        validatorsWrapper.innerHTML = '';
-        renderTableHeader(sort_by, sortOrderMapping[sort_by]);
-
-        for (let i = 0; i < data.length; i++) {
-
-          const validator = data[i];
-
-          const tr = document.createElement('tr');
-          tr.classList.add('each-validator-wrapper');
-          const tdInfo = document.createElement('td');
-          tdInfo.style.display = 'flex';
-          tdInfo.style.alignItems = 'center';
-          tdInfo.style.gap = '20px';
-        
-          const validatorImageDiv = document.createElement('div');
-          validatorImageDiv.classList.add('validator-image');
-      
-          const rankingDiv = document.createElement('div');
-          rankingDiv.classList.add('absolute-ranking-number-content', 'center');
-          rankingDiv.textContent = i + 1;
-        
-          const img = document.createElement('img');
-          img.src = validator.temporary_image_uri
-            ? validator.temporary_image_uri
-            : '/res/images/default_validator_photo.png';
-        
-          validatorImageDiv.appendChild(rankingDiv);
-          validatorImageDiv.appendChild(img);
-        
-          const textualInfoWrapper = document.createElement('div');
-          textualInfoWrapper.classList.add('validator-textual-info-wrapper');
-        
-          const monikerDiv = document.createElement('div');
-          monikerDiv.classList.add('validator-moniker');
-          monikerDiv.textContent = validator.moniker;
-        
-          const operatorAddressDiv = document.createElement('div');
-          operatorAddressDiv.classList.add('validator-operator-address');
-          operatorAddressDiv.textContent = validator.operator_address;
-        
-          textualInfoWrapper.appendChild(monikerDiv);
-          textualInfoWrapper.appendChild(operatorAddressDiv);
-        
-          tdInfo.appendChild(validatorImageDiv);
-          tdInfo.appendChild(textualInfoWrapper);
-        
-          const createNumericTd = (value) => {
-            const td = document.createElement('td');
-            td.classList.add('validator-each-numeric-info');
-            td.textContent = value;
-            return td;
-          };
-        
-          const selfStakeTd = createNumericTd((validator.self_stake / 1e6).toFixed(2) + ' ATOM');
-          const withdrawTd = createNumericTd((validator.withdraw / 1e6).toFixed(2) + ' ATOM');
-          const ratioTd = createNumericTd(validator.ratio.toFixed(2));
-          const soldTd = createNumericTd((validator.sold / 1e6).toFixed(2) + ' ATOM');
-        
-          tr.appendChild(tdInfo);
-          tr.appendChild(selfStakeTd);
-          tr.appendChild(withdrawTd);
-          tr.appendChild(ratioTd);
-          tr.appendChild(soldTd);
-        
-          validatorsWrapper.appendChild(tr);
-          
-        }
+        generateValidatorRankingContent(response, sort_by, sortOrderMapping);
+        rankingResponsesCache[bottomDate + '.' + topTimestamp] = response;
       }
     )
 
