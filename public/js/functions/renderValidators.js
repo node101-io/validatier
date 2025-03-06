@@ -27,6 +27,9 @@ function renderValidators() {
     
     const validatorsWrapper = document.getElementById('validators-main-wrapper');
 
+    document.getElementById('export-sort-by').innerHTML = sort_by;
+    document.getElementById('export-order').innerHTML = sortOrderMapping[sort_by];
+
     serverRequest(
       BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=${sort_by}&order=${sortOrderMapping[sort_by]}`,
       'GET',

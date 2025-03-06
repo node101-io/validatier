@@ -72,6 +72,9 @@ interface ValidatorModel extends Model<ValidatorInterface> {
   rankValidators: (
     body: {
       sort_by: 'self_stake' | 'withdraw' | 'ratio' | 'sold',
+      search_by: 'block_height' | 'withdraw',
+      bottom_block_height: number,
+      top_block_height: number,
       order: SortOrder
     },
     callback: (

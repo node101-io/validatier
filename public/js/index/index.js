@@ -8,8 +8,13 @@ window.onload = () => {
   let currentMonthValue = (currentDate.getMonth() + 1);
 
   handleCalendarEvents(currentYearValue, currentMonthValue);
-
   renderValidators();
+  handleExportEvents(
+    'export-sort-by', 
+    'export-order',
+    'export-bottom', 
+    'export-top'
+  );
   // changeInitialsFontFamily('Sofia');
 
   const BASE_URL = window.location.href;

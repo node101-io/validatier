@@ -7,7 +7,7 @@ export default (req: Request, res: Response) => {
   const sortOrder = req.query.order as SortOrder;
 
   Validator.rankValidators(
-    { sort_by: sortBy, order: sortOrder },
+    { sort_by: sortBy, order: sortOrder, search_by: 'block_height', bottom_block_height: 0, top_block_height: 1e8 },
     (err, validators) => {
       if (err) return res.json({ err: err, success: false });
       return res.json({ success: true, data: validators });

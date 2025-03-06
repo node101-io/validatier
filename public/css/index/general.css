@@ -62,7 +62,7 @@ body {
   color: #333;
 }
 
-.each-input-wrapper input {
+input {
   width: 100%;
   padding: 8px;
   font-size: 14px;

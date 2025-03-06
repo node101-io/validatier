@@ -65,7 +65,7 @@ function getMonthInfo(year, month) {
 }
 
 function handleCalendarEvents (currentYearValue, currentMonthValue) {
-
+  
   removeAllEventListeners();
 
   const monthWrapper = document.getElementById('month-wrapper');

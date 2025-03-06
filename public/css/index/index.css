@@ -40,7 +40,7 @@ body {
   padding: 5px;
   border-radius: 5px;
   cursor: pointer;
-  background-color: rgb(34, 33, 38);
+  background-color: var(--color-pale-black);
   align-items: center;
   font-size: 12px;
 }
@@ -60,7 +60,7 @@ body {
   backdrop-filter: blur(8px);
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
   color: var(--color-dark-violet);
-  transition: all 0.25s ease-in-out 0.1s;
+  transition: all 0.25s ease 0s;
   transform: perspective(1000px) rotateX(-90deg);
   transform-origin: top;
   opacity: 0;
@@ -288,4 +288,70 @@ td {
   display: flex;
   flex-direction: column;
   gap: 5px;
+}
+
+.table-filters {
+  display: flex;
+  align-items: baseline;
+}
+
+.export-wrapper-header {
+  background-color: var(--color-pale-black);
+  color: var(--color-powder-blue);
+  padding: 15px;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 5px;
+  gap: 20px;
+}
+
+.export-wrapper-content {
+  background-color: var(--color-powder-blue);
+  padding: 10px;
+  font-size: 14px;
+  color: var(--color-dark-violet);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-radius: 5px;
+  transition: all 0.25s ease 0s;
+  transform-origin: top;
+  transform: perspective(8000px) rotateX(-90deg);
+}
+
+.each-export-choice {
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.25s ease 0s;
+  border-radius: 5px;
+}
+
+.each-export-choice:hover {
+  background-color: #f0f0f0;
+}
+
+.export-choice-selected {
+  color: var(--color-powder-blue);
+  background-color: var(--color-dark-violet);
+}
+
+.export-choice-selected:hover {
+  background-color: var(--color-dark-violet) !important;
+}
+
+.export-choice-download-button {
+  padding: 5px;
+  background-color: var(--color-dark-violet);
+  color: var(--color-powder-blue);
+  border-radius: 5px;
+  font-size: 14px;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.export-choice-rename-input {
+  margin-top: 10px;
 }
