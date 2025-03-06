@@ -68,11 +68,11 @@ block content
                 div#export-order desc
                 div#export-bottom 24650450
                 div#export-top 24650540
-              .each-export-choice(range='0' class='export-choice-selected') All time
+              .each-export-choice(range=0 class='export-choice-selected') All time
                 div.center#export-choice-check-indicator
                   include ../icons/check.pug
-              .each-export-choice(range=7) Every 7 days
-              .each-export-choice(range=30) Every 30 days
+              .each-export-choice(range=(7 * 86400)) Every 7 days
+              .each-export-choice(range=(30 * 86400)) Every 30 days
               input.export-choice-rename-input(type='text' style='width: calc(100% - 20px);' placeholder='untitled.csv' id='export-choice-rename-input')
               .export-choice-download-button(class='center')#export-choice-download-button
                 include ../icons/download.pug

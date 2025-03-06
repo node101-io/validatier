@@ -12,8 +12,8 @@ window.onload = () => {
   handleExportEvents(
     'export-sort-by', 
     'export-order',
-    'export-bottom', 
-    'export-top'
+    'periodic-query-bottom-timestamp', 
+    'periodic-query-top-timestamp'
   );
   // changeInitialsFontFamily('Sofia');
 

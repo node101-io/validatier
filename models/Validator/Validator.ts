@@ -72,10 +72,10 @@ interface ValidatorModel extends Model<ValidatorInterface> {
   rankValidators: (
     body: {
       sort_by: 'self_stake' | 'withdraw' | 'ratio' | 'sold',
-      search_by: 'block_height' | 'withdraw',
-      bottom_block_height: number,
-      top_block_height: number,
-      order: SortOrder
+      bottom_timestamp: number,
+      top_timestamp: number,
+      order: SortOrder,
+      with_photos?: string,
     },
     callback: (
       err: string | null,
@@ -280,7 +280,7 @@ validatorSchema.statics.rankValidators = function (
   callback: Parameters<ValidatorModel['rankValidators']>[1],
 ) {
 
-  const { sort_by, order } = body;
+  const { sort_by, order, bottom_timestamp, top_timestamp, with_photos } = body;
 
   const validatorsArray: {
     operator_address: string,
@@ -304,9 +304,9 @@ validatorSchema.statics.rankValidators = function (
           .getTotalPeriodicSelfStakeAndWithdraw(
             {
               operator_address: eachValidator.operator_address,
-              bottomBlockHeight: 0,
-              topBlockHeight: 1e8,
-              searchBy: 'block_height'
+              bottomTimestamp: bottom_timestamp * 1000,
+              topTimestamp: top_timestamp * 1000,
+              searchBy: 'timestamp'
             },
             (err, totalPeriodicSelfStakeAndWithdraw) => {
               if (err) return callback('bad_request', null)
@@ -315,7 +315,7 @@ validatorSchema.statics.rankValidators = function (
               const ratio = (totalPeriodicSelfStakeAndWithdraw?.self_stake ? totalPeriodicSelfStakeAndWithdraw?.self_stake : 0) / (totalPeriodicSelfStakeAndWithdraw?.withdraw ? totalPeriodicSelfStakeAndWithdraw?.withdraw : 1);
               const sold = (totalPeriodicSelfStakeAndWithdraw?.withdraw ? totalPeriodicSelfStakeAndWithdraw?.withdraw : 0) - (totalPeriodicSelfStakeAndWithdraw?.self_stake ? totalPeriodicSelfStakeAndWithdraw?.self_stake : 0);
 
-              validatorsArray.push({
+              const pushObjectData = {
                 operator_address: eachValidator.operator_address,
                 moniker: eachValidator.moniker,
                 temporary_image_uri: eachValidator.temporary_image_uri,
@@ -323,8 +323,10 @@ validatorSchema.statics.rankValidators = function (
                 withdraw: withdraw ? withdraw : 0,
                 ratio: ratio,
                 sold: sold
-              });
+              };
 
+              if (with_photos != 'true') delete pushObjectData.temporary_image_uri;
+              validatorsArray.push(pushObjectData);
               return next()
             }
           )

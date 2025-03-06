@@ -3,7 +3,7 @@ import Validator from '../../../models/Validator/Validator.js';
 
 const indexGetController = (req: Request, res: Response): void => {
 
-  Validator.rankValidators({ sort_by: 'ratio', order: 'desc', search_by: 'block_height', bottom_block_height: 1, top_block_height: 1e8 }, (err, validators) => {
+  Validator.rankValidators({ sort_by: 'ratio', order: 'desc', bottom_timestamp: 1, top_timestamp: 2e9, with_photos: 'true' }, (err, validators) => {
     if (err) return res.json({ success: false, err: 'bad_request' })
     return res.render('index/index', {
       page: 'index/index',

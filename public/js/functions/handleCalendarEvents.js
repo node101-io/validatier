@@ -119,12 +119,20 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
   }
 
   const previousMonthListener = (event) => {
-    currentMonthValue -= 1; 
+    currentMonthValue--;
+    if (currentMonthValue == 0) {
+      currentMonthValue = 12;
+      currentYearValue--;
+    }
     handleCalendarEvents(currentYearValue, currentMonthValue);
   }
 
   const nextMonthListener = (event) => {
-    currentMonthValue += 1; 
+    currentMonthValue++;
+    if (currentMonthValue == 13) {
+      currentMonthValue = 1;
+      currentYearValue++;
+    }
     handleCalendarEvents(currentYearValue, currentMonthValue);
   }
 

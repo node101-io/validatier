@@ -1,7 +1,6 @@
 
 function renderValidators() {
 
-
   const sortOrderMapping = {
     self_stake: '',
     withdraw: '',
@@ -10,16 +9,20 @@ function renderValidators() {
   }
 
   document.addEventListener('click', (event) => {
+    const isHeaderClickedChecker = event.target.classList.contains('each-table-header-wrapper') || event.target.parentNode.classList.contains('each-table-header-wrapper') || event.target.parentNode.parentNode.classList.contains('each-table-header-wrapper');
+    const isApplyClickedChecker = event.target.classList.contains('apply') || event.target.parentNode.classList.contains('apply')
+    if (!isHeaderClickedChecker && !isApplyClickedChecker) return;
+
+    document.querySelector('.picker-main-wrapper').style.transform = 'perspective(1000px) rotateX(-90deg)';
+    document.querySelector('.picker-main-wrapper').style.opacity = 0;
     
-    if (!event.target.classList.contains('each-table-header-wrapper') && !event.target.parentNode.classList.contains('each-table-header-wrapper') && !event.target.parentNode.parentNode.classList.contains('each-table-header-wrapper')) return;
-
     let target = event.target;
-    while (!target.classList.contains('each-table-header-wrapper')) target = target.parentNode;
+    while (isHeaderClickedChecker && !target.classList.contains('each-table-header-wrapper')) target = target.parentNode;
 
-    const sort_by = target.id;
+    const sort_by = target.id ? target.id : 'ratio';
 
     sortOrderMapping[sort_by] == 'desc'
-      ? sortOrderMapping[sort_by] = 'asc'
+      ? target.id ? sortOrderMapping[sort_by] = 'asc' : 'desc'
       : sortOrderMapping[sort_by] = 'desc'
 
     const GET_VALIDATORS_API_ENDPOINT = 'validator/rank_validators';
@@ -30,8 +33,14 @@ function renderValidators() {
     document.getElementById('export-sort-by').innerHTML = sort_by;
     document.getElementById('export-order').innerHTML = sortOrderMapping[sort_by];
 
+    const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
+    const topDate = document.getElementById('periodic-query-top-timestamp').value
+
+    const bottomTimestamp = Math.floor(new Date(bottomDate).getTime() / 1000);
+    const topTimestamp = Math.floor(new Date(topDate).getTime() / 1000);
+
     serverRequest(
-      BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=${sort_by}&order=${sortOrderMapping[sort_by]}`,
+      BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=${sort_by}&order=${sortOrderMapping[sort_by]}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&with_photos=true`,
       'GET',
       {},
       (response) => {
