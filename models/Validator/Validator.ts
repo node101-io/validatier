@@ -1,8 +1,9 @@
 
 import async from 'async';
 
-import mongoose, { Schema, Model, Validator } from 'mongoose';
+import mongoose, { Schema, Model, Validator, SortOrder } from 'mongoose';
 import ValidatorChangeEvent from '../ValidatorChangeEvent/ValidatorChangeEvent.js';
+import CompositeEventBlock from '../CompositeEventBlock/CompositeEventBlock.js';
 
 import { isOperatorAddressValid, isPubkeyValid } from '../../utils/validationFunctions.js';
 
@@ -68,18 +69,22 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       validator: ValidatorInterface | null
     ) => any
   ) => any;
-  getValidatorsByCustomFilter: (
+  rankValidators: (
     body: {
-      minCommissionRate?: string;
-      maxCommissionRate?: string;
-      minBondShares?: string;
-      maxBondShares?: string;
-      minLiquidShares?: string;
-      maxLiquidShares?: string;
+      sort_by: 'self_stake' | 'withdraw' | 'ratio' | 'sold',
+      order: SortOrder
     },
     callback: (
       err: string | null,
-      validators: ValidatorInterface[] | null
+      validators: {
+        operator_address: string,
+        moniker: string,
+        temporary_image_uri: string,
+        self_stake: number,
+        withdraw: number,
+        ratio: number,
+        sold: number
+      }[] | null
     ) => any
   ) => any;
   deleteValidatorsNotAppearingOnApiResponse: (
@@ -267,14 +272,70 @@ validatorSchema.statics.getValidatorByOperatorAddress = function (
     .catch(err => callback(err, null));
 }
 
-validatorSchema.statics.getValidatorsByCustomFilter = function (
-  body: Parameters<ValidatorModel['getValidatorsByCustomFilter']>[0], 
-  callback: Parameters<ValidatorModel['getValidatorsByCustomFilter']>[1],
+validatorSchema.statics.rankValidators = function (
+  body: Parameters<ValidatorModel['rankValidators']>[0], 
+  callback: Parameters<ValidatorModel['rankValidators']>[1],
 ) {
+
+  const { sort_by, order } = body;
+
+  const validatorsArray: {
+    operator_address: string,
+    moniker: string,
+    temporary_image_uri: string,
+    self_stake: number,
+    withdraw: number,
+    ratio: number,
+    sold: number
+  }[] = [];
+
   Validator
-    .find({})
-    .then((validators: ValidatorInterface[]) =>  callback(null, validators))
-    .catch(err => callback('bad_request', null))
+  .find({ deleted_at: null })
+  .then((validators) => {
+    async.timesSeries(
+      validators.length,
+      (i, next) => {
+        const eachValidator: any = validators[i];
+
+        CompositeEventBlock
+          .getTotalPeriodicSelfStakeAndWithdraw(
+            {
+              operator_address: eachValidator.operator_address,
+              bottomBlockHeight: 0,
+              topBlockHeight: 1e8,
+              searchBy: 'block_height'
+            },
+            (err, totalPeriodicSelfStakeAndWithdraw) => {
+              if (err) return callback('bad_request', null)
+              const selfStake = totalPeriodicSelfStakeAndWithdraw?.self_stake;
+              const withdraw = totalPeriodicSelfStakeAndWithdraw?.withdraw;
+              const ratio = (totalPeriodicSelfStakeAndWithdraw?.self_stake ? totalPeriodicSelfStakeAndWithdraw?.self_stake : 0) / (totalPeriodicSelfStakeAndWithdraw?.withdraw ? totalPeriodicSelfStakeAndWithdraw?.withdraw : 1);
+              const sold = (totalPeriodicSelfStakeAndWithdraw?.withdraw ? totalPeriodicSelfStakeAndWithdraw?.withdraw : 0) - (totalPeriodicSelfStakeAndWithdraw?.self_stake ? totalPeriodicSelfStakeAndWithdraw?.self_stake : 0);
+
+              validatorsArray.push({
+                operator_address: eachValidator.operator_address,
+                moniker: eachValidator.moniker,
+                temporary_image_uri: eachValidator.temporary_image_uri,
+                self_stake: selfStake ? selfStake : 0,
+                withdraw: withdraw ? withdraw : 0,
+                ratio: ratio,
+                sold: sold
+              });
+
+              return next()
+            }
+          )
+      }, 
+      (err) => {
+        if (err) return callback('bad_request', null);
+        order == 'desc'
+          ? validatorsArray.sort((a: any, b: any) => (b[sort_by as keyof typeof b] || 0) - (a[sort_by as keyof typeof a] || 0))
+          : validatorsArray.sort((a: any, b: any) => (a[sort_by as keyof typeof a] || 0) - (b[sort_by as keyof typeof b] || 0))
+
+        return callback(null, validatorsArray)
+      }
+    )
+  }).catch(err => callback('bad_request', null));
 }
 
 

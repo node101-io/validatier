@@ -139,3 +139,21 @@ option:hover {
   background-color: var(--color-powder-blue);
 }
 
+
+.triangle-up {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 10px solid var(--color-powder-blue);
+  filter: brightness(0.25);
+}
+
+.triangle-down {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 10px solid var(--color-powder-blue);
+  filter: brightness(0.25);
+}

@@ -1,11 +1,11 @@
 import express, { Router } from 'express';
-import getValidatorsGetController from '../controllers/Validator/getValidators/get.js';
+import rankValidatorsGetController from '../controllers/Validator/rankValidators/get.js';
 
 const router: Router = express.Router();
 
 router.get(
-  '/get_validators', 
-  getValidatorsGetController
+  '/rank_validators', 
+  rankValidatorsGetController
 );
 
 export default router;

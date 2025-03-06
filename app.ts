@@ -27,7 +27,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(rateLimit({
   windowMs: 1000,
-  max: 5,
+  max: 200,
   message: 'maximum_request_per_second_reached',
 }));
 

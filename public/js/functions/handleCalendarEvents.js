@@ -28,9 +28,6 @@ function updateDateInputs () {
 
 function paintBlocksInBetween () {
 
-  console.log(selectedDateBottom)
-  console.log(selectedDateTop)
-
   document.querySelectorAll('.middle-date').forEach(each => each.classList.remove('middle-date'));
   document.querySelectorAll('.selected-date').forEach(each => each.classList.remove('selected-date'));
 
@@ -78,9 +75,7 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
     if (event.target.classList.contains('selected-range') || event.target.parentNode.classList.contains('selected-range') || event.target.parentNode.parentNode.classList.contains('selected-range')) {
       
       let target = event.target;
-      while (!target.classList.contains('selected-range')) {
-        target = target.parentNode;
-      }
+      while (!target.classList.contains('selected-range')) target = target.parentNode;
 
       if (target.nextSibling.style.opacity == 0) {
         target.nextSibling.style.transform = 'perspective(1000px) rotateX(0deg)';
