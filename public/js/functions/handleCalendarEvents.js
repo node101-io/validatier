@@ -1,10 +1,25 @@
 
-const SELECTED_DATE_CLASS_NAME = 'selected-date';
-const SELECTED_BOTTOM_DATE_ID = 'selected-date-bottom';
-const SELECTED_TOP_DATE_ID = 'selected-date-top';
+function checkIfCookieDateIsValid (cookie) {
+  const datesArray = cookie.split('.');
+  if (datesArray.length <= 0) return false;
+  
+  datesArray.forEach(eachDate => {
+    const eachDateSplit = eachDate.split('-');
+    if (parseInt(eachDateSplit[0]) < 0) return false;
+    if (parseInt(eachDateSplit[1]) < 0 || parseInt(eachDateSplit[1]) > 12) return false;
+    if (parseInt(eachDateSplit[2]) < 0 || parseInt(eachDateSplit[2]) > 31) return false;
+  })
 
-let selectedDateBottom = new Date().toISOString().split('T')[0];
-let selectedDateTop = '';
+  return true;
+}
+
+let selectedDateBottom = checkIfCookieDateIsValid(document.cookie)
+  ? document.cookie.split('.')[0]
+  : new Date().toISOString().split('T')[0]
+
+let selectedDateTop = checkIfCookieDateIsValid(document.cookie)
+  ? document.cookie.split('.')[1]
+  : ''
 
 const eventListeners = [];
 
@@ -23,6 +38,68 @@ function updateDateInputs () {
   if (selectedDateTop) {
     document.getElementById('header-range-top-block').innerHTML = new Date(selectedDateTop).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     document.getElementById('periodic-query-top-timestamp').value = selectedDateTop;
+  }
+}
+
+function generateMonthContent (currentYearValue, currentMonthValue) {
+  document.getElementById('month-wrapper').innerHTML = '';
+  document.getElementById('current-month-and-year-display').innerHTML = new Date(currentYearValue, currentMonthValue - 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+
+  const currentMonth = getMonthInfo(currentYearValue, currentMonthValue)
+  for (let i = 0; i < currentMonth.days.length; i++) {
+    const eachDay = currentMonth.days[i];
+    if (i == 0) {
+      let weekCount = 0;
+      const previousMonth = getMonthInfo(currentYearValue, currentMonthValue - 1);
+      while (weekCount < eachDay.dayIndex) {
+        const prevDateToBePushed = previousMonth.days[previousMonth.days.length - (eachDay.dayIndex - weekCount)];
+  
+        const date = document.createElement('div');
+        date.classList.add('date');
+        date.style.color = '#888';
+        date.innerHTML = prevDateToBePushed.date;
+
+        const dayToBeUsedAsDayInTheId = prevDateToBePushed.date.toString().length == 1 ? '0' + (prevDateToBePushed.date).toString() : prevDateToBePushed.date;
+        const monthToBeUsedInTheId = (currentMonthValue - 1).toString().length == 1 ? '0' + (currentMonthValue - 1).toString() : currentMonthValue - 1;
+        
+        date.setAttribute('date', `${currentYearValue}-${monthToBeUsedInTheId}-${dayToBeUsedAsDayInTheId}`);
+  
+        document.getElementById('month-wrapper').appendChild(date);
+        weekCount++;
+      }
+    }
+
+    const date = document.createElement('div');
+    date.classList.add('date');
+    date.innerHTML = eachDay.date;
+
+    const dayToBeUsedAsDayInTheId = eachDay.date.toString().length == 1 ? '0' + (eachDay.date).toString() : eachDay.date;
+    const monthToBeUsedInTheId = (currentMonthValue).toString().length == 1 ? '0' + (currentMonthValue).toString() : currentMonthValue;
+    
+    date.setAttribute('date', `${currentYearValue}-${monthToBeUsedInTheId}-${dayToBeUsedAsDayInTheId}`);
+    
+    document.getElementById('month-wrapper').appendChild(date);
+
+    if (i == currentMonth.days.length - 1) {
+      let weekCount = 0;
+      const nextMonth = getMonthInfo(currentYearValue, currentMonthValue + 1);
+      while (weekCount < (6 - eachDay.dayIndex)) {
+        const nextDateToBePushed = nextMonth.days[weekCount];
+  
+        const date = document.createElement('div');
+        date.classList.add('date');
+        date.style.color = '#888';
+        date.innerHTML = nextDateToBePushed.date;
+        
+        const dayToBeUsedAsDayInTheId = nextDateToBePushed.date.toString().length == 1 ? '0' + (nextDateToBePushed.date).toString() : nextDateToBePushed.date;
+        const monthToBeUsedInTheId = (currentMonthValue + 1).toString().length == 1 ? '0' + (currentMonthValue + 1).toString() : currentMonthValue + 1;
+        
+        date.setAttribute('date', `${currentYearValue}-${monthToBeUsedInTheId}-${dayToBeUsedAsDayInTheId}`);
+  
+        document.getElementById('month-wrapper').appendChild(date);
+        weekCount++;
+      }
+    }
   }
 }
 
@@ -89,17 +166,21 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
         target.children[target.children.length - 1].style.transform = 'rotateZ(0deg)';
       }
 
-    } else if (event.target.classList.contains('left-wrapper-each-choice')) {
+    } else if (event.target.classList.contains('left-wrapper-each-choice') && !event.target.classList.contains('selected')) { 
       event.target.parentNode.childNodes.forEach(eachLeftWrapperChoice => {
         eachLeftWrapperChoice.classList.remove('selected');
       })
       event.target.classList.add('selected');
       document.getElementById('header-selected-range-description').innerHTML = event.target.innerHTML;
-      event.target.appendChild(document.getElementById('left-wrapper-selected-check-mark'));
+
+      const leftWrapperSelectedCheckMark = document.getElementById('left-wrapper-selected-check-mark');
+      document.getElementById('left-wrapper-selected-check-mark').remove();
+      event.target.appendChild(leftWrapperSelectedCheckMark);
 
       selectedDateBottom = getDateRange(new Date().toISOString().split('T')[0])[event.target.id].bottom;
       selectedDateTop = getDateRange(new Date().toISOString().split('T')[0])[event.target.id].top;
 
+      generateMonthContent(new Date().getFullYear(), new Date().getMonth() + 1);
       paintBlocksInBetween();
       updateDateInputs();
     } else if (event.target.classList.contains('date')) {
@@ -116,6 +197,27 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
       paintBlocksInBetween();
       updateDateInputs();
     }
+  }
+
+  const changeEventListener = (event) => {
+    
+    if (!event.target.classList.contains('each-date-input')) return;
+
+    if (event.target.id == 'periodic-query-bottom-timestamp') {
+      selectedDateBottom = event.target.value;
+      if (event.target.value > document.getElementById('periodic-query-top-timestamp').value) {
+        selectedDateTop = '';
+        document.getElementById('periodic-query-top-timestamp').value = '';
+      }
+    }
+    else if (event.target.id == 'periodic-query-top-timestamp') {
+      if (event.target.value < document.getElementById('periodic-query-bottom-timestamp').value) {
+        document.getElementById('periodic-query-top-timestamp').value = '';
+        selectedDateTop = '';
+        selectedDateBottom = event.target.value;
+      } else selectedDateTop = event.target.value;
+    }
+    paintBlocksInBetween();
   }
 
   const previousMonthListener = (event) => {
@@ -136,68 +238,12 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
     handleCalendarEvents(currentYearValue, currentMonthValue);
   }
 
-  document.getElementById('current-month-and-year-display').innerHTML = new Date(currentYearValue, currentMonthValue - 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
-
-  const currentMonth = getMonthInfo(currentYearValue, currentMonthValue)
-  for (let i = 0; i < currentMonth.days.length; i++) {
-    const eachDay = currentMonth.days[i];
-    if (i == 0) {
-      let weekCount = 0;
-      const previousMonth = getMonthInfo(currentYearValue, currentMonthValue - 1);
-      while (weekCount < eachDay.dayIndex) {
-        const prevDateToBePushed = previousMonth.days[previousMonth.days.length - (eachDay.dayIndex - weekCount)];
-  
-        const date = document.createElement('div');
-        date.classList.add('date');
-        date.style.color = '#888';
-        date.innerHTML = prevDateToBePushed.date;
-
-        const dayToBeUsedAsDayInTheId = prevDateToBePushed.date.toString().length == 1 ? '0' + (prevDateToBePushed.date).toString() : prevDateToBePushed.date;
-        const monthToBeUsedInTheId = (currentMonthValue - 1).toString().length == 1 ? '0' + (currentMonthValue - 1).toString() : currentMonthValue - 1;
-        
-        date.setAttribute('date', `${currentYearValue}-${monthToBeUsedInTheId}-${dayToBeUsedAsDayInTheId}`);
-  
-        monthWrapper.appendChild(date);
-        weekCount++;
-      }
-    }
-
-    const date = document.createElement('div');
-    date.classList.add('date');
-    date.innerHTML = eachDay.date;
-
-    const dayToBeUsedAsDayInTheId = eachDay.date.toString().length == 1 ? '0' + (eachDay.date).toString() : eachDay.date;
-    const monthToBeUsedInTheId = (currentMonthValue).toString().length == 1 ? '0' + (currentMonthValue).toString() : currentMonthValue;
-    
-    date.setAttribute('date', `${currentYearValue}-${monthToBeUsedInTheId}-${dayToBeUsedAsDayInTheId}`);
-    
-    monthWrapper.appendChild(date);
-
-    if (i == currentMonth.days.length - 1) {
-      let weekCount = 0;
-      const nextMonth = getMonthInfo(currentYearValue, currentMonthValue + 1);
-      while (weekCount < (6 - eachDay.dayIndex)) {
-        const nextDateToBePushed = nextMonth.days[weekCount];
-  
-        const date = document.createElement('div');
-        date.classList.add('date');
-        date.style.color = '#888';
-        date.innerHTML = nextDateToBePushed.date;
-        
-        const dayToBeUsedAsDayInTheId = nextDateToBePushed.date.toString().length == 1 ? '0' + (nextDateToBePushed.date).toString() : nextDateToBePushed.date;
-        const monthToBeUsedInTheId = (currentMonthValue + 1).toString().length == 1 ? '0' + (currentMonthValue + 1).toString() : currentMonthValue + 1;
-        
-        date.setAttribute('date', `${currentYearValue}-${monthToBeUsedInTheId}-${dayToBeUsedAsDayInTheId}`);
-  
-        monthWrapper.appendChild(date);
-        weekCount++;
-      }
-    }
-  }
-
+  generateMonthContent(currentYearValue, currentMonthValue);
   paintBlocksInBetween();
   updateDateInputs();
 
+  document.addEventListener('focusout', changeEventListener);
+  eventListeners.push({ element: document, event: 'focusout', listener: changeEventListener })
 
   document.getElementById('previous-month').addEventListener('click', previousMonthListener);
   eventListeners.push({ element: document.getElementById('previous-month'), event: 'click', listener: previousMonthListener });

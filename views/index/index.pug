@@ -5,8 +5,8 @@ block content
     .inner-main-wrapper
       .query-main-wrapper
         .general-title-description-wrapper
-          h3 Node101 | CosmosHub Validator Timeline
-          p Node101's journey as a CosmosHub validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.
+          h3 node101 | CosmosHub Validator Timeline
+          p node101's journey as a CosmosHub validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.
         .table-filters
           .date-picker
             .selected-range 
@@ -25,7 +25,7 @@ block content
                   .dropdown
                     ul
                       li.left-wrapper-each-choice(class='selected') All time
-                        span.center#left-wrapper-selected-check-mark
+                        div.center#left-wrapper-selected-check-mark
                           include ../icons/check.pug
                       li.left-wrapper-each-choice#this-week This week
                       li.left-wrapper-each-choice#last-week Last week
@@ -39,9 +39,9 @@ block content
                   .calendar
                     div(style='font-size: 10px; margin-bottom: 5px;') Time frame
                     .date-input
-                      input(type='date' id='periodic-query-bottom-timestamp')
+                      input.each-date-input(type='date' id='periodic-query-bottom-timestamp')
                       span —
-                      input(type='date' id='periodic-query-top-timestamp')
+                      input.each-date-input(type='date' id='periodic-query-top-timestamp')
                     .date-input-month-year-info-content
                       div(style='transform: rotateZ(90deg)')#previous-month
                         include ../icons/chevron_dark.pug

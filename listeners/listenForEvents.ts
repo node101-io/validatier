@@ -6,7 +6,7 @@ import CompositeEventBlock from '../models/CompositeEventBlock/CompositeEventBlo
 import StakeRecordEvent from '../models/StakeRecord/StakeRecord.js';
 import WithdrawRecordEvent from '../models/WithdrawRecord/WithdrawRecord.js';
 
-import { convertOperationAddressToBech32 } from '../utils/convertOperationAddressToBech32.js';
+import { convertOperatorAddressToBech32 } from '../utils/convertOperatorAddressToBech32.js';
 import { getOnlyNativeTokenValueFromCommissionOrRewardEvent } from './functions/getOnlyNativeTokenValueFromCommissionOrRewardEvent.js';
 import { getSpecificAttributeOfAnEventFromTxEventsArray } from '../utils/getSpecificAttributeOfAnEventFromTxEventsArray.js';
 
@@ -71,7 +71,7 @@ export const listenEvents = () => {
 
           if (!validatorAddress || !delegatorAddress || !LISTENING_EVENTS.includes(messageType)) return next();
 
-          convertOperationAddressToBech32(validatorAddress, (err, bech32ValidatorAddress) => {
+          convertOperatorAddressToBech32(validatorAddress, (err, bech32ValidatorAddress) => {
             if (err) return console.log(err);
 
             if (messageType == '/cosmos.staking.v1beta1.MsgDelegate' && delegatorAddress == bech32ValidatorAddress) {

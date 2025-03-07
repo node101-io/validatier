@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-import { convertOperationAddressToBech32 } from '../../utils/convertOperationAddressToBech32.js';
+import { convertOperatorAddressToBech32 } from '../../utils/convertOperatorAddressToBech32.js';
 import { GeneralRewardObjectInterface } from './getValidatorUnclaimedRewardsAndComission.js';
 import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
 
@@ -18,7 +18,7 @@ export const getValidatorSpendableBalance = function (operator_address: string, 
 
   if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
 
-  convertOperationAddressToBech32(operator_address, (err, validatorBech32Address) => {
+  convertOperatorAddressToBech32(operator_address, (err, validatorBech32Address) => {
     if (err) return callback('bad_request', null);
     axios
       .get(`${REST_API_BASE_URL}/${REST_API_ENDPOINT}/${validatorBech32Address}`)

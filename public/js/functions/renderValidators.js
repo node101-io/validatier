@@ -108,6 +108,8 @@ function renderValidators() {
     const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
     const topDate = document.getElementById('periodic-query-top-timestamp').value
 
+    if (isApplyClickedChecker) document.cookie = `${bottomDate}.${topDate}`;
+
     const bottomTimestamp = Math.floor(new Date(bottomDate).getTime() / 1000);
     const topTimestamp = Math.floor(new Date(topDate).getTime() / 1000);
 
@@ -128,6 +130,5 @@ function renderValidators() {
         rankingResponsesCache[bottomDate + '.' + topTimestamp] = response;
       }
     )
-
   })
 }

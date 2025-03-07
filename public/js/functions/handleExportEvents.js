@@ -17,10 +17,8 @@ function handleExportEvents (sort_by, order, bottom_timestamp, top_timestamp) {
       document.querySelectorAll('.each-export-choice').forEach(each => each.classList.remove('export-choice-selected'));
       event.target.classList.add('export-choice-selected');
       selectedRangeValue = event.target.getAttribute('range');
-      event.target.appendChild(document.getElementById('export-choice-check-indicator'))
+      event.target.appendChild(document.getElementById('export-choice-check-indicator'));
     } else if (event.target.id == 'export-choice-download-button' || event.target.parentNode.id == 'export-choice-download-button') {
-      
-
 
       const bottomDate = document.getElementById(bottom_timestamp).value;
       const topDate = document.getElementById(top_timestamp).value
