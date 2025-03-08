@@ -42,7 +42,6 @@ window.onload = () => {
       return requestResultDisplayContent.innerHTML = 'Warning! Please provide input in the correct format.';
     };
 
-
     const timestampBeforeRequest = Date.now();
 
     serverRequest(

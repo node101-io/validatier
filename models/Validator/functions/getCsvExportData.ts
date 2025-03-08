@@ -1,9 +1,17 @@
-function downloadCSV(rankings, filename = "data.csv") {
 
-  let csvString = '';
+export const getCsvExportData = (
+  rankings: any,
+  callback: (
+    err: string | null,
+    csvExportData: any
+  ) => any
+) => {
 
-  for (let i = 0; i < rankings.length; i++) {
-    const eachRanking = rankings[i];
+  for (const key in rankings) {
+    if (!Object.prototype.hasOwnProperty.call(rankings, key)) continue;
+
+    let csvString = '';
+    const eachRanking = rankings[key];
 
     csvString += 'operator_address,moniker,self_stake,withdraw,ratio,sold\n';
 
@@ -12,17 +20,8 @@ function downloadCSV(rankings, filename = "data.csv") {
       const safeValidatorMoniker = (eachValidator.moniker.replace(',', '')).replace('"', '');
       csvString += `${eachValidator.operator_address},${safeValidatorMoniker},${eachValidator.self_stake},${eachValidator.withdraw},${eachValidator.ratio},${eachValidator.sold} \n`
     }
-    csvString += ', , , , , \n , , , , , \n'
+
+    rankings[key] = csvString;
   }
-
-  const blob = new Blob([csvString], { type: "text/csv" });
-  
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-
-  document.body.appendChild(a);
-  a.click();
-  
-  document.body.removeChild(a);
+  callback(null, rankings);
 }

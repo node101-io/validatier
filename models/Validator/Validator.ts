@@ -6,6 +6,8 @@ import ValidatorChangeEvent from '../ValidatorChangeEvent/ValidatorChangeEvent.j
 import CompositeEventBlock from '../CompositeEventBlock/CompositeEventBlock.js';
 
 import { isOperatorAddressValid, isPubkeyValid } from '../../utils/validationFunctions.js';
+import { getCsvExportData } from './functions/getCsvExportData.js';
+import { formatTimestamp } from '../../utils/formatTimestamp.js';
 
 const MAX_DATABASE_TEXT_FIELD_LENGTH = 1e4;
 
@@ -97,6 +99,19 @@ interface ValidatorModel extends Model<ValidatorInterface> {
     callback: (
       err: string | null, 
       validatorsMarkedAsDeleted: string[] | Boolean | null
+    ) => any
+  ) => any;
+  exportCsv: (
+    body: {
+      sort_by: 'self_stake' | 'withdraw' | 'ratio' | 'sold';
+      order: SortOrder;
+      bottom_timestamp?: number | null;
+      top_timestamp?: number | null;
+      range?: number;
+    },
+    callback: (
+      err: string | null,
+      csvDataMapping: any | null
     ) => any
   ) => any
 }
@@ -373,6 +388,47 @@ validatorSchema.statics.deleteValidatorsNotAppearingOnApiResponse = function (
       )
     })
     .catch(err => callback(err, null))
+}
+
+
+validatorSchema.statics.exportCsv = function (
+  body: Parameters<ValidatorModel['exportCsv']>[0], 
+  callback: Parameters<ValidatorModel['exportCsv']>[1]
+) {
+  const { sort_by, order, bottom_timestamp, top_timestamp, range } = body;
+
+  let bottomTimestamp = bottom_timestamp ? bottom_timestamp : 0;
+  const topTimestamp = top_timestamp ? top_timestamp : 2e9;
+  const timestampRange = range ? range : 0;
+
+  const csvDataMapping: any = {};
+
+  async.whilst(
+    function test(cb) { cb(null, bottomTimestamp < topTimestamp); },
+    function iter(next) {
+      Validator.rankValidators({
+        sort_by: sort_by,
+        order: order,
+        bottom_timestamp: bottom_timestamp ? bottom_timestamp : 0,
+        top_timestamp: top_timestamp ? top_timestamp : 2e9,
+        with_photos: 'false'
+      }, (err, validators) => {
+
+        bottomTimestamp += timestampRange;
+
+        if (err || !validators) return next();
+        csvDataMapping[`validator-ranking-${formatTimestamp(bottomTimestamp)}_${formatTimestamp(bottomTimestamp + timestampRange)}.csv`] = validators;
+        return next();
+      })
+    },
+    function (err) {
+      if (err) return callback('async_error', null);
+      getCsvExportData(csvDataMapping, (err, csvExportData) => {
+        if (err) return callback('bad_request', null);
+        return callback(null, csvExportData);
+      })
+    }
+  )
 }
 
 

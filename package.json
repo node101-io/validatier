@@ -12,6 +12,7 @@
   "author": "Dogu Boran Senturk",
   "license": "ISC",
   "dependencies": {
+    "adm-zip": "^0.5.16",
     "async": "^3.2.6",
     "axios": "^1.7.9",
     "bech32": "^2.0.0",
@@ -29,6 +30,7 @@
     "ws": "^8.18.1"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.5.7",
     "@types/async": "^3.2.24",
     "@types/body-parser": "^1.19.5",
     "@types/express": "^5.0.0",

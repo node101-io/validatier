@@ -20,65 +20,25 @@ function handleExportEvents (sort_by, order, bottom_timestamp, top_timestamp) {
       event.target.appendChild(document.getElementById('export-choice-check-indicator'));
     } else if (event.target.id == 'export-choice-download-button' || event.target.parentNode.id == 'export-choice-download-button') {
 
+
+      const BASE_URL = window.location.href + 'validator';
+      const EXPORT_API_ENDPOINT = '/export_csv';
+
       const bottomDate = document.getElementById(bottom_timestamp).value;
       const topDate = document.getElementById(top_timestamp).value
 
       const bottomTimestamp = Math.floor(new Date(bottomDate).getTime() / 1000);
-      const topTimestamp = Math.floor(new Date(topDate).getTime() / 1000);   
+      const topTimestamp = Math.floor(new Date(topDate).getTime() / 1000);
+      const sortBy = document.getElementById(sort_by).innerHTML;
+      const sortOrder = document.getElementById(order).innerHTML;
+      const range = parseInt(selectedRangeValue);
 
-      getExportData(
-        'timestamp', 
-        document.getElementById(sort_by).innerHTML, 
-        document.getElementById(order).innerHTML, 
-        bottomTimestamp,
-        topTimestamp,
-        parseInt(selectedRangeValue)
-      )
-      .then((dataToBeExported) => {
-        const filename = document.getElementById('export-choice-rename-input').value;
-        downloadCSV(dataToBeExported, filename);
-      })
-      .catch(err => console.log(err))
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.href = BASE_URL + EXPORT_API_ENDPOINT + `?sort_by=${sortBy}&order=${sortOrder}&range=${range}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}`;
+      a.target = '_blank';
+      a.click();
     }
   })
-}
-
-async function getExportData(search_by, sort_by, order, bottom_timestamp, top_timestamp, range) {
-  return new Promise((resolve, reject) => {
-    const GET_VALIDATORS_API_ENDPOINT = 'validator/rank_validators';
-    const BASE_URL = window.location.href;
-    const dataToBeExported = []
-
-    let promises = [];
-    if (range <= 0) range = top_timestamp - bottom_timestamp;
-
-    while (bottom_timestamp < top_timestamp) {
-      
-      const eachBottomTimestamp = bottom_timestamp;
-      const eachTopTimestamp = bottom_timestamp + range;
-      bottom_timestamp = eachTopTimestamp;
-
-      const requestPromise = new Promise((resolveRequest, rejectRequest) => {
-        serverRequest(
-          BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=${sort_by}&order=${order}&bottom_timestamp=${eachBottomTimestamp}&top_timestamp=${eachTopTimestamp}&with_photos=false`,
-          'GET',
-          {},
-          (response) => {
-            if (response.err || !response.success) {
-              rejectRequest(response.err);
-              return;
-            }
-            dataToBeExported.push(response.data);
-            resolveRequest();
-          }
-        );
-      });
-
-      promises.push(requestPromise);
-    }
-
-    Promise.all(promises)
-      .then(() => resolve(dataToBeExported))
-      .catch((error) => reject(error));
-  });
 }
