@@ -106,10 +106,11 @@ function generateMonthContent (currentYearValue, currentMonthValue) {
 function paintBlocksInBetween () {
 
   document.querySelectorAll('.middle-date').forEach(each => each.classList.remove('middle-date'));
-  document.querySelectorAll('.selected-date').forEach(each => each.classList.remove('selected-date'));
+  document.querySelectorAll('.selected-date-bottom').forEach(each => each.classList.remove('selected-date-bottom'));
+  document.querySelectorAll('.selected-date-top').forEach(each => each.classList.remove('selected-date-top'));
 
-  if (document.querySelector(`div[date="${selectedDateBottom}"]`)) document.querySelector(`div[date="${selectedDateBottom}"]`).classList.add('selected-date');
-  if (document.querySelector(`div[date="${selectedDateTop}"]`)) document.querySelector(`div[date="${selectedDateTop}"]`).classList.add('selected-date');
+  if (document.querySelector(`div[date="${selectedDateBottom}"]`)) document.querySelector(`div[date="${selectedDateBottom}"]`).classList.add('selected-date-bottom');
+  if (document.querySelector(`div[date="${selectedDateTop}"]`)) document.querySelector(`div[date="${selectedDateTop}"]`).classList.add('selected-date-top');
 
   const allDateElements = document.querySelectorAll('.date');
   for (let i = 0; i < allDateElements.length; i++) {
@@ -158,12 +159,12 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
         target.nextSibling.style.transform = 'perspective(1000px) rotateX(0deg)';
         target.nextSibling.style.opacity = 1;
   
-        target.children[target.children.length - 1].style.transform = 'rotateZ(180deg) translateY(5px)';
+        target.children[target.children.length - 1].style.transform = 'rotateX(180deg) translateY(5px)';
       } else {
         target.nextSibling.style.transform = 'perspective(1000px) rotateX(-90deg)';
         target.nextSibling.style.opacity = 0;
   
-        target.children[target.children.length - 1].style.transform = 'rotateZ(0deg)';
+        target.children[target.children.length - 1].style.transform = 'rotateX(0deg)';
       }
 
     } else if (event.target.classList.contains('left-wrapper-each-choice') && !event.target.classList.contains('selected')) { 
@@ -172,10 +173,6 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
       })
       event.target.classList.add('selected');
       document.getElementById('header-selected-range-description').innerHTML = event.target.innerHTML;
-
-      const leftWrapperSelectedCheckMark = document.getElementById('left-wrapper-selected-check-mark');
-      document.getElementById('left-wrapper-selected-check-mark').remove();
-      event.target.appendChild(leftWrapperSelectedCheckMark);
 
       selectedDateBottom = getDateRange(new Date().toISOString().split('T')[0])[event.target.id].bottom;
       selectedDateTop = getDateRange(new Date().toISOString().split('T')[0])[event.target.id].top;

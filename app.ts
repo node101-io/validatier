@@ -14,6 +14,7 @@ import validatorRouter from './routes/validatorRouter.js';
 import { startCronJobs } from './cron/startCronJobs.js';
 import { listenEvents } from './listeners/listenForEvents.js';
 import Validator from './models/Validator/Validator.js';
+import { getArrayOfChainIdentifiers } from './utils/getArrayOfChainIdentifiers.js';
 
 dotenv.config();
 
@@ -58,8 +59,6 @@ app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at PORT ${PORT}`);
-
-  // startCronJobs();
-  // listenEvents();
+  // getArrayOfChainIdentifiers();
 });
 

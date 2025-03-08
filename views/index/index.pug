@@ -2,12 +2,38 @@ extends ../partials/head
 block content 
   .all-main-wrapper 
     .header-main-wrapper 
+      .header-banner-wrapper(style='gap: 10px; display: flex; align-items: center;')
+        .banner-logo-wrapper(class='center' style='height: 100%')
+          img(src='/res/images/logo.svg', alt='node101' class='center')
+        .banner-title-content(style='font-size: 24px; font-weight: 700') VALIDATOR LIST
+      .header-network-switch-wrapper
+        .network-switch-header#network-switch-header
+          .network-switch-network-image-wrapper 
+            img#current-network-img(src="https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/celestia/chain.png")
+          .network-switch-network-info-wrapper 
+            .network-switch-network-title#current-network-name Celestia
+            .network-switch-network-chain-id#current-network-chain-id TIA
+          .network-switch-drowdown-toggle
+            include ../icons/chevron.pug
+        .network-switch-dropdown#network-switch-dropdown
     .inner-main-wrapper
+      .general-title-description-wrapper
+        h3 node101 | CosmosHub Validator Timeline
+        p node101's journey as a CosmosHub validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.
       .query-main-wrapper
-        .general-title-description-wrapper
-          h3 node101 | CosmosHub Validator Timeline
-          p node101's journey as a CosmosHub validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.
         .table-filters
+          .validator-filter-input-wrapper(style='margin-right: auto')
+            .validator-filter-input-content-wrapper 
+              .validator-search-icon
+                include ../icons/search.svg
+              input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search name / operator address')
+              .validator-dropdown-icon#validator-dropdown-icon
+                include ../icons/chevron.pug
+            .validator-filter-input-result-wrapper#validator-filter-input-result-wrapper
+              .center(style='gap: 10px; height: 100%;')#validator-filter-result-pre-input-animation-wrapper
+                .each-pre-input-animation-ball
+                .each-pre-input-animation-ball
+                .each-pre-input-animation-ball
           .date-picker
             .selected-range 
               span.date-interval-description 
@@ -17,16 +43,14 @@ block content
                 span#header-range-bottom-block Genesis
                 span  - 
                 span#header-range-top-block= new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-              .dropdown-icon
+              .dropdown-icon(style='margin-bottom: -6px;')
                 include ../icons/chevron.pug
             .picker-main-wrapper
               .picker-content-wrapper
                 .left-wrapper
                   .dropdown
                     ul
-                      li.left-wrapper-each-choice(class='selected') All time
-                        div.center#left-wrapper-selected-check-mark
-                          include ../icons/check.pug
+                      li.left-wrapper-each-choice(class='selected')#all-time All time
                       li.left-wrapper-each-choice#this-week This week
                       li.left-wrapper-each-choice#last-week Last week
                       li.left-wrapper-each-choice#last-7-days Last 7 days
@@ -36,31 +60,30 @@ block content
                       li.left-wrapper-each-choice#last-calendar-year Last calendar year
                       li.left-wrapper-each-choice Custom
                 .calendar-wrapper
-                  .calendar
-                    div(style='font-size: 10px; margin-bottom: 5px;') Time frame
-                    .date-input
+                  .calendar 
+                    .date-input(style='display: none')
                       input.each-date-input(type='date' id='periodic-query-bottom-timestamp')
                       span —
                       input.each-date-input(type='date' id='periodic-query-top-timestamp')
                     .date-input-month-year-info-content
-                      div(style='transform: rotateZ(90deg)')#previous-month
+                      div#current-month-and-year-display(style='font-size: 20px; font-weight: 600; margin-right: auto;')
+                      div(style='transform: rotateZ(90deg); margin-right: 20px;')#previous-month
                         include ../icons/chevron_dark.pug
-                      div#current-month-and-year-display
                       div(style='transform: rotateZ(-90deg)')#next-month
                         include ../icons/chevron_dark.pug
                     .days(class='days-header-wrapper')
-                      each day in [ 'S', 'M', 'T', 'W', 'T', 'F', 'S' ]
+                      each day in [ 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa' ]
                         span.day= day
                     .month-wrapper
-                      .days#month-wrapper    
+                      .days#month-wrapper
               .buttons
-                .cancel Cancel
+                .reset Cancel
                 .apply
                   span Apply
                   include ../icons/check.pug
           .export-main-wrapper 
             .export-wrapper-header(class='center' isOpen='false')#export-wrapper-toggle
-              include ../icons/export.pug
+              include ../icons/export.csv
               span Export CSV
             .export-wrapper-content
               div(style='display: none')
@@ -69,11 +92,10 @@ block content
                 div#export-bottom 24650450
                 div#export-top 24650540
               .each-export-choice(range=0 class='export-choice-selected') All time
-                div.center#export-choice-check-indicator
-                  include ../icons/check.pug
               .each-export-choice(range=(7 * 86400)) Every 7 days
               .each-export-choice(range=(30 * 86400)) Every 30 days
-              input.export-choice-rename-input(type='text' style='width: calc(100% - 20px);' placeholder='untitled.csv' id='export-choice-rename-input')
+              .each-export-choice(range=(90 * 86400)) Every 90 days
+              .each-export-choice(range=(365 * 86400)) Every year
               .export-choice-download-button(class='center')#export-choice-download-button
                 include ../icons/download.pug
                 span Download
@@ -82,24 +104,32 @@ block content
             const headers_array = [
               {name: 'Self stake', id: 'self_stake'}, 
               {name: 'Withdraw', id: 'withdraw'}, 
-              {name: 'Ratio', id: 'ratio'}, 
-              {name: 'Sold', id: 'sold'}, 
+              {name: 'Ratio', id: 'ratio', popup_text: 'Self stake / Withdraw'}, 
+              {name: 'Sold', id: 'sold', popup_text: 'Withdraw - Self stake'}, 
             ]
           tr
-            td Validators
+            td.each-table-header-title Validators
             each header in headers_array
               td
+                .each-table-header-wrapper-popup-content
                 .each-table-header-wrapper(id=`${header.id}`)
-                  .each-table-header-title= header.name
+                  .each-table-header-title
+                    div= header.name
+                    if header.popup_text
+                      .each-table-popup-wrapper
+                        .each-table-popup-info-content(class='center')= header.popup_text
+                          .each-table-popup-info-arrow
+                        .each-tooltip-info-hover(style='margin-bottom: -2px')
+                          img(src='/res/images/info.svg')
                   .each-table-header-sort-indicators 
                     .triangle-up
                     .triangle-down
           each validator, index in validators
-            tr.each-validator-wrapper
-              td(style='display: flex; align-items: center; gap: 20px;')
+            tr.each-validator-wrapper(id=`${validator.operator_address}`)
+              td(style='display: flex; align-items: center; gap: 18px;')
                 .validator-image
-                  .absolute-ranking-number-content(class='center')= index + 1
-                  img(src=`${validator.temporary_image_uri ? validator.temporary_image_uri : '/res/images/default_validator_photo.png'}`)
+                  .ranking-number-content(class='center')= index + 1
+                  img.validator-image-content(src=`${validator.temporary_image_uri ? validator.temporary_image_uri : '/res/images/default_validator_photo.png'}`)
                 .validator-textual-info-wrapper 
                   .validator-moniker #{validator.moniker}
                   .validator-operator-address #{validator.operator_address}
@@ -107,29 +137,14 @@ block content
               td.validator-each-numeric-info= (validator['withdraw'] / 1e6).toFixed(2) + ' ATOM'
               td.validator-each-numeric-info= (validator['ratio']).toFixed(2)
               td.validator-each-numeric-info= (validator['sold'] / 1e6).toFixed(2) + ' ATOM'
-        .query-input-wrapper-header 
-          select.general-select-content#query-search-by
-            option(value='block_height') Block Height
-            option(value='timestamp') Timestamp
-        .query-main-wrapper-input-wrapper
-          .each-input-wrapper 
-            span Validator operator_address
-            input(type='text' id='periodic-query-operator-address' placeholder='cosmosvaloper1...')
-          .each-input-wrapper(class='query-block-height-input')
-            span Bottom block_height
-            input(type='number' id='periodic-query-bottom-block-height')
-          .each-input-wrapper(class='query-block-height-input')
-            span Top block_height
-            input(type='number' id='periodic-query-top-block-height')
-        .query-main-wrapper-result-content
-          .submit-button#query-submit-button(style='color: var(--color-dark-violet); background-color: var(--color-powder-blue)') Get data
-          ul 
-            li
-              span Total self_stake: 
-              span#query-total-self-stake-result-content 0
-              span  ATOM
-            li
-              span Total withdraw: 
-              span#query-total-withdraw-result-content 0
-              span  ATOM
-          .general-single-line-request-result-display-content#general-single-line-request-result-display-content
+    .footer-main-wrapper(class='center')
+      .footer-main-title Connect us 
+      .footer-socials-wrapper(class='center')
+        .each-social-icon 
+          include ../icons/telegram.svg
+        .each-social-icon 
+          include ../icons/x.svg
+        .each-social-icon 
+          include ../icons/github.svg
+        .each-social-icon 
+          include ../icons/linkedin.svg

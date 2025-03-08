@@ -21,7 +21,7 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     validatorImageDiv.classList.add('validator-image');
 
     const rankingDiv = document.createElement('div');
-    rankingDiv.classList.add('absolute-ranking-number-content', 'center');
+    rankingDiv.classList.add('ranking-number-content', 'center');
     rankingDiv.textContent = i + 1;
   
     const img = document.createElement('img');
@@ -100,7 +100,7 @@ function renderValidators() {
       : sortOrderMapping[sort_by] = 'desc'
 
     const GET_VALIDATORS_API_ENDPOINT = 'validator/rank_validators';
-    const BASE_URL = window.location.href;
+    const BASE_URL = !window.location.href.includes('#') ? window.location.href : window.location.href.split('#')[0];
     
     document.getElementById('export-sort-by').innerHTML = sort_by;
     document.getElementById('export-order').innerHTML = sortOrderMapping[sort_by];
@@ -114,13 +114,13 @@ function renderValidators() {
     const topTimestamp = Math.floor(new Date(topDate).getTime() / 1000);
 
     const cacheResponse = rankingResponsesCache[bottomDate + '.' + topTimestamp];
+
     if (cacheResponse) {
       sortOrderMapping[sort_by] == 'desc'
         ? cacheResponse.data.sort((a, b) => (b[sort_by] || 0) - (a[sort_by] || 0))
         : cacheResponse.data.sort((a, b) => (a[sort_by] || 0) - (b[sort_by] || 0))
       return generateValidatorRankingContent(cacheResponse, sort_by, sortOrderMapping)
     };
-
     serverRequest(
       BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=${sort_by}&order=${sortOrderMapping[sort_by]}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&with_photos=true`,
       'GET',

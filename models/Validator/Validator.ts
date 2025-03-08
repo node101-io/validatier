@@ -399,7 +399,7 @@ validatorSchema.statics.exportCsv = function (
 
   let bottomTimestamp = bottom_timestamp ? bottom_timestamp : 0;
   const topTimestamp = top_timestamp ? top_timestamp : 2e9;
-  const timestampRange = range ? range : 0;
+  const timestampRange = Math.min((topTimestamp - bottomTimestamp), (range ? range : (topTimestamp - bottomTimestamp)));
 
   const csvDataMapping: any = {};
 
@@ -409,8 +409,8 @@ validatorSchema.statics.exportCsv = function (
       Validator.rankValidators({
         sort_by: sort_by,
         order: order,
-        bottom_timestamp: bottom_timestamp ? bottom_timestamp : 0,
-        top_timestamp: top_timestamp ? top_timestamp : 2e9,
+        bottom_timestamp: bottomTimestamp,
+        top_timestamp: bottomTimestamp + timestampRange,
         with_photos: 'false'
       }, (err, validators) => {
 

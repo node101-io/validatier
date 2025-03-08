@@ -1,13 +1,26 @@
 
 :root {
-  --color-powder-blue: rgb(224, 228, 255);
-  --color-dark-violet: rgb(44, 32, 43);
-  --color-pale-white: #f5f5f5;
-  --color-pale-black: #171717;
+  --color-powder-blue: rgb(245, 245, 255);
+  --color-pale-dark: rgb(22, 22, 22);
+  --color-pale-white: rgb(248, 248, 248);
+  --color-dropdown-background: rgba(242, 242, 242, 1);
+  --color-triangle-unselected: rgba(183, 166, 198, 1);
+  --color-middle-date-background: rgba(232, 232, 255, 1);
+  --color-selected-date-background: rgba(202, 200, 255, 1);
+  --color-network-switch: rgb(224, 228, 255);
+  --color-network-switch-dropdown-background: rgb(236, 240, 255);
+  --color-table-header-popup: rgba(209, 209, 209, 1);
+  --pointer-default-dark: url('/res/pointers/default-dark.svg') 4 0, auto;
+  --pointer-hand-dark: url('/res/pointers/hand-dark.svg') 6 0, auto;
+}
+
+a {
+  color: var(--color-pale-black);
+  text-decoration: none;
 }
 
 input {
-  font-family: 'Inter';
+  font-family: 'Darker Grotesque';
 }
 
 input[type='date']::-webkit-calendar-picker-indicator {
@@ -30,8 +43,11 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter';
-  background-color: var(--color-pale-black);
+  font-family: 'Darker Grotesque';
+  font-weight: 500;
+  background-color: var(--color-pale-white);
+  color: var(--color-pale-dark);
+  cursor: var(--pointer-default-dark);
 }
 
 .center {
@@ -52,14 +68,12 @@ body {
   width: 220px;
   text-align: center;
   background-color: var(--color-powder-blue);
-  color: var(--color-dark-violet);
   transition: all 0.5s ease-in-out 0s;
 }
 
 .each-input-wrapper span {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
 }
 
 input {
@@ -83,7 +97,7 @@ input {
   padding: 10px 20px;
   border: none;
   border-radius: 8px;
-  cursor: pointer;
+  cursor: var(--pointer-hand-dark);
   transition: all 0.3s ease-in-out 0s;
   box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.15);
   text-transform: uppercase;
@@ -114,7 +128,7 @@ select.general-select-content {
   border-radius: 8px;
   padding: 10px 15px;
   font-size: 16px;
-  cursor: pointer;
+  cursor: var(--pointer-hand-dark);
   outline: none;
   transition: all 0.3s ease;
 }
@@ -145,8 +159,7 @@ option:hover {
   height: 0;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-bottom: 10px solid var(--color-powder-blue);
-  filter: brightness(0.25);
+  border-bottom: 5px solid var(--color-triangle-unselected);
 }
 
 .triangle-down {
@@ -154,6 +167,30 @@ option:hover {
   height: 0;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-top: 10px solid var(--color-powder-blue);
-  filter: brightness(0.25);
+  border-top: 5px solid var(--color-triangle-unselected);
+}
+
+.footer-main-title {
+  font-size: 48px;
+  font-weight: 600;
+}
+
+.footer-socials-wrapper {
+  display: flex;
+  gap: 56px;
+}
+
+.footer-main-wrapper {
+  padding: 50px 0;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.each-social-icon {
+  transition: all 0.25s ease 0s;
+  cursor: var(--pointer-hand-dark);
+}
+
+.each-social-icon:hover {
+  scale: 1.2;
 }

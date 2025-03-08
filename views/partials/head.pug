@@ -3,7 +3,9 @@ html(lang='tr')
   head
     meta(name='viewport', content='width=device-width, initial-scale=1.0, shrink-to-fit=no, maximum-scale=1.0, user-scalable=0')
     title #{title}
-    link(href='https://fonts.googleapis.com/css?family=Sofia:400,700|Inter:100,200,300,400,500,600,700,800,900&display=swap' rel='stylesheet')
+    link(rel="preconnect" href="https://fonts.googleapis.com")
+    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+    link(href="https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&family=Playfair+Display&display=swap" rel="stylesheet")
     if includes && includes.external
       if includes.external.css
         if includes.external.css.includes('page')
@@ -21,6 +23,9 @@ html(lang='tr')
           script(src=`/js/functions/getDateRange.js`)
           script(src=`/js/functions/handleCalendarEvents.js`)
           script(src=`/js/functions/handleExportEvents.js`)
+          script(src=`/js/functions/handleNetworkSwitch.js`)
+          script(src=`/js/functions/handleTooltipEvents.js`)
+          script(src=`/js/functions/handleValidatorSearch.js`)
           script(src=`/js/functions/httpRequest.js`)
           script(src=`/js/functions/nativeCurrencyConversions.js`)
           script(src=`/js/functions/renderTableHeader.js`)

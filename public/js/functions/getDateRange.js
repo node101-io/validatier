@@ -8,6 +8,10 @@ function getDateRange(currentDate) {
   const formatDate = (date) => date.toISOString().split('T')[0];
 
   return {
+    'all-time': {
+      bottom: formatDate(new Date(currentYear - 10, 0, 1)),
+      top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
+    },
     'this-week': {
       bottom: formatDate(new Date(currentYear, currentMonth, currentDay - currentDayOfWeek)),
       top: formatDate(new Date(currentYear, currentMonth, currentDay - currentDayOfWeek + 6))

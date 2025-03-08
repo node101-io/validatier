@@ -6,10 +6,12 @@ function handleExportEvents (sort_by, order, bottom_timestamp, top_timestamp) {
   document.addEventListener('click', (event) => {
     if (event.target.id == 'export-wrapper-toggle' || event.target.parentNode.id == 'export-wrapper-toggle') {
       if (document.getElementById('export-wrapper-toggle').getAttribute('isOpen') == 'false') {
-        event.target.nextSibling.style.transform = 'perspective(8000px) rotateX(0deg)';
+        document.getElementById('export-wrapper-toggle').nextSibling.style.transform = 'perspective(8000px) rotateX(0deg)';
+        document.getElementById('export-wrapper-toggle').nextSibling.style.opacity = '1';
         document.getElementById('export-wrapper-toggle').setAttribute('isOpen', 'true');
       } else {
-        event.target.nextSibling.style.transform = 'perspective(8000px) rotateX(-90deg)';
+        document.getElementById('export-wrapper-toggle').nextSibling.style.transform = 'perspective(8000px) rotateX(-90deg)';
+        document.getElementById('export-wrapper-toggle').nextSibling.style.opacity = '0';
         document.getElementById('export-wrapper-toggle').setAttribute('isOpen', 'false');
       }
     }
@@ -17,12 +19,11 @@ function handleExportEvents (sort_by, order, bottom_timestamp, top_timestamp) {
       document.querySelectorAll('.each-export-choice').forEach(each => each.classList.remove('export-choice-selected'));
       event.target.classList.add('export-choice-selected');
       selectedRangeValue = event.target.getAttribute('range');
-      event.target.appendChild(document.getElementById('export-choice-check-indicator'));
     } else if (event.target.id == 'export-choice-download-button' || event.target.parentNode.id == 'export-choice-download-button') {
 
 
-      const BASE_URL = window.location.href + 'validator';
-      const EXPORT_API_ENDPOINT = '/export_csv';
+      const BASE_URL = !window.location.href.includes('#') ? window.location.href : window.location.href.split('#')[0];
+      const EXPORT_API_ENDPOINT = 'validator/export_csv';
 
       const bottomDate = document.getElementById(bottom_timestamp).value;
       const topDate = document.getElementById(top_timestamp).value
