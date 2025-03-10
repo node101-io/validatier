@@ -10,7 +10,7 @@ const indexGetController = (req: Request, res: Response): void => {
     const activeNetworkChainId = req.cookies.network;
     if (chains) chains.forEach(element => element.chain_id == activeNetworkChainId ? selectedChain = element : (''))    
 
-    Validator.rankValidators({ sort_by: 'ratio', order: 'desc', bottom_timestamp: 1, top_timestamp: 2e9, with_photos: 'true' }, (err, validators) => {
+    Validator.rankValidators({ sort_by: 'ratio', order: 'desc', bottom_timestamp: 1, top_timestamp: 2e9, with_photos: false }, (err, validators) => {
       if (err) return res.json({ success: false, err: 'bad_request' })
       return res.render('index/index', {
         page: 'index/index',

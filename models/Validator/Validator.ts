@@ -77,7 +77,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       bottom_timestamp: number,
       top_timestamp: number,
       order: SortOrder,
-      with_photos?: string,
+      with_photos?: Boolean,
     },
     callback: (
       err: string | null,
@@ -340,7 +340,7 @@ validatorSchema.statics.rankValidators = function (
                 sold: sold
               };
 
-              if (with_photos != 'true') delete pushObjectData.temporary_image_uri;
+              if (!with_photos) delete pushObjectData.temporary_image_uri;
               validatorsArray.push(pushObjectData);
               return next()
             }
@@ -411,7 +411,7 @@ validatorSchema.statics.exportCsv = function (
         order: order,
         bottom_timestamp: bottomTimestamp,
         top_timestamp: bottomTimestamp + timestampRange,
-        with_photos: 'false'
+        with_photos: false
       }, (err, validators) => {
 
         if (err || !validators) return next();
