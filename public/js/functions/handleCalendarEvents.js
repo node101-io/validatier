@@ -1,29 +1,13 @@
 
-function checkIfCookieDateIsValid (cookie) {
-  const datesArray = cookie.split('.');
-  if (datesArray.length <= 0) return false;
-  
-  datesArray.forEach(eachDate => {
-    const eachDateSplit = eachDate.split('-');
-    if (parseInt(eachDateSplit[0]) < 0) return false;
-    if (parseInt(eachDateSplit[1]) < 0 || parseInt(eachDateSplit[1]) > 12) return false;
-    if (parseInt(eachDateSplit[2]) < 0 || parseInt(eachDateSplit[2]) > 31) return false;
-  })
-
-  return true;
-}
-
-let selectedDateBottom = checkIfCookieDateIsValid(document.cookie)
-  ? document.cookie.split('.')[0]
+let selectedDateBottom = getCookie('selectedDateBottom')
+  ? getCookie('selectedDateBottom')
   : new Date().toISOString().split('T')[0]
 
-let selectedDateTop = checkIfCookieDateIsValid(document.cookie)
-  ? document.cookie.split('.')[1]
+let selectedDateTop = getCookie('selectedDateTop')
+  ? getCookie('selectedDateTop')
   : ''
 
-const eventListeners = [];
-
-function removeAllEventListeners() {
+function removeAllEventListeners(eventListeners) {
   eventListeners.forEach(({ element, event, listener }) => {
     element.removeEventListener(event, listener);
   });
@@ -144,7 +128,9 @@ function getMonthInfo(year, month) {
 
 function handleCalendarEvents (currentYearValue, currentMonthValue) {
   
-  removeAllEventListeners();
+  const eventListeners = [];
+
+  removeAllEventListeners(eventListeners);
 
   const monthWrapper = document.getElementById('month-wrapper');
   monthWrapper.innerHTML = '';
@@ -237,7 +223,6 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
 
   generateMonthContent(currentYearValue, currentMonthValue);
   paintBlocksInBetween();
-  updateDateInputs();
 
   document.addEventListener('focusout', changeEventListener);
   eventListeners.push({ element: document, event: 'focusout', listener: changeEventListener })

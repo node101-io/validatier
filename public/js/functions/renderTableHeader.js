@@ -10,6 +10,7 @@ function renderTableHeader (sort_by, order) {
   ];
   const headersRow = document.createElement('tr');
   const tdValidators = document.createElement('td');
+  tdValidators.style.marginLeft = '20px';
   tdValidators.textContent = 'Validators';
   tdValidators.classList.add('each-table-header-title');
   headersRow.appendChild(tdValidators);

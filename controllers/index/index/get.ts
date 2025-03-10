@@ -14,7 +14,8 @@ const indexGetController = (req: Request, res: Response): void => {
           js: ['page', 'functions'],
         },
       },
-      validators
+      validators,
+      cookies: req.cookies
     });
   })
 };

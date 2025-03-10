@@ -259,7 +259,7 @@
 }
 
 td {
-  padding: 20px;
+  padding: 10px;
   position: relative;
 }
 
@@ -330,7 +330,8 @@ td {
 
 .table-filters {
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  border-bottom: 2px solid var(--color-middle-date-background);
 }
 
 .export-main-wrapper {

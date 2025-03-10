@@ -33,6 +33,7 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     validatorImageDiv.appendChild(img);
   
     const textualInfoWrapper = document.createElement('div');
+    textualInfoWrapper.style.marginLeft = '-2px';
     textualInfoWrapper.classList.add('validator-textual-info-wrapper');
   
     const monikerDiv = document.createElement('div');
@@ -108,7 +109,10 @@ function renderValidators() {
     const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
     const topDate = document.getElementById('periodic-query-top-timestamp').value
 
-    if (isApplyClickedChecker) document.cookie = `${bottomDate}.${topDate}`;
+    if (isApplyClickedChecker) {
+      setCookie('selectedDateBottom', bottomDate, 7);
+      setCookie('selectedDateTop', topDate, 7);
+    }
 
     const bottomTimestamp = Math.floor(new Date(bottomDate).getTime() / 1000);
     const topTimestamp = Math.floor(new Date(topDate).getTime() / 1000);

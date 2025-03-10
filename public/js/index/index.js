@@ -5,10 +5,10 @@ window.onload = () => {
   let currentYearValue = currentDate.getFullYear();
   let currentMonthValue = (currentDate.getMonth() + 1);
 
-  handleNetworkSwitch(localStorage.getItem('selected-network-chain-id'));
+  handleNetworkSwitch(getCookie('network'));
   handleValidatorSearch();
   handleTooltipEvents();
-  handleCalendarEvents(currentYearValue, currentMonthValue);
+  handleCalendarEvents(currentYearValue, currentMonthValue)
   renderValidators();
   handleExportEvents(
     'export-sort-by', 

@@ -40,12 +40,12 @@ function handleNetworkSwitch (currentNetwork) {
         container.style.padding = '10px';
         container.id = eachChain.chainId;
 
-        if (currentNetwork == eachChain.chainId) setSelectedChain(eachChain.chainName, eachChain.chainId, eachChain.chainSymbolImageUrl);
+        if (getCookie('network') == eachChain.chainId) setSelectedChain(eachChain.chainName, eachChain.chainId, eachChain.chainSymbolImageUrl);
 
         container.addEventListener('click', () => {
           setSelectedChain(eachChain.chainName, eachChain.chainId, eachChain.chainSymbolImageUrl);
           networkSwitchDropdown.classList.remove('network-switch-dropdown-open');
-          localStorage.setItem('selected-network-chain-id', eachChain.chainId);
+          setCookie('network', eachChain.chainId, 7);
         })
 
         const img = document.createElement('img');

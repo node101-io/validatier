@@ -414,10 +414,9 @@ validatorSchema.statics.exportCsv = function (
         with_photos: 'false'
       }, (err, validators) => {
 
-        bottomTimestamp += timestampRange;
-
         if (err || !validators) return next();
         csvDataMapping[`validator-ranking-${formatTimestamp(bottomTimestamp)}_${formatTimestamp(bottomTimestamp + timestampRange)}.csv`] = validators;
+        bottomTimestamp += timestampRange;
         return next();
       })
     },

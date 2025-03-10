@@ -27,8 +27,6 @@ block content
               .validator-search-icon
                 include ../icons/search.svg
               input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search name / operator address')
-              .validator-dropdown-icon#validator-dropdown-icon
-                include ../icons/chevron.pug
             .validator-filter-input-result-wrapper#validator-filter-input-result-wrapper
               .center(style='gap: 10px; height: 100%;')#validator-filter-result-pre-input-animation-wrapper
                 .each-pre-input-animation-ball
@@ -40,9 +38,9 @@ block content
                 include ../icons/calendar.pug
                 span#header-selected-range-description All time
               span.date-range
-                span#header-range-bottom-block Genesis
+                span#header-range-bottom-block= cookies.selectedDateBottom ? new Date(cookies.selectedDateBottom).toLocaleDateString('en-GB') : 'Genesis'
                 span  - 
-                span#header-range-top-block= new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                span#header-range-top-block= new Date(cookies.selectedDateTop ? cookies.selectedDateTop : '').toLocaleDateString('en-GB')
               .dropdown-icon(style='margin-bottom: -6px;')
                 include ../icons/chevron.pug
             .picker-main-wrapper
@@ -107,8 +105,8 @@ block content
               {name: 'Ratio', id: 'ratio', popup_text: 'Self stake / Withdraw'}, 
               {name: 'Sold', id: 'sold', popup_text: 'Withdraw - Self stake'}, 
             ]
-          tr
-            td.each-table-header-title Validators
+          tr.validator-table-header
+            td.each-table-header-title(style='margin-left: 20px;') Validators
             each header in headers_array
               td
                 .each-table-header-wrapper-popup-content
@@ -140,11 +138,11 @@ block content
     .footer-main-wrapper(class='center')
       .footer-main-title Connect us 
       .footer-socials-wrapper(class='center')
-        .each-social-icon 
+        a(href='https://t.me/node101', target='_blank').each-social-icon 
           include ../icons/telegram.svg
-        .each-social-icon 
+        a(href='https://x.com/node_101' target='_blank').each-social-icon 
           include ../icons/x.svg
-        .each-social-icon 
+        a(href='https://github.com/node101-io' target='_blank').each-social-icon 
           include ../icons/github.svg
-        .each-social-icon 
+        a(href='https://www.linkedin.com/company/node101/' target='_blank').each-social-icon 
           include ../icons/linkedin.svg
