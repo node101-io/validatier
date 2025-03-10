@@ -246,13 +246,13 @@
 .reset, .apply {
   padding: 10px 10px;
   border: none;
-  font-size: 16px;
+  font-size: 14px !important;
   font-weight: 600;
   cursor: var(--pointer-hand-dark);
+  background: var(--color-dark-violet);
 }
 
 .apply {
-  background: var(--color-dark-violet);
   display: flex;
   align-items: center;
   gap: 10px;

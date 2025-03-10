@@ -45,7 +45,7 @@ block content
             .selected-range 
               span.date-interval-description 
                 include ../icons/calendar.pug
-                span#header-selected-range-description All time
+                span#header-selected-range-description= cookies.specificRangeName ? cookies.specificRangeName : 'All time'
               span.date-range
                 span#header-range-bottom-block= cookies.selectedDateBottom ? new Date(cookies.selectedDateBottom).toLocaleDateString('en-GB') : 'Genesis'
                 span  - 
@@ -56,22 +56,28 @@ block content
               .picker-content-wrapper
                 .left-wrapper
                   .dropdown
+                    - 
+                      const options = [
+                        { id: 'all-time', label: 'All time', selected: true },
+                        { id: 'this-week', label: 'This week' },
+                        { id: 'last-week', label: 'Last week' },
+                        { id: 'last-7-days', label: 'Last 7 days' },
+                        { id: 'last-30-days', label: 'Last 30 days' },
+                        { id: 'last-90-days', label: 'Last 90 days' },
+                        { id: 'this-year', label: 'This year (Jan - Today)' },
+                        { id: 'last-calendar-year', label: 'Last calendar year' },
+                        { id: 'custom', label: 'Custom' }
+                      ]
                     ul
-                      li.left-wrapper-each-choice(class='selected')#all-time All time
-                      li.left-wrapper-each-choice#this-week This week
-                      li.left-wrapper-each-choice#last-week Last week
-                      li.left-wrapper-each-choice#last-7-days Last 7 days
-                      li.left-wrapper-each-choice#last-30-days Last 30 days
-                      li.left-wrapper-each-choice#last-90-days Last  90 days
-                      li.left-wrapper-each-choice#this-year This year (Jan - Today)
-                      li.left-wrapper-each-choice#last-calendar-year Last calendar year
-                      li.left-wrapper-each-choice Custom
+                      each option in options
+                        li.left-wrapper-each-choice(class=`${cookies.specificRange == option.id ? 'selected' : ''}` id=option.id) #{option.label}
+
                 .calendar-wrapper
                   .calendar 
                     .date-input(style='display: none')
-                      input.each-date-input(type='date' id='periodic-query-bottom-timestamp')
+                      input.each-date-input(type='date' id='periodic-query-bottom-timestamp' value=`${cookies.selectedDateBottom ? cookies.selectedDateBottom : ''}`)
                       span —
-                      input.each-date-input(type='date' id='periodic-query-top-timestamp')
+                      input.each-date-input(type='date' id='periodic-query-top-timestamp' value=`${cookies.selectedDateTop ? cookies.selectedDateTop : ''}`)
                     .date-input-month-year-info-content
                       div#current-month-and-year-display(style='font-size: 20px; font-weight: 600; margin-right: auto;')
                       div(style='transform: rotateZ(90deg); margin-right: 20px;')#previous-month
@@ -84,8 +90,8 @@ block content
                     .month-wrapper
                       .days#month-wrapper
               .buttons
-                .reset Cancel
-                .apply
+                button.reset Cancel
+                button.apply#apply
                   span Apply
                   include ../icons/check.pug
           .export-main-wrapper 

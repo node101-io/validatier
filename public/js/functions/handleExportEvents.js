@@ -38,7 +38,7 @@ function handleExportEvents (sort_by, order, bottom_timestamp, top_timestamp) {
       a.style.display = 'none';
       document.body.appendChild(a);
       a.href = BASE_URL + EXPORT_API_ENDPOINT + `?sort_by=${sortBy}&order=${sortOrder}&range=${range}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}`;
-      a.target = '_blank';
+      a.target = '_self';
       a.click();
     }
   })

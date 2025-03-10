@@ -14,7 +14,6 @@ import validatorRouter from './routes/validatorRouter.js';
 
 import { startCronJobs } from './cron/startCronJobs.js';
 import { listenEvents } from './listeners/listenForEvents.js';
-import Chain from './models/Chain/Chain.js';
 
 dotenv.config();
 

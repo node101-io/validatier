@@ -8,9 +8,12 @@ const indexGetController = (req: Request, res: Response): void => {
 
     let selectedChain: ChainInterface;
     const activeNetworkChainId = req.cookies.network;
-    if (chains) chains.forEach(element => element.chain_id == activeNetworkChainId ? selectedChain = element : (''))    
+    if (chains) chains.forEach(element => element.chain_id == activeNetworkChainId ? selectedChain = element : (''));
 
-    Validator.rankValidators({ sort_by: 'ratio', order: 'desc', bottom_timestamp: 1, top_timestamp: 2e9, with_photos: false }, (err, validators) => {
+    const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime() / 1000): 1;
+    const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime() / 1000): 2e9;
+
+    Validator.rankValidators({ sort_by: 'ratio', order: 'desc', bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp, with_photos: true }, (err, validators) => {
       if (err) return res.json({ success: false, err: 'bad_request' })
       return res.render('index/index', {
         page: 'index/index',

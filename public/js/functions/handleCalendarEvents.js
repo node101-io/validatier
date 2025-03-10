@@ -15,14 +15,14 @@ function removeAllEventListeners(eventListeners) {
 }
 
 function updateDateInputs () {
-  if (selectedDateBottom) {
-    document.getElementById('header-range-bottom-block').innerHTML = new Date(selectedDateBottom).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    document.getElementById('periodic-query-bottom-timestamp').value = selectedDateBottom;
-  }
-  if (selectedDateTop) {
-    document.getElementById('header-range-top-block').innerHTML = new Date(selectedDateTop).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    document.getElementById('periodic-query-top-timestamp').value = selectedDateTop;
-  }
+
+  if (selectedDateBottom && selectedDateTop) document.getElementById('apply').disabled = false;
+  else document.getElementById('apply').disabled = true;
+
+  document.getElementById('header-range-bottom-block').innerHTML = new Date(selectedDateBottom).toLocaleDateString('en-US')
+  document.getElementById('periodic-query-bottom-timestamp').value = selectedDateBottom;
+  document.getElementById('header-range-top-block').innerHTML = selectedDateTop ? new Date(selectedDateTop).toLocaleDateString('en-GB') : 'pending'
+  document.getElementById('periodic-query-top-timestamp').value = selectedDateTop;
 }
 
 function generateMonthContent (currentYearValue, currentMonthValue) {
@@ -162,16 +162,38 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
 
       selectedDateBottom = getDateRange(new Date().toISOString().split('T')[0])[event.target.id].bottom;
       selectedDateTop = getDateRange(new Date().toISOString().split('T')[0])[event.target.id].top;
+      
+      setCookie('specificRange', event.target.id, 7);
+      setCookie('specificRangeName', event.target.innerHTML, 7);
+      setCookie('selectedDateBottom', selectedDateBottom, 7);
+      setCookie('selectedDateTop', selectedDateTop, 7);
 
       generateMonthContent(new Date().getFullYear(), new Date().getMonth() + 1);
       paintBlocksInBetween();
       updateDateInputs();
     } else if (event.target.classList.contains('date')) {
 
-      if (!selectedDateBottom) selectedDateBottom = event.target.getAttribute('date');
+      event.target.parentNode.childNodes.forEach(eachLeftWrapperChoice => {
+        eachLeftWrapperChoice.classList.remove('selected');
+      })
+      document.getElementById('custom').classList.add('selected');
+      document.getElementById('header-selected-range-description').innerHTML = 'Custom';
+
+      setCookie('specificRange', 'custom', 7);
+      setCookie('specificRangeName', 'Custom', 7);
+
+      if (!selectedDateBottom) {
+        selectedDateBottom = event.target.getAttribute('date');
+        selectedDateTop = '';
+      }
       else if (selectedDateBottom && !selectedDateTop) {
-        if (event.target.getAttribute('date') < selectedDateBottom) selectedDateBottom = event.target.getAttribute('date');
-        else selectedDateTop = event.target.getAttribute('date');
+        if (event.target.getAttribute('date') < selectedDateBottom) {
+          selectedDateBottom = event.target.getAttribute('date');
+          selectedDateTop = '';
+        }
+        else {
+          selectedDateTop = event.target.getAttribute('date');
+        }
       } else if (selectedDateBottom && selectedDateTop) {
         selectedDateBottom = event.target.getAttribute('date');
         selectedDateTop = '';
@@ -201,6 +223,7 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
       } else selectedDateTop = event.target.value;
     }
     paintBlocksInBetween();
+    updateDateInputs();
   }
 
   const previousMonthListener = (event) => {

@@ -266,9 +266,14 @@ validatorSchema.statics.deleteValidator = function (
   Validator
     .findOneAndUpdate(
       { operator_address: operator_address, deleted_at: null },
-      { deleted_at: new Date() }
+      { deleted_at: new Date()  }
     )
     .then((deletedValidator) => {
+      if (!deletedValidator) return callback('bad_request', null);
+
+      deletedValidator.moniker = deletedValidator.moniker + '-deactived-' + (new Date(deletedValidator.deleted_at)).toLocaleDateString('en-GB');
+      deletedValidator.save();
+
       return callback(null, deletedValidator);
     })
     .catch(err => callback(err, null)) 
@@ -307,20 +312,30 @@ validatorSchema.statics.rankValidators = function (
     sold: number
   }[] = [];
 
-  Validator
-  .find({ deleted_at: null })
+  Validator.find({
+    created_at: { $lte: new Date(top_timestamp * 1000) },
+    $or: [
+      { deleted_at: { $gte: new Date(bottom_timestamp * 1000) } },
+      { deleted_at: null }
+    ]
+  })
   .then((validators) => {
     async.timesSeries(
       validators.length,
       (i, next) => {
         const eachValidator: any = validators[i];
 
+        const adjustedDeletedAt = eachValidator.deleted_at ? eachValidator.deleted_at : new Date();
+
+        const bottomTimestamp = new Date(bottom_timestamp * 1000) < eachValidator.created_at ? new Date(eachValidator.created_at).getTime() : bottom_timestamp * 1000;
+        const topTimestamp = new Date(top_timestamp * 1000) > adjustedDeletedAt ? new Date(adjustedDeletedAt).getTime() : top_timestamp * 1000
+
         CompositeEventBlock
           .getTotalPeriodicSelfStakeAndWithdraw(
             {
               operator_address: eachValidator.operator_address,
-              bottomTimestamp: bottom_timestamp * 1000,
-              topTimestamp: top_timestamp * 1000,
+              bottomTimestamp: bottomTimestamp,
+              topTimestamp: topTimestamp,
               searchBy: 'timestamp'
             },
             (err, totalPeriodicSelfStakeAndWithdraw) => {
