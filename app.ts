@@ -58,31 +58,7 @@ app.use('/', indexRouter);
 app.use('/composite_event_block', compositeEventBlockRouter);
 app.use('/validator', validatorRouter);
 
-import async from 'async';
-
 app.listen(PORT, () => {
   console.log(`Server running at PORT ${PORT}`);
-
-  const chains = ['agoric', 'cosmoshub', 'lava', 'celestia', 'evmos', 'osmosis'];
-  async.timesSeries(
-    chains.length, 
-    (i, next) => {
-      fetch(`https://chains.cosmos.directory/${chains[i]}`)
-        .then(response => response.json())
-        .then(data => {
-          Chain.saveChain({
-            name: data.chain.chain_name,
-            pretty_name: data.chain.pretty_name,
-            chain_id: data.chain.chain_id,
-            image: data.chain.logo_URIs.png,
-          }, (err, chain) => {
-            return next();
-          })
-        })
-    }, 
-    () => {
-      console.log('done')
-    }
-  )
 });
 

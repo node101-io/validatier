@@ -25,6 +25,12 @@ interface ChainModel extends Model<ChainInterface> {
       newChain: ChainInterface | null
     ) => any
   ) => any;
+  getAllChains: (
+    callback: (
+      err: string | null,
+      chains: ChainInterface[] | null,
+    ) => any
+  ) => void
 }
 
 
@@ -69,6 +75,14 @@ const chainSchema = new Schema<ChainInterface>({
   }
 });
 
+chainSchema.statics.getAllChains = function (callback: Parameters<ChainModel['getAllChains']>[0]) {
+  Chain
+    .find({})
+    .then(chains => {
+      return callback(null, chains);
+    })
+    .catch(err => callback('bad_request', null))
+}
 
 chainSchema.statics.saveChain = function (
   body: Parameters<ChainModel['saveChain']>[0], 

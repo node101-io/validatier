@@ -9,13 +9,22 @@ block content
       .header-network-switch-wrapper
         .network-switch-header#network-switch-header
           .network-switch-network-image-wrapper 
-            img#current-network-img(src="https://raw.githubusercontent.com/chainapsis/keplr-chain-registry/main/images/celestia/chain.png")
+            img#current-network-img(src=`${selectedChain.image ? selectedChain.image : ''}`)
           .network-switch-network-info-wrapper 
-            .network-switch-network-title#current-network-name Celestia
-            .network-switch-network-chain-id#current-network-chain-id TIA
+            .network-switch-network-title#current-network-name= selectedChain.pretty_name ? selectedChain.pretty_name : 'Cosmos Hub'
+            .network-switch-network-chain-id#current-network-chain-id= selectedChain.chain_id ? selectedChain.chain_id : 'cosmos-hub-1'
           .network-switch-drowdown-toggle
             include ../icons/chevron.pug
         .network-switch-dropdown#network-switch-dropdown
+          .network-switch-search-bar
+            input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search chain name / id')
+          each chain in chains 
+            .each-chain-wrapper(style='display: flex; align-items: center; padding: 10px 5px' id=`${chain.chain_id}`)
+              .network-switch-network-image-wrapper 
+                img#current-network-img(src=`${chain.image}` style='width: 25px; height: 25px; margin-right: 10px;')
+              .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
+                .network-switch-network-title(style='text-wrap: nowrap')#current-network-name= chain.pretty_name
+                .network-switch-network-chain-id(style='text-wrap: nowrap')#current-network-chain-id= chain.chain_id
     .inner-main-wrapper
       .general-title-description-wrapper
         h3 node101 | CosmosHub Validator Timeline

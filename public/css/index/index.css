@@ -417,13 +417,24 @@ td {
   border-radius: 5px;
 }
 
+.network-switch-search-bar {
+  width: calc(100% - 30px);
+  padding: 10px;
+}
+
+.network-switch-input-content {
+  background-color: var(--color-network-switch);
+  border: none;
+}
+
 .network-switch-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
   z-index: 20;
-  width: fit-content;
+  width: 250px;
   height: 200px;
+  overflow-x: hidden;
   overflow-y: scroll;
   background-color: black;
   background-color: var(--color-network-switch-dropdown-background);
