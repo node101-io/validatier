@@ -1,8 +1,19 @@
 
-@media only screen and (max-width: 1200px) {
-  
-}
+@media only screen and (max-width: 500px) {
+  .export-header-main-title {
+    display: none;
+  }
 
-@media only screen and (max-width: 800px) {
-  
+  .date {
+    border: 0.125rem solid transparent;
+    padding: 0.125rem;
+  }
+
+  .selected-date-bottom, .selected-date-top {
+    border: 0.125rem solid var(--color-middle-date-background);
+  }
+
+  .dropdown li {
+    padding: 4px;
+  }
 }

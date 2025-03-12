@@ -41,7 +41,6 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
       ? validator.temporary_image_uri
       : '/res/images/default_validator_photo.png';
   
-    validatorImageDiv.appendChild(rankingDiv);
     validatorImageDiv.appendChild(img);
   
     const textualInfoWrapper = document.createElement('div');
@@ -73,6 +72,7 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     textualInfoWrapper.appendChild(monikerDiv);
     textualInfoWrapper.appendChild(operatorAddressDiv);
   
+    tdInfo.appendChild(rankingDiv);
     tdInfo.appendChild(validatorImageDiv);
     tdInfo.appendChild(textualInfoWrapper);
   
@@ -167,11 +167,39 @@ function renderValidators() {
     if (!event.target.classList.contains('validator-operator-address') && !event.target.parentNode.classList.contains('validator-operator-address') && !event.target.parentNode.parentNode.classList.contains('validator-operator-address')) return;
     let target = event.target;
     while (!target.classList.contains('validator-operator-address')) target = target.parentNode;
-    navigator.clipboard.writeText(target.children[0].innerHTML);
+    navigator.clipboard.writeText(target.children[0].getAttribute('operator_address'));
     target.children[1].children[0].src = '/res/images/check.svg';
     setTimeout(() => {
       target.children[1].children[0].src = '/res/images/clipboard.svg';
     }, 1000);
   })
 
+
+  document.body.addEventListener('mouseover', (event) => {
+    if (!event.target.classList.contains('validator-operator-address') && !event.target.parentNode.classList.contains('validator-operator-address') && !event.target.parentNode.parentNode.classList.contains('validator-operator-address')) {
+      
+      document.querySelectorAll('.validator-operator-address-content-expanded').forEach(each => {
+        setTimeout(() => {
+          each.innerHTML = each.getAttribute('operator_address').slice(0,4) + '...' + each.getAttribute('operator_address').slice(each.getAttribute('operator_address').length - 4, each.getAttribute('operator_address').length)
+        }, 0.5 * 1000);
+        each.classList.remove('validator-operator-address-content-expanded');
+      });
+      document.querySelectorAll('.validator-operator-address-expanded').forEach(each => each.classList.remove('validator-operator-address-expanded'));  
+    }
+    document.querySelectorAll('.validator-operator-address-visible').forEach(each => each.classList.remove('validator-operator-address-visible'));
+    let target = event.target;
+    while (target != document.body && !target.classList.contains('each-validator-wrapper')) target = target.parentNode;
+    if (!target.classList.contains('each-validator-wrapper')) return;
+
+    const operatorAddressWrapper = target.children[0].children[2].children[1];
+
+    operatorAddressWrapper.classList.add('validator-operator-address-visible');
+    operatorAddressWrapper.addEventListener('mouseover', (event) => {
+      setTimeout(() => {
+        operatorAddressWrapper.children[0].innerHTML = operatorAddressWrapper.children[0].getAttribute('operator_address');
+        operatorAddressWrapper.children[0].classList.add('validator-operator-address-content-expanded');
+        operatorAddressWrapper.classList.add('validator-operator-address-expanded');  
+      }, 0.5 * 1000);
+    })
+  })
 }
