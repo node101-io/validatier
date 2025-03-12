@@ -134,15 +134,16 @@
 
   --validator-operator-address-font-size: 16px;
   --validator-operator-address-gap: 5px;
-  --validator-operator-address-width: 100px;
+  --validator-operator-address-width: auto;
   --validator-operator-address-height: 0;
   --validator-operator-address-opacity: 0;
-  --validator-operator-address-transition-duration: 0.5s;
-  --validator-operator-address-expanded-width: 400px;
+  --validator-operator-address-transition-duration: 1s;
   --validator-operator-address-visible-height: 20px;
   --validator-operator-address-visible-opacity: 0.75;
   --validator-operator-address-visible-opacity-hover: 1;
-  --validator-operator-address-content-min-width: 75px;
+  --validator-operator-address-content-min-width: fit-content;
+  --validator-operator-address-shrink-span-transition-duration: 1s;
+  --validator-operator-address-shrink-span-width: fit-content;
 
   --validator-moniker-font-size: 20px;
   --validator-moniker-font-weight: 500;
@@ -637,6 +638,7 @@
 
 .validator-textual-info-wrapper {
   text-wrap: nowrap;
+  width: 80%;
 }
 
 .validator-image img {
@@ -651,15 +653,17 @@
   overflow-x: visible;
   font-size: var(--validator-operator-address-font-size);
   gap: var(--validator-operator-address-gap);
-  width: var(--validator-image-width);
+  width: 100%;
   height: var(--validator-operator-address-height);
   opacity: var(--validator-operator-address-opacity);
   transition: all var(--validator-operator-address-transition-duration) ease 0s;
   cursor: var(--pointer-hand-dark); 
 }
 
-.validator-operator-address-expanded {
-  width: var(--validator-operator-address-expanded-width) !important;
+.validator-operator-address-content {
+  overflow: hidden;
+  display: flex;
+  white-space: nowrap;
 }
 
 .validator-operator-address-visible {
@@ -671,10 +675,10 @@
   opacity: var(--validator-operator-address-visible-opacity-hover);
 }
 
-.validator-operator-address-content {
-  min-width: var(--validator-operator-address-content-min-width);
+.validator-operator-address-shrink-span {
+  width: 8px;
   overflow: hidden;
-  white-space: nowrap;
+  transition: width 1s ease 0s;
 }
 
 .validator-moniker {

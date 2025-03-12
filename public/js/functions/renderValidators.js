@@ -173,9 +173,9 @@ function renderValidators() {
     let target = event.target;
     while (!target.classList.contains('validator-operator-address')) target = target.parentNode;
     navigator.clipboard.writeText(target.children[0].getAttribute('operator_address'));
-    target.children[1].children[0].src = '/res/images/check.svg';
+    target.children[0].children[3].children[0].src = '/res/images/check.svg';
     setTimeout(() => {
-      target.children[1].children[0].src = '/res/images/clipboard.svg';
+      target.children[0].children[3].children[0].src = '/res/images/clipboard.svg';
     }, 1000);
   })
 
@@ -185,7 +185,10 @@ function renderValidators() {
       
       document.querySelectorAll('.validator-operator-address-content-expanded').forEach(each => {
         setTimeout(() => {
-          each.innerHTML = each.getAttribute('operator_address').slice(0,4) + '...' + each.getAttribute('operator_address').slice(each.getAttribute('operator_address').length - 4, each.getAttribute('operator_address').length)
+          each.children[1].style.width = '8px';
+          setTimeout(() => {
+            each.children[1].innerHTML = '...';
+          }, 1000);
         }, 0.5 * 1000);
         each.classList.remove('validator-operator-address-content-expanded');
       });
@@ -197,13 +200,17 @@ function renderValidators() {
     if (!target.classList.contains('each-validator-wrapper')) return;
 
     const operatorAddressWrapper = target.children[0].children[2].children[1];
+    const operatorAddressValue = operatorAddressWrapper.children[0].getAttribute('operator_address');
+    const operatorAddressValueMiddle = operatorAddressValue.slice(4, operatorAddressValue.length - 4);
 
     operatorAddressWrapper.classList.add('validator-operator-address-visible');
     operatorAddressWrapper.addEventListener('mouseover', (event) => {
       setTimeout(() => {
-        operatorAddressWrapper.children[0].innerHTML = operatorAddressWrapper.children[0].getAttribute('operator_address');
-        operatorAddressWrapper.children[0].classList.add('validator-operator-address-content-expanded');
+        operatorAddressWrapper.children[0].classList.add('validator-operator-address-content-expanded')
         operatorAddressWrapper.classList.add('validator-operator-address-expanded');  
+
+        operatorAddressWrapper.children[0].children[1].innerHTML = operatorAddressValueMiddle;
+        operatorAddressWrapper.children[0].children[1].style.width = '100%';
       }, 0.5 * 1000);
     })
   })

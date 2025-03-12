@@ -144,9 +144,12 @@ block content
                       .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
                         img(src='/res/images/warning.svg')
                   .validator-operator-address
-                    .validator-operator-address-content(operator_address=`${validator.operator_address}`) #{validator.operator_address.slice(0,4) + '...' + validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)}
-                    .validator-operator-address-copy-button(class='center')
-                      img(src='/res/images/clipboard.svg')
+                    .validator-operator-address-content(operator_address=`${validator.operator_address}`) 
+                      div= validator.operator_address.slice(0,4)
+                      div.validator-operator-address-shrink-span ...
+                      div= validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)
+                      .validator-operator-address-copy-button(class='center')
+                        img(src='/res/images/clipboard.svg')
               -
                 function shortNumberFormat(num) {
                   const sign = num < 0 ? '-' : '';
