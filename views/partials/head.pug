@@ -12,6 +12,7 @@ html(lang='tr')
           link(rel='stylesheet' href=`/css/${page}.css`)
         if includes.external.css.includes('general')
           link(rel='stylesheet' href=`/css/${page.split('/')[0]}/general.css`)
+          link(rel='stylesheet' href=`/css/${page.split('/')[0]}/responsive.css`)
         if includes.external.css.includes('index')
           link(rel='stylesheet' href=`/css/${page.split('/')[0]}/index.css`)
       if includes.external.js 

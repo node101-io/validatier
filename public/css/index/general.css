@@ -14,12 +14,46 @@
   --pointer-hand-dark: url('/res/pointers/hand-dark.svg') 6 0, auto;
 }
 
+html {
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Darker Grotesque';
+  font-weight: 500;
+  background-color: var(--color-pale-white);
+  color: var(--color-pale-dark);
+  cursor: var(--pointer-default-dark);
+}
+
 table {
   border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
 }
 
 table tr {
   border-bottom: 0.5px solid var(--color-triangle-unselected);
+}
+
+td {
+  padding: 10px;
+  position: relative;
+  min-width: 100px;
+}
+
+td:first-child {
+  width: 40%;
+  background-color: var(--color-powder-blue);
+}
+
+td:not(:first-child) {
+  width: 15%;
+  text-align: end;
 }
 
 a {
@@ -43,51 +77,16 @@ input[type='date']::-webkit-calendar-picker-indicator {
   pointer-events: none !important;
 }
 
-html {
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Darker Grotesque';
-  font-weight: 500;
-  background-color: var(--color-pale-white);
-  color: var(--color-pale-dark);
-  cursor: var(--pointer-default-dark);
-}
-
 .center {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.each-input-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  background: #f9f9f9;
-  padding: 12px;
-  border-radius: 10px;
-  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.1);
-  width: 220px;
-  text-align: center;
-  background-color: var(--color-powder-blue);
-  transition: all 0.5s ease-in-out 0s;
-}
-
-.each-input-wrapper span {
-  font-size: 14px;
-  font-weight: 600;
-}
-
 input {
   width: 100%;
   padding: 8px;
-  font-size: 14px;
+  font-size: clamp(0.625rem, 2vw, 0.875rem);
   border: 1px solid #ccc;
   border-radius: 6px;
   outline: none;
@@ -95,12 +94,8 @@ input {
   background-color: var(--color-pale-white);
 }
 
-.each-input-wrapper input:focus {
-  box-shadow: 0px 0px 5px var(--color-powder-blue);
-}
-
 .submit-button {
-  font-size: 16px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
   font-weight: 600;
   padding: 10px 20px;
   border: none;
@@ -125,7 +120,7 @@ input {
 }
 
 .general-single-line-request-result-display-content {
-  font-size: 14px;
+  font-size: clamp(0.625rem, 2vw, 0.875rem);
   font-weight: 300;
 }
 
@@ -135,7 +130,7 @@ select.general-select-content {
   border: 2px solid var(--color-dark-violet);
   border-radius: 8px;
   padding: 10px 15px;
-  font-size: 16px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
   cursor: var(--pointer-hand-dark);
   outline: none;
   transition: all 0.3s ease;
@@ -179,7 +174,7 @@ option:hover {
 }
 
 .footer-main-title {
-  font-size: 48px;
+  font-size: clamp(1.5rem, 2vw, 3rem);
   font-weight: 600;
 }
 

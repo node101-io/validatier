@@ -364,8 +364,8 @@ validatorSchema.statics.rankValidators = function (
       (err) => {
         if (err) return callback('bad_request', null);
         order == 'desc'
-          ? validatorsArray.sort((a: any, b: any) => (b[sort_by as keyof typeof b] || 0) - (a[sort_by as keyof typeof a] || 0))
-          : validatorsArray.sort((a: any, b: any) => (a[sort_by as keyof typeof a] || 0) - (b[sort_by as keyof typeof b] || 0))
+          ? validatorsArray.sort((a: any, b: any) => (b[sort_by] || 0) - (a[sort_by] || 0))
+          : validatorsArray.sort((a: any, b: any) => (a[sort_by] || 0) - (b[sort_by] || 0))
 
         return callback(null, validatorsArray)
       }

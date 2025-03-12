@@ -25,7 +25,10 @@ const indexGetController = (req: Request, res: Response): void => {
           },
         },
         validators,
-        cookies: req.cookies,
+        selectedDateBottom: req.cookies.selectedDateBottom,
+        selectedDateTop: req.cookies.selectedDateTop,
+        specificRangeName: req.cookies.specificRangeName,
+        specificRange: req.cookies.specificRange,
         chains,
         selectedChain: selectedChain ? selectedChain : ''
       });

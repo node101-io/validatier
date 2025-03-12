@@ -173,7 +173,7 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
       updateDateInputs();
     } else if (event.target.classList.contains('date')) {
 
-      event.target.parentNode.childNodes.forEach(eachLeftWrapperChoice => {
+      document.querySelectorAll('.left-wrapper-each-choice').forEach(eachLeftWrapperChoice => {
         eachLeftWrapperChoice.classList.remove('selected');
       })
       document.getElementById('custom').classList.add('selected');

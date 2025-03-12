@@ -10,12 +10,13 @@ function renderTableHeader (sort_by, order) {
   ];
   const headersRow = document.createElement('tr');
   const tdValidators = document.createElement('td');
-  tdValidators.style.marginLeft = '20px';
   tdValidators.textContent = 'Validators';
+  tdValidators.style.paddingLeft = '40px';
   tdValidators.classList.add('each-table-header-title');
   headersRow.appendChild(tdValidators);
   headersArray.forEach(header => {
     const td = document.createElement('td');
+    if (header.id == 'sold') td.style.paddingRight = '20px';
     const wrapperDiv = document.createElement('div');
     wrapperDiv.classList.add('each-table-header-wrapper');
     wrapperDiv.id = header.id;
@@ -40,7 +41,7 @@ function renderTableHeader (sort_by, order) {
   
       const tooltipWrapper = document.createElement('div');
       tooltipWrapper.classList.add('each-tooltip-info-hover', 'center');
-      tooltipWrapper.style.marginBottom = '-4px';
+      tooltipWrapper.style.marginBottom = '-7px';
       tooltipWrapper.style.marginLeft = '-5px';
   
       const infoIcon = document.createElement('img');

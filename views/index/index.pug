@@ -2,10 +2,10 @@ extends ../partials/head
 block content 
   .all-main-wrapper 
     .header-main-wrapper 
-      .header-banner-wrapper(style='gap: 10px; display: flex; align-items: center;')
-        .banner-logo-wrapper(class='center' style='height: 100%')
+      .header-banner-wrapper
+        .banner-logo-wrapper(class='center')
           img(src='/res/images/logo.svg', alt='node101' class='center')
-        .banner-title-content(style='font-size: 24px; font-weight: 700') VALIDATOR LIST
+        .banner-title-content VALIDATOR LIST
       .header-network-switch-wrapper
         .network-switch-header#network-switch-header
           .network-switch-network-image-wrapper 
@@ -20,7 +20,7 @@ block content
             input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search chain name / id')
           each chain in chains 
             .each-chain-wrapper(style='display: flex; align-items: center; padding: 10px 5px' id=`${chain.chain_id}`)
-              .network-switch-network-image-wrapper 
+              .network-switch-network-image-wrapper(class='center')
                 img#current-network-img(src=`${chain.image}` style='width: 25px; height: 25px; margin-right: 10px;')
               .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
                 .network-switch-network-title(style='text-wrap: nowrap')#current-network-name= chain.pretty_name
@@ -45,11 +45,11 @@ block content
             .selected-range 
               span.date-interval-description 
                 include ../icons/calendar.pug
-                span#header-selected-range-description= cookies.specificRangeName ? cookies.specificRangeName : 'All time'
+                span#header-selected-range-description= specificRangeName ? specificRangeName : 'All time'
               span.date-range
-                span#header-range-bottom-block= cookies.selectedDateBottom ? new Date(cookies.selectedDateBottom).toLocaleDateString('en-GB') : 'Genesis'
+                span#header-range-bottom-block= selectedDateBottom ? new Date(selectedDateBottom).toLocaleDateString('en-GB') : 'Genesis'
                 span  - 
-                span#header-range-top-block= new Date(cookies.selectedDateTop ? cookies.selectedDateTop : '').toLocaleDateString('en-GB')
+                span#header-range-top-block= new Date(selectedDateTop ? selectedDateTop : '').toLocaleDateString('en-GB')
               .dropdown-icon(style='margin-bottom: -6px;')
                 include ../icons/chevron.pug
             .picker-main-wrapper
@@ -70,16 +70,16 @@ block content
                       ]
                     ul
                       each option in options
-                        li.left-wrapper-each-choice(class=`${cookies.specificRange == option.id ? 'selected' : ''}` id=option.id) #{option.label}
+                        li.left-wrapper-each-choice(class=`${specificRange == option.id ? 'selected' : ''}` id=option.id) #{option.label}
 
                 .calendar-wrapper
                   .calendar 
                     .date-input(style='display: none')
-                      input.each-date-input(type='date' id='periodic-query-bottom-timestamp' value=`${cookies.selectedDateBottom ? cookies.selectedDateBottom : ''}`)
+                      input.each-date-input(type='date' id='periodic-query-bottom-timestamp' value=`${selectedDateBottom ? selectedDateBottom : ''}`)
                       span —
-                      input.each-date-input(type='date' id='periodic-query-top-timestamp' value=`${cookies.selectedDateTop ? cookies.selectedDateTop : ''}`)
+                      input.each-date-input(type='date' id='periodic-query-top-timestamp' value=`${selectedDateTop ? selectedDateTop : ''}`)
                     .date-input-month-year-info-content
-                      div#current-month-and-year-display(style='font-size: 20px; font-weight: 600; margin-right: auto;')
+                      div.current-month-and-year-display#current-month-and-year-display
                       div(style='transform: rotateZ(90deg); margin-right: 20px;')#previous-month
                         include ../icons/chevron_dark.pug
                       div(style='transform: rotateZ(-90deg)')#next-month
@@ -121,7 +121,7 @@ block content
               {name: 'Sold', id: 'sold', popup_text: 'Withdraw - Self stake'}, 
             ]
           tr.validator-table-header
-            td.each-table-header-title(style='margin-left: 20px;') Validators
+            td.each-table-header-title Validators
             each header in headers_array
               td
                 .each-table-header-wrapper-popup-content
@@ -141,15 +141,32 @@ block content
             tr.each-validator-wrapper(id=`${validator.operator_address}`)
               td(style='display: flex; align-items: center; gap: 18px;')
                 .validator-image
-                  .ranking-number-content(class='center')= index + 1
+                  .ranking-number-content= index + 1
                   img.validator-image-content(src=`${validator.temporary_image_uri ? validator.temporary_image_uri : '/res/images/default_validator_photo.png'}`)
                 .validator-textual-info-wrapper 
                   .validator-moniker #{validator.moniker}
-                  .validator-operator-address #{validator.operator_address}
-              td.validator-each-numeric-info= (validator['self_stake'] / 1e6).toFixed(2) + ' ATOM'
-              td.validator-each-numeric-info= (validator['withdraw'] / 1e6).toFixed(2) + ' ATOM'
-              td.validator-each-numeric-info= (validator['ratio']).toFixed(2)
-              td.validator-each-numeric-info= (validator['sold'] / 1e6).toFixed(2) + ' ATOM'
+                  .validator-operator-address 
+                    .validator-operator-address-content #{validator.operator_address}
+                    .validator-operator-address-copy-button(class='center')
+                      img(src='/res/images/clipboard.svg')
+                  #{validator.operator_address}
+              -
+                function shortNumberFormat(num) {
+                  const sign = num < 0 ? '-' : '';
+                  num = Math.abs(num);
+                  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
+                  if (num >= 10_000) return Math.floor(num / 1_000) + "K";
+
+                  if (num >= 1_000) return num.toFixed(0);
+                  if (num >= 100) return num.toFixed(1);
+                  if (num >= 0) return num.toFixed(2);
+
+                  return sign + num.toString();
+                }
+              td.validator-each-numeric-info= shortNumberFormat(validator['self_stake'] / 1e6) + ' ATOM'
+              td.validator-each-numeric-info= shortNumberFormat(validator['withdraw'] / 1e6) + ' ATOM'
+              td.validator-each-numeric-info= shortNumberFormat(validator['ratio'])
+              td.validator-each-numeric-info= shortNumberFormat(validator['sold'] / 1e6) + ' ATOM'
     .footer-main-wrapper(class='center')
       .footer-main-title Connect us 
       .footer-socials-wrapper(class='center')

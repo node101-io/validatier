@@ -1,8 +1,8 @@
 
 import mongoose, { Schema, Model } from 'mongoose';
-import Validator, { ValidatorInterface } from '../Validator/Validator.js';
+import Validator from '../Validator/Validator.js';
 import { isRecordChanged } from './functions/isRecordChanged.js';
-import { generateChangeObjectToSave } from './functions/generateChangeObjectToSave.js';
+import { OldOrNewBodyInterface, generateChangeObjectToSave } from './functions/generateChangeObjectToSave.js';
 import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
 
 export interface ValidatorChangeEventInterface {
@@ -78,7 +78,7 @@ validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (
     .then((validator) => {
       if (!validator) return callback('fetch_error', null);
 
-      isRecordChanged(validator, body, ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares', 'keybase_id'], (err: string, changedAttributes) => {
+      isRecordChanged(validator, body, ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares', 'keybase_id'], (err: string, changedAttributes: (keyof OldOrNewBodyInterface)[] | null) => {
         if (err) return callback(err, null);
         if (!changedAttributes || changedAttributes.length <= 0) return callback(null, true); 
 

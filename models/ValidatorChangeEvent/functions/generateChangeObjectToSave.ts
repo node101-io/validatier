@@ -14,9 +14,10 @@ export interface OldOrNewBodyInterface {
   commission_rate?: string;
   bond_shares?: string;
   liquid_shares?: string;
+  keybase_id?: string;
 }
 
-export const generateChangeObjectToSave = function (changedAttributes: string[], oldBody: OldOrNewBodyInterface, newBody: OldOrNewBodyInterface, callback: (err: string | null, result: ChangeObjectResultInterface | null) => any) {
+export const generateChangeObjectToSave = function (changedAttributes: (keyof OldOrNewBodyInterface)[], oldBody: OldOrNewBodyInterface, newBody: OldOrNewBodyInterface, callback: (err: string | null, result: ChangeObjectResultInterface | null) => any) {
 
   let oldBodyResult: string[] = [];
   let newBodyResult: string[] = [];
@@ -26,12 +27,12 @@ export const generateChangeObjectToSave = function (changedAttributes: string[],
     changedAttributes.length, 
     (i, next) => {
 
-      let changedAttribute: string = changedAttributes[i];
+      let changedAttribute: keyof OldOrNewBodyInterface = changedAttributes[i];
       
       if (!ALLOWED_ATTRIBUTE_LIST.includes(changedAttribute)) return next();
 
-      const oldValue = oldBody[changedAttribute as keyof typeof oldBody];
-      const newValue = newBody[changedAttribute as keyof typeof oldBody];
+      const oldValue = oldBody[changedAttribute];
+      const newValue = newBody[changedAttribute];
 
       if (!oldValue || !newValue) return next();
 

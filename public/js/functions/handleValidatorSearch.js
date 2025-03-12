@@ -2,7 +2,7 @@
 function handleValidatorSearch () {
   const validatorFilterInput = document.getElementById('validator-filter-input');
   const monikers = Array.from(document.querySelectorAll('.validator-moniker')).map(each => each.innerHTML);
-  const operatorAddresses = Array.from(document.querySelectorAll('.validator-operator-address')).map(each => each.innerHTML);
+  const operatorAddresses = Array.from(document.querySelectorAll('.validator-operator-address-content')).map(each => each.innerHTML);
   
   validatorFilterInput.addEventListener('keyup', (event) => {
 

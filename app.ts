@@ -6,7 +6,6 @@ import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import path from 'path';
 import { rateLimit } from 'express-rate-limit';
-import session from 'express-session';
 
 import compositeEventBlockRouter from './routes/compositeEventBlockRouter.js';
 import indexRouter from './routes/indexRouter.js';
@@ -41,15 +40,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET as string,
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false },
-  })
-);
-
 
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
 

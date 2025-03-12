@@ -1,3 +1,15 @@
+function shortNumberFormat(num) {
+  const sign = num < 0 ? '-' : '';
+  num = Math.abs(num);
+  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
+  if (num >= 10_000) return Math.floor(num / 1_000) + "K";
+
+  if (num >= 1_000) return num.toFixed(0);
+  if (num >= 100) return num.toFixed(1);
+  if (num >= 0) return num.toFixed(2);
+
+  return sign + num.toString();
+}
 
 function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
   if (response.err || !response.success) return;
@@ -42,7 +54,21 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
   
     const operatorAddressDiv = document.createElement('div');
     operatorAddressDiv.classList.add('validator-operator-address');
-    operatorAddressDiv.textContent = validator.operator_address;
+
+    const operatorAddressContentDiv = document.createElement('div');
+    operatorAddressContentDiv.classList.add('validator-operator-address-content');
+    operatorAddressContentDiv.innerHTML = validator.operator_address;
+
+    const operatorAddressIcon = document.createElement('div');
+    operatorAddressIcon.classList.add('validator-operator-address-copy-button');
+
+    const operatorAddressIconImageContent = document.createElement('img');
+    operatorAddressIconImageContent.classList.add('center');
+    operatorAddressIconImageContent.src = '/res/images/clipboard.svg';
+    operatorAddressIcon.appendChild(operatorAddressIconImageContent);
+
+    operatorAddressDiv.appendChild(operatorAddressContentDiv);
+    operatorAddressDiv.appendChild(operatorAddressIcon);
   
     textualInfoWrapper.appendChild(monikerDiv);
     textualInfoWrapper.appendChild(operatorAddressDiv);
@@ -57,10 +83,10 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
       return td;
     };
   
-    const selfStakeTd = createNumericTd((validator.self_stake / 1e6).toFixed(2) + ' ATOM');
-    const withdrawTd = createNumericTd((validator.withdraw / 1e6).toFixed(2) + ' ATOM');
-    const ratioTd = createNumericTd(validator.ratio.toFixed(2));
-    const soldTd = createNumericTd((validator.sold / 1e6).toFixed(2) + ' ATOM');
+    const selfStakeTd = createNumericTd(shortNumberFormat(validator.self_stake / 1e6) + ' ATOM');
+    const withdrawTd = createNumericTd(shortNumberFormat(validator.withdraw / 1e6) + ' ATOM');
+    const ratioTd = createNumericTd(shortNumberFormat(validator.ratio));
+    const soldTd = createNumericTd(shortNumberFormat(validator.sold / 1e6) + ' ATOM');
   
     tr.appendChild(tdInfo);
     tr.appendChild(selfStakeTd);
@@ -126,7 +152,7 @@ function renderValidators() {
       return generateValidatorRankingContent(cacheResponse, sort_by, sortOrderMapping)
     };
     serverRequest(
-      BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=${sort_by}&order=${sortOrderMapping[sort_by]}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&with_photos=true`,
+      BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=${sort_by}&order=${sortOrderMapping[sort_by]}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&with_photos`,
       'GET',
       {},
       (response) => {
@@ -135,4 +161,17 @@ function renderValidators() {
       }
     )
   })
+
+
+  document.body.addEventListener('click', (event) => {
+    if (!event.target.classList.contains('validator-operator-address') && !event.target.parentNode.classList.contains('validator-operator-address') && !event.target.parentNode.parentNode.classList.contains('validator-operator-address')) return;
+    let target = event.target;
+    while (!target.classList.contains('validator-operator-address')) target = target.parentNode;
+    navigator.clipboard.writeText(target.children[0].innerHTML);
+    target.children[1].children[0].src = '/res/images/check.svg';
+    setTimeout(() => {
+      target.children[1].children[0].src = '/res/images/clipboard.svg';
+    }, 1000);
+  })
+
 }
