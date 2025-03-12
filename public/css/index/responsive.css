@@ -16,4 +16,22 @@
   .dropdown li {
     padding: 4px;
   }
+
+  .validator-each-numeric-info {
+    width: 150px;
+  }
+
+  .each-validator-wrapper {
+    padding-left: 150px;
+  }
+
+  .each-validator-info-wrapper {
+    overflow: hidden;
+    position: absolute;
+    border-right: 2px solid var(--color-triangle-unselected);
+  }
+
+  .each-validator-info-wrapper:hover {
+    width: 100%;
+  }
 }

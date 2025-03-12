@@ -8,14 +8,22 @@ function renderTableHeader (sort_by, order) {
       { name: 'Ratio', id: 'ratio', popup_text: 'self stake / withdraw' },
       { name: 'Sold', id: 'sold', popup_text: 'withdraw - self stake' },
   ];
-  const headersRow = document.createElement('tr');
-  const tdValidators = document.createElement('td');
-  tdValidators.textContent = 'Validators';
-  tdValidators.style.paddingLeft = '40px';
-  tdValidators.classList.add('each-table-header-title');
+  const headersRow = document.createElement('div');
+  headersRow.classList.add('validator-table-header')
+  const tdValidators = document.createElement('div');
+  tdValidators.classList.add('each-table-header-wrapper');
+  tdValidators.classList.add('each-table-header-validator-info-header')
+
+  const tdValidatorsTitle = document.createElement('div')
+  tdValidatorsTitle.textContent = 'Validators';
+  tdValidatorsTitle.classList.add('each-table-header-title');
+
+  tdValidators.appendChild(tdValidatorsTitle);
+  
   headersRow.appendChild(tdValidators);
   headersArray.forEach(header => {
-    const td = document.createElement('td');
+    const td = document.createElement('div');
+    td.classList.add('each-table-header-wrapper');
     if (header.id == 'sold') td.style.paddingRight = '20px';
     const wrapperDiv = document.createElement('div');
     wrapperDiv.classList.add('each-table-header-wrapper');

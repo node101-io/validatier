@@ -1,6 +1,7 @@
 extends ../partials/head
 block content 
   .all-main-wrapper 
+    .inactivity-display-content
     .header-main-wrapper 
       .header-banner-wrapper
         .banner-logo-wrapper(class='center')
@@ -19,7 +20,7 @@ block content
           .network-switch-search-bar
             input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search chain name / id')
           each chain in chains 
-            .each-chain-wrapper(style='display: flex; align-items: center; padding: 10px 5px' id=`${chain.chain_id}`)
+            .each-chain-wrapper(style='display: flex; align-items: center; padding: 10px 5px' id=`${chain.chain_id}` chain_id=`${chain.chain_id}` chain_name=`${chain.pretty_name}` image=`${chain.image}`)
               .network-switch-network-image-wrapper(class='center')
                 img#current-network-img(src=`${chain.image}` style='width: 25px; height: 25px; margin-right: 10px;')
               .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
@@ -29,11 +30,11 @@ block content
       .general-title-description-wrapper
         h3 node101 | CosmosHub Validator Timeline
         p node101's journey as a CosmosHub validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.
-      .query-main-wrapper
+      .table-main-wrapper
         .table-filters
           .validator-filter-input-wrapper
             .validator-filter-input-content-wrapper 
-              .validator-search-icon
+              .validator-search-icon(class='center')
                 include ../icons/search.svg
               input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search name / operator address')
           .table-filters-subgroup 
@@ -87,13 +88,10 @@ block content
                         .days#month-wrapper
                 .buttons
                   button.reset Cancel
-                  button.apply#apply
-                    span Apply
-                    include ../icons/check.pug
+                  button.apply#apply Apply
             .export-main-wrapper 
               .export-wrapper-header(class='center' isOpen='false')#export-wrapper-toggle
                 include ../icons/export.csv
-                span.export-header-main-title Export CSV
               .export-wrapper-content
                 div(style='display: none')
                   div#export-sort-by ratio
@@ -108,7 +106,7 @@ block content
                 .export-choice-download-button(class='center')#export-choice-download-button
                   include ../icons/download.pug
                   span Download
-        table.validators-main-wrapper#validators-main-wrapper
+        .validators-main-wrapper#validators-main-wrapper
           - 
             const headers_array = [
               {name: 'Self stake', id: 'self_stake'}, 
@@ -116,26 +114,27 @@ block content
               {name: 'Ratio', id: 'ratio', popup_text: 'Self stake / Withdraw'}, 
               {name: 'Sold', id: 'sold', popup_text: 'Withdraw - Self stake'}, 
             ]
-          tr.validator-table-header
-            td.each-table-header-title Validators
+          .validator-table-header
+            .each-table-header-wrapper(class='each-table-header-validator-info-header')
+              .each-table-header-title Validators
             each header in headers_array
-              td
+              .each-table-header-wrapper
                 .each-table-header-wrapper-popup-content
                 .each-table-header-wrapper(id=`${header.id}`)
                   .each-table-header-title
-                    div= header.name
                     if header.popup_text
                       .each-table-popup-wrapper
                         .each-table-popup-info-content(class='center')= header.popup_text
                           .each-table-popup-info-arrow
                         .each-tooltip-info-hover(style='margin-bottom: -2px')
                           img(src='/res/images/info.svg')
+                    div= header.name
                   .each-table-header-sort-indicators 
                     .triangle-up
                     .triangle-down
           each validator, index in validators
-            tr.each-validator-wrapper(id=`${validator.operator_address}`)
-              td(style='display: flex; align-items: center; gap: 18px;')
+            .each-validator-wrapper(id=`${validator.operator_address}`)
+              .each-validator-info-wrapper
                 .ranking-number-content= index + 1
                 .validator-image
                   img.validator-image-content(src=`${validator.temporary_image_uri ? validator.temporary_image_uri : '/res/images/default_validator_photo.png'}`)
@@ -145,6 +144,8 @@ block content
                     .validator-operator-address-content(operator_address=`${validator.operator_address}`) #{validator.operator_address.slice(0,4) + '...' + validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)}
                     .validator-operator-address-copy-button(class='center')
                       img(src='/res/images/clipboard.svg')
+                if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
+                  .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`) Warning
               -
                 function shortNumberFormat(num) {
                   const sign = num < 0 ? '-' : '';
@@ -158,10 +159,10 @@ block content
 
                   return sign + num.toString();
                 }
-              td.validator-each-numeric-info= shortNumberFormat(validator['self_stake'] / 1e6) + ' ATOM'
-              td.validator-each-numeric-info= shortNumberFormat(validator['withdraw'] / 1e6) + ' ATOM'
-              td.validator-each-numeric-info= shortNumberFormat(validator['ratio'])
-              td.validator-each-numeric-info= shortNumberFormat(validator['sold'] / 1e6) + ' ATOM'
+              div.validator-each-numeric-info= shortNumberFormat(validator['self_stake'] / 1e6) + ' ATOM'
+              div.validator-each-numeric-info= shortNumberFormat(validator['withdraw'] / 1e6) + ' ATOM'
+              div.validator-each-numeric-info= shortNumberFormat(validator['ratio'])
+              div.validator-each-numeric-info= shortNumberFormat(validator['sold'] / 1e6) + ' ATOM'
     .footer-main-wrapper(class='center')
       .footer-main-title Connect us 
       .footer-socials-wrapper(class='center')

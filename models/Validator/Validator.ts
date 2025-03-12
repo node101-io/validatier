@@ -8,6 +8,7 @@ import CompositeEventBlock from '../CompositeEventBlock/CompositeEventBlock.js';
 import { isOperatorAddressValid, isPubkeyValid } from '../../utils/validationFunctions.js';
 import { getCsvExportData } from './functions/getCsvExportData.js';
 import { formatTimestamp } from '../../utils/formatTimestamp.js';
+import { mergeIntervals } from '../../utils/mergeIntervals.js';
 
 const MAX_DATABASE_TEXT_FIELD_LENGTH = 1e4;
 
@@ -270,10 +271,6 @@ validatorSchema.statics.deleteValidator = function (
     )
     .then((deletedValidator) => {
       if (!deletedValidator) return callback('bad_request', null);
-
-      deletedValidator.moniker = deletedValidator.moniker + '-deactived-' + (new Date(deletedValidator.deleted_at)).toLocaleDateString('en-GB');
-      deletedValidator.save();
-
       return callback(null, deletedValidator);
     })
     .catch(err => callback(err, null)) 
@@ -309,8 +306,10 @@ validatorSchema.statics.rankValidators = function (
     self_stake: number,
     withdraw: number,
     ratio: number,
-    sold: number
+    sold: number,
+    inactivityIntervals: number[]
   }[] = [];
+  const pushedValidatorOperatorAddressArray: string[] = [];
 
   Validator.find({
     created_at: { $lte: new Date(top_timestamp * 1000) },
@@ -324,18 +323,13 @@ validatorSchema.statics.rankValidators = function (
       validators.length,
       (i, next) => {
         const eachValidator: any = validators[i];
-
-        const adjustedDeletedAt = eachValidator.deleted_at ? eachValidator.deleted_at : new Date();
-
-        const bottomTimestamp = new Date(bottom_timestamp * 1000) < eachValidator.created_at ? new Date(eachValidator.created_at).getTime() : bottom_timestamp * 1000;
-        const topTimestamp = new Date(top_timestamp * 1000) > adjustedDeletedAt ? new Date(adjustedDeletedAt).getTime() : top_timestamp * 1000
-
+        
         CompositeEventBlock
           .getTotalPeriodicSelfStakeAndWithdraw(
             {
               operator_address: eachValidator.operator_address,
-              bottomTimestamp: bottomTimestamp,
-              topTimestamp: topTimestamp,
+              bottomTimestamp: bottom_timestamp * 1000,
+              topTimestamp: top_timestamp * 1000,
               searchBy: 'timestamp'
             },
             (err, totalPeriodicSelfStakeAndWithdraw) => {
@@ -345,6 +339,29 @@ validatorSchema.statics.rankValidators = function (
               const ratio = (totalPeriodicSelfStakeAndWithdraw?.self_stake ? totalPeriodicSelfStakeAndWithdraw?.self_stake : 0) / (totalPeriodicSelfStakeAndWithdraw?.withdraw ? totalPeriodicSelfStakeAndWithdraw?.withdraw : 1);
               const sold = (totalPeriodicSelfStakeAndWithdraw?.withdraw ? totalPeriodicSelfStakeAndWithdraw?.withdraw : 0) - (totalPeriodicSelfStakeAndWithdraw?.self_stake ? totalPeriodicSelfStakeAndWithdraw?.self_stake : 0);
 
+              const inactivityIntervals = [];
+
+              const adjustedDeletedAt = eachValidator.deleted_at ? eachValidator.deleted_at : new Date(2e13);
+
+              const bottomInactivityPeriod = new Date(bottom_timestamp * 1000) < eachValidator.created_at ? true : false;
+              const topInactivityPeriod = adjustedDeletedAt < new Date(top_timestamp * 1000) ? true : false;
+
+              if (bottomInactivityPeriod) {
+                inactivityIntervals.push(bottom_timestamp * 1000);
+                inactivityIntervals.push((new Date(eachValidator.created_at)).getTime());
+              }
+
+              if (topInactivityPeriod) {
+                inactivityIntervals.push(top_timestamp * 1000);
+                inactivityIntervals.push((new Date(adjustedDeletedAt)).getTime());
+              }
+
+              if (pushedValidatorOperatorAddressArray.includes(eachValidator.operator_address)) {
+                const previousValidator = validatorsArray[pushedValidatorOperatorAddressArray.indexOf(eachValidator.operator_address)];
+                previousValidator.inactivityIntervals = mergeIntervals(inactivityIntervals, previousValidator.inactivityIntervals);
+                return next();
+              }
+
               const pushObjectData = {
                 operator_address: eachValidator.operator_address,
                 moniker: eachValidator.moniker,
@@ -352,11 +369,14 @@ validatorSchema.statics.rankValidators = function (
                 self_stake: selfStake ? selfStake : 0,
                 withdraw: withdraw ? withdraw : 0,
                 ratio: ratio,
-                sold: sold
+                sold: sold,
+                inactivityIntervals: inactivityIntervals
               };
 
               if (!with_photos) delete pushObjectData.temporary_image_uri;
+
               validatorsArray.push(pushObjectData);
+              pushedValidatorOperatorAddressArray.push(pushObjectData.operator_address);
               return next()
             }
           )

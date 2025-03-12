@@ -45,10 +45,7 @@ function handleExportEvents (sort_by, order, bottom_timestamp, top_timestamp) {
       document.getElementById('export-choice-download-button').appendChild(createSpinner(10));
 
       fetch(url)
-          .then(response => {
-              if (!response.ok) return;
-              return response.blob();
-          })
+          .then(response => response.blob())
           .then(blob => {
               const downloadUrl = URL.createObjectURL(blob);
               

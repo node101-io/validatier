@@ -2,12 +2,11 @@
 function handleValidatorSearch () {
   const validatorFilterInput = document.getElementById('validator-filter-input');
   const monikers = Array.from(document.querySelectorAll('.validator-moniker')).map(each => each.innerHTML);
-  const operatorAddresses = Array.from(document.querySelectorAll('.validator-operator-address-content')).map(each => each.innerHTML);
+  const operatorAddresses = Array.from(document.querySelectorAll('.validator-operator-address-content')).map(each => each.getAttribute('operator_address'));
   
   validatorFilterInput.addEventListener('keyup', (event) => {
 
-    if (!validatorFilterInput.value || validatorFilterInput.value.length < 4) return document.querySelectorAll('.each-validator-wrapper').forEach(each => each.style.display = 'table-row');;
-    document.getElementById('validator-filter-input-result-wrapper').innerHTML = '';
+    if (!validatorFilterInput.value || validatorFilterInput.value.length < 4) return document.querySelectorAll('.each-validator-wrapper').forEach(each => each.style.display = 'flex');;
     document.querySelectorAll('.each-validator-wrapper').forEach(each => each.style.display = 'none');
     for (let i = 0; i < monikers.length; i++) {
       const eachMoniker = monikers[i];
@@ -17,7 +16,7 @@ function handleValidatorSearch () {
         eachMoniker.includes(validatorFilterInput.value.trim().toLowerCase()) || 
         eachOperatorAddress.includes(validatorFilterInput.value.trim().toLowerCase())
       ) {
-        document.getElementById(operatorAddresses[i]).style.display = 'table-row';
+        document.getElementById(operatorAddresses[i]).style.display = 'flex';
       }
     }
   })

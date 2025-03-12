@@ -22,12 +22,10 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
 
     const validator = data[i];
 
-    const tr = document.createElement('tr');
+    const tr = document.createElement('div');
     tr.classList.add('each-validator-wrapper');
-    const tdInfo = document.createElement('td');
-    tdInfo.style.display = 'flex';
-    tdInfo.style.alignItems = 'center';
-    tdInfo.style.gap = '20px';
+    const tdInfo = document.createElement('div');
+    tdInfo.classList.add('each-validator-info-wrapper');
   
     const validatorImageDiv = document.createElement('div');
     validatorImageDiv.classList.add('validator-image');
@@ -56,7 +54,9 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
 
     const operatorAddressContentDiv = document.createElement('div');
     operatorAddressContentDiv.classList.add('validator-operator-address-content');
-    operatorAddressContentDiv.innerHTML = validator.operator_address;
+    
+    operatorAddressContentDiv.setAttribute('operator_address', validator.operator_address);
+    operatorAddressContentDiv.innerHTML = validator.operator_address.slice(0,4) + '...' + validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length);
 
     const operatorAddressIcon = document.createElement('div');
     operatorAddressIcon.classList.add('validator-operator-address-copy-button');
@@ -77,7 +77,7 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     tdInfo.appendChild(textualInfoWrapper);
   
     const createNumericTd = (value) => {
-      const td = document.createElement('td');
+      const td = document.createElement('div');
       td.classList.add('validator-each-numeric-info');
       td.textContent = value;
       return td;
@@ -113,6 +113,11 @@ function renderValidators() {
     const isHeaderClickedChecker = event.target.classList.contains('each-table-header-wrapper') || event.target.parentNode.classList.contains('each-table-header-wrapper') || event.target.parentNode.parentNode.classList.contains('each-table-header-wrapper');
     const isApplyClickedChecker = event.target.classList.contains('apply') || event.target.parentNode.classList.contains('apply')
     if (!isHeaderClickedChecker && !isApplyClickedChecker) return;
+
+    document.querySelectorAll('.validator-image').forEach(each => each.classList.add('skeleton-image'));
+    document.querySelectorAll('.validator-moniker').forEach(each => each.classList.add('skeleton-text'));
+    document.querySelectorAll('.validator-each-numeric-info').forEach(each => each.classList.add('skeleton-text'));
+    document.querySelectorAll('.validator-operator-address').forEach(each => each.remove());
 
     document.querySelector('.picker-main-wrapper').style.transform = 'perspective(1000px) rotateX(-90deg)';
     document.querySelector('.picker-main-wrapper').style.opacity = 0;
