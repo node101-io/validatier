@@ -140,18 +140,19 @@ block content
                   img.validator-image-content(src=`${validator.temporary_image_uri ? validator.temporary_image_uri : '/res/images/default_validator_photo.png'}`)
                 .validator-textual-info-wrapper 
                   .validator-moniker #{validator.moniker}
+                    if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
+                      .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
+                        img(src='/res/images/warning.svg')
                   .validator-operator-address
                     .validator-operator-address-content(operator_address=`${validator.operator_address}`) #{validator.operator_address.slice(0,4) + '...' + validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)}
                     .validator-operator-address-copy-button(class='center')
                       img(src='/res/images/clipboard.svg')
-                if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
-                  .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`) Warning
               -
                 function shortNumberFormat(num) {
                   const sign = num < 0 ? '-' : '';
                   num = Math.abs(num);
-                  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
-                  if (num >= 10_000) return Math.floor(num / 1_000) + "K";
+                  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + 'M';
+                  if (num >= 10_000) return Math.floor(num / 1_000) + 'K';
 
                   if (num >= 1_000) return num.toFixed(0);
                   if (num >= 100) return num.toFixed(1);

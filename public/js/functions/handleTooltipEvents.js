@@ -8,13 +8,13 @@ function handleTooltipEvents () {
   })
 
   document.body.addEventListener('mouseover', (event) => {
-    if (!event.target.classList.contains('validator-inactivity-display')) return document.querySelectorAll('.inactivity-display-content').forEach(each => {
-      each.style.display = 'none';
-      each.innerHTML = '';
-    });
-    const inactivityIntervals = event.target.getAttribute('value').split(',');
+    let target = event.target;
+    while (target != document.body && !target.classList.contains('validator-inactivity-display')) target = target.parentNode;
+    if (!target.classList.contains('validator-inactivity-display')) return document.querySelectorAll('.inactivity-display-content').forEach(each => each.style.display = 'none');
+    const inactivityIntervals = target.getAttribute('value').split(',');
 
     const inactivityDisplayContent = document.querySelector('.inactivity-display-content');
+    inactivityDisplayContent.innerHTML = '';
     inactivityDisplayContent.style.display = 'flex';
     
     inactivityDisplayContent.style.left = event.pageX + 5 + 'px';

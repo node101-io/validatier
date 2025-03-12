@@ -148,15 +148,6 @@
   --validator-moniker-font-weight: 500;
   --validator-moniker-gap: 10px;
 
-  --validator-inactivity-display-background-color: rgb(255, 204, 128);
-  --validator-inactivity-display-color: rgb(138, 79, 0);
-  --validator-inactivity-display-border-left-color: rgb(255, 152, 0);
-  --validator-inactivity-display-border-left-size: 5px;
-  --validator-inactivity-display-padding: 5px;
-  --validator-inactivity-display-font-size: 14px;
-  --validator-inactivity-display-border-radius: 5px;
-  --validator-inactivity-display-font-weight: 400;
-
   --inactivity-display-content-padding: 10px;
   --inactivity-display-content-border-size: 4px;
   --inactivity-display-content-border-color: rgb(255, 152, 0);
@@ -691,16 +682,6 @@
   font-weight: var(--validator-moniker-font-weight);
   gap: var(--validator-moniker-gap);
   display: flex;
-}
-
-.validator-inactivity-display {
-  background-color: var(--validator-inactivity-display-background-color);
-  color: var(--validator-inactivity-display-color);
-  border-left: var(--validator-inactivity-display-border-left-size) solid var(--validator-inactivity-display-border-left-color);
-  padding: var(--validator-inactivity-display-padding);
-  font-size: var(--validator-inactivity-display-font-size);
-  border-radius: var(--validator-inactivity-display-border-radius);
-  font-weight: var(--validator-inactivity-display-font-weight);
 }
 
 .inactivity-display-content {
