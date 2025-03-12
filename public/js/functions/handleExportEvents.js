@@ -1,4 +1,8 @@
 
+function formatTimestamp (timestamp) {
+  return new Date(timestamp * 1000).toISOString().split("T")[0];
+}
+
 function handleExportEvents (sort_by, order, bottom_timestamp, top_timestamp) {
 
   let selectedRangeValue = 0;
@@ -34,12 +38,32 @@ function handleExportEvents (sort_by, order, bottom_timestamp, top_timestamp) {
       const sortOrder = document.getElementById(order).innerHTML;
       const range = parseInt(selectedRangeValue);
 
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.href = BASE_URL + EXPORT_API_ENDPOINT + `?sort_by=${sortBy}&order=${sortOrder}&range=${range}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}`;
-      a.target = '_self';
-      a.click();
+      const url = BASE_URL + EXPORT_API_ENDPOINT + `?sort_by=${sortBy}&order=${sortOrder}&range=${range}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}`;
+
+      const downloadButtonInnerHTML = document.getElementById('export-choice-download-button').innerHTML;
+      document.getElementById('export-choice-download-button').innerHTML = '';
+      document.getElementById('export-choice-download-button').appendChild(createSpinner(10));
+
+      fetch(url)
+          .then(response => {
+              if (!response.ok) return;
+              return response.blob();
+          })
+          .then(blob => {
+              const downloadUrl = URL.createObjectURL(blob);
+              
+              const a = document.createElement('a');
+              a.href = downloadUrl;
+              a.download = `validator-timeline-${formatTimestamp(parseInt(bottomTimestamp))}-${formatTimestamp(parseInt(topTimestamp))}.zip`;
+              
+              document.body.appendChild(a);
+              a.click();
+              
+              document.body.removeChild(a);
+              URL.revokeObjectURL(downloadUrl);
+              document.getElementById('export-choice-download-button').innerHTML = downloadButtonInnerHTML;
+          })
+          .catch(error => (''));      
     }
   })
 }
