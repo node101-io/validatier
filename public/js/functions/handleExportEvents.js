@@ -3,7 +3,7 @@ function formatTimestamp (timestamp) {
   return new Date(timestamp * 1000).toISOString().split("T")[0];
 }
 
-function handleExportEvents (sort_by, order, bottom_timestamp, top_timestamp) {
+function handleExportEvents () {
 
   let selectedRangeValue = 0;
 
@@ -29,13 +29,13 @@ function handleExportEvents (sort_by, order, bottom_timestamp, top_timestamp) {
       const BASE_URL = !window.location.href.includes('#') ? window.location.href : window.location.href.split('#')[0];
       const EXPORT_API_ENDPOINT = 'validator/export_csv';
 
-      const bottomDate = document.getElementById(bottom_timestamp).value;
-      const topDate = document.getElementById(top_timestamp).value
+      const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
+      const topDate = document.getElementById('periodic-query-top-timestamp').value
 
       const bottomTimestamp = Math.floor(new Date(bottomDate).getTime() / 1000);
       const topTimestamp = Math.floor(new Date(topDate).getTime() / 1000);
-      const sortBy = document.getElementById(sort_by).innerHTML;
-      const sortOrder = document.getElementById(order).innerHTML;
+      const sortBy = document.getElementById('export-sort-by').innerHTML;
+      const sortOrder = document.getElementById('export-order').innerHTML;
       const range = parseInt(selectedRangeValue);
 
       const url = BASE_URL + EXPORT_API_ENDPOINT + `?sort_by=${sortBy}&order=${sortOrder}&range=${range}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}`;

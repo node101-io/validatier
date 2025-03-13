@@ -24,7 +24,6 @@ function renderTableHeader (sort_by, order) {
   headersArray.forEach(header => {
     const td = document.createElement('div');
     td.classList.add('each-table-header-wrapper');
-    if (header.id == 'sold') td.style.paddingRight = '20px';
     const wrapperDiv = document.createElement('div');
     wrapperDiv.classList.add('each-table-header-wrapper');
     wrapperDiv.id = header.id;
@@ -42,7 +41,7 @@ function renderTableHeader (sort_by, order) {
       contentWrapper.classList.add('each-table-popup-info-content', 'center');
       contentWrapper.innerHTML = header.popup_text
       contentWrapper.style.bottom = '200%';
-      contentWrapper.style.left = '-60px';  
+      contentWrapper.style.left = '-50px';  
 
       const arrowWrapper = document.createElement('div');
       arrowWrapper.classList.add('each-table-popup-info-arrow')
@@ -78,8 +77,8 @@ function renderTableHeader (sort_by, order) {
 
     sortIndicatorsDiv.appendChild(triangleUp);
     sortIndicatorsDiv.appendChild(triangleDown);
-    wrapperDiv.appendChild(titleDiv);
     if (header.popup_text) wrapperDiv.appendChild(popupWrapper);
+    wrapperDiv.appendChild(titleDiv);
     wrapperDiv.appendChild(sortIndicatorsDiv);
     td.appendChild(wrapperDiv);
     headersRow.appendChild(td);

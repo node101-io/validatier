@@ -20,6 +20,7 @@
 
   --skeleton-background-color: rgb(204, 204, 204);
   --skeleton-text-border-radius: 20px;
+  --skeleton-transition-duration: 0.2s;
 
   --spinner-border-size: 4px;
   --spinner-border-radius: 50%;
@@ -134,11 +135,13 @@ input {
   color: transparent !important;
   background-color: var(--skeleton-background-color);
   border-radius: var(--skeleton-text-border-radius) !important;
+  transition: all var(--skeleton-transition-duration) ease 0s;
 }
 
 .skeleton-image {
   color: transparent !important;
   background-color: var(--skeleton-background-color);
+  transition: all var(--skeleton-transition-duration) ease 0s;
 }
 
 .skeleton-image img {

@@ -1,8 +1,8 @@
 function shortNumberFormat(num) {
   const sign = num < 0 ? '-' : '';
   num = Math.abs(num);
-  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
-  if (num >= 10_000) return Math.floor(num / 1_000) + "K";
+  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + 'M';
+  if (num >= 10_000) return Math.floor(num / 1_000) + 'K';
 
   if (num >= 1_000) return num.toFixed(0);
   if (num >= 100) return num.toFixed(1);
@@ -42,12 +42,31 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     validatorImageDiv.appendChild(img);
   
     const textualInfoWrapper = document.createElement('div');
-    textualInfoWrapper.style.marginLeft = '-2px';
     textualInfoWrapper.classList.add('validator-textual-info-wrapper');
   
     const monikerDiv = document.createElement('div');
     monikerDiv.classList.add('validator-moniker');
-    monikerDiv.textContent = validator.moniker;
+
+    const validatorMonikerTextContentWrapper = document.createElement('div');
+    validatorMonikerTextContentWrapper.classList.add('validator-moniker-text-content');
+    const validatorMonikerInnerTextContent = document.createElement('span');
+    validatorMonikerInnerTextContent.classList.add('validator-moniker-text');
+    validatorMonikerInnerTextContent.innerHTML = validator.moniker;
+
+    validatorMonikerTextContentWrapper.appendChild(validatorMonikerInnerTextContent);
+    monikerDiv.appendChild(validatorMonikerTextContentWrapper);
+
+    if (validator.inactivityIntervals && validator.inactivityIntervals.length > 0) {
+      const inactivityDiv = document.createElement('div');
+      inactivityDiv.classList.add('validator-inactivity-display', 'center');
+      inactivityDiv.setAttribute('value', `${validator.inactivityIntervals}`);
+  
+      const warningImg = document.createElement('img');
+      warningImg.src = '/res/images/warning.svg';
+  
+      inactivityDiv.appendChild(warningImg);
+      monikerDiv.appendChild(inactivityDiv);
+    }
   
     const operatorAddressDiv = document.createElement('div');
     operatorAddressDiv.classList.add('validator-operator-address');
@@ -107,6 +126,7 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
   
     document.getElementById('validators-main-wrapper').appendChild(tr);
   }
+  animateOverflowMonikers();
 }
 
 const rankingResponsesCache = {};
@@ -129,6 +149,7 @@ function renderValidators() {
     document.querySelectorAll('.validator-moniker').forEach(each => each.classList.add('skeleton-text'));
     document.querySelectorAll('.validator-each-numeric-info').forEach(each => each.classList.add('skeleton-text'));
     document.querySelectorAll('.validator-operator-address').forEach(each => each.remove());
+    document.querySelectorAll('.validator-inactivity-display').forEach(each => each.remove());
 
     document.querySelector('.picker-main-wrapper').style.transform = 'perspective(1000px) rotateX(-90deg)';
     document.querySelector('.picker-main-wrapper').style.opacity = 0;

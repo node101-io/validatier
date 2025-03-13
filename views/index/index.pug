@@ -139,7 +139,9 @@ block content
                 .validator-image
                   img.validator-image-content(src=`${validator.temporary_image_uri ? validator.temporary_image_uri : '/res/images/default_validator_photo.png'}`)
                 .validator-textual-info-wrapper 
-                  .validator-moniker #{validator.moniker}
+                  .validator-moniker 
+                    .validator-moniker-text-content 
+                      span.validator-moniker-text #{validator.moniker}
                     if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
                       .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
                         img(src='/res/images/warning.svg')

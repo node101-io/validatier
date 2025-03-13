@@ -144,10 +144,10 @@
 
   --validator-operator-address-font-size: 16px;
   --validator-operator-address-gap: 5px;
-  --validator-operator-address-width: 100%;
+  --validator-operator-address-width: 105%;
   --validator-operator-address-height: 0;
   --validator-operator-address-opacity: 0;
-  --validator-operator-address-transition-duration: 1s;
+  --validator-operator-address-transition-duration: 0.5s;
   --validator-operator-address-visible-height: 20px;
   --validator-operator-address-visible-opacity: 0.75;
   --validator-operator-address-visible-opacity-hover: 1;
@@ -176,7 +176,8 @@
 
   --validator-table-header-horizontal-padding: 2%;
 
-  --each-table-header-sort-indicators-margin-bottom: -4px;
+  --each-table-header-sort-indicators-margin-bottom: -5px;
+  --each-table-header-sort-indicators-margin-left: 5px;
   --each-table-header-sort-indicators-gap: 2px;
 
   --table-filters-border-bottom-size: 2px;
@@ -700,6 +701,27 @@
   gap: var(--validator-moniker-gap);
   display: flex;
 }
+.validator-moniker-text-content {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 150px;
+}
+
+.validator-moniker-text {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+@keyframes scrollText {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(150px - 105%));
+  }
+}
 
 .inactivity-display-content {
   padding: var(--inactivity-display-content-padding);
@@ -760,6 +782,7 @@
 
 .each-table-header-sort-indicators {
   margin-bottom: var(--each-table-header-sort-indicators-margin-bottom);
+  margin-left: var(--each-table-header-sort-indicators-margin-left);
   gap: var(--each-table-header-sort-indicators-gap);
   display: flex;
   flex-direction: column;
