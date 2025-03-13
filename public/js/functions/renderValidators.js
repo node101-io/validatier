@@ -113,10 +113,10 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
       return td;
     };
   
-    const selfStakeTd = createNumericTd(shortNumberFormat(validator.self_stake / 1e6) + ' ATOM');
-    const withdrawTd = createNumericTd(shortNumberFormat(validator.withdraw / 1e6) + ' ATOM');
+    const selfStakeTd = createNumericTd(shortNumberFormat(validator.self_stake / 1e6) + ' Atom');
+    const withdrawTd = createNumericTd(shortNumberFormat(validator.withdraw / 1e6) + ' Atom');
     const ratioTd = createNumericTd(shortNumberFormat(validator.ratio));
-    const soldTd = createNumericTd(shortNumberFormat(validator.sold / 1e6) + ' ATOM');
+    const soldTd = createNumericTd(shortNumberFormat(validator.sold / 1e6) + ' Atom');
   
     tr.appendChild(tdInfo);
     tr.appendChild(selfStakeTd);
@@ -125,6 +125,10 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     tr.appendChild(soldTd);
   
     document.getElementById('validators-main-wrapper').appendChild(tr);
+    
+    const eachValidatorSeperatorDiv = document.createElement('div');
+    eachValidatorSeperatorDiv.classList.add('each-validator-wrapper-seperator-line');
+    document.getElementById('validators-main-wrapper').appendChild(eachValidatorSeperatorDiv)
   }
   animateOverflowMonikers();
 }
@@ -157,7 +161,7 @@ function renderValidators() {
     let target = event.target;
     while (isHeaderClickedChecker && !target.classList.contains('each-table-header-wrapper')) target = target.parentNode;
 
-    const sort_by = target.id ? target.id : 'ratio';
+    const sort_by = (target.id != 'apply') ? target.id : 'ratio';
 
     sortOrderMapping[sort_by] == 'desc'
       ? target.id ? sortOrderMapping[sort_by] = 'asc' : 'desc'
@@ -236,7 +240,7 @@ function renderValidators() {
     const operatorAddressValueMiddle = operatorAddressValue.slice(4, operatorAddressValue.length - 4);
 
     operatorAddressWrapper.classList.add('validator-operator-address-visible');
-    operatorAddressWrapper.addEventListener('mouseover', (event) => {
+    operatorAddressWrapper.addEventListener('mouseenter', (event) => {
       if (window.innerWidth < 1200) return;
       setTimeout(() => {
         operatorAddressWrapper.children[0].classList.add('validator-operator-address-content-expanded')

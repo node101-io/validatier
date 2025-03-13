@@ -40,22 +40,15 @@ function renderTableHeader (sort_by, order) {
       const contentWrapper = document.createElement('div');
       contentWrapper.classList.add('each-table-popup-info-content', 'center');
       contentWrapper.innerHTML = header.popup_text
-      contentWrapper.style.bottom = '200%';
-      contentWrapper.style.left = '-50px';  
-
-      const arrowWrapper = document.createElement('div');
-      arrowWrapper.classList.add('each-table-popup-info-arrow')
   
       const tooltipWrapper = document.createElement('div');
       tooltipWrapper.classList.add('each-tooltip-info-hover', 'center');
-      tooltipWrapper.style.marginBottom = '-7px';
-      tooltipWrapper.style.marginLeft = '-5px';
   
       const infoIcon = document.createElement('img');
       infoIcon.src = '/res/images/info.svg';
+      infoIcon.style.marginBottom = '-5px';
       
       tooltipWrapper.appendChild(infoIcon);
-      contentWrapper.appendChild(arrowWrapper);
       popupWrapper.appendChild(contentWrapper);
       popupWrapper.appendChild(tooltipWrapper);
     }

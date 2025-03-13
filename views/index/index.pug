@@ -125,8 +125,7 @@ block content
                     if header.popup_text
                       .each-table-popup-wrapper
                         .each-table-popup-info-content(class='center')= header.popup_text
-                          .each-table-popup-info-arrow
-                        .each-tooltip-info-hover(style='margin-bottom: -2px')
+                        .each-tooltip-info-hover(style='margin-bottom: -1px')
                           img(src='/res/images/info.svg')
                     div= header.name
                   .each-table-header-sort-indicators 
@@ -165,10 +164,11 @@ block content
 
                   return sign + num.toString();
                 }
-              div.validator-each-numeric-info= shortNumberFormat(validator['self_stake'] / 1e6) + ' ATOM'
-              div.validator-each-numeric-info= shortNumberFormat(validator['withdraw'] / 1e6) + ' ATOM'
+              div.validator-each-numeric-info= shortNumberFormat(validator['self_stake'] / 1e6) + ' Atom'
+              div.validator-each-numeric-info= shortNumberFormat(validator['withdraw'] / 1e6) + ' Atom'
               div.validator-each-numeric-info= shortNumberFormat(validator['ratio'])
-              div.validator-each-numeric-info= shortNumberFormat(validator['sold'] / 1e6) + ' ATOM'
+              div.validator-each-numeric-info= shortNumberFormat(validator['sold'] / 1e6) + ' Atom'
+            .each-validator-wrapper-seperator-line
     .footer-main-wrapper(class='center')
       .footer-main-title Connect us 
       .footer-socials-wrapper(class='center')

@@ -1,9 +1,18 @@
 function handleTooltipEvents () {
-  document.body.addEventListener('mouseover', (event) => {
-    if (!event.target.classList.contains('each-tooltip-info-hover') && !event.target.parentNode.classList.contains('each-tooltip-info-hover') && !event.target.parentNode.parentNode.classList.contains('each-tooltip-info-hover')) return document.querySelectorAll('.each-table-popup-info-content-hover').forEach(each => each.classList.remove('each-table-popup-info-content-hover'));
+  document.body.addEventListener('mousemove', (event) => {
+    if (!event.target.classList.contains('each-tooltip-info-hover') && !event.target.parentNode.classList.contains('each-tooltip-info-hover') && !event.target.parentNode.parentNode.classList.contains('each-tooltip-info-hover')) return document.querySelectorAll('.each-table-popup-info-content-hover').forEach(each => {
+      each.classList.remove('each-table-popup-info-content-hover');
+      setTimeout(() => {
+        each.style.left = '0px';
+        each.style.top = '0px';
+      }, 0.25 * 1000);
+    });
     let target = event.target;
     while (!target.classList.contains('each-tooltip-info-hover')) target = target.parentNode;
     document.querySelectorAll('.each-table-popup-info-content-hover').forEach(each => each.classList.remove('each-table-popup-info-content-hover'))
+
+    target.previousSibling.style.left = event.pageX + 5 + 'px';
+    target.previousSibling.style.top = event.pageY + 5 + 'px';
     target.previousSibling.classList.add('each-table-popup-info-content-hover');
   })
 

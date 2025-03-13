@@ -35,7 +35,7 @@
   --each-table-popup-info-content-translate-y: -10px;
   --each-table-popup-info-content-opacity: 0;
   --each-table-popup-info-content-bottom: 105%;
-  --each-table-popup-info-content-transition: all 0.25s ease 0s;
+  --each-table-popup-info-content-transition-duration: 0.25s;
   --each-table-popup-info-content-height: 24px;
   --each-table-popup-info-content-width: 108px;
   --each-table-popup-info-content-left: -46px;
@@ -73,6 +73,7 @@
   --picker-content-wrapper-font-size: 14px;
   --picker-content-wrapper-margin-top: 5px;
 
+  --calendar-left-wrapper-width: 145px;
   --calendar-left-wrapper-padding: 5px;
   --calendar-left-wrapper-dropdown-ul-margin: 0;
   --calendar-left-wrapper-dropdown-ul-padding: 0;
@@ -121,7 +122,7 @@
   --each-validator-wrapper-vertical-padding: 10px;
   --each-validator-wrapper-horizontal-padding: 20px;
   --each-validator-wrapper-transition-duration: 0.25s;
-  --each-validator-wrapper-border-bottom-size: 0.5px;
+  --each-validator-wrapper-border-bottom-size: 0px;
   --each-validator-wrapper-min-width: 100%;
 
   --each-validator-info-wrapper-gap: 18px;
@@ -158,6 +159,8 @@
   --validator-moniker-font-size: 20px;
   --validator-moniker-font-weight: 500;
   --validator-moniker-gap: 10px;
+  --validator-moniker-text-content-width: 150px;
+  --validator-moniker-overflow-animation-scroll-percentage: 105%;
 
   --inactivity-display-content-padding: 10px;
   --inactivity-display-content-border-size: 4px;
@@ -171,10 +174,13 @@
   --validator-each-numeric-info-max-width: 200px;
   --validator-each-numeric-info-width-adjustment: 0px;
 
+  --each-validator-wrapper-seperator-line-height: 0.5px;
+
   --each-month-wrapper-width: 100%;
   --each-month-wrapper-flex-grow: 100%;
 
   --validator-table-header-horizontal-padding: 2%;
+  --validator-table-header-gap: 50px;
 
   --each-table-header-sort-indicators-margin-bottom: -5px;
   --each-table-header-sort-indicators-margin-left: 5px;
@@ -396,7 +402,7 @@
   transform: translateY(var(--each-table-popup-info-content-translate-y));
   opacity: var(--each-table-popup-info-content-opacity);
   bottom: var(--each-table-popup-info-content-bottom);
-  transition: var(--each-table-popup-info-content-transition);
+  transition: transform, opacity var(--each-table-popup-info-content-transition-duration) ease 0s;
   height: var(--each-table-popup-info-content-height);
   width: var(--each-table-popup-info-content-width);
   left: var(--each-table-popup-info-content-left);
@@ -423,7 +429,6 @@
 }
 
 .each-table-popup-wrapper {
-  position: relative;
   margin-right: var(--each-table-popup-wrapper-margin-right);
 }
 
@@ -474,6 +479,7 @@
 
 .left-wrapper {
   padding: var(--calendar-left-wrapper-padding);
+  width: var(--calendar-left-wrapper-width);
 }
 
 .left-wrapper-each-choice {
@@ -706,7 +712,7 @@
   position: relative;
   overflow: hidden;
   white-space: nowrap;
-  width: 150px;
+  width: var(--validator-moniker-text-content-width);
 }
 
 .validator-moniker-text {
@@ -719,8 +725,15 @@
     transform: translateX(0);
   }
   100% {
-    transform: translateX(calc(150px - 105%));
+    transform: translateX(calc(var(--validator-moniker-text-content-width) - var(--validator-moniker-overflow-animation-scroll-percentage)));
   }
+}
+
+.each-validator-wrapper-seperator-line {
+  position: absolute; 
+  width: calc(100% - (var(--inner-main-wrapper-horizontal-padding) * 2)); 
+  background-color: var(--color-triangle-unselected); 
+  height: var(--each-validator-wrapper-seperator-line-height);
 }
 
 .inactivity-display-content {
@@ -758,7 +771,7 @@
   padding: 0 var(--validator-table-header-horizontal-padding);
   display: flex;
   align-items: center;
-  gap: 50px;
+  gap: var(--validator-table-header-gap);
 }
 
 .each-table-header-wrapper {

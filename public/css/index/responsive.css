@@ -24,3 +24,31 @@
     --current-month-and-year-display-font-size: 16px;
   }
 }
+
+@media only screen and (max-width: 500px) {
+  :root {
+    --date-picker-z-index: 10;
+    --date-picker-height: 48px;
+  
+    --selected-range-font-size: 14px;
+
+    --calendar-left-wrapper-dropdown-li-padding: 4px;
+  
+    --calendar-left-wrapper-each-choice-font-size: 14px;
+    --calendar-left-wrapper-each-choice-font-weight: 400;
+  
+    --calendar-wrapper-padding: 10px;
+    --picker-main-wrapper-right: -50px;
+  
+    --date-input-month-year-info-content-font-size: 14px;
+    --calendar-left-wrapper-width: 120px;
+  
+    --days-header-wrapper-horizontal-margin: -5px;
+    --days-header-wrapper-horizontal-padding: 5px;
+    --days-header-wrapper-gap: 5px;
+  
+    --date-font-size: 14px;
+    --date-border-size: 4px;
+    --date-padding: 0px;
+  }
+}
