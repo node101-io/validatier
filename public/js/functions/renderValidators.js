@@ -56,18 +56,29 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     operatorAddressContentDiv.classList.add('validator-operator-address-content');
     
     operatorAddressContentDiv.setAttribute('operator_address', validator.operator_address);
-    operatorAddressContentDiv.innerHTML = validator.operator_address.slice(0,4) + '...' + validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length);
+
+    const firstFourSpan = document.createElement('div');
+    firstFourSpan.innerHTML = validator.operator_address.slice(0, 4);
+    const middleSpan = document.createElement('div');
+    middleSpan.classList.add('validator-operator-address-shrink-span');
+    middleSpan.innerHTML = '...';
+    const lastFourSpan = document.createElement('div');
+    lastFourSpan.innerHTML = validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length);
+
+    operatorAddressContentDiv.appendChild(firstFourSpan);
+    operatorAddressContentDiv.appendChild(middleSpan);
+    operatorAddressContentDiv.appendChild(lastFourSpan);
 
     const operatorAddressIcon = document.createElement('div');
-    operatorAddressIcon.classList.add('validator-operator-address-copy-button');
+    operatorAddressIcon.classList.add('validator-operator-address-copy-button', 'center');
 
     const operatorAddressIconImageContent = document.createElement('img');
     operatorAddressIconImageContent.classList.add('center');
     operatorAddressIconImageContent.src = '/res/images/clipboard.svg';
     operatorAddressIcon.appendChild(operatorAddressIconImageContent);
 
+    operatorAddressContentDiv.appendChild(operatorAddressIcon);
     operatorAddressDiv.appendChild(operatorAddressContentDiv);
-    operatorAddressDiv.appendChild(operatorAddressIcon);
   
     textualInfoWrapper.appendChild(monikerDiv);
     textualInfoWrapper.appendChild(operatorAddressDiv);
@@ -205,6 +216,7 @@ function renderValidators() {
 
     operatorAddressWrapper.classList.add('validator-operator-address-visible');
     operatorAddressWrapper.addEventListener('mouseover', (event) => {
+      if (window.innerWidth < 1200) return;
       setTimeout(() => {
         operatorAddressWrapper.children[0].classList.add('validator-operator-address-content-expanded')
         operatorAddressWrapper.classList.add('validator-operator-address-expanded');  

@@ -1,37 +1,26 @@
-
-@media only screen and (max-width: 500px) {
-  .export-header-main-title {
-    display: none;
-  }
-
-  .date {
-    border: 0.125rem solid transparent;
-    padding: 0.125rem;
-  }
-
-  .selected-date-bottom, .selected-date-top {
-    border: 0.125rem solid var(--color-middle-date-background);
-  }
-
-  .dropdown li {
-    padding: 4px;
-  }
-
-  .validator-each-numeric-info {
-    width: 150px;
-  }
-
-  .each-validator-wrapper {
-    padding-left: 150px;
-  }
-
-  .each-validator-info-wrapper {
-    overflow: hidden;
-    position: absolute;
-    border-right: 2px solid var(--color-triangle-unselected);
-  }
-
-  .each-validator-info-wrapper:hover {
-    width: 100%;
+@media only screen and (max-width: 900px) {
+  :root {
+    --banner-title-content-font-size: 20px;
+    --each-table-header-title-font-size: 20px;
+    --each-table-popup-info-content-font-size: 14px;
+    --selected-range-font-size: 14px;
+    --picker-content-wrapper-font-size: 14px;
+    --calendar-left-wrapper-each-choice-font-size: 14px;
+    --date-input-month-year-info-content-font-size: 14px;
+    --day-width-font-size: 14px;
+    --date-font-size: 14px;
+    --each-calendar-action-button-font-size: 14px;
+    --ranking-number-content-font-size: 14px;
+    --validator-operator-address-font-size: 14px;
+    --validator-moniker-font-size: 16px;
+    --inactivity-display-content-font-size: 14px;
+    --validator-each-numeric-info-font-size: 16px;
+    --export-wrapper-header-font-size: 14px;
+    --export-wrapper-content-font-size: 14px;
+    --export-choice-download-button-font-size: 14px;
+    --header-network-switch-wrapper-font-size: 16px;
+    --network-switch-network-chain-id-font-size: 14px;
+    --validator-filter-input-font-size: 14px;
+    --current-month-and-year-display-font-size: 16px;
   }
 }
