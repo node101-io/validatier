@@ -1,5 +1,9 @@
 
 @media only screen and (max-width: 1200px) {
+  :root {
+    --each-validator-wrapper-gap: 50px;
+    --validator-table-header-gap: 50px;
+  }
   .validator-operator-address:hover .dots {
     max-width: fit-content;
     opacity: 1;

@@ -15,6 +15,8 @@
   --header-banner-wrapper-gap: 10px;
   --banner-title-content-font-size: 24px;
   --banner-title-content-font-weight: 600;
+  --banner-title-content-margin-top: -4px;
+  --banner-title-content-letter-spacing: 1px;
   --banner-logo-wrapper-height: 100%;
 
   --each-table-header-wrapper-gap: 0px;
@@ -61,6 +63,7 @@
 
   --date-interval-description-padding: 10px;
   --date-interval-description-gap: 5px;
+  --date-interval-descriptio-text-margin-top: -2px;
 
   --picker-main-wrapper-box-shadow-color: rgba(23, 37, 76, 0.12);
   --picker-main-wrapper-transition-duration: 0.25s;
@@ -106,6 +109,7 @@
   --date-hover-background-color: rgb(221, 221, 221);
 
   --date-range-gap: 2px;
+  --date-range-margin-top: -2px;
   
   --selected-date-border-size: 4px;
   --selected-date-border-radius: 20px;
@@ -118,9 +122,9 @@
   --validators-main-wrapper-vertical-padding: 10px;
   
   --each-validator-wrapper-height: 40px;
-  --each-validator-wrapper-gap: 50px;
+  --each-validator-wrapper-gap: 120px;
   --each-validator-wrapper-vertical-padding: 10px;
-  --each-validator-wrapper-horizontal-padding: 20px;
+  --each-validator-wrapper-horizontal-padding: 10px;
   --each-validator-wrapper-transition-duration: 0.25s;
   --each-validator-wrapper-border-bottom-size: 0px;
   --each-validator-wrapper-min-width: 100%;
@@ -129,7 +133,7 @@
   --each-validator-info-wrapper-min-width: 200px;
   --each-validator-info-wrapper-max-width: 500px;
   --each-validator-info-wrapper-height: 100%;
-  --each-validator-info-wrapper-left: 1%;
+  --each-validator-info-wrapper-left: 10px;
   --each-validator-info-wrapper-vertical-padding: 20px;
   --each-validator-info-wrapper-transition-duration: 0.5s;
 
@@ -139,13 +143,15 @@
   --validator-image-gap: 10px;
   --validator-image-border-radius: 100%;
 
+  --ranking-number-content-margin-top-adjustment: -2px;
   --ranking-number-content-font-size: 16px;
 
   --validator-textual-info-wrapper-width: 80%;
+  --validator-textual-info-margin-top: -2px;
 
   --validator-operator-address-font-size: 16px;
   --validator-operator-address-gap: 5px;
-  --validator-operator-address-width: 105%;
+  --validator-operator-address-width: fit-content;
   --validator-operator-address-height: 0;
   --validator-operator-address-opacity: 0;
   --validator-operator-address-transition-duration: 0.5s;
@@ -153,6 +159,7 @@
   --validator-operator-address-visible-opacity: 0.75;
   --validator-operator-address-visible-opacity-hover: 1;
   --validator-operator-address-content-min-width: fit-content;
+  --validator-operator-address-copy-button: 2px;
   
   --validator-opeartor-address-dots-max-width: 20px;
   --validator-operator-address-animaton-transition-duration: 1s;
@@ -168,7 +175,7 @@
   --validator-moniker-font-size: 20px;
   --validator-moniker-font-weight: 500;
   --validator-moniker-gap: 10px;
-  --validator-moniker-text-content-width: 150px;
+  --validator-moniker-text-content-width: 120px;
   --validator-moniker-overflow-animation-scroll-percentage: 105%;
 
   --inactivity-display-content-padding: 10px;
@@ -188,8 +195,9 @@
   --each-month-wrapper-width: 100%;
   --each-month-wrapper-flex-grow: 100%;
 
-  --validator-table-header-horizontal-padding: 2%;
-  --validator-table-header-gap: 50px;
+  --validator-table-header-right-padding: 10px;
+  --validator-table-header-left-padding: 4%;
+  --validator-table-header-gap: 120px;
 
   --each-table-header-sort-indicators-margin-bottom: -5px;
   --each-table-header-sort-indicators-margin-left: 5px;
@@ -290,6 +298,8 @@
 }
 
 .banner-title-content {
+  margin-top: var(--banner-title-content-margin-top);
+  letter-spacing: var(--banner-title-content-letter-spacing);
   font-size: var(--banner-title-content-font-size);
   font-weight: var(--banner-title-content-font-weight);
 }
@@ -388,6 +398,11 @@
   font-weight: var(--network-switch-network-chain-id-font-weight);
 }
 
+.network-switch-drowdown-toggle {
+  transform-origin: center;
+  transition: all var(--dropdown-icon-transition-duration) ease 0s;
+}
+
 .table-main-wrapper {
   display: flex;
   flex-direction: column;
@@ -465,6 +480,10 @@
   align-items: center;
   padding: var(--date-interval-description-padding);
   gap: var(--date-interval-description-gap);
+}
+
+.date-interval-description-text {
+  margin-top: var(--date-interval-descriptio-text-margin-top);
 }
 
 .picker-main-wrapper {
@@ -563,6 +582,7 @@
 .date-range {
   display: flex;
   gap: var(--date-range-gap);
+  margin-top: var(--date-range-margin-top);
   width: fit-content;
 }
 
@@ -664,10 +684,12 @@
 .ranking-number-content {
   text-align: center;
   font-size: var(--ranking-number-content-font-size);
+  margin-top: var(--ranking-number-content-margin-top-adjustment);
 }
 
 .validator-textual-info-wrapper {
   text-wrap: nowrap;
+  margin-top: var(--validator-textual-info-margin-top);
   width: var(--validator-textual-info-wrapper-width);
 }
 
@@ -705,6 +727,10 @@
   opacity: var(--validator-operator-address-visible-opacity-hover);
 }
 
+.validator-operator-address-copy-button {
+  transform: translateY(var(--validator-operator-address-copy-button));
+}
+
 .validator-operator-address {
   display: flex;
   align-items: center;
@@ -721,27 +747,26 @@
 .dots {
   white-space: nowrap;
   display: inline-block;
+  overflow: visible;
   max-width: var(--validator-opeartor-address-dots-max-width);
-  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out var(--validator-operator-address-animaton-transition-delay), opacity var(--validator-operator-address-animaton-transition-duration) ease-in-out var(--validator-operator-address-animaton-transition-delay);
+  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out calc(var(--validator-operator-address-animaton-transition-delay) - 0.25s);
 }
 
 .middle-address {
   white-space: nowrap;
   display: inline-block;
   max-width: 0;
-  opacity: 0;
   overflow: hidden;
-  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out var(--validator-operator-address-animaton-transition-delay), opacity var(--validator-operator-address-animaton-transition-duration) ease-in-out var(--validator-operator-address-animaton-transition-delay);
+  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out var(--validator-operator-address-animaton-transition-delay);
 }
 
 .validator-operator-address:hover .dots {
+  overflow: hidden;
   max-width: 0;
-  opacity: 0;
 }
 
 .validator-operator-address:hover .middle-address {
   max-width: var(--validator-operator-address-hover-middle-address-max-width);
-  opacity: var(--validator-operator-address-hover-middle-address-opacity);
 }
 
 .validator-moniker {
@@ -811,7 +836,8 @@
 }
 
 .validator-table-header {
-  padding: 0 var(--validator-table-header-horizontal-padding);
+  padding-right: var(--validator-table-header-right-padding);
+  padding-left: var(--validator-table-header-left-padding);
   display: flex;
   align-items: center;
   gap: var(--validator-table-header-gap);

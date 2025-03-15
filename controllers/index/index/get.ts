@@ -29,6 +29,7 @@ const indexGetController = (req: Request, res: Response): void => {
         selectedDateTop: req.cookies.selectedDateTop,
         specificRangeName: req.cookies.specificRangeName,
         specificRange: req.cookies.specificRange,
+        startDay: req.cookies.startDay,
         chains,
         selectedChain: selectedChain ? selectedChain : ''
       });

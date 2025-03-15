@@ -7,7 +7,7 @@ import { Job_UpdateValidatorsImageUri } from './jobs/Job_UpdateValidatorsImageUr
 import { Job_SaveChains } from './jobs/Job_SaveChains.js';
 
 const SEPERATOR_LINE = '---------------------------------------------------';
-const TEST_TIME_INTERVAL_REGEX = '*/20 * * * * *';
+const TEST_TIME_INTERVAL_REGEX = '*/10 * * * * *';
 const EVERY_HOUR_REGEX_STRING = '0 * * * *';
 
 

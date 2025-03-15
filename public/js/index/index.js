@@ -8,7 +8,7 @@ window.onload = () => {
   handleNetworkSwitch(getCookie('network'));
   handleValidatorSearch();
   handleTooltipEvents();
-  handleCalendarEvents(currentYearValue, currentMonthValue)
+  handleCalendarEvents(currentYearValue, currentMonthValue, document.getElementById('calendar-format-toggle').value)
   renderValidators();
   handleExportEvents();
 }

@@ -8,19 +8,19 @@ block content
           img(src='/res/images/logo.svg', alt='node101' class='center')
         .banner-title-content VALIDATOR LIST
       .header-network-switch-wrapper
-        .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}`)
+        .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}`)
           .network-switch-network-image-wrapper 
             img#current-network-img(src=`${selectedChain.image ? selectedChain.image : ''}`)
           .network-switch-network-info-wrapper 
             .network-switch-network-title#current-network-name= selectedChain.pretty_name ? selectedChain.pretty_name : 'Cosmos Hub'
             .network-switch-network-chain-id#current-network-chain-id= selectedChain.chain_id ? selectedChain.chain_id : 'cosmos-hub-1'
-          .network-switch-drowdown-toggle
+          .network-switch-drowdown-toggle#network-switch-dropdown-arrow
             include ../icons/chevron.pug
         .network-switch-dropdown#network-switch-dropdown
           .network-switch-search-bar
             input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search chain name / id')
           each chain in chains 
-            .each-chain-wrapper(style='display: flex; align-items: center; padding: 10px 5px' id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}`)
+            .each-chain-wrapper(style='display: flex; align-items: center; padding: 10px 5px' id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}` symbol=`${chain.symbol}` decimals=`${chain.decimals}`)
               .network-switch-network-image-wrapper(class='center')
                 img#current-network-img(src=`${chain.image}` style='width: 25px; height: 25px; margin-right: 10px;')
               .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
@@ -42,7 +42,7 @@ block content
               .selected-range 
                 span.date-interval-description 
                   include ../icons/calendar.pug
-                  span#header-selected-range-description= specificRangeName ? specificRangeName : 'All time'
+                  span.date-interval-description-text#header-selected-range-description= specificRangeName ? specificRangeName : 'All time'
                 span.date-range
                   span#header-range-bottom-block= selectedDateBottom ? new Date(selectedDateBottom).toLocaleDateString('en-GB') : 'Genesis'
                   span  - 
@@ -56,11 +56,11 @@ block content
                       - 
                         const options = [
                           { id: 'all-time', label: 'All time', selected: true },
-                          { id: 'this-week', label: 'This week' },
                           { id: 'last-week', label: 'Last week' },
                           { id: 'last-7-days', label: 'Last 7 days' },
                           { id: 'last-30-days', label: 'Last 30 days' },
                           { id: 'last-90-days', label: 'Last 90 days' },
+                          { id: 'last-365-days', label: 'Last 365 days' },
                           { id: 'this-year', label: 'This year (Jan - Today)' },
                           { id: 'last-calendar-year', label: 'Last calendar year' },
                           { id: 'custom', label: 'Custom' }
@@ -81,12 +81,16 @@ block content
                           include ../icons/chevron_dark.pug
                         div(style='transform: rotateZ(-90deg)')#next-month
                           include ../icons/chevron_dark.pug
-                      .days(class='days-header-wrapper')
-                        each day in [ 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa' ]
+                      .days#days-main-wrapper(class='days-header-wrapper')
+                        each day in (`${startDay}` == 'sunday' ? ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] : ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'])
                           span.day= day
                       .month-wrapper
                         .days#month-wrapper
                 .buttons
+                  div.switch
+                    input(type='checkbox' id='calendar-format-toggle' class='switch-checkbox' value=`${startDay ? startDay : 'monday'}` checked=(startDay === 'sunday'))
+                    label(for='calendar-format-toggle', class='switch-label')
+                      span(class='switch-button')
                   button.reset Cancel
                   button.apply#apply Apply
             .export-main-wrapper 
@@ -148,8 +152,9 @@ block content
                     .validator-operator-address-content(operator_address=`${validator.operator_address}`)
                       div= validator.operator_address.slice(0,4)
                       .hidden-part
-                        span.dots ........
+                        span.dots ..
                         span.middle-address= validator.operator_address.slice(4, validator.operator_address.length - 4)
+                        span.dots ..
                       div= validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)
                       .validator-operator-address-copy-button
                         img(src='/res/images/clipboard.svg')
@@ -166,10 +171,10 @@ block content
 
                   return sign + num.toString();
                 }
-              div.validator-each-numeric-info= shortNumberFormat(validator['self_stake'] / 1e6) + ' Atom'
-              div.validator-each-numeric-info= shortNumberFormat(validator['withdraw'] / 1e6) + ' Atom'
+              div.validator-each-numeric-info= shortNumberFormat(validator['self_stake'] / 1e6) + ` ${selectedChain ? selectedChain.symbol : 'ATOM'}`
+              div.validator-each-numeric-info= shortNumberFormat(validator['withdraw'] / 1e6) + ` ${selectedChain ? selectedChain.symbol : 'ATOM'}`
               div.validator-each-numeric-info= shortNumberFormat(validator['ratio'])
-              div.validator-each-numeric-info= shortNumberFormat(validator['sold'] / 1e6) + ' Atom'
+              div.validator-each-numeric-info= shortNumberFormat(validator['sold'] / 1e6) + ` ${selectedChain ? selectedChain.symbol : 'ATOM'}`
             .each-validator-wrapper-seperator-line
     .footer-main-wrapper(class='center')
       .footer-main-title Connect us 

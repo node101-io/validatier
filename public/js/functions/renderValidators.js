@@ -82,9 +82,13 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     const hiddenPartDiv = document.createElement('div');
     hiddenPartDiv.classList.add('hidden-part');
 
-    const dotsSpan = document.createElement('span');
-    dotsSpan.classList.add('dots');
-    dotsSpan.innerHTML = '........';
+    const dotsFirstSpan = document.createElement('span');
+    dotsFirstSpan.classList.add('dots');
+    dotsFirstSpan.innerHTML = '..';
+
+    const dotsLastSpan = document.createElement('span');
+    dotsLastSpan.classList.add('dots');
+    dotsLastSpan.innerHTML = '..';
 
     const middleSpan = document.createElement('span');
     middleSpan.classList.add('middle-address');
@@ -100,8 +104,9 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     operatorAddressIconImageContent.classList.add('center');
     operatorAddressIconImageContent.src = '/res/images/clipboard.svg';
     
-    hiddenPartDiv.appendChild(dotsSpan);
+    hiddenPartDiv.appendChild(dotsFirstSpan);
     hiddenPartDiv.appendChild(middleSpan);
+    hiddenPartDiv.appendChild(dotsLastSpan);
     
     operatorAddressContentDiv.appendChild(firstFourSpan);
     operatorAddressContentDiv.appendChild(hiddenPartDiv);
@@ -124,10 +129,13 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
       return td;
     };
   
-    const selfStakeTd = createNumericTd(shortNumberFormat(validator.self_stake / 1e6) + ' Atom');
-    const withdrawTd = createNumericTd(shortNumberFormat(validator.withdraw / 1e6) + ' Atom');
+    const currentChainSymbol = document.getElementById('network-switch-header').getAttribute('current_chain_symbol');
+    const currentChainDecimals = document.getElementById('network-switch-header').getAttribute('current_chain_decimals');
+
+    const selfStakeTd = createNumericTd(shortNumberFormat(validator.self_stake / (10 ** parseInt(currentChainDecimals))) + ` ${currentChainSymbol}`);
+    const withdrawTd = createNumericTd(shortNumberFormat(validator.withdraw / (10 ** parseInt(currentChainDecimals))) + ` ${currentChainSymbol}`);
     const ratioTd = createNumericTd(shortNumberFormat(validator.ratio));
-    const soldTd = createNumericTd(shortNumberFormat(validator.sold / 1e6) + ' Atom');
+    const soldTd = createNumericTd(shortNumberFormat(validator.sold / (10 ** parseInt(currentChainDecimals))) + ` ${currentChainSymbol}`);
   
     tr.appendChild(tdInfo);
     tr.appendChild(selfStakeTd);
@@ -158,11 +166,7 @@ function renderValidators() {
     const isApplyClickedChecker = event.target.classList.contains('apply') || event.target.parentNode.classList.contains('apply')
     if (!isHeaderClickedChecker && !isApplyClickedChecker) return;
 
-    document.querySelectorAll('.validator-image').forEach(each => each.classList.add('skeleton-image'));
-    document.querySelectorAll('.validator-moniker').forEach(each => each.classList.add('skeleton-text'));
-    document.querySelectorAll('.validator-each-numeric-info').forEach(each => each.classList.add('skeleton-text'));
-    document.querySelectorAll('.validator-operator-address').forEach(each => each.remove());
-    document.querySelectorAll('.validator-inactivity-display').forEach(each => each.remove());
+    displaySkeleton();
 
     document.querySelector('.picker-main-wrapper').style.transform = 'perspective(1000px) rotateX(-90deg)';
     document.querySelector('.picker-main-wrapper').style.opacity = 0;

@@ -25,8 +25,16 @@ function handleNetworkSwitch (currentNetwork) {
   const networkSwitchHeader = document.getElementById('network-switch-header');
   const networkSwitchDropdown = document.getElementById('network-switch-dropdown');
   networkSwitchHeader.addEventListener('click', (event) => {
-    if (!networkSwitchDropdown.classList.contains('network-switch-dropdown-open')) networkSwitchDropdown.classList.add('network-switch-dropdown-open');
-    else networkSwitchDropdown.classList.remove('network-switch-dropdown-open');
+    if (!networkSwitchDropdown.classList.contains('network-switch-dropdown-open')) {
+      document.getElementById('network-switch-dropdown-arrow').style.transform = 'rotateX(180deg)';
+      document.getElementById('network-switch-dropdown-arrow').style.marginTop = '-10px';
+      networkSwitchDropdown.classList.add('network-switch-dropdown-open');
+    }
+    else {
+      document.getElementById('network-switch-dropdown-arrow').style.transform = 'rotateX(0deg)';
+      document.getElementById('network-switch-dropdown-arrow').style.marginTop = '0px';
+      networkSwitchDropdown.classList.remove('network-switch-dropdown-open');
+    };
   })
 
   document.body.addEventListener('click', (event) => {
@@ -52,12 +60,18 @@ function handleNetworkSwitch (currentNetwork) {
     const BASE_URL = !window.location.href.includes('#') ? window.location.href : window.location.href.split('#')[0];
   
     const chainIdentifier = target.getAttribute('name');
+    const chainSymbol = target.getAttribute('symbol');
+    const chainDecimals = target.getAttribute('decimals');
 
     const cacheResponse = rankingResponsesCache[bottomDate + '.' + topTimestamp + '.' + chainIdentifier];
     
     document.getElementById('network-switch-header').setAttribute('current_chain_identifier', chainIdentifier);
+    document.getElementById('network-switch-header').setAttribute('current_chain_symbol', chainSymbol);
+    document.getElementById('network-switch-header').setAttribute('current_chain_decimals', chainDecimals);
 
     if (cacheResponse) return generateValidatorRankingContent(cacheResponse, 'ratio', 'desc');
+
+    displaySkeleton();
 
     serverRequest(
       BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=ratio&order=desc&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&chain_identifier=${chainIdentifier}&with_photos`,

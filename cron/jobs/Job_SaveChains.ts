@@ -18,8 +18,8 @@ export const Job_SaveChains = (callback: (err: string | null, success: Boolean) 
             pretty_name: response.data.chain.pretty_name,
             chain_id: response.data.chain.chain_id,
             image: response.data.chain.logo_URIs.png,
-            rpc_url: '',
-            wss_url: ''
+            symbol: response.data.chain.symbol,
+            decimals: response.data.chain.decimals,
           }, (err, chain) => {
             if (err && !chain) return next(new Error(err));
             Job_SaveValidators(chainIdentifiers[i], (err, success) => {

@@ -12,10 +12,6 @@ function getDateRange(currentDate) {
       bottom: formatDate(new Date(currentYear - 10, 0, 1)),
       top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
     },
-    'this-week': {
-      bottom: formatDate(new Date(currentYear, currentMonth, currentDay - currentDayOfWeek)),
-      top: formatDate(new Date(currentYear, currentMonth, currentDay - currentDayOfWeek + 6))
-    },
     'last-week': {
       bottom: formatDate(new Date(currentYear, currentMonth, currentDay - currentDayOfWeek - 7)),
       top: formatDate(new Date(currentYear, currentMonth, currentDay - currentDayOfWeek - 1))
@@ -30,6 +26,10 @@ function getDateRange(currentDate) {
     },
     'last-90-days': {
       bottom: formatDate(new Date(currentYear, currentMonth, currentDay - 90)),
+      top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
+    },
+    'last-365-days': {
+      bottom: formatDate(new Date(currentYear, currentMonth, currentDay - 365)),
       top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
     },
     'this-year': {

@@ -25,11 +25,11 @@ function updateDateInputs () {
   document.getElementById('periodic-query-top-timestamp').value = selectedDateTop;
 }
 
-function generateMonthContent (currentYearValue, currentMonthValue) {
+function generateMonthContent (currentYearValue, currentMonthValue, startDay) {
   document.getElementById('month-wrapper').innerHTML = '';
   document.getElementById('current-month-and-year-display').innerHTML = new Date(currentYearValue, currentMonthValue - 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
 
-  const currentMonth = getMonthInfo(currentYearValue, currentMonthValue)
+  const currentMonth = getMonthInfo(currentYearValue, currentMonthValue, startDay)
   for (let i = 0; i < currentMonth.days.length; i++) {
     const eachDay = currentMonth.days[i];
     if (i == 0) {
@@ -104,31 +104,40 @@ function paintBlocksInBetween () {
 }
 
 
-function getMonthInfo(year, month) {
+function getMonthInfo(year, month, startDay = 'monday') {
   const firstDay = new Date(year, month - 1, 1);
   const lastDay = new Date(year, month, 0);
 
   const monthInfo = {
-      month: `${month.toString().padStart(2, '0')}/${year}`,
-      firstDayIndex: firstDay.getDay(), 
-      lastDayIndex: lastDay.getDay(), 
-      days: []
+    month: `${month.toString().padStart(2, '0')}/${year}`,
+    firstDayIndex: firstDay.getDay(),
+    lastDayIndex: lastDay.getDay(),
+    days: []
+  };
+
+  const adjustDayIndex = (dayIndex) => {
+    if (startDay === 'monday') {
+      return (dayIndex === 0) ? 6 : dayIndex - 1; 
+    }
+    return dayIndex; 
   };
 
   for (let day = 1; day <= lastDay.getDate(); day++) {
-      const date = new Date(year, month - 1, day);
-      monthInfo.days.push({
-          date: day,
-          dayIndex: date.getDay()
-      });
+    const date = new Date(year, month - 1, day);
+    const dayIndex = adjustDayIndex(date.getDay());
+
+    monthInfo.days.push({
+      date: day,
+      dayIndex: dayIndex
+    });
   }
 
   return monthInfo;
 }
 
-function handleCalendarEvents (currentYearValue, currentMonthValue) {
-  
-  const eventListeners = [];
+const eventListeners = [];
+
+function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
 
   removeAllEventListeners(eventListeners);
 
@@ -168,7 +177,7 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
       setCookie('selectedDateBottom', selectedDateBottom, 7);
       setCookie('selectedDateTop', selectedDateTop, 7);
 
-      generateMonthContent(new Date().getFullYear(), new Date().getMonth() + 1);
+      generateMonthContent(new Date().getFullYear(), new Date().getMonth() + 1, startDay);
       paintBlocksInBetween();
       updateDateInputs();
     } else if (event.target.classList.contains('date')) {
@@ -226,13 +235,15 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
     updateDateInputs();
   }
 
+  const calendarFormatToggle = document.getElementById('calendar-format-toggle');
+
   const previousMonthListener = (event) => {
     currentMonthValue--;
     if (currentMonthValue == 0) {
       currentMonthValue = 12;
       currentYearValue--;
     }
-    handleCalendarEvents(currentYearValue, currentMonthValue);
+    handleCalendarEvents(currentYearValue, currentMonthValue, calendarFormatToggle.value);
   }
 
   const nextMonthListener = (event) => {
@@ -241,10 +252,31 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
       currentMonthValue = 1;
       currentYearValue++;
     }
-    handleCalendarEvents(currentYearValue, currentMonthValue);
+    handleCalendarEvents(currentYearValue, currentMonthValue, calendarFormatToggle.value);
   }
 
-  generateMonthContent(currentYearValue, currentMonthValue);
+  const changeCalendarFormat = (event) => {
+
+    calendarFormatToggle.value = calendarFormatToggle.value == 'monday' ? 'sunday' : 'monday';
+
+    const startDayMonday = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+    const startDaySunday = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+    const arrayToBeUsedToGenerateTopDaysContent = calendarFormatToggle.value == 'sunday' ? startDaySunday : startDayMonday;
+    const daysMainWrapper = document.getElementById('days-main-wrapper');
+    daysMainWrapper.innerHTML = '';
+    arrayToBeUsedToGenerateTopDaysContent.forEach(eachDayLabel => {
+      const eachDayLabelSpan = document.createElement('span');
+      eachDayLabelSpan.classList.add('day');
+      eachDayLabelSpan.innerHTML = eachDayLabel;
+      daysMainWrapper.appendChild(eachDayLabelSpan);
+    })
+
+    setCookie('startDay', calendarFormatToggle.value);
+    handleCalendarEvents(currentYearValue, currentMonthValue, calendarFormatToggle.value);
+  }
+
+  generateMonthContent(currentYearValue, currentMonthValue, startDay);
   paintBlocksInBetween();
 
   document.addEventListener('focusout', changeEventListener);
@@ -258,4 +290,8 @@ function handleCalendarEvents (currentYearValue, currentMonthValue) {
   
   document.addEventListener('click', clickEventListener);
   eventListeners.push({ element: document, event: 'click', listener: clickEventListener });
+
+  calendarFormatToggle.addEventListener('change', changeCalendarFormat);
+  eventListeners.push({ element: calendarFormatToggle, event: 'change', listener: changeCalendarFormat });
+
 }

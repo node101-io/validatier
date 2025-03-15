@@ -12,8 +12,8 @@ function animateOverflowMonikers(monikerWrapper) {
     const containerWidth = container.offsetWidth;
     const textWidth = monikerText.scrollWidth;
     if (textWidth > containerWidth) {
-      if (monikerText.style.animation != 'scrollText 4s linear infinite alternate')  monikerText.style.animation = "scrollText 4s linear infinite alternate";
-      if (monikerText.style.position != "relative")  monikerText.style.position = "relative";
+      monikerText.style.animation = `scrollText ${(textWidth/containerWidth) * 2}s linear infinite alternate`;
+      monikerText.style.position = "relative";
     } else {
       monikerText.style.animation = "none";
     }
