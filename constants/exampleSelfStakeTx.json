@@ -1,6 +1,0 @@
-{
-  "@type": "/cosmos.staking.v1beta1.MsgDelegate",
-  "delegator_address": "cosmos157v7tczs40axfgejp2m43kwuzqe0wsy0xcn5sl",
-  "validator_address": "cosmos157v7tczs40axfgejp2m43kwuzqe0wsy0xcn5sl",
-  "amount": { "denom": "uatom", "amount": "163514" }
-}

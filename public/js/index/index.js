@@ -5,7 +5,6 @@ window.onload = () => {
   let currentYearValue = currentDate.getFullYear();
   let currentMonthValue = (currentDate.getMonth() + 1);
 
-  animateOverflowMonikers();
   handleNetworkSwitch(getCookie('network'));
   handleValidatorSearch();
   handleTooltipEvents();

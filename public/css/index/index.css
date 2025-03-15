@@ -153,8 +153,17 @@
   --validator-operator-address-visible-opacity: 0.75;
   --validator-operator-address-visible-opacity-hover: 1;
   --validator-operator-address-content-min-width: fit-content;
-  --validator-operator-address-shrink-span-transition-duration: 1s;
-  --validator-operator-address-shrink-span-initial-width: 8px;
+  
+  --validator-opeartor-address-dots-max-width: 20px;
+  --validator-operator-address-animaton-transition-duration: 1s;
+  --validator-operator-address-animaton-transition-delay: 1s;
+  
+  --validator-operator-address-hover-dots-max-width: 0;
+  --validator-operator-address-hover-dots-opacity: 0;
+  --animated-middle-date-display: unset;
+  
+  --validator-operator-address-hover-middle-address-max-width: 500px;
+  --validator-operator-address-hover-middle-address-opacity: 1;
 
   --validator-moniker-font-size: 20px;
   --validator-moniker-font-weight: 500;
@@ -575,6 +584,7 @@
 }
 
 .middle-date {
+  display: var(--animated-middle-date-display);
   background-color: var(--color-middle-date-background);
 }
 
@@ -695,10 +705,43 @@
   opacity: var(--validator-operator-address-visible-opacity-hover);
 }
 
-.validator-operator-address-shrink-span {
-  width: var(--validator-operator-address-shrink-span-initial-width);
+.validator-operator-address {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.hidden-part {
+  position: relative;
+  display: flex;
+  align-items: center;
   overflow: hidden;
-  transition: width var(--validator-operator-address-shrink-span-transition-duration) ease 0s;
+}
+
+.dots {
+  white-space: nowrap;
+  display: inline-block;
+  max-width: var(--validator-opeartor-address-dots-max-width);
+  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out var(--validator-operator-address-animaton-transition-delay), opacity var(--validator-operator-address-animaton-transition-duration) ease-in-out var(--validator-operator-address-animaton-transition-delay);
+}
+
+.middle-address {
+  white-space: nowrap;
+  display: inline-block;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out var(--validator-operator-address-animaton-transition-delay), opacity var(--validator-operator-address-animaton-transition-duration) ease-in-out var(--validator-operator-address-animaton-transition-delay);
+}
+
+.validator-operator-address:hover .dots {
+  max-width: 0;
+  opacity: 0;
+}
+
+.validator-operator-address:hover .middle-address {
+  max-width: var(--validator-operator-address-hover-middle-address-max-width);
+  opacity: var(--validator-operator-address-hover-middle-address-opacity);
 }
 
 .validator-moniker {

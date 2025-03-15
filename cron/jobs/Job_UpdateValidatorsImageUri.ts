@@ -7,12 +7,10 @@ export const Job_UpdateValidatorsImageUri = (callback: (err: string | null, succ
     .then((validators) => {
       async.times(
         validators.length,
-        (i, next) => {
-          console.log(i);
+        (i, next) => {      
           const eachValidator = validators[i];
-
           if (!eachValidator.keybase_id) return next();
-
+          
           getKeybasePicture(eachValidator.keybase_id, (err, imageUri) => {
             if (err) return next();
 

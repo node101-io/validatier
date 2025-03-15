@@ -1,13 +1,13 @@
 import async from 'async';
 
-import Validator, { ValidatorInterface } from '../../models/Validator/Validator.js';
+import Validator from '../../models/Validator/Validator.js';
 import { getActiveValidators, ValidatorResponse } from '../functions/getActiveValidators.js';
 
-export const Job_SaveValidators = (callback: (err: string | null, success: Boolean) => any) => {
+export const Job_SaveValidators = (chainIdentifier: string, callback: (err: string | null, success: Boolean) => any) => {
 
   const visitedValidatorsOperatorAddresses: string[] | null = [];
 
-  getActiveValidators((err: string | null, validators: ValidatorResponse[] | null) => {
+  getActiveValidators(chainIdentifier, (err: string | null, validators: ValidatorResponse[] | null) => {
 
     if (err || !validators) return callback('validator_count_zero', false);
 
@@ -16,6 +16,7 @@ export const Job_SaveValidators = (callback: (err: string | null, success: Boole
       (i, next) => {
         const eachValidator = validators[i];
         const validatorSaveObject = {
+          chain_identifier: chainIdentifier,
           pubkey: eachValidator.consensus_pubkey.key ? eachValidator.consensus_pubkey.key : 'N/A',
           operator_address: eachValidator.operator_address ? eachValidator.operator_address : 'N/A',
           moniker: eachValidator.description.moniker ? eachValidator.description.moniker : 'N/A',
@@ -37,7 +38,7 @@ export const Job_SaveValidators = (callback: (err: string | null, success: Boole
         if (!visitedValidatorsOperatorAddresses || visitedValidatorsOperatorAddresses.length < 0) return callback(null, true);
 
         Validator.deleteValidatorsNotAppearingOnApiResponse(
-          { visitedValidatorsOperatorAddresses }, 
+          { visitedValidatorsOperatorAddresses, chain_identifier: chainIdentifier }, 
           (err, validators) => {
             if (err) return callback('async_error', false);
             return callback(null, true);

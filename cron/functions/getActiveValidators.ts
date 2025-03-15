@@ -44,10 +44,12 @@ export interface ValidatorResponse {
 }
 
 const NUMBER_OF_ACTIVE_VALIDATORS_TO_BE_FETCHED = 200;
-const REST_API_BASE_URL = 'https://rest.cosmos.directory/cosmoshub';
 const REST_API_ENDPOINT = `cosmos/staking/v1beta1/validators?status=BOND_STATUS_BONDED&pagination.limit=${NUMBER_OF_ACTIVE_VALIDATORS_TO_BE_FETCHED}`;
 
-export const getActiveValidators = (callback: (err: string | null, validators: ValidatorResponse[] | null) => any) => {
+export const getActiveValidators = (chainIdentifier: string, callback: (err: string | null, validators: ValidatorResponse[] | null) => any) => {
+  
+  const REST_API_BASE_URL = `https://rest.cosmos.directory/${chainIdentifier}`;
+
   axios
     .get(`${REST_API_BASE_URL}/${REST_API_ENDPOINT}`)
     .then((response: { data: { validators: ValidatorResponse[] } }) => callback(null, response.data.validators))

@@ -1,10 +1,11 @@
 import async from 'async';
 import axios from 'axios';
 import Chain from "../../models/Chain/Chain.js"
+import { Job_SaveValidators } from './Job_SaveValidators.js';
 
 export const Job_SaveChains = (callback: (err: string | null, success: Boolean) => any) => {
   
-  const chainIdentifiers = ['agoric', 'cosmoshub', 'lava', 'celestia', 'evmos', 'osmosis'];
+  const chainIdentifiers = ['cosmoshub', 'celestia'];
 
   async.timesSeries(
     chainIdentifiers.length,
@@ -20,8 +21,11 @@ export const Job_SaveChains = (callback: (err: string | null, success: Boolean) 
             rpc_url: '',
             wss_url: ''
           }, (err, chain) => {
-            if (err || !chain) return next();
-            return next();
+            if (err && !chain) return next(new Error(err));
+            Job_SaveValidators(chainIdentifiers[i], (err, success) => {
+              if (err && !success) next(new Error(err));
+              return next()
+            })
           })
         })
     },

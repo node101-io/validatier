@@ -38,7 +38,8 @@ function handleExportEvents () {
       const sortOrder = document.getElementById('export-order').innerHTML;
       const range = parseInt(selectedRangeValue);
 
-      const url = BASE_URL + EXPORT_API_ENDPOINT + `?sort_by=${sortBy}&order=${sortOrder}&range=${range}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}`;
+      const chainIdentifier = document.getElementById('network-switch-header').getAttribute('current_chain_identifier');
+      const url = BASE_URL + EXPORT_API_ENDPOINT + `?sort_by=${sortBy}&order=${sortOrder}&range=${range}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&chain_identifier=${chainIdentifier}`;
 
       const downloadButtonInnerHTML = document.getElementById('export-choice-download-button').innerHTML;
       document.getElementById('export-choice-download-button').innerHTML = '';

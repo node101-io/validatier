@@ -7,13 +7,13 @@ const indexGetController = (req: Request, res: Response): void => {
   Chain.getAllChains((err: string | null, chains: ChainInterface[] | null) => {
 
     let selectedChain: ChainInterface;
-    const activeNetworkChainId = req.cookies.network;
-    if (chains) chains.forEach(element => element.chain_id == activeNetworkChainId ? selectedChain = element : (''));
+    const activeNetworkIdentifier = req.cookies.network;
+    if (chains) chains.forEach(element => element.name == activeNetworkIdentifier ? selectedChain = element : (''));
 
     const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime() / 1000): 1;
     const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime() / 1000): 2e9;
-
-    Validator.rankValidators({ sort_by: 'ratio', order: 'desc', bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp, with_photos: true }, (err, validators) => {
+    
+    Validator.rankValidators({ sort_by: 'ratio', order: 'desc', bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp, chain_identifier: activeNetworkIdentifier, with_photos: true }, (err, validators) => {
       if (err) return res.json({ success: false, err: 'bad_request' })
       return res.render('index/index', {
         page: 'index/index',

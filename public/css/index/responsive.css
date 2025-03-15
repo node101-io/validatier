@@ -1,5 +1,28 @@
+
+@media only screen and (max-width: 1200px) {
+  .validator-operator-address:hover .dots {
+    max-width: fit-content;
+    opacity: 1;
+  }
+  
+  .validator-operator-address:hover .middle-address {
+    max-width: 0;
+    opacity: 0;
+  }
+}
+
+@media only screen and (max-width: 1000px) {
+  :root {
+    --each-validator-wrapper-gap: 30px;
+    --validator-table-header-gap: 30px;
+  }
+}
+
 @media only screen and (max-width: 900px) {
   :root {
+    --each-validator-wrapper-gap: 10px;
+    --validator-table-header-gap: 10px;
+
     --banner-title-content-font-size: 20px;
     --each-table-header-title-font-size: 20px;
     --each-table-popup-info-content-font-size: 14px;
@@ -22,6 +45,13 @@
     --network-switch-network-chain-id-font-size: 14px;
     --validator-filter-input-font-size: 14px;
     --current-month-and-year-display-font-size: 16px;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  :root {
+    --each-validator-wrapper-gap: 0px;
+    --validator-table-header-gap: 0px;
   }
 }
 

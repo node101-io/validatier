@@ -1,8 +1,11 @@
 
-function setSelectedChain (name, chainId, src) {
-  document.getElementById('current-network-name').innerHTML = name;
+const rankingResponsesCache = {};
+
+function setSelectedChain (pretty_name, chainId, src, name) {
+  document.getElementById('current-network-name').innerHTML = pretty_name;
   document.getElementById('current-network-chain-id').innerHTML = chainId;
   document.getElementById('current-network-img').src = src;
+  document.getElementById('network-switch-header').setAttribute('chain_identifier', name);
 }
 
 function handleNetworkSwitch (currentNetwork) {
@@ -31,8 +34,39 @@ function handleNetworkSwitch (currentNetwork) {
     while (target != document.body && !target.classList.contains('each-chain-wrapper')) target = target.parentNode;
     if (!target.classList.contains('each-chain-wrapper')) return;
 
-    setSelectedChain(target.getAttribute('chain_name'), target.getAttribute('chain_id'), target.getAttribute('image'));
+    setSelectedChain(target.getAttribute('pretty_name'), target.getAttribute('chain_id'), target.getAttribute('image'));
     networkSwitchDropdown.classList.remove('network-switch-dropdown-open');
-    setCookie('network', target.getAttribute('chain_id'), 7);
+    setCookie('network', target.getAttribute('name'), 7);
+        
+    const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
+    const topDate = document.getElementById('periodic-query-top-timestamp').value
+
+    
+    setCookie('selectedDateBottom', bottomDate, 7);
+    setCookie('selectedDateTop', topDate, 7);
+
+    const bottomTimestamp = Math.floor(new Date(bottomDate).getTime() / 1000);
+    const topTimestamp = Math.floor(new Date(topDate).getTime() / 1000);
+
+    const GET_VALIDATORS_API_ENDPOINT = 'validator/rank_validators';
+    const BASE_URL = !window.location.href.includes('#') ? window.location.href : window.location.href.split('#')[0];
+  
+    const chainIdentifier = target.getAttribute('name');
+
+    const cacheResponse = rankingResponsesCache[bottomDate + '.' + topTimestamp + '.' + chainIdentifier];
+    
+    document.getElementById('network-switch-header').setAttribute('current_chain_identifier', chainIdentifier);
+
+    if (cacheResponse) return generateValidatorRankingContent(cacheResponse, 'ratio', 'desc');
+
+    serverRequest(
+      BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=ratio&order=desc&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&chain_identifier=${chainIdentifier}&with_photos`,
+      'GET',
+      {},
+      (response) => {
+        generateValidatorRankingContent(response, 'ratio', 'desc');
+        rankingResponsesCache[bottomDate + '.' + topTimestamp + '.' + chainIdentifier] = response;
+      }
+    )
   })
 }

@@ -8,7 +8,7 @@ block content
           img(src='/res/images/logo.svg', alt='node101' class='center')
         .banner-title-content VALIDATOR LIST
       .header-network-switch-wrapper
-        .network-switch-header#network-switch-header
+        .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}`)
           .network-switch-network-image-wrapper 
             img#current-network-img(src=`${selectedChain.image ? selectedChain.image : ''}`)
           .network-switch-network-info-wrapper 
@@ -20,7 +20,7 @@ block content
           .network-switch-search-bar
             input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search chain name / id')
           each chain in chains 
-            .each-chain-wrapper(style='display: flex; align-items: center; padding: 10px 5px' id=`${chain.chain_id}` chain_id=`${chain.chain_id}` chain_name=`${chain.pretty_name}` image=`${chain.image}`)
+            .each-chain-wrapper(style='display: flex; align-items: center; padding: 10px 5px' id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}`)
               .network-switch-network-image-wrapper(class='center')
                 img#current-network-img(src=`${chain.image}` style='width: 25px; height: 25px; margin-right: 10px;')
               .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
@@ -145,11 +145,13 @@ block content
                       .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
                         img(src='/res/images/warning.svg')
                   .validator-operator-address
-                    .validator-operator-address-content(operator_address=`${validator.operator_address}`) 
+                    .validator-operator-address-content(operator_address=`${validator.operator_address}`)
                       div= validator.operator_address.slice(0,4)
-                      div.validator-operator-address-shrink-span ...
+                      .hidden-part
+                        span.dots ........
+                        span.middle-address= validator.operator_address.slice(4, validator.operator_address.length - 4)
                       div= validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)
-                      .validator-operator-address-copy-button(class='center')
+                      .validator-operator-address-copy-button
                         img(src='/res/images/clipboard.svg')
               -
                 function shortNumberFormat(num) {

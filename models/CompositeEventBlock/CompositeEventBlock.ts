@@ -135,7 +135,7 @@ compositeEventBlockSchema.statics.searchTillExists = function (
 
 
   CompositeEventBlock
-    .find({ 
+    .find({
       operator_address: operator_address,
       [search_by]: condition
     })

@@ -15,6 +15,7 @@ const MAX_DATABASE_TEXT_FIELD_LENGTH = 1e4;
 export interface ValidatorInterface {
   pubkey: string;
   operator_address: string;
+  chain_identifier: string;
   moniker: string;
   commission_rate: string;
   bond_shares: string;
@@ -30,6 +31,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
     body: {
       pubkey: string;
       operator_address: string;
+      chain_identifier: string;
       moniker: string;
       commission_rate: string;
       bond_shares: string;
@@ -74,6 +76,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
   ) => any;
   rankValidators: (
     body: {
+      chain_identifier?: string;
       sort_by: 'self_stake' | 'withdraw' | 'ratio' | 'sold',
       bottom_timestamp: number,
       top_timestamp: number,
@@ -95,7 +98,8 @@ interface ValidatorModel extends Model<ValidatorInterface> {
   ) => any;
   deleteValidatorsNotAppearingOnApiResponse: (
     body: {
-      visitedValidatorsOperatorAddresses: string[]
+      visitedValidatorsOperatorAddresses: string[],
+      chain_identifier: string
     },
     callback: (
       err: string | null, 
@@ -104,6 +108,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
   ) => any;
   exportCsv: (
     body: {
+      chain_identifier?: string;
       sort_by: 'self_stake' | 'withdraw' | 'ratio' | 'sold';
       order: SortOrder;
       bottom_timestamp?: number | null;
@@ -122,27 +127,18 @@ const validatorSchema = new Schema<ValidatorInterface>({
     type: String, 
     required: true,
     trim: true,
-    index: 1,
-    validate: {
-      validator: function (value: string): boolean {
-        const requiredLength = 44;
-        return value.length === requiredLength;
-      },
-      message: 'invalid_length',
-    },
+    index: 1
   },
   operator_address: { 
     type: String, 
     required: true, 
     trim: true,
-    index: 1,
-    validate: {
-      validator: function (value: string): boolean {
-        const requiredLength = 52;
-        return value.includes('cosmosvaloper1') && value.length === requiredLength;
-      },
-      message: 'invalid_length',
-    },
+    index: 1
+  },
+  chain_identifier: {
+    type: String,
+    required: true,
+    trim: true
   },
   moniker: { 
     type: String, 
@@ -178,7 +174,7 @@ const validatorSchema = new Schema<ValidatorInterface>({
   },
   created_at: { 
     type: Date, 
-    default: new Date() 
+    default: new Date(1740866645000)
   },
   deleted_at: { 
     type: Date, 
@@ -194,10 +190,7 @@ validatorSchema.statics.saveValidator = function (
   body: Parameters<ValidatorModel['saveValidator']>[0], 
   callback: Parameters<ValidatorModel['saveValidator']>[1],
 ) {
-  if (!body.pubkey) return callback('bad_request', null);
-
   const { pubkey, operator_address, moniker, commission_rate, bond_shares, liquid_shares, keybase_id } = body;
-
   if (!isOperatorAddressValid(operator_address) || !isPubkeyValid(pubkey)) return callback('format_error', null);
 
   Validator
@@ -297,7 +290,7 @@ validatorSchema.statics.rankValidators = function (
   callback: Parameters<ValidatorModel['rankValidators']>[1],
 ) {
 
-  const { sort_by, order, bottom_timestamp, top_timestamp, with_photos } = body;
+  const { sort_by, order, bottom_timestamp, top_timestamp, with_photos, chain_identifier } = body;
 
   const validatorsArray: {
     operator_address: string,
@@ -312,6 +305,7 @@ validatorSchema.statics.rankValidators = function (
   const pushedValidatorOperatorAddressArray: string[] = [];
 
   Validator.find({
+    chain_identifier: chain_identifier ? chain_identifier : 'cosmoshub',
     created_at: { $lte: new Date(top_timestamp * 1000) },
     $or: [
       { deleted_at: { $gte: new Date(bottom_timestamp * 1000) } },
@@ -399,12 +393,12 @@ validatorSchema.statics.deleteValidatorsNotAppearingOnApiResponse = function (
   callback: Parameters<ValidatorModel['deleteValidatorsNotAppearingOnApiResponse']>[1],
 ) {
 
-  const { visitedValidatorsOperatorAddresses } = body;
+  const { visitedValidatorsOperatorAddresses, chain_identifier } = body;
 
   const deletedValidatorsOperatorAddresses: string[] = [];
 
   Validator
-    .find({ operator_address: { $nin: visitedValidatorsOperatorAddresses } })
+    .find({ operator_address: { $nin: visitedValidatorsOperatorAddresses }, chain_identifier: chain_identifier })
     .then(validators => {
       if (!validators.length) return callback(null, true);
       async.timesSeries(
@@ -430,7 +424,7 @@ validatorSchema.statics.exportCsv = function (
   body: Parameters<ValidatorModel['exportCsv']>[0], 
   callback: Parameters<ValidatorModel['exportCsv']>[1]
 ) {
-  const { sort_by, order, bottom_timestamp, top_timestamp, range } = body;
+  const { sort_by, order, bottom_timestamp, top_timestamp, range, chain_identifier } = body;
 
   let bottomTimestamp = bottom_timestamp ? bottom_timestamp : 0;
   const topTimestamp = top_timestamp ? top_timestamp : 2e9;
@@ -442,6 +436,7 @@ validatorSchema.statics.exportCsv = function (
     function test(cb) { cb(null, bottomTimestamp < topTimestamp); },
     function iter(next) {
       Validator.rankValidators({
+        chain_identifier: chain_identifier ? chain_identifier : 'cosmoshub',
         sort_by: sort_by,
         order: order,
         bottom_timestamp: bottomTimestamp,

@@ -13,26 +13,31 @@ import { getSpecificAttributeOfAnEventFromTxEventsArray } from '../utils/getSpec
 import { CosmosTx } from './interfaces/apiTxResultInterface.js';
 
 const RESTART_WAIT_INTERVAL = 5 * 1000;
-const TENDERMINT_RPC_URL = 'https://rest.cosmos.directory/cosmoshub/cosmos/tx/v1beta1/txs/';
-const WEBSOCKET_URL = 'wss://cosmoshub.tendermintrpc.lava.build/websocket';
+const WEBSOCKET_URLS = [
+  {url: 'wss://g.w.lavanet.xyz:443/gateway/celestia/tendermint-rpc/14f76aeb7eb005d23cba691b5c355d4d', chain_identifier: 'celestia'},
+  // {url: 'wss://cosmoshub.tendermintrpc.lava.build/websocket', chain_identifier: 'cosmoshub'}
+];
 const LISTENING_EVENTS = [
   '/cosmos.staking.v1beta1.MsgDelegate',
   '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission',
   '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward'
-]
+];
 
-function getTransactionInfo(txHash: string, callback: (err: string | null, data: CosmosTx | null) => any) {
+function getTransactionInfo(txHash: string, chain_identifier: string, callback: (err: string | null, data: CosmosTx | null) => any) {
+  
+  const TENDERMINT_RPC_URL = `https://rest.cosmos.directory/${chain_identifier}/cosmos/tx/v1beta1/txs/`;
+
   axios
     .get(`${TENDERMINT_RPC_URL}/${txHash}`)
     .then((response: { data: CosmosTx }) => callback(null, response.data))
     .catch((err) => callback('bad_request', null));
 }
 
-export const listenEvents = () => {
-  const ws = new WebSocket(WEBSOCKET_URL);
+const listenEventsForUrl = (url: string, chain_identifier: string) => {
+  const ws = new WebSocket(url);
 
-  ws.on('open', () => {
-    console.log('Connected to WebSocket!');
+  ws.on('open', () => {    
+    console.log(`Listening to chain ${chain_identifier.toUpperCase()} | Connected to WebSocket: ${url}`);
 
     const subscribeMsg = {
       jsonrpc: '2.0',
@@ -43,28 +48,31 @@ export const listenEvents = () => {
       }
     };
     ws.send(JSON.stringify(subscribeMsg));
-    console.log('Subscribed to events:\n - MsgDelegate \n - MsgWithdrawDelegatorRewards \n - MsgWithdrawValidatorCommission');
+    console.log(`Subscribed to events on ${url}: \n - MsgDelegate \n - MsgWithdrawDelegatorRewards \n - MsgWithdrawValidatorCommission`);
   });
 
   ws.on('message', async (data) => {
-    const events = JSON.parse(data.toString()).result.events;
-    if (!events || !events['message.module'] || !events['message.action'] || !events['tx.hash'] || !events['tx.hash'][0] || !events['tx.height'] || !events['tx.height'][0]) return;
+    
+    const dataJson = JSON.parse(data.toString());
+    if (!dataJson || !dataJson.result || !dataJson.result.events) return;
+    const events = dataJson.result.events;
+
+    if (!events || !events['tx.hash'] || !events['tx.hash'][0] || !events['tx.height'] || !events['tx.height'][0]) return;
 
     const blockHeight = events['tx.height'][0];
     const txHash = events['tx.hash'][0];
 
-    getTransactionInfo(txHash, (err, txRawResult) => {
-      if (err || !txRawResult || !txRawResult.tx || !txRawResult.tx.body || txRawResult.tx_response) return;
-
-      const txResult = txRawResult.tx.body;
+    getTransactionInfo(txHash, chain_identifier, (err, txRawResult) => {
       
-      if (!txResult || !txResult.messages) return;
+      if (err || !txRawResult || !txRawResult.tx || !txRawResult.tx.body || !txRawResult.tx_response) return;
+      const txResult = txRawResult.tx.body;
 
+      if (!txResult || !txResult.messages) return;
       async.timesSeries(
-        txResult.messages.length, 
+        txResult.messages.length,
         (i, next) => {
           const eachMessage = txResult.messages[i];
-
+          
           const messageType = eachMessage['@type'];
           const validatorAddress = eachMessage['validator_address'];
           const delegatorAddress = eachMessage['delegator_address'];
@@ -74,7 +82,7 @@ export const listenEvents = () => {
           convertOperatorAddressToBech32(validatorAddress, (err, bech32ValidatorAddress) => {
             if (err) return console.log(err);
 
-            if (messageType == '/cosmos.staking.v1beta1.MsgDelegate' && delegatorAddress == bech32ValidatorAddress) {
+            if (messageType == '/cosmos.staking.v1beta1.MsgDelegate'/* && delegatorAddress == bech32ValidatorAddress*/) {
 
               const amountAttribute = eachMessage['amount'];
 
@@ -126,14 +134,15 @@ export const listenEvents = () => {
                       reward: parseInt(nativeRewardOrCommissionValue)
                     }, (err, newCompositeEventBlock) => {
                       if (err || !newCompositeEventBlock) return console.log(err + ' | ' + new Date());
-    
+
                       console.log('Commission withdraw saved for validator: ' + newWithdrawRecordEvent.operator_address + ' | Composite block saved with block_height: ' + newCompositeEventBlock.block_height + ' | ' + new Date());
                       return next();
                     });
                   });
                 });
               });
-            } else if (messageType == '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward' && delegatorAddress == bech32ValidatorAddress) {
+            } else if (messageType == '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward'/* && delegatorAddress == bech32ValidatorAddress */) {
+              
               getSpecificAttributeOfAnEventFromTxEventsArray(txRawResult.tx_response.events, 'withdraw_rewards', 'amount', (err, specificAttributeValue) => {
                 if (err || !specificAttributeValue) return console.log(err + ' | ' + new Date());
                 getOnlyNativeTokenValueFromCommissionOrRewardEvent(specificAttributeValue, (err, nativeRewardOrCommissionValue) => {
@@ -142,7 +151,7 @@ export const listenEvents = () => {
                     operator_address: validatorAddress,
                     withdrawType: 'reward',
                     denom: 'uatom',
-                    amount: nativeRewardOrCommissionValue,
+                    amount: chain_identifier == 'cosmoshub' ? nativeRewardOrCommissionValue : specificAttributeValue,
                     txHash: txHash
                   }, (err, newWithdrawRecordEvent) => {
                     if (err || !newWithdrawRecordEvent) return console.log(err + ' | ' + new Date());
@@ -150,10 +159,10 @@ export const listenEvents = () => {
                       block_height: parseInt(blockHeight),
                       operator_address: validatorAddress,
                       denom: 'uatom',
-                      reward: parseInt(nativeRewardOrCommissionValue)
+                      reward: parseInt(chain_identifier == 'cosmoshub' ? nativeRewardOrCommissionValue : specificAttributeValue)
                     }, (err, newCompositeEventBlock) => {
                       if (err || !newCompositeEventBlock) return console.log(err + ' | ' + new Date());
-    
+
                       console.log('Reward withdraw saved for validator: ' + newWithdrawRecordEvent.operator_address + ' | Composite block saved with block_height: ' + newCompositeEventBlock.block_height + ' | ' + new Date());
                       return next();
                     });
@@ -162,7 +171,7 @@ export const listenEvents = () => {
               });
             } else return;
           });
-        }, 
+        },
         (err) => {
           if (err) return console.log(err);
           return;
@@ -176,7 +185,13 @@ export const listenEvents = () => {
   });
 
   ws.on('close', () => {
-    console.warn('WebSocket closed. Reconnecting...');
-    setTimeout(listenEvents, RESTART_WAIT_INTERVAL);
+    console.warn(`WebSocket closed for ${url}. Reconnecting...`);
+    setTimeout(() => listenEventsForUrl(url, chain_identifier), RESTART_WAIT_INTERVAL);
+  });
+};
+
+export const listenEvents = () => {
+  WEBSOCKET_URLS.forEach(network => {
+    listenEventsForUrl(network.url, network.chain_identifier);
   });
 };

@@ -70,7 +70,7 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
   
     const operatorAddressDiv = document.createElement('div');
     operatorAddressDiv.classList.add('validator-operator-address');
-
+    
     const operatorAddressContentDiv = document.createElement('div');
     operatorAddressContentDiv.classList.add('validator-operator-address-content');
     
@@ -78,24 +78,35 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
 
     const firstFourSpan = document.createElement('div');
     firstFourSpan.innerHTML = validator.operator_address.slice(0, 4);
-    const middleSpan = document.createElement('div');
-    middleSpan.classList.add('validator-operator-address-shrink-span');
-    middleSpan.innerHTML = '...';
-    const lastFourSpan = document.createElement('div');
-    lastFourSpan.innerHTML = validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length);
 
-    operatorAddressContentDiv.appendChild(firstFourSpan);
-    operatorAddressContentDiv.appendChild(middleSpan);
-    operatorAddressContentDiv.appendChild(lastFourSpan);
+    const hiddenPartDiv = document.createElement('div');
+    hiddenPartDiv.classList.add('hidden-part');
+
+    const dotsSpan = document.createElement('span');
+    dotsSpan.classList.add('dots');
+    dotsSpan.innerHTML = '........';
+
+    const middleSpan = document.createElement('span');
+    middleSpan.classList.add('middle-address');
+    middleSpan.innerHTML = validator.operator_address.slice(4, validator.operator_address.length - 4);
+
+    const lastFourSpan = document.createElement('div');
+    lastFourSpan.innerHTML = validator.operator_address.slice(validator.operator_address.length - 4);
 
     const operatorAddressIcon = document.createElement('div');
     operatorAddressIcon.classList.add('validator-operator-address-copy-button', 'center');
-
+    
     const operatorAddressIconImageContent = document.createElement('img');
     operatorAddressIconImageContent.classList.add('center');
     operatorAddressIconImageContent.src = '/res/images/clipboard.svg';
+    
+    hiddenPartDiv.appendChild(dotsSpan);
+    hiddenPartDiv.appendChild(middleSpan);
+    
+    operatorAddressContentDiv.appendChild(firstFourSpan);
+    operatorAddressContentDiv.appendChild(hiddenPartDiv);
+    operatorAddressContentDiv.appendChild(lastFourSpan);
     operatorAddressIcon.appendChild(operatorAddressIconImageContent);
-
     operatorAddressContentDiv.appendChild(operatorAddressIcon);
     operatorAddressDiv.appendChild(operatorAddressContentDiv);
   
@@ -130,10 +141,8 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     eachValidatorSeperatorDiv.classList.add('each-validator-wrapper-seperator-line');
     document.getElementById('validators-main-wrapper').appendChild(eachValidatorSeperatorDiv)
   }
-  animateOverflowMonikers();
 }
 
-const rankingResponsesCache = {};
 
 function renderValidators() {
 
@@ -184,7 +193,9 @@ function renderValidators() {
     const bottomTimestamp = Math.floor(new Date(bottomDate).getTime() / 1000);
     const topTimestamp = Math.floor(new Date(topDate).getTime() / 1000);
 
-    const cacheResponse = rankingResponsesCache[bottomDate + '.' + topTimestamp];
+    const chainIdentifier = document.getElementById('network-switch-header').getAttribute('current_chain_identifier');
+
+    const cacheResponse = rankingResponsesCache[bottomDate + '.' + topTimestamp + '.' + chainIdentifier];
 
     if (cacheResponse) {
       sortOrderMapping[sort_by] == 'desc'
@@ -193,21 +204,22 @@ function renderValidators() {
       return generateValidatorRankingContent(cacheResponse, sort_by, sortOrderMapping)
     };
     serverRequest(
-      BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=${sort_by}&order=${sortOrderMapping[sort_by]}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&with_photos`,
+      BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=${sort_by}&order=${sortOrderMapping[sort_by]}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&chain_identifier=${chainIdentifier}&with_photos`,
       'GET',
       {},
       (response) => {
         generateValidatorRankingContent(response, sort_by, sortOrderMapping);
-        rankingResponsesCache[bottomDate + '.' + topTimestamp] = response;
+        rankingResponsesCache[bottomDate + '.' + topTimestamp + '.' + chainIdentifier] = response;
       }
     )
   })
 
 
   document.body.addEventListener('click', (event) => {
-    if (!event.target.classList.contains('validator-operator-address') && !event.target.parentNode.classList.contains('validator-operator-address') && !event.target.parentNode.parentNode.classList.contains('validator-operator-address')) return;
     let target = event.target;
-    while (!target.classList.contains('validator-operator-address')) target = target.parentNode;
+    while (target != document.body && !target.classList.contains('validator-operator-address')) target = target.parentNode;
+    if (!target.classList.contains('validator-operator-address')) return;
+
     navigator.clipboard.writeText(target.children[0].getAttribute('operator_address'));
     target.children[0].children[3].children[0].src = '/res/images/check.svg';
     setTimeout(() => {
@@ -215,40 +227,21 @@ function renderValidators() {
     }, 1000);
   })
 
+  document.body.addEventListener('mouseover', (event) => {
+    if (!event.target.classList.contains('each-validator-wrapper') && !event.target.classList.contains('validator-moniker')) return;
+
+    const monikerWrapper = event.target.children[0].children[2].children[0];
+    animateOverflowMonikers(monikerWrapper);
+  })
 
   document.body.addEventListener('mouseover', (event) => {
-    if (!event.target.classList.contains('validator-operator-address') && !event.target.parentNode.classList.contains('validator-operator-address') && !event.target.parentNode.parentNode.classList.contains('validator-operator-address')) {
-      
-      document.querySelectorAll('.validator-operator-address-content-expanded').forEach(each => {
-        setTimeout(() => {
-          each.children[1].style.width = '8px';
-          setTimeout(() => {
-            each.children[1].innerHTML = '...';
-          }, 1000);
-        }, 0.5 * 1000);
-        each.classList.remove('validator-operator-address-content-expanded');
-      });
-      document.querySelectorAll('.validator-operator-address-expanded').forEach(each => each.classList.remove('validator-operator-address-expanded'));  
-    }
+
     document.querySelectorAll('.validator-operator-address-visible').forEach(each => each.classList.remove('validator-operator-address-visible'));
     let target = event.target;
     while (target != document.body && !target.classList.contains('each-validator-wrapper')) target = target.parentNode;
     if (!target.classList.contains('each-validator-wrapper')) return;
-
+    
     const operatorAddressWrapper = target.children[0].children[2].children[1];
-    const operatorAddressValue = operatorAddressWrapper.children[0].getAttribute('operator_address');
-    const operatorAddressValueMiddle = operatorAddressValue.slice(4, operatorAddressValue.length - 4);
-
     operatorAddressWrapper.classList.add('validator-operator-address-visible');
-    operatorAddressWrapper.addEventListener('mouseenter', (event) => {
-      if (window.innerWidth < 1200) return;
-      setTimeout(() => {
-        operatorAddressWrapper.children[0].classList.add('validator-operator-address-content-expanded')
-        operatorAddressWrapper.classList.add('validator-operator-address-expanded');  
-
-        operatorAddressWrapper.children[0].children[1].innerHTML = operatorAddressValueMiddle;
-        operatorAddressWrapper.children[0].children[1].style.width = '100%';
-      }, 0.5 * 1000);
-    })
   })
 }
