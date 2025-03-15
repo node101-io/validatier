@@ -11,6 +11,7 @@ import { getOnlyNativeTokenValueFromCommissionOrRewardEvent } from './functions/
 import { getSpecificAttributeOfAnEventFromTxEventsArray } from '../utils/getSpecificAttributeOfAnEventFromTxEventsArray.js';
 
 import { CosmosTx } from './interfaces/apiTxResultInterface.js';
+import Chain from '../models/Chain/Chain.js';
 
 const RESTART_WAIT_INTERVAL = 5 * 1000;
 const WEBSOCKET_URLS = [
@@ -33,7 +34,7 @@ function getTransactionInfo(txHash: string, chain_identifier: string, callback: 
     .catch((err) => callback('bad_request', null));
 }
 
-const listenEventsForUrl = (url: string, chain_identifier: string) => {
+const listenEventsForUrl = (url: string, chain_identifier: string, denom: string) => {
   const ws = new WebSocket(url);
 
   ws.on('open', () => {    
@@ -88,7 +89,6 @@ const listenEventsForUrl = (url: string, chain_identifier: string) => {
 
               if (!amountAttribute) return next();
 
-              const denom = amountAttribute['denom'];
               const amount = amountAttribute['amount'];
 
               if (!denom || !amount) return next();
@@ -104,7 +104,7 @@ const listenEventsForUrl = (url: string, chain_identifier: string) => {
                 CompositeEventBlock.saveCompositeEventBlock({
                   block_height: parseInt(blockHeight),
                   operator_address: validatorAddress,
-                  denom: 'uatom',
+                  denom: denom,
                   self_stake: parseFloat(amount)
                 }, (err, newCompositeEventBlock) => {
                   if (err || !newCompositeEventBlock) return console.log(err + ' | ' + new Date());
@@ -117,12 +117,12 @@ const listenEventsForUrl = (url: string, chain_identifier: string) => {
 
               getSpecificAttributeOfAnEventFromTxEventsArray(txRawResult.tx_response.events, 'withdraw_commission', 'amount', (err, specificAttributeValue) => {
                 if (err || !specificAttributeValue) return console.log(err + ' | ' + new Date());
-                getOnlyNativeTokenValueFromCommissionOrRewardEvent(specificAttributeValue, (err, nativeRewardOrCommissionValue) => {
+                getOnlyNativeTokenValueFromCommissionOrRewardEvent(specificAttributeValue, denom, (err, nativeRewardOrCommissionValue) => {
                   if (err || !nativeRewardOrCommissionValue) return console.log(err + ' | ' + new Date());
                   WithdrawRecordEvent.saveWithdrawRecordEvent({
                     operator_address: validatorAddress,
                     withdrawType: 'commission',
-                    denom: 'uatom',
+                    denom: denom,
                     amount: nativeRewardOrCommissionValue,
                     txHash: txHash
                   }, (err, newWithdrawRecordEvent) => {
@@ -130,8 +130,8 @@ const listenEventsForUrl = (url: string, chain_identifier: string) => {
                     CompositeEventBlock.saveCompositeEventBlock({
                       block_height: parseInt(blockHeight),
                       operator_address: validatorAddress,
-                      denom: 'uatom',
-                      reward: parseInt(nativeRewardOrCommissionValue)
+                      denom: denom,
+                      reward: parseInt(nativeRewardOrCommissionValue),
                     }, (err, newCompositeEventBlock) => {
                       if (err || !newCompositeEventBlock) return console.log(err + ' | ' + new Date());
 
@@ -145,21 +145,21 @@ const listenEventsForUrl = (url: string, chain_identifier: string) => {
               
               getSpecificAttributeOfAnEventFromTxEventsArray(txRawResult.tx_response.events, 'withdraw_rewards', 'amount', (err, specificAttributeValue) => {
                 if (err || !specificAttributeValue) return console.log(err + ' | ' + new Date());
-                getOnlyNativeTokenValueFromCommissionOrRewardEvent(specificAttributeValue, (err, nativeRewardOrCommissionValue) => {
+                getOnlyNativeTokenValueFromCommissionOrRewardEvent(specificAttributeValue, denom, (err, nativeRewardOrCommissionValue) => {
                   if (err || !nativeRewardOrCommissionValue) return console.log(err + ' | ' + new Date());
                   WithdrawRecordEvent.saveWithdrawRecordEvent({
                     operator_address: validatorAddress,
                     withdrawType: 'reward',
-                    denom: 'uatom',
-                    amount: chain_identifier == 'cosmoshub' ? nativeRewardOrCommissionValue : specificAttributeValue,
+                    denom: denom,
+                    amount: nativeRewardOrCommissionValue,
                     txHash: txHash
                   }, (err, newWithdrawRecordEvent) => {
                     if (err || !newWithdrawRecordEvent) return console.log(err + ' | ' + new Date());
                     CompositeEventBlock.saveCompositeEventBlock({
                       block_height: parseInt(blockHeight),
                       operator_address: validatorAddress,
-                      denom: 'uatom',
-                      reward: parseInt(chain_identifier == 'cosmoshub' ? nativeRewardOrCommissionValue : specificAttributeValue)
+                      denom: denom,
+                      reward: parseInt(nativeRewardOrCommissionValue)
                     }, (err, newCompositeEventBlock) => {
                       if (err || !newCompositeEventBlock) return console.log(err + ' | ' + new Date());
 
@@ -186,12 +186,17 @@ const listenEventsForUrl = (url: string, chain_identifier: string) => {
 
   ws.on('close', () => {
     console.warn(`WebSocket closed for ${url}. Reconnecting...`);
-    setTimeout(() => listenEventsForUrl(url, chain_identifier), RESTART_WAIT_INTERVAL);
+    setTimeout(() => listenEventsForUrl(url, chain_identifier, denom), RESTART_WAIT_INTERVAL);
   });
 };
 
 export const listenEvents = () => {
-  WEBSOCKET_URLS.forEach(network => {
-    listenEventsForUrl(network.url, network.chain_identifier);
-  });
+
+  Chain
+    .find({})
+    .then(chains => {
+      chains.forEach(eachChain => {
+        listenEventsForUrl(eachChain.wss_url, eachChain.name, eachChain.denom);
+      })
+    })
 };

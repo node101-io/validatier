@@ -48,5 +48,6 @@ app.use('/composite_event_block', compositeEventBlockRouter);
 app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => {
+  listenEvents();
   console.log(`Server running at PORT ${PORT}`);
 });

@@ -8,6 +8,8 @@ export interface ChainInterface {
   image: string;
   symbol: string;
   decimals: number;
+  denom: string;
+  wss_url: string;
 }
 
 interface ChainModel extends Model<ChainInterface> {
@@ -19,6 +21,7 @@ interface ChainModel extends Model<ChainInterface> {
       image: string;
       symbol: string;
       decimals: number;
+      denom: string;
     }, 
     callback: (
       err: string | null,
@@ -65,11 +68,21 @@ const chainSchema = new Schema<ChainInterface>({
     trim: true,
     required: true
   },
+  denom: {
+    type: String,
+    unique: true,
+    trim: true,
+    required: true
+  },
   decimals: {
     type: Number,
     required: true,
     min: 0,
     max: 20
+  },
+  wss_url: {
+    type: String,
+    required: false
   }
 });
 
@@ -87,7 +100,7 @@ chainSchema.statics.saveChain = function (
   callback: Parameters<ChainModel['saveChain']>[1]
 ) {
 
-  const { name, pretty_name, chain_id, image, symbol, decimals } = body;
+  const { name, pretty_name, chain_id, image, symbol, decimals, denom } = body;
 
   Chain
     .findOneAndUpdate(
@@ -97,7 +110,8 @@ chainSchema.statics.saveChain = function (
         pretty_name: pretty_name,
         image: image,
         symbol: symbol,
-        decimals: decimals
+        decimals: decimals,
+        denom: denom
       }
     )
     .then((oldChain) => {
@@ -111,7 +125,8 @@ chainSchema.statics.saveChain = function (
           chain_id: chain_id,
           image: image,
           symbol: symbol,
-          decimals: decimals
+          decimals: decimals,
+          denom: denom
         })
         .then((newChain: ChainInterface) => {
           if (!newChain) return callback('creation_error', null);
