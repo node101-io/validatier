@@ -68,6 +68,7 @@ const decodeTransactions = (base_url: string, txs: string[], callback: (err: str
 
                 const events = data.result.tx_result.events;
                 
+                // TODO: callbackten synce çevirme
                 getSpecificAttributeOfAnEventFromTxEventsArray(
                   events,
                   ['withdraw_rewards', 'withdraw_commission'],
