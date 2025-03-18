@@ -13,25 +13,23 @@ export interface DataInterface {
   };
 }
 
-const getTxsByHeight = async (base_url: string, block_height: number): Promise<any> => {
-  try {
-    const response = await request(`${base_url}/block?height=${block_height}`);
-    const data: any = await response.body.json();
+const getTxsByHeight = (base_url: string, block_height: number, callback: (err: string | null, decodedTxs?: [{ messages: any[] }]) => any) => {
+  request(`${base_url}/block?height=${block_height}`)
+    .then(response => response.body.json())
+    .then((data: any) => {
+      if (!data.result?.block?.data?.txs || !data.result?.block?.header?.height)
+        return callback('bad_request', null);
 
-    if (!data.result?.block?.data?.txs || !data.result?.block?.header?.height) {
-      throw new Error('bad_request');
-    }
-
-    return new Promise((resolve, reject) => {
       decodeTxs(base_url, data.result.block.data.txs, (err: string | null, decodedTxs?: any) => {
-        if (err) return reject(err);
-        resolve(decodedTxs);
+        if (err) return callback(err, null);
+
+        return callback(null, decodedTxs);
       });
+    })
+    .catch(error => {
+      console.error('Error fetching block data:', error);
+      return callback(error.toString(), null);
     });
-  } catch (error) {
-    console.error('Error fetching block data:', error);
-    throw error;
-  }
 };
 
 export default getTxsByHeight;
