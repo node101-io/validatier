@@ -93,8 +93,8 @@ function paintBlocksInBetween () {
   document.querySelectorAll('.selected-date-bottom').forEach(each => each.classList.remove('selected-date-bottom'));
   document.querySelectorAll('.selected-date-top').forEach(each => each.classList.remove('selected-date-top'));
 
-  if (document.querySelector(`div[date="${selectedDateBottom}"]`)) document.querySelector(`div[date="${selectedDateBottom}"]`).classList.add('selected-date-bottom');
-  if (document.querySelector(`div[date="${selectedDateTop}"]`)) document.querySelector(`div[date="${selectedDateTop}"]`).classList.add('selected-date-top');
+  if (document.querySelector(`div[date='${selectedDateBottom}']`)) document.querySelector(`div[date='${selectedDateBottom}']`).classList.add('selected-date-bottom');
+  if (document.querySelector(`div[date='${selectedDateTop}']`)) document.querySelector(`div[date='${selectedDateTop}']`).classList.add('selected-date-top');
 
   const allDateElements = document.querySelectorAll('.date');
   for (let i = 0; i < allDateElements.length; i++) {

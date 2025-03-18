@@ -12,6 +12,9 @@
   "author": "Dogu Boran Senturk",
   "license": "ISC",
   "dependencies": {
+    "@cosmjs/crypto": "^0.33.1",
+    "@cosmjs/proto-signing": "^0.33.1",
+    "@cosmjs/stargate": "^0.33.1",
     "adm-zip": "^0.5.16",
     "async": "^3.2.6",
     "axios": "^1.7.9",
@@ -28,6 +31,7 @@
     "pug": "^3.0.3",
     "socket.io-client": "^4.8.1",
     "tendermint": "^5.0.2",
+    "undici": "^7.5.0",
     "ws": "^8.18.1"
   },
   "devDependencies": {

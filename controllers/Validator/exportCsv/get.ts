@@ -1,7 +1,7 @@
 
 import { Request, Response } from 'express';
 import Validator from '../../../models/Validator/Validator.js';
-import { SortOrder } from "mongoose";
+import { SortOrder } from 'mongoose';
 import { getCsvZipBuffer } from '../../../models/Validator/functions/getCsvZipBuffer.js';
 import { formatTimestamp } from '../../../utils/formatTimestamp.js';
 import { isValidSortBy } from '../../../utils/isValidSortBy.js';

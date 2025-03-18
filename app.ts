@@ -12,7 +12,8 @@ import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
 
 import { startCronJobs } from './cron/startCronJobs.js';
-import { listenEvents } from './listeners/listenForEvents.js';
+import { processBlocks } from './utils/processBlocks.js';
+import { getGenesisTxs } from './utils/getGenesisTxs.js';
 
 dotenv.config();
 
@@ -32,7 +33,7 @@ app.use(rateLimit({
 }));
 
 mongoose
-  .connect('mongodb://127.0.0.1:27017/validator-timeline')
+  .connect('mongodb://127.0.0.1:27017/validator-timeline-test-v2')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
@@ -47,7 +48,9 @@ app.use('/', indexRouter);
 app.use('/composite_event_block', compositeEventBlockRouter);
 app.use('/validator', validatorRouter);
 
-app.listen(PORT, () => {
-  listenEvents();
+
+app.listen(PORT, async () => {
   console.log(`Server running at PORT ${PORT}`);
+
+  processBlocks(17224685, 17229685, 'cosmoshub');
 });

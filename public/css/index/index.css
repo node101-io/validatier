@@ -159,7 +159,8 @@
   --validator-operator-address-visible-opacity: 0.75;
   --validator-operator-address-visible-opacity-hover: 1;
   --validator-operator-address-content-min-width: fit-content;
-  --validator-operator-address-copy-button: 2px;
+  --validator-operator-address-copy-button-margin-top: 3px;
+  --validator-operator-address-copy-button-margin-left: 4px;
   
   --validator-opeartor-address-dots-max-width: 20px;
   --validator-operator-address-animaton-transition-duration: 1s;
@@ -728,7 +729,8 @@
 }
 
 .validator-operator-address-copy-button {
-  transform: translateY(var(--validator-operator-address-copy-button));
+  margin-top: var(--validator-operator-address-copy-button-margin-top); 
+  margin-left: var(--validator-operator-address-copy-button-margin-left);
 }
 
 .validator-operator-address {
@@ -742,6 +744,7 @@
   display: flex;
   align-items: center;
   overflow: hidden;
+  margin-bottom: var(--validator-operator-address-copy-button-margin-top);
 }
 
 .dots {
@@ -749,7 +752,7 @@
   display: inline-block;
   overflow: visible;
   max-width: var(--validator-opeartor-address-dots-max-width);
-  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out calc(var(--validator-operator-address-animaton-transition-delay) - 0.25s);
+  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out var(--validator-operator-address-animaton-transition-delay);
 }
 
 .middle-address {

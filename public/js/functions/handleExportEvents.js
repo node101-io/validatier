@@ -1,6 +1,6 @@
 
 function formatTimestamp (timestamp) {
-  return new Date(timestamp * 1000).toISOString().split("T")[0];
+  return new Date(timestamp * 1000).toISOString().split('T')[0];
 }
 
 function handleExportEvents () {

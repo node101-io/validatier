@@ -19,8 +19,7 @@ interface ValidatorChangeEventModel extends Model<ValidatorChangeEventInterface>
       operator_address: string;
       moniker: string;
       commission_rate: string;
-      bond_shares: string;
-      liquid_shares: string;
+      keybase_id: string;
     }, 
     callback: (
       err: string | null,
@@ -78,7 +77,7 @@ validatorChangeEventSchema.statics.saveValidatorChangeEvent = function (
     .then((validator) => {
       if (!validator) return callback('fetch_error', null);
 
-      isRecordChanged(validator, body, ['moniker', 'commission_rate', 'bond_shares', 'liquid_shares', 'keybase_id'], (err: string, changedAttributes: (keyof OldOrNewBodyInterface)[] | null) => {
+      isRecordChanged(validator, body, ['moniker', 'commission_rate', 'keybase_id'], (err: string, changedAttributes: (keyof OldOrNewBodyInterface)[] | null) => {
         if (err) return callback(err, null);
         if (!changedAttributes || changedAttributes.length <= 0) return callback(null, true); 
 

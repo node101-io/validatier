@@ -8,12 +8,12 @@ interface EventInterface {
   }[];
 }
 
-export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: EventInterface[], specificEventType: string, specificAttributeKey: string, callback: (err: string | null, specificAttributeValue: string | null) => any) {
+export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: EventInterface[], specificEventTypes: string[], specificAttributeKey: string, callback: (err: string | null, specificAttributeValue: string | null) => any) {
   
   for (let i = 0; i < events.length; i++) {
     const eachEvent = events[i];
 
-    if (eachEvent.type != specificEventType) continue;
+    if (!specificEventTypes.includes(eachEvent.type)) continue;
  
     const attributes = eachEvent.attributes;
     

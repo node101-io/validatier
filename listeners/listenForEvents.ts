@@ -1,202 +1,137 @@
 import async from 'async';
-import axios from 'axios';
-import WebSocket from 'ws';
-
 import CompositeEventBlock from '../models/CompositeEventBlock/CompositeEventBlock.js';
-import StakeRecordEvent from '../models/StakeRecord/StakeRecord.js';
-import WithdrawRecordEvent from '../models/WithdrawRecord/WithdrawRecord.js';
-
-import { convertOperatorAddressToBech32 } from '../utils/convertOperatorAddressToBech32.js';
-import { getOnlyNativeTokenValueFromCommissionOrRewardEvent } from './functions/getOnlyNativeTokenValueFromCommissionOrRewardEvent.js';
-import { getSpecificAttributeOfAnEventFromTxEventsArray } from '../utils/getSpecificAttributeOfAnEventFromTxEventsArray.js';
-
-import { CosmosTx } from './interfaces/apiTxResultInterface.js';
+import Validator from '../models/Validator/Validator.js';
 import Chain from '../models/Chain/Chain.js';
+import getTxsByHeight from '../utils/getTxsByHeight.js';
 
-const RESTART_WAIT_INTERVAL = 5 * 1000;
-const WEBSOCKET_URLS = [
-  {url: 'wss://g.w.lavanet.xyz:443/gateway/celestia/tendermint-rpc/14f76aeb7eb005d23cba691b5c355d4d', chain_identifier: 'celestia'},
-  // {url: 'wss://cosmoshub.tendermintrpc.lava.build/websocket', chain_identifier: 'cosmoshub'}
-];
 const LISTENING_EVENTS = [
+  '/cosmos.staking.v1beta1.MsgCreateValidator',
   '/cosmos.staking.v1beta1.MsgDelegate',
-  '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission',
-  '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward'
+  '/cosmos.staking.v1beta1.MsgEditValidator',
+  '/cosmos.staking.v1beta1.MsgUndelegate',
+  '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
+  '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission'
 ];
 
-function getTransactionInfo(txHash: string, chain_identifier: string, callback: (err: string | null, data: CosmosTx | null) => any) {
-  
-  const TENDERMINT_RPC_URL = `https://rest.cosmos.directory/${chain_identifier}/cosmos/tx/v1beta1/txs/`;
+export const listenForEvents = async (
+  bottom_block_height: number,
+  top_block_height: number,
+  chain_identifier: string,
+  final_callback: (err: string | null, success: Boolean) => any
+) => {
+  try {
+    const chain = await Chain.findOne({ name: chain_identifier });
+    if (!chain) throw new Error('not_found');
 
-  axios
-    .get(`${TENDERMINT_RPC_URL}/${txHash}`)
-    .then((response: { data: CosmosTx }) => callback(null, response.data))
-    .catch((err) => callback('bad_request', null));
-}
+    const denom = chain.denom;
+    const initialBottomBlock = bottom_block_height;
+    let startTime = Date.now();
 
-const listenEventsForUrl = (url: string, chain_identifier: string, denom: string) => {
-  const ws = new WebSocket(url);
+    const promises: Promise<void>[] = [];
 
-  ws.on('open', () => {    
-    console.log(`Listening to chain ${chain_identifier.toUpperCase()} | Connected to WebSocket: ${url}`);
-
-    const subscribeMsg = {
-      jsonrpc: '2.0',
-      id: 1,
-      method: 'subscribe',
-      params: {
-        query: 'tm.event=\'Tx\''
+    for (let height = bottom_block_height; height < top_block_height; height++) {
+      if ((height - initialBottomBlock) % 100 === 0) {
+        console.log(`${(Date.now() - startTime) / 1000}s`);
+        startTime = Date.now();
       }
-    };
-    ws.send(JSON.stringify(subscribeMsg));
-    console.log(`Subscribed to events on ${url}: \n - MsgDelegate \n - MsgWithdrawDelegatorRewards \n - MsgWithdrawValidatorCommission`);
-  });
 
-  ws.on('message', async (data) => {
-    
-    const dataJson = JSON.parse(data.toString());
-    if (!dataJson || !dataJson.result || !dataJson.result.events) return;
-    const events = dataJson.result.events;
+      promises.push(
+        new Promise((resolve, rejecet) => {
+          getTxsByHeight(chain.rpc_url, height, (err, decodedTxs) => {
 
-    if (!events || !events['tx.hash'] || !events['tx.hash'][0] || !events['tx.height'] || !events['tx.height'][0]) return;
-
-    const blockHeight = events['tx.height'][0];
-    const txHash = events['tx.hash'][0];
-
-    getTransactionInfo(txHash, chain_identifier, (err, txRawResult) => {
-      
-      if (err || !txRawResult || !txRawResult.tx || !txRawResult.tx.body || !txRawResult.tx_response) return;
-      const txResult = txRawResult.tx.body;
-
-      if (!txResult || !txResult.messages) return;
-      async.timesSeries(
-        txResult.messages.length,
-        (i, next) => {
-          const eachMessage = txResult.messages[i];
-          
-          const messageType = eachMessage['@type'];
-          const validatorAddress = eachMessage['validator_address'];
-          const delegatorAddress = eachMessage['delegator_address'];
-
-          if (!validatorAddress || !delegatorAddress || !LISTENING_EVENTS.includes(messageType)) return next();
-
-          convertOperatorAddressToBech32(validatorAddress, (err, bech32ValidatorAddress) => {
-            if (err) return console.log(err);
-
-            if (messageType == '/cosmos.staking.v1beta1.MsgDelegate'/* && delegatorAddress == bech32ValidatorAddress*/) {
-
-              const amountAttribute = eachMessage['amount'];
-
-              if (!amountAttribute) return next();
-
-              const amount = amountAttribute['amount'];
-
-              if (!denom || !amount) return next();
-
-              StakeRecordEvent.saveStakeRecordEvent({
-                operator_address: validatorAddress,
-                denom: denom,
-                amount: amount,
-                txHash: txHash
-              }, (err, newStakeRecordEvent) => {
-                if (err || !newStakeRecordEvent || typeof parseInt(blockHeight) != 'number' || typeof parseFloat(amount) != 'number') return console.log('bad_request | ' + new Date());
-
-                CompositeEventBlock.saveCompositeEventBlock({
-                  block_height: parseInt(blockHeight),
-                  operator_address: validatorAddress,
-                  denom: denom,
-                  self_stake: parseFloat(amount)
-                }, (err, newCompositeEventBlock) => {
-                  if (err || !newCompositeEventBlock) return console.log(err + ' | ' + new Date());
-
-                  console.log('Stake event saved for validator: ' + newStakeRecordEvent.operator_address + ' | Composite block saved with block_height: ' + newCompositeEventBlock.block_height + ' | ' + new Date());
-                  return next();
-                });
-              });
-            } else if (messageType == '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission') {
-
-              getSpecificAttributeOfAnEventFromTxEventsArray(txRawResult.tx_response.events, 'withdraw_commission', 'amount', (err, specificAttributeValue) => {
-                if (err || !specificAttributeValue) return console.log(err + ' | ' + new Date());
-                getOnlyNativeTokenValueFromCommissionOrRewardEvent(specificAttributeValue, denom, (err, nativeRewardOrCommissionValue) => {
-                  if (err || !nativeRewardOrCommissionValue) return console.log(err + ' | ' + new Date());
-                  WithdrawRecordEvent.saveWithdrawRecordEvent({
-                    operator_address: validatorAddress,
-                    withdrawType: 'commission',
-                    denom: denom,
-                    amount: nativeRewardOrCommissionValue,
-                    txHash: txHash
-                  }, (err, newWithdrawRecordEvent) => {
-                    if (err || !newWithdrawRecordEvent) return console.log(err + ' | ' + new Date());
-                    CompositeEventBlock.saveCompositeEventBlock({
-                      block_height: parseInt(blockHeight),
-                      operator_address: validatorAddress,
-                      denom: denom,
-                      reward: parseInt(nativeRewardOrCommissionValue),
-                    }, (err, newCompositeEventBlock) => {
-                      if (err || !newCompositeEventBlock) return console.log(err + ' | ' + new Date());
-
-                      console.log('Commission withdraw saved for validator: ' + newWithdrawRecordEvent.operator_address + ' | Composite block saved with block_height: ' + newCompositeEventBlock.block_height + ' | ' + new Date());
-                      return next();
-                    });
-                  });
-                });
-              });
-            } else if (messageType == '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward'/* && delegatorAddress == bech32ValidatorAddress */) {
-              
-              getSpecificAttributeOfAnEventFromTxEventsArray(txRawResult.tx_response.events, 'withdraw_rewards', 'amount', (err, specificAttributeValue) => {
-                if (err || !specificAttributeValue) return console.log(err + ' | ' + new Date());
-                getOnlyNativeTokenValueFromCommissionOrRewardEvent(specificAttributeValue, denom, (err, nativeRewardOrCommissionValue) => {
-                  if (err || !nativeRewardOrCommissionValue) return console.log(err + ' | ' + new Date());
-                  WithdrawRecordEvent.saveWithdrawRecordEvent({
-                    operator_address: validatorAddress,
-                    withdrawType: 'reward',
-                    denom: denom,
-                    amount: nativeRewardOrCommissionValue,
-                    txHash: txHash
-                  }, (err, newWithdrawRecordEvent) => {
-                    if (err || !newWithdrawRecordEvent) return console.log(err + ' | ' + new Date());
-                    CompositeEventBlock.saveCompositeEventBlock({
-                      block_height: parseInt(blockHeight),
-                      operator_address: validatorAddress,
-                      denom: denom,
-                      reward: parseInt(nativeRewardOrCommissionValue)
-                    }, (err, newCompositeEventBlock) => {
-                      if (err || !newCompositeEventBlock) return console.log(err + ' | ' + new Date());
-
-                      console.log('Reward withdraw saved for validator: ' + newWithdrawRecordEvent.operator_address + ' | Composite block saved with block_height: ' + newCompositeEventBlock.block_height + ' | ' + new Date());
-                      return next();
-                    });
-                  });
-                });
-              });
-            } else return;
           });
-        },
-        (err) => {
-          if (err) return console.log(err);
-          return;
-        }
+        });
+        (async () => {
+          try {
+            const decodedTxs = await getTxsByHeight(chain.rpc_url, height);
+            if (!decodedTxs) return;
+
+            const flattenedDecodedTxs = decodedTxs.flatMap((obj: { messages: any }) => obj.messages);
+            if (!flattenedDecodedTxs.length) return;
+
+            // TODO: async.times
+            for (const eachMessage of flattenedDecodedTxs) {
+              if (!LISTENING_EVENTS.includes(eachMessage.typeUrl)) continue;
+
+              if (['/cosmos.staking.v1beta1.MsgCreateValidator', '/cosmos.staking.v1beta1.MsgEditValidator'].includes(eachMessage.typeUrl)) {
+                await new Promise<void>((resolve, reject) => {
+
+                  const pubkey: ArrayBuffer = eachMessage.value.pubkey.value;
+                  const byteArray = new Uint8Array(Object.values(pubkey).slice(2));
+                  const pubkeyBase64 = btoa(String.fromCharCode(...byteArray));
+
+                  Validator.saveValidator(
+                    {
+                      pubkey: pubkeyBase64,
+                      operator_address: eachMessage.value.validatorAddress,
+                      delegator_address: eachMessage.value.delegatorAddress,
+                      keybase_id: eachMessage.value.description.identity,
+                      moniker: eachMessage.value.description.moniker,
+                      commission_rate: eachMessage.value.commission.rate,
+                      chain_identifier: chain.name
+                    },
+                    (err, validator) => {
+                      if (err) return reject(err);
+                      console.log(`${eachMessage.typeUrl} | SAVED | ${validator?.operator_address}`);
+                      resolve();
+                    }
+                  );
+                });
+              } else if (
+                ['/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward', '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission'].includes(
+                  eachMessage.typeUrl
+                )
+              ) {
+                await new Promise<void>((resolve, reject) => {
+                  CompositeEventBlock.saveCompositeEventBlock(
+                    {
+                      block_height: height,
+                      operator_address: eachMessage.value.validatorAddress,
+                      denom: denom,
+                      reward: parseInt(eachMessage.value.amount.amount)
+                    },
+                    (err, newCompositeEventBlock) => {
+                      if (err) return reject(err);
+                      console.log(`${eachMessage.typeUrl} | SAVED | ${newCompositeEventBlock?.operator_address}`);
+                      resolve();
+                    }
+                  );
+                });
+              } else if (
+                ['/cosmos.staking.v1beta1.MsgDelegate', '/cosmos.staking.v1beta1.MsgUndelegate'].includes(eachMessage.typeUrl)
+              ) {
+                const selfStake =
+                  eachMessage.typeUrl === '/cosmos.staking.v1beta1.MsgDelegate'
+                    ? parseInt(eachMessage.value.amount.amount)
+                    : -parseInt(eachMessage.value.amount.amount);
+
+                await new Promise<void>((resolve, reject) => {
+                  CompositeEventBlock.saveCompositeEventBlock(
+                    {
+                      block_height: height,
+                      operator_address: eachMessage.value.validatorAddress,
+                      denom: denom,
+                      self_stake: selfStake
+                    },
+                    (err, newCompositeEventBlock) => {
+                      if (err) return reject(err);
+                      console.log(`${eachMessage.typeUrl} | SAVED | ${newCompositeEventBlock?.operator_address}`);
+                      resolve();
+                    }
+                  );
+                });
+              }
+            }
+          } catch (error) {
+            console.error(`Error processing block ${height}:`, error);
+          }
+        })()
       );
-    });
-  });
+    }
 
-  ws.on('error', (err) => {
-    console.error('WebSocket error:', err);
-  });
-
-  ws.on('close', () => {
-    console.warn(`WebSocket closed for ${url}. Reconnecting...`);
-    setTimeout(() => listenEventsForUrl(url, chain_identifier, denom), RESTART_WAIT_INTERVAL);
-  });
-};
-
-export const listenEvents = () => {
-
-  Chain
-    .find({})
-    .then(chains => {
-      chains.forEach(eachChain => {
-        listenEventsForUrl(eachChain.wss_url, eachChain.name, eachChain.denom);
-      })
-    })
+    await Promise.allSettled(promises);
+    return final_callback(null, true);
+  } catch (err) {
+    if (err) return final_callback(err.toString(), false);
+  }
 };

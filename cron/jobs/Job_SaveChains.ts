@@ -1,6 +1,6 @@
 import async from 'async';
 import axios from 'axios';
-import Chain from "../../models/Chain/Chain.js"
+import Chain from '../../models/Chain/Chain.js'
 import { Job_SaveValidators } from './Job_SaveValidators.js';
 
 export const Job_SaveChains = (callback: (err: string | null, success: Boolean) => any) => {
@@ -23,10 +23,7 @@ export const Job_SaveChains = (callback: (err: string | null, success: Boolean) 
             denom: response.data.chain.denom,
           }, (err, chain) => {
             if (err && !chain) return next(new Error(err));
-            Job_SaveValidators(chainIdentifiers[i], (err, success) => {
-              if (err && !success) next(new Error(err));
-              return next()
-            })
+            return next();            
           })
         })
     },

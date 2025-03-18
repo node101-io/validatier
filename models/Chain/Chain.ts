@@ -9,7 +9,7 @@ export interface ChainInterface {
   symbol: string;
   decimals: number;
   denom: string;
-  wss_url: string;
+  rpc_url: string;
 }
 
 interface ChainModel extends Model<ChainInterface> {
@@ -80,7 +80,7 @@ const chainSchema = new Schema<ChainInterface>({
     min: 0,
     max: 20
   },
-  wss_url: {
+  rpc_url: {
     type: String,
     required: false
   }

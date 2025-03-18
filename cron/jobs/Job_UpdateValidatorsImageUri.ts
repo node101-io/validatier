@@ -1,6 +1,6 @@
-import Validator from "../../models/Validator/Validator.js";
-import async from "async"; // Make sure async is imported
-import { getKeybasePicture } from "../../models/Validator/functions/getKeybasePicture.js";
+import Validator from '../../models/Validator/Validator.js';
+import async from 'async'; // Make sure async is imported
+import { getKeybasePicture } from '../../models/Validator/functions/getKeybasePicture.js';
 
 export const Job_UpdateValidatorsImageUri = (callback: (err: string | null, success: Boolean) => any) => {
   Validator.find({})

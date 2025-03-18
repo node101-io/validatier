@@ -25,14 +25,6 @@ export const startCronJobs = () => {
         console.info('Cron Job UpdateValidatorsImageUri | success | ' + new Date());
         console.log(SEPERATOR_LINE);
       })
-      // Job_RecordValidatorBalance((err, success) => {
-      //   if (err && !success) return console.error(err + ' | ' + new Date())
-      //   console.info('Cron Job: RecordValidatorBalance| success | ' + new Date());
-      //   Job_RecordValidatorRewards((err, success) => {
-      //     if (err && !success) return console.error(err + ' | ' + new Date())
-      //     console.info('Cron Job: RecordValidatorRewards | success | ' + new Date());
-      //   });
-      // });
     });
   })
 }

@@ -1,8 +1,8 @@
 function animateOverflowMonikers(monikerWrapper) {
 
   document.querySelectorAll('.validator-moniker-text').forEach(each => {
-    each.style.animation = "none";
-    each.style.position = "inline-block";
+    each.style.animation = 'none';
+    each.style.position = 'inline-block';
   })
 
   const container = monikerWrapper.children[0];
@@ -13,9 +13,9 @@ function animateOverflowMonikers(monikerWrapper) {
     const textWidth = monikerText.scrollWidth;
     if (textWidth > containerWidth) {
       monikerText.style.animation = `scrollText ${(textWidth/containerWidth) * 2}s linear infinite alternate`;
-      monikerText.style.position = "relative";
+      monikerText.style.position = 'relative';
     } else {
-      monikerText.style.animation = "none";
+      monikerText.style.animation = 'none';
     }
   }
   

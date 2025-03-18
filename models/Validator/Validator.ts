@@ -5,7 +5,7 @@ import mongoose, { Schema, Model, Validator, SortOrder } from 'mongoose';
 import ValidatorChangeEvent from '../ValidatorChangeEvent/ValidatorChangeEvent.js';
 import CompositeEventBlock from '../CompositeEventBlock/CompositeEventBlock.js';
 
-import { isOperatorAddressValid, isPubkeyValid } from '../../utils/validationFunctions.js';
+import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
 import { getCsvExportData } from './functions/getCsvExportData.js';
 import { formatTimestamp } from '../../utils/formatTimestamp.js';
 import { mergeIntervals } from '../../utils/mergeIntervals.js';
@@ -15,11 +15,10 @@ const MAX_DATABASE_TEXT_FIELD_LENGTH = 1e4;
 export interface ValidatorInterface {
   pubkey: string;
   operator_address: string;
+  delegator_address: string;
   chain_identifier: string;
   moniker: string;
   commission_rate: string;
-  bond_shares: string;
-  liquid_shares: string;
   keybase_id: string;
   temporary_image_uri: string;
   created_at: Date;
@@ -31,11 +30,10 @@ interface ValidatorModel extends Model<ValidatorInterface> {
     body: {
       pubkey: string;
       operator_address: string;
+      delegator_address: string;
       chain_identifier: string;
       moniker: string;
       commission_rate: string;
-      bond_shares: string;
-      liquid_shares: string;
       keybase_id: string;
     }, 
     callback: (
@@ -48,8 +46,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       operator_address: string;
       moniker: string;
       commission_rate: string;
-      bond_shares: string;
-      liquid_shares: string;
+      keybase_id: string;
     }, 
     callback: (
       err: string | null,
@@ -123,8 +120,8 @@ interface ValidatorModel extends Model<ValidatorInterface> {
 }
 
 const validatorSchema = new Schema<ValidatorInterface>({
-  pubkey: { 
-    type: String, 
+  pubkey: {
+    type: String,
     required: true,
     trim: true,
     index: 1
@@ -132,6 +129,12 @@ const validatorSchema = new Schema<ValidatorInterface>({
   operator_address: { 
     type: String, 
     required: true, 
+    trim: true,
+    index: 1
+  },
+  delegator_address: { 
+    type: String, 
+    required: false, 
     trim: true,
     index: 1
   },
@@ -149,16 +152,6 @@ const validatorSchema = new Schema<ValidatorInterface>({
     maxlength: MAX_DATABASE_TEXT_FIELD_LENGTH
   },
   commission_rate: { 
-    type: String, 
-    required: true,
-    trim: true
-  },
-  bond_shares: { 
-    type: String, 
-    required: true,
-    trim: true
-  },
-  liquid_shares: { 
     type: String, 
     required: true,
     trim: true
@@ -183,15 +176,15 @@ const validatorSchema = new Schema<ValidatorInterface>({
   }
 });
 
-validatorSchema.index({ pubkey: 1, operator_address: 1, moniker: 1, deleted_at: 1 }, { unique: true });
+validatorSchema.index({ pubkey: 1, delegator_address: 1, operator_address: 1, moniker: 1, deleted_at: 1 }, { unique: true });
 
 
 validatorSchema.statics.saveValidator = function (
   body: Parameters<ValidatorModel['saveValidator']>[0], 
   callback: Parameters<ValidatorModel['saveValidator']>[1],
 ) {
-  const { pubkey, operator_address, moniker, commission_rate, bond_shares, liquid_shares, keybase_id } = body;
-  if (!isOperatorAddressValid(operator_address) || !isPubkeyValid(pubkey)) return callback('format_error', null);
+  const { operator_address, moniker, commission_rate, keybase_id } = body;
+  if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
 
   Validator
     .findOne({
@@ -213,8 +206,6 @@ validatorSchema.statics.saveValidator = function (
         operator_address: operator_address,
         moniker: moniker,
         commission_rate: commission_rate,
-        bond_shares: bond_shares,
-        liquid_shares: liquid_shares,
         keybase_id: keybase_id
       }
 
@@ -236,12 +227,12 @@ validatorSchema.statics.updateValidator = function (
   callback: Parameters<ValidatorModel['updateValidator']>[1],
 ) {
   
-  const { operator_address, moniker, commission_rate, bond_shares, liquid_shares } = body;
+  const { operator_address, moniker, commission_rate, keybase_id } = body;
   
   Validator
     .findOneAndUpdate(
       { operator_address: operator_address },
-      { moniker: moniker, commission_rate: commission_rate, bond_shares: bond_shares, liquid_shares: liquid_shares }
+      { moniker: moniker, commission_rate: commission_rate, keybase_id: keybase_id }
     )
     .then((updatedValidator) => {
       return callback(null, updatedValidator);
