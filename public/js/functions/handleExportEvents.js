@@ -1,6 +1,6 @@
 
 function formatTimestamp (timestamp) {
-  return new Date(timestamp * 1000).toISOString().split('T')[0];
+  return new Date(timestamp).toISOString().split('T')[0];
 }
 
 function handleExportEvents () {
@@ -46,22 +46,36 @@ function handleExportEvents () {
       document.getElementById('export-choice-download-button').appendChild(createSpinner(10));
 
       fetch(url)
-          .then(response => response.blob())
-          .then(blob => {
-              const downloadUrl = URL.createObjectURL(blob);
-              
-              const a = document.createElement('a');
-              a.href = downloadUrl;
-              a.download = `validator-timeline-${formatTimestamp(parseInt(bottomTimestamp))}-${formatTimestamp(parseInt(topTimestamp))}.zip`;
-              
-              document.body.appendChild(a);
-              a.click();
-              
-              document.body.removeChild(a);
-              URL.revokeObjectURL(downloadUrl);
-              document.getElementById('export-choice-download-button').innerHTML = downloadButtonInnerHTML;
-          })
-          .catch(error => (''));      
-    }
+      .then(async (response) => {
+          if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+  
+          const contentType = response.headers.get('Content-Type');
+          const isZip = contentType === 'application/zip';
+  
+          const blob = await response.blob();
+          if (blob.size === 0) {
+              throw new Error('Downloaded file is empty.');
+          }
+  
+          return { blob, isZip };
+      })
+      .then(({ blob, isZip }) => {
+          const downloadUrl = URL.createObjectURL(blob);
+          const fileExtension = isZip ? 'zip' : 'csv';
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = `validator-timeline-${formatTimestamp(parseInt(bottomTimestamp))}_${formatTimestamp(parseInt(topTimestamp))}.${fileExtension}`;
+  
+          document.body.appendChild(a);
+          a.click();
+  
+          document.body.removeChild(a);
+          URL.revokeObjectURL(downloadUrl);
+          document.getElementById('export-choice-download-button').innerHTML = downloadButtonInnerHTML;
+      })
+      .catch(error => console.error('Download failed:', error));
+    }  
   })
 }

@@ -514,7 +514,7 @@ validatorSchema.statics.exportCsv = function (
     function test(cb) { cb(null, bottomTimestamp < topTimestamp); },
     function iter(next) {
       Validator.rankValidators({
-        chain_identifier: chain_identifier ? chain_identifier : 'cosmoshub',
+        chain_identifier: chain_identifier,
         sort_by: sort_by,
         order: order,
         bottom_timestamp: bottomTimestamp,

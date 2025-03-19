@@ -46,9 +46,15 @@
     --export-wrapper-content-font-size: 14px;
     --export-choice-download-button-font-size: 14px;
     --header-network-switch-wrapper-font-size: 16px;
-    --network-switch-network-chain-id-font-size: 14px;
+    --network-switch-network-symbol-font-size: 14px;
     --validator-filter-input-font-size: 14px;
     --current-month-and-year-display-font-size: 16px;
+
+    --footer-main-title-font-size: 42px;
+    --footer-socials-wrapper-gap: 36px;
+    
+    --footer-main-wrapper-vertical-padding: 30px;
+    --footer-main-wrapper-gap: 14px;
   }
 }
 
@@ -61,6 +67,10 @@
 
 @media only screen and (max-width: 500px) {
   :root {
+
+    --default-inner-image-content-height: 32px;
+    --network-switch-header-height: 32px;
+
     --date-picker-z-index: 10;
     --date-picker-height: 48px;
   

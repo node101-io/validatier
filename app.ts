@@ -50,8 +50,8 @@ app.use('/', indexRouter);
 app.use('/composite_event_block', compositeEventBlockRouter);
 app.use('/validator', validatorRouter);
 
-app.listen(PORT, () => {  
+app.listen(PORT, () => {
   console.log(`Server running at PORT ${PORT}`);
-  // processBlocks(1, 100000, 'celestia');
+  // processBlocks(1, 10000, 'celestia');
   // processBlocks(5200791, 5300791, 'cosmoshub');
 })

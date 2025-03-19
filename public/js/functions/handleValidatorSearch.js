@@ -1,12 +1,11 @@
 
 function handleValidatorSearch () {
   const validatorFilterInput = document.getElementById('validator-filter-input');
-  const monikers = Array.from(document.querySelectorAll('.validator-moniker')).map(each => each.innerHTML);
+  const monikers = Array.from(document.querySelectorAll('.validator-moniker')).map(each => each.children[0].children[0].innerHTML);
   const operatorAddresses = Array.from(document.querySelectorAll('.validator-operator-address-content')).map(each => each.getAttribute('operator_address'));
   
   validatorFilterInput.addEventListener('keyup', (event) => {
-
-    if (!validatorFilterInput.value || validatorFilterInput.value.length < 4) return document.querySelectorAll('.each-validator-wrapper').forEach(each => {
+    if (!validatorFilterInput.value || validatorFilterInput.value.length <= 0) return document.querySelectorAll('.each-validator-wrapper').forEach(each => {
       each.style.display = 'flex';
       each.nextSibling.style.display = 'unset';
     });
@@ -15,8 +14,8 @@ function handleValidatorSearch () {
       each.nextSibling.style.display = 'none';
     });
     for (let i = 0; i < monikers.length; i++) {
-      const eachMoniker = monikers[i];
-      const eachOperatorAddress = operatorAddresses[i];
+      const eachMoniker = monikers[i].trim().toLowerCase();
+      const eachOperatorAddress = operatorAddresses[i].trim().toLowerCase();
 
       if (
         eachMoniker.includes(validatorFilterInput.value.trim().toLowerCase()) || 

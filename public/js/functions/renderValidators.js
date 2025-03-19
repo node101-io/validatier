@@ -82,31 +82,31 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     const hiddenPartDiv = document.createElement('div');
     hiddenPartDiv.classList.add('hidden-part');
 
-    const dotsFirstSpan = document.createElement('span');
-    dotsFirstSpan.classList.add('dots');
-    dotsFirstSpan.innerHTML = '..';
+    const dotsSpan = document.createElement('span');
+    dotsSpan.classList.add('dots');
+    dotsSpan.innerHTML = '....';
 
-    const dotsLastSpan = document.createElement('span');
-    dotsLastSpan.classList.add('dots');
-    dotsLastSpan.innerHTML = '..';
+    const firstMiddleSpan = document.createElement('span');
+    firstMiddleSpan.classList.add('middle-address');
+    firstMiddleSpan.innerHTML = validator.operator_address.slice(4, (validator.operator_address.length - 4) / 2);
 
-    const middleSpan = document.createElement('span');
-    middleSpan.classList.add('middle-address');
-    middleSpan.innerHTML = validator.operator_address.slice(4, validator.operator_address.length - 4);
+    const secondMiddleSpan = document.createElement('span');
+    secondMiddleSpan.classList.add('middle-address');
+    secondMiddleSpan.innerHTML = validator.operator_address.slice((validator.operator_address.length - 4) / 2, validator.operator_address.length - 4);
 
     const lastFourSpan = document.createElement('div');
     lastFourSpan.innerHTML = validator.operator_address.slice(validator.operator_address.length - 4);
 
     const operatorAddressIcon = document.createElement('div');
-    operatorAddressIcon.classList.add('validator-operator-address-copy-button', 'center');
+    operatorAddressIcon.classList.add('validator-operator-address-copy-button');
     
     const operatorAddressIconImageContent = document.createElement('img');
     operatorAddressIconImageContent.classList.add('center');
     operatorAddressIconImageContent.src = '/res/images/clipboard.svg';
     
-    hiddenPartDiv.appendChild(dotsFirstSpan);
-    hiddenPartDiv.appendChild(middleSpan);
-    hiddenPartDiv.appendChild(dotsLastSpan);
+    hiddenPartDiv.appendChild(firstMiddleSpan);
+    hiddenPartDiv.appendChild(dotsSpan);
+    hiddenPartDiv.appendChild(secondMiddleSpan);
     
     operatorAddressContentDiv.appendChild(firstFourSpan);
     operatorAddressContentDiv.appendChild(hiddenPartDiv);
@@ -160,6 +160,13 @@ function renderValidators() {
     ratio: '',
     sold: ''
   };
+
+  document.getElementById('cancel').addEventListener('click', (event) => {
+    document.getElementById('picker-main-wrapper').style.transform = 'perspective(1000px) rotateX(-90deg)';
+    document.getElementById('picker-main-wrapper').style.opacity = 0;
+
+    document.getElementById('picker-main-wrapper').children[document.getElementById('picker-main-wrapper').children.length - 1].style.transform = 'rotateX(0deg)';
+  })
 
   document.addEventListener('click', (event) => {
     const isHeaderClickedChecker = event.target.classList.contains('each-table-header-wrapper') || event.target.parentNode.classList.contains('each-table-header-wrapper') || event.target.parentNode.parentNode.classList.contains('each-table-header-wrapper');

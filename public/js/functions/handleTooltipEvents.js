@@ -16,18 +16,20 @@ function handleTooltipEvents () {
     target.previousSibling.classList.add('each-table-popup-info-content-hover');
   })
 
-  document.body.addEventListener('mouseover', (event) => {
+  document.body.addEventListener('mousemove', (event) => {
     let target = event.target;
     while (target != document.body && !target.classList.contains('validator-inactivity-display')) target = target.parentNode;
-    if (!target.classList.contains('validator-inactivity-display')) return document.querySelectorAll('.inactivity-display-content').forEach(each => each.style.display = 'none');
+    if (!target.classList.contains('validator-inactivity-display')) return document.querySelectorAll('.inactivity-display-content').forEach(each => {
+      each.style.display = 'none'
+    });
     const inactivityIntervals = target.getAttribute('value').split(',');
 
     const inactivityDisplayContent = document.querySelector('.inactivity-display-content');
     inactivityDisplayContent.innerHTML = '';
     inactivityDisplayContent.style.display = 'flex';
     
-    inactivityDisplayContent.style.left = event.pageX + 5 + 'px';
-    inactivityDisplayContent.style.top = event.pageY + 5 + 'px';
+    inactivityDisplayContent.style.left = (event.pageX - 200) + 'px';
+    inactivityDisplayContent.style.top = event.pageY + 20 + 'px';
 
     let i = 0;
     while (i < inactivityIntervals.length - 1) {

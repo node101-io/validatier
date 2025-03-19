@@ -40,7 +40,6 @@
   --each-social-icon-transition-duration: 0.25s;
   --each-social-icon-hover-scale: 1.2;
   
-  
   --switch-label-width: 50px;
   --switch-label-height: 25px;
   --switch-label-background-color: rgb(252, 252, 252);
@@ -153,6 +152,11 @@ input {
   background-color: var(--skeleton-background-color);
   border-radius: var(--skeleton-text-border-radius) !important;
   transition: all var(--skeleton-transition-duration) ease 0s;
+}
+
+.skeleton-text::after {
+  content: '';
+  display: none;
 }
 
 .skeleton-image {

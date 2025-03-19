@@ -1,20 +1,21 @@
 
 const rankingResponsesCache = {};
 
-function setSelectedChain (pretty_name, chainId, src, name) {
+function setSelectedChain (pretty_name, symbol, src, name) {
   document.getElementById('current-network-name').innerHTML = pretty_name;
-  document.getElementById('current-network-chain-id').innerHTML = chainId;
+  document.getElementById('current-network-symbol').innerHTML = symbol;
   document.getElementById('current-network-img').src = src;
   document.getElementById('network-switch-header').setAttribute('chain_identifier', name);
 }
 
-function handleNetworkSwitch (currentNetwork) {
+function handleNetworkSwitch () {
 
   const networkSwitchInput = document.getElementById('network-switch-input');
   networkSwitchInput.addEventListener('keyup', (event) => {
-    if (!networkSwitchInput.value || networkSwitchInput.value.length < 3) return document.querySelectorAll('.each-chain-wrapper').forEach(each => each.style.display = 'flex');
+    if (!networkSwitchInput.value || networkSwitchInput.value.length <= 0) return document.querySelectorAll('.each-chain-wrapper').forEach(each => each.style.display = 'flex');
     document.querySelectorAll('.each-chain-wrapper').forEach(each => {
-      if (each.children[1].children[0].innerHTML.includes(networkSwitchInput.value) || each.children[1].children[1].innerHTML.includes(networkSwitchInput.value)) {
+      const eachTextContent = each.children[1].children[0].innerHTML.trim().toLowerCase();
+      if (eachTextContent.includes(networkSwitchInput.value.trim().toLowerCase())) {
         each.style.display = 'flex';
       } else {
         each.style.display = 'none';
@@ -42,7 +43,7 @@ function handleNetworkSwitch (currentNetwork) {
     while (target != document.body && !target.classList.contains('each-chain-wrapper')) target = target.parentNode;
     if (!target.classList.contains('each-chain-wrapper')) return;
 
-    setSelectedChain(target.getAttribute('pretty_name'), target.getAttribute('chain_id'), target.getAttribute('image'));
+    setSelectedChain(target.getAttribute('pretty_name'), target.getAttribute('symbol'), target.getAttribute('image'));
     networkSwitchDropdown.classList.remove('network-switch-dropdown-open');
     setCookie('network', target.getAttribute('name'), 7);
         
