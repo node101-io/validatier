@@ -44,7 +44,7 @@ function handleExportEvents () {
       const downloadButtonInnerHTML = document.getElementById('export-choice-download-button').innerHTML;
       document.getElementById('export-choice-download-button').innerHTML = '';
       document.getElementById('export-choice-download-button').appendChild(createSpinner(10));
-
+      document.getElementById('export-choice-download-button').disabled = true;
       fetch(url)
       .then(async (response) => {
           if (!response.ok) {
@@ -74,6 +74,7 @@ function handleExportEvents () {
           document.body.removeChild(a);
           URL.revokeObjectURL(downloadUrl);
           document.getElementById('export-choice-download-button').innerHTML = downloadButtonInnerHTML;
+          document.getElementById('export-choice-download-button').disabled = false;
       })
       .catch(error => console.error('Download failed:', error));
     }  

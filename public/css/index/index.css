@@ -990,10 +990,15 @@
 
 .export-choice-download-button {
   padding: var(--export-choice-download-button-padding);
-  font-size: var(--export-choice-download-button-font-size);
+  font-size: var(--export-choice-download-button-font-size) !important;
   gap: var(--export-choice-download-button-gap);
   background-color: var(--color-dark-violet);
   cursor: var(--pointer-hand-dark);
+  border: none;
+}
+
+.export-choice-download-button span {
+  font-size: calc(var(--export-choice-download-button-font-size) - 2px);
 }
 
 .dropdown-icon {
