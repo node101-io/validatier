@@ -32,8 +32,8 @@ function handleExportEvents () {
       const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
       const topDate = document.getElementById('periodic-query-top-timestamp').value
 
-      const bottomTimestamp = Math.floor(new Date(bottomDate).getTime() / 1000);
-      const topTimestamp = Math.floor(new Date(topDate).getTime() / 1000);
+      const bottomTimestamp = Math.floor(new Date(bottomDate).getTime());
+      const topTimestamp = Math.floor(new Date(topDate).getTime());
       const sortBy = document.getElementById('export-sort-by').innerHTML;
       const sortOrder = document.getElementById('export-order').innerHTML;
       const range = parseInt(selectedRangeValue);

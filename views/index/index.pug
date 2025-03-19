@@ -6,7 +6,7 @@ block content
       .header-banner-wrapper
         .banner-logo-wrapper(class='center')
           img(src='/res/images/logo.svg', alt='node101' class='center')
-        .banner-title-content VALIDATOR LIST
+        .banner-title-content L'VALIDATIÈR
       .header-network-switch-wrapper
         .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}`)
           .network-switch-network-image-wrapper 
@@ -28,8 +28,8 @@ block content
                 .network-switch-network-chain-id(style='text-wrap: nowrap')#current-network-chain-id= chain.chain_id
     .inner-main-wrapper
       .general-title-description-wrapper
-        h3 node101 | CosmosHub Validator Timeline
-        p node101's journey as a CosmosHub validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.
+        h2 node101 | Cosmos Validator Timeline
+        p node101's journey as a Cosmos validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.
       .table-main-wrapper
         .table-filters
           .validator-filter-input-wrapper
@@ -162,12 +162,12 @@ block content
                 function shortNumberFormat(num) {
                   const sign = num < 0 ? '-' : '';
                   num = Math.abs(num);
-                  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + 'M';
-                  if (num >= 10_000) return Math.floor(num / 1_000) + 'K';
+                  if (num >= 1_000_000) return sign + (num / 1_000_000).toFixed(1) + 'M';
+                  if (num >= 10_000) return sign + Math.floor(num / 1_000) + 'K';
 
-                  if (num >= 1_000) return num.toFixed(0);
-                  if (num >= 100) return num.toFixed(1);
-                  if (num >= 0) return num.toFixed(2);
+                  if (num >= 1_000) return sign + num.toFixed(0).toString();
+                  if (num >= 100) return sign + num.toFixed(1).toString();
+                  if (num >= 0) return sign + num.toFixed(2).toString();
 
                   return sign + num.toString();
                 }

@@ -14,6 +14,8 @@ import validatorRouter from './routes/validatorRouter.js';
 import { startCronJobs } from './cron/startCronJobs.js';
 import { processBlocks } from './utils/processBlocks.js';
 import { getGenesisTxs } from './utils/getGenesisTxs.js';
+import Chain from './models/Chain/Chain.js';
+import Validator from './models/Validator/Validator.js';
 
 dotenv.config();
 
@@ -48,9 +50,8 @@ app.use('/', indexRouter);
 app.use('/composite_event_block', compositeEventBlockRouter);
 app.use('/validator', validatorRouter);
 
-
-app.listen(PORT, async () => {
+app.listen(PORT, () => {  
   console.log(`Server running at PORT ${PORT}`);
-
-  processBlocks(17224685, 17229685, 'cosmoshub');
-});
+  // processBlocks(1, 100000, 'celestia');
+  // processBlocks(5200791, 5300791, 'cosmoshub');
+})

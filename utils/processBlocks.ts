@@ -3,7 +3,7 @@ import { listenForEvents } from "../listeners/listenForEvents.js";
 export const processBlocks = async (start: number, end: number, chain_identifier: string) => {
   let bottom_block_height = start;
   const max_block_height = end;
-  const interval = 64;
+  const interval = 100;
 
   const startTime = Date.now();
 

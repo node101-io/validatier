@@ -53,8 +53,8 @@ function handleNetworkSwitch (currentNetwork) {
     setCookie('selectedDateBottom', bottomDate, 7);
     setCookie('selectedDateTop', topDate, 7);
 
-    const bottomTimestamp = Math.floor(new Date(bottomDate).getTime() / 1000);
-    const topTimestamp = Math.floor(new Date(topDate).getTime() / 1000);
+    const bottomTimestamp = Math.floor(new Date(bottomDate).getTime());
+    const topTimestamp = Math.floor(new Date(topDate).getTime());
 
     const GET_VALIDATORS_API_ENDPOINT = 'validator/rank_validators';
     const BASE_URL = !window.location.href.includes('#') ? window.location.href : window.location.href.split('#')[0];

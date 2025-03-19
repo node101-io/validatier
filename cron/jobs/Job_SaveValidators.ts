@@ -18,12 +18,14 @@ export const Job_SaveValidators = (chainIdentifier: string, callback: (err: stri
         const validatorSaveObject = {
           chain_identifier: chainIdentifier,
           pubkey: eachValidator.consensus_pubkey.key ? eachValidator.consensus_pubkey.key : 'N/A',
+          delegator_address: '',
           operator_address: eachValidator.operator_address ? eachValidator.operator_address : 'N/A',
           moniker: eachValidator.description.moniker ? eachValidator.description.moniker : 'N/A',
           commission_rate: eachValidator.commission.commission_rates.rate ? eachValidator.commission.commission_rates.rate : 'N/A',
           bond_shares: eachValidator.validator_bond_shares ? eachValidator.validator_bond_shares : 'N/A',
           liquid_shares: eachValidator.liquid_shares ? eachValidator.liquid_shares : 'N/A',
-          keybase_id: eachValidator.description.identity.trim().length > 0 ? eachValidator.description.identity : 'N/A'
+          keybase_id: eachValidator.description.identity.trim().length > 0 ? eachValidator.description.identity : 'N/A',
+          created_at: Date.now()
         }
         
         Validator.saveValidator(validatorSaveObject, (err, newValidator) => {

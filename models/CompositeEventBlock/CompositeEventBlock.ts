@@ -36,6 +36,7 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
     body: {
       block_height: number;
       operator_address: string;
+      timestamp: number;
       denom?: string;
       reward?: number;
       self_stake?: number;
@@ -81,7 +82,7 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
 const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
   timestamp: {
     type: Number,
-    default: Date.now()
+    required: true
   },
   block_height: { 
     type: Number, 
@@ -177,7 +178,7 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
   callback: Parameters<CompositeEventBlockModel['saveCompositeEventBlock']>[1]
 ) {
 
-  const { block_height, operator_address, denom, reward, self_stake } = body;
+  const { block_height, operator_address, denom, reward, self_stake, timestamp } = body;
 
   CompositeEventBlock.searchTillExists(
     {
@@ -210,6 +211,7 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
           .create({
             operator_address: operator_address,
             block_height: block_height,
+            timestamp: timestamp,
             denom: denom ? denom : 'uatom',
             reward: reward ? reward : 0,
             self_stake: self_stake ? self_stake : 0,
@@ -278,7 +280,6 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
           const totalWithdraw = (topRewardPrefixSum - bottomRewardPrefixSum) + bottomReward;
           const totalStake = (topSelfStakePrefixSum - bottomSelfStakePrefixSum) + bottomSelfStake;
           
-          if (totalWithdraw < 0 || totalStake < 0) return callback('bad_request', null);
           return callback(
             null,
             {

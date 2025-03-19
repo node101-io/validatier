@@ -41,6 +41,7 @@
   --each-table-popup-info-content-height: 24px;
   --each-table-popup-info-content-width: 108px;
   --each-table-popup-info-content-left: -46px;
+  --each-table-popup-info-content-horizontal-padding: 5px;
 
   --each-table-popup-info-content-hover-translate-y: 0px;
   --each-table-popup-info-content-hover-opacity: 1;
@@ -431,9 +432,9 @@
   height: var(--each-table-popup-info-content-height);
   width: var(--each-table-popup-info-content-width);
   left: var(--each-table-popup-info-content-left);
+  padding: 0 var(--each-table-popup-info-content-horizontal-padding);
   position: absolute;
   text-wrap: nowrap;
-  width: fit-content;
   cursor: var(--pointer-default-dark);
 }
 
@@ -750,9 +751,10 @@
 .dots {
   white-space: nowrap;
   display: inline-block;
-  overflow: visible;
+  overflow: hidden;
   max-width: var(--validator-opeartor-address-dots-max-width);
-  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out var(--validator-operator-address-animaton-transition-delay);
+  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out 
+              calc(var(--validator-operator-address-animaton-transition-delay) + 0.5s);
 }
 
 .middle-address {
@@ -760,11 +762,13 @@
   display: inline-block;
   max-width: 0;
   overflow: hidden;
-  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out var(--validator-operator-address-animaton-transition-delay);
+  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out 
+              var(--validator-operator-address-animaton-transition-delay);
 }
 
 .validator-operator-address:hover .dots {
-  overflow: hidden;
+  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out 
+  calc(var(--validator-operator-address-animaton-transition-delay) - 0.5s);
   max-width: 0;
 }
 

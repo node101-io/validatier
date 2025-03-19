@@ -1,5 +1,5 @@
 
-export const getOnlyNativeTokenValueFromCommissionOrRewardEvent = function (value: string, denom: string, callback: (err: string | null, nativeRewardOrCommissionValue: string) => any) {
+export const getOnlyNativeTokenValueFromCommissionOrRewardEvent = function (value: string, denom: string) {
 
   const splitString: string[] = value.split(',');
 
@@ -9,7 +9,7 @@ export const getOnlyNativeTokenValueFromCommissionOrRewardEvent = function (valu
     if (!eachWithdrawChunk.includes(denom)) continue;
 
     const nativeTokenAmount: string = eachWithdrawChunk.replace(denom, '');
-    return callback(null, nativeTokenAmount);
+    return nativeTokenAmount;
   }
-  return callback(null, '0');
+  return null;
 }

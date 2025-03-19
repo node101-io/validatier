@@ -9,6 +9,9 @@ import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
 import { getCsvExportData } from './functions/getCsvExportData.js';
 import { formatTimestamp } from '../../utils/formatTimestamp.js';
 import { mergeIntervals } from '../../utils/mergeIntervals.js';
+import { getPubkeysOfActiveValidatorsByHeight } from '../../utils/getPubkeysOfActiveValidatorsByHeight.js';
+import { areDatesDifferent } from '../../utils/areDatesDifferent.js';
+import Chain from '../Chain/Chain.js';
 
 const MAX_DATABASE_TEXT_FIELD_LENGTH = 1e4;
 
@@ -35,6 +38,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       moniker: string;
       commission_rate: string;
       keybase_id: string;
+      created_at: Date;
     }, 
     callback: (
       err: string | null,
@@ -55,7 +59,8 @@ interface ValidatorModel extends Model<ValidatorInterface> {
   ) => any;
   deleteValidator: (
     body: {
-      operator_address: string
+      operator_address: string,
+      block_time: Date
     }, 
     callback: (
       err: string | null,
@@ -93,15 +98,27 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       }[] | null
     ) => any
   ) => any;
-  deleteValidatorsNotAppearingOnApiResponse: (
+  deleteValidatorsNotAppearingActiveSet: (
     body: {
-      visitedValidatorsOperatorAddresses: string[],
-      chain_identifier: string
+      activeValidatorsPubkeys: string[],
+      chain_identifier: string,
+      block_time: Date
     },
     callback: (
       err: string | null, 
-      validatorsMarkedAsDeleted: string[] | Boolean | null
+      validatorsRestoredAndDeleted: {
+        deleted: string[],
+        restored: string[]
+      } | null
     ) => any
+  ) => any;
+  updateActiveValidatorList: (
+    body: {
+      chain_rpc_url: string,
+      chain_identifier: string,
+      height: number,
+      block_time: Date
+    }
   ) => any;
   exportCsv: (
     body: {
@@ -158,8 +175,9 @@ const validatorSchema = new Schema<ValidatorInterface>({
   },
   keybase_id: {
     type: String,
-    required: true,
-    trim: true
+    required: false,
+    trim: true,
+    default: ''
   },
   temporary_image_uri: {
     type: String,
@@ -167,7 +185,7 @@ const validatorSchema = new Schema<ValidatorInterface>({
   },
   created_at: { 
     type: Date, 
-    default: new Date(1740866645000)
+    required: true
   },
   deleted_at: { 
     type: Date, 
@@ -183,11 +201,12 @@ validatorSchema.statics.saveValidator = function (
   body: Parameters<ValidatorModel['saveValidator']>[0], 
   callback: Parameters<ValidatorModel['saveValidator']>[1],
 ) {
-  const { operator_address, moniker, commission_rate, keybase_id } = body;
+  const { operator_address, moniker, commission_rate, keybase_id, chain_identifier } = body;
   if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
 
   Validator
     .findOne({
+      chain_identifier: chain_identifier,
       operator_address: operator_address,
       deleted_at: null
     })
@@ -230,14 +249,17 @@ validatorSchema.statics.updateValidator = function (
   const { operator_address, moniker, commission_rate, keybase_id } = body;
   
   Validator
-    .findOneAndUpdate(
-      { operator_address: operator_address },
-      { moniker: moniker, commission_rate: commission_rate, keybase_id: keybase_id }
-    )
-    .then((updatedValidator) => {
-      return callback(null, updatedValidator);
+    .findOne({ operator_address: operator_address })
+    .sort({ created_at: -1 })
+    .then(validator => {
+      if (!validator) return callback('bad_request', null);
+      validator.moniker = moniker;
+      validator.commission_rate = commission_rate;
+      validator.keybase_id = keybase_id;
+      validator.save();
+      return callback(null, validator);
     })
-    .catch(err => callback(err, null))
+    .catch(err => callback(err, null));
 }
 
 
@@ -246,12 +268,12 @@ validatorSchema.statics.deleteValidator = function (
   callback: Parameters<ValidatorModel['deleteValidator']>[1],
 ) {
 
-  const { operator_address } = body;
+  const { operator_address, block_time } = body;
 
   Validator
     .findOneAndUpdate(
       { operator_address: operator_address, deleted_at: null },
-      { deleted_at: new Date()  }
+      { deleted_at: new Date(block_time)  }
     )
     .then((deletedValidator) => {
       if (!deletedValidator) return callback('bad_request', null);
@@ -313,56 +335,65 @@ validatorSchema.statics.rankValidators = function (
           .getTotalPeriodicSelfStakeAndWithdraw(
             {
               operator_address: eachValidator.operator_address,
-              bottomTimestamp: bottom_timestamp * 1000,
-              topTimestamp: top_timestamp * 1000,
+              bottomTimestamp: bottom_timestamp,
+              topTimestamp: top_timestamp,
               searchBy: 'timestamp'
             },
             (err, totalPeriodicSelfStakeAndWithdraw) => {
-              if (err) return callback('bad_request', null)
-              const selfStake = totalPeriodicSelfStakeAndWithdraw?.self_stake;
-              const withdraw = totalPeriodicSelfStakeAndWithdraw?.withdraw;
-              const ratio = (totalPeriodicSelfStakeAndWithdraw?.self_stake ? totalPeriodicSelfStakeAndWithdraw?.self_stake : 0) / (totalPeriodicSelfStakeAndWithdraw?.withdraw ? totalPeriodicSelfStakeAndWithdraw?.withdraw : 1);
-              const sold = (totalPeriodicSelfStakeAndWithdraw?.withdraw ? totalPeriodicSelfStakeAndWithdraw?.withdraw : 0) - (totalPeriodicSelfStakeAndWithdraw?.self_stake ? totalPeriodicSelfStakeAndWithdraw?.self_stake : 0);
+              
+              if (err) return callback('bad_request', null);
+              if (!totalPeriodicSelfStakeAndWithdraw) return next();
 
-              const inactivityIntervals = [];
+              Chain
+                .findOne({ name: eachValidator.chain_identifier })
+                .then(chain => {
+                  if (!chain) return next();
 
-              const adjustedDeletedAt = eachValidator.deleted_at ? eachValidator.deleted_at : new Date(2e13);
+                  const selfStake = totalPeriodicSelfStakeAndWithdraw?.self_stake;
+                  const withdraw = totalPeriodicSelfStakeAndWithdraw?.withdraw;
+                  const ratio = (totalPeriodicSelfStakeAndWithdraw?.self_stake ? (totalPeriodicSelfStakeAndWithdraw?.self_stake) : 0) / (totalPeriodicSelfStakeAndWithdraw?.withdraw ? totalPeriodicSelfStakeAndWithdraw?.withdraw : (10 ** chain?.decimals));
+                  const sold = (totalPeriodicSelfStakeAndWithdraw?.withdraw ? totalPeriodicSelfStakeAndWithdraw?.withdraw : 0) - (totalPeriodicSelfStakeAndWithdraw?.self_stake ? totalPeriodicSelfStakeAndWithdraw?.self_stake : 0);
 
-              const bottomInactivityPeriod = new Date(bottom_timestamp * 1000) < eachValidator.created_at ? true : false;
-              const topInactivityPeriod = adjustedDeletedAt < new Date(top_timestamp * 1000) ? true : false;
+                  const inactivityIntervals = [];
 
-              if (bottomInactivityPeriod) {
-                inactivityIntervals.push(bottom_timestamp * 1000);
-                inactivityIntervals.push((new Date(eachValidator.created_at)).getTime());
-              }
+                  const adjustedDeletedAt = eachValidator.deleted_at ? eachValidator.deleted_at : new Date(2e13);
 
-              if (topInactivityPeriod) {
-                inactivityIntervals.push(top_timestamp * 1000);
-                inactivityIntervals.push((new Date(adjustedDeletedAt)).getTime());
-              }
+                  const bottomInactivityPeriod = new Date(bottom_timestamp) <= eachValidator.created_at ? true : false;
+                  const topInactivityPeriod = adjustedDeletedAt <= new Date(top_timestamp) ? true : false;
 
-              if (pushedValidatorOperatorAddressArray.includes(eachValidator.operator_address)) {
-                const previousValidator = validatorsArray[pushedValidatorOperatorAddressArray.indexOf(eachValidator.operator_address)];
-                previousValidator.inactivityIntervals = mergeIntervals(inactivityIntervals, previousValidator.inactivityIntervals);
-                return next();
-              }
+                  if (bottomInactivityPeriod && areDatesDifferent(bottom_timestamp, (new Date(eachValidator.created_at)).getTime())) {
+                    inactivityIntervals.push(bottom_timestamp);
+                    inactivityIntervals.push((new Date(eachValidator.created_at)).getTime());
+                  }
 
-              const pushObjectData = {
-                operator_address: eachValidator.operator_address,
-                moniker: eachValidator.moniker,
-                temporary_image_uri: eachValidator.temporary_image_uri,
-                self_stake: selfStake ? selfStake : 0,
-                withdraw: withdraw ? withdraw : 0,
-                ratio: ratio,
-                sold: sold,
-                inactivityIntervals: inactivityIntervals
-              };
+                  if (topInactivityPeriod && areDatesDifferent(top_timestamp, (new Date(adjustedDeletedAt)).getTime())) {
+                    inactivityIntervals.push((new Date(adjustedDeletedAt)).getTime());
+                    inactivityIntervals.push(top_timestamp);
+                  }
 
-              if (!with_photos) delete pushObjectData.temporary_image_uri;
+                  if (pushedValidatorOperatorAddressArray.includes(eachValidator.operator_address)) {
+                    const previousValidator = validatorsArray[pushedValidatorOperatorAddressArray.indexOf(eachValidator.operator_address)];
+                    previousValidator.inactivityIntervals = mergeIntervals(inactivityIntervals, previousValidator.inactivityIntervals);
+                    return next();
+                  }
 
-              validatorsArray.push(pushObjectData);
-              pushedValidatorOperatorAddressArray.push(pushObjectData.operator_address);
-              return next()
+                  const pushObjectData = {
+                    operator_address: eachValidator.operator_address,
+                    moniker: eachValidator.moniker,
+                    temporary_image_uri: eachValidator.temporary_image_uri,
+                    self_stake: selfStake ? selfStake : 0,
+                    withdraw: withdraw ? withdraw : 0,
+                    ratio: ratio,
+                    sold: sold,
+                    inactivityIntervals: inactivityIntervals
+                  };
+
+                  if (!with_photos) delete pushObjectData.temporary_image_uri;
+
+                  validatorsArray.push(pushObjectData);
+                  pushedValidatorOperatorAddressArray.push(pushObjectData.operator_address);
+                  return next()
+                })
             }
           )
       }, 
@@ -375,40 +406,96 @@ validatorSchema.statics.rankValidators = function (
         return callback(null, validatorsArray)
       }
     )
-  }).catch(err => callback('bad_request', null));
+  })
+  .catch(err => callback(err, null));
 }
 
 
-validatorSchema.statics.deleteValidatorsNotAppearingOnApiResponse = function (
-  body: Parameters<ValidatorModel['deleteValidatorsNotAppearingOnApiResponse']>[0], 
-  callback: Parameters<ValidatorModel['deleteValidatorsNotAppearingOnApiResponse']>[1],
+validatorSchema.statics.deleteValidatorsNotAppearingActiveSet = function (
+  body: Parameters<ValidatorModel['deleteValidatorsNotAppearingActiveSet']>[0], 
+  callback: Parameters<ValidatorModel['deleteValidatorsNotAppearingActiveSet']>[1],
 ) {
 
-  const { visitedValidatorsOperatorAddresses, chain_identifier } = body;
-
+  const { activeValidatorsPubkeys, chain_identifier, block_time } = body;
   const deletedValidatorsOperatorAddresses: string[] = [];
+  const restoredValidatorsOperatorAddresses: string[] = [];
 
   Validator
-    .find({ operator_address: { $nin: visitedValidatorsOperatorAddresses }, chain_identifier: chain_identifier })
+    .find({ pubkey: { $nin: activeValidatorsPubkeys }, chain_identifier: chain_identifier })
     .then(validators => {
-      if (!validators.length) return callback(null, true);
+      if (!validators.length) return processRestoration();
+
       async.timesSeries(
         validators.length,
         (i, next) => {
           const eachValidatorToBeDeleted = validators[i];
-          Validator.deleteValidator({ operator_address: eachValidatorToBeDeleted.operator_address }, (err, validator) => {
+          Validator.deleteValidator({ operator_address: eachValidatorToBeDeleted.operator_address, block_time }, (err, validator) => {
             if (!err && validator) deletedValidatorsOperatorAddresses.push(validator.operator_address);
             return next();
-          })
+          });
         },
         (err) => {
           if (err) return callback('bad_request', null);
-          return callback(null, deletedValidatorsOperatorAddresses);
+          processRestoration();
         }
-      )
+      );
     })
-    .catch(err => callback(err, null))
+    .catch(err => callback(err, null));
+
+  function processRestoration() {
+    Validator
+      .find({ operator_address: { $in: activeValidatorsPubkeys }, chain_identifier: chain_identifier, deleted_at: { $ne: null } })
+      .then(restorableValidators => {
+        if (!restorableValidators.length) return callback(null, { deleted: deletedValidatorsOperatorAddresses, restored: restoredValidatorsOperatorAddresses });
+
+        async.timesSeries(
+          restorableValidators.length,
+          (i, next) => {
+            const eachValidatorToRestore = restorableValidators[i];
+
+            Validator.saveValidator({
+              ...eachValidatorToRestore.toObject()
+            }, (err, newValidator) => {
+              if (!err && newValidator) restoredValidatorsOperatorAddresses.push(newValidator.operator_address);
+              return next();
+            });
+          },
+          (err) => {
+            if (err) return callback('bad_request', null);
+            return callback(null, { deleted: deletedValidatorsOperatorAddresses, restored: restoredValidatorsOperatorAddresses });
+          }
+        );
+      })
+      .catch(err => callback(err, null));
+  }
 }
+
+
+validatorSchema.statics.updateActiveValidatorList = async function (
+  body: Parameters<ValidatorModel['updateActiveValidatorList']>[0]
+): Promise<void> {
+
+  const { chain_identifier, chain_rpc_url, height, block_time } = body;
+
+  return new Promise((resolve, reject) => {
+    getPubkeysOfActiveValidatorsByHeight(chain_rpc_url, height, (err, pubkeysOfActiveValidators) => {
+      console.log(pubkeysOfActiveValidators)
+      if (err || !pubkeysOfActiveValidators) return reject(err);
+      Validator.deleteValidatorsNotAppearingActiveSet(
+        {
+          chain_identifier: chain_identifier,
+          activeValidatorsPubkeys: pubkeysOfActiveValidators,
+          block_time: block_time
+        },
+        (err) => {
+          if (err) return reject(err);
+          console.log(`Validator cleanup executed at height ${height}`);
+          resolve();
+        }
+      );
+    });
+  });
+};
 
 
 validatorSchema.statics.exportCsv = function (

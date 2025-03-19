@@ -8,7 +8,7 @@ interface EventInterface {
   }[];
 }
 
-export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: EventInterface[], specificEventTypes: string[], specificAttributeKey: string, callback: (err: string | null, specificAttributeValue: string | null) => any) {
+export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: EventInterface[], specificEventTypes: string[], specificAttributeKey: string): string | null {
   
   for (let i = 0; i < events.length; i++) {
     const eachEvent = events[i];
@@ -20,9 +20,9 @@ export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: 
     for (let j = 0; j < attributes.length; j++) {
       const eachAttribute: {key: string, value: string} = attributes[j];
 
-      if (eachAttribute.key == specificAttributeKey) return callback(null, eachAttribute.value); ;
-      if (atob(eachAttribute.key) == specificAttributeKey) return callback(null, atob(eachAttribute.value));
+      if (eachAttribute.key == specificAttributeKey) return eachAttribute.value; ;
+      if (atob(eachAttribute.key) == specificAttributeKey) return atob(eachAttribute.value);
     }
   };
-  return callback('not_found', null);
+  return null;
 }

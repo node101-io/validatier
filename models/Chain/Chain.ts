@@ -10,6 +10,8 @@ export interface ChainInterface {
   decimals: number;
   denom: string;
   rpc_url: string;
+  first_available_block_height: number;
+  first_available_block_time: Date;
 }
 
 interface ChainModel extends Model<ChainInterface> {
@@ -82,6 +84,14 @@ const chainSchema = new Schema<ChainInterface>({
   },
   rpc_url: {
     type: String,
+    required: false
+  },
+  first_available_block_height: {
+    type: Number,
+    required: false
+  },
+  first_available_block_time: {
+    type: Date,
     required: false
   }
 });

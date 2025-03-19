@@ -1,8 +1,8 @@
-import async from 'async';
 import CompositeEventBlock from '../models/CompositeEventBlock/CompositeEventBlock.js';
 import Validator from '../models/Validator/Validator.js';
 import Chain from '../models/Chain/Chain.js';
 import getTxsByHeight from '../utils/getTxsByHeight.js';
+import { DecodedMessage } from '../utils/decodeTxs.js';
 
 const LISTENING_EVENTS = [
   '/cosmos.staking.v1beta1.MsgCreateValidator',
@@ -12,6 +12,8 @@ const LISTENING_EVENTS = [
   '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
   '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission'
 ];
+
+const ACTIVE_VALIDATOR_SET_CHECK_FREQUENCY = 3000;
 
 export const listenForEvents = async (
   bottom_block_height: number,
@@ -24,124 +26,107 @@ export const listenForEvents = async (
     if (!chain) throw new Error('not_found');
 
     const denom = chain.denom;
-    const initialBottomBlock = bottom_block_height;
-    let startTime = Date.now();
 
     const promises: Promise<void>[] = [];
 
     for (let height = bottom_block_height; height < top_block_height; height++) {
-      if ((height - initialBottomBlock) % 100 === 0) {
-        console.log(`${(Date.now() - startTime) / 1000}s`);
-        startTime = Date.now();
-      }
 
       promises.push(
-        new Promise((resolve, reject) => {
-          getTxsByHeight(chain.rpc_url, height, (err, decodedTxs) => {
-            if (err) return reject(err);
-            if (!decodedTxs) return resolve();
+        (async () => {
+          try {
+            const decodedTxs = await getTxsByHeight(chain.rpc_url, height, denom);
+            if (!decodedTxs) return;
 
-            const flattenedDecodedTxs = decodedTxs.flatMap(obj => obj.messages);
-            if (!flattenedDecodedTxs.length) return resolve();
+            const flattenedDecodedTxs: DecodedMessage[] = decodedTxs.flatMap((obj: { messages: DecodedMessage }) => obj.messages);
+            if (!flattenedDecodedTxs.length) return;
+            
+            const blockTime = flattenedDecodedTxs[0].time;
 
-            async.timesSeries(
-              flattenedDecodedTxs.length,
-              (i, next) => {
-                const eachMessage = flattenedDecodedTxs[i];
-                if (!LISTENING_EVENTS.includes(eachMessage.typeUrl)) return next();
+            if (height % ACTIVE_VALIDATOR_SET_CHECK_FREQUENCY == 0) await Validator.updateActiveValidatorList({
+              chain_identifier: chain.name, 
+              chain_rpc_url: chain.rpc_url, 
+              height: height, 
+              block_time: new Date(blockTime)
+            });
 
-                if (['/cosmos.staking.v1beta1.MsgCreateValidator', '/cosmos.staking.v1beta1.MsgEditValidator'].includes(eachMessage.typeUrl)) {
-                  const pubkey: ArrayBuffer = eachMessage.value.pubkey.value;
-                  const byteArray = new Uint8Array(Object.values(pubkey).slice(2));
-                  const pubkeyBase64 = btoa(String.fromCharCode(...byteArray));
+            const validatorMap: Record<string, any> = {};
+            const rewardMap: Record<string, any> = {};
+            const stakeMap: Record<string, any> = {};
 
-                  Validator.saveValidator({
-                    pubkey: pubkeyBase64,
-                    operator_address: eachMessage.value.validatorAddress,
-                    delegator_address: eachMessage.value.delegatorAddress,
-                    keybase_id: eachMessage.value.description.identity,
-                    moniker: eachMessage.value.description.moniker,
-                    commission_rate: eachMessage.value.commission.rate,
-                    chain_identifier: chain.name
-                  }, (err, validator) => {
-                    if (err) return reject(err);
-                    console.log(`${eachMessage.typeUrl} | SAVED | ${validator?.operator_address}`);
-                    resolve();
-                  })
-                } else if (['/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward', '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission'].includes(eachMessage.typeUrl)) {
-                    
-                }
-              },
-              (err) => {
-                if (err) return reject(err);
-                resolve();
+            for (const eachMessage of flattenedDecodedTxs) {
+              if (!LISTENING_EVENTS.includes(eachMessage.typeUrl)) continue;
+
+              const key = eachMessage.value.validatorAddress;
+
+              if (['/cosmos.staking.v1beta1.MsgCreateValidator', '/cosmos.staking.v1beta1.MsgEditValidator'].includes(eachMessage.typeUrl)) {
+                const pubkey: ArrayBuffer = eachMessage.value.pubkey.value;
+                const byteArray = new Uint8Array(Object.values(pubkey).slice(2));
+                const pubkeyBase64 = btoa(String.fromCharCode(...byteArray));
+
+                validatorMap[key] = {
+                  pubkey: pubkeyBase64,
+                  operator_address: eachMessage.value.validatorAddress,
+                  delegator_address: eachMessage.value.delegatorAddress,
+                  keybase_id: eachMessage.value.description.identity,
+                  moniker: eachMessage.value.description.moniker,
+                  commission_rate: eachMessage.value.commission.rate,
+                  chain_identifier: chain.name,
+                  created_at: eachMessage.time,
+                };
+              } 
+              else if (['/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward', '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission'].includes(eachMessage.typeUrl)) {
+                if (!rewardMap[key]) rewardMap[key] = { block_height: height, operator_address: key, denom, reward: 0, timestamp: new Date(eachMessage.time).getTime() };
+                rewardMap[key].reward += parseInt(eachMessage.value.amount.amount);
+              } else if (
+                ['/cosmos.staking.v1beta1.MsgDelegate', '/cosmos.staking.v1beta1.MsgUndelegate'].includes(eachMessage.typeUrl)
+              ) {
+                if (!stakeMap[key]) stakeMap[key] = { block_height: height, operator_address: key, denom, self_stake: 0, timestamp: new Date(eachMessage.time).getTime() };
+
+                const stakeAmount = parseInt(eachMessage.value.amount.amount);
+                stakeMap[key].self_stake += eachMessage.typeUrl === '/cosmos.staking.v1beta1.MsgDelegate' ? stakeAmount : -stakeAmount;
               }
-            )
-          });
-        });
-        //       } else if (
-        //         ['/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward', '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission'].includes(
-        //           eachMessage.typeUrl
-        //         )
-        //       ) {
-        //         await new Promise<void>((resolve, reject) => {
-        //           CompositeEventBlock.saveCompositeEventBlock(
-        //             {
-        //               block_height: height,
-        //               operator_address: eachMessage.value.validatorAddress,
-        //               denom: denom,
-        //               reward: parseInt(eachMessage.value.amount.amount)
-        //             },
-        //             (err, newCompositeEventBlock) => {
-        //               if (err) return reject(err);
-        //               console.log(`${eachMessage.typeUrl} | SAVED | ${newCompositeEventBlock?.operator_address}`);
-        //               resolve();
-        //             }
-        //           );
-        //         });
-        //       } else if (
-        //         ['/cosmos.staking.v1beta1.MsgDelegate', '/cosmos.staking.v1beta1.MsgUndelegate'].includes(eachMessage.typeUrl)
-        //       ) {
-        //         const selfStake =
-        //           eachMessage.typeUrl === '/cosmos.staking.v1beta1.MsgDelegate'
-        //             ? parseInt(eachMessage.value.amount.amount)
-        //             : -parseInt(eachMessage.value.amount.amount);
+            }
 
-        //         await new Promise<void>((resolve, reject) => {
-        //           CompositeEventBlock.saveCompositeEventBlock(
-        //             {
-        //               block_height: height,
-        //               operator_address: eachMessage.value.validatorAddress,
-        //               denom: denom,
-        //               self_stake: selfStake
-        //             },
-        //             (err, newCompositeEventBlock) => {
-        //               if (err) return reject(err);
-        //               console.log(`${eachMessage.typeUrl} | SAVED | ${newCompositeEventBlock?.operator_address}`);
-        //               resolve();
-        //             }
-        //           );
-        //         });
-        //       }
-        //     }
-        //   } catch (error) {
-        //     console.error(`Error processing block ${height}:`, error);
-        //   }
-        // })()
+            for (const key in validatorMap) {
+              await new Promise<void>((resolve, reject) => {
+                Validator.saveValidator(validatorMap[key], (err, validator) => {
+                  if (err) return reject(err);
+                  console.log(`VALIDATOR | SAVED | ${validator?.operator_address}`);
+                  resolve();
+                });
+              });
+            }
+
+            for (const key in rewardMap) {
+              await new Promise<void>((resolve, reject) => {
+                CompositeEventBlock.saveCompositeEventBlock(rewardMap[key], (err, newCompositeEventBlock) => {
+                  if (err) return reject(err);
+                  console.log(`REWARD | SAVED | ${newCompositeEventBlock?.operator_address}`);
+                  resolve();
+                });
+              });
+            }
+
+            for (const key in stakeMap) {
+              await new Promise<void>((resolve, reject) => {
+                CompositeEventBlock.saveCompositeEventBlock(stakeMap[key], (err, newCompositeEventBlock) => {
+                  if (err) return reject(err);
+                  console.log(`STAKE | SAVED | ${newCompositeEventBlock?.operator_address}`);
+                  resolve();
+                });
+              });
+            }
+
+          } catch (error) {
+            console.error(`Error processing block ${height}:`, error);
+          }
+        })()
       );
     }
 
-    Promise.allSettled(promises)
-      .then(values => {
-        for (const value of values)
-          if (value.status !== 'fulfilled')
-            console.error(`${value.reason}`);
-      })
-      .catch(err => {
-        console.error(`${err}`);
-      })
+    await Promise.all(promises);
     return final_callback(null, true);
-  } catch (err) {
-    if (err) return final_callback(err.toString(), false);
+  } catch (error) {
+    return final_callback('bad_request', false);
   }
 };

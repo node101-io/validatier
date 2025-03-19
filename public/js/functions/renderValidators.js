@@ -194,8 +194,8 @@ function renderValidators() {
       setCookie('selectedDateTop', topDate, 7);
     }
 
-    const bottomTimestamp = Math.floor(new Date(bottomDate).getTime() / 1000);
-    const topTimestamp = Math.floor(new Date(topDate).getTime() / 1000);
+    const bottomTimestamp = Math.floor(new Date(bottomDate).getTime());
+    const topTimestamp = Math.floor(new Date(topDate).getTime());
 
     const chainIdentifier = document.getElementById('network-switch-header').getAttribute('current_chain_identifier');
 

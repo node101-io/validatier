@@ -1,10 +1,11 @@
 import decodeTxs from './decodeTxs.js';
-import { request } from 'undici';
+
 export interface DataInterface {
   result: {
     block: {
       header: {
         height: number;
+        time: Date;
       };
       data: {
         txs: string[];
@@ -13,23 +14,23 @@ export interface DataInterface {
   };
 }
 
-const getTxsByHeight = (base_url: string, block_height: number, callback: (err: string | null, decodedTxs?: [{ messages: any[] }]) => any) => {
-  request(`${base_url}/block?height=${block_height}`)
-    .then(response => response.body.json())
-    .then((data: any) => {
-      if (!data.result?.block?.data?.txs || !data.result?.block?.header?.height)
-        return callback('bad_request', null);
+const getTxsByHeight = async (base_url: string, block_height: number, denom: string): Promise<any> => {
+  try {
+    const response = await fetch(`${base_url}/block?height=${block_height}`);
+    const data: DataInterface = await response.json();
 
-      decodeTxs(base_url, data.result.block.data.txs, (err: string | null, decodedTxs?: any) => {
-        if (err) return callback(err, null);
+    return new Promise((resolve, reject) => {
+      if (!data.result?.block?.data?.txs || data.result?.block?.data?.txs.length <= 0 || !data.result?.block?.header?.height || !data.result?.block?.header?.time) resolve([]);
 
-        return callback(null, decodedTxs);
+      decodeTxs(base_url, data.result.block.data.txs, denom, data.result?.block?.header?.time, (err: string | null, decodedTxs?: any) => {
+        if (err) return reject(err);
+        resolve(decodedTxs);
       });
-    })
-    .catch(error => {
-      console.error('Error fetching block data:', error);
-      return callback(error.toString(), null);
     });
+  } catch (error) {
+    console.error('Error fetching block data:', error);
+    throw error;
+  }
 };
 
 export default getTxsByHeight;
