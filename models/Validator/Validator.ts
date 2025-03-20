@@ -478,7 +478,6 @@ validatorSchema.statics.updateActiveValidatorList = async function (
 
   return new Promise((resolve, reject) => {
     getPubkeysOfActiveValidatorsByHeight(chain_rpc_url, height, (err, pubkeysOfActiveValidators) => {
-      console.log(pubkeysOfActiveValidators)
       if (err || !pubkeysOfActiveValidators) return reject(err);
       Validator.deleteValidatorsNotAppearingActiveSet(
         {

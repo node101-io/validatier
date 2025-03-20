@@ -15,7 +15,7 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
       const data = await response.json();
   
       const validatorsData = data.app_state.staking.validators;
-      const activeValidatorsData = data.validators;
+      const activeValidatorsData = data.validators; 
       const genesisTxs = data.app_state.genutil.gen_txs;
 
       const flattenedGenesisTxs: DecodedMessage[] = genesisTxs.flatMap((obj: { body: { messages: DecodedMessage }}) => obj.body.messages);
@@ -45,19 +45,17 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
           if (err) return callback(err.message, false)
           
           if (!activeValidatorsData || activeValidatorsData.length <= 0) {
-            const result = await Validator.updateActiveValidatorList({
+            await Validator.updateActiveValidatorList({
               block_time: chain.first_available_block_time,
               height: chain.first_available_block_height,
               chain_identifier: chain.name,
               chain_rpc_url: chain.rpc_url
             });
-            console.log(result)
             return callback(null, true);
           } else {
             const pubkeysOfActiveValidators = activeValidatorsData.map((v: any) => v.pub_key.value) || [];           
             Validator.deleteValidatorsNotAppearingActiveSet({ chain_identifier: chain.name , activeValidatorsPubkeys: pubkeysOfActiveValidators, block_time: chain.first_available_block_time }, (err, validatorsRestoredOrDeleted) => {
               if (err) return callback(err, false);
-              console.log(err);
               return callback(null, true);
             })
           }

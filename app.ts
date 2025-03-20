@@ -51,18 +51,17 @@ app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at PORT ${PORT}`);
-
-  Chain
-    .find({})
-    .then((chains) => {
-      chains.forEach(async (chain) => {
-        await storeVariable(chain.name, chain.first_available_block_height.toString());
-        const lastVisitedBlock = await getVariable(chain.name);
-        processBlocks(
-          lastVisitedBlock ? parseInt(lastVisitedBlock) : chain.first_available_block_height,
-          1e8,
-          chain.name
-        );
-      })
-    })
+  // Chain
+  //   .find({})
+  //   .then((chains) => {
+  //     chains.forEach(async (chain) => {
+  //       await storeVariable(chain.name, chain.first_available_block_height.toString());
+  //       const lastVisitedBlock = await getVariable(chain.name);
+  //       processBlocks(
+  //         lastVisitedBlock ? parseInt(lastVisitedBlock) : chain.first_available_block_height,
+  //         1e8,
+  //         chain.name
+  //       );
+  //     })
+  //   })
 })

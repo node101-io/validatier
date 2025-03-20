@@ -85,7 +85,6 @@ export const listenForEvents = async (
               ) {
                 if (!stakeMap[key]) stakeMap[key] = { block_height: height, operator_address: key, denom, self_stake: 0, timestamp: new Date(eachMessage.time).getTime() };
 
-                console.log(eachMessage);
                 const stakeAmount = parseInt(eachMessage.value.amount.amount);
                 stakeMap[key].self_stake += eachMessage.typeUrl === '/cosmos.staking.v1beta1.MsgDelegate' ? stakeAmount : -stakeAmount;
               }

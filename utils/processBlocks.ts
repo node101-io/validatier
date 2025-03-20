@@ -12,7 +12,7 @@ export const processBlocks = async (start: number, end: number, chain_identifier
     const top_block_height = Math.min(bottom_block_height + interval, max_block_height);
 
     console.log(`Processing blocks from ${bottom_block_height} to ${top_block_height} | ${chain_identifier.toUpperCase()}`);
-    storeVariable(chain_identifier, bottom_block_height.toString());
+    await storeVariable(chain_identifier, bottom_block_height.toString());
 
     try {
       await new Promise<void>((resolve, reject) => {
