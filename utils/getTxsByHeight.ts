@@ -28,9 +28,8 @@ const getTxsByHeight = async (base_url: string, block_height: number, denom: str
         resolve(decodedTxs);
       });
     });
-  } catch (error) {
-    console.error('Error fetching block data:', error);
-    throw error;
+  } catch (err) {
+    throw new Error(`Error fetching block ${block_height}: ${err}`);
   }
 };
 

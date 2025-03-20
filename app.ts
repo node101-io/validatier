@@ -12,10 +12,9 @@ import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
 
 import { startCronJobs } from './cron/startCronJobs.js';
-import { processBlocks } from './utils/processBlocks.js';
-import { getGenesisTxs } from './utils/getGenesisTxs.js';
 import Chain from './models/Chain/Chain.js';
-import Validator from './models/Validator/Validator.js';
+import { getVariable, storeVariable } from './utils/levelDbFunctions.js';
+import { processBlocks } from './utils/processBlocks.js';
 
 dotenv.config();
 
@@ -52,6 +51,18 @@ app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at PORT ${PORT}`);
-  processBlocks(1, 10000, 'celestia');
-  // processBlocks(5200791, 5300791, 'cosmoshub');
+
+  Chain
+    .find({})
+    .then((chains) => {
+      chains.forEach(async (chain) => {
+        await storeVariable(chain.name, chain.first_available_block_height.toString());
+        const lastVisitedBlock = await getVariable(chain.name);
+        processBlocks(
+          lastVisitedBlock ? parseInt(lastVisitedBlock) : chain.first_available_block_height,
+          1e8,
+          chain.name
+        );
+      })
+    })
 })

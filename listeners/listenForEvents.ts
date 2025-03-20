@@ -120,9 +120,8 @@ export const listenForEvents = async (
                 });
               });
             }
-
-          } catch (error) {
-            console.error(`Error processing block ${height}:`, error);
+          } catch (err) {
+            throw new Error(`Error processing block ${height}: ${err}`);
           }
         })()
       );
