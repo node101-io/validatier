@@ -25,7 +25,7 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
         validatorsData.length,
         (i, next) => {
           const eachValidator = validatorsData[i]
-          const delegatorAddress = eachValidator.delegator_address ? eachValidator.delegator_address : convertOperatorAddressToBech32(eachValidator.operator_address, chain_identifier);
+          const delegatorAddress = eachValidator.delegator_address ? eachValidator.delegator_address : convertOperatorAddressToBech32(eachValidator.operator_address, chain.bech32_prefix);
           Validator.saveValidator({
             pubkey: eachValidator.consensus_pubkey ? eachValidator.consensus_pubkey.key : eachValidator.pubkey.key,
             commission_rate: eachValidator.commission.commission_rates ? eachValidator.commission.commission_rates.rate : eachValidator.commission.rate,

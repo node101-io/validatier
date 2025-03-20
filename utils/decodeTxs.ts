@@ -34,7 +34,7 @@ const WITHDRAW_EVENTS = [
 
 const registry = new Registry(defaultRegistryTypes);
 
-const decodeTransactions = (base_url: string, txs: string[], denom: string, chain_identifier: string, time: Date, callback: (err: string | null, result?: DecodedTx[]) => any) => {
+const decodeTransactions = (base_url: string, txs: string[], denom: string, bech32_prefix: string, time: Date, callback: (err: string | null, result?: DecodedTx[]) => any) => {
   async.map(
     txs,
     (base64tx: string, cb: (err: string | null, result?: DecodedTx) => void) => {
@@ -49,7 +49,7 @@ const decodeTransactions = (base_url: string, txs: string[], denom: string, chai
             const message = filteredMessages[i];
             const preCheckDecodedMessage = registry.decode(message);
             
-            const bech32OperatorAddress = convertOperatorAddressToBech32(preCheckDecodedMessage.validatorAddress, chain_identifier);
+            const bech32OperatorAddress = convertOperatorAddressToBech32(preCheckDecodedMessage.validatorAddress, bech32_prefix);
 
             if (
               (message.typeUrl != '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission' && message.typeUrl != '/cosmos.staking.v1beta1.MsgCreateValidator' && message.typeUrl != '/cosmos.staking.v1beta1.MsgEditValidator') &&
@@ -63,7 +63,7 @@ const decodeTransactions = (base_url: string, txs: string[], denom: string, chai
 
             const sha256v = sha256(Buffer.from(base64tx ,'base64'));
             const txHash = toHex(sha256v);
-            request(`${base_url}/tx?hash=0x${txHash.toUpperCase().trim()}`)
+            request(`http://${base_url}/tx?hash=0x${txHash.toUpperCase().trim()}`)
               .then(response => response.body.json())
               .then((data: any) => {
                 const events = data.result.tx_result.events;

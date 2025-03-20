@@ -35,7 +35,7 @@ export const listenForEvents = async (
       promises.push(
         (async () => {
           try {
-            const decodedTxs = await getTxsByHeight(chain.rpc_url, height, denom, chain_identifier);
+            const decodedTxs = await getTxsByHeight(chain.rpc_url, height, denom, chain.bech32_prefix);
             if (!decodedTxs) return;
 
             const flattenedDecodedTxs: DecodedMessage[] = decodedTxs.flatMap((obj: { messages: DecodedMessage }) => obj.messages);
@@ -69,7 +69,7 @@ export const listenForEvents = async (
                 validatorMap[key] = {
                   pubkey: pubkeyBase64,
                   operator_address: eachMessage.value.validatorAddress,
-                  delegator_address: eachMessage.value.delegatorAddress ? eachMessage.value.delegatorAddress : convertOperatorAddressToBech32(eachMessage.value.validatorAddress, chain_identifier),
+                  delegator_address: eachMessage.value.delegatorAddress ? eachMessage.value.delegatorAddress : convertOperatorAddressToBech32(eachMessage.value.validatorAddress, chain.bech32_prefix),
                   keybase_id: eachMessage.value.description.identity,
                   moniker: eachMessage.value.description.moniker,
                   commission_rate: eachMessage.value.commission.rate,

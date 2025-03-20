@@ -11,7 +11,9 @@ export interface ChainInterface {
   denom: string;
   rpc_url: string;
   first_available_block_height: number;
+  last_available_block_height: number;
   first_available_block_time: Date;
+  bech32_prefix: string;
 }
 
 interface ChainModel extends Model<ChainInterface> {
@@ -24,6 +26,11 @@ interface ChainModel extends Model<ChainInterface> {
       symbol: string;
       decimals: number;
       denom: string;
+      bech32_prefix: string;
+      rpc_url: string;
+      first_available_block_height: number;
+      last_available_block_height: number;
+      first_available_block_time: Date;
     }, 
     callback: (
       err: string | null,
@@ -84,15 +91,24 @@ const chainSchema = new Schema<ChainInterface>({
   },
   rpc_url: {
     type: String,
-    required: false
+    required: true,
+    trim: true
   },
   first_available_block_height: {
     type: Number,
-    required: false
+    required: true 
+  },
+  last_available_block_height: {
+    type: Number,
+    required: true 
   },
   first_available_block_time: {
     type: Date,
-    required: false
+    required: true
+  },
+  bech32_prefix: {
+    type: String,
+    required: true
   }
 });
 
@@ -110,7 +126,7 @@ chainSchema.statics.saveChain = function (
   callback: Parameters<ChainModel['saveChain']>[1]
 ) {
 
-  const { name, pretty_name, chain_id, image, symbol, decimals, denom } = body;
+  const { name, pretty_name, chain_id, image, symbol, decimals, denom, bech32_prefix, rpc_url, first_available_block_height, last_available_block_height, first_available_block_time } = body;
 
   Chain
     .findOneAndUpdate(
@@ -121,7 +137,12 @@ chainSchema.statics.saveChain = function (
         image: image,
         symbol: symbol,
         decimals: decimals,
-        denom: denom
+        denom: denom,
+        bech32_prefix: bech32_prefix,
+        rpc_url: rpc_url,
+        first_available_block_height: first_available_block_height,
+        last_available_block_height: last_available_block_height,
+        first_available_block_time: first_available_block_time
       }
     )
     .then((oldChain) => {
@@ -136,7 +157,12 @@ chainSchema.statics.saveChain = function (
           image: image,
           symbol: symbol,
           decimals: decimals,
-          denom: denom
+          denom: denom,
+          bech32_prefix: bech32_prefix,
+          rpc_url: rpc_url,
+          first_available_block_height: first_available_block_height,
+          last_available_block_height: last_available_block_height,
+          first_available_block_time: first_available_block_time
         })
         .then((newChain: ChainInterface) => {
           if (!newChain) return callback('creation_error', null);

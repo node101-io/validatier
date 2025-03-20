@@ -15,15 +15,15 @@ export interface DataInterface {
   };
 }
 
-const getTxsByHeight = async (base_url: string, block_height: number, denom: string, chain_identifier: string): Promise<any> => {
+const getTxsByHeight = async (base_url: string, block_height: number, denom: string, bech32_prefix: string): Promise<any> => {
   try {
-    const response = await request(`${base_url}/block?height=${block_height}`);
+    const response = await request(`http://${base_url}/block?height=${block_height}`);
     const data: any = await response.body.json();
 
     return new Promise((resolve, reject) => {
       if (!data.result?.block?.data?.txs || data.result?.block?.data?.txs.length <= 0 || !data.result?.block?.header?.height || !data.result?.block?.header?.time) resolve([]);
 
-      decodeTxs(base_url, data.result.block.data.txs, denom, chain_identifier, data.result?.block?.header?.time, (err: string | null, decodedTxs?: any) => {
+      decodeTxs(base_url, data.result.block.data.txs, denom, bech32_prefix, data.result?.block?.header?.time, (err: string | null, decodedTxs?: any) => {
         if (err) return reject(err);
         resolve(decodedTxs);
       });
