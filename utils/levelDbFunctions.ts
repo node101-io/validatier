@@ -1,6 +1,6 @@
 import level from 'level';
 
-const db = new level.Level<string, string>('./last_visited_block_by_chain');
+const db = new level.Level<string, string>('./db');
 
 export async function storeVariable(key: string, value: string): Promise<void> {
     try {
