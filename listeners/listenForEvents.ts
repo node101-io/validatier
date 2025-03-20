@@ -3,6 +3,7 @@ import Validator from '../models/Validator/Validator.js';
 import Chain from '../models/Chain/Chain.js';
 import getTxsByHeight from '../utils/getTxsByHeight.js';
 import { DecodedMessage } from '../utils/decodeTxs.js';
+import { convertOperatorAddressToBech32 } from '../utils/convertOperatorAddressToBech32.js';
 
 const LISTENING_EVENTS = [
   '/cosmos.staking.v1beta1.MsgCreateValidator',
@@ -34,7 +35,7 @@ export const listenForEvents = async (
       promises.push(
         (async () => {
           try {
-            const decodedTxs = await getTxsByHeight(chain.rpc_url, height, denom);
+            const decodedTxs = await getTxsByHeight(chain.rpc_url, height, denom, chain_identifier);
             if (!decodedTxs) return;
 
             const flattenedDecodedTxs: DecodedMessage[] = decodedTxs.flatMap((obj: { messages: DecodedMessage }) => obj.messages);
@@ -59,6 +60,8 @@ export const listenForEvents = async (
               const key = eachMessage.value.validatorAddress;
 
               if (['/cosmos.staking.v1beta1.MsgCreateValidator', '/cosmos.staking.v1beta1.MsgEditValidator'].includes(eachMessage.typeUrl)) {
+                
+                if (!eachMessage.value.pubkey || !eachMessage.value.description.moniker) continue;
                 const pubkey: ArrayBuffer = eachMessage.value.pubkey.value;
                 const byteArray = new Uint8Array(Object.values(pubkey).slice(2));
                 const pubkeyBase64 = btoa(String.fromCharCode(...byteArray));
@@ -66,7 +69,7 @@ export const listenForEvents = async (
                 validatorMap[key] = {
                   pubkey: pubkeyBase64,
                   operator_address: eachMessage.value.validatorAddress,
-                  delegator_address: eachMessage.value.delegatorAddress,
+                  delegator_address: eachMessage.value.delegatorAddress ? eachMessage.value.delegatorAddress : convertOperatorAddressToBech32(eachMessage.value.validatorAddress, chain_identifier),
                   keybase_id: eachMessage.value.description.identity,
                   moniker: eachMessage.value.description.moniker,
                   commission_rate: eachMessage.value.commission.rate,
@@ -82,6 +85,7 @@ export const listenForEvents = async (
               ) {
                 if (!stakeMap[key]) stakeMap[key] = { block_height: height, operator_address: key, denom, self_stake: 0, timestamp: new Date(eachMessage.time).getTime() };
 
+                console.log(eachMessage);
                 const stakeAmount = parseInt(eachMessage.value.amount.amount);
                 stakeMap[key].self_stake += eachMessage.typeUrl === '/cosmos.staking.v1beta1.MsgDelegate' ? stakeAmount : -stakeAmount;
               }

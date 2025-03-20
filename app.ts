@@ -52,6 +52,6 @@ app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at PORT ${PORT}`);
-  // processBlocks(1, 10000, 'celestia');
+  processBlocks(1, 10000, 'celestia');
   // processBlocks(5200791, 5300791, 'cosmoshub');
 })

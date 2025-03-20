@@ -12,7 +12,7 @@ export const getValidatorSpendableBalance = function (operator_address: string, 
 
   if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
 
-  const validatorBech32Address = convertOperatorAddressToBech32(operator_address)
+  const validatorBech32Address = convertOperatorAddressToBech32(operator_address, '');
   if (!validatorBech32Address) return callback('bad_request', null);
   axios
     .get(`${REST_API_BASE_URL}/${REST_API_ENDPOINT}/${validatorBech32Address}`)

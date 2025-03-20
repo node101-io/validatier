@@ -34,7 +34,7 @@ const WITHDRAW_EVENTS = [
 
 const registry = new Registry(defaultRegistryTypes);
 
-const decodeTransactions = (base_url: string, txs: string[], denom: string, time: Date, callback: (err: string | null, result?: DecodedTx[]) => any) => {
+const decodeTransactions = (base_url: string, txs: string[], denom: string, chain_identifier: string, time: Date, callback: (err: string | null, result?: DecodedTx[]) => any) => {
   async.map(
     txs,
     (base64tx: string, cb: (err: string | null, result?: DecodedTx) => void) => {
@@ -49,10 +49,10 @@ const decodeTransactions = (base_url: string, txs: string[], denom: string, time
             const message = filteredMessages[i];
             const preCheckDecodedMessage = registry.decode(message);
             
-            const bech32OperatorAddress = convertOperatorAddressToBech32(preCheckDecodedMessage.validatorAddress);
-              
+            const bech32OperatorAddress = convertOperatorAddressToBech32(preCheckDecodedMessage.validatorAddress, chain_identifier);
+
             if (
-              message.typeUrl != '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission' &&
+              (message.typeUrl != '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission' && message.typeUrl != '/cosmos.staking.v1beta1.MsgCreateValidator' && message.typeUrl != '/cosmos.staking.v1beta1.MsgEditValidator') &&
               (!bech32OperatorAddress || bech32OperatorAddress != preCheckDecodedMessage.delegatorAddress)
             ) return next();
           

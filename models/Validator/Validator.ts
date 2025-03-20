@@ -207,8 +207,7 @@ validatorSchema.statics.saveValidator = function (
   Validator
     .findOne({
       chain_identifier: chain_identifier,
-      operator_address: operator_address,
-      deleted_at: null
+      operator_address: operator_address
     })
     .then(oldValidator => { 
       if (!oldValidator) {
