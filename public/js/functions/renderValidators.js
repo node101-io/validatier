@@ -11,6 +11,12 @@ function shortNumberFormat(num) {
   return sign + num.toString();
 }
 
+function getValueWithDecimals(value, currency, exhange_rate, decimals) {
+  const exchangeRate = exhange_rate ? exhange_rate : 0;
+  if (currency.toLowerCase().trim() != 'usd') return `${shortNumberFormat(value / (10 ** decimals))} ${currency}`
+  return `${shortNumberFormat((value / (10 ** decimals)) * exchangeRate)} $`
+}
+
 function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
   if (response.err || !response.success) return;
   const data = response.data; 
@@ -24,6 +30,7 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
 
     const tr = document.createElement('div');
     tr.classList.add('each-validator-wrapper');
+    tr.id = validator.operator_address;
     const tdInfo = document.createElement('div');
     tdInfo.classList.add('each-validator-info-wrapper');
   
@@ -67,7 +74,15 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
       inactivityDiv.appendChild(warningImg);
       monikerDiv.appendChild(inactivityDiv);
     }
-  
+
+    const stakeButton = document.createElement('a');
+    stakeButton.classList.add('validator-stake-button');
+    stakeButton.innerHTML = 'Stake';
+    stakeButton.target = '_blank';
+    stakeButton.href = `https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${validator.chain_id}&validator_address=${validator.operator_address}`
+    
+    monikerDiv.appendChild(stakeButton);
+
     const operatorAddressDiv = document.createElement('div');
     operatorAddressDiv.classList.add('validator-operator-address');
     
@@ -122,20 +137,34 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     tdInfo.appendChild(validatorImageDiv);
     tdInfo.appendChild(textualInfoWrapper);
   
-    const createNumericTd = (value) => {
+    const createRatioTd = (value) => {
       const td = document.createElement('div');
       td.classList.add('validator-each-numeric-info');
+      td.classList.add('validator-ratio');
       td.textContent = value;
       return td;
     };
-  
+
+    const exchangeRate = document.getElementById('network-switch-header').getAttribute('current_chain_usd_exhange_rate');
     const currentChainSymbol = document.getElementById('network-switch-header').getAttribute('current_chain_symbol');
     const currentChainDecimals = document.getElementById('network-switch-header').getAttribute('current_chain_decimals');
 
-    const selfStakeTd = createNumericTd(shortNumberFormat(validator.self_stake / (10 ** parseInt(currentChainDecimals))) + ` ${currentChainSymbol}`);
-    const withdrawTd = createNumericTd(shortNumberFormat(validator.withdraw / (10 ** parseInt(currentChainDecimals))) + ` ${currentChainSymbol}`);
-    const ratioTd = createNumericTd(shortNumberFormat(validator.ratio));
-    const soldTd = createNumericTd(shortNumberFormat(validator.sold / (10 ** parseInt(currentChainDecimals))) + ` ${currentChainSymbol}`);
+    const createCurrencyTd = (value) => {
+      const td = document.createElement('div');
+      td.setAttribute('native', getValueWithDecimals(value, currentChainSymbol, exchangeRate, currentChainDecimals));
+      td.setAttribute('usd', getValueWithDecimals(value, 'usd', exchangeRate, currentChainDecimals));
+      td.classList.add('validator-each-numeric-info');
+
+      const currency = document.getElementById('currency-toggle').value == 'native' ? currentChainSymbol : 'usd';
+
+      td.textContent = getValueWithDecimals(value, currency, exchangeRate, currentChainDecimals);
+      return td;
+    };
+
+    const selfStakeTd = createCurrencyTd(validator.self_stake);
+    const withdrawTd = createCurrencyTd(validator.withdraw);
+    const ratioTd = createRatioTd(shortNumberFormat(validator.ratio));
+    const soldTd = createCurrencyTd(validator.sold);
   
     tr.appendChild(tdInfo);
     tr.appendChild(selfStakeTd);

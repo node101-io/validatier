@@ -14,6 +14,10 @@ export interface ChainInterface {
   last_available_block_height: number;
   first_available_block_time: Date;
   bech32_prefix: string;
+  last_visited_block: number;
+  active_set_last_updated_block_height: number,
+  usd_exchange_rate: number,
+  is_genesis_saved: boolean
 }
 
 interface ChainModel extends Model<ChainInterface> {
@@ -31,6 +35,7 @@ interface ChainModel extends Model<ChainInterface> {
       first_available_block_height: number;
       last_available_block_height: number;
       first_available_block_time: Date;
+      usd_exchange_rate: number
     }, 
     callback: (
       err: string | null,
@@ -42,7 +47,21 @@ interface ChainModel extends Model<ChainInterface> {
       err: string | null,
       chains: ChainInterface[] | null,
     ) => any
-  ) => void
+  ) => any;
+  findChainByIdentifier: (
+    body: { chain_identifier: string },
+    callback: (
+      err: string | null,
+      chain: ChainInterface | null
+    ) => any
+  ) => any;
+  markGenesisAsSaved: (
+    body: { chain_identifier: string },
+    callback: (
+      err: string | null,
+      chain: ChainInterface | null
+    ) => any
+  ) => any
 }
 
 
@@ -109,6 +128,23 @@ const chainSchema = new Schema<ChainInterface>({
   bech32_prefix: {
     type: String,
     required: true
+  },
+  last_visited_block: {
+    type: Number,
+    required: false
+  },
+  active_set_last_updated_block_height: {
+    type: Number,
+    required: false
+  },
+  usd_exchange_rate: {
+    type: Number,
+    required: true
+  },
+  is_genesis_saved: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 });
 
@@ -126,7 +162,7 @@ chainSchema.statics.saveChain = function (
   callback: Parameters<ChainModel['saveChain']>[1]
 ) {
 
-  const { name, pretty_name, chain_id, image, symbol, decimals, denom, bech32_prefix, rpc_url, first_available_block_height, last_available_block_height, first_available_block_time } = body;
+  const { name, pretty_name, chain_id, image, symbol, decimals, denom, bech32_prefix, rpc_url, first_available_block_height, last_available_block_height, first_available_block_time, usd_exchange_rate } = body;
 
   Chain
     .findOneAndUpdate(
@@ -142,7 +178,8 @@ chainSchema.statics.saveChain = function (
         rpc_url: rpc_url,
         first_available_block_height: first_available_block_height,
         last_available_block_height: last_available_block_height,
-        first_available_block_time: first_available_block_time
+        first_available_block_time: first_available_block_time,
+        usd_exchange_rate: usd_exchange_rate
       }
     )
     .then((oldChain) => {
@@ -162,7 +199,10 @@ chainSchema.statics.saveChain = function (
           rpc_url: rpc_url,
           first_available_block_height: first_available_block_height,
           last_available_block_height: last_available_block_height,
-          first_available_block_time: first_available_block_time
+          first_available_block_time: first_available_block_time,
+          usd_exchange_rate: usd_exchange_rate,
+          last_visited_block: first_available_block_height,
+          active_set_last_updated_block_height: first_available_block_height
         })
         .then((newChain: ChainInterface) => {
           if (!newChain) return callback('creation_error', null);
@@ -173,6 +213,37 @@ chainSchema.statics.saveChain = function (
     .catch(err => callback('save_error', null))
 }
 
+
+chainSchema.statics.findChainByIdentifier = function (
+  body: Parameters<ChainModel['findChainByIdentifier']>[0],
+  callback: Parameters<ChainModel['findChainByIdentifier']>[1],
+) {
+
+  const { chain_identifier } = body;
+
+  Chain
+    .findOne({ name: chain_identifier })
+    .then(chain => {
+      if (!chain) return callback('bad_request', null);
+      return callback(null, chain);
+    })
+    .catch(err => callback('bad_request', null))
+}
+
+
+chainSchema.statics.markGenesisAsSaved = function (
+  body: Parameters<ChainModel['markGenesisAsSaved']>[0],
+  callback: Parameters<ChainModel['markGenesisAsSaved']>[1],
+) {
+  const { chain_identifier } = body;
+  Chain
+    .findOneAndUpdate(
+      { name: chain_identifier },
+      { is_genesis_saved: true }
+    )
+    .then(chain => callback(null, chain))
+    .catch(err => callback(err, null))
+}
 
 const Chain = mongoose.model<ChainInterface, ChainModel>('Chains', chainSchema);
 

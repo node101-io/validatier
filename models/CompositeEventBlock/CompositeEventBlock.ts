@@ -37,13 +37,27 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
       block_height: number;
       operator_address: string;
       timestamp: number;
-      denom?: string;
+      denom: string;
       reward?: number;
       self_stake?: number;
     }, 
     callback: (
       err: string | null,
       newCompositeEventBlock: CompositeEventBlockInterface | null
+    ) => any
+  ) => any;
+  saveManyCompositeEventBlocks: (
+    body: Record<string, {
+      block_height: number;
+      operator_address: string;
+      timestamp: number;
+      denom: string;
+      reward?: number;
+      self_stake?: number;
+    }>, 
+    callback: (
+      err: string | null,
+      savedCompositeEventBlocks: CompositeEventBlockInterface[] | null
     ) => any
   ) => any;
   searchTillExists: (
@@ -227,6 +241,105 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
   )
 }
 
+compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
+  body: Parameters<CompositeEventBlockModel['saveManyCompositeEventBlocks']>[0],
+  callback: Parameters<CompositeEventBlockModel['saveManyCompositeEventBlocks']>[1],
+) {
+  const compositeEventBlocksArray = Object.values(body);
+
+  const operatorAddresses = compositeEventBlocksArray.map(each => each.operator_address);
+
+  CompositeEventBlock.aggregate([
+    { $match: { operator_address: { $in: operatorAddresses } } }, 
+    { $sort: { created_at: -1 } }, 
+    {
+      $group: {
+        _id: "$operator_address",
+        mostRecentRecord: { $first: "$$ROOT" }, 
+      },
+    },
+    { $replaceRoot: { newRoot: "$mostRecentRecord" } }, 
+  ])
+  .then((mostRecendRecordsArray) => {
+    if (mostRecendRecordsArray.length <= 0) mostRecendRecordsArray = compositeEventBlocksArray;
+    
+    const compositeEventBlocksArrayToInsertMany: {
+      timestamp: number;
+      block_height: number;
+      operator_address: string;
+      denom: string;
+      reward: number,
+      self_stake: number,
+      reward_prefix_sum: number,
+      self_stake_prefix_sum: number
+    }[] = [];
+    
+    for (let i = 0; i < mostRecendRecordsArray.length; i++) {
+      const mostRecentCompositeEventBlock = mostRecendRecordsArray[i];
+      
+      const reward = body[mostRecentCompositeEventBlock.operator_address].reward;
+      const selfStake = body[mostRecentCompositeEventBlock.operator_address].self_stake;
+
+      const reward_prefix_sum = mostRecentCompositeEventBlock.reward_prefix_sum ? (reward ? mostRecentCompositeEventBlock.reward_prefix_sum + reward : mostRecentCompositeEventBlock.reward_prefix_sum) : reward;
+      const self_stake_prefix_sum = mostRecentCompositeEventBlock.self_stake_prefix_sum ? (selfStake ? mostRecentCompositeEventBlock.self_stake_prefix_sum + selfStake : mostRecentCompositeEventBlock.self_stake_prefix_sum) : selfStake;
+
+      if (!body[mostRecentCompositeEventBlock.operator_address].denom) continue;
+
+      const saveObject = {
+        timestamp: body[mostRecentCompositeEventBlock.operator_address].timestamp,
+        block_height: body[mostRecentCompositeEventBlock.operator_address].block_height,
+        operator_address: mostRecentCompositeEventBlock.operator_address,
+        denom: body[mostRecentCompositeEventBlock.operator_address].denom,
+        reward: body[mostRecentCompositeEventBlock.operator_address].reward ?? 0,
+        self_stake: body[mostRecentCompositeEventBlock.operator_address].self_stake ?? 0,
+        reward_prefix_sum: reward_prefix_sum,
+        self_stake_prefix_sum: self_stake_prefix_sum
+      }
+
+      compositeEventBlocksArrayToInsertMany.push(saveObject);
+    }
+
+    const blockHeightsArray = compositeEventBlocksArrayToInsertMany.map(each => each.block_height);
+
+    CompositeEventBlock.find({ block_height: { $in: blockHeightsArray } })
+      .then((alreadyExistingCompositeEventBlocks) => {
+
+        const existingBlockHeights = alreadyExistingCompositeEventBlocks.map(each => each.block_height);
+
+        const newCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each => !existingBlockHeights.includes(each.block_height));
+        const updateCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each => existingBlockHeights.includes(each.block_height));
+
+        CompositeEventBlock
+          .insertMany(newCompositeEventBlocks, { ordered: false })
+          .then(insertedCompositeEventBlocks => {
+
+            const updateCompositeEventBlocksBulk = updateCompositeEventBlocks.map(each => {
+
+              const updateObj: { [key: string]: any } = {};
+             
+              if (each.reward != 0) updateObj.reward = each.reward;
+              if (each.self_stake != 0) updateObj.self_stake = each.self_stake;
+              if (each.reward_prefix_sum != 0) updateObj.reward_prefix_sum = each.reward_prefix_sum;
+              if (each.self_stake_prefix_sum != 0) updateObj.self_stake_prefix_sum = each.self_stake_prefix_sum;
+            
+              return {
+                updateOne: {
+                  filter: { block_height: each.block_height },
+                  update: { $set: updateObj }
+                }
+              };
+            });
+        
+            CompositeEventBlock
+              .bulkWrite(updateCompositeEventBlocksBulk)
+              .then(updateCompositeEventBlocks => callback(null, insertedCompositeEventBlocks))
+              .catch(err => callback(err, null))
+          })
+          .catch(err => callback(err, null))
+      })
+  })
+  .catch((err) => callback(err, null));
+}
 
 compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = function (
   body: Parameters<CompositeEventBlockModel['getTotalPeriodicSelfStakeAndWithdraw']>[0],

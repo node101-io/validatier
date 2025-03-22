@@ -63,12 +63,14 @@ function handleNetworkSwitch () {
     const chainIdentifier = target.getAttribute('name');
     const chainSymbol = target.getAttribute('symbol');
     const chainDecimals = target.getAttribute('decimals');
+    const usdExchangeRate = target.getAttribute('usd_exchange_rate');
 
     const cacheResponse = rankingResponsesCache[bottomDate + '.' + topTimestamp + '.' + chainIdentifier];
     
     document.getElementById('network-switch-header').setAttribute('current_chain_identifier', chainIdentifier);
     document.getElementById('network-switch-header').setAttribute('current_chain_symbol', chainSymbol);
     document.getElementById('network-switch-header').setAttribute('current_chain_decimals', chainDecimals);
+    document.getElementById('network-switch-header').setAttribute('current_chain_usd_exhange_rate', usdExchangeRate);
 
     if (cacheResponse) return generateValidatorRankingContent(cacheResponse, 'ratio', 'desc');
 

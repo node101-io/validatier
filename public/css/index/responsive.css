@@ -55,6 +55,7 @@
     
     --footer-main-wrapper-vertical-padding: 30px;
     --footer-main-wrapper-gap: 14px;
+    --each-social-icon-size: 24px;
   }
 }
 
@@ -62,6 +63,7 @@
   :root {
     --each-validator-wrapper-gap: 0px;
     --validator-table-header-gap: 0px;
+    --footer-main-title-font-size: 36px;
   }
 }
 
@@ -94,5 +96,8 @@
     --date-font-size: 14px;
     --date-border-size: 4px;
     --date-padding: 0px;
+
+    --footer-main-title-font-size: 32px;
+    --each-social-icon-size: 20px;
   }
 }

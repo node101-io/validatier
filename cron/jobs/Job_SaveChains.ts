@@ -33,6 +33,7 @@ export const Job_SaveChains = (callback: (err: string | null, success: Boolean) 
                 first_available_block_height: earliestNode.earliest_block_height,
                 last_available_block_height: earliestNode.latest_block_height,
                 first_available_block_time: new Date(earliestNode.data_since),
+                usd_exchange_rate: response.chain.prices.coingecko[response.chain.display].usd
               }, (err, chain) => {
                 if (err && !chain) return next(new Error(err));
                 return next();

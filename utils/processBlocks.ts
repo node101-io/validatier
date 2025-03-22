@@ -1,5 +1,4 @@
 import { listenForEvents } from "../listeners/listenForEvents.js";
-import { storeVariable } from "./levelDbFunctions.js";
 
 export const processBlocks = async (start: number, end: number, chain_identifier: string) => {
   let bottom_block_height = start;
@@ -12,14 +11,13 @@ export const processBlocks = async (start: number, end: number, chain_identifier
     const top_block_height = Math.min(bottom_block_height + interval, max_block_height);
 
     console.log(`Processing blocks from ${bottom_block_height} to ${top_block_height} | ${chain_identifier.toUpperCase()}`);
-    await storeVariable(chain_identifier, bottom_block_height.toString());
 
     try {
       await new Promise<void>((resolve, reject) => {
         listenForEvents(bottom_block_height, top_block_height, chain_identifier, (err, success) => {
           if (err) {
             console.error(`Error processing blocks ${bottom_block_height}-${top_block_height}:`, err);
-            return reject();
+            return reject(err);
           } else {
             console.log(`Finished processing blocks ${bottom_block_height}-${top_block_height}`);
           }

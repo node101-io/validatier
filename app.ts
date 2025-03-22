@@ -12,9 +12,8 @@ import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
 
 import { startCronJobs } from './cron/startCronJobs.js';
-import Chain from './models/Chain/Chain.js';
-import { getVariable, storeVariable } from './utils/levelDbFunctions.js';
-import { processBlocks } from './utils/processBlocks.js';
+import { startFetchingData } from './utils/startFetchingData.js';
+import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
 
 dotenv.config();
 
@@ -34,7 +33,7 @@ app.use(rateLimit({
 }));
 
 mongoose
-  .connect('mongodb://127.0.0.1:27017/validator-timeline-test-v2')
+  .connect('mongodb://127.0.0.1:27017/validator-timeline-test-v3')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
@@ -51,17 +50,5 @@ app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running at PORT ${PORT}`);
-  Chain
-    .find({})
-    .then((chains) => {
-      chains.forEach(async (chain) => {
-        await storeVariable(chain.name, chain.first_available_block_height.toString());
-        const lastVisitedBlock = await getVariable(chain.name);
-        processBlocks(
-          lastVisitedBlock ? parseInt(lastVisitedBlock) : chain.first_available_block_height,
-          chain.last_available_block_height,
-          chain.name
-        );
-      })
-    })
+  // startFetchingData();
 })

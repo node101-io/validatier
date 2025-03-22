@@ -45,6 +45,7 @@ function handleExportEvents () {
       document.getElementById('export-choice-download-button').innerHTML = '';
       document.getElementById('export-choice-download-button').appendChild(createSpinner(10));
       document.getElementById('export-choice-download-button').disabled = true;
+      document.getElementById('export-choice-download-button').style.cursor = 'var(--pointer-default-dark)';
       fetch(url)
       .then(async (response) => {
           if (!response.ok) {
@@ -55,9 +56,7 @@ function handleExportEvents () {
           const isZip = contentType === 'application/zip';
   
           const blob = await response.blob();
-          if (blob.size === 0) {
-              throw new Error('Downloaded file is empty.');
-          }
+          if (blob.size === 0) throw new Error('Downloaded file is empty.');
   
           return { blob, isZip };
       })
@@ -75,6 +74,7 @@ function handleExportEvents () {
           URL.revokeObjectURL(downloadUrl);
           document.getElementById('export-choice-download-button').innerHTML = downloadButtonInnerHTML;
           document.getElementById('export-choice-download-button').disabled = false;
+          document.getElementById('export-choice-download-button').style.cursor = 'var(--pointer-hand-dark)';
       })
       .catch(error => console.error('Download failed:', error));
     }  

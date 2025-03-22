@@ -1,6 +1,6 @@
 extends ../partials/head
 block content 
-  .all-main-wrapper 
+  .all-main-wrapper#all-main-wrapper
     .inactivity-display-content
     .header-main-wrapper 
       .header-banner-wrapper
@@ -8,7 +8,7 @@ block content
           img(src='/res/images/logo.svg', alt='node101' class='center')
         .banner-title-content L'VALIDATIÈR
       .header-network-switch-wrapper
-        .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}`)
+        .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}`)
           .network-switch-network-image-wrapper 
             img#current-network-img(src=`${selectedChain.image ? selectedChain.image : ''}`)
           .network-switch-network-info-wrapper 
@@ -22,13 +22,13 @@ block content
                 include ../icons/search.svg
             input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search')
           each chain in chains 
-            .each-chain-wrapper(id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}` symbol=`${chain.symbol}` decimals=`${chain.decimals}`)
+            .each-chain-wrapper(id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}` symbol=`${chain.symbol}` decimals=`${chain.decimals}` usd_exchange_rate=`${chain.usd_exchange_rate}`)
               .network-switch-network-image-wrapper(class='center')
                 img#current-network-img(src=`${chain.image}` style='width: 25px; height: 25px; margin-right: 10px;')
               .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
                 .network-switch-network-title(style='text-wrap: nowrap')#current-network-name= chain.pretty_name
                 .network-switch-network-symbol(style='text-wrap: nowrap')#current-network-symbol= chain.symbol
-    .inner-main-wrapper
+    .inner-main-wrapper#inner-main-wrapper
       .general-title-description-wrapper
         h2 node101 | Cosmos Validator Timeline
         p node101's journey as a Cosmos validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.
@@ -40,6 +40,13 @@ block content
                 include ../icons/search.svg
               input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search name / operator address')
           .table-filters-subgroup 
+            .currency-switch-wrapper
+              .each-currency-switch-label #{selectedChain.symbol}
+              .switch
+                input(type='checkbox' id='currency-toggle' class='switch-checkbox' value=`${currency_type ? currency_type : 'native'}` checked=(currency_type === 'usd'))
+                label(for='currency-toggle', class='switch-label')
+                  span(class='switch-button')
+              .each-currency-switch-label $
             .date-picker
               .selected-range 
                 span.date-interval-description 
@@ -150,6 +157,7 @@ block content
                     if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
                       .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
                         img(src='/res/images/warning.svg')
+                    a.validator-stake-button(href=`https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${validator.chain_id}&validator_address=${validator.operator_address}` target='_blank') Stake
                   .validator-operator-address
                     .validator-operator-address-content(operator_address=`${validator.operator_address}`)
                       div= validator.operator_address.slice(0,4)
@@ -173,19 +181,26 @@ block content
 
                   return sign + num.toString();
                 }
-              div.validator-each-numeric-info= shortNumberFormat(validator['self_stake'] / 1e6) + ` ${selectedChain ? selectedChain.symbol : 'ATOM'}`
-              div.validator-each-numeric-info= shortNumberFormat(validator['withdraw'] / 1e6) + ` ${selectedChain ? selectedChain.symbol : 'ATOM'}`
-              div.validator-each-numeric-info= shortNumberFormat(validator['ratio'])
-              div.validator-each-numeric-info= shortNumberFormat(validator['sold'] / 1e6) + ` ${selectedChain ? selectedChain.symbol : 'ATOM'}`
+              - 
+                function getValue(value, currency) {
+                  const decimals = selectedChain ? selectedChain.decimals : 6;
+                  const exchangeRate = selectedChain ? selectedChain.usd_exchange_rate : 0;
+                  if (currency.toLowerCase().trim() != 'usd') return `${shortNumberFormat(value / (10 ** decimals))} ${currency}`
+                  return `${shortNumberFormat((value / (10 ** decimals)) * exchangeRate)} $`
+                }
+              div.validator-each-numeric-info(native=`${getValue(validator.self_stake, selectedChain.symbol)}` usd=`${getValue(validator.self_stake, 'usd')}`)= currency_type == 'native' ? getValue(validator.self_stake, selectedChain.symbol) : getValue(validator.self_stake, 'usd')
+              div.validator-each-numeric-info(native=`${getValue(validator.withdraw, selectedChain.symbol)}` usd=`${getValue(validator.withdraw, 'usd')}`)= currency_type == 'native' ? getValue(validator.withdraw, selectedChain.symbol) : getValue(validator.withdraw, 'usd')
+              div.validator-each-numeric-info(class='validator-ratio')= shortNumberFormat(validator.ratio)
+              div.validator-each-numeric-info(native=`${getValue(validator.sold, selectedChain.symbol)}` usd=`${getValue(validator.sold, 'usd')}`)= currency_type == 'native' ? getValue(validator.sold, selectedChain.symbol) : getValue(validator.sold, 'usd')
             .each-validator-wrapper-seperator-line
     .footer-main-wrapper(class='center')
       .footer-main-title Connect us 
       .footer-socials-wrapper(class='center')
         a(href='https://t.me/node101', target='_blank').each-social-icon 
-          include ../icons/telegram.svg
+          img(src="/res/images/telegram.svg" alt='node_101_telegram')
         a(href='https://x.com/node_101' target='_blank').each-social-icon 
-          include ../icons/x.svg
+          img(src="/res/images/x.svg" alt='node_101_x_twitter')
         a(href='https://github.com/node101-io' target='_blank').each-social-icon 
-          include ../icons/github.svg
+          img(src="/res/images/github.svg" alt='node_101_github')
         a(href='https://www.linkedin.com/company/node101/' target='_blank').each-social-icon 
-          include ../icons/linkedin.svg
+          img(src="/res/images/linkedin.svg" alt='node_101_linkedin')

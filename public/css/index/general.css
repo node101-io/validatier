@@ -39,6 +39,7 @@
   
   --each-social-icon-transition-duration: 0.25s;
   --each-social-icon-hover-scale: 1.2;
+  --each-social-icon-size: 36px;
   
   --switch-label-width: 50px;
   --switch-label-height: 25px;
@@ -59,6 +60,21 @@ html {
   padding: 0;
   font-size: var(--website-main-font-size);
   background-color: rgb(245, 245, 245);
+  overflow-y: scroll;
+}
+
+html::-webkit-scrollbar {
+  width: 8px;
+}
+
+html::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 100, var(--scrollbar-opacity, 1));
+  border-radius: 10px;
+  transition: background 0.3s ease-in-out;
+}
+
+html::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 body {
@@ -127,8 +143,15 @@ input {
 }
 
 .each-social-icon {
+  width: var(--each-social-icon-size);
+  aspect-ratio: 1/1;
   transition: all var(--each-social-icon-transition-duration) ease 0s;
   cursor: var(--pointer-hand-dark);
+}
+
+.each-social-icon img {
+  width: 100%;
+  height: 100%;
 }
 
 .each-social-icon:hover {
@@ -210,3 +233,12 @@ input {
   transform: translateX(calc(var(--switch-button-width) + (var(--switch-button-left) * 2)));
 }
 
+.currency-switch-wrapper .switch-button {
+  width: calc(var(--switch-button-width) / 1.2) !important;
+  height: calc(var(--switch-button-height) / 1.2) !important;
+}
+
+.currency-switch-wrapper .switch-label {
+  width: calc(var(--switch-label-width) / 1.2) !important;
+  height: calc(var(--switch-label-height) / 1.2) !important;
+}

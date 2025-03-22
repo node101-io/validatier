@@ -291,6 +291,12 @@
   
   --current-month-and-year-display-font-size: 20px;
   --current-month-and-year-display-font-weight: 600;
+
+  --validator-stake-button-vertical-padding: 0px;
+  --validator-stake-button-horizontal-padding: 10px;
+  --validator-stake-button-border-radius: 5px;
+  --validator-stake-button-font-size: 16px;
+  --validator-stake-button-transition-duration: 0.25s;
 }
 
 
@@ -1043,3 +1049,23 @@
   cursor: var(--pointer-hand-dark);
 }
 
+.validator-stake-button {
+  padding: var(--validator-stake-button-vertical-padding) var(--validator-stake-button-horizontal-padding);
+  text-align: center;
+  background-color: var(--color-triangle-unselected);
+  border-radius: var(--validator-stake-button-border-radius);
+  opacity: 0;
+  font-size: var(--validator-stake-button-font-size);
+  transition: all var(--validator-stake-button-transition-duration) ease-in-out 0s;
+  cursor: var(--pointer-hand-dark);
+}
+
+.each-validator-wrapper:hover .validator-stake-button {
+  opacity: 1;
+}
+
+.currency-switch-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}

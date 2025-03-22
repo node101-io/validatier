@@ -1,10 +1,16 @@
 
+function isElementScrolled(element) {
+  return element.scrollHeight > element.clientHeight && element.scrollTop > 0;
+}
+
 function handleValidatorSearch () {
   const validatorFilterInput = document.getElementById('validator-filter-input');
-  const monikers = Array.from(document.querySelectorAll('.validator-moniker')).map(each => each.children[0].children[0].innerHTML);
-  const operatorAddresses = Array.from(document.querySelectorAll('.validator-operator-address-content')).map(each => each.getAttribute('operator_address'));
-  
   validatorFilterInput.addEventListener('keyup', (event) => {
+    
+    const monikers = Array.from(document.querySelectorAll('.validator-moniker')).map(each => each.children[0].children[0].innerHTML);
+    const operatorAddresses = Array.from(document.querySelectorAll('.validator-operator-address-content')).map(each => each.getAttribute('operator_address'));  
+
+    document.documentElement.style.setProperty("--scrollbar-opacity", "1");
     if (!validatorFilterInput.value || validatorFilterInput.value.length <= 0) return document.querySelectorAll('.each-validator-wrapper').forEach(each => {
       each.style.display = 'flex';
       each.nextSibling.style.display = 'unset';
@@ -24,6 +30,10 @@ function handleValidatorSearch () {
         document.getElementById(operatorAddresses[i]).style.display = 'flex';
         document.getElementById(operatorAddresses[i]).nextSibling.style.display = 'unset';
       }
+    }
+
+    if (document.documentElement.scrollHeight <= document.documentElement.clientHeight) {
+      document.documentElement.style.setProperty("--scrollbar-opacity", "0");
     }
   })
 }
