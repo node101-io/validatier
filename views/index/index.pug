@@ -122,8 +122,10 @@ block content
         .validators-main-wrapper#validators-main-wrapper
           - 
             const headers_array = [
-              {name: 'Self stake', id: 'self_stake'}, 
-              {name: 'Withdraw', id: 'withdraw'}, 
+              {name: 'Stake', id: 'total_stake'}, 
+              {name: 'Withdraw', id: 'total_withdraw'}, 
+              {name: 'Self-stake', id: 'self_stake'}, 
+              {name: 'Claimed', id: 'withdraw'}, 
               {name: 'Ratio', id: 'ratio', popup_text: 'Self stake / Withdraw'}, 
               {name: 'Sold', id: 'sold', popup_text: 'Withdraw - Self stake'}, 
             ]
@@ -189,6 +191,8 @@ block content
                   if (currency.toLowerCase().trim() != 'usd') return `${shortNumberFormat(value / (10 ** decimals))} ${currency}`
                   return `${shortNumberFormat((value / (10 ** decimals)) * exchangeRate)} $`
                 }
+              div.validator-each-numeric-info(native=`${getValue(validator.total_stake, selectedChain.symbol)}` usd=`${getValue(validator.total_stake, 'usd')}`)= currency_type == 'native' ? getValue(validator.total_stake, selectedChain.symbol) : getValue(validator.total_stake, 'usd')
+              div.validator-each-numeric-info(native=`${getValue(validator.total_withdraw, selectedChain.symbol)}` usd=`${getValue(validator.total_withdraw, 'usd')}`)= currency_type == 'native' ? getValue(validator.total_withdraw, selectedChain.symbol) : getValue(validator.total_withdraw, 'usd')
               div.validator-each-numeric-info(native=`${getValue(validator.self_stake, selectedChain.symbol)}` usd=`${getValue(validator.self_stake, 'usd')}`)= currency_type == 'native' ? getValue(validator.self_stake, selectedChain.symbol) : getValue(validator.self_stake, 'usd')
               div.validator-each-numeric-info(native=`${getValue(validator.withdraw, selectedChain.symbol)}` usd=`${getValue(validator.withdraw, 'usd')}`)= currency_type == 'native' ? getValue(validator.withdraw, selectedChain.symbol) : getValue(validator.withdraw, 'usd')
               div.validator-each-numeric-info(class='validator-ratio')= shortNumberFormat(validator.ratio)

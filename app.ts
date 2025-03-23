@@ -13,10 +13,10 @@ import compositeEventBlockRouter from './routes/compositeEventBlockRouter.js';
 import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
 
-import { startCronJobs } from './cron/startCronJobs.js';
 import { startFetchingData } from './utils/startFetchingData.js';
 import { handleSocketIoConnection } from './controllers/Validator/getGraphData/get.js';
-
+import getTxsByHeight from './utils/getTxsByHeight.js';
+import { startCronJobs } from './cron/startCronJobs.js';
 dotenv.config();
 
 const app: Express = express();
@@ -50,25 +50,12 @@ app.use('/', indexRouter);
 app.use('/composite_event_block', compositeEventBlockRouter);
 app.use('/validator', validatorRouter);
 
-import { decodeTxRaw, Registry } from '@cosmjs/proto-signing';
-import { defaultRegistryTypes } from '@cosmjs/stargate';
-import { getGenesisTxs } from './utils/getGenesisTxs.js';
-
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 io.listen(PORT + 1);
 
-const registry = new Registry(defaultRegistryTypes);
-
 app.listen(PORT, () => {
-  handleSocketIoConnection(io)
   console.log(`Server running at PORT ${PORT}`);
+  handleSocketIoConnection(io);
   // startFetchingData();
-
-  getGenesisTxs('cosmoshub', (err, string) => {
-    console.log('cosmoshub is done');
-  })
-  getGenesisTxs('celestia', (err, string) => {
-    console.log('celestia is done');
-  })
 })

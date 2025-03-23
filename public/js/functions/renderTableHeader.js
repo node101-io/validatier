@@ -3,10 +3,12 @@ function renderTableHeader (sort_by, order) {
   const validatorsWrapper = document.getElementById('validators-main-wrapper');
 
   const headersArray = [
-      { name: 'Self stake', id: 'self_stake' },
-      { name: 'Withdraw', id: 'withdraw' },
-      { name: 'Ratio', id: 'ratio', popup_text: 'self stake / withdraw' },
-      { name: 'Sold', id: 'sold', popup_text: 'withdraw - self stake' },
+    {name: 'Stake', id: 'total_stake'}, 
+    {name: 'Withdraw', id: 'total_withdraw'}, 
+    { name: 'Self stake', id: 'self_stake' },
+    { name: 'Claimed', id: 'withdraw' },
+    { name: 'Ratio', id: 'ratio', popup_text: 'self stake / withdraw' },
+    { name: 'Sold', id: 'sold', popup_text: 'withdraw - self stake' },
   ];
   const headersRow = document.createElement('div');
   headersRow.classList.add('validator-table-header')

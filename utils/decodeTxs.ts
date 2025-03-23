@@ -24,7 +24,7 @@ const MESSAGE_TYPES_TO_DECODE: string[] = [
   '/cosmos.staking.v1beta1.MsgEditValidator',
   '/cosmos.staking.v1beta1.MsgUndelegate',
   '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
-  '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission'
+  '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission',
 ];
 
 const WITHDRAW_EVENTS = [
@@ -47,7 +47,7 @@ const decodeTransactions = (base_url: string, txs: string[], denom: string, bech
           filteredMessages.length,
           (i, next) => {
             const message = filteredMessages[i];
-          
+
             if (!WITHDRAW_EVENTS.includes(message.typeUrl)) {
               messages.push({ time: time, typeUrl: message.typeUrl, value: registry.decode(message) });
               return next();
@@ -72,10 +72,8 @@ const decodeTransactions = (base_url: string, txs: string[], denom: string, bech
                 return next();
               })
               .catch((err) => console.log(err));
-              
             },
             (err) => cb(null, { messages })
-            
           )
         } catch (err) {
           if (err) return cb(null, { messages })

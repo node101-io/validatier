@@ -8,10 +8,10 @@ export const startFetchingData = () => {
     .getAllChains((err, chains) => {
       if (err || !chains) return;
       chains.forEach(chain => {
-        if (chain.is_genesis_saved) processBlocks(chain.last_visited_block, chain.first_available_block_height + 100000, chain.name);
+        if (chain.is_genesis_saved) processBlocks(chain.last_visited_block, chain.last_available_block_height, chain.name);
         else getGenesisTxs(chain.name, (err, success) => {
           if (err || !success) return console.log(err);
-          return processBlocks(chain.last_visited_block, chain.first_available_block_height + 100000, chain.name);
+          processBlocks(chain.last_visited_block, chain.last_available_block_height, chain.name);
         })
       })
     })

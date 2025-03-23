@@ -123,7 +123,7 @@
   --validators-main-wrapper-vertical-padding: 10px;
   
   --each-validator-wrapper-height: 40px;
-  --each-validator-wrapper-gap: 120px;
+  --each-validator-wrapper-gap: 50px;
   --each-validator-wrapper-vertical-padding: 10px;
   --each-validator-wrapper-horizontal-padding: 10px;
   --each-validator-wrapper-transition-duration: 0.25s;
@@ -202,7 +202,7 @@
 
   --validator-table-header-right-padding: 10px;
   --validator-table-header-left-padding: 4%;
-  --validator-table-header-gap: 120px;
+  --validator-table-header-gap: 50px;
 
   --each-table-header-sort-indicators-margin-bottom: -5px;
   --each-table-header-sort-indicators-margin-left: 5px;
