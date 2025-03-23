@@ -1,6 +1,8 @@
 
 window.onload = () => {
 
+  const socket = io('ws://localhost:3001');
+
   const currentDate = new Date();
   let currentYearValue = currentDate.getFullYear();
   let currentMonthValue = (currentDate.getMonth() + 1);
@@ -11,5 +13,6 @@ window.onload = () => {
   handleCalendarEvents(currentYearValue, currentMonthValue, document.getElementById('calendar-format-toggle').value)
   renderValidators();
   handleExportEvents();
-  handleCurrencyToggle();
+  handleCurrencyToggle(); 
+  handlePlotButtonClick(socket);
 }

@@ -3,9 +3,11 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import express, { Express } from 'express';
 import { fileURLToPath } from 'url';
+import http from 'http';
 import mongoose from 'mongoose';
 import path from 'path';
 import { rateLimit } from 'express-rate-limit';
+import { Server } from 'socket.io';
 
 import compositeEventBlockRouter from './routes/compositeEventBlockRouter.js';
 import indexRouter from './routes/indexRouter.js';
@@ -13,7 +15,7 @@ import validatorRouter from './routes/validatorRouter.js';
 
 import { startCronJobs } from './cron/startCronJobs.js';
 import { startFetchingData } from './utils/startFetchingData.js';
-import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
+import { handleSocketIoConnection } from './controllers/Validator/getGraphData/get.js';
 
 dotenv.config();
 
@@ -48,7 +50,12 @@ app.use('/', indexRouter);
 app.use('/composite_event_block', compositeEventBlockRouter);
 app.use('/validator', validatorRouter);
 
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+io.listen(PORT + 1);
+
 app.listen(PORT, () => {
+  handleSocketIoConnection(io)
   console.log(`Server running at PORT ${PORT}`);
   // startFetchingData();
 })

@@ -16,6 +16,7 @@ html(lang='tr')
         if includes.external.css.includes('index')
           link(rel='stylesheet' href=`/css/${page.split('/')[0]}/index.css`)
       if includes.external.js 
+        script(src="https://cdn.socket.io/4.7.2/socket.io.min.js")
         if includes.external.js.includes('page')
           script(src=`/js/${page}.js`)
         if includes.external.js.includes('functions')
@@ -32,9 +33,9 @@ html(lang='tr')
           script(src=`/js/functions/handleValidatorSearch.js`)
           script(src=`/js/functions/httpRequest.js`)
           script(src=`/js/functions/nativeCurrencyConversions.js`)
+          script(src=`/js/functions/plotValidatorGraph.js`)
           script(src=`/js/functions/renderTableHeader.js`)
           script(src=`/js/functions/renderValidators.js`)
-        script(src='https://kit.fontawesome.com/e47420f551.js' crossorigin='anonymous')
   body
     block content
   footer 

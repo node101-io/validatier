@@ -30,7 +30,7 @@
     "node-cron": "^3.0.3",
     "node-fetch": "^3.3.2",
     "pug": "^3.0.3",
-    "socket.io-client": "^4.8.1",
+    "socket.io": "^4.8.1",
     "tendermint": "^5.0.2",
     "undici": "^7.5.0",
     "ws": "^8.18.1"

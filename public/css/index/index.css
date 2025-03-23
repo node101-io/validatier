@@ -292,11 +292,11 @@
   --current-month-and-year-display-font-size: 20px;
   --current-month-and-year-display-font-weight: 600;
 
-  --validator-stake-button-vertical-padding: 0px;
-  --validator-stake-button-horizontal-padding: 10px;
-  --validator-stake-button-border-radius: 5px;
-  --validator-stake-button-font-size: 16px;
-  --validator-stake-button-transition-duration: 0.25s;
+  --validator-action-button-vertical-padding: 0px;
+  --validator-action-button-horizontal-padding: 10px;
+  --validator-action-button-border-radius: 5px;
+  --validator-action-button-font-size: 16px;
+  --validator-action-button-transition-duration: 0.25s;
 }
 
 
@@ -1049,18 +1049,18 @@
   cursor: var(--pointer-hand-dark);
 }
 
-.validator-stake-button {
-  padding: var(--validator-stake-button-vertical-padding) var(--validator-stake-button-horizontal-padding);
+.validator-action-button {
+  padding: var(--validator-action-button-vertical-padding) var(--validator-action-button-horizontal-padding);
   text-align: center;
   background-color: var(--color-triangle-unselected);
-  border-radius: var(--validator-stake-button-border-radius);
+  border-radius: var(--validator-action-button-border-radius);
   opacity: 0;
-  font-size: var(--validator-stake-button-font-size);
-  transition: all var(--validator-stake-button-transition-duration) ease-in-out 0s;
+  font-size: var(--validator-action-button-font-size);
+  transition: all var(--validator-action-button-transition-duration) ease-in-out 0s;
   cursor: var(--pointer-hand-dark);
 }
 
-.each-validator-wrapper:hover .validator-stake-button {
+.each-validator-wrapper:hover .validator-action-button {
   opacity: 1;
 }
 
@@ -1068,4 +1068,156 @@
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+
+.validator-graph-wrapper {
+  width: calc(100% - 50px);
+  height: 300px;
+  display: flex;
+  gap: 0;
+  margin: 50px;
+  position: relative;
+  transition: all 1s ease-in-out 0s;
+}
+
+.each-graph-column-wrapper {
+  width: 10%;
+  height: 100%;
+  border-left: 0.5px solid var(--color-triangle-unselected);
+  position: relative; 
+}
+
+.each-data-point {
+  max-width: 10px;
+  min-width: 10px;
+  aspect-ratio: 1/1;
+  left: calc(0px - 5px);
+  position: absolute;
+  border-radius: 100%;
+  margin-bottom: -5px;
+  z-index: 20;
+}
+
+.each-data-line {
+  width: 100%;
+  left: 0;
+  position: absolute;
+  height: 2px;
+  transform-origin: left;
+  z-index: 10;
+}
+
+.each-data-delta-vertical-line {
+  width: 5px;
+  background-color: var(--color-triangle-unselected);
+  position: absolute;
+  left: -2.5px;
+  z-index: 0;
+  opacity: 0;
+  transition: all 0.5s ease 0s;
+}
+
+.each-data-delta-vertical-line-visible {
+  opacity: 1;
+}
+
+.each-data-point-value-display {
+  width: 100px;
+  height: 0px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-triangle-unselected);
+  border-radius: 5px;
+  position: absolute;
+  left: -55px;
+  transition: all 0.5s ease 0s;
+  z-index: 30;
+  opacity: 0;
+}
+
+.each-data-point-value-display-visible {
+  height: 50px;
+  opacity: 1;
+}
+
+.each-data-point-value-display-each-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-wrap: nowrap;
+}
+
+.each-data-point-value-display-legend-ball {
+  width: 5px;
+  aspect-ratio: 1/1;
+  border-radius: 100%;
+}
+
+.each-data-point-value-display-legend-text {
+  font-size: 12px;
+}
+
+.each-data-point-value-display-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 12px;
+}
+
+.each-data-point-difference-display {
+  max-width: 0%;
+  height: 30px;
+  background-color: var(--color-triangle-unselected);
+  position: absolute;
+  margin-bottom: -25px;
+  z-index: 30;
+  padding: 2px 10px 7px 10px;
+  border-radius: 5px;
+  opacity: 0;
+  transition: all 0.5s ease-in-out 0s;
+  margin-left: 20px;
+}
+
+.each-data-point-difference-display-visible {
+  max-width: 100px;
+  opacity: 1;
+}
+
+.each-data-point-difference-display::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  height: 4px;
+  width: 20px;
+  border-radius: 5px 0px 0px 5px;
+  background-color: var(--color-triangle-unselected);
+  transform: translateY(-50%);
+}
+
+.horizontal-axis-label {
+  font-size: 14px;
+  transform-origin: center;
+  transform: rotateZ(45deg);
+  position: absolute;
+  bottom: -20px;
+  left: -20px;
+}
+
+.vertical-axis-labels {
+  height: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+  bottom: 0;
+  right: 100%;
+}
+
+.each-vertical-label {
+  font-size: 14px;
 }

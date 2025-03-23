@@ -648,7 +648,6 @@ validatorSchema.statics.updateLastVisitedBlock = function (
 }
 
 
-
 const Validator = mongoose.model<ValidatorInterface, ValidatorModel>('Validators', validatorSchema);
 
 export default Validator;

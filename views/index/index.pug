@@ -157,7 +157,8 @@ block content
                     if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
                       .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
                         img(src='/res/images/warning.svg')
-                    a.validator-stake-button(href=`https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${validator.chain_id}&validator_address=${validator.operator_address}` target='_blank') Stake
+                    a.validator-action-button(href=`https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${validator.chain_id}&validator_address=${validator.operator_address}` target='_blank') Stake
+                    .validator-action-button(class='validator-plot-graph-button' operator-address=`${validator.operator_address}`) Plot
                   .validator-operator-address
                     .validator-operator-address-content(operator_address=`${validator.operator_address}`)
                       div= validator.operator_address.slice(0,4)

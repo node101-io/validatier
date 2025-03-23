@@ -12,6 +12,6 @@ router.get(
 router.get(
   '/export_csv',
   exportValidatorsGetController
-)
+);
 
 export default router;
