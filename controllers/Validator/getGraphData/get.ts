@@ -26,12 +26,20 @@ export const handleSocketIoConnection = (io: Server) => {
         const sold = (totalPeriodicSelfStakeAndWithdraw?.withdraw ? totalPeriodicSelfStakeAndWithdraw?.withdraw : 0) - (totalPeriodicSelfStakeAndWithdraw?.self_stake ? totalPeriodicSelfStakeAndWithdraw?.self_stake : 0);
 
         return socket.emit('response', { success: true, data: {
-          self_stake: totalPeriodicSelfStakeAndWithdraw.self_stake,
-          withdraw: totalPeriodicSelfStakeAndWithdraw.withdraw,
-          ratio: ratio,
-          sold: sold,
+          self_stake: Math.random() * 20,
+          withdraw: Math.random() * 20,
+          ratio: Math.random() * 20,
+          sold: Math.random() * 20,
           timestamp: topTimestamp
         } });
+
+        // return socket.emit('response', { success: true, data: {
+        //   self_stake: totalPeriodicSelfStakeAndWithdraw.self_stake,
+        //   withdraw: totalPeriodicSelfStakeAndWithdraw.withdraw,
+        //   ratio: ratio,
+        //   sold: sold,
+        //   timestamp: topTimestamp
+        // } });
       })
     })
   })

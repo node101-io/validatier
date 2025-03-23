@@ -1,0 +1,1952 @@
+[
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "0xFury",
+      "identity": "CD3DA1D23BBA4D59",
+      "website": "https://0xfury.com",
+      "security_contact": "security@0xfury.com",
+      "details": "0xFury - Enterprise-grade blockchain infrastructure solutions."
+    },
+    "commission": {
+      "rate": "0.080000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1kl5nxl54xt3g6k5k4zlk48udfcx8gkz2kkvm7e",
+    "validator_address": "celestiavaloper1kl5nxl54xt3g6k5k4zlk48udfcx8gkz2nfwzgl",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "ZbIukxRVlvD2EugqyWY5oq8VPvxLDBs61qzHVK0bqAo="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "72140000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "4sv",
+      "identity": "2B65B2317C499E16",
+      "website": "https://www.4sv.io/",
+      "security_contact": "sumne@4sv.io",
+      "details": "4SV invests in nascent blockchain companies and advances the growth of their transformative technologies."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1vlugkygcx9dng7lsc03wjw997zq855xytylgh5",
+    "validator_address": "celestiavaloper1vlugkygcx9dng7lsc03wjw997zq855xywma3pj",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "Ri715K13nR7tANI+KZOUCJJn3o61aO0bJT2IrrXb7kQ="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "51600000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "AVIAONE 🟢",
+      "identity": "DCD3D6C0BF61C200",
+      "website": "https://aviaone.com",
+      "security_contact": "",
+      "details": "Staking with Aviaone 🟢 generate a yield and your tokens stays on your wallet 🔑 🔒. NO TRANSFER REQUIRED 👍"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.500000000000000000",
+      "max_change_rate": "0.100000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1e7jh5dt02ee5k6vrfls0ttuxyj9k0g5a42tl2q",
+    "validator_address": "celestiavaloper1e7jh5dt02ee5k6vrfls0ttuxyj9k0g5as4fxux",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "XKPJp8fSr/wPh3RcIAApC25x2B/jLoRmYXkUzBu5MV4="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Active Nodes",
+      "identity": "A2EA7DE76AD57E1A",
+      "website": "https://www.activenodes.io",
+      "security_contact": "",
+      "details": "We Skyrocket your Stake! Highly Available Enterprise Infrastructure with multiple nodes around the world"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1t345w0vxnyyrf4eh43lpd3jl7z378rtsgv8j5h",
+    "validator_address": "celestiavaloper1t345w0vxnyyrf4eh43lpd3jl7z378rtsdn9tz3",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "J+TjVEWF8QcOdjJAfuaVjK+AlZdUn3wK5qW5DrVIDFo="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "72850000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "B-Harvest",
+      "identity": "8957C5091FBF4192",
+      "website": "https://bharvest.io",
+      "security_contact": "contact@bharvest.io",
+      "details": "B-Harvest focus on the value of high standard security & stability, active community participation on Cosmos Network, and real world practical use-case of blockchain technology."
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia14ntfv0qkg8522xe0pvrfgqxcmnj5x466fcqgae",
+    "validator_address": "celestiavaloper14ntfv0qkg8522xe0pvrfgqxcmnj5x466v8z3tl",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "LlPYsY3SJVZpj453ugU31a+Ue/++MSbgh0PgsI+iuhs="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "108800000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "BitNordic",
+      "identity": "8620B2B38D72599B",
+      "website": "https://bitnordic.com",
+      "security_contact": "info@bitnordic.com",
+      "details": "Your partner in staking & web3"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.120000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1slnzmhg3kwhc2c5y9atrt5jtmt3sauzzy2f325",
+    "validator_address": "celestiavaloper1slnzmhg3kwhc2c5y9atrt5jtmt3sauzzp4tguj",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "ptuoujxCDDF4+F0M5J7Gv8jwMwijkxFNmphxzxavcvM="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "BlackBlocks",
+      "identity": "2E0040A44894A00D",
+      "website": "https://blackblocks.io",
+      "security_contact": "security@blackblocks.io",
+      "details": "Collaborative validator featuring WayneWayner, a top-10 participant in the Blockspace Race (incentivized testnet), and winner of the light node challenge, along with BlackBlocks GmbH, a professional node infrastructure company. Our validator is housed at firstcolo FRA4, Germany."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.070000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1knn88yl08ctsdrtxvfp39jywt7rph9ptfpkguz",
+    "validator_address": "celestiavaloper1knn88yl08ctsdrtxvfp39jywt7rph9ptv7532y",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "zPYTB+0OM56gFu6V03k1DIvyHP6IIEu2yNsTGRvkfu0="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Blockdaemon",
+      "identity": "35892AC552B8A0A8",
+      "website": "blockdaemon.com",
+      "security_contact": "support@blockdaemon.com",
+      "details": ""
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1evu846d408jdz5ju4883gtq9pnjvs8hzq8z2c9",
+    "validator_address": "celestiavaloper1evu846d408jdz5ju4883gtq9pnjvs8hz9cqnwr",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "xwbuyz6bUNd+Ef79w0ysCU4qgDru1OZTn/yHnPaw5JE="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "66400000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Brightlystake",
+      "identity": "545033B5FD01FC86",
+      "website": "https://brightlystake.com",
+      "security_contact": "",
+      "details": "Stake with confidence"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.100000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia19y52qzj4hxw0u68krfptkjlm77cvth8ddre8j6",
+    "validator_address": "celestiavaloper19y52qzj4hxw0u68krfptkjlm77cvth8dgum7yu",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "NHPP98+UqQ+0ra4cnCXpTWtt0wO5c/gxilOs2VUIjY8="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "BwareLabs",
+      "identity": "E83A08BEEE7A70BD",
+      "website": "https://bwarelabs.com",
+      "security_contact": "validators@bwarelabs.com",
+      "details": "Guaranteed availability and up-time backed by a professional blockchain infrastructure team."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.100000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1vl3dkus7g0cj4lg0e2jrqk2reukmlht0uxup4n",
+    "validator_address": "celestiavaloper1vl3dkus7g0cj4lg0e2jrqk2reukmlht0ee7cr4",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "T3MYxMlrc+6Mbfg3m0/XJwYctpRBHSj6RBFqeETehU0="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "52000000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "ChainodeTech",
+      "identity": "E34BF744FF5BA8A9",
+      "website": "https://chainode.tech/",
+      "security_contact": "contact@chainode.tech",
+      "details": "Chainode Tech is your reliable partner for Distributed Ledger Technology (DLT) staking and validation services. Join our staking crew and engage with us: https://t.me/ChainodeTech"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1qxeza0sa037u35p3ze8p7ka7emajvydnpdacec",
+    "validator_address": "celestiavaloper1qxeza0sa037u35p3ze8p7ka7emajvydnyjlp07",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "GPhLy9RdAJq/SqyxX0M4Wt5hqQ+Xx5yZqzXu4v2cMp4="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Chorus One",
+      "identity": "00B79D689B7DC1CE",
+      "website": "https://chorus.one",
+      "security_contact": "security@chorus.one",
+      "details": "Secure Celestia and shape its future by delegating to Chorus One, a highly secure and stable validator. By delegating, you agree to the terms of service at: https://chorus.one/tos"
+    },
+    "commission": {
+      "rate": "0.080000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.100000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia15urq2dtp9qce4fyc85m6upwm9xul3049d30meq",
+    "validator_address": "celestiavaloper15urq2dtp9qce4fyc85m6upwm9xul3049gwdz0x",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "TFWxyudpTzYq2s5V3bQgkKoImG/xhG5f2yQYmdHsNTo="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "62000000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Conqueror",
+      "identity": "EAD22B173DE57E6A",
+      "website": "https://github.com/DasRasyo",
+      "security_contact": "https://t.me/DasRasyo  || conqueror.prime",
+      "details": "Stake with me"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia10f8l8m4879h40848rsvxat797t3a5ghgg0s35e",
+    "validator_address": "celestiavaloper10f8l8m4879h40848rsvxat797t3a5ghgdsjgzl",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "yT3q+LmNieKBkE7iFs5txYaRqHwxuYgCUqPthe4Jm/Y="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Cosmostation",
+      "identity": "AE4C403A6E7AA1AC",
+      "website": "https://www.cosmostation.io",
+      "security_contact": "admin@stamper.network",
+      "details": "Cosmostation validator node. Delegate your tokens and Start Earning Staking Rewards"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.200000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1uqj5ul7jtpskk9ste9mfv6jvh0y3w34vw7qg7g",
+    "validator_address": "celestiavaloper1uqj5ul7jtpskk9ste9mfv6jvh0y3w34vtpz3gw",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "+uKbyW/ACHtvDZZ8iufjsNMJ8zAFyv2fRL8w8J6R54w="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "9000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Cumulo",
+      "identity": "77158D6796D16CD0",
+      "website": "https://cumulo.pro",
+      "security_contact": "cumulo.pro@gmail.com",
+      "details": "Cumulo is a leading trusted validator and a valuable asset to the blockchain ecosystem bringing security, quality and growth to the network. Boost your token staking earnings with Cumulo. Grow with us."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1cs37tvmahavw8xcnzcgyz342sh0al37mc2qetd",
+    "validator_address": "celestiavaloper1cs37tvmahavw8xcnzcgyz342sh0al37ma4zqat",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "bKM4TE/YxPphrFOLqil/CDkHkeGiiXLHkLtnc6aZ/M4="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "63500000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "DSRV",
+      "identity": "CC434B6FE536F51B",
+      "website": "https://dsrvlabs.com",
+      "security_contact": "validator@dsrvlabs.com",
+      "details": "DSRV is an integrated blockchain solutions company with the mission of enriching the crypto ecosystem via stronger connectivity. We strive to be your gateway to a suite of all-comprehensive blockchain services. Everything distributed, served complete."
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.100000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1vje2he3pcq3w5udyvla7zm9qd5yes6hzvkjts5",
+    "validator_address": "celestiavaloper1vje2he3pcq3w5udyvla7zm9qd5yes6hzffsjxj",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "n3OpFWpY1FDepbaqwB0dBVyzhozeN5TL1lL1cN2yEQo="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Everstake",
+      "identity": "EF5AC70C00BECEDC",
+      "website": "https://everstake.one",
+      "security_contact": "",
+      "details": "Reliable and experienced staking service provider from Ukraine. Visit our website for more details."
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.120000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1eualhqh07w7p45g45hvrjagkcxsfnflzg3kt5w",
+    "validator_address": "celestiavaloper1eualhqh07w7p45g45hvrjagkcxsfnflzdw5jzg",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "Xyh/BhvPUETay1aNSmcEX9VYK86qzYRZN1pyxxcV5lY="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "65099000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Finoa Consensus Services",
+      "identity": "0FA38A5EDF5FA362",
+      "website": "https://www.finoa.io/staking-delegation",
+      "security_contact": "operations@consensus.finoa.io",
+      "details": "Stake and grow your assets using Finoa's institutional-grade infrastructure."
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.100000000000000000",
+      "max_change_rate": "0.100000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1e2p4u5vqwgum7pm9vhp0yjvl58gvhfc6pkljcn",
+    "validator_address": "celestiavaloper1e2p4u5vqwgum7pm9vhp0yjvl58gvhfc6yfatw4",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "rm4LhKWZEO8B1HeEJnQaUOAjzgJrHnvOMlNOj+tzKiA="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "52000000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "GPvalidator",
+      "identity": "CB9FF16299C91CF8",
+      "website": "https://gpvalidator.com/",
+      "security_contact": "contact@gpvalidator.com",
+      "details": "web3 the future🔒"
+    },
+    "commission": {
+      "rate": "0.070000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.100000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1rrkk74mgyn2ylf5q27zwe8069n2qfyelnlvmgt",
+    "validator_address": "celestiavaloper1rrkk74mgyn2ylf5q27zwe8069n2qfyelkqwz7d",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "iZQLsep99TpmB0bb8EQD4MDGWcvTtzO9aCMWhJxBwHc="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "60888000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Gunter",
+      "identity": "2ED33F91521C07AB",
+      "website": "",
+      "security_contact": "",
+      "details": ""
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.020000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1pavac9yrlgwyw6v9yx84sttc96n9ee9zxdln2c",
+    "validator_address": "celestiavaloper1pavac9yrlgwyw6v9yx84sttc96n9ee9zrja2u7",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "WN5n8XM+TzDQnoq1q6tRggEZCum603LAYoItzZcGLCA="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "56800000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Keplr (formerly known as Blockapsis)",
+      "identity": "55AE6F8C61BF4749",
+      "website": "https://www.keplr.app/",
+      "security_contact": "",
+      "details": "Interchain infra. Apoapsis to the Periapsis."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1uwmf03ke52vld2sa9khs0nslpgzwsm5x4tmvh4",
+    "validator_address": "celestiavaloper1uwmf03ke52vld2sa9khs0nslpgzwsm5xs5e4pn",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "dZ1cV+w2F5KYKh13FkPYoUD/kTzU4Q0AQSkDAIT+u9I="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Kiln",
+      "identity": "9B74364A5E526BED",
+      "website": "https://kiln.fi",
+      "security_contact": "contact@kiln.fi",
+      "details": "Enterprise-grade staking made easy"
+    },
+    "commission": {
+      "rate": "0.080000000000000000",
+      "max_rate": "1.000000000000000000",
+      "max_change_rate": "0.020000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1djqecw6nn5tydxq0shan7srv8j65clsf7vypl6",
+    "validator_address": "celestiavaloper1djqecw6nn5tydxq0shan7srv8j65clsfmnxcfu",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "eFL4Um4Y8r9FPLdJcHR5l8ebOmMgnK2h3M+HPZHLl3I="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "65000000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "latamnodes",
+      "identity": "725B663406CF4FF3",
+      "website": "https://daomazon.org",
+      "security_contact": "soporte@latamnodes.org",
+      "details": "Somos LatamNodes una comunidad latina. GVSDA, We are a Latin America based validator supporting the Latino community in Web3"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.120000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia14v4ush42xewyeuuldf6jtdz0a7pxg5fwxq7zc0",
+    "validator_address": "celestiavaloper14v4ush42xewyeuuldf6jtdz0a7pxg5fwrlumwf",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "7QjWHj5OsJ2WhD9Kny13I0qubrdpHITzfR/34MhSzGk="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "LowFeeValidation",
+      "identity": "DFC0A03938AD2177",
+      "website": "https://lowfeevalidation.com/",
+      "security_contact": "bonsfi@lowfeevalidation.com",
+      "details": "Low Fees. Transparent. Secure."
+    },
+    "commission": {
+      "rate": "0.070000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.100000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1ekr44a2fss4emywwke36cuem46fmatdvtt5f8s",
+    "validator_address": "celestiavaloper1ekr44a2fss4emywwke36cuem46fmatdvw5ks3k",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "NvoYjJx1Fgv+xEUihHwXxwaWduQ+JnHa5j/Bi7fWq9A="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "56908000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "MZONDER",
+      "identity": "931A47B46A0D32AA",
+      "website": "",
+      "security_contact": "",
+      "details": ""
+    },
+    "commission": {
+      "rate": "0.090000000000000000",
+      "max_rate": "0.120000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1demcj83q7nxt6gtqxlu7qsmwqpt4jspj5za6nv",
+    "validator_address": "celestiavaloper1demcj83q7nxt6gtqxlu7qsmwqpt4jspj3alr92",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "9ExpHkbi6LQJu2GMfdHA2OzXLV/LKMZ9neZThB0mOrY="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Moonlet",
+      "identity": "9A2BCB95983B1B73",
+      "website": "https://moonlet.io",
+      "security_contact": "contact@moonlet.io",
+      "details": "We operate nodes for next-generation blockchain networks and we are committed to support the decentralisation movement forward"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.020000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1q8teur40emyun60et4wh5z6yj5669stg8cyfzr",
+    "validator_address": "celestiavaloper1q8teur40emyun60et4wh5z6yj5669stgz8xs59",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "DUjLobSYVLIGTJaUHx7dpExRTnh/E5FhktNDVq18Zv0="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "75000000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "NakoTurk",
+      "identity": "CD2574B68358E7B3",
+      "website": "https://github.com/okannako",
+      "security_contact": "cryptochainnakoturk@gmail.com",
+      "details": "Validator | Node Runner | Crypto and Blockchain Enthusiast 🔗"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1pnzrk7yzx0nr9xrcjyswj7ram4qxlrfz0cy49u",
+    "validator_address": "celestiavaloper1pnzrk7yzx0nr9xrcjyswj7ram4qxlrfz28xvn6",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "wABEWz0WhQoHosUoSM0nw86u261vJiikQ2jgCQ0mNYk="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Neoprom",
+      "identity": "",
+      "website": "",
+      "security_contact": "",
+      "details": ""
+    },
+    "commission": {
+      "rate": "0.120000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1000000",
+    "delegator_address": "celestia187fhh435s76juewsmrey5yv3ljq4vpptmahqvr",
+    "validator_address": "celestiavaloper187fhh435s76juewsmrey5yv3ljq4vppt7z4e69",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "i2jI3tw8z/3AO+3G17/jQZlNxi4ufSxoAlmvKqU/fng="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "54160000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Neuler",
+      "identity": "71834D19856D880B",
+      "website": "https://neuler.xyz",
+      "security_contact": "",
+      "details": "Accelerating decentralization"
+    },
+    "commission": {
+      "rate": "0.120000000000000000",
+      "max_rate": "0.120000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1yraa2gnhdlwms4keqq0gekv2ese6wteqfr6p0e",
+    "validator_address": "celestiavaloper1yraa2gnhdlwms4keqq0gekv2ese6wteqvuccel",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "u8d0XUmrwGbENHHCJQqMcs5ooHXa9jUeVr5QhhcDEHY="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "NodeStake",
+      "identity": "94EFE192B2C52424",
+      "website": "https://nodestake.top",
+      "security_contact": "info@nodestake.top",
+      "details": "NodeStake is the professional validator, infrastructure provider and IBC relayer.⚛️7*24h | https://twitter.com/Nodestake_top"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.200000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia19f0w9svr905fhefusyx4z8sf83j6et0g3p3ppp",
+    "validator_address": "celestiavaloper19f0w9svr905fhefusyx4z8sf83j6et0g57nch8",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "+Fd7ar/vc1cnJVgX3px7N5LrDbQsirHND+5wtfRK1DA="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "53800000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Nodes.Guru",
+      "identity": "28B672FCE6BBD562",
+      "website": "https://stake.nodes.guru",
+      "security_contact": "security@nodes.guru",
+      "details": "Guru of non-custodial staking. Professional node running, low fees, best uptime and 24/7 customer support."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1hm2d8e6nd5ngtlte3hlded03vgj3rer9sne5de",
+    "validator_address": "celestiavaloper1hm2d8e6nd5ngtlte3hlded03vgj3rer94vmdml",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "YI3najh0I3cLeXbIuPhVNkGG3sq3/EVwjlPaHJi0yx8="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "56000000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Notional",
+      "identity": "0E480E2B83B23D80",
+      "website": "https://notional.ventures",
+      "security_contact": "contact@notional.ventures",
+      "details": "High-quality in-house validation, relaying, and software engineering for the Cosmos"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1cydgz3dtxpqd8j8t2k3wh9wa9vc28tkt53zges",
+    "validator_address": "celestiavaloper1cydgz3dtxpqd8j8t2k3wh9wa9vc28tkt3wq30k",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "hykgLmpkKVGwfjJRxafw9ymRmckZ8b8bQ7LS6rrWi58="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "64000000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "P-OPS Team",
+      "identity": "A2B9CAA088770EA6",
+      "website": "https://www.pops.one",
+      "security_contact": "security@pops.one",
+      "details": "P-OPS TEAM is a decentralized organization providing you with validation and staking services, blockchain consultation, growth acceleration and investment capital for innovative Web 3.0 projects."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1ac4mnwg79gyvd0x5trl2fgjv07lgfas00dtggp",
+    "validator_address": "celestiavaloper1ac4mnwg79gyvd0x5trl2fgjv07lgfas02jf378",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "X53KLdX7D9S4M64VGeIQ7lNHPVc+RRYiPLtbBNZE+6I="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "78720000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "🍒 RYABINA 🍒",
+      "identity": "6B1C8FDD84CF4ACD",
+      "website": "https://ryabina.io",
+      "security_contact": "info@ryabina.io",
+      "details": "We are validators and developers on awesome networks"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1rq8kvlncjvs42hmrx90dcff2tdshj5k75mqwew",
+    "validator_address": "celestiavaloper1rq8kvlncjvs42hmrx90dcff2tdshj5k73yzh0g",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "Zd6HWnViTNpzq/sKpVPyUJKrS7uMgtmEVEtQfjcdr3c="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "74730000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "STAKEME",
+      "identity": "5EAD753536BB995C",
+      "website": "https://stakeme.pro",
+      "security_contact": "team@stakeme.pro",
+      "details": "STAKEME helps web 3.0 projects to test their product, and provide the most efficient development support"
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.020000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1vfkgjmjxkvj0kfnzf5jkjzkj7wn3ms8dzwatqk",
+    "validator_address": "celestiavaloper1vfkgjmjxkvj0kfnzf5jkjzkj7wn3ms8d83ljks",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "UgfOzR+CtVCvvxeYtxP2aslAUA8SHYkk//FmgzmB0pg="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "58180000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "AI",
+      "identity": "2C9864355EA8C4AF",
+      "website": "",
+      "security_contact": "celestia.aezyl@8alias.com",
+      "details": "This validator is operated by AI."
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1v5hrqlv8dqgzvy0pwzqzg0gxy899rm4k6ayzec",
+    "validator_address": "celestiavaloper1v5hrqlv8dqgzvy0pwzqzg0gxy899rm4klzxm07",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "WJJElHEmeEREbb6vbYE6If9laLyipD5IkqCtpKrXGuM="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Stake🦑Squid",
+      "identity": "580B79398A609483",
+      "website": "https://stakesquid.com/",
+      "security_contact": "",
+      "details": "We provide enterprise-grade, secure, high availability non-custodial staking services and developer tools."
+    },
+    "commission": {
+      "rate": "0.060000000000000000",
+      "max_rate": "0.120000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1l0zmpm02u240crndlj7hkvlj5azuglv4uytp5d",
+    "validator_address": "celestiavaloper1l0zmpm02u240crndlj7hkvlj5azuglv4emfczt",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "JN3I8u+mdTRe57lw7VDDXV/ROZv8c1U3dk4frW3kxfk="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "64400000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "StakeWithUs",
+      "identity": "609F83752053AD57",
+      "website": "https://stakewith.us",
+      "security_contact": "node@stakewith.us",
+      "details": "Secured Staking Made Easy. Put Your Crypto to Work - Hassle Free. Disclaimer: Delegators should understand that delegation comes with slashing risk. By delegating to StakeWithUs Pte Ltd, you acknowledge that StakeWithUs Pte Ltd is not liable for any losses on your investment."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1c9ye54e3pzwm3e0zpdlel6pnavrj9qqvhxzwea",
+    "validator_address": "celestiavaloper1c9ye54e3pzwm3e0zpdlel6pnavrj9qqvjeqh0m",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "HRbnBq6RQdMLnVE81prrgNiCEA5i5uFqidQtleYktOA="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Staked",
+      "identity": "",
+      "website": "",
+      "security_contact": "",
+      "details": ""
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1pmn4cjwf26hkcpvyl322glhpdpcemcelz8ln6e",
+    "validator_address": "celestiavaloper1pmn4cjwf26hkcpvyl322glhpdpcemcel8ca2vl",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "meCW/d9wIhUoWKqVyfbzNOTwn/cb/lCP0e3c5HK85KE="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "51600000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Stakely.io",
+      "identity": "55A5F88B4ED52D3E",
+      "website": "https://stakely.io/",
+      "security_contact": "admin@stakely.io",
+      "details": "🔥 Professional validator highly experienced in PoS 🔥 Slashing protection & Eligible for airdrops | Learn with our staking guides, video tutorials and FAQs | Part of the commission of our nodes will go to our Multicoin Faucet funds and other tools 🌱 Carbon Neutral 🌱"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1yknsyf9ws4ugtv3r9g43kwqkne4zmrupae4xa3",
+    "validator_address": "celestiavaloper1yknsyf9ws4ugtv3r9g43kwqkne4zmrupcxhlth",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "YrMG8QfYW5/ww/s82Z1wR13x8lewK+9S3tfy/tqU0aA="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "53000000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Staking4All",
+      "identity": "12375441A4267DC9",
+      "website": "https://www.staking4all.org",
+      "security_contact": "Shez",
+      "details": "Validator for Proof of Stake blockchains. Delegate to us for a easy staking experience"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia19kr4f4ndyek6kwa0vt3w4un8he0tkekuvz9juw",
+    "validator_address": "celestiavaloper19kr4f4ndyek6kwa0vt3w4un8he0tkekufa8t2g",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "jBDHJNSkgFhEfseF60+/4Cn7luH3zFSvn5PAcXpBZrQ="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "62910000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "StakingCabin",
+      "identity": "C0522DF992B0C407",
+      "website": "https://stakingcabin.com",
+      "security_contact": "richard@stakingcabin.com",
+      "details": "StakingCabin"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.100000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1vdp8q3v72mntewqqak56yk3gzz7h5ukmumeups",
+    "validator_address": "celestiavaloper1vdp8q3v72mntewqqak56yk3gzz7h5ukmeym9hk",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "e4g7CnAmtrrq6E3b03itBdoxVblOnwyTAwkshzoV9QU="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "72800000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Staking Facilities",
+      "identity": "6B0DF6793DE1FB1F",
+      "website": "https://stakingfacilities.com/",
+      "security_contact": "",
+      "details": ""
+    },
+    "commission": {
+      "rate": "0.080000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.100000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1wu24jxpn9j0580ehjz344d58cf3t7lzrxhzz99",
+    "validator_address": "celestiavaloper1wu24jxpn9j0580ehjz344d58cf3t7lzrrgqmnr",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "cQZHcOGkyQeBZzydXfZwjKKIxHBOBOCGq5jML1bH5dM="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "70640000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Suntzu",
+      "identity": "7DD13EEADCA17730",
+      "website": "",
+      "security_contact": "",
+      "details": "The best choice for staking!"
+    },
+    "commission": {
+      "rate": "0.070000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1vl2ef86uxflhdy2qvy9f7qdpwzuw5jmar6gejm",
+    "validator_address": "celestiavaloper1vl2ef86uxflhdy2qvy9f7qdpwzuw5jmax92qya",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "rx/gvLop1aFsgQuat/513H30+xoRhDJo1rEySxQ3xdM="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "75555984000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Twinstake",
+      "identity": "A7823F4D765E18AB",
+      "website": "https://twinstake.io",
+      "security_contact": "hello@twinstake.io",
+      "details": "Twinstake is an institutional-grade, non-custodial staking provider designed and built in collaboration with leaders in the digital assets space. The platform offers industry leading performance, institutional-grade security and uncompromising Know Your Client (KYC) procedures."
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.020000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1mhux0vt6qszz8qwv8axggt02jjm7tuvdvgq835",
+    "validator_address": "celestiavaloper1mhux0vt6qszz8qwv8axggt02jjm7tuvdfhz78j",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "qWEq7neppaXl9C3BkYN9OXBy9A5lIiOV551oFzj097c="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "63300000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Upnode | 0% Fee",
+      "identity": "",
+      "website": "",
+      "security_contact": "",
+      "details": ""
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.250000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia133t4gpv4vhpqgfn9gr8l4u423zrglg8rnlm9h9",
+    "validator_address": "celestiavaloper133t4gpv4vhpqgfn9gr8l4u423zrglg8rkqeupr",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "nfJs6LqABJd1oDZLo1HuHdWtbgOWBmWmtwu95gg7180="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "9000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Validatus",
+      "identity": "DEF3590B1DCD96A4",
+      "website": "https://www.validatus.com",
+      "security_contact": "support@validatus.com",
+      "details": "Validatus - verifying blockchain entries on purely Enterprise Linux based systems with regular security audits. Stay safe. Stake with us."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.120000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia19v94c3z7ckarwsum76kaagma0wqsqhh5kqkmkw",
+    "validator_address": "celestiavaloper19v94c3z7ckarwsum76kaagma0wqsqhh5nl5zqg",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "Rt3Fh5rJJblo7Ljh1u6R63aTWMnxtdGOvvV8ktWvXmY="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "XPRV",
+      "identity": "6F76E87715274694",
+      "website": "https://xprv.io",
+      "security_contact": "contact@xprv.io",
+      "details": "XPRV helps cryptocurrency investors earn returns through our high-uptime, secure staking platform."
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1nwu3ugynh8m6r7aphv0uxnca84t7gnrufmxqn7",
+    "validator_address": "celestiavaloper1nwu3ugynh8m6r7aphv0uxnca84t7gnruvyye9c",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "gyYb6DPPt85NlxKT3FNYJ+9rYV0kcnw9BuQ6tc4JIZE="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "58050000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "ZKValidator",
+      "identity": "",
+      "website": "https://zkvalidator.com",
+      "security_contact": "devops@zkvalidator.com",
+      "details": "Zero Knowledge Validator: Stake & Support ZKP Research & Privacy Tech"
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.100000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia187avawwq7qhanrkxf45mayztdqsr49huzqmmm3",
+    "validator_address": "celestiavaloper187avawwq7qhanrkxf45mayztdqsr49hu8lezdh",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "ueUh8xh/b1zlBcCgblxHrZ9impMwKOkgyG5P3f1HkjE="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "[NODERS]TEAM",
+      "identity": "B38EBF2F38B998F4",
+      "website": "https://noders.team",
+      "security_contact": "office@noders.team",
+      "details": "Tell me what node you set, and I will tell you who you are"
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.020000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia139mu0a0ucz0gmrkavm5wjar2lpx7yvxq5xgd0j",
+    "validator_address": "celestiavaloper139mu0a0ucz0gmrkavm5wjar2lpx7yvxq3e25e5",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "m7tzBRBy/nTfmNCNelQtq0Bme3QOK3Bv+ACrnUfNFgo="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "53000000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "alphab.ai",
+      "identity": "",
+      "website": "https://alphab.ai/s/m/celestia/",
+      "security_contact": "https://t.me/intelix",
+      "details": "Analytics & staking dashboard"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1v987evnk7hsqct7smdqpxqprhvlcxgt45fxqc7",
+    "validator_address": "celestiavaloper1v987evnk7hsqct7smdqpxqprhvlcxgt43kyewc",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "1NfzJ7SfbqNONm8nVvSkvUhl9srbpv1NrOerb3LFJmI="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "AM Solutions 🪐",
+      "identity": "5A1DB2A1F7B6A66F",
+      "website": "https://www.theamsolutions.info",
+      "security_contact": "Discord: AlexeyM#5409",
+      "details": "The most important is - reliability."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1m07mptc7nhz2qk55qa8xeyqt992sktddw354an",
+    "validator_address": "celestiavaloper1m07mptc7nhz2qk55qa8xeyqt992sktddtwkvt4",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "IAuGeG6xR60hG+bfwmSL1S4vsFWxI7qUOuCIORiVV5Q="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "63500000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Blockscope.net",
+      "identity": "54788E59DF2F2272",
+      "website": "https://blockscope.net",
+      "security_contact": "blockscope@protonmail.com",
+      "details": "Experienced team of IT engineers building dApps and infrastructures for blockchain projects like Near, Solana and Sui"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.100000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1cqgzxhn3dqd58xexz8yley2wntdvym4e7awcmc",
+    "validator_address": "celestiavaloper1cqgzxhn3dqd58xexz8yley2wntdvym4emzvpd7",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "DiYTDGlIQlhuxbH6hc/lJ3Bi4BGc2Tpf1dvLVH+r62A="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "52000000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "BloClick",
+      "identity": "E973700FB1927C26",
+      "website": "https://bloclick.com",
+      "security_contact": "bloclick@protonmail.com",
+      "details": ""
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.100000000000000000"
+    },
+    "min_self_delegation": "1000000",
+    "delegator_address": "celestia1gm7txvnd539ruc86mkz2sgnz3r456e86d6rffn",
+    "validator_address": "celestiavaloper1gm7txvnd539ruc86mkz2sgnz3r456e86g9psl4",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "xkKGQ6TDgEiMJ9LaIf1EpD7dVllC3Cl1In0gpQUVrVw="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "54837000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "counterpoint",
+      "identity": "9612859ACCDF4A93",
+      "website": "https://counterpoint.software",
+      "security_contact": "security@counterpoint.software",
+      "details": "Counterpoint Software"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1vfydl5r98zev8xc7j0mus28r63jcklsulww9t3",
+    "validator_address": "celestiavaloper1vfydl5r98zev8xc7j0mus28r63jcklsu63vuah",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "riL4KuTil0lTokRsr4aPFBCjmFDc170O/ORFCFM4wuE="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "53520000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Easy 2 Stake",
+      "identity": "2C877AC873132C91",
+      "website": "https://www.easy2stake.com/",
+      "security_contact": "",
+      "details": "Complete transparency and trust with a secure and stable validator."
+    },
+    "commission": {
+      "rate": "0.060000000000000000",
+      "max_rate": "0.120000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1un77nfm6axkhkupe8fk4xl6fd4adz3y5qk7ph6",
+    "validator_address": "celestiavaloper1un77nfm6axkhkupe8fk4xl6fd4adz3y59fucpu",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "RxfIMOqG/8D+oPuCMci22JH4xG8ss8JyIYswkBlYwgc="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "72500000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Figment",
+      "identity": "E5F274B870BDA01D",
+      "website": "https://figment.io",
+      "security_contact": "security@figment.io",
+      "details": "Figment"
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.200000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1xqc7w3pe38kg4tswjt7mnvks7gy4p38vw07aw5",
+    "validator_address": "celestiavaloper1xqc7w3pe38kg4tswjt7mnvks7gy4p38vtsuycj",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "vrSsYrWno/rLAE0wFry5RYXA/o/jh7XI8aGsqO/XkrE="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "FreshSTAKING",
+      "identity": "63575EE3F0F9FAFC",
+      "website": "https://FreshSTAKING.com",
+      "security_contact": "sec@FreshSTAKING.com",
+      "details": "Since 2019, FreshSTAKING runs on bare metal in a SSAE16 SOC2 certified Tier 4 datacenter with geographically distributed private sentry nodes, YubiHSM2 hardware protected keys, with 24/7 monitoring, alerting, and analytics."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia17h2x3j7u44qkrq0sk8ul0r2qr440rwgjzhd27f",
+    "validator_address": "celestiavaloper17h2x3j7u44qkrq0sk8ul0r2qr440rwgj8g0ng0",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "VyW0FrwvwaL6P2wFIJlfMlq80pM/qPd+HcERkAxWcxs="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "65650000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "ContributionDAO",
+      "identity": "3034BD2560DD86B4",
+      "website": "https://contributiondao.com",
+      "security_contact": "",
+      "details": "Bootstrapping Quality Talents and Onboarding Users to the Projects for making opportunities in Web 3.0 accessible to everyone."
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia17srrapx2cvqyyy4rg3menq0hn86py8f3nqmxpe",
+    "validator_address": "celestiavaloper17srrapx2cvqyyy4rg3menq0hn86py8f3klelhl",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "iM+kGBPIpJ8wxzqSOYrVROydaUQs5AO+Zp4NjanHPg0="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "60000000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "moonli.me",
+      "identity": "662AEC27BD90D036",
+      "website": "https://moonli.me",
+      "security_contact": "tequila@moonli.me",
+      "details": "Independent Staking Provider"
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.250000000000000000",
+      "max_change_rate": "0.020000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1qx43f066sh6728avms4qq09cj2a3mg83ghswuv",
+    "validator_address": "celestiavaloper1qx43f066sh6728avms4qq09cj2a3mg83dgjh22",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "njOL+kmlgZZHb6mf3/Mrep9jUK6A3lhpQyIkknlME4U="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Imperator.co",
+      "identity": "0878BA6BE556C132",
+      "website": "https://imperator.co/",
+      "security_contact": "contact@imperator.co",
+      "details": "100% refund on downtime slashing -- Leading Proof-of-Stake Network Validator & Relayer"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.500000000000000000",
+      "max_change_rate": "0.100000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1r5xt7twqmh39ky72f4txxjrhlt2z0qww7jlx37",
+    "validator_address": "celestiavaloper1r5xt7twqmh39ky72f4txxjrhlt2z0qwwmdal8c",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "P0Fju/UVVtGbxQ5CiwkQ5FssuintfgKz2ZIxcFYWMlk="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": " kjnodes.com 🦄",
+      "identity": "1C5ACD2EEF363C3A",
+      "website": "http://kjnodes.com",
+      "security_contact": "contact@kjnodes.com",
+      "details": "Trusted Proof of Stake validator across Cosmos universe. Active ecosystem contributor, IBC relayer and chain service provider since 2021. We deliver top-notch secure and reliable infrastructure for Cosmos projects. 24/7 monitoring with no slashing history in our track record."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia17p8y0sm76zhrtjny98tknevafvlq9860ugx05h",
+    "validator_address": "celestiavaloper17p8y0sm76zhrtjny98tknevafvlq9860ehykz3",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "FMxXDtNPGfUajZIUaKqGkuqCSiUGtebIytw1IoxstyE="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "61600000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "kooltek68",
+      "identity": "2B1788BD8D14A3AF",
+      "website": "https://linktr.ee/datalac",
+      "security_contact": "kooltek68@yahoo.com",
+      "details": "We have a duty to be optimistic. Becoz the future is open, not predetermined and therefore cannot just be accepted: we are all responsible for what it holds. Thus it is our duty to Fight for a Better World."
+    },
+    "commission": {
+      "rate": "0.080000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1ax83exaawlmy5p2qn22gcynrchwdntt5rnskk6",
+    "validator_address": "celestiavaloper1ax83exaawlmy5p2qn22gcynrchwdntt5xvj0qu",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "UP2MGLh3O4qD++Hj/79KPUouhtdExHxcVa/zmvGZ/uw="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Larry Engineer",
+      "identity": "28DC4101DA38C22C",
+      "website": "https://larry.engineer",
+      "security_contact": "gm@larry.engineer",
+      "details": "Bare metal validator based in Portugal"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.120000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1ryyzale2qcp3e35k0ze3kc0mpfdtw9jad8jf8s",
+    "validator_address": "celestiavaloper1ryyzale2qcp3e35k0ze3kc0mpfdtw9jagcss3k",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "yFOHPDSiBjo+MyNIeuZ2sTLZJIwkWRwbEo7Y3fEYwXo="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "66850000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Lemniscap",
+      "identity": "1FDB0F8D14C89421",
+      "website": "https://lemniscap.com/",
+      "security_contact": "",
+      "details": "Lemniscap is an investment firm specialising in investments in emerging cryptoassets and blockchain startups."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.020000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia12t63cy8kn5n7qw77xvjn00ymcr0uuvz2fg9cgr",
+    "validator_address": "celestiavaloper12t63cy8kn5n7qw77xvjn00ymcr0uuvz2vh8p79",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "5+ni9aeP93pN4TjFnxOZm8Yj7Cke4SurpQzgjdV8678="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Maple Nodes",
+      "identity": "17FE787DE7A41E46",
+      "website": "https://maplenodes.com/",
+      "security_contact": "security@maplenodes.com",
+      "details": "Canadian-based Blockchain Validator"
+    },
+    "commission": {
+      "rate": "0.080000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1nttcw852wga4y4gww3hu70djg9d4fu4ca6ak38",
+    "validator_address": "celestiavaloper1nttcw852wga4y4gww3hu70djg9d4fu4cc9l08p",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "JqnevZ6bUB6+Vs83BeHyXQCPmruLGmXviVAjgUaa9kA="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "60000000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Node Guardians",
+      "identity": "26FE476C84A3C760",
+      "website": "nodeguardians.io",
+      "security_contact": "admin@nodeguardians.io",
+      "details": "Celestia Network is under the watchful eyes of the Node Guardians, delivering protection and rewards - nodeguardians.io"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1m58punvt32u07ra4p6x7krgxakye3m90xa2zr7",
+    "validator_address": "celestiavaloper1m58punvt32u07ra4p6x7krgxakye3m90rzgm4c",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "YYCXr43pteNhGfV5nFA4UQQTU/ldof/3N/8TiTCiGUY="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "66700000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "quantumcore",
+      "identity": "",
+      "website": "",
+      "security_contact": "",
+      "details": ""
+    },
+    "commission": {
+      "rate": "0.120000000000000000",
+      "max_rate": "0.250000000000000000",
+      "max_change_rate": "0.030000000000000000"
+    },
+    "min_self_delegation": "1000000",
+    "delegator_address": "celestia1yxrf303ewxrwndex9cxj0mg24vekrpqshuaxjh",
+    "validator_address": "celestiavaloper1yxrf303ewxrwndex9cxj0mg24vekrpqsjrlly3",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "wZuyeykwQKPPi+UMxbNILha7/YzsJvZi5dCtlREdfRQ="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "53520000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Qubelabs",
+      "identity": "16DFCF6AF28D699D",
+      "website": "https://qubelabs.io",
+      "security_contact": "security@qubelabs.io",
+      "details": "Independent organization of validators, builders, network contributors and community builders."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1j2jq259d3rrc24876gwxg0ksp0lhd8gys65rxd",
+    "validator_address": "celestiavaloper1j2jq259d3rrc24876gwxg0ksp0lhd8gy49k6st",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "hf7BPUuIEY5mNTAXT33NvzEpineM5SsnjQrvzchnSpE="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "81520000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "spidey",
+      "identity": "",
+      "website": "",
+      "security_contact": "",
+      "details": ""
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.120000000000000000",
+      "max_change_rate": "0.020000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1st4h4ymu52hwtl3s0n298t6adj0vputxzdv7sd",
+    "validator_address": "celestiavaloper1st4h4ymu52hwtl3s0n298t6adj0vputx8jw8xt",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "tvFMgCZUlAbgNeipsvsP9bQsk5S9HwxKR/AeT/R4fI8="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Staker Space",
+      "identity": "59850BC3A3C5F039",
+      "website": "https://staker.space",
+      "security_contact": "hello@staker.space or @gnossienli on telegram",
+      "details": "Independent node operator securing public blockchains"
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.100000000000000000",
+      "max_change_rate": "0.001000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1qdfdh8stxpkj4zz46x2n9ejyyy9h0c86s4kaya",
+    "validator_address": "celestiavaloper1qdfdh8stxpkj4zz46x2n9ejyyy9h0c86425yjm",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "Kw9ZMXqaRVALHVjVACA+WNIMFQ1hpxpWERzqs3ruuHs="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "67650000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Stakin",
+      "identity": "83D300CB42D06962",
+      "website": "https://stakin.com",
+      "security_contact": "security@stakin.com",
+      "details": "Reliable and Secure Staking Services Trusted by Institutions. ISO27001 certified, Cosmos ecosystem contributor, IBC relayer provider. Visit our website to know more about Stakin and for T&Cs."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.250000000000000000",
+      "max_change_rate": "0.050000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1dlsl4u42ycahzjfwc6td6upgsup9tt7c8cwedn",
+    "validator_address": "celestiavaloper1dlsl4u42ycahzjfwc6td6upgsup9tt7cz8vqm4",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "PPWwBozpIT4BLPo5WUZBog9E4HrfL6PYO2+6lwePpFE="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "65000000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "Swiss Staking",
+      "identity": "165F85FC0194320D",
+      "website": "https://swiss-staking.ch",
+      "security_contact": "info@swiss-staking.ch",
+      "details": "Our Celestia bare metal validator is running in a former military bunker in Switzerland. We are trusted by 50,000+ addresses and known for top-notch protection, security and reliability."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.250000000000000000",
+      "max_change_rate": "0.025000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1u4vhh70lwlt2va7hw5evzl6sap92t0m9klqz2t",
+    "validator_address": "celestiavaloper1u4vhh70lwlt2va7hw5evzl6sap92t0m9nqzmud",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "gxPYrd5G0ZoaQZGTJatw2ISQ59dEZi0W9cVbeIURPaw="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "8000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "W3.Hitchhiker",
+      "identity": "184eb53cd5ca5f495ed230946e6e1ccb20efe97b",
+      "website": "https://w3hitchhiker.com",
+      "security_contact": "renhongyi_r@outlook.com",
+      "details": "A small but experienced research lab."
+    },
+    "commission": {
+      "rate": "0.050000000000000000",
+      "max_rate": "0.150000000000000000",
+      "max_change_rate": "0.000300000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1zdrz4w2pwwffdvmpum0626vycel9caayqvncfe",
+    "validator_address": "celestiavaloper1zdrz4w2pwwffdvmpum0626vycel9caay9n3pll",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "Ttvi0PTnyhzaKjXGo7h+UFhucyS9le3lBLZziiHbTXM="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "75945000000"
+    }
+  },
+  {
+    "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+    "description": {
+      "moniker": "wavefive",
+      "identity": "6050863ECCF387E4",
+      "website": "https://wavefive.co",
+      "security_contact": "hello@wavefive.co",
+      "details": "Wavefive - We work for protocols and protocols work for us"
+    },
+    "commission": {
+      "rate": "0.100000000000000000",
+      "max_rate": "0.200000000000000000",
+      "max_change_rate": "0.010000000000000000"
+    },
+    "min_self_delegation": "1",
+    "delegator_address": "celestia1cmaga4f6f7pttuwzfldn9067ld3090uw2xcmkp",
+    "validator_address": "celestiavaloper1cmaga4f6f7pttuwzfldn9067ld3090uw0e6zq8",
+    "pubkey": {
+      "@type": "/cosmos.crypto.ed25519.PubKey",
+      "key": "YT4/Xc+fP+1EvVhq9WsivOJgFr/+Vit8On8H3PDY9cY="
+    },
+    "value": {
+      "denom": "utia",
+      "amount": "53520000000"
+    }
+  }
+]

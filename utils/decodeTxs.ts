@@ -47,14 +47,6 @@ const decodeTransactions = (base_url: string, txs: string[], denom: string, bech
           filteredMessages.length,
           (i, next) => {
             const message = filteredMessages[i];
-            const preCheckDecodedMessage = registry.decode(message);
-            
-            const bech32OperatorAddress = convertOperatorAddressToBech32(preCheckDecodedMessage.validatorAddress, bech32_prefix);
-
-            if (
-              (message.typeUrl != '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission' && message.typeUrl != '/cosmos.staking.v1beta1.MsgCreateValidator' && message.typeUrl != '/cosmos.staking.v1beta1.MsgEditValidator') &&
-              (!bech32OperatorAddress || bech32OperatorAddress != preCheckDecodedMessage.delegatorAddress)
-            ) return next();
           
             if (!WITHDRAW_EVENTS.includes(message.typeUrl)) {
               messages.push({ time: time, typeUrl: message.typeUrl, value: registry.decode(message) });

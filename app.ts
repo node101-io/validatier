@@ -50,12 +50,25 @@ app.use('/', indexRouter);
 app.use('/composite_event_block', compositeEventBlockRouter);
 app.use('/validator', validatorRouter);
 
+import { decodeTxRaw, Registry } from '@cosmjs/proto-signing';
+import { defaultRegistryTypes } from '@cosmjs/stargate';
+import { getGenesisTxs } from './utils/getGenesisTxs.js';
+
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 io.listen(PORT + 1);
+
+const registry = new Registry(defaultRegistryTypes);
 
 app.listen(PORT, () => {
   handleSocketIoConnection(io)
   console.log(`Server running at PORT ${PORT}`);
   // startFetchingData();
+
+  getGenesisTxs('cosmoshub', (err, string) => {
+    console.log('cosmoshub is done');
+  })
+  getGenesisTxs('celestia', (err, string) => {
+    console.log('celestia is done');
+  })
 })
