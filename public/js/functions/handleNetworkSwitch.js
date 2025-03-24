@@ -49,7 +49,6 @@ function handleNetworkSwitch () {
         
     const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
     const topDate = document.getElementById('periodic-query-top-timestamp').value
-
     
     setCookie('selectedDateBottom', bottomDate, 7);
     setCookie('selectedDateTop', topDate, 7);
@@ -71,6 +70,8 @@ function handleNetworkSwitch () {
     document.getElementById('network-switch-header').setAttribute('current_chain_symbol', chainSymbol);
     document.getElementById('network-switch-header').setAttribute('current_chain_decimals', chainDecimals);
     document.getElementById('network-switch-header').setAttribute('current_chain_usd_exhange_rate', usdExchangeRate);
+
+    document.getElementById('currency-switch-current-chain-symbol').innerHTML = chainSymbol;
 
     if (cacheResponse) return generateValidatorRankingContent(cacheResponse, 'ratio', 'desc');
 

@@ -132,8 +132,8 @@ export const listenForEvents = (
 
                 if (!compositeEventBlockMap[eachMessage.value.validatorDstAddress]) 
                   compositeEventBlockMap[eachMessage.value.validatorDstAddress] = NULL_COMPOSITE_EVENT_BLOCK;
-                compositeEventBlockMap[eachMessage.value.validatorDstAddress].operator_address = eachMessage.value.validatorSrcAddress;
-                compositeEventBlockMap[eachMessage.value.validatorSrcAddress].total_stake += value;
+                compositeEventBlockMap[eachMessage.value.validatorDstAddress].operator_address = eachMessage.value.validatorDstAddress;
+                compositeEventBlockMap[eachMessage.value.validatorDstAddress].total_stake += value;
               }
             }
             resolve();
@@ -158,8 +158,9 @@ export const listenForEvents = (
             savedCompositeEventBlocks ? console.log(`CompositeEventBlock | CREATED | ${savedCompositeEventBlocks.length <= 0 ? 'NONE' : savedCompositeEventBlocks}`) : '';
             console.log('\n')
             const timestamp = (compositeEventBlocks && compositeEventBlocks[0]) ? new Date(compositeEventBlocks[0].timestamp) : undefined;
-            Validator.updateLastVisitedBlock({ chain_identifier: chain_identifier, block_height: top_block_height, block_time: timestamp }, (err, chain) => {
+            Validator.updateLastVisitedBlock({ chain_identifier: chain_identifier, block_height: top_block_height, block_time: timestamp }, (err, updated) => {
               if (err) return final_callback(err, false);
+              if (updated?.saved_active_validators) console.log(`ACTIVE VALIDATOR LIST UPDATED | TOTAL OF ${updated?.saved_active_validators.active_validators.length} ACTIVE`);
               return final_callback(null, true);
             })
           })

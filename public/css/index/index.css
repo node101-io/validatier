@@ -1072,20 +1072,22 @@
 
 
 .validator-graph-wrapper {
-  width: calc(100% - 50px);
+  user-select: none;
+  min-width: calc(100% - 200px);
   height: 500px;
   display: flex;
   gap: 0;
-  margin: 50px;
   position: relative;
   transition: all 1s ease-in-out 0s;
+  overflow: hidden;
+  padding: 50px 100px;
 }
 
 .each-graph-column-wrapper {
-  width: 10%;
+  flex-grow: 1;
   height: 100%;
-  border-left: 0.5px solid var(--color-triangle-unselected);
-  position: relative; 
+  border-bottom: 0.5px solid var(--color-triangle-unselected);
+  position: relative;
 }
 
 .each-data-point {
@@ -1097,6 +1099,12 @@
   border-radius: 100%;
   margin-bottom: -5px;
   z-index: 20;
+  opacity: 0;
+  transition: all 0.2s ease 0s;
+}
+
+.each-data-point-hovered {
+  opacity: 1;
 }
 
 .each-data-line {
@@ -1123,31 +1131,35 @@
 }
 
 .each-data-point-value-display {
-  width: 100px;
-  height: 0px;
+  width: 0;
+  height: 40px;
   padding: 5px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
   background-color: var(--color-triangle-unselected);
   border-radius: 5px;
   position: absolute;
-  left: -55px;
+  top: -50px;
+  left: 0;
   transition: all 0.5s ease 0s;
   z-index: 30;
   opacity: 0;
+  overflow: hidden;
+  gap: 5px;
 }
 
 .each-data-point-value-display-visible {
-  height: 50px;
+  width: 250px;
+  left: -130px;
   opacity: 1;
 }
 
 .each-data-point-value-display-each-line {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
   text-wrap: nowrap;
 }
 
@@ -1202,9 +1214,16 @@
   font-size: 14px;
   transform-origin: center;
   transform: rotateZ(45deg);
+  transition: all 0.2s ease 0s;
+  width: 20px;
   position: absolute;
-  bottom: -20px;
-  left: -20px;
+  bottom: -5%;
+  left: -10px;
+}
+
+.each-data-point-horizontal-label-hovered {
+  font-weight: 800;
+  font-size: 16px;
 }
 
 .vertical-axis-labels {
@@ -1213,11 +1232,50 @@
   flex-direction: column-reverse;
   justify-content: space-between;
   align-items: center;
-  position: absolute;
   bottom: 0;
-  right: 100%;
+  border-right: 0.5px solid var(--color-triangle-unselected);
 }
 
 .each-vertical-label {
   font-size: 14px;
+  margin-right: 20px;
+}
+
+.graph-resizing-wrapper {
+  width: calc(100% + 5px);
+  height: 100%;
+  background-color: rgba(245, 245, 255, 0.5);
+  backdrop-filter: blur(6px);
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  left: 0;
+  top: -5px;
+  z-index: 100;
+}
+
+.graph-range-paint-bar {
+  position: absolute;
+  width: 0px;
+  height: 100%;
+  left: 0;
+  transform-origin: top left;
+  background-color: rgba(23, 37, 76, 0.5);
+  bottom: 0;
+}
+
+.each-data-indicator-vertical-line {
+  width: 0;
+  border-right: 2px dashed var(--color-triangle-unselected);
+  height: calc(100% + 50px);
+  top: -50px;
+  left: -1px;
+  position: absolute;
+  opacity: 0;
+  transition: all 1s ease 0s;
+}
+
+.each-data-indicator-vertical-line-visible {
+  opacity: 1;
 }

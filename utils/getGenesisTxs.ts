@@ -5,6 +5,7 @@ import Chain from '../models/Chain/Chain.js';
 import Validator from '../models/Validator/Validator.js';
 import { DecodedMessage } from '../utils/decodeTxs.js';
 import CompositeEventBlock from '../models/CompositeEventBlock/CompositeEventBlock.js';
+import ActiveValidators from '../models/ActiveValidators/ActiveValidators.js';
 
 export const getGenesisTxs = async (chain_identifier: string, callback: (err: string | null, success: Boolean) => any) => {
 
@@ -61,20 +62,31 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
               Chain.markGenesisAsSaved({ chain_identifier: chain_identifier }, (err, chainGenesisMarkedAsSaved) => {
                 if (err) return callback(err, false);
                 
+                const month = (new Date(chain.first_available_block_time)).getMonth();
+                const year = (new Date(chain.first_available_block_time)).getFullYear();
+
                 if (!activeValidatorsData || activeValidatorsData.length <= 0) {
                   Validator.updateActiveValidatorList({
-                    block_time: chain.first_available_block_time,
+                    month: month,
+                    year: year,
                     height: chain.first_available_block_height,
                     chain_identifier: chain.name,
                     chain_rpc_url: chain.rpc_url
-                  }, (err, validatorsRestoredAndDeleted) => {
+                  }, (err, savedActiveValidators) => {
                     if (err) return callback(err, false);
+                    console.log(`ACTIVE VALIDATOR LIST UPDATED | TOTAL OF ${savedActiveValidators?.active_validators.length} ACTIVE`);
                     return callback(null, true);
                   });
                 } else {
                   const pubkeysOfActiveValidators = activeValidatorsData.map((v: any) => v.pub_key.value) || [];           
-                  Validator.deleteValidatorsNotAppearingActiveSet({ chain_identifier: chain.name , activeValidatorsPubkeys: pubkeysOfActiveValidators, block_time: chain.first_available_block_time }, (err, validatorsRestoredOrDeleted) => {
+                  ActiveValidators.saveActiveValidators({
+                    chain_identifier: chain_identifier,
+                    month: month,
+                    year: year,
+                    active_validators_pubkeys_array: pubkeysOfActiveValidators
+                  }, (err, savedActiveValidators) => {
                     if (err) return callback(err, false);
+                    console.log(`ACTIVE VALIDATOR LIST UPDATED | TOTAL OF ${savedActiveValidators?.active_validators.length} ACTIVE`);
                     return callback(null, true);
                   })
                 }

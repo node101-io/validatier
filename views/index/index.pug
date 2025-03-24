@@ -41,7 +41,7 @@ block content
               input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search name / operator address')
           .table-filters-subgroup 
             .currency-switch-wrapper
-              .each-currency-switch-label #{selectedChain.symbol}
+              .each-currency-switch-label#currency-switch-current-chain-symbol #{selectedChain.symbol}
               .switch
                 input(type='checkbox' id='currency-toggle' class='switch-checkbox' value=`${currency_type ? currency_type : 'native'}` checked=(currency_type === 'usd'))
                 label(for='currency-toggle', class='switch-label')

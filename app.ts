@@ -57,5 +57,5 @@ io.listen(PORT + 1);
 app.listen(PORT, () => {
   console.log(`Server running at PORT ${PORT}`);
   handleSocketIoConnection(io);
-  startFetchingData();
+  // startFetchingData();
 })

@@ -15,9 +15,10 @@ export interface ChainInterface {
   first_available_block_time: Date;
   bech32_prefix: string;
   last_visited_block: number;
-  active_set_last_updated_block_height: number,
-  usd_exchange_rate: number,
-  is_genesis_saved: boolean
+  last_visited_block_time: number;
+  active_set_last_updated_block_time: number;
+  usd_exchange_rate: number;
+  is_genesis_saved: boolean;
 }
 
 interface ChainModel extends Model<ChainInterface> {
@@ -133,7 +134,11 @@ const chainSchema = new Schema<ChainInterface>({
     type: Number,
     required: false
   },
-  active_set_last_updated_block_height: {
+  last_visited_block_time: {
+    type: Number,
+    required: false
+  },
+  active_set_last_updated_block_time: {
     type: Number,
     required: false
   },
@@ -202,7 +207,8 @@ chainSchema.statics.saveChain = function (
           first_available_block_time: first_available_block_time,
           usd_exchange_rate: usd_exchange_rate,
           last_visited_block: first_available_block_height,
-          active_set_last_updated_block_height: first_available_block_height
+          last_visited_block_time: first_available_block_time,
+          active_set_last_updated_block_time: first_available_block_time
         })
         .then((newChain: ChainInterface) => {
           if (!newChain) return callback('creation_error', null);

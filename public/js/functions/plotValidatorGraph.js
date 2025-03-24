@@ -1,5 +1,5 @@
 
-const PERIOD_INVERVAL = 25;
+const PERIOD_INVERVAL = 50;
 
 function prettyDate(timestamp) {
   const date = new Date(parseInt(timestamp));
@@ -7,7 +7,7 @@ function prettyDate(timestamp) {
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
+  return `${day}/${month}/${year.toString().slice(2)}`;
 }
 
 function addVerticalAxisLabels(graphWrapper, min, max, details, currency, decimals, usd_exchange_rate) {
@@ -26,6 +26,20 @@ function addVerticalAxisLabels(graphWrapper, min, max, details, currency, decima
   }
 
   graphWrapper.appendChild(verticalAxisLabels);
+}
+
+function generatePointAndLine(color, bottom) {
+  const point = document.createElement('div');
+  point.className = 'each-data-point';
+  point.style.backgroundColor = color;
+  point.style.bottom = `${bottom}%`;
+
+  const line = document.createElement('div');
+  line.className = 'each-data-line';
+  line.style.backgroundColor = color;
+  line.style.bottom = `${bottom}%`;
+
+  return { point, line };
 }
 
 
@@ -69,6 +83,36 @@ function getAngleBetweenTwoPoints (column1, column2) {
   };
 }
 
+function generateSingleHorizontalAxisLabel (timestamp) {
+  const horizontalAxisLabel = document.createElement('div');
+  horizontalAxisLabel.classList.add('horizontal-axis-label');
+  horizontalAxisLabel.innerHTML = prettyDate(timestamp).split('/').slice(0, 2).join('/');
+  return horizontalAxisLabel
+}
+
+function generatePointValueDisplay (data, graphDataMapping, currency, usd_exchange_rate, decimals, timestamp) {
+  const eachDataPointValueDisplay = document.createElement('div');
+  eachDataPointValueDisplay.classList.add('each-data-point-value-display');
+
+  const eachDataPointValueDisplayTitle = document.createElement('div');
+  eachDataPointValueDisplayTitle.classList.add('each-data-point-value-display-title');
+  
+  eachDataPointValueDisplayTitle.innerHTML = `${prettyDate(Object.keys(graphDataMapping)[0])}-${prettyDate(timestamp)}`;
+
+  const prettySelfStake = getValueWithDecimals(data.self_stake, currency, usd_exchange_rate, decimals);
+  const prettyWithdraw = getValueWithDecimals(data.withdraw, currency, usd_exchange_rate, decimals);
+  const prettyRatio = shortNumberFormat(data.ratio);
+  const prettySold = getValueWithDecimals(data.sold, currency, usd_exchange_rate, decimals);
+
+  eachDataPointValueDisplay.appendChild(eachDataPointValueDisplayTitle);
+  eachDataPointValueDisplay.appendChild(generateLegendLine(prettySelfStake, 'Self-stake', 'green'));
+  eachDataPointValueDisplay.appendChild(generateLegendLine(prettyWithdraw, 'Withdraw', 'blue'));
+  eachDataPointValueDisplay.appendChild(generateLegendLine(prettyRatio, 'Ratio', 'green'));
+  eachDataPointValueDisplay.appendChild(generateLegendLine(prettySold, 'Sold', 'yellow'));
+
+  return eachDataPointValueDisplay;
+}
+
 const validatorGraphEventListenersMapping = {};
 
 function plotValidatorGraph(params) {
@@ -95,75 +139,33 @@ function plotValidatorGraph(params) {
   const graphWrapper = document.createElement('div');
   graphWrapper.className = 'validator-graph-wrapper';
   graphWrapper.id = `validator-graph-wrapper-${operatorAddress}`;
+
+  addVerticalAxisLabels(graphWrapper, Math.min(minSelfStake, minWithdraw), Math.max(maxSelfStake, maxWithdraw), 5, currency, decimals, usd_exchange_rate);
   
-  Object.entries(graphDataMapping).forEach(([timestamp, data]) => {
+  Object.entries(graphDataMapping).forEach(([timestamp, data], index) => {
     const columnWrapper = document.createElement('div');
     columnWrapper.className = 'each-graph-column-wrapper';
   
     const selfStakeBottom = ((data.self_stake - minValue) / (maxValue - minValue)) * 100;
     const withdrawBottom = ((data.withdraw - minValue) / (maxValue - minValue)) * 100;
   
-    const horizontalAxisLabel = document.createElement('div');
-    horizontalAxisLabel.classList.add('horizontal-axis-label');
-    horizontalAxisLabel.innerHTML = prettyDate(timestamp).split('/').slice(0, 2).join('/');
+    const horizontalAxisLabel = generateSingleHorizontalAxisLabel(timestamp);
 
-    const selfStakePoint = document.createElement('div');
-    selfStakePoint.className = 'each-data-point';
-    selfStakePoint.style.backgroundColor = 'darkblue';
-    selfStakePoint.style.bottom = `${selfStakeBottom}%`;
-  
-    const selfStakeLine = document.createElement('div');
-    selfStakeLine.className = 'each-data-line';
-    selfStakeLine.style.backgroundColor = 'lightcoral';
-    selfStakeLine.style.bottom = `${selfStakeBottom}%`;
-  
-    const withdrawPoint = document.createElement('div');
-    withdrawPoint.className = 'each-data-point';
-    withdrawPoint.style.backgroundColor = 'darkgreen';
-    withdrawPoint.style.bottom = `${withdrawBottom}%`;
-  
-    const withdrawLine = document.createElement('div');
-    withdrawLine.className = 'each-data-line';
-    withdrawLine.style.backgroundColor = 'lightcoral';
-    withdrawLine.style.bottom = `${withdrawBottom}%`;
+    const { point: selfStakePoint, line: selfStakeLine } = generatePointAndLine('lightblue', selfStakeBottom);
+    const { point: withdrawPoint, line: withdrawLine } = generatePointAndLine('lightgreen', withdrawBottom);
 
-    const eachDataPointValueDisplay = document.createElement('div');
-    eachDataPointValueDisplay.classList.add('each-data-point-value-display');
-    eachDataPointValueDisplay.style.bottom = `calc(${Math.max(selfStakeBottom, withdrawBottom)}% + 10px)`;
+    const eachDataPointValueDisplay = generatePointValueDisplay(data, graphDataMapping, currency, usd_exchange_rate, decimals, timestamp);
 
-    const eachDataPointValueDisplayTitle = document.createElement('div');
-    eachDataPointValueDisplayTitle.classList.add('each-data-point-value-display-title');
-    
-    eachDataPointValueDisplayTitle.innerHTML = prettyDate(timestamp);
-
-    const prettySelfStake = getValueWithDecimals(data.self_stake, currency, usd_exchange_rate, decimals);
-    const prettyWithdraw = getValueWithDecimals(data.withdraw, currency, usd_exchange_rate, decimals);
-    const prettyRatio = shortNumberFormat(data.ratio);
-    const prettySold = getValueWithDecimals(data.sold, currency, usd_exchange_rate, decimals);
-
-    const legendLineSelfStake = generateLegendLine(prettySelfStake, 'self-stake', 'blue');
-    const legendLineWithdraw = generateLegendLine(prettyWithdraw, 'withdraw', 'red');
-
-    eachDataPointValueDisplay.appendChild(eachDataPointValueDisplayTitle);
-    eachDataPointValueDisplay.appendChild(legendLineSelfStake);
-    eachDataPointValueDisplay.appendChild(legendLineWithdraw);
-
-    const eachDataPointDifferenceDisplay = document.createElement('div');
-    eachDataPointDifferenceDisplay.classList.add('each-data-point-difference-display');
-    eachDataPointDifferenceDisplay.style.bottom = `${(Math.max(selfStakeBottom, withdrawBottom) + Math.min(selfStakeBottom, withdrawBottom)) / 2}%`;
-
-    const legendLineRatio = generateLegendLine(prettyRatio, 'ratio', 'green');
-    const legendLineSold = generateLegendLine(prettySold, 'sold', 'yellow');
-
-    eachDataPointDifferenceDisplay.appendChild(legendLineRatio);
-    eachDataPointDifferenceDisplay.appendChild(legendLineSold);
+    const eachDataIndicatorVerticalLine = document.createElement('div');
+    eachDataIndicatorVerticalLine.classList.add('each-data-indicator-vertical-line');
 
     const eachDataDeltaVerticalLine = document.createElement('div');
     eachDataDeltaVerticalLine.classList.add('each-data-delta-vertical-line');
     eachDataDeltaVerticalLine.style.bottom = `${Math.min(selfStakeBottom, withdrawBottom)}%`;
     eachDataDeltaVerticalLine.style.height = `${Math.max(selfStakeBottom, withdrawBottom) - Math.min(selfStakeBottom, withdrawBottom)}%`
 
-    addVerticalAxisLabels(graphWrapper, Math.min(minSelfStake, minWithdraw), Math.max(maxSelfStake, maxWithdraw), 5, currency, decimals, usd_exchange_rate);
+    const paintBar = document.createElement('div');
+    paintBar.classList.add('graph-range-paint-bar');
 
     columnWrapper.appendChild(selfStakePoint);
     columnWrapper.appendChild(selfStakeLine);
@@ -171,11 +173,28 @@ function plotValidatorGraph(params) {
     columnWrapper.appendChild(withdrawLine);
     columnWrapper.appendChild(eachDataPointValueDisplay);
     columnWrapper.appendChild(eachDataDeltaVerticalLine);
-    columnWrapper.appendChild(eachDataPointDifferenceDisplay);
-    columnWrapper.appendChild(horizontalAxisLabel);
+    columnWrapper.appendChild(eachDataIndicatorVerticalLine);
+    columnWrapper.appendChild(paintBar);
+    if (index % 10 == 0) columnWrapper.appendChild(horizontalAxisLabel);
   
+    let isSelectingRange = false;
+    let rangeInitialColumn;
+
+    const graphMouseDownHandler = (event) => {
+      isSelectingRange = true;
+      let target = event.target;
+      while (target != document.body && !target.classList.contains('each-graph-column-wrapper')) target = target.parentNode;
+      rangeInitialColumn = target;
+    }
+
+    const graphMouseUpHandler = (event) => {
+      isSelectingRange = false;
+      rangeInitialColumn = '';
+      document.querySelectorAll('.graph-range-paint-bar').forEach(each => each.style.width = '0');
+    }
+
     const columnMouseHandler = (event) => {
-  
+
       const rect = columnWrapper.getBoundingClientRect();
       const left = event.clientX - rect.left;
       
@@ -183,15 +202,62 @@ function plotValidatorGraph(params) {
       
       if (left > columnWrapper.offsetWidth / 2) hoveredColumnWrapper = hoveredColumnWrapper.nextSibling;
 
+      columnWrapper.children[0].classList.add('each-data-point-hovered');
+      columnWrapper.children[2].classList.add('each-data-point-hovered');
       columnWrapper.children[4].classList.add('each-data-point-value-display-visible');
       columnWrapper.children[5].classList.add('each-data-delta-vertical-line-visible');
-      columnWrapper.children[6].classList.add('each-data-point-difference-display-visible');
+      columnWrapper.children[6].classList.add('each-data-indicator-vertical-line-visible');
+
+      if (index % 10 == 0) columnWrapper.children[8].classList.add('each-data-point-horizontal-label-hovered');
+
+      if (!isSelectingRange || index == Object.values(graphDataMapping).length - 1) return;
+
+      const deltaX = columnWrapper.getBoundingClientRect().width;
+
+      const { selfStakeAngle, selfStakeHypotenuse } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling);
+
+      let current = rangeInitialColumn;
+
+      let target = event.target;
+      while (!target.classList.contains('each-graph-column-wrapper')) target = target.parentNode;
+      if (target != rangeInitialColumn) {
+        while (current != target) {
+          if (!current.nextSibling) break;
+          const { selfStakeHypotenuse } = getAngleBetweenTwoPoints(current, current.nextSibling);
+
+          current.children[7].style.width = selfStakeHypotenuse + 'px';
+
+          current = current.nextSibling;
+        }
+      }
+
+      paintBar.style.width = ((left / deltaX) * selfStakeHypotenuse) + 'px';
+      paintBar.style.bottom = (selfStakeBottom - 100) + '%';
+      paintBar.style.transform = `rotateZ(${selfStakeAngle}deg) skewX(${selfStakeAngle}deg)`;
     };
 
+    let isResizing = false;
+    window.onresize = () => {
+      if (!isResizing) {
+
+        const resizingWrapper = document.createElement('div');
+        resizingWrapper.classList.add('graph-resizing-wrapper');
+        resizingWrapper.innerHTML = 'Resizing';
+        graphWrapper.appendChild(resizingWrapper);
+
+        setTimeout(() => {
+          plotValidatorGraph({ operatorAddress, graphDataMapping, currency, decimals, usd_exchange_rate });
+        }, 1000);
+        isResizing = true;
+      }
+    }
+
     const columnMouseLeaveHandler = (event) => {
+      document.querySelectorAll('.each-data-point-hovered').forEach(each => each.classList.remove('each-data-point-hovered'));
       document.querySelectorAll('.each-data-point-value-display-visible').forEach(each => each.classList.remove('each-data-point-value-display-visible'));
       document.querySelectorAll('.each-data-delta-vertical-line-visible').forEach(each => each.classList.remove('each-data-delta-vertical-line-visible'));
-      document.querySelectorAll('.each-data-point-difference-display-visible').forEach(each => each.classList.remove('each-data-point-difference-display-visible'));
+      document.querySelectorAll('.each-data-point-horizontal-label-hovered').forEach(each => each.classList.remove('each-data-point-horizontal-label-hovered'));
+      document.querySelectorAll('.each-data-indicator-vertical-line-visible').forEach(each => each.classList.remove('each-data-indicator-vertical-line-visible'));
     }
 
     columnWrapper.addEventListener('mousemove', columnMouseHandler);
@@ -199,9 +265,14 @@ function plotValidatorGraph(params) {
     columnWrapper.addEventListener('mouseleave', columnMouseLeaveHandler);
     validatorGraphEventListenersMapping[operatorAddress].push({ event: 'mouseleave', handler: columnMouseLeaveHandler, element: columnWrapper });
 
+    graphWrapper.addEventListener('mousedown', graphMouseDownHandler);
+    validatorGraphEventListenersMapping[operatorAddress].push({ event: 'mousedown', handler: graphMouseDownHandler, element: graphWrapper });
+    graphWrapper.addEventListener('mouseup', graphMouseUpHandler);
+    validatorGraphEventListenersMapping[operatorAddress].push({ event: 'mouseup', handler: graphMouseUpHandler, element: graphWrapper });
+
+
     graphWrapper.appendChild(columnWrapper);
   });
-
 
   validatorsMainWrapper.insertBefore(graphWrapper, validatorWrapper.nextSibling);
     
@@ -214,7 +285,6 @@ function plotValidatorGraph(params) {
     columns[i].children[1].style.width = `${selfStakeHypotenuse}px`;
     columns[i].children[3].style.transform = `rotateZ(${withdrawAngle}deg)`;
     columns[i].children[3].style.width = `${withdrawHypotenuse}px`;
-
   }
   
   columns[columns.length - 1].children[1].style.display = 'none';
