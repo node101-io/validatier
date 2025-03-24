@@ -72,7 +72,6 @@ function getAngleBetweenTwoPoints (column1, column2) {
 const validatorGraphEventListenersMapping = {};
 
 function plotValidatorGraph(params) {
-
   const { operatorAddress, graphDataMapping, currency, decimals, usd_exchange_rate } = params;
 
   if (document.getElementById(`validator-graph-wrapper-${operatorAddress}`)) document.getElementById(`validator-graph-wrapper-${operatorAddress}`).remove();
@@ -93,13 +92,13 @@ function plotValidatorGraph(params) {
   const minValue = Math.min(minSelfStake, minWithdraw);
   const maxValue = Math.max(maxSelfStake, maxWithdraw);
   
-  const graphWrapper = document.createElement("div");
-  graphWrapper.className = "validator-graph-wrapper";
+  const graphWrapper = document.createElement('div');
+  graphWrapper.className = 'validator-graph-wrapper';
   graphWrapper.id = `validator-graph-wrapper-${operatorAddress}`;
   
   Object.entries(graphDataMapping).forEach(([timestamp, data]) => {
-    const columnWrapper = document.createElement("div");
-    columnWrapper.className = "each-graph-column-wrapper";
+    const columnWrapper = document.createElement('div');
+    columnWrapper.className = 'each-graph-column-wrapper';
   
     const selfStakeBottom = ((data.self_stake - minValue) / (maxValue - minValue)) * 100;
     const withdrawBottom = ((data.withdraw - minValue) / (maxValue - minValue)) * 100;
@@ -108,24 +107,24 @@ function plotValidatorGraph(params) {
     horizontalAxisLabel.classList.add('horizontal-axis-label');
     horizontalAxisLabel.innerHTML = prettyDate(timestamp).split('/').slice(0, 2).join('/');
 
-    const selfStakePoint = document.createElement("div");
-    selfStakePoint.className = "each-data-point";
-    selfStakePoint.style.backgroundColor = "darkblue";
+    const selfStakePoint = document.createElement('div');
+    selfStakePoint.className = 'each-data-point';
+    selfStakePoint.style.backgroundColor = 'darkblue';
     selfStakePoint.style.bottom = `${selfStakeBottom}%`;
   
-    const selfStakeLine = document.createElement("div");
-    selfStakeLine.className = "each-data-line";
-    selfStakeLine.style.backgroundColor = "lightcoral";
+    const selfStakeLine = document.createElement('div');
+    selfStakeLine.className = 'each-data-line';
+    selfStakeLine.style.backgroundColor = 'lightcoral';
     selfStakeLine.style.bottom = `${selfStakeBottom}%`;
   
-    const withdrawPoint = document.createElement("div");
-    withdrawPoint.className = "each-data-point";
-    withdrawPoint.style.backgroundColor = "darkgreen";
+    const withdrawPoint = document.createElement('div');
+    withdrawPoint.className = 'each-data-point';
+    withdrawPoint.style.backgroundColor = 'darkgreen';
     withdrawPoint.style.bottom = `${withdrawBottom}%`;
   
-    const withdrawLine = document.createElement("div");
-    withdrawLine.className = "each-data-line";
-    withdrawLine.style.backgroundColor = "lightcoral";
+    const withdrawLine = document.createElement('div');
+    withdrawLine.className = 'each-data-line';
+    withdrawLine.style.backgroundColor = 'lightcoral';
     withdrawLine.style.bottom = `${withdrawBottom}%`;
 
     const eachDataPointValueDisplay = document.createElement('div');
@@ -239,7 +238,7 @@ function handlePlotButtonClick (socket) {
     
     const graphDataMapping = {};
 
-    const currency = document.getElementById('currency-toggle').value == 'native' ? currentChainSymbol : 'usd';
+    const currency = document.getElementById('currency-toggle').value == 'native' ? document.getElementById('network-switch-header').getAttribute('current_chain_symbol') : 'usd';
     const decimals = document.getElementById('network-switch-header').getAttribute('current_chain_decimals');
     const usd_exchange_rate = document.getElementById('network-switch-header').getAttribute('current_chain_usd_exhange_rate');
 

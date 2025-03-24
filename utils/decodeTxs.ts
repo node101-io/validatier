@@ -6,7 +6,7 @@ import { sha256 } from '@cosmjs/crypto';
 import { toHex } from '@cosmjs/encoding';
 import { getSpecificAttributeOfAnEventFromTxEventsArray } from './getSpecificAttributeOfAnEventFromTxEventsArray.js';
 import { getOnlyNativeTokenValueFromCommissionOrRewardEvent } from '../listeners/functions/getOnlyNativeTokenValueFromCommissionOrRewardEvent.js';
-import { convertOperatorAddressToBech32 } from './convertOperatorAddressToBech32.js';
+import { LISTENING_EVENTS } from '../listeners/listenForEvents.js';
 
 export interface DecodedMessage {
   time: Date;
@@ -17,15 +17,6 @@ export interface DecodedMessage {
 interface DecodedTx {
   messages: DecodedMessage[];
 }
-
-const MESSAGE_TYPES_TO_DECODE: string[] = [
-  '/cosmos.staking.v1beta1.MsgCreateValidator',
-  '/cosmos.staking.v1beta1.MsgDelegate',
-  '/cosmos.staking.v1beta1.MsgEditValidator',
-  '/cosmos.staking.v1beta1.MsgUndelegate',
-  '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
-  '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission',
-];
 
 const WITHDRAW_EVENTS = [
   '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
@@ -42,7 +33,7 @@ const decodeTransactions = (base_url: string, txs: string[], denom: string, bech
       try {
         const tx = decodeTxRaw(Buffer.from(base64tx, 'base64'));
 
-        const filteredMessages = tx.body.messages.filter((message) => MESSAGE_TYPES_TO_DECODE.includes(message.typeUrl))
+        const filteredMessages = tx.body.messages.filter((message) => LISTENING_EVENTS.includes(message.typeUrl))
         async.times(
           filteredMessages.length,
           (i, next) => {

@@ -30,7 +30,6 @@ interface ValidatorStatusModel extends Model<ValidatorStatusInterface> {
   ) => any;
 }
 
-
 const validatorStatusSchema = new Schema<ValidatorStatusInterface>({
   operator_address: {
     type: String,
@@ -52,7 +51,6 @@ const validatorStatusSchema = new Schema<ValidatorStatusInterface>({
     default: null
   }
 });
-
 
 validatorStatusSchema.statics.saveValidatorStatus = function (
   body: Parameters<ValidatorStatusModel['saveValidatorStatus']>[0],

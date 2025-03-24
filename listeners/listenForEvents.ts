@@ -5,17 +5,19 @@ import getTxsByHeight from '../utils/getTxsByHeight.js';
 import { DecodedMessage } from '../utils/decodeTxs.js';
 import { convertOperatorAddressToBech32 } from '../utils/convertOperatorAddressToBech32.js';
 
-const LISTENING_EVENTS = [
+export const LISTENING_EVENTS = [
   '/cosmos.staking.v1beta1.MsgCreateValidator',
   '/cosmos.staking.v1beta1.MsgDelegate',
   '/cosmos.staking.v1beta1.MsgEditValidator',
   '/cosmos.staking.v1beta1.MsgUndelegate',
+  '/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation',
+  '/cosmos.staking.v1beta1.MsgBeginRedelegate',
   '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
   '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission',
-  'slash',
+  'slash'
 ];
 
-export const listenForEvents = async (
+export const listenForEvents = (
   bottom_block_height: number,
   top_block_height: number,
   chain_identifier: string,
@@ -28,21 +30,37 @@ export const listenForEvents = async (
     
     const validatorMap: Record<string, any> = {};
     const compositeEventBlockMap: Record<string, any> = {};
-    for (let height = bottom_block_height; height < top_block_height; height++) {
+    for (let height = bottom_block_height; height < top_block_height; height++) 
       promises.push(
-        new Promise ((resolve, reject) => {
+        new Promise ((resolve, reject) => 
           getTxsByHeight(chain.rpc_url, height, chain.denom, chain.bech32_prefix, (err, decodedTxs) => {
             
             if (err) reject(err);
             if (!decodedTxs || decodedTxs.length <= 0) return resolve();
+            
             const flattenedDecodedTxs: DecodedMessage[] = decodedTxs.flatMap((obj: { messages: DecodedMessage }) => obj.messages);
-            if (!flattenedDecodedTxs.length) resolve();
+
             for (const eachMessage of flattenedDecodedTxs) {
               if (!LISTENING_EVENTS.includes(eachMessage.typeUrl)) continue;
-              const key = eachMessage.value.validatorAddress;
+              const key = eachMessage.value.validatorAddress ? eachMessage.value.validatorAddress : '';
 
-              if (['/cosmos.staking.v1beta1.MsgCreateValidator', '/cosmos.staking.v1beta1.MsgEditValidator'].includes(eachMessage.typeUrl)) {
-                
+              const NULL_COMPOSITE_EVENT_BLOCK = {
+                block_height: height,
+                operator_address: key,
+                denom: chain.denom,
+                self_stake: 0,
+                reward: 0,
+                total_stake: 0,
+                total_withdraw: 0,
+                timestamp: new Date(eachMessage.time).getTime()
+              }
+
+              if (
+                [
+                  '/cosmos.staking.v1beta1.MsgCreateValidator',
+                  '/cosmos.staking.v1beta1.MsgEditValidator'
+                ].includes(eachMessage.typeUrl)
+              ) {
                 if (!eachMessage.value.pubkey || !eachMessage.value.description.moniker) continue;
 
                 const pubkey: ArrayBuffer = eachMessage.value.pubkey.value;
@@ -61,34 +79,67 @@ export const listenForEvents = async (
                 };
 
                 if (eachMessage.value.value.denom && eachMessage.value.value.amount) {
-                  if (!compositeEventBlockMap[key]) compositeEventBlockMap[key] = { block_height: height, operator_address: key, denom: chain.denom, self_stake: 0, reward: 0, total_stake: 0, total_withdraw: 0, timestamp: new Date(eachMessage.time).getTime() };
+                  if (!compositeEventBlockMap[key]) 
+                    compositeEventBlockMap[key] = NULL_COMPOSITE_EVENT_BLOCK;
                   compositeEventBlockMap[key].self_stake += eachMessage.value.value.amount;
                   compositeEventBlockMap[key].total_stake += eachMessage.value.value.amount;
                 }
-              } else {
-                if (!compositeEventBlockMap[key]) compositeEventBlockMap[key] = { block_height: height, operator_address: key, denom: chain.denom, self_stake: 0, reward: 0, total_stake: 0, total_withdraw: 0, timestamp: new Date(eachMessage.time).getTime() };
+              } else if (!compositeEventBlockMap[key]) {
+                compositeEventBlockMap[key] = NULL_COMPOSITE_EVENT_BLOCK;
               }
 
-              const bech32OperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorAddress, chain.bech32_prefix);
+              const bech32OperatorAddress = eachMessage.value.validatorAddress ? convertOperatorAddressToBech32(eachMessage.value.validatorAddress, chain.bech32_prefix) : '';
 
-              if (['/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward', '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission'].includes(eachMessage.typeUrl)) {
+              if (
+                [
+                  '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
+                  '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission'
+                ].includes(eachMessage.typeUrl)
+              ) {
 
                 compositeEventBlockMap[key].total_withdraw += parseInt(eachMessage.value.amount.amount);
                 if (bech32OperatorAddress == eachMessage.value.delegatorAddress) compositeEventBlockMap[key].reward += parseInt(eachMessage.value.amount.amount);
               
-              } else if (['/cosmos.staking.v1beta1.MsgDelegate', '/cosmos.staking.v1beta1.MsgUndelegate', 'slash'].includes(eachMessage.typeUrl)) {
+              } else if (
+                [
+                  '/cosmos.staking.v1beta1.MsgDelegate',
+                  '/cosmos.staking.v1beta1.MsgUndelegate',
+                  '/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation',
+                  'slash'
+                ].includes(eachMessage.typeUrl)
+              ) {
 
                 const stakeAmount = parseInt(eachMessage.value.amount.amount);
+                const additiveTxs = ['/cosmos.staking.v1beta1.MsgDelegate', '/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation'];
 
-                compositeEventBlockMap[key].total_stake += eachMessage.typeUrl === '/cosmos.staking.v1beta1.MsgDelegate' ? stakeAmount : -stakeAmount;
-                if (bech32OperatorAddress == eachMessage.value.delegatorAddress) compositeEventBlockMap[key].self_stake += eachMessage.typeUrl === '/cosmos.staking.v1beta1.MsgDelegate' ? stakeAmount : -stakeAmount;
+                compositeEventBlockMap[key].total_stake += additiveTxs.includes(eachMessage.typeUrl) ? stakeAmount : -stakeAmount;
+                if (bech32OperatorAddress == eachMessage.value.delegatorAddress) compositeEventBlockMap[key].self_stake += additiveTxs.includes(eachMessage.typeUrl) ? stakeAmount : -stakeAmount;
+              } else if (
+                ['/cosmos.staking.v1beta1.MsgBeginRedelegate'].includes(eachMessage.typeUrl)
+              ) {
+
+                const bech32SrcOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorSrcAddress, chain.denom);
+
+                const value = parseInt(eachMessage.value.amount.amount);
+
+                if (!compositeEventBlockMap[eachMessage.value.validatorSrcAddress]) 
+                  compositeEventBlockMap[eachMessage.value.validatorSrcAddress] = NULL_COMPOSITE_EVENT_BLOCK;
+                compositeEventBlockMap[eachMessage.value.validatorSrcAddress].operator_address = eachMessage.value.validatorSrcAddress;
+                compositeEventBlockMap[eachMessage.value.validatorSrcAddress].total_stake += (value * -1);
+                if (bech32SrcOperatorAddress == eachMessage.value.delegatorAddress)
+                  compositeEventBlockMap[eachMessage.value.validatorSrcAddress].self_stake += (value * -1);
+
+
+                if (!compositeEventBlockMap[eachMessage.value.validatorDstAddress]) 
+                  compositeEventBlockMap[eachMessage.value.validatorDstAddress] = NULL_COMPOSITE_EVENT_BLOCK;
+                compositeEventBlockMap[eachMessage.value.validatorDstAddress].operator_address = eachMessage.value.validatorSrcAddress;
+                compositeEventBlockMap[eachMessage.value.validatorSrcAddress].total_stake += value;
               }
             }
             resolve();
-          });
-        })
+          })
+        )
       );
-    }
     
     Promise.allSettled(promises)
       .then(values => {
@@ -113,7 +164,6 @@ export const listenForEvents = async (
             })
           })
         })
-      })
-    })
-  
+      });
+  });
 };

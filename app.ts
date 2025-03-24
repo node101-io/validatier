@@ -58,4 +58,9 @@ app.listen(PORT, () => {
   console.log(`Server running at PORT ${PORT}`);
   handleSocketIoConnection(io);
   // startFetchingData();
+  getTxsByHeight('5.9.86.153:26657', 24969875, 'uatom', 'cosmos', (err, decodedTxs) => {
+    decodedTxs.forEach((each: any) => {
+      console.log(each.messages)
+    })
+  })
 })
