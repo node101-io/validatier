@@ -1,12 +1,19 @@
 import async from 'async';
-import { request } from 'undici';
 import { decodeTxRaw, Registry } from '@cosmjs/proto-signing';
 import { defaultRegistryTypes } from '@cosmjs/stargate';
-import { sha256 } from '@cosmjs/crypto';
-import { toHex } from '@cosmjs/encoding';
 import { getSpecificAttributeOfAnEventFromTxEventsArray } from './getSpecificAttributeOfAnEventFromTxEventsArray.js';
 import { getOnlyNativeTokenValueFromCommissionOrRewardEvent } from '../listeners/functions/getOnlyNativeTokenValueFromCommissionOrRewardEvent.js';
 import { LISTENING_EVENTS } from '../listeners/listenForEvents.js';
+
+export interface EventAttribute { 
+  key: string; 
+  value: string; 
+  index: boolean 
+};
+export interface Event { 
+  type: string, 
+  attributes: EventAttribute[] 
+};
 
 export interface DecodedMessage {
   time: Date;
@@ -25,58 +32,45 @@ const WITHDRAW_EVENTS = [
 
 const registry = new Registry(defaultRegistryTypes);
 
-const decodeTransactions = (base_url: string, txs: string[], denom: string, bech32_prefix: string, time: Date, callback: (err: string | null, result?: DecodedTx[]) => any) => {
-  async.map(
-    txs,
-    (base64tx: string, cb: (err: string | null, result?: DecodedTx) => void) => {
-      const messages: DecodedMessage[] = [];
-      try {
-        const tx = decodeTxRaw(Buffer.from(base64tx, 'base64'));
+const decodeTransactions = (txs: string[], events: Event[][], denom: string, time: Date) => {
 
-        const filteredMessages = tx.body.messages.filter((message) => LISTENING_EVENTS.includes(message.typeUrl))
-        async.times(
-          filteredMessages.length,
-          (i, next) => {
-            const message = filteredMessages[i];
+  const decodedTxs = [];
+  
+  for (let i = 0; i < txs.length; i++) {
+    const base64tx = txs[i];
 
-            if (!WITHDRAW_EVENTS.includes(message.typeUrl)) {
-              messages.push({ time: time, typeUrl: message.typeUrl, value: registry.decode(message) });
-              return next();
-            };
+    const messages = [];
 
-            const sha256v = sha256(Buffer.from(base64tx ,'base64'));
-            const txHash = toHex(sha256v);
-            request(`http://${base_url}/tx?hash=0x${txHash.toUpperCase().trim()}`)
-              .then(response => response.body.json())
-              .then((data: any) => {
-                const events = data.result.tx_result.events;
-                
-                const specificAttributeValue = getSpecificAttributeOfAnEventFromTxEventsArray(events, ['withdraw_rewards', 'withdraw_commission'], 'amount');
-                if (!specificAttributeValue) return next();
-                
-                const nativeRewardOrCommissionValue = getOnlyNativeTokenValueFromCommissionOrRewardEvent(specificAttributeValue, denom);
-                const decodedMessage = registry.decode(message);
-                
-                decodedMessage.amount = { denom: denom, amount: nativeRewardOrCommissionValue };
-                messages.push({ time: time, typeUrl: message.typeUrl, value: decodedMessage });
-                
-                return next();
-              })
-              .catch((err) => console.log(err));
-            },
-            (err) => cb(null, { messages })
-          )
-        } catch (err) {
-          if (err) return cb(null, { messages })
-        }
-      },
-      (err, decodedTxs) => {
-        if (err) return callback(err);
+    try {
+      const tx = decodeTxRaw(Buffer.from(base64tx, 'base64'));
+      const filteredMessages = tx.body.messages.filter((message) => LISTENING_EVENTS.includes(message.typeUrl));
       
-        const filteredTxs: DecodedTx[] = (decodedTxs || []).filter((tx): tx is DecodedTx => tx !== undefined && tx.messages.length > 0);
-        callback(null, filteredTxs);
+      for (let j = 0; j < filteredMessages.length; j++) {
+        const message = filteredMessages[j];
+        
+        if (!WITHDRAW_EVENTS.includes(message.typeUrl)) {
+          messages.push({ time: time, typeUrl: message.typeUrl, value: registry.decode(message) });
+          continue;
+        }
+        
+        const nativeRewardOrCommissionValue = getSpecificAttributeOfAnEventFromTxEventsArray(events[i], ['withdraw_rewards', 'withdraw_commission'], 'amount', denom);
+        if (!nativeRewardOrCommissionValue) continue;
+        
+        const decodedMessage = registry.decode(message);
+        
+        decodedMessage.amount = { denom: denom, amount: nativeRewardOrCommissionValue };
+        messages.push({ time: time, typeUrl: message.typeUrl, value: decodedMessage });
       }
-    );
+      
+      decodedTxs.push({ messages });
+    } catch (err) {
+      console.log(err)
+      decodedTxs.push({ messages });
+    }
+  }
+  
+  const filteredTxs = decodedTxs.filter((tx) => tx.messages.length > 0);
+  return filteredTxs;
 };
 
 export default decodeTransactions;

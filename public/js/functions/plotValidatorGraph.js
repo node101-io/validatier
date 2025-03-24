@@ -1,5 +1,5 @@
 
-const PERIOD_INVERVAL = 50;
+const PERIOD_INVERVAL = 25;
 
 function prettyDate(timestamp) {
   const date = new Date(parseInt(timestamp));

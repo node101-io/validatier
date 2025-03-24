@@ -5,7 +5,7 @@ export const getOnlyNativeTokenValueFromCommissionOrRewardEvent = function (valu
 
   for (let i = 0; i < splitString.length; i++) {
     const eachWithdrawChunk: string = splitString[i];
-    
+
     if (!eachWithdrawChunk.includes(denom)) continue;
 
     const nativeTokenAmount: string = eachWithdrawChunk.replace(denom, '');

@@ -1,15 +1,11 @@
 
-interface EventInterface {
-  type: string;
-  attributes: {
-    key: string;
-    value: string;
-    index: boolean;
-  }[];
-}
+import { getOnlyNativeTokenValueFromCommissionOrRewardEvent } from '../listeners/functions/getOnlyNativeTokenValueFromCommissionOrRewardEvent.js';
+import { Event } from './decodeTxs.js';
 
-export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: EventInterface[], specificEventTypes: string[], specificAttributeKey: string): string | null {
+export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: Event[], specificEventTypes: string[], specificAttributeKey: string, denom: string): string {
   
+  let total = 0;
+
   for (let i = 0; i < events.length; i++) {
     const eachEvent = events[i];
 
@@ -18,11 +14,22 @@ export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: 
     const attributes = eachEvent.attributes;
     
     for (let j = 0; j < attributes.length; j++) {
+
       const eachAttribute: {key: string, value: string} = attributes[j];
 
-      if (eachAttribute.key == specificAttributeKey) return eachAttribute.value; ;
-      if (atob(eachAttribute.key) == specificAttributeKey) return atob(eachAttribute.value);
+      let nativeTokenValue = 0;
+
+      try {
+        if (eachAttribute.key == specificAttributeKey) nativeTokenValue = parseInt(getOnlyNativeTokenValueFromCommissionOrRewardEvent(eachAttribute.value, denom) ?? '0');
+        else if (atob(eachAttribute.key) == specificAttributeKey) nativeTokenValue = parseInt(getOnlyNativeTokenValueFromCommissionOrRewardEvent(atob(eachAttribute.value), denom) ?? '0');
+        else continue;
+  
+        total += nativeTokenValue;
+      } catch (err) {
+        continue;
+      }
     }
   };
-  return null;
+
+  return total.toString();
 }

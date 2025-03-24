@@ -1073,7 +1073,7 @@
 
 .validator-graph-wrapper {
   width: calc(100% - 50px);
-  height: 300px;
+  height: 500px;
   display: flex;
   gap: 0;
   margin: 50px;
