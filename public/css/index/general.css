@@ -12,6 +12,8 @@
   --color-table-header-popup: rgba(209, 209, 209, 1);
   --pointer-default-dark: url('/res/pointers/default-dark.svg') 4 0, auto;
   --pointer-hand-dark: url('/res/pointers/hand-dark.svg') 6 0, auto;
+  --pointer-hand-drag-dark: url('/res/pointers/hand-drag-dark.svg') 6 0, auto;
+  --pointer-hand-click-dark: url('/res/pointers/hand-click-dark.svg') 6 0, auto;
 
   --website-main-font-size: 16px;
   --website-main-font-family: 'Darker Grotesque';

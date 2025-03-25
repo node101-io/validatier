@@ -1081,6 +1081,11 @@
   transition: all 1s ease-in-out 0s;
   overflow: hidden;
   padding: 50px 100px;
+  cursor: var(--pointer-hand-click-dark);
+}
+
+.validator-graph-wrapper:active {
+  cursor: var(--pointer-hand-drag-dark);;
 }
 
 .each-graph-column-wrapper {
@@ -1263,11 +1268,20 @@
   position: absolute;
   width: 0px;
   height: 100%;
-  left: 0;
-  transform-origin: top left;
   bottom: 0;
   opacity: 0.75;
 }
+
+.graph-range-paint-bar-left {
+  left: 0 !important;
+  transform-origin: top left !important;
+}
+
+.graph-range-paint-bar-right {
+  right: 0 !important;
+  transform-origin: top right !important;
+}
+
 
 .each-data-indicator-vertical-line {
   width: 0;

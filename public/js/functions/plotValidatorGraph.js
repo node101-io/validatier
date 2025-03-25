@@ -1,5 +1,5 @@
 
-const PERIOD_INVERVAL = 100;
+const PERIOD_INVERVAL = 51;
 
 function prettyDate(timestamp) {
   const date = new Date(parseInt(timestamp));
@@ -159,6 +159,7 @@ function plotValidatorGraph(params) {
   let isSelectingRange = false;
   let rangeInitialColumn;
   let rangeFinalColumn;
+  let isSelectionDirectionToLeft = false;
 
   const graphMouseDownHandler = (event) => {
     rangeInitialColumn = '';
@@ -181,20 +182,36 @@ function plotValidatorGraph(params) {
       document.querySelectorAll('.each-data-indicator-vertical-line-visible').forEach(each => each.classList.remove('each-data-indicator-vertical-line-visible'));
       document.querySelectorAll('.range-edges-indicator').forEach(each => each.classList.remove('range-edges-indicator'));
     } else {
-      const deltaSelfStake = rangeFinalColumn.getAttribute('self_stake') - rangeInitialColumn.getAttribute('self_stake');
-      const deltaWithdraw = rangeFinalColumn.getAttribute('withdraw') - rangeInitialColumn.getAttribute('withdraw');
+      const deltaSelfStake = !isSelectionDirectionToLeft 
+        ? rangeFinalColumn.getAttribute('self_stake') - rangeInitialColumn.getAttribute('self_stake') 
+        : rangeInitialColumn.getAttribute('self_stake') - rangeFinalColumn.getAttribute('self_stake');
       
-      const initialTimestamp = rangeInitialColumn.getAttribute('timestamp');
-      const timestamp = rangeFinalColumn.getAttribute('timestamp');
+      const deltaWithdraw = !isSelectionDirectionToLeft 
+        ? rangeFinalColumn.getAttribute('withdraw') - rangeInitialColumn.getAttribute('withdraw') 
+        : rangeInitialColumn.getAttribute('withdraw') - rangeFinalColumn.getAttribute('withdraw');
+      
 
-      rangeFinalColumn.nextSibling.children[7].style.width = '0px';
-      rangeFinalColumn.nextSibling.children[8].style.width = '0px';
+      const initialTimestamp = !isSelectionDirectionToLeft ? rangeInitialColumn.getAttribute('timestamp') : rangeFinalColumn.getAttribute('timestamp');
+      const timestamp = !isSelectionDirectionToLeft ? rangeFinalColumn.getAttribute('timestamp') : rangeInitialColumn.getAttribute('timestamp');
+
+      if (!isSelectionDirectionToLeft) {
+        rangeFinalColumn.nextSibling.children[7].style.width = '0px';
+        rangeFinalColumn.nextSibling.children[8].style.width = '0px';
+
+        rangeFinalColumn.nextSibling.children[6].classList.add('each-data-indicator-vertical-line-visible');
+        rangeFinalColumn.nextSibling.children[6].classList.add('range-edges-indicator');  
+      } else {
+        rangeInitialColumn.children[7].style.width = '0px';
+        rangeInitialColumn.children[8].style.width = '0px';
+        rangeFinalColumn.previousSibling.children[7].style.width = '0px';
+        rangeFinalColumn.previousSibling.children[8].style.width = '0px';
+
+        rangeFinalColumn.children[6].classList.add('each-data-indicator-vertical-line-visible');
+        rangeFinalColumn.children[6].classList.add('range-edges-indicator');  
+      }
 
       rangeInitialColumn.children[6].classList.add('each-data-indicator-vertical-line-visible');
       rangeInitialColumn.children[6].classList.add('range-edges-indicator');
-
-      rangeFinalColumn.nextSibling.children[6].classList.add('each-data-indicator-vertical-line-visible');
-      rangeFinalColumn.nextSibling.children[6].classList.add('range-edges-indicator');
     
       const dataPointValueDisplay = generatePointValueDisplay({
         self_stake: deltaSelfStake,
@@ -260,6 +277,7 @@ function plotValidatorGraph(params) {
 
       const rect = columnWrapper.getBoundingClientRect();
       const left = event.clientX - rect.left;
+      const right = rect.right - event.clientX;
       
       let hoveredColumnWrapper = columnWrapper;
       
@@ -283,17 +301,64 @@ function plotValidatorGraph(params) {
       while (!target.classList.contains('each-graph-column-wrapper')) target = target.parentNode;
       if (target != rangeInitialColumn) {
         while (current != target) {
-          if (!current.nextSibling) break;
+
+          let selfStakeBottom;
+          let withdrawBottom;
+
+          if (target.getAttribute('timestamp') < rangeInitialColumn.getAttribute('timestamp')) {
+
+            isSelectionDirectionToLeft = true;
+
+            if (!current.previousSibling) break;
+
+            rangeInitialColumn.children[7].style.width = '0px';
+            rangeInitialColumn.children[8].style.width = '0px';
+            let targetPrevious = target.previousSibling;
+            
+            while(targetPrevious) {
+              if (targetPrevious.children[7]) targetPrevious.children[7].style.width = '0px';
+              if (targetPrevious.children[8]) targetPrevious.children[8].style.width = '0px';
+              targetPrevious = targetPrevious.previousSibling;
+            }
+            
+            current.children[7].classList.add('graph-range-paint-bar-right');
+            current.children[7].classList.remove('graph-range-paint-bar-left');
+
+            current.children[8].classList.add('graph-range-paint-bar-right');
+            current.children[8].classList.remove('graph-range-paint-bar-left');
+
+            selfStakeBottom = ((current.nextSibling.getAttribute('self_stake') - minValue) / (maxValue - minValue)) * 100;
+            withdrawBottom = ((current.nextSibling.getAttribute('withdraw') - minValue) / (maxValue - minValue)) * 100;
+          } else {
+
+            isSelectionDirectionToLeft = false;
+
+            if (!current.nextSibling) break;
+
+            let targetNext = target.nextSibling;
+            while(targetNext) {
+              targetNext.children[7].style.width = '0px';
+              targetNext.children[8].style.width = '0px';
+              targetNext = targetNext.nextSibling;
+            }
+
+            current.children[7].classList.add('graph-range-paint-bar-left');
+            current.children[7].classList.remove('graph-range-paint-bar-right');
+
+            current.children[8].classList.add('graph-range-paint-bar-left');
+            current.children[8].classList.remove('graph-range-paint-bar-right');
+
+            selfStakeBottom = ((current.getAttribute('self_stake') - minValue) / (maxValue - minValue)) * 100;
+            withdrawBottom = ((current.getAttribute('withdraw') - minValue) / (maxValue - minValue)) * 100;
+          }
           
           const { selfStakeHypotenuse, selfStakeAngle, withdrawHypotenuse, withdrawAngle } = getAngleBetweenTwoPoints(current, current.nextSibling);
 
-          const selfStakeBottom = ((current.getAttribute('self_stake') - minValue) / (maxValue - minValue)) * 100;
           current.children[7].style.width = selfStakeHypotenuse + 'px';
           current.children[7].style.bottom = (selfStakeBottom - 100) + '%';
           current.children[7].style.transform = `rotateZ(${selfStakeAngle}deg) skewX(${selfStakeAngle}deg)`;
           current.children[7].style.backgroundColor = 'lightgreen';
 
-          const withdrawBottom = ((current.getAttribute('withdraw') - minValue) / (maxValue - minValue)) * 100;
           current.children[8].style.width = withdrawHypotenuse + 'px';
           current.children[8].style.bottom = (withdrawBottom - 100) + '%';
           current.children[8].style.transform = `rotateZ(${withdrawAngle}deg) skewX(${withdrawAngle}deg)`;
@@ -308,19 +373,52 @@ function plotValidatorGraph(params) {
           }
 
           rangeFinalColumn = current;
-          current = current.nextSibling;
+          if (target.getAttribute('timestamp') < rangeInitialColumn.getAttribute('timestamp')) current = current.previousSibling;
+          else current = current.nextSibling;
         }
       }
 
-      const { selfStakeHypotenuse, selfStakeAngle, withdrawHypotenuse, withdrawAngle } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling);
+      const { selfStakeAngle, withdrawAngle } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling);
 
-      paintBarSelfStake.style.width = ((left / deltaX) * selfStakeHypotenuse) + 'px';
-      paintBarSelfStake.style.bottom = (selfStakeBottom - 100) + '%';
+      if (target.getAttribute('timestamp') < rangeInitialColumn.getAttribute('timestamp')) {
+
+        isSelectionDirectionToLeft = true;
+
+        const { selfStakeHypotenuse, withdrawHypotenuse } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling);
+
+        const selfStakeBottom = ((Object.values(graphDataMapping)[index + 1].self_stake - minValue) / (maxValue - minValue)) * 100;
+        const withdrawBottom = ((Object.values(graphDataMapping)[index + 1].withdraw - minValue) / (maxValue - minValue)) * 100;    
+
+        paintBarSelfStake.classList.add('graph-range-paint-bar-right');
+        paintBarSelfStake.classList.remove('graph-range-paint-bar-left');
+
+        paintBarWithdraw.classList.add('graph-range-paint-bar-right');
+        paintBarWithdraw.classList.remove('graph-range-paint-bar-left');
+        
+        paintBarSelfStake.style.width = ((right / deltaX) * selfStakeHypotenuse) + 'px';
+        paintBarSelfStake.style.bottom = (selfStakeBottom - 100) + '%';
+        paintBarWithdraw.style.width = ((right / deltaX) * withdrawHypotenuse) + 'px';
+        paintBarWithdraw.style.bottom = (withdrawBottom - 100) + '%';
+      } else {
+
+        isSelectionDirectionToLeft = false;
+        
+        const { selfStakeHypotenuse, withdrawHypotenuse } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling);
+
+        paintBarSelfStake.classList.add('graph-range-paint-bar-left');
+        paintBarSelfStake.classList.remove('graph-range-paint-bar-right');
+
+        paintBarWithdraw.classList.add('graph-range-paint-bar-left');
+        paintBarWithdraw.classList.remove('graph-range-paint-bar-right');
+
+        paintBarSelfStake.style.width = ((left / deltaX) * selfStakeHypotenuse) + 'px';
+        paintBarSelfStake.style.bottom = (selfStakeBottom - 100) + '%';
+        paintBarWithdraw.style.width = ((left / deltaX) * withdrawHypotenuse) + 'px';
+        paintBarWithdraw.style.bottom = (withdrawBottom - 100) + '%';
+      }
       paintBarSelfStake.style.transform = `rotateZ(${selfStakeAngle}deg) skewX(${selfStakeAngle}deg)`;
       paintBarSelfStake.style.backgroundColor = 'lightgreen';
 
-      paintBarWithdraw.style.width = ((left / deltaX) * withdrawHypotenuse) + 'px';
-      paintBarWithdraw.style.bottom = (withdrawBottom - 100) + '%';
       paintBarWithdraw.style.transform = `rotateZ(${withdrawAngle}deg) skewX(${withdrawAngle}deg)`;
       paintBarWithdraw.style.backgroundColor = 'lightcoral'
     };
