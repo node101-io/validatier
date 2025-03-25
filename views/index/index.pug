@@ -41,7 +41,7 @@ block content
               input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search name / operator address')
           .table-filters-subgroup 
             .currency-switch-wrapper
-              .each-currency-switch-label#currency-switch-current-chain-symbol #{selectedChain.symbol}
+              .each-currency-switch-label#currency-switch-current-chain-symbol #{selectedChain.symbol ? selectedChain.symbol : 'ATOM'}
               .switch
                 input(type='checkbox' id='currency-toggle' class='switch-checkbox' value=`${currency_type ? currency_type : 'native'}` checked=(currency_type === 'usd'))
                 label(for='currency-toggle', class='switch-label')
@@ -191,12 +191,13 @@ block content
                   if (currency.toLowerCase().trim() != 'usd') return `${shortNumberFormat(value / (10 ** decimals))} ${currency}`
                   return `${shortNumberFormat((value / (10 ** decimals)) * exchangeRate)} $`
                 }
-              div.validator-each-numeric-info(native=`${getValue(validator.total_stake, selectedChain.symbol)}` usd=`${getValue(validator.total_stake, 'usd')}`)= currency_type == 'native' ? getValue(validator.total_stake, selectedChain.symbol) : getValue(validator.total_stake, 'usd')
-              div.validator-each-numeric-info(native=`${getValue(validator.total_withdraw, selectedChain.symbol)}` usd=`${getValue(validator.total_withdraw, 'usd')}`)= currency_type == 'native' ? getValue(validator.total_withdraw, selectedChain.symbol) : getValue(validator.total_withdraw, 'usd')
-              div.validator-each-numeric-info(native=`${getValue(validator.self_stake, selectedChain.symbol)}` usd=`${getValue(validator.self_stake, 'usd')}`)= currency_type == 'native' ? getValue(validator.self_stake, selectedChain.symbol) : getValue(validator.self_stake, 'usd')
-              div.validator-each-numeric-info(native=`${getValue(validator.withdraw, selectedChain.symbol)}` usd=`${getValue(validator.withdraw, 'usd')}`)= currency_type == 'native' ? getValue(validator.withdraw, selectedChain.symbol) : getValue(validator.withdraw, 'usd')
+              - const symbol = selectedChain.symbol ? selectedChain.symbol : 'ATOM'
+              div.validator-each-numeric-info(native=`${getValue(validator.total_stake, symbol)}` usd=`${getValue(validator.total_stake, 'usd')}`)= currency_type == 'native' ? getValue(validator.total_stake, symbol) : getValue(validator.total_stake, 'usd')
+              div.validator-each-numeric-info(native=`${getValue(validator.total_withdraw, symbol)}` usd=`${getValue(validator.total_withdraw, 'usd')}`)= currency_type == 'native' ? getValue(validator.total_withdraw, symbol) : getValue(validator.total_withdraw, 'usd')
+              div.validator-each-numeric-info(native=`${getValue(validator.self_stake, symbol)}` usd=`${getValue(validator.self_stake, 'usd')}`)= currency_type == 'native' ? getValue(validator.self_stake, symbol) : getValue(validator.self_stake, 'usd')
+              div.validator-each-numeric-info(native=`${getValue(validator.withdraw, symbol)}` usd=`${getValue(validator.withdraw, 'usd')}`)= currency_type == 'native' ? getValue(validator.withdraw, symbol) : getValue(validator.withdraw, 'usd')
               div.validator-each-numeric-info(class='validator-ratio')= shortNumberFormat(validator.ratio)
-              div.validator-each-numeric-info(native=`${getValue(validator.sold, selectedChain.symbol)}` usd=`${getValue(validator.sold, 'usd')}`)= currency_type == 'native' ? getValue(validator.sold, selectedChain.symbol) : getValue(validator.sold, 'usd')
+              div.validator-each-numeric-info(native=`${getValue(validator.sold, symbol)}` usd=`${getValue(validator.sold, 'usd')}`)= currency_type == 'native' ? getValue(validator.sold, symbol) : getValue(validator.sold, 'usd')
             .each-validator-wrapper-seperator-line
     .footer-main-wrapper(class='center')
       .footer-main-title Connect us 
