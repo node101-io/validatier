@@ -80,7 +80,7 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
                 } else {
                   const pubkeysOfActiveValidators = activeValidatorsData.map((v: any) => v.pub_key.value) || [];           
                   ActiveValidators.saveActiveValidators({
-                    chain_identifier: chain_identifier,
+                    chain_identifier: chain.name,
                     month: month,
                     year: year,
                     active_validators_pubkeys_array: pubkeysOfActiveValidators

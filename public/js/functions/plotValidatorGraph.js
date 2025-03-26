@@ -1,6 +1,4 @@
 
-const PERIOD_INVERVAL = 51;
-
 function prettyDate(timestamp) {
   const date = new Date(parseInt(timestamp));
   
@@ -67,29 +65,24 @@ function generateLegendLine (data, label, color, currency, usd_exchange_rate, de
   return eachDataPointValueDisplayLine;
 }
 
-function getAngleBetweenTwoPoints (column1, column2) {
+function getAngleBetweenTwoPoints (column1, column2, operatorAddress) {
 
-  const selfStakeDeltaX = column1.getBoundingClientRect().width;
+  const deltaX = `--graph-column-width-${operatorAddress}`;
   const selfStakeDeltaY = column2.children[0].getBoundingClientRect().bottom - column1.children[0].getBoundingClientRect().bottom;
 
-  const selfStakeHypotenuse = Math.sqrt((selfStakeDeltaX ** 2) + (selfStakeDeltaY ** 2));
-  const selfStakeAngle = Math.atan(selfStakeDeltaY / selfStakeDeltaX) * (180 / Math.PI);
+  const selfStakeHypotenuse = `calc(1px * sqrt(var(${deltaX}) * var(${deltaX}) + ${selfStakeDeltaY ** 2}))`;
+  const selfStakeAngle = `atan(${selfStakeDeltaY} / var(${deltaX}))`;
 
-  const withdrawDeltaX = column1.getBoundingClientRect().width;
   const withdrawDeltaY = column2.children[2].getBoundingClientRect().bottom - column1.children[2].getBoundingClientRect().bottom;
-
-  const withdrawHypotenuse = Math.sqrt((withdrawDeltaX ** 2) + (withdrawDeltaY ** 2));
-  const withdrawAngle = Math.atan(withdrawDeltaY / withdrawDeltaX) * (180 / Math.PI);
+  
+  const withdrawHypotenuse = `calc(1px * sqrt(var(${deltaX}) * var(${deltaX}) + ${withdrawDeltaY ** 2}))`;
+  const withdrawAngle = `atan(${withdrawDeltaY} / var(${deltaX}))`;
 
   return {
     selfStakeHypotenuse,
     selfStakeAngle,
     withdrawHypotenuse,
-    withdrawAngle,
-    selfStakeDeltaX,
-    selfStakeDeltaY,
-    withdrawDeltaX,
-    withdrawDeltaY
+    withdrawAngle
   };
 }
 
@@ -150,6 +143,7 @@ function plotValidatorGraph(params) {
   const graphWrapper = document.createElement('div');
   graphWrapper.className = 'validator-graph-wrapper';
   graphWrapper.id = `validator-graph-wrapper-${operatorAddress}`;
+  graphWrapper.setAttribute('operator_address', operatorAddress);
 
   const graphWrapperHorizontalLabelsBackgroundAbsolute = document.createElement('div');
   graphWrapperHorizontalLabelsBackgroundAbsolute.classList.add('graph-wrapper-horizontal-labels-background-absolute')
@@ -352,16 +346,16 @@ function plotValidatorGraph(params) {
             withdrawBottom = ((current.getAttribute('withdraw') - minValue) / (maxValue - minValue)) * 100;
           }
           
-          const { selfStakeHypotenuse, selfStakeAngle, withdrawHypotenuse, withdrawAngle } = getAngleBetweenTwoPoints(current, current.nextSibling);
+          const { selfStakeHypotenuse, selfStakeAngle, withdrawHypotenuse, withdrawAngle } = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress);
 
-          current.children[7].style.width = selfStakeHypotenuse + 'px';
+          current.children[7].style.width = selfStakeHypotenuse;
           current.children[7].style.bottom = (selfStakeBottom - 100) + '%';
-          current.children[7].style.transform = `rotateZ(${selfStakeAngle}deg) skewX(${selfStakeAngle}deg)`;
+          current.children[7].style.transform = `rotateZ(${selfStakeAngle}) skewX(${selfStakeAngle})`;
           current.children[7].style.backgroundColor = 'lightgreen';
 
-          current.children[8].style.width = withdrawHypotenuse + 'px';
+          current.children[8].style.width = withdrawHypotenuse;
           current.children[8].style.bottom = (withdrawBottom - 100) + '%';
-          current.children[8].style.transform = `rotateZ(${withdrawAngle}deg) skewX(${withdrawAngle}deg)`;
+          current.children[8].style.transform = `rotateZ(${withdrawAngle}) skewX(${withdrawAngle})`;
           current.children[8].style.backgroundColor = 'lightcoral';
           
           if (current.getAttribute('self_stake') > current.getAttribute('withdraw')) {
@@ -378,13 +372,13 @@ function plotValidatorGraph(params) {
         }
       }
 
-      const { selfStakeAngle, withdrawAngle } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling);
+      const { selfStakeAngle, withdrawAngle } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling, operatorAddress);
 
       if (target.getAttribute('timestamp') < rangeInitialColumn.getAttribute('timestamp')) {
 
         isSelectionDirectionToLeft = true;
 
-        const { selfStakeHypotenuse, withdrawHypotenuse } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling);
+        const { selfStakeHypotenuse, withdrawHypotenuse } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling, operatorAddress);
 
         const selfStakeBottom = ((Object.values(graphDataMapping)[index + 1].self_stake - minValue) / (maxValue - minValue)) * 100;
         const withdrawBottom = ((Object.values(graphDataMapping)[index + 1].withdraw - minValue) / (maxValue - minValue)) * 100;    
@@ -395,15 +389,15 @@ function plotValidatorGraph(params) {
         paintBarWithdraw.classList.add('graph-range-paint-bar-right');
         paintBarWithdraw.classList.remove('graph-range-paint-bar-left');
         
-        paintBarSelfStake.style.width = ((right / deltaX) * selfStakeHypotenuse) + 'px';
+        paintBarSelfStake.style.width = `calc((${right / deltaX}) * ${selfStakeHypotenuse.replace('calc', '')})`;
         paintBarSelfStake.style.bottom = (selfStakeBottom - 100) + '%';
-        paintBarWithdraw.style.width = ((right / deltaX) * withdrawHypotenuse) + 'px';
+        paintBarWithdraw.style.width = `calc((${right / deltaX}) * ${withdrawHypotenuse.replace('calc', '')})`;
         paintBarWithdraw.style.bottom = (withdrawBottom - 100) + '%';
       } else {
 
         isSelectionDirectionToLeft = false;
         
-        const { selfStakeHypotenuse, withdrawHypotenuse } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling);
+        const { selfStakeHypotenuse, withdrawHypotenuse } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling, operatorAddress);
 
         paintBarSelfStake.classList.add('graph-range-paint-bar-left');
         paintBarSelfStake.classList.remove('graph-range-paint-bar-right');
@@ -411,33 +405,17 @@ function plotValidatorGraph(params) {
         paintBarWithdraw.classList.add('graph-range-paint-bar-left');
         paintBarWithdraw.classList.remove('graph-range-paint-bar-right');
 
-        paintBarSelfStake.style.width = ((left / deltaX) * selfStakeHypotenuse) + 'px';
+        paintBarSelfStake.style.width = `calc((${left / deltaX}) * ${selfStakeHypotenuse.replace('calc', '')})`;
         paintBarSelfStake.style.bottom = (selfStakeBottom - 100) + '%';
-        paintBarWithdraw.style.width = ((left / deltaX) * withdrawHypotenuse) + 'px';
+        paintBarWithdraw.style.width = `calc((${left / deltaX}) * ${withdrawHypotenuse.replace('calc', '')})`;
         paintBarWithdraw.style.bottom = (withdrawBottom - 100) + '%';
       }
-      paintBarSelfStake.style.transform = `rotateZ(${selfStakeAngle}deg) skewX(${selfStakeAngle}deg)`;
+      paintBarSelfStake.style.transform = `rotateZ(${selfStakeAngle}) skewX(${selfStakeAngle})`;
       paintBarSelfStake.style.backgroundColor = 'lightgreen';
 
-      paintBarWithdraw.style.transform = `rotateZ(${withdrawAngle}deg) skewX(${withdrawAngle}deg)`;
+      paintBarWithdraw.style.transform = `rotateZ(${withdrawAngle}) skewX(${withdrawAngle})`;
       paintBarWithdraw.style.backgroundColor = 'lightcoral'
     };
-
-    let isResizing = false;
-    window.onresize = () => {
-      if (!isResizing) {
-
-        const resizingWrapper = document.createElement('div');
-        resizingWrapper.classList.add('graph-resizing-wrapper');
-        resizingWrapper.innerHTML = 'Resizing';
-        graphWrapper.appendChild(resizingWrapper);
-
-        setTimeout(() => {
-          plotValidatorGraph({ operatorAddress, graphDataMapping, currency, decimals, usd_exchange_rate });
-        }, 1000);
-        isResizing = true;
-      }
-    }
 
     const columnMouseLeaveHandler = (event) => {
       document.querySelectorAll('.each-data-point-hovered').forEach(each => each.classList.remove('each-data-point-hovered'));
@@ -458,16 +436,21 @@ function plotValidatorGraph(params) {
   validatorsMainWrapper.insertBefore(graphWrapper, validatorWrapper.nextSibling);
     
   const columns = document.querySelectorAll('.each-graph-column-wrapper');
+  document.documentElement.style.setProperty(
+    `--graph-column-width-${operatorAddress}`,
+    columns[0].getBoundingClientRect().width
+  );
+
   for (let i = 0; i < columns.length - 1; i++) {
     
-    const { selfStakeAngle, selfStakeHypotenuse, withdrawAngle, withdrawHypotenuse } = getAngleBetweenTwoPoints(columns[i], columns[i + 1]);
+    const { selfStakeAngle, selfStakeHypotenuse, withdrawAngle, withdrawHypotenuse } = getAngleBetweenTwoPoints(columns[i], columns[i + 1], operatorAddress);
     
-    columns[i].children[1].style.transform = `rotateZ(${selfStakeAngle}deg)`;
-    columns[i].children[1].style.width = `${selfStakeHypotenuse}px`;
+    columns[i].children[1].style.transform = `rotateZ(${selfStakeAngle})`;
+    columns[i].children[1].style.width = `${selfStakeHypotenuse}`;
     columns[i].children[1].setAttribute('self_stake_hypotenuse', selfStakeHypotenuse);
 
-    columns[i].children[3].style.transform = `rotateZ(${withdrawAngle}deg)`;
-    columns[i].children[3].style.width = `${withdrawHypotenuse}px`;
+    columns[i].children[3].style.transform = `rotateZ(${withdrawAngle})`;
+    columns[i].children[3].style.width = `${withdrawHypotenuse}`;
     columns[i].children[3].setAttribute('withdraw_hypotenuse', withdrawHypotenuse);
   }
   
@@ -475,7 +458,7 @@ function plotValidatorGraph(params) {
   columns[columns.length - 1].children[3].style.display = 'none';
 }
 
-function handlePlotButtonClick (socket) {
+function handlePlotButtonClick () {
   document.addEventListener('click', async (event) => {
     if (!event.target.classList.contains('validator-plot-graph-button')) return;
 
@@ -484,52 +467,66 @@ function handlePlotButtonClick (socket) {
 
     const operatorAddress = event.target.getAttribute('operator-address');
     const bottomTimestamp = Math.floor(new Date(bottomDate).getTime());
-    const topTimestamp = Math.floor(new Date(topDate).getTime());
-
-
-    let iter = bottomTimestamp;
-    const step = (topTimestamp - bottomTimestamp) / PERIOD_INVERVAL;
-    
+    const topTimestamp = Math.floor(new Date(topDate).getTime());    
     const graphDataMapping = {};
 
     const currency = document.getElementById('currency-toggle').value == 'native' ? document.getElementById('network-switch-header').getAttribute('current_chain_symbol') : 'usd';
     const decimals = document.getElementById('network-switch-header').getAttribute('current_chain_decimals');
     const usd_exchange_rate = document.getElementById('network-switch-header').getAttribute('current_chain_usd_exhange_rate');
     const symbol = document.getElementById('network-switch-header').getAttribute('current_chain_symbol');
-    
-    while (iter < topTimestamp) {
       
-      const requestData = {
-        operator_address: operatorAddress,
-        bottom_timestamp: bottomTimestamp,
-        top_timestamp: iter + step,
-        decimals: document.getElementById('network-switch-header').getAttribute('current_chain_decimals')
-      };
-    
-      try {
-        const response = await new Promise((resolve, reject) => {
-          socket.emit('getTotalPeriodicSelfStakeAndWithdraw', requestData);
-    
-          socket.once('response', (response) => {
-            if (!response.success || response.err) {
-              reject(new Error(response.err || 'Error with the response'));
-            }
-            resolve(response);
-          });
-        });
-    
-        
-        graphDataMapping[iter] = {
-          self_stake: response.data.self_stake,
-          withdraw: response.data.withdraw,
-          ratio: response.data.ratio,
-          sold: response.data.sold
-        };
-    
-      } catch (error) { return console.error('Error in response:', error) }
-      plotValidatorGraph({ operatorAddress, graphDataMapping, currency, decimals, usd_exchange_rate, symbol });
+    const requestData = {
+      operator_address: operatorAddress,
+      bottom_timestamp: bottomTimestamp,
+      top_timestamp: topTimestamp,
+      decimals: document.getElementById('network-switch-header').getAttribute('current_chain_decimals')
+    };
+  
+    const queryString = new URLSearchParams(requestData).toString();
+    const eventSource = new EventSource(`/validator/get_graph_data?${queryString}`);
 
-      iter = iter + step;
-    }    
-  })
+    const worker = new Worker('/js/functions/worker.js');
+
+    worker.onmessage = (event) => {
+      const { data } = event.data;
+      graphDataMapping[data.timestamp] = data;
+      plotValidatorGraph({ operatorAddress, graphDataMapping, currency, decimals, usd_exchange_rate, symbol });
+    };
+    
+    eventSource.onmessage = (event) => {
+      const response = JSON.parse(event.data);
+      
+      if (!response.success || response.err) return eventSource.close();
+    
+      worker.postMessage({
+        action: 'processData',
+        data: { responseData: response }
+      });
+    };
+
+    eventSource.onerror = (err) => eventSource.close();
+  });
+      
+
+  let isResizing = false;
+  window.onresize = () => {
+    if (isResizing) return;
+    isResizing = true;
+
+    const graphWrappersArray = document.querySelectorAll('.validator-graph-wrapper');
+    setTimeout(() => {
+  
+      for (let i = 0; i < graphWrappersArray.length; i++) {
+        const eachGraphWrapper = graphWrappersArray[i];
+        const operatorAddress = eachGraphWrapper.getAttribute('operator_address');
+        const columnWrapper = eachGraphWrapper.querySelector('.each-graph-column-wrapper');
+        
+        document.documentElement.style.setProperty(
+          `--graph-column-width-${operatorAddress}`, 
+          columnWrapper.getBoundingClientRect().width
+        );
+      }
+      isResizing = false;
+    }, 100);
+  }
 }

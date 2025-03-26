@@ -55,7 +55,7 @@ activeValidatorsSchema.statics.saveActiveValidators = function (
   ActiveValidators
     .findOne({ chain_identifier: chain_identifier, month: month, year: year })
     .then(activeValidatorsRecord => {
-
+      
       if (activeValidatorsRecord) {
         activeValidatorsRecord?.active_validators.push(active_validators_pubkeys_array);
         activeValidatorsRecord.save();

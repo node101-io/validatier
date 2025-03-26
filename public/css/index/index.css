@@ -1291,7 +1291,7 @@
   left: -1px;
   position: absolute;
   opacity: 0;
-  transition: all 1s ease 0s;
+  transition: all 0.2s ease 0s;
 }
 
 .each-data-indicator-vertical-line-visible {

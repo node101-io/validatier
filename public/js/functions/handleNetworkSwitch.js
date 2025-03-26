@@ -10,6 +10,17 @@ function setSelectedChain (pretty_name, symbol, src, name) {
 
 function handleNetworkSwitch () {
 
+  const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
+  const topDate = document.getElementById('periodic-query-top-timestamp').value;
+  const chainIdentifier = document.getElementById('network-switch-header').getAttribute('current_chain_identifier');
+
+  const bottomTimestamp = Math.floor((new Date(bottomDate)).getTime());
+  const topTimestamp = Math.floor((new Date(topDate)).getTime());
+
+  const validators = document.getElementById('validators-main-wrapper');
+
+  rankingResponsesCache[bottomTimestamp + '.' + topTimestamp + '.' + chainIdentifier] = validators ? { success: true, data: JSON.parse(validators.getAttribute('validators')) } : '';
+
   const networkSwitchInput = document.getElementById('network-switch-input');
   networkSwitchInput.addEventListener('keyup', (event) => {
     if (!networkSwitchInput.value || networkSwitchInput.value.length <= 0) return document.querySelectorAll('.each-chain-wrapper').forEach(each => each.style.display = 'flex');
@@ -64,7 +75,7 @@ function handleNetworkSwitch () {
     const chainDecimals = target.getAttribute('decimals');
     const usdExchangeRate = target.getAttribute('usd_exchange_rate');
 
-    const cacheResponse = rankingResponsesCache[bottomDate + '.' + topTimestamp + '.' + chainIdentifier];
+    const cacheResponse = rankingResponsesCache[bottomTimestamp + '.' + topTimestamp + '.' + chainIdentifier];
     
     document.getElementById('network-switch-header').setAttribute('current_chain_identifier', chainIdentifier);
     document.getElementById('network-switch-header').setAttribute('current_chain_symbol', chainSymbol);
@@ -83,7 +94,7 @@ function handleNetworkSwitch () {
       {},
       (response) => {
         generateValidatorRankingContent(response, 'ratio', 'desc');
-        rankingResponsesCache[bottomDate + '.' + topTimestamp + '.' + chainIdentifier] = response;
+        rankingResponsesCache[bottomTimestamp + '.' + topTimestamp + '.' + chainIdentifier] = response;
       }
     )
   })

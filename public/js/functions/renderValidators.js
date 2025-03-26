@@ -76,12 +76,19 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     }
 
     const stakeButton = document.createElement('a');
-    stakeButton.classList.add('validator-stake-button');
+    stakeButton.classList.add('validator-action-button');
     stakeButton.innerHTML = 'Stake';
     stakeButton.target = '_blank';
     stakeButton.href = `https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${validator.chain_id}&validator_address=${validator.operator_address}`
-    
+
+    const plotButton = document.createElement('div');
+    plotButton.classList.add('validator-action-button');
+    plotButton.classList.add('validator-plot-graph-button');
+    plotButton.setAttribute('operator-address', validator.operator_address);
+    plotButton.innerHTML = 'Plot';
+
     monikerDiv.appendChild(stakeButton);
+    monikerDiv.appendChild(plotButton);
 
     const operatorAddressDiv = document.createElement('div');
     operatorAddressDiv.classList.add('validator-operator-address');
@@ -188,6 +195,8 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
 function renderValidators() {
 
   const sortOrderMapping = {
+    total_stake: '',
+    total_withdraw: '',
     self_stake: '',
     withdraw: '',
     ratio: '',
@@ -239,12 +248,13 @@ function renderValidators() {
 
     const chainIdentifier = document.getElementById('network-switch-header').getAttribute('current_chain_identifier');
 
-    const cacheResponse = rankingResponsesCache[bottomDate + '.' + topTimestamp + '.' + chainIdentifier];
+    const cacheResponse = rankingResponsesCache[bottomTimestamp + '.' + topTimestamp + '.' + chainIdentifier];
 
     if (cacheResponse) {
       sortOrderMapping[sort_by] == 'desc'
         ? cacheResponse.data.sort((a, b) => (b[sort_by] || 0) - (a[sort_by] || 0))
         : cacheResponse.data.sort((a, b) => (a[sort_by] || 0) - (b[sort_by] || 0))
+
       return generateValidatorRankingContent(cacheResponse, sort_by, sortOrderMapping)
     };
     serverRequest(
@@ -253,7 +263,7 @@ function renderValidators() {
       {},
       (response) => {
         generateValidatorRankingContent(response, sort_by, sortOrderMapping);
-        rankingResponsesCache[bottomDate + '.' + topTimestamp + '.' + chainIdentifier] = response;
+        rankingResponsesCache[bottomTimestamp + '.' + topTimestamp + '.' + chainIdentifier] = response;
       }
     )
   })

@@ -3,20 +3,17 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import express, { Express } from 'express';
 import { fileURLToPath } from 'url';
-import http from 'http';
 import mongoose from 'mongoose';
 import path from 'path';
 import { rateLimit } from 'express-rate-limit';
-import { Server } from 'socket.io';
 
 import compositeEventBlockRouter from './routes/compositeEventBlockRouter.js';
 import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
 
 import { startFetchingData } from './utils/startFetchingData.js';
-import { handleSocketIoConnection } from './controllers/Validator/getGraphData/get.js';
-import getTxsByHeight from './utils/getTxsByHeight.js';
 import { startCronJobs } from './cron/startCronJobs.js';
+
 dotenv.config();
 
 const app: Express = express();
@@ -35,7 +32,7 @@ app.use(rateLimit({
 }));
 
 mongoose
-  .connect('mongodb://127.0.0.1:27017/validator-timeline-test-v3')
+  .connect('mongodb://127.0.0.1:27017/validator-timeline-test-v4')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
@@ -50,12 +47,4 @@ app.use('/', indexRouter);
 app.use('/composite_event_block', compositeEventBlockRouter);
 app.use('/validator', validatorRouter);
 
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
-io.listen(PORT + 1);
-
-app.listen(PORT, () => {
-  console.log(`Server running at PORT ${PORT}`);
-  handleSocketIoConnection(io);
-  // startFetchingData();
-})
+app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));

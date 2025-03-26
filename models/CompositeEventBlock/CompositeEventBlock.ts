@@ -187,13 +187,12 @@ compositeEventBlockSchema.statics.searchTillExists = function (
       [search_by]: condition
     })
     .sort({ [search_by]: order })
-    .exec()
     .then((compositeEventBlocksOfValidator: CompositeEventBlockInterface[]) => {
       if (!compositeEventBlocksOfValidator || compositeEventBlocksOfValidator.length <= 0) return callback(null, null);
       const foundCompositeBlockEvent = compositeEventBlocksOfValidator[0];
       return callback(null, foundCompositeBlockEvent);
     })
-    .catch(err => callback('bad_request', null));
+    .catch(err => callback(err, null));
 }
 
 compositeEventBlockSchema.statics.checkIfBlockExistsAndUpdate = function (
@@ -424,7 +423,7 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
       order: 'asc'
     },
     (err, bottomCompositeBlockEvent) => {
-      if (err) return callback('bad_request', null);
+      if (err) return callback(err, null);
 
       if (
         ((searchBy == 'block_height' && topBlockHeight) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.block_height > topBlockHeight)) ||
@@ -440,7 +439,7 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
           order: 'desc'
         },
         (err, topCompositeBlockEvent) => {
-          if (err) return callback('bad_request', null);
+          if (err) return callback(err, null);
 
           if (
             ((searchBy == 'block_height' && bottomBlockHeight) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.block_height < bottomBlockHeight)) ||

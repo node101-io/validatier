@@ -174,7 +174,6 @@ const validatorSchema = new Schema<ValidatorInterface>({
     type: String, 
     required: true,
     trim: true,
-    unique: true,
     index: 1,
     minlength: 1,
     maxlength: MAX_DATABASE_TEXT_FIELD_LENGTH
@@ -485,14 +484,14 @@ validatorSchema.statics.updateLastVisitedBlock = function (
   Chain
     .findOneAndUpdate(
       { name: chain_identifier },
-      { last_visited_block: block_height }
+      { last_visited_block: block_height, last_visited_block_time: block_time }
     )
     .then(updatedChain => {
       if (!updatedChain) return callback('database_error', null);
 
       if (
-        (new Date(updatedChain.last_visited_block_time)).getDay() - new Date(updatedChain.active_set_last_updated_block_time).getDay() != 1 || 
-        (new Date(updatedChain.last_visited_block_time)).getMonth() - new Date(updatedChain.active_set_last_updated_block_time).getMonth() != 1 || 
+        (new Date(updatedChain.last_visited_block_time)).getDay() - new Date(updatedChain.active_set_last_updated_block_time).getDay() < 1 || 
+        (new Date(updatedChain.last_visited_block_time)).getMonth() - new Date(updatedChain.active_set_last_updated_block_time).getMonth() < 1 || 
         !block_time
       ) return callback(null, { updated_chain: updatedChain, saved_active_validators: null });
     
@@ -503,9 +502,9 @@ validatorSchema.statics.updateLastVisitedBlock = function (
         month: (new Date(block_time)).getMonth(),
         year: (new Date(block_time)).getFullYear()
       }, (err, savedActiveValidators) => {
-        if (err) return callback('database_error', null);
+        if (err || !savedActiveValidators) return callback('database_error', null);
         
-        updatedChain.active_set_last_updated_block_time = updatedChain.last_visited_block_time;
+        updatedChain.active_set_last_updated_block_time = (new Date(block_time)).getTime();
         updatedChain.save();
         return callback(null, {
           updated_chain: updatedChain,

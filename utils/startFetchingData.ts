@@ -8,7 +8,7 @@ export const startFetchingData = () => {
     .getAllChains((err, chains) => {
       if (err || !chains) return;
       chains.forEach(chain => {
-        if (chain.is_genesis_saved && chain.name == 'cosmoshub') processBlocks(chain.last_visited_block, chain.last_available_block_height, chain.name);
+        if (chain.is_genesis_saved) processBlocks(chain.last_visited_block, chain.last_available_block_height, chain.name);
         else getGenesisTxs(chain.name, (err, success) => {
           if (err || !success) return console.log(err);
           processBlocks(chain.last_visited_block, chain.last_available_block_height, chain.name);

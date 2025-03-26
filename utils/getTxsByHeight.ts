@@ -35,12 +35,13 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
       const slashMessages: DecodedMessage[] | null = getSlashEventsFromFinalizeBlockEvents(finalizeBlockEvents, bech32_prefix, time);
       const txs: string[] = [];
       const events: Event[][] = [];
-      data_block_results.result.txs_results.forEach((tx: any, index: number) => {
-        if (tx.code == 0) {
-          txs.push(data.result.block.data.txs[index]);
-          events.push(tx.events);
-        };
-      })
+
+      for (let i = 0; i < data_block_results.result.txs_results.length; i++) {
+        const tx = data_block_results.result.txs_results[i];
+        if (tx.code != 0) continue;
+        txs.push(data.result.block.data.txs[i]);
+        events.push(tx.events);
+      }
         
       const decodedTxs = decodeTxs(txs, events, denom, data.result?.block?.header?.time)
       if (slashMessages && slashMessages.length > 0) decodedTxs.push({ messages: slashMessages });

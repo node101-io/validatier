@@ -6,7 +6,7 @@ block content
       .header-banner-wrapper
         .banner-logo-wrapper(class='center')
           img(src='/res/images/logo.svg', alt='node101' class='center')
-        .banner-title-content L'VALIDATIÈR
+        .banner-title-content VALIDATIER
       .header-network-switch-wrapper
         .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}`)
           .network-switch-network-image-wrapper 
@@ -119,7 +119,7 @@ block content
                 button.export-choice-download-button(class='center')#export-choice-download-button
                   include ../icons/download.pug
                   span Download
-        .validators-main-wrapper#validators-main-wrapper
+        .validators-main-wrapper#validators-main-wrapper(validators=validators)
           - 
             const headers_array = [
               {name: 'Stake', id: 'total_stake'}, 
