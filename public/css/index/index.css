@@ -1,6 +1,8 @@
 
 :root {
 
+  --base-width: 100vw;
+
   --default-inner-image-content-width: 100%;
   --default-inner-image-content-height: 100%;
   --default-inner-image-content-border-radius: 100%;
