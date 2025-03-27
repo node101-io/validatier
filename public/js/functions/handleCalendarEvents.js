@@ -210,6 +210,10 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
 
       paintBlocksInBetween();
       updateDateInputs();
+    } else {
+      document.getElementById('picker-main-wrapper').style.transform = 'perspective(1000px) rotateX(-90deg)';
+      document.getElementById('picker-main-wrapper').style.opacity = 0;
+      document.getElementById('picker-main-wrapper').previousSibling.children[document.getElementById('picker-main-wrapper').previousSibling.children.length - 1].style.transform = 'rotateX(0deg)';
     }
   }
 

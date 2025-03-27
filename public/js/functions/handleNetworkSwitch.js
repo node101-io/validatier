@@ -36,8 +36,13 @@ function handleNetworkSwitch () {
 
   const networkSwitchHeader = document.getElementById('network-switch-header');
   const networkSwitchDropdown = document.getElementById('network-switch-dropdown');
-  networkSwitchHeader.addEventListener('click', (event) => {
-    if (!networkSwitchDropdown.classList.contains('network-switch-dropdown-open')) {
+  document.body.addEventListener('click', (event) => {
+    
+    let target = event.target;
+    while (target != document.body && !target.classList.contains('header-network-switch-wrapper')) target = target.parentNode;
+    if (!target.classList.contains('header-network-switch-wrapper')) return networkSwitchDropdown.classList.remove('network-switch-dropdown-open');
+
+    if (!event.target.classList.contains('network-switch-dropdown-open')) {
       document.getElementById('network-switch-dropdown-arrow').style.transform = 'rotateX(180deg)';
       document.getElementById('network-switch-dropdown-arrow').style.marginTop = '-10px';
       networkSwitchDropdown.classList.add('network-switch-dropdown-open');

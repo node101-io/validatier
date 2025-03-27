@@ -77,6 +77,10 @@ function handleExportEvents () {
           document.getElementById('export-choice-download-button').style.cursor = 'var(--pointer-hand-dark)';
       })
       .catch(error => console.error('Download failed:', error));
-    }  
+    } else {
+      document.getElementById('export-wrapper-toggle').nextSibling.style.transform = 'perspective(8000px) rotateX(-90deg)';
+      document.getElementById('export-wrapper-toggle').nextSibling.style.opacity = '0';
+      document.getElementById('export-wrapper-toggle').setAttribute('isOpen', 'false');
+    }
   })
 }

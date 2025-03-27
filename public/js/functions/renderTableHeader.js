@@ -5,8 +5,9 @@ function renderTableHeader (sort_by, order) {
   const headersArray = [
     {name: 'Stake', id: 'total_stake'}, 
     {name: 'Withdraw', id: 'total_withdraw'}, 
-    { name: 'Self stake', id: 'self_stake' },
-    { name: 'Claimed', id: 'withdraw' },
+    { name: 'Self-stake', id: 'self_stake' },
+    { name: 'Reward', id: 'reward' },
+    { name: 'Commission', id: 'commission' },
     { name: 'Ratio', id: 'ratio', popup_text: 'self stake / withdraw' },
     { name: 'Sold', id: 'sold', popup_text: 'withdraw - self stake' },
   ];

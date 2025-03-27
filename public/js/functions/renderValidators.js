@@ -171,7 +171,8 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     const totalStakeTd = createCurrencyTd(validator.total_stake);
     const totalWithdrawTd = createCurrencyTd(validator.total_withdraw);
     const selfStakeTd = createCurrencyTd(validator.self_stake);
-    const withdrawTd = createCurrencyTd(validator.withdraw);
+    const rewardTd = createCurrencyTd(validator.reward);
+    const commissionTd = createCurrencyTd(validator.commission);
     const ratioTd = createRatioTd(shortNumberFormat(validator.ratio));
     const soldTd = createCurrencyTd(validator.sold);
   
@@ -179,7 +180,8 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     tr.appendChild(totalStakeTd);
     tr.appendChild(totalWithdrawTd);
     tr.appendChild(selfStakeTd);
-    tr.appendChild(withdrawTd);
+    tr.appendChild(rewardTd);
+    tr.appendChild(commissionTd);
     tr.appendChild(ratioTd);
     tr.appendChild(soldTd);
   
@@ -198,7 +200,8 @@ function renderValidators() {
     total_stake: '',
     total_withdraw: '',
     self_stake: '',
-    withdraw: '',
+    reward: '',
+    commission: '',
     ratio: '',
     sold: ''
   };

@@ -1,8 +1,6 @@
 
 :root {
 
-  --base-width: 100vw;
-
   --default-inner-image-content-width: 100%;
   --default-inner-image-content-height: 100%;
   --default-inner-image-content-border-radius: 100%;
@@ -1107,7 +1105,6 @@
   margin-bottom: -5px;
   z-index: 20;
   opacity: 0;
-  transition: all 0.2s ease 0s;
 }
 
 .each-data-point-hovered {
@@ -1130,7 +1127,7 @@
   left: -2.5px;
   z-index: 0;
   opacity: 0;
-  transition: all 0.5s ease 0s;
+  transition: all 0.25s ease 0s;
 }
 
 .each-data-delta-vertical-line-visible {
@@ -1159,7 +1156,7 @@
 }
 
 .each-data-point-value-display-visible {
-  width: 250px;
+  width: 300px;
   left: -130px;
   opacity: 1;
 }
@@ -1219,10 +1216,10 @@
 }
 
 .horizontal-axis-label {
-  font-size: 14px;
+  font-size: 16px;
   transform-origin: center;
   transform: rotateZ(45deg);
-  transition: all 0.2s ease 0s;
+  transition: font-weight 0.2s ease 0s;
   width: 20px;
   position: absolute;
   bottom: -5%;
@@ -1232,7 +1229,6 @@
 
 .each-data-point-horizontal-label-hovered {
   font-weight: 800;
-  font-size: 16px;
 }
 
 .vertical-axis-labels {
@@ -1309,4 +1305,43 @@
   background-color: var(--color-powder-blue);
   z-index: 10;
   border-top: 0.5px solid var(--color-triangle-unselected);
+}
+
+.graph-visibility-legend-wrapper {
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  align-items: end; 
+  padding: 4px;
+  right: 0;
+  top: 0;
+  position: absolute;
+}
+
+.each-graph-visibility-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: var(--pointer-hand-dark);
+  user-select: none;
+}
+
+.each-graph-visibility-indicator {
+  width: 25px;
+  height: 10px;
+  transform: rotateZ(45deg) skewX(45deg);
+  transform-origin: center;
+}
+
+.each-graph-visibility-content-disabled .each-graph-visibility-indicator {
+  background-color: #ccc !important;
+}
+
+.each-graph-visibility-content-disabled .each-graph-visibility-text {
+  color: #ccc !important;
+}
+
+.graph-element-semi-visible {
+  background-color: #eee !important;
 }

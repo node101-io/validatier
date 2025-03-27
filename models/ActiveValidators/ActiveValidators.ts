@@ -5,7 +5,10 @@ export interface ActiveValidatorsInterface {
   chain_identifier: string;
   month: number;
   year: number;
-  active_validators: string[][];
+  active_validators: {
+    day: number;
+    pubkeys: string[];
+  }[];
 }
 
 interface ActiveValidatorsModel extends Model<ActiveValidatorsInterface> {
@@ -14,6 +17,7 @@ interface ActiveValidatorsModel extends Model<ActiveValidatorsInterface> {
       chain_identifier: string;
       month: number,
       year: number,
+      day: number;
       active_validators_pubkeys_array: string[]
     },
     callback: (
@@ -38,11 +42,10 @@ const activeValidatorsSchema = new Schema<ActiveValidatorsInterface>({
     type: Number,
     required: true
   },
-  active_validators: [
-    {
-      type: [String]
-    }
-  ]
+  active_validators: [{
+    day: Number,
+    pubkeys: [String]
+  }]
 });
 
 activeValidatorsSchema.index({ chain_identifier: 1, month: 1, year: 1 }, { unique: true });
@@ -51,26 +54,30 @@ activeValidatorsSchema.statics.saveActiveValidators = function (
   body: Parameters<ActiveValidatorsModel['saveActiveValidators']>[0],
   callback: Parameters<ActiveValidatorsModel['saveActiveValidators']>[1]
 ) {
-  const { chain_identifier, month, year, active_validators_pubkeys_array } = body;
+  const { chain_identifier, day, month, year, active_validators_pubkeys_array } = body;
   ActiveValidators
-    .findOne({ chain_identifier: chain_identifier, month: month, year: year })
+    .findOneAndUpdate(
+      { chain_identifier: chain_identifier, month: month, year: year },
+      { $push: { active_validators: {
+        day: day,
+        pubkeys: active_validators_pubkeys_array
+      } } }
+    )
     .then(activeValidatorsRecord => {
       
-      if (activeValidatorsRecord) {
-        activeValidatorsRecord?.active_validators.push(active_validators_pubkeys_array);
-        activeValidatorsRecord.save();
-        return callback(null, activeValidatorsRecord);
-      }
+      if (activeValidatorsRecord) return callback(null, activeValidatorsRecord);
 
-      const newRecordActiveValidators: string[][] = [];
-      newRecordActiveValidators.push(active_validators_pubkeys_array);
+      const newRecordActiveValidators = {
+        day: day,
+        pubkeys: active_validators_pubkeys_array
+      }
 
       ActiveValidators
         .create({
           chain_identifier: chain_identifier,
           month: month,
           year: year,
-          active_validators: newRecordActiveValidators
+          active_validators: [newRecordActiveValidators]
         })
         .then(newActiveValidatorsRecord => callback(null, newActiveValidatorsRecord))
         .catch(err => callback(err, null));

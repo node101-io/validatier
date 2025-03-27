@@ -98,7 +98,8 @@ interface ValidatorModel extends Model<ValidatorInterface> {
         moniker: string,
         temporary_image_uri: string,
         self_stake: number,
-        withdraw: number,
+        reward: number,
+        commission: number,
         ratio: number,
         sold: number
       }[] | null
@@ -109,6 +110,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       chain_rpc_url: string,
       chain_identifier: string,
       height: number,
+      day: number,
       month: number,
       year: number
     },
@@ -135,10 +137,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
     body: { chain_identifier: string, block_height?: number, block_time?: Date },
     callback: (
       err: string | null,
-      updated: {
-        updated_chain: ChainInterface,
-        saved_active_validators: ActiveValidatorsInterface | null
-      } | null
+      updated_chain: ChainInterface | null
     ) => any
   ) => any;
 }
@@ -332,7 +331,8 @@ validatorSchema.statics.rankValidators = function (
     moniker: string,
     temporary_image_uri: string,
     self_stake: number,
-    withdraw: number,
+    reward: number,
+    commission: number,
     ratio: number,
     sold: number
   }[] = [];
@@ -367,11 +367,12 @@ validatorSchema.statics.rankValidators = function (
                   if (!chain) return next();
 
                   const selfStake = totalPeriodicSelfStakeAndWithdraw?.self_stake;
-                  const withdraw = totalPeriodicSelfStakeAndWithdraw?.withdraw;
+                  const reward = totalPeriodicSelfStakeAndWithdraw?.reward;
+                  const commission = totalPeriodicSelfStakeAndWithdraw?.commission;
                   const totalStake = totalPeriodicSelfStakeAndWithdraw?.average_total_stake;
                   const totalWithdraw = totalPeriodicSelfStakeAndWithdraw?.average_withdraw;
-                  const ratio = (totalPeriodicSelfStakeAndWithdraw?.self_stake ? (totalPeriodicSelfStakeAndWithdraw?.self_stake) : 0) / (totalPeriodicSelfStakeAndWithdraw?.withdraw ? totalPeriodicSelfStakeAndWithdraw?.withdraw : (10 ** chain?.decimals));
-                  const sold = (totalPeriodicSelfStakeAndWithdraw?.withdraw ? totalPeriodicSelfStakeAndWithdraw?.withdraw : 0) - (totalPeriodicSelfStakeAndWithdraw?.self_stake ? totalPeriodicSelfStakeAndWithdraw?.self_stake : 0);
+                  const ratio = (totalPeriodicSelfStakeAndWithdraw?.self_stake ? (totalPeriodicSelfStakeAndWithdraw?.self_stake) : 0) / (totalPeriodicSelfStakeAndWithdraw?.reward ? totalPeriodicSelfStakeAndWithdraw?.reward : (10 ** chain?.decimals));
+                  const sold = (totalPeriodicSelfStakeAndWithdraw?.reward ? totalPeriodicSelfStakeAndWithdraw?.reward : 0) - (totalPeriodicSelfStakeAndWithdraw?.self_stake ? totalPeriodicSelfStakeAndWithdraw?.self_stake : 0);
 
 
                   if (err) return next(new Error(err))
@@ -380,7 +381,8 @@ validatorSchema.statics.rankValidators = function (
                     moniker: eachValidator.moniker,
                     temporary_image_uri: eachValidator.temporary_image_uri,
                     self_stake: selfStake ? selfStake : 0,
-                    withdraw: withdraw ? withdraw : 0,
+                    reward: reward ? reward : 0,
+                    commission: commission ? commission : 0,
                     total_stake: totalStake ? totalStake : 0,
                     total_withdraw: totalWithdraw ? totalWithdraw : 0,
                     chain_identifier: chain_identifier,
@@ -417,7 +419,7 @@ validatorSchema.statics.updateActiveValidatorList = async function (
   callback: Parameters<ValidatorModel['updateActiveValidatorList']>[1]
 ) {
 
-  const { chain_identifier, chain_rpc_url, height, month, year } = body;
+  const { chain_identifier, chain_rpc_url, height, day, month, year } = body;
  
   getPubkeysOfActiveValidatorsByHeight(chain_rpc_url, height, (err, pubkeysOfActiveValidators) => {
     if (err || !pubkeysOfActiveValidators) return callback(err, null);
@@ -426,10 +428,11 @@ validatorSchema.statics.updateActiveValidatorList = async function (
       chain_identifier: chain_identifier,
       month: month,
       year: year,
+      day: day,
       active_validators_pubkeys_array: pubkeysOfActiveValidators
     }, (err, savedActiveValidators) => {
       if (err) return callback(err, null);
-      return callback(null, savedActiveValidators);
+      return callback(null, savedActiveValidators);    
     })
   });
 };
@@ -488,29 +491,7 @@ validatorSchema.statics.updateLastVisitedBlock = function (
     )
     .then(updatedChain => {
       if (!updatedChain) return callback('database_error', null);
-
-      if (
-        (new Date(updatedChain.last_visited_block_time)).getDay() - new Date(updatedChain.active_set_last_updated_block_time).getDay() < 1 || 
-        (new Date(updatedChain.last_visited_block_time)).getMonth() - new Date(updatedChain.active_set_last_updated_block_time).getMonth() < 1 || 
-        !block_time
-      ) return callback(null, { updated_chain: updatedChain, saved_active_validators: null });
-    
-      Validator.updateActiveValidatorList({ 
-        chain_identifier: updatedChain.name, 
-        chain_rpc_url: updatedChain.rpc_url, 
-        height: updatedChain.last_visited_block, 
-        month: (new Date(block_time)).getMonth(),
-        year: (new Date(block_time)).getFullYear()
-      }, (err, savedActiveValidators) => {
-        if (err || !savedActiveValidators) return callback('database_error', null);
-        
-        updatedChain.active_set_last_updated_block_time = (new Date(block_time)).getTime();
-        updatedChain.save();
-        return callback(null, {
-          updated_chain: updatedChain,
-          saved_active_validators: savedActiveValidators ? savedActiveValidators : null
-        });
-      })
+      return callback(null, updatedChain);
     })
     .catch(err => callback('database_error', null))
 }

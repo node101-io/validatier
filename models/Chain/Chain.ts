@@ -62,7 +62,14 @@ interface ChainModel extends Model<ChainInterface> {
       err: string | null,
       chain: ChainInterface | null
     ) => any
-  ) => any
+  ) => any;
+  updateTimeOfLastActiveSetSave: (
+    body: { chain_identifier: string, time: number },
+    callback: (
+      err: string | null,
+      chain: ChainInterface | null
+    ) => any
+  ) => any;
 }
 
 
@@ -249,6 +256,20 @@ chainSchema.statics.markGenesisAsSaved = function (
     )
     .then(chain => callback(null, chain))
     .catch(err => callback(err, null))
+}
+
+chainSchema.statics.updateTimeOfLastActiveSetSave = function (
+  body: Parameters<ChainModel['updateTimeOfLastActiveSetSave']>[0],
+  callback: Parameters<ChainModel['updateTimeOfLastActiveSetSave']>[1],
+) {
+  const { chain_identifier, time } = body;
+  Chain
+    .findOneAndUpdate(
+      { name: chain_identifier },
+      { active_set_last_updated_block_time: time }
+    )
+    .then(chain => callback(null, chain))
+    .catch(err => callback(err, null));
 }
 
 const Chain = mongoose.model<ChainInterface, ChainModel>('Chains', chainSchema);

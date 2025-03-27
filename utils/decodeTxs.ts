@@ -45,11 +45,10 @@ const decodeTransactions = (txs: string[], events: Event[][], denom: string, tim
 
     const messages = [];
 
-    // TODO / TEST ET
     let tx;
     try { tx = decodeTxRaw(Buffer.from(base64tx, 'base64')); }
     catch (err) { continue; }
-  
+      
     const filteredMessages = tx.body.messages.filter((message) => LISTENING_EVENTS.includes(message.typeUrl));
     
     for (let j = 0; j < filteredMessages.length; j++) {

@@ -9,9 +9,11 @@ self.onmessage = (event) => {
       data: {
         self_stake: responseData.data.self_stake,
         withdraw: responseData.data.withdraw,
+        commission: responseData.data.commission,
         ratio: responseData.data.ratio,
         sold: responseData.data.sold,
-        timestamp: responseData.data.timestamp
+        timestamp: responseData.data.timestamp,
+        index: responseData.data.index,
       }
     });
   }

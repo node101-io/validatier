@@ -9,14 +9,16 @@ export interface CompositeEventBlockInterface {
   block_height: number;
   operator_address: string;
   denom: string;
-  reward: number,
-  self_stake: number,
-  total_stake: number,
-  total_withdraw: number,
-  reward_prefix_sum: number,
-  self_stake_prefix_sum: number,
-  total_stake_prefix_sum: number
-  total_withdraw_prefix_sum: number,
+  reward: number;
+  commission: number;
+  self_stake: number;
+  total_stake: number;
+  total_withdraw: number;
+  reward_prefix_sum: number;
+  commission_prefix_sum: number;
+  self_stake_prefix_sum: number;
+  total_stake_prefix_sum: number;
+  total_withdraw_prefix_sum: number;
 }
 
 interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
@@ -25,12 +27,14 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
       operator_address: string;
       block_height: number;
       update_body: {
-        reward?: number;
         self_stake?: number;
+        reward?: number;
+        commission?: number;
         total_stake?: number;
         total_withdraw?: number,
-        reward_prefix_sum?: number;
         self_stake_prefix_sum?: number;
+        reward_prefix_sum?: number;
+        commission_prefix_sum?: number;
         total_stake_prefix_sum?: number;
         total_withdraw_prefix_sum?: number;
       }
@@ -46,8 +50,9 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
       operator_address: string;
       timestamp: number;
       denom: string;
-      reward?: number;
       self_stake?: number;
+      reward?: number;
+      commission?: number;
       total_stake?: number;
       total_withdraw?: number;
     }, 
@@ -62,8 +67,9 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
       operator_address: string;
       timestamp: number;
       denom: string;
-      reward?: number;
       self_stake?: number;
+      reward?: number;
+      commission?: number;
       total_stake?: number;
       total_withdraw?: number;
     }>, 
@@ -98,7 +104,8 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
       err: string | null,
       totalPeriodicSelfStakeAndWithdraw: {
         self_stake: number,
-        withdraw: number,
+        reward: number,
+        commission: number,
         average_total_stake: number,
         average_withdraw: number
       } | null
@@ -128,13 +135,18 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
     minlength: 1,
     maxlength: MAX_DENOM_LENGTH
   },
+  self_stake: { 
+    type: Number, 
+    required: false,
+    default: 0
+  },
   reward: { 
     type: Number, 
     required: false,
     default: 0
   },
-  self_stake: { 
-    type: Number, 
+  commission: {
+    type: Number,
     required: false,
     default: 0
   },
@@ -148,12 +160,16 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
     required: false,
     default: 0
   },
+  self_stake_prefix_sum: {
+    type: Number, 
+    required: true
+  },
   reward_prefix_sum: {
     type: Number, 
     required: true,
   },
-  self_stake_prefix_sum: {
-    type: Number, 
+  commission_prefix_sum: {
+    type: Number,
     required: true
   },
   total_stake_prefix_sum: {
@@ -202,16 +218,17 @@ compositeEventBlockSchema.statics.checkIfBlockExistsAndUpdate = function (
 
   const { operator_address, block_height, update_body } = body;
 
-  if (!update_body.reward) delete update_body.reward;
   if (!update_body.self_stake) delete update_body.self_stake;
+  if (!update_body.reward) delete update_body.reward;  
+  if (!update_body.commission) delete update_body.commission;
   if (!update_body.total_stake) delete update_body.total_stake;
   if (!update_body.total_withdraw) delete update_body.total_withdraw;
 
-  if (!update_body.reward_prefix_sum) delete update_body.reward_prefix_sum;
   if (!update_body.self_stake_prefix_sum) delete update_body.self_stake_prefix_sum;
+  if (!update_body.reward_prefix_sum) delete update_body.reward_prefix_sum;
+  if (!update_body.commission_prefix_sum) delete update_body.commission_prefix_sum;
   if (!update_body.total_stake_prefix_sum) delete update_body.total_stake_prefix_sum;
   if (!update_body.total_withdraw_prefix_sum) delete update_body.total_withdraw_prefix_sum;
-  
 
   CompositeEventBlock
     .findOneAndUpdate(
@@ -229,7 +246,7 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
   callback: Parameters<CompositeEventBlockModel['saveCompositeEventBlock']>[1]
 ) {
 
-  const { block_height, operator_address, denom, reward, self_stake, total_stake, total_withdraw, timestamp } = body;
+  const { block_height, operator_address, denom, self_stake, reward, commission, total_stake, total_withdraw, timestamp } = body;
 
   CompositeEventBlock.searchTillExists(
     {
@@ -241,8 +258,9 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
     (err, foundCompositeBlockEvent) => {
       if (err) return callback(err, null); 
 
-      const reward_prefix_sum = foundCompositeBlockEvent ? (reward ? foundCompositeBlockEvent.reward_prefix_sum + reward : foundCompositeBlockEvent.reward_prefix_sum) : reward;
       const self_stake_prefix_sum = foundCompositeBlockEvent ? (self_stake ? foundCompositeBlockEvent.self_stake_prefix_sum + self_stake : foundCompositeBlockEvent.self_stake_prefix_sum) : self_stake;
+      const reward_prefix_sum = foundCompositeBlockEvent ? (reward ? foundCompositeBlockEvent.reward_prefix_sum + reward : foundCompositeBlockEvent.reward_prefix_sum) : reward;
+      const commission_prefix_sum = foundCompositeBlockEvent ? (commission ? foundCompositeBlockEvent.commission_prefix_sum + commission : foundCompositeBlockEvent.commission_prefix_sum) : commission;
       const total_stake_prefix_sum = foundCompositeBlockEvent ? (total_stake ? foundCompositeBlockEvent.total_stake_prefix_sum + total_stake : foundCompositeBlockEvent.total_stake_prefix_sum) : total_stake;
       const total_withdraw_prefix_sum = foundCompositeBlockEvent ? (total_withdraw ? foundCompositeBlockEvent.total_withdraw_prefix_sum + total_withdraw : foundCompositeBlockEvent.total_withdraw_prefix_sum) : total_withdraw;
 
@@ -250,12 +268,14 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
         operator_address: operator_address,
         block_height: block_height,
         update_body: {
-          reward: reward ? reward : 0,
           self_stake: self_stake ? self_stake : 0,
+          reward: reward ? reward : 0,
+          commission: commission ? commission : 0,
           total_stake: total_stake ? total_stake : 0,
           total_withdraw: total_withdraw ? total_withdraw : 0,
-          reward_prefix_sum: reward_prefix_sum ? reward_prefix_sum : 0,
           self_stake_prefix_sum: self_stake_prefix_sum ? self_stake_prefix_sum : 0,
+          reward_prefix_sum: reward_prefix_sum ? reward_prefix_sum : 0,
+          commission_prefix_sum: commission_prefix_sum ? commission_prefix_sum : 0,
           total_stake_prefix_sum: total_stake_prefix_sum ? total_stake_prefix_sum : 0,
           total_withdraw_prefix_sum: total_withdraw_prefix_sum ? total_withdraw_prefix_sum : 0
         }
@@ -270,12 +290,14 @@ compositeEventBlockSchema.statics.saveCompositeEventBlock = function (
             block_height: block_height,
             timestamp: timestamp,
             denom: denom,
-            reward: reward ? reward : 0,
             self_stake: self_stake ? self_stake : 0,
+            reward: reward ? reward : 0,
+            commission: commission ? commission : 0,
             total_stake: total_stake ? total_stake : 0,
             total_withdraw: total_withdraw ? total_withdraw : 0,
-            reward_prefix_sum: reward_prefix_sum ? reward_prefix_sum : 0,
             self_stake_prefix_sum: self_stake_prefix_sum ? self_stake_prefix_sum : 0,
+            reward_prefix_sum: reward_prefix_sum ? reward_prefix_sum : 0,
+            commission_prefix_sum: commission_prefix_sum ? commission_prefix_sum : 0,
             total_stake_prefix_sum: total_stake_prefix_sum ? total_stake_prefix_sum : 0,
             total_withdraw_prefix_sum: total_withdraw_prefix_sum ? total_withdraw_prefix_sum : 0
           })
@@ -315,12 +337,14 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
       block_height: number;
       operator_address: string;
       denom: string;
-      reward: number,
       self_stake: number,
+      reward: number,
+      commission: number,
       total_stake: number,
       total_withdraw: number,
-      reward_prefix_sum: number,
       self_stake_prefix_sum: number,
+      reward_prefix_sum: number,
+      commission_prefix_sum: number,
       total_stake_prefix_sum: number,
       total_withdraw_prefix_sum: number,
     }[] = [];
@@ -328,13 +352,15 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
     for (let i = 0; i < mostRecendRecordsArray.length; i++) {
       const mostRecentCompositeEventBlock = mostRecendRecordsArray[i];
       
-      const reward = body[mostRecentCompositeEventBlock.operator_address].reward;
       const selfStake = body[mostRecentCompositeEventBlock.operator_address].self_stake;
+      const reward = body[mostRecentCompositeEventBlock.operator_address].reward;
+      const commission = body[mostRecentCompositeEventBlock.operator_address].commission;
       const totalStake = body[mostRecentCompositeEventBlock.operator_address].total_stake;
       const totalWithdraw = body[mostRecentCompositeEventBlock.operator_address].total_withdraw;
 
-      const rewardPrefixSum = mostRecentCompositeEventBlock.reward_prefix_sum ? (reward ? mostRecentCompositeEventBlock.reward_prefix_sum + reward : mostRecentCompositeEventBlock.reward_prefix_sum) : reward;
       const selfStakePrefixSum = mostRecentCompositeEventBlock.self_stake_prefix_sum ? (selfStake ? mostRecentCompositeEventBlock.self_stake_prefix_sum + selfStake : mostRecentCompositeEventBlock.self_stake_prefix_sum) : selfStake;
+      const rewardPrefixSum = mostRecentCompositeEventBlock.reward_prefix_sum ? (reward ? mostRecentCompositeEventBlock.reward_prefix_sum + reward : mostRecentCompositeEventBlock.reward_prefix_sum) : reward;
+      const commissionPrefixSum = mostRecentCompositeEventBlock.commission_prefix_sum ? (commission ? mostRecentCompositeEventBlock.commission_prefix_sum + commission : mostRecentCompositeEventBlock.commission_prefix_sum) : commission;
       const totalStakePrefixSum = mostRecentCompositeEventBlock.total_stake_prefix_sum ? (totalStake ? mostRecentCompositeEventBlock.total_stake_prefix_sum + totalStake : mostRecentCompositeEventBlock.total_stake_prefix_sum) : totalStake;
       const totalWithdrawPrefixSum = mostRecentCompositeEventBlock.total_withdraw_prefix_sum ? (totalWithdraw ? mostRecentCompositeEventBlock.total_withdraw_prefix_sum + totalWithdraw : mostRecentCompositeEventBlock.total_withdraw_prefix_sum) : totalWithdraw;
 
@@ -345,12 +371,14 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
         block_height: body[mostRecentCompositeEventBlock.operator_address].block_height,
         operator_address: mostRecentCompositeEventBlock.operator_address,
         denom: body[mostRecentCompositeEventBlock.operator_address].denom,
-        reward: reward ?? 0,
         self_stake: selfStake ?? 0,
+        reward: reward ?? 0,
+        commission: commission ?? 0,
         total_stake: totalStake ?? 0,
         total_withdraw: totalWithdraw ?? 0,
         reward_prefix_sum: rewardPrefixSum,
         self_stake_prefix_sum: selfStakePrefixSum,
+        commission_prefix_sum: commissionPrefixSum,
         total_stake_prefix_sum: totalStakePrefixSum,
         total_withdraw_prefix_sum: totalWithdrawPrefixSum
       }
@@ -376,13 +404,15 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
 
               const updateObj: { [key: string]: any } = {};
              
-              if (each.reward != 0) updateObj.reward = each.reward;
               if (each.self_stake != 0) updateObj.self_stake = each.self_stake;
+              if (each.reward != 0) updateObj.reward = each.reward;
+              if (each.commission != 0) updateObj.commission = each.commission;
               if (each.total_stake != 0) updateObj.total_stake = each.total_stake;
               if (each.total_withdraw != 0) updateObj.total_withdraw = each.total_withdraw;
 
               if (each.reward_prefix_sum != 0) updateObj.reward_prefix_sum = each.reward_prefix_sum;
               if (each.self_stake_prefix_sum != 0) updateObj.self_stake_prefix_sum = each.self_stake_prefix_sum;
+              if (each.commission_prefix_sum != 0) updateObj.commission_prefix_sum = each.commission_prefix_sum;
               if (each.total_stake_prefix_sum != 0) updateObj.total_stake_prefix_sum = each.total_stake_prefix_sum;
               if (each.total_withdraw_prefix_sum != 0) updateObj.total_withdraw_prefix_sum = each.total_withdraw_prefix_sum;
 
@@ -428,7 +458,7 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
       if (
         ((searchBy == 'block_height' && topBlockHeight) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.block_height > topBlockHeight)) ||
         ((searchBy == 'timestamp' && topTimestamp) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.timestamp > topTimestamp))
-      ) return callback(null, { self_stake: 0, withdraw: 0, average_total_stake: 0, average_withdraw: 0 });
+      ) return callback(null, { self_stake: 0, reward: 0, commission: 0, average_total_stake: 0, average_withdraw: 0 });
 
       CompositeEventBlock.searchTillExists(
         {
@@ -444,27 +474,31 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
           if (
             ((searchBy == 'block_height' && bottomBlockHeight) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.block_height < bottomBlockHeight)) ||
             ((searchBy == 'timestamp' && bottomTimestamp) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.timestamp < bottomTimestamp))
-          ) return callback(null, { self_stake: 0, withdraw: 0, average_total_stake: 0, average_withdraw: 0 });
+          ) return callback(null, { self_stake: 0, reward: 0, commission: 0, average_total_stake: 0, average_withdraw: 0 });
 
           const bottomRewardPrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.reward_prefix_sum : 0;
           const bottomSelfStakePrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.self_stake_prefix_sum : 0;
+          const bottomCommissionPrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.commission_prefix_sum : 0;
           const bottomTotalStakePrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.total_stake_prefix_sum : 0;
           const bottomTotalWithdrawPrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.total_withdraw_prefix_sum : 0;
 
           const bottomReward = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.reward : 0;
           const bottomSelfStake = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.self_stake : 0;
+          const bottomCommission = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.commission : 0;
           const bottomTotalStake = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.total_stake : 0;
           const bottomTotalWithdraw = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.total_withdraw : 0;
 
           const topRewardPrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.reward_prefix_sum : 0;
           const topSelfStakePrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.self_stake_prefix_sum : 0;
+          const topCommissionPrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.commission_prefix_sum : 0;
           const topTotalStakePrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.total_stake_prefix_sum : 0;
           const topTotalWithdrawPrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.total_withdraw_prefix_sum : 0;
 
-          const totalWithdraw = (topRewardPrefixSum - bottomRewardPrefixSum) + bottomReward;
+          const totalReward = (topRewardPrefixSum - bottomRewardPrefixSum) + bottomReward;
           const totalSelfStake = (topSelfStakePrefixSum - bottomSelfStakePrefixSum) + bottomSelfStake;
+          const totalCommission = (topCommissionPrefixSum - bottomCommissionPrefixSum) + bottomCommission;
 
-          const daysBetweenTimestamps = Math.ceil(Math.abs(topTimestamp - bottomTimestamp) / 86400);
+          const daysBetweenTimestamps = Math.ceil(Math.abs(topTimestamp - bottomTimestamp) / 86400000);
           const averageTotalStake = ((topTotalStakePrefixSum - bottomTotalStakePrefixSum) + bottomTotalStake) / daysBetweenTimestamps;
           const averageTotalWithdraw = ((topTotalWithdrawPrefixSum - bottomTotalWithdrawPrefixSum) + bottomTotalWithdraw) / daysBetweenTimestamps;
 
@@ -472,7 +506,8 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
             null,
             {
               self_stake: totalSelfStake,
-              withdraw: totalWithdraw,
+              reward: totalReward,
+              commission: totalCommission,
               average_total_stake: averageTotalStake,
               average_withdraw: averageTotalWithdraw
             }
