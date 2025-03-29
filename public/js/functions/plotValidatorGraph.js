@@ -33,7 +33,9 @@ function plotValidatorGraph(params) {
     isSelectingRange = true;
     let target = event.target;
     while (target != document.body && !target.classList.contains('each-graph-column-wrapper')) target = target.parentNode;
-    rangeInitialColumn = target;
+
+    if (target.classList.contains('each-graph-column-wrapper')) return rangeInitialColumn = target;
+    return rangeInitialColumn = document.getElementById(`validator-graph-wrapper-${operatorAddress}`).querySelectorAll('.each-graph-column-wrapper')[0];
   }
 
   const graphMouseUpHandler = (event) => {

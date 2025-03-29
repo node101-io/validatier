@@ -17,9 +17,129 @@ function getValueWithDecimals(value, currency, exhange_rate, decimals) {
   return `${shortNumberFormat((value / (10 ** decimals)) * exchangeRate)} $`
 }
 
+function createValidatorDetails(validator, activeValidatorHistory) {
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('each-validator-details-content-wrapper');
+  
+  const infoDetails = document.createElement('div');
+  infoDetails.classList.add('each-validator-info-details-content');
+  
+  // Stake Button
+  const stakeButton = document.createElement('a');
+  stakeButton.classList.add('validator-action-button');
+  stakeButton.href = `https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${validator.chain_id}&validator_address=${validator.operator_address}`;
+  stakeButton.target = '_blank';
+  stakeButton.textContent = 'Stake';
+  infoDetails.appendChild(stakeButton);
+  
+  // Validator Operator Address
+  const operatorAddressDiv = document.createElement('div');
+  operatorAddressDiv.classList.add('validator-operator-address');
+  
+  const addressContent = document.createElement('div');
+  addressContent.classList.add('validator-operator-address-content');
+  
+  const start = document.createElement('div');
+  start.textContent = validator.operator_address.slice(0, 4);
+  addressContent.appendChild(start);
+  
+  const hiddenPart = document.createElement('div');
+  hiddenPart.classList.add('hidden-part');
+  
+  const middleStart = document.createElement('span');
+  middleStart.classList.add('middle-address');
+  middleStart.textContent = validator.operator_address.slice(4, (validator.operator_address.length - 4) / 2);
+  
+  const dots = document.createElement('span');
+  dots.classList.add('dots');
+  dots.textContent = '....';
+  
+  const middleEnd = document.createElement('span');
+  middleEnd.classList.add('middle-address');
+  middleEnd.textContent = validator.operator_address.slice((validator.operator_address.length - 4) / 2, validator.operator_address.length - 4);
+  
+  hiddenPart.append(middleStart, dots, middleEnd);
+  addressContent.appendChild(hiddenPart);
+  
+  const end = document.createElement('div');
+  end.textContent = validator.operator_address.slice(validator.operator_address.length - 4);
+  addressContent.appendChild(end);
+  
+  // Copy Button
+  const copyButton = document.createElement('div');
+  copyButton.classList.add('validator-operator-address-copy-button');
+  const copyImg = document.createElement('img');
+  copyImg.src = '/res/images/clipboard.svg';
+  copyButton.appendChild(copyImg);
+  addressContent.appendChild(copyButton);
+  
+  operatorAddressDiv.appendChild(addressContent);
+  infoDetails.appendChild(operatorAddressDiv);
+  
+  // Textual Info
+  const textualInfoWrapper = document.createElement('div');
+  textualInfoWrapper.classList.add('validator-details-textual-info-wrapper');
+  
+  const websiteInfo = document.createElement('div');
+  websiteInfo.classList.add('each-validator-details-textual-info');
+  websiteInfo.textContent = `Website: ${validator.website}`;
+  
+  const descriptionInfo = document.createElement('div');
+  descriptionInfo.classList.add('each-validator-details-textual-info');
+  descriptionInfo.textContent = `Description: ${validator.description}`;
+  
+  textualInfoWrapper.append(websiteInfo, descriptionInfo);
+  infoDetails.appendChild(textualInfoWrapper);
+  
+  // Inactivity Checker
+  const inactivityWrapper = document.createElement('div');
+  inactivityWrapper.classList.add('validator-details-inactivity-wrapper');
+  
+  let eachValidatorInactivity = [];
+  let isCurrentlyActive = true;
+  
+  activeValidatorHistory.forEach(month => {
+      month.active_validators.forEach(day => {
+          if (!day.pubkeys.includes(validator.pubkey) && isCurrentlyActive) {
+              isCurrentlyActive = false;
+              eachValidatorInactivity.push(`${day.day}/${month.month}/${month.year}`);
+          } else if (day.pubkeys.includes(validator.pubkey) && !isCurrentlyActive) {
+              isCurrentlyActive = true;
+              eachValidatorInactivity.push(`${day.day}/${month.month}/${month.year}`);
+          }
+      });
+  });
+  
+  if (eachValidatorInactivity.length > 0) {
+      const inactivityTitle = document.createElement('div');
+      inactivityTitle.classList.add('each-inactivity-line-display-content', 'center');
+      inactivityTitle.textContent = 'Validator inactivity intervals';
+      inactivityWrapper.appendChild(inactivityTitle);
+      
+      for (let i = 0; i < eachValidatorInactivity.length; i += 2) {
+          const inactivityLine = document.createElement('div');
+          inactivityLine.classList.add('each-inactivity-line-display-content', 'center');
+          inactivityLine.textContent = `from ${eachValidatorInactivity[i]} to ${eachValidatorInactivity[i + 1] ? eachValidatorInactivity[i + 1] : 'today'}`;
+          inactivityWrapper.appendChild(inactivityLine);
+      }
+  } else {
+      const alwaysActive = document.createElement('div');
+      alwaysActive.classList.add('validator-activeness-always-content', 'center');
+      alwaysActive.textContent = 'Validator was always active';
+      inactivityWrapper.appendChild(alwaysActive);
+  }
+  
+  infoDetails.appendChild(inactivityWrapper);
+  wrapper.appendChild(infoDetails);
+  
+  return wrapper;
+}
+
+
 function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
   if (response.err || !response.success) return;
-  const data = response.data; 
+  const data = response.data.validators;
+  const activeValidatorHistory = response.data.activeValidatorHistory; 
 
   document.getElementById('validators-main-wrapper').innerHTML = '';
   renderTableHeader(sort_by, sortOrderMapping[sort_by]);
@@ -75,70 +195,7 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
       monikerDiv.appendChild(inactivityDiv);
     }
 
-    const stakeButton = document.createElement('a');
-    stakeButton.classList.add('validator-action-button');
-    stakeButton.innerHTML = 'Stake';
-    stakeButton.target = '_blank';
-    stakeButton.href = `https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${validator.chain_id}&validator_address=${validator.operator_address}`
-
-    const plotButton = document.createElement('div');
-    plotButton.classList.add('validator-action-button');
-    plotButton.classList.add('validator-plot-graph-button');
-    plotButton.setAttribute('operator-address', validator.operator_address);
-    plotButton.innerHTML = 'Plot';
-
-    monikerDiv.appendChild(stakeButton);
-    monikerDiv.appendChild(plotButton);
-
-    const operatorAddressDiv = document.createElement('div');
-    operatorAddressDiv.classList.add('validator-operator-address');
-    
-    const operatorAddressContentDiv = document.createElement('div');
-    operatorAddressContentDiv.classList.add('validator-operator-address-content');
-    
-    operatorAddressContentDiv.setAttribute('operator_address', validator.operator_address);
-
-    const firstFourSpan = document.createElement('div');
-    firstFourSpan.innerHTML = validator.operator_address.slice(0, 4);
-
-    const hiddenPartDiv = document.createElement('div');
-    hiddenPartDiv.classList.add('hidden-part');
-
-    const dotsSpan = document.createElement('span');
-    dotsSpan.classList.add('dots');
-    dotsSpan.innerHTML = '....';
-
-    const firstMiddleSpan = document.createElement('span');
-    firstMiddleSpan.classList.add('middle-address');
-    firstMiddleSpan.innerHTML = validator.operator_address.slice(4, (validator.operator_address.length - 4) / 2);
-
-    const secondMiddleSpan = document.createElement('span');
-    secondMiddleSpan.classList.add('middle-address');
-    secondMiddleSpan.innerHTML = validator.operator_address.slice((validator.operator_address.length - 4) / 2, validator.operator_address.length - 4);
-
-    const lastFourSpan = document.createElement('div');
-    lastFourSpan.innerHTML = validator.operator_address.slice(validator.operator_address.length - 4);
-
-    const operatorAddressIcon = document.createElement('div');
-    operatorAddressIcon.classList.add('validator-operator-address-copy-button');
-    
-    const operatorAddressIconImageContent = document.createElement('img');
-    operatorAddressIconImageContent.classList.add('center');
-    operatorAddressIconImageContent.src = '/res/images/clipboard.svg';
-    
-    hiddenPartDiv.appendChild(firstMiddleSpan);
-    hiddenPartDiv.appendChild(dotsSpan);
-    hiddenPartDiv.appendChild(secondMiddleSpan);
-    
-    operatorAddressContentDiv.appendChild(firstFourSpan);
-    operatorAddressContentDiv.appendChild(hiddenPartDiv);
-    operatorAddressContentDiv.appendChild(lastFourSpan);
-    operatorAddressIcon.appendChild(operatorAddressIconImageContent);
-    operatorAddressContentDiv.appendChild(operatorAddressIcon);
-    operatorAddressDiv.appendChild(operatorAddressContentDiv);
-  
     textualInfoWrapper.appendChild(monikerDiv);
-    textualInfoWrapper.appendChild(operatorAddressDiv);
   
     tdInfo.appendChild(rankingDiv);
     tdInfo.appendChild(validatorImageDiv);
@@ -186,7 +243,10 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     tr.appendChild(soldTd);
   
     document.getElementById('validators-main-wrapper').appendChild(tr);
-    
+
+    const detailsWrapper = createValidatorDetails(validator, activeValidatorHistory);
+    document.getElementById('validators-main-wrapper').appendChild(detailsWrapper);
+
     const eachValidatorSeperatorDiv = document.createElement('div');
     eachValidatorSeperatorDiv.classList.add('each-validator-wrapper-seperator-line');
     document.getElementById('validators-main-wrapper').appendChild(eachValidatorSeperatorDiv)
@@ -287,7 +347,12 @@ function renderValidators() {
   document.body.addEventListener('mouseover', (event) => {
     let target = event.target;
     while (target != document.body && !target.classList.contains('each-validator-wrapper')) target = target.parentNode;
-    if (!target.classList.contains('each-validator-wrapper')) return;
+    
+    document.querySelectorAll('.validator-moniker-text').forEach(each => {
+      if (each.innerHTML == target.querySelector('.validator-moniker-text').innerHTML) return;
+      each.style.animation = 'none';
+      each.style.position = 'inline-block';
+    })
 
     const monikerWrapper = target.children[0].children[2].children[0];
     animateOverflowMonikers(monikerWrapper);

@@ -13,7 +13,6 @@ block content
             img#current-network-img(src=`${selectedChain.image ? selectedChain.image : ''}`)
           .network-switch-network-info-wrapper 
             .network-switch-network-title#current-network-name= selectedChain.pretty_name ? selectedChain.pretty_name : 'Cosmos Hub'
-            .network-switch-network-symbol(style='display: none')#current-network-symbol= selectedChain.symbol
           .network-switch-drowdown-toggle#network-switch-dropdown-arrow
             include ../icons/chevron.pug
         .network-switch-dropdown#network-switch-dropdown

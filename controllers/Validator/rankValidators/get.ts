@@ -3,6 +3,7 @@ import Validator from '../../../models/Validator/Validator.js';
 import { SortOrder } from 'mongoose';
 import { isValidSortBy } from '../../../utils/isValidSortBy.js';
 import { isValidSortOrder } from '../../../utils/isValidSortOrder.js';
+import ActiveValidators from '../../../models/ActiveValidators/ActiveValidators.js';
 
 export default (req: Request, res: Response): any => {
 
@@ -25,7 +26,17 @@ export default (req: Request, res: Response): any => {
     { sort_by: sortBy, order: sortOrder, bottom_timestamp: parseInt(bottomTimestamp), top_timestamp: parseInt(topTimestamp), chain_identifier: chainIdentifier, with_photos: withPhotos },
     (err, validators) => {
       if (err) return res.json({ err: err, success: false });
-      return res.json({ success: true, data: validators });
+
+      ActiveValidators.getActiveValidatorHistoryByChain({ chain_identifier: chainIdentifier }, (err, activeValidatorHistory) => {
+        if (err) return res.json({ err: err, success: false });
+        return res.json({
+          success: true,
+          data: {
+            validators: validators,
+            activeValidatorHistory: activeValidatorHistory
+          }
+        });
+      });
     }
   );
 };

@@ -1,10 +1,5 @@
 function animateOverflowMonikers(monikerWrapper) {
 
-  document.querySelectorAll('.validator-moniker-text').forEach(each => {
-    each.style.animation = 'none';
-    each.style.position = 'inline-block';
-  })
-
   const container = monikerWrapper.children[0];
   const monikerText = monikerWrapper.children[0].children[0];
 
@@ -12,9 +7,9 @@ function animateOverflowMonikers(monikerWrapper) {
     const containerWidth = container.offsetWidth;
     const textWidth = monikerText.scrollWidth;
     if (textWidth > containerWidth) {
-      monikerWrapper.setAttribute('is_animating', 'true');
-      monikerText.style.animation = `scrollText ${(textWidth/containerWidth) * 2}s linear infinite alternate`;
-      monikerText.style.position = 'relative';
+      const animation = `scrollText ${(textWidth/containerWidth) * 2}s linear infinite alternate`;
+      monikerText.style.animation = animation;
+      monikerText.style.position = monikerText.style.position = 'relative';
     } else {
       monikerText.style.animation = 'none';
     }

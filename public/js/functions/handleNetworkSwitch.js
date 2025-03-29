@@ -3,7 +3,6 @@ const rankingResponsesCache = {};
 
 function setSelectedChain (pretty_name, symbol, src, name) {
   document.getElementById('current-network-name').innerHTML = pretty_name;
-  document.getElementById('current-network-symbol').innerHTML = symbol;
   document.getElementById('current-network-img').src = src;
   document.getElementById('network-switch-header').setAttribute('chain_identifier', name);
 }
@@ -92,8 +91,6 @@ function handleNetworkSwitch () {
     document.getElementById('network-switch-header').setAttribute('current_chain_symbol', chainSymbol);
     document.getElementById('network-switch-header').setAttribute('current_chain_decimals', chainDecimals);
     document.getElementById('network-switch-header').setAttribute('current_chain_usd_exhange_rate', usdExchangeRate);
-
-    document.getElementById('currency-switch-current-chain-symbol').innerHTML = chainSymbol;
 
     if (cacheResponse) return generateValidatorRankingContent(cacheResponse, 'ratio', 'desc');
 
