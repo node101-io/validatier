@@ -3,8 +3,8 @@ function renderTableHeader (sort_by, order) {
   const validatorsWrapper = document.getElementById('validators-main-wrapper');
 
   const headersArray = [
-    {name: 'Stake', id: 'total_stake'}, 
-    {name: 'Withdraw', id: 'total_withdraw'}, 
+    {name: 'Avg Stake', id: 'total_stake'}, 
+    {name: 'Avg Withdraw', id: 'total_withdraw'}, 
     { name: 'Self-stake', id: 'self_stake' },
     { name: 'Reward', id: 'reward' },
     { name: 'Commission', id: 'commission' },

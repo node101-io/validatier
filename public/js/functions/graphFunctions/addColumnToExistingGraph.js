@@ -88,6 +88,7 @@ function addColumnToExistingGraph (params) {
       while (current != target) {
         let selfStakeBottom;
         let withdrawBottom;
+        let commissionBottom;
         if (target.getAttribute('timestamp') < rangeInitialColumn.getAttribute('timestamp')) {
           isSelectionDirectionToLeft = true;
           if (!current.previousSibling) break;
@@ -139,16 +140,19 @@ function addColumnToExistingGraph (params) {
         current.children[9].style.bottom = `calc((${selfStakeBottom.replace('calc', '')}) - 100%)`;
         current.children[9].style.transform = `rotateZ(${selfStakeAngle}) skewX(${selfStakeAngle})`;
         current.children[9].style.backgroundColor = 'lightgreen';
+        current.children[9].style.zIndex = '0';
 
         current.children[10].style.width = withdrawHypotenuse;
         current.children[10].style.bottom = `calc((${withdrawBottom.replace('calc', '')}) - 100%)`;
         current.children[10].style.transform = `rotateZ(${withdrawAngle}) skewX(${withdrawAngle})`;
         current.children[10].style.backgroundColor = 'lightcoral';
+        current.children[10].style.zIndex = '5';
 
         current.children[11].style.width = commissionHypotenuse;
         current.children[11].style.bottom = `calc((${commissionBottom.replace('calc', '')}) - 100%)`;
         current.children[11].style.transform = `rotateZ(${commissionAngle}) skewX(${commissionAngle})`;
         current.children[11].style.backgroundColor = 'orange';
+        current.children[11].style.zIndex = '3';
 
         rangeFinalColumn = current;
         if (target.getAttribute('timestamp') < rangeInitialColumn.getAttribute('timestamp')) current = current.previousSibling;
@@ -194,14 +198,14 @@ function addColumnToExistingGraph (params) {
       paintBarWithdraw.style.width = `calc((${left / deltaX}) * ${withdrawHypotenuse.replace('calc', '')})`;
       paintBarWithdraw.style.bottom = `calc((${withdrawBottom.replace('calc', '')}) - 100%)`;
       paintBarCommission.style.width = `calc((${left / deltaX}) * ${commissionHypotenuse.replace('calc', '')})`;
-      paintBarCommission.style.bottom = `calc((${commissionHypotenuse.replace('calc', '')}) - 100%)`;
+      paintBarCommission.style.bottom = `calc((${commissionBottom.replace('calc', '')}) - 100%)`;
     }
     paintBarSelfStake.style.transform = `rotateZ(${selfStakeAngle}) skewX(${selfStakeAngle})`;
     paintBarSelfStake.style.backgroundColor = 'lightgreen';
     paintBarWithdraw.style.transform = `rotateZ(${withdrawAngle}) skewX(${withdrawAngle})`;
-    paintBarWithdraw.style.backgroundColor = 'lightcoral'
+    paintBarWithdraw.style.backgroundColor = 'lightcoral';
     paintBarCommission.style.transform = `rotateZ(${commissionAngle}) skewX(${commissionAngle})`;
-    paintBarCommission.style.backgroundColor = 'lightcoral'
+    paintBarCommission.style.backgroundColor = 'orange';
   };
   const columnMouseLeaveHandler = (event) => {
     document.querySelectorAll('.each-data-point-hovered').forEach(each => each.classList.remove('each-data-point-hovered'));

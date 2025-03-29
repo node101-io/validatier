@@ -1,8 +1,6 @@
 import { request } from 'undici';
 import decodeTxs, { DecodedMessage, Event } from './decodeTxs.js';
 import { getSlashEventsFromFinalizeBlockEvents } from './getSlashEventsFromFinalizeBlockEvents.js';
-import Validator from '../models/Validator/Validator.js';
-import Chain from '../models/Chain/Chain.js';
 
 export interface DataInterface {
   result: {
@@ -31,7 +29,9 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
       const data = block_promise_res.value;
       const data_block_results = block_results_promise_res.value;
 
-      if (!data_block_results.result || !data_block_results.result.finalize_block_events || !data.result?.block?.data?.txs || data.result?.block?.data?.txs.length <= 0 || !data.result?.block?.header?.height || !data.result?.block?.header?.time) return callback(null, []);
+      if (!data_block_results.result || !data_block_results.result.finalize_block_events || !data.result?.block?.data?.txs || data.result?.block?.data?.txs.length <= 0 || !data.result?.block?.header?.height) 
+        return callback(null, { time: data.result?.block?.header?.time ? data.result?.block?.header?.time : '', decodedTxs: []});
+
       const finalizeBlockEvents = data_block_results.result.finalize_block_events;
       const time = data.result?.block?.header?.time;
       
@@ -49,7 +49,10 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
       const decodedTxs = decodeTxs(txs, events, denom, data.result?.block?.header?.time)
       if (slashMessages && slashMessages.length > 0) decodedTxs.push({ messages: slashMessages });
       
-      return callback(null, decodedTxs);
+      return callback(null, {
+        time: time,
+        decodedTxs: decodedTxs
+      });
     })
     .catch(err => console.log(err));
 }

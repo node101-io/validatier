@@ -19,6 +19,9 @@ export interface ValidatorInterface {
   delegator_address: string;
   chain_identifier: string;
   moniker: string;
+  website: string;
+  description: string;
+  secuirty_contact: string;
   commission_rate: string;
   keybase_id: string;
   temporary_image_uri: string;
@@ -33,6 +36,9 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       delegator_address: string;
       chain_identifier: string;
       moniker: string;
+      website: string;
+      description: string;
+      secuirty_contact: string;
       commission_rate: string;
       keybase_id: string;
       created_at: Date;
@@ -49,6 +55,9 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       delegator_address: string;
       chain_identifier: string;
       moniker: string;
+      website: string;
+      description: string;
+      secuirty_contact: string;
       commission_rate: string;
       keybase_id: string;
       created_at: Date;
@@ -65,6 +74,9 @@ interface ValidatorModel extends Model<ValidatorInterface> {
     body: {
       operator_address: string;
       moniker: string;
+      website: string;
+      description: string;
+      secuirty_contact: string;
       commission_rate: string;
       keybase_id: string;
     }, 
@@ -177,6 +189,21 @@ const validatorSchema = new Schema<ValidatorInterface>({
     minlength: 1,
     maxlength: MAX_DATABASE_TEXT_FIELD_LENGTH
   },
+  website: { 
+    type: String, 
+    trim: true,
+    required: false
+  },
+  description: { 
+    type: String, 
+    trim: true,
+    required: false
+  },
+  secuirty_contact: { 
+    type: String, 
+    trim: true,
+    required: false
+  },
   commission_rate: { 
     type: String, 
     required: true,
@@ -203,7 +230,7 @@ validatorSchema.statics.saveValidator = function (
   body: Parameters<ValidatorModel['saveValidator']>[0], 
   callback: Parameters<ValidatorModel['saveValidator']>[1],
 ) {
-  const { operator_address, moniker, commission_rate, keybase_id, chain_identifier } = body;
+  const { operator_address, moniker, commission_rate, keybase_id, chain_identifier, description, secuirty_contact, website } = body;
   if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
 
   Validator
@@ -226,7 +253,10 @@ validatorSchema.statics.saveValidator = function (
         operator_address: operator_address,
         moniker: moniker,
         commission_rate: commission_rate,
-        keybase_id: keybase_id
+        keybase_id: keybase_id,
+        website: website,
+        description: description,
+        secuirty_contact: secuirty_contact
       }
 
       Validator.updateValidator(updateAndChangeValidatorBody, (err, updatedValidator) => {
@@ -288,17 +318,22 @@ validatorSchema.statics.updateValidator = function (
   callback: Parameters<ValidatorModel['updateValidator']>[1],
 ) {
   
-  const { operator_address, moniker, commission_rate, keybase_id } = body;
+  const { operator_address, moniker, commission_rate, keybase_id, website, secuirty_contact, description } = body;
   
   Validator
-    .findOne({ operator_address: operator_address })
-    .sort({ created_at: -1 })
+    .findOneAndUpdate(
+      { operator_address: operator_address },
+      {
+        moniker: moniker,
+        commission_rate: commission_rate,
+        keybase_id: keybase_id,
+        website: website,
+        secuirty_contact: secuirty_contact,
+        description: description
+      }  
+    )
     .then(validator => {
       if (!validator) return callback('bad_request', null);
-      validator.moniker = moniker;
-      validator.commission_rate = commission_rate;
-      validator.keybase_id = keybase_id;
-      validator.save();
       return callback(null, validator);
     })
     .catch(err => callback(err, null));
@@ -374,11 +409,13 @@ validatorSchema.statics.rankValidators = function (
                   const ratio = (totalPeriodicSelfStakeAndWithdraw?.self_stake ? (totalPeriodicSelfStakeAndWithdraw?.self_stake) : 0) / (totalPeriodicSelfStakeAndWithdraw?.reward ? totalPeriodicSelfStakeAndWithdraw?.reward : (10 ** chain?.decimals));
                   const sold = (totalPeriodicSelfStakeAndWithdraw?.reward ? totalPeriodicSelfStakeAndWithdraw?.reward : 0) - (totalPeriodicSelfStakeAndWithdraw?.self_stake ? totalPeriodicSelfStakeAndWithdraw?.self_stake : 0);
 
-
                   if (err) return next(new Error(err))
                   const pushObjectData = {
-                    operator_address: eachValidator.operator_address,
-                    moniker: eachValidator.moniker,
+                    pubkey: eachValidator.pubkey ? eachValidator.pubkey : '',
+                    operator_address: eachValidator.operator_address ? eachValidator.operator_address : '',
+                    moniker: eachValidator.moniker ? eachValidator.moniker : '',
+                    website: eachValidator.website ? eachValidator.website : '',
+                    description: eachValidator.description ? eachValidator.description : '',
                     temporary_image_uri: eachValidator.temporary_image_uri,
                     self_stake: selfStake ? selfStake : 0,
                     reward: reward ? reward : 0,
@@ -391,7 +428,11 @@ validatorSchema.statics.rankValidators = function (
                     sold: sold
                   };
 
-                  if (!with_photos) delete pushObjectData.temporary_image_uri;
+                  if (!with_photos) {
+                    delete eachValidator.website;
+                    delete eachValidator.description;
+                    delete pushObjectData.temporary_image_uri;
+                  }
 
                   validatorsArray.push(pushObjectData);
                   pushedValidatorOperatorAddressArray.push(pushObjectData.operator_address);
@@ -483,7 +524,7 @@ validatorSchema.statics.updateLastVisitedBlock = function (
   callback: Parameters<ValidatorModel['updateLastVisitedBlock']>[1]
 ) {
   const { chain_identifier, block_height, block_time } = body;
-
+  
   Chain
     .findOneAndUpdate(
       { name: chain_identifier },

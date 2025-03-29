@@ -211,6 +211,9 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
       paintBlocksInBetween();
       updateDateInputs();
     } else {
+      let target = event.target;
+      while (target != document.documentElement && !target.classList.contains('date-picker')) target = target.parentNode;
+      if (target.classList.contains('date-picker')) return;
       document.getElementById('picker-main-wrapper').style.transform = 'perspective(1000px) rotateX(-90deg)';
       document.getElementById('picker-main-wrapper').style.opacity = 0;
       document.getElementById('picker-main-wrapper').previousSibling.children[document.getElementById('picker-main-wrapper').previousSibling.children.length - 1].style.transform = 'rotateX(0deg)';
@@ -260,8 +263,16 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
   }
 
   const changeCalendarFormat = (event) => {
+    let target = event.target;
+    while (target != document.body && !target.classList.contains('each-start-day-choice')) target = target.parentNode;
+    if (!target.classList.contains('each-start-day-choice')) return;
 
-    calendarFormatToggle.value = calendarFormatToggle.value == 'monday' ? 'sunday' : 'monday';
+    calendarFormatToggle.value = target.getAttribute('value');
+    target.parentNode.querySelectorAll('.general-choice-radio-button-inner-circle')
+      .forEach(each => {
+        if (each.getAttribute('value') == target.getAttribute('value')) return each.style.display = 'unset';
+        return each.style.display = 'none';
+      })
 
     const startDayMonday = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
     const startDaySunday = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
@@ -295,7 +306,6 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
   document.addEventListener('click', clickEventListener);
   eventListeners.push({ element: document, event: 'click', listener: clickEventListener });
 
-  calendarFormatToggle.addEventListener('change', changeCalendarFormat);
-  eventListeners.push({ element: calendarFormatToggle, event: 'change', listener: changeCalendarFormat });
-
+  document.body.addEventListener('click', changeCalendarFormat);
+  eventListeners.push({ element: document.body, event: 'click', listener: changeCalendarFormat });
 }

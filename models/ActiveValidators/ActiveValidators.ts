@@ -15,14 +15,23 @@ interface ActiveValidatorsModel extends Model<ActiveValidatorsInterface> {
   saveActiveValidators: (
     body: {
       chain_identifier: string;
-      month: number,
-      year: number,
+      month: number;
+      year: number;
       day: number;
-      active_validators_pubkeys_array: string[]
+      active_validators_pubkeys_array: string[];
     },
     callback: (
       err: string | null,
       savedActiveValidators: ActiveValidatorsInterface | null
+    ) => any
+  ) => any;
+  getActiveValidatorHistoryByChain: (
+    body: {
+      chain_identifier: string;
+    },
+    callback: (
+      err: string | null,
+      activeValidatorHistory: ActiveValidatorsInterface[] | null,
     ) => any
   ) => any
 }
@@ -35,8 +44,8 @@ const activeValidatorsSchema = new Schema<ActiveValidatorsInterface>({
   month: {
     type: Number,
     required: true,
-    min: 0,
-    max: 11
+    min: 1,
+    max: 12
   },
   year: {
     type: Number,
@@ -83,6 +92,20 @@ activeValidatorsSchema.statics.saveActiveValidators = function (
         .catch(err => callback(err, null));
     })
     .catch(err => callback(err, null));
+}
+
+
+activeValidatorsSchema.statics.getActiveValidatorHistoryByChain = function (
+  body: Parameters<ActiveValidatorsModel['getActiveValidatorHistoryByChain']>[0],
+  callback: Parameters<ActiveValidatorsModel['getActiveValidatorHistoryByChain']>[1]
+) {
+
+  const { chain_identifier } = body;
+
+  ActiveValidators
+    .find({ chain_identifier: chain_identifier })
+    .then(activeValidatorHistory => callback(null, activeValidatorHistory))
+    .catch(err => callback(err, null))
 }
 
 

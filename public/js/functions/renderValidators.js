@@ -285,20 +285,11 @@ function renderValidators() {
   })
 
   document.body.addEventListener('mouseover', (event) => {
-    if (!event.target.classList.contains('each-validator-wrapper') && !event.target.classList.contains('validator-moniker')) return;
-
-    const monikerWrapper = event.target.children[0].children[2].children[0];
-    animateOverflowMonikers(monikerWrapper);
-  })
-
-  document.body.addEventListener('mouseover', (event) => {
-
-    document.querySelectorAll('.validator-operator-address-visible').forEach(each => each.classList.remove('validator-operator-address-visible'));
     let target = event.target;
     while (target != document.body && !target.classList.contains('each-validator-wrapper')) target = target.parentNode;
     if (!target.classList.contains('each-validator-wrapper')) return;
-    
-    const operatorAddressWrapper = target.children[0].children[2].children[1];
-    operatorAddressWrapper.classList.add('validator-operator-address-visible');
+
+    const monikerWrapper = target.children[0].children[2].children[0];
+    animateOverflowMonikers(monikerWrapper);
   })
 }

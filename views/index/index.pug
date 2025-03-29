@@ -13,7 +13,7 @@ block content
             img#current-network-img(src=`${selectedChain.image ? selectedChain.image : ''}`)
           .network-switch-network-info-wrapper 
             .network-switch-network-title#current-network-name= selectedChain.pretty_name ? selectedChain.pretty_name : 'Cosmos Hub'
-            .network-switch-network-symbol#current-network-symbol= selectedChain.symbol
+            .network-switch-network-symbol(style='display: none')#current-network-symbol= selectedChain.symbol
           .network-switch-drowdown-toggle#network-switch-dropdown-arrow
             include ../icons/chevron.pug
         .network-switch-dropdown#network-switch-dropdown
@@ -23,15 +23,15 @@ block content
             input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search')
           each chain in chains 
             .each-chain-wrapper(id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}` symbol=`${chain.symbol}` decimals=`${chain.decimals}` usd_exchange_rate=`${chain.usd_exchange_rate}`)
-              .network-switch-network-image-wrapper(class='center')
-                img#current-network-img(src=`${chain.image}` style='width: 25px; height: 25px; margin-right: 10px;')
+              .network-switch-network-image-wrapper(class='center network-unselected-image-wrapper')
+                img(src=`${chain.image}`)
               .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
-                .network-switch-network-title(style='text-wrap: nowrap')#current-network-name= chain.pretty_name
-                .network-switch-network-symbol(style='text-wrap: nowrap')#current-network-symbol= chain.symbol
+                .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
+                .network-switch-network-symbol(style='text-wrap: nowrap')= chain.symbol
     .inner-main-wrapper#inner-main-wrapper
-      .general-title-description-wrapper
-        h2 node101 | Cosmos Validator Timeline
-        p node101's journey as a Cosmos validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.
+      .main-greeting-title-description-wrapper
+        .main-greeting-title-content What Is Lorem Ipsum?
+        .main-greeting-description-content Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. 
       .table-main-wrapper
         .table-filters
           .validator-filter-input-wrapper
@@ -39,14 +39,16 @@ block content
               .validator-search-icon(class='center')
                 include ../icons/search.svg
               input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search name / operator address')
+          .currency-switch-wrapper(id='currency-toggle' value=`${currency_type ? currency_type : 'native'}`)
+            .each-currency-switch-wrapper(value='native')
+              .general-choice-radio-button(class='center')
+                .general-choice-radio-button-inner-circle(value='native' style=`${currency_type == 'native' ? 'display: unset' : ''}`)
+              .each-currency-switch-label #{selectedChain.symbol ? selectedChain.symbol : 'ATOM'}
+            .each-currency-switch-wrapper(value='usd')
+              .general-choice-radio-button(class='center')
+                .general-choice-radio-button-inner-circle(value='usd' style=`${currency_type == 'usd' ? 'display: unset' : ''}`)
+              .each-currency-switch-label $ Dollar
           .table-filters-subgroup 
-            .currency-switch-wrapper
-              .each-currency-switch-label#currency-switch-current-chain-symbol #{selectedChain.symbol ? selectedChain.symbol : 'ATOM'}
-              .switch
-                input(type='checkbox' id='currency-toggle' class='switch-checkbox' value=`${currency_type ? currency_type : 'native'}` checked=(currency_type === 'usd'))
-                label(for='currency-toggle', class='switch-label')
-                  span(class='switch-button')
-              .each-currency-switch-label $
             .date-picker
               .selected-range 
                 span.date-interval-description 
@@ -96,34 +98,48 @@ block content
                       .month-wrapper
                         .days#month-wrapper
                 .buttons
-                  div.switch
-                    input(type='checkbox' id='calendar-format-toggle' class='switch-checkbox' value=`${startDay ? startDay : 'monday'}` checked=(startDay === 'sunday'))
-                    label(for='calendar-format-toggle', class='switch-label')
-                      span(class='switch-button')
+                  .calendar-start-day-wrapper(id='calendar-format-toggle' value=`${startDay ? startDay : 'monday'}`)
+                    .calendar-start-day-toggle-title Week Starts on
+                    .each-start-day-choice(value='monday')
+                      .general-choice-radio-button(class='center')
+                        .general-choice-radio-button-inner-circle(style=`${startDay == 'monday' ? 'display: unset' : ''}` value='monday')
+                      span Monday
+                    .each-start-day-choice(value='sunday')
+                      .general-choice-radio-button(class='center')
+                        .general-choice-radio-button-inner-circle(style=`${startDay == 'sunday' ? 'display: unset' : ''}` value='sunday')
+                      span Sunday
                   button.cancel#cancel Cancel
                   button.apply#apply Apply
             .export-main-wrapper 
               .export-wrapper-header(class='center' isOpen='false')#export-wrapper-toggle
                 include ../icons/export.csv
               .export-wrapper-content
+                .export-wrapper-content-title Lorem ipsum dolor?
                 div(style='display: none')
                   div#export-sort-by ratio
                   div#export-order desc
                   div#export-bottom 24650450
                   div#export-top 24650540
-                .each-export-choice(range=0 class='export-choice-selected') All time
-                .each-export-choice(range=(7 * 86400 * 1000)) Every 7 days
-                .each-export-choice(range=(30 * 86400 * 1000)) Every 30 days
-                .each-export-choice(range=(90 * 86400 * 1000)) Every 90 days
-                .each-export-choice(range=(365 * 86400 * 1000)) Every year
-                button.export-choice-download-button(class='center')#export-choice-download-button
-                  include ../icons/download.pug
-                  span Download
+                -
+                  const export_choices = [
+                    { label: 'All time', range: 0, is_selected: true },
+                    { label: 'Weekly', range: 7 * 86400 * 1000 },
+                    { label: 'Monthly', range: 30 * 86400 * 1000 },
+                    { label: 'Yearly', range: 365 * 86400 * 1000 },
+                  ]
+                each export_choice in export_choices
+                  .each-export-choice(range=export_choice.range class=`${export_choice.is_selected ? 'export-choice-selected' : ''}`)
+                    .general-choice-radio-button(class='center')
+                      .general-choice-radio-button-inner-circle(style=`${export_choice.is_selected ? 'display: unset' : ''}`)
+                    span= export_choice.label
+                .export-action-buttons-wrapper
+                  button.export-choice-action-button(class='center export-choice-download-button')#export-choice-download-button Download
+                  button.export-choice-action-button(class='center')#export-choice-cancel-button Cancel
         .validators-main-wrapper#validators-main-wrapper(validators=validators)
           - 
             const headers_array = [
-              {name: 'Stake', id: 'total_stake'}, 
-              {name: 'Withdraw', id: 'total_withdraw'}, 
+              {name: 'Avg Stake', id: 'total_stake'}, 
+              {name: 'Avg Withdraw', id: 'total_withdraw'}, 
               {name: 'Self-stake', id: 'self_stake'}, 
               {name: 'Reward', id: 'reward'}, 
               {name: 'Commission', id: 'commission'}, 
@@ -160,18 +176,6 @@ block content
                     if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
                       .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
                         img(src='/res/images/warning.svg')
-                    a.validator-action-button(href=`https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${validator.chain_id}&validator_address=${validator.operator_address}` target='_blank') Stake
-                    .validator-action-button(class='validator-plot-graph-button' operator-address=`${validator.operator_address}`) Plot
-                  .validator-operator-address
-                    .validator-operator-address-content(operator_address=`${validator.operator_address}`)
-                      div= validator.operator_address.slice(0,4)
-                      .hidden-part
-                        span.middle-address= validator.operator_address.slice(4, (validator.operator_address.length - 4) / 2)
-                        span.dots ....
-                        span.middle-address= validator.operator_address.slice((validator.operator_address.length - 4) / 2, validator.operator_address.length - 4)
-                      div= validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)
-                      .validator-operator-address-copy-button
-                        img(src='/res/images/clipboard.svg')
               -
                 function shortNumberFormat(num) {
                   const sign = num < 0 ? '-' : '';
@@ -200,6 +204,44 @@ block content
               div.validator-each-numeric-info(native=`${getValue(validator.commission, symbol)}` usd=`${getValue(validator.commission, 'usd')}`)= currency_type == 'native' ? getValue(validator.commission, symbol) : getValue(validator.commission, 'usd')
               div.validator-each-numeric-info(class='validator-ratio')= shortNumberFormat(validator.ratio)
               div.validator-each-numeric-info(native=`${getValue(validator.sold, symbol)}` usd=`${getValue(validator.sold, 'usd')}`)= currency_type == 'native' ? getValue(validator.sold, symbol) : getValue(validator.sold, 'usd')
+            .each-validator-details-content-wrapper
+              .each-validator-info-details-content
+                a.validator-action-button(href=`https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${validator.chain_id}&validator_address=${validator.operator_address}` target='_blank') Stake
+                .validator-operator-address
+                  .validator-operator-address-content(operator_address=`${validator.operator_address}`)
+                    div= validator.operator_address.slice(0,4)
+                    .hidden-part
+                      span.middle-address= validator.operator_address.slice(4, (validator.operator_address.length - 4) / 2)
+                      span.dots ....
+                      span.middle-address= validator.operator_address.slice((validator.operator_address.length - 4) / 2, validator.operator_address.length - 4)
+                    div= validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)
+                    .validator-operator-address-copy-button
+                      img(src='/res/images/clipboard.svg')
+                .validator-details-textual-info-wrapper 
+                  .each-validator-details-textual-info Website: #{validator.website}
+                  .each-validator-details-textual-info Description: #{validator.description}
+                .validator-details-inactivity-wrapper 
+                  - const eachValidatorInactivity = [];
+                  - var isCurrentlyActive = true;
+
+                  each month in activeValidatorHistory
+                    each day in month.active_validators
+                      if (!day.pubkeys.includes(validator.pubkey) && isCurrentlyActive)
+                        - isCurrentlyActive = false 
+                        - eachValidatorInactivity.push(`${day.day}/${month.month}/${month.year}`)
+                      else if (day.pubkeys.includes(validator.pubkey) && !isCurrentlyActive)
+                        - isCurrentlyActive = true
+                        - eachValidatorInactivity.push(`${day.day}/${month.month}/${month.year}`)
+
+                  if eachValidatorInactivity.length > 0
+                    .each-inactivity-line-display-content(class='center') Validator inactivity intervals
+                    - let i = 0
+                    while i < eachValidatorInactivity.length
+                      .each-inactivity-line-display-content(class='center') from #{eachValidatorInactivity[i]} to #{eachValidatorInactivity[i+1] ? eachValidatorInactivity[i+1] : 'today'}
+                      - i += 2
+                  else 
+                    .validator-activeness-always-content(class='center') Validator was always active
+                                  
             .each-validator-wrapper-seperator-line
     .footer-main-wrapper(class='center')
       .footer-main-title Connect us 

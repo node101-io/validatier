@@ -3,6 +3,7 @@
   :root {
     --each-validator-wrapper-gap: 50px;
     --validator-table-header-gap: 50px;
+    --table-filters-subgroup-gap: 40px;
   }
   .validator-operator-address:hover .dots {
     max-width: fit-content;
@@ -19,6 +20,7 @@
   :root {
     --each-validator-wrapper-gap: 30px;
     --validator-table-header-gap: 30px;
+    --table-filters-subgroup-gap: 30px;
   }
 }
 
@@ -26,6 +28,8 @@
   :root {
     --each-validator-wrapper-gap: 10px;
     --validator-table-header-gap: 10px;
+    --table-filters-subgroup-gap: 20px;
+    --currency-switch-wrapper-gap: 20px;
 
     --banner-title-content-font-size: 20px;
     --each-table-header-title-font-size: 20px;
@@ -56,6 +60,7 @@
     --footer-main-wrapper-vertical-padding: 30px;
     --footer-main-wrapper-gap: 14px;
     --each-social-icon-size: 24px;
+    --table-filters-subgroup-gap: 10px;
   }
 }
 
@@ -64,6 +69,7 @@
     --each-validator-wrapper-gap: 0px;
     --validator-table-header-gap: 0px;
     --footer-main-title-font-size: 36px;
+    --currency-switch-wrapper-gap: 10px;
   }
 }
 
@@ -72,7 +78,9 @@
 
     --default-inner-image-content-height: 32px;
     --network-switch-header-height: 32px;
+    --currency-switch-wrapper-gap: 5px;
 
+    --table-filters-subgroup-gap: 0px;
     --date-picker-z-index: 10;
     --date-picker-height: 48px;
   

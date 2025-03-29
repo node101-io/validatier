@@ -17,6 +17,7 @@ import { startCronJobs } from './cron/startCronJobs.js';
 import { getGenesisTxs } from './utils/getGenesisTxs.js';
 import getTxsByHeight from './utils/getTxsByHeight.js';
 import Chain from './models/Chain/Chain.js';
+import decodeTransactions from './utils/decodeTxs.js';
 
 dotenv.config();
 
@@ -37,7 +38,7 @@ app.use(rateLimit({
 }));
 
 mongoose
-  .connect('mongodb://127.0.0.1:27017/validator-timeline-test-v4')
+  .connect('mongodb://127.0.0.1:27017/validator-timeline-test-v5')
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
@@ -52,4 +53,6 @@ app.use('/', indexRouter);
 app.use('/composite_event_block', compositeEventBlockRouter);
 app.use('/validator', validatorRouter);
 
+// startFetchingData();
+// startCronJobs();
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));

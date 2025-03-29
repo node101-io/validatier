@@ -27,9 +27,9 @@ export default (req: Request, res: Response): any => {
 
   const bottomTimestamp = parseInt(bottom_timestamp, 10);
   const topTimestamp = parseInt(top_timestamp, 10);
-  const stepValue = 4000000000;
+  const stepValue = 8000000000;
 
-  async.timesSeries(
+  async.times(
     Math.ceil((topTimestamp - bottomTimestamp) / stepValue), 
     (i, next) => {
 
@@ -52,11 +52,11 @@ export default (req: Request, res: Response): any => {
           sendData({
             success: true,
             data: {
-              self_stake: 3 * ((i ** 2) + 1) * 1e6,
-              withdraw: 1 * ((i ** 2) + 1) * 1e6,
-              commission: 2 * ((i ** 2) + 1) * 1e6,
-              ratio: 2 * ((i ** 2) + 1) * 1e6,
-              sold: 2 * ((i ** 2) + 1) * 1e6,
+              self_stake: 3 * ((i ** 2) + 1) * 1e6 * Math.sin(i),
+              withdraw: 1 * ((i ** 2) + 1) * 1e6 * Math.cos(i),
+              commission: 2 * ((i ** 2) + 1) * 1e6 * Math.sin(i),
+              ratio: 2 * ((i ** 2) + 1) * 1e6 * Math.cos(i),
+              sold: 2 * ((i ** 2) + 1) * 1e6 * Math.sin(i),
               timestamp: bottomTimestamp + i * stepValue,
               index: i
             },

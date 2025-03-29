@@ -7,7 +7,30 @@ function handleExportEvents () {
 
   let selectedRangeValue = 0;
 
+
   document.addEventListener('click', (event) => {
+    
+    let target = event.target;
+    while (target != document.body && !target.classList.contains('each-export-choice')) target = target.parentNode;
+    if (!target.classList.contains('each-export-choice')) return;
+
+    document.querySelectorAll('.each-export-choice').forEach(each => {
+      each.classList.remove('export-choice-selected')
+      each.children[0].children[0].style.display = 'none';
+    });
+    target.classList.add('export-choice-selected');
+    target.children[0].children[0].style.display = 'unset';
+    selectedRangeValue = event.target.getAttribute('range');
+  })
+
+  document.getElementById('export-choice-cancel-button').addEventListener('click', (event) => {
+    document.getElementById('export-wrapper-toggle').nextSibling.style.transform = 'perspective(8000px) rotateX(-90deg)';
+    document.getElementById('export-wrapper-toggle').nextSibling.style.opacity = '0';
+    document.getElementById('export-wrapper-toggle').setAttribute('isOpen', 'false');
+  })
+
+
+  document.body.addEventListener('click', (event) => {
     if (event.target.id == 'export-wrapper-toggle' || event.target.parentNode.id == 'export-wrapper-toggle') {
       if (document.getElementById('export-wrapper-toggle').getAttribute('isOpen') == 'false') {
         document.getElementById('export-wrapper-toggle').nextSibling.style.transform = 'perspective(8000px) rotateX(0deg)';
@@ -18,11 +41,6 @@ function handleExportEvents () {
         document.getElementById('export-wrapper-toggle').nextSibling.style.opacity = '0';
         document.getElementById('export-wrapper-toggle').setAttribute('isOpen', 'false');
       }
-    }
-    else if (event.target.classList.contains('each-export-choice')) {
-      document.querySelectorAll('.each-export-choice').forEach(each => each.classList.remove('export-choice-selected'));
-      event.target.classList.add('export-choice-selected');
-      selectedRangeValue = event.target.getAttribute('range');
     } else if (event.target.id == 'export-choice-download-button' || event.target.parentNode.id == 'export-choice-download-button') {
 
 
@@ -49,14 +67,14 @@ function handleExportEvents () {
       fetch(url)
       .then(async (response) => {
           if (!response.ok) {
-              throw new Error(`HTTP error! Status: ${response.status}`);
+              throw new Error(`${response.status}`);
           }
   
           const contentType = response.headers.get('Content-Type');
           const isZip = contentType === 'application/zip';
   
           const blob = await response.blob();
-          if (blob.size === 0) throw new Error('Downloaded file is empty.');
+          if (blob.size === 0) throw new Error('file_empty');
   
           return { blob, isZip };
       })
@@ -78,6 +96,10 @@ function handleExportEvents () {
       })
       .catch(error => console.error('Download failed:', error));
     } else {
+      let target = event.target;
+      while (target != document.body && !target.classList.contains('export-main-wrapper')) target = target.parentNode;
+      if (target.classList.contains('export-main-wrapper')) return;
+
       document.getElementById('export-wrapper-toggle').nextSibling.style.transform = 'perspective(8000px) rotateX(-90deg)';
       document.getElementById('export-wrapper-toggle').nextSibling.style.opacity = '0';
       document.getElementById('export-wrapper-toggle').setAttribute('isOpen', 'false');

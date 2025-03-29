@@ -30,6 +30,8 @@ export const listenForEvents = (
 
     const validatorMap: Record<string, any> = {};
     const compositeEventBlockMap: Record<string, any> = {};
+    let timestamp: Date;
+
     for (let height = bottom_block_height; height < top_block_height; height++) 
       promises.push(
         new Promise ((resolve, reject) => 
@@ -38,8 +40,11 @@ export const listenForEvents = (
             height, 
             chain.denom, 
             chain.bech32_prefix, 
-            (err, decodedTxs) => {
-            
+            (err, result) => {
+
+              const { time, decodedTxs } = result;
+              timestamp = new Date(time);
+
               if (err) reject(err);
               if (!decodedTxs || decodedTxs.length <= 0) return resolve();
               
@@ -79,6 +84,9 @@ export const listenForEvents = (
                     delegator_address: eachMessage.value.delegatorAddress ? eachMessage.value.delegatorAddress : convertOperatorAddressToBech32(eachMessage.value.validatorAddress, chain.bech32_prefix),
                     keybase_id: eachMessage.value.description.identity,
                     moniker: eachMessage.value.description.moniker,
+                    website: eachMessage.value.description.website,
+                    details: eachMessage.value.description.details,
+                    security_contant: eachMessage.value.description.securityContact,
                     commission_rate: eachMessage.value.commission.rate,
                     chain_identifier: chain.name,
                     created_at: eachMessage.time,
@@ -164,9 +172,9 @@ export const listenForEvents = (
             (validators?.insertedValidators && validators?.insertedValidators.length > 0) ? console.log(`Validator | CREATED | ${insertedValidatorAddresses.length <= 0 ? 'NONE' : insertedValidatorAddresses}`) : '';
             (savedCompositeEventBlocks && savedCompositeEventBlocks.length > 0) ? console.log(`CompositeEventBlock | CREATED | ${savedCompositeEventBlocks.length <= 0 ? 'NONE' : savedCompositeEventBlocks}`) : '';
             console.log('\n')
-            const timestamp = (compositeEventBlocks && compositeEventBlocks[0]) ? new Date(compositeEventBlocks[0].timestamp) : undefined;
             const blockTimestamp = timestamp ? new Date(timestamp).getTime() : '';
-            Validator.updateLastVisitedBlock({ chain_identifier, block_height: bottom_block_height, block_time: timestamp }, (err, updated_chain) => {
+            
+            Validator.updateLastVisitedBlock({ chain_identifier: chain.name, block_height: bottom_block_height, block_time: timestamp }, (err, updated_chain) => {
               if (!blockTimestamp || blockTimestamp - chain.active_set_last_updated_block_time <= 86400000)
               return final_callback(null, true);
 
@@ -175,7 +183,7 @@ export const listenForEvents = (
                 chain_identifier: chain_identifier,
                 chain_rpc_url: chain.rpc_url,
                 height: bottom_block_height,
-                day: new Date(blockTimestamp).getDay(),
+                day: new Date(blockTimestamp).getDate(),
                 month: new Date(blockTimestamp).getMonth() + 1,
                 year: new Date(blockTimestamp).getFullYear(),
               }, (err, savedActiveValidators) => {

@@ -35,6 +35,9 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
                 delegator_address: delegatorAddress ? delegatorAddress : '',
                 chain_identifier: chain.name,
                 moniker: eachValidator.description.moniker,
+                description: eachValidator.description.details,
+                secuirty_contact: eachValidator.description.securityContact,
+                website: eachValidator.description.website,
                 keybase_id: eachValidator.description.identity,
                 created_at: chain.first_available_block_time
               }, (err, validator) => {
@@ -62,13 +65,15 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
               Chain.markGenesisAsSaved({ chain_identifier: chain_identifier }, (err, chainGenesisMarkedAsSaved) => {
                 if (err) return callback(err, false);
                 
-                const month = (new Date(chain.first_available_block_time)).getMonth();
+                const day = (new Date(chain.first_available_block_time)).getDate();
+                const month = (new Date(chain.first_available_block_time)).getMonth() + 1;
                 const year = (new Date(chain.first_available_block_time)).getFullYear();
 
                 if (!activeValidatorsData || activeValidatorsData.length <= 0) {
                   Validator.updateActiveValidatorList({
                     month: month,
                     year: year,
+                    day: day,
                     height: chain.first_available_block_height,
                     chain_identifier: chain.name,
                     chain_rpc_url: chain.rpc_url
@@ -83,6 +88,7 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
                     chain_identifier: chain.name,
                     month: month,
                     year: year,
+                    day: day,
                     active_validators_pubkeys_array: pubkeysOfActiveValidators
                   }, (err, savedActiveValidators) => {
                     if (err) return callback(err, false);

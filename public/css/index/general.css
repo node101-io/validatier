@@ -2,6 +2,7 @@
 :root {
   --color-powder-blue: rgb(245, 245, 255);
   --color-pale-dark: rgb(22, 22, 22);
+  --color-night-blue: rgba(41, 48, 80, 1);
   --color-pale-white: rgb(248, 248, 248);
   --color-dropdown-background: rgba(242, 242, 242, 1);
   --color-triangle-unselected: rgba(183, 166, 198, 1);
@@ -73,6 +74,7 @@ html::-webkit-scrollbar-thumb {
   background: rgba(100, 100, 100, var(--scrollbar-opacity, 1));
   border-radius: 10px;
   transition: background 0.3s ease-in-out;
+  letter-spacing: 1px;
 }
 
 html::-webkit-scrollbar-track {
@@ -192,53 +194,17 @@ input {
   opacity: 0 !important;
 }
 
-.switch {
-  display: flex;
-  align-items: center;
-  position: relative;
-  margin-right: auto;
+.general-choice-radio-button {
+  width: 10px;
+  aspect-ratio: 1 / 1;
+  border-radius: 100%;
+  border: 1px solid var(--color-night-blue);
 }
 
-.switch-checkbox {
+.general-choice-radio-button-inner-circle {
+  width: 5px;
+  aspect-ratio: 1 / 1;
+  border-radius: 100%;
+  background-color: var(--color-night-blue);
   display: none;
-}
-
-.switch-label {
-  position: relative;
-  display: block;
-  width: var(--switch-label-width);
-  height: var(--switch-label-height);
-  background-color: var(--switch-label-background-color);
-  border-radius: var(--switch-label-border-radius);
-  cursor: var(--pointer-hand-dark);
-  transition: background-color var(--switch-button-transition-duration) ease;
-}
-
-.switch-button {
-  position: absolute;
-  top: var(--switch-button-top);
-  left: var(--switch-button-left);
-  width: var(--switch-button-height);
-  height: var(--switch-button-width);
-  background-color: var(--switch-button-background-color);
-  border-radius: var(--switch-button-border-radius);
-  transition: transform var(--switch-button-transition-duration) ease;
-}
-
-.switch-checkbox:checked + .switch-label {
-  background-color: var(--color-network-switch); 
-}
-
-.switch-checkbox:checked + .switch-label .switch-button {
-  transform: translateX(calc(var(--switch-button-width) + (var(--switch-button-left) * 2)));
-}
-
-.currency-switch-wrapper .switch-button {
-  width: calc(var(--switch-button-width) / 1.2) !important;
-  height: calc(var(--switch-button-height) / 1.2) !important;
-}
-
-.currency-switch-wrapper .switch-label {
-  width: calc(var(--switch-label-width) / 1.2) !important;
-  height: calc(var(--switch-label-height) / 1.2) !important;
 }

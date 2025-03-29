@@ -5,7 +5,7 @@ function generatePointValueDisplay (data, graphDataMapping, currency, usd_exchan
   const eachDataPointValueDisplayTitle = document.createElement('div');
   eachDataPointValueDisplayTitle.classList.add('each-data-point-value-display-title');
   
-  if (!isRangeValueDisplay) eachDataPointValueDisplayTitle.innerHTML = `${prettyDate(Object.keys(graphDataMapping)[0])}-${prettyDate(timestamp)}`;
+  if (!isRangeValueDisplay) eachDataPointValueDisplayTitle.innerHTML = `${prettyDate(graphDataMapping[0].timestamp)}-${prettyDate(timestamp)}`;
   else eachDataPointValueDisplayTitle.innerHTML = `${prettyDate(initialTimestamp)}-${prettyDate(timestamp)}`;
 
   eachDataPointValueDisplay.appendChild(eachDataPointValueDisplayTitle);

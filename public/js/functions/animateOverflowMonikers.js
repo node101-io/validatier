@@ -12,11 +12,11 @@ function animateOverflowMonikers(monikerWrapper) {
     const containerWidth = container.offsetWidth;
     const textWidth = monikerText.scrollWidth;
     if (textWidth > containerWidth) {
+      monikerWrapper.setAttribute('is_animating', 'true');
       monikerText.style.animation = `scrollText ${(textWidth/containerWidth) * 2}s linear infinite alternate`;
       monikerText.style.position = 'relative';
     } else {
       monikerText.style.animation = 'none';
     }
   }
-  
 }

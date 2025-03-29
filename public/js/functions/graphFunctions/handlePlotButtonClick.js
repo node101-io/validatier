@@ -15,13 +15,19 @@ function calculateMaxAndMinValue (graphDataMapping) {
 }
 
 function handlePlotButtonClick () {
-  document.addEventListener('click', async (event) => {
-    if (!event.target.classList.contains('validator-plot-graph-button')) return;
+  document.body.addEventListener('click', async (event) => {
+    let target = event.target;
+    while (target != document.body && !target.classList.contains('each-validator-wrapper')) target = target.parentNode;
+    if (!target.classList.contains('each-validator-wrapper')) return;
+
+    if (target.nextSibling.classList.contains('each-validator-details-content-wrapper-visible')) 
+      return target.nextSibling.classList.remove('each-validator-details-content-wrapper-visible');
+    target.nextSibling.classList.add('each-validator-details-content-wrapper-visible');
 
     const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
     const topDate = document.getElementById('periodic-query-top-timestamp').value
 
-    const operatorAddress = event.target.getAttribute('operator-address');
+    const operatorAddress = target.id;
     const bottomTimestamp = Math.floor(new Date(bottomDate).getTime());
     const topTimestamp = Math.floor(new Date(topDate).getTime());    
     
@@ -38,21 +44,36 @@ function handlePlotButtonClick () {
       top_timestamp: topTimestamp,
       decimals: document.getElementById('network-switch-header').getAttribute('current_chain_decimals')
     };
-  
+
+    plotValidatorGraph({ operatorAddress, graphDataMapping, currency, decimals, usd_exchange_rate, symbol });
+
     const queryString = new URLSearchParams(requestData).toString();
     const eventSource = new EventSource(`/validator/get_graph_data?${queryString}`);
 
     const worker = new Worker('/js/functions/worker.js');
 
-    plotValidatorGraph({ operatorAddress, graphDataMapping, currency, decimals, usd_exchange_rate, symbol });
+    let pushedColumnIndex = -1;
+
     worker.onmessage = (event) => {
       const { data } = event.data;
-      graphDataMapping[data.timestamp] = data;
+      graphDataMapping[data.index] = data;
 
       const { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping);
       document.documentElement.style.setProperty('--min-value', minValue);
       document.documentElement.style.setProperty('--max-value', maxValue);
 
+      if (data.index === pushedColumnIndex + 1) {
+        addColumnToGraph(data);
+        pushedColumnIndex++;
+
+        while (graphDataMapping[pushedColumnIndex + 1]) {
+          pushedColumnIndex++;
+          addColumnToGraph(graphDataMapping[pushedColumnIndex]);
+        }
+      }
+    };
+
+    function addColumnToGraph(data) {
       const insertedColumn = addColumnToExistingGraph({
         operatorAddress: operatorAddress,
         data: data,
@@ -64,9 +85,11 @@ function handlePlotButtonClick () {
         symbol: symbol,
         graphDataMapping
       });
-      if (!insertedColumn.previousSibling || !insertedColumn.previousSibling.classList.contains('each-graph-column-wrapper')) return;
-      adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, operatorAddress);
-    };
+
+      if (insertedColumn.previousSibling && insertedColumn.previousSibling.classList.contains('each-graph-column-wrapper')) {
+        adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, operatorAddress);
+      }
+    }
     
     eventSource.onmessage = (event) => {
       const response = JSON.parse(event.data);

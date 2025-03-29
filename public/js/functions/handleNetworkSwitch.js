@@ -34,22 +34,28 @@ function handleNetworkSwitch () {
     });
   })
 
-  const networkSwitchHeader = document.getElementById('network-switch-header');
   const networkSwitchDropdown = document.getElementById('network-switch-dropdown');
   document.body.addEventListener('click', (event) => {
     
     let target = event.target;
-    while (target != document.body && !target.classList.contains('header-network-switch-wrapper')) target = target.parentNode;
-    if (!target.classList.contains('header-network-switch-wrapper')) return networkSwitchDropdown.classList.remove('network-switch-dropdown-open');
+    while (target != document.body && (!target.classList.contains('network-switch-header') && !target.classList.contains('network-switch-dropdown'))) target = target.parentNode;
+    
+    if (!target.classList.contains('network-switch-header') && !target.classList.contains('network-switch-dropdown')) {
+      document.getElementById('network-switch-dropdown-arrow').style.transform = 'rotateX(0deg)';
+      document.getElementById('network-switch-dropdown-arrow').style.marginTop = '2px';
+      return networkSwitchDropdown.classList.remove('network-switch-dropdown-open');
+    };
 
-    if (!event.target.classList.contains('network-switch-dropdown-open')) {
+    if (target.classList.contains('network-switch-dropdown')) return;
+    
+    if (!networkSwitchDropdown.classList.contains('network-switch-dropdown-open')) {
       document.getElementById('network-switch-dropdown-arrow').style.transform = 'rotateX(180deg)';
-      document.getElementById('network-switch-dropdown-arrow').style.marginTop = '-10px';
+      document.getElementById('network-switch-dropdown-arrow').style.marginTop = '-8px';
       networkSwitchDropdown.classList.add('network-switch-dropdown-open');
     }
     else {
       document.getElementById('network-switch-dropdown-arrow').style.transform = 'rotateX(0deg)';
-      document.getElementById('network-switch-dropdown-arrow').style.marginTop = '0px';
+      document.getElementById('network-switch-dropdown-arrow').style.marginTop = '2px';
       networkSwitchDropdown.classList.remove('network-switch-dropdown-open');
     };
   })

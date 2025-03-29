@@ -9,7 +9,6 @@ function plotValidatorGraph(params) {
   else validatorGraphEventListenersMapping[operatorAddress].forEach(eachEventHandler => eachEventHandler.element.removeEventListener(eachEventHandler.event, eachEventHandler.handler));
 
   const validatorWrapper = document.getElementById(operatorAddress);
-  const validatorsMainWrapper = document.getElementById('validators-main-wrapper');
   
   const graphWrapper = document.createElement('div');
   graphWrapper.className = 'validator-graph-wrapper';
@@ -57,23 +56,25 @@ function plotValidatorGraph(params) {
       const timestamp = !isSelectionDirectionToLeft ? rangeFinalColumn.getAttribute('timestamp') : rangeInitialColumn.getAttribute('timestamp');
 
       if (!isSelectionDirectionToLeft) {
-        rangeFinalColumn.nextSibling.children[7].style.width = '0px';
-        rangeFinalColumn.nextSibling.children[8].style.width = '0px';
+        rangeFinalColumn.nextSibling.children[9].style.width = '0px';
+        rangeFinalColumn.nextSibling.children[10].style.width = '0px';
+        rangeFinalColumn.nextSibling.children[11].style.width = '0px';
 
-        rangeFinalColumn.nextSibling.children[6].classList.add('each-data-indicator-vertical-line-visible');
-        rangeFinalColumn.nextSibling.children[6].classList.add('range-edges-indicator');  
+        rangeFinalColumn.nextSibling.children[8].classList.add('each-data-indicator-vertical-line-visible');
+        rangeFinalColumn.nextSibling.children[8].classList.add('range-edges-indicator');  
       } else {
-        rangeInitialColumn.children[7].style.width = '0px';
-        rangeInitialColumn.children[8].style.width = '0px';
-        rangeFinalColumn.previousSibling.children[7].style.width = '0px';
-        rangeFinalColumn.previousSibling.children[8].style.width = '0px';
+        rangeInitialColumn.children[9].style.width = '0px';
+        rangeInitialColumn.children[10].style.width = '0px';
+        rangeFinalColumn.previousSibling.children[9].style.width = '0px';
+        rangeFinalColumn.previousSibling.children[10].style.width = '0px';
+        rangeFinalColumn.previousSibling.children[11].style.width = '0px';
 
-        rangeFinalColumn.children[6].classList.add('each-data-indicator-vertical-line-visible');
-        rangeFinalColumn.children[6].classList.add('range-edges-indicator');  
+        rangeFinalColumn.children[8].classList.add('each-data-indicator-vertical-line-visible');
+        rangeFinalColumn.children[8].classList.add('range-edges-indicator');  
       }
 
-      rangeInitialColumn.children[6].classList.add('each-data-indicator-vertical-line-visible');
-      rangeInitialColumn.children[6].classList.add('range-edges-indicator');
+      rangeInitialColumn.children[8].classList.add('each-data-indicator-vertical-line-visible');
+      rangeInitialColumn.children[8].classList.add('range-edges-indicator');
     
       const dataPointValueDisplay = generatePointValueDisplay({
         self_stake: deltaSelfStake,
@@ -94,5 +95,5 @@ function plotValidatorGraph(params) {
   graphWrapper.addEventListener('mouseup', graphMouseUpHandler);
   validatorGraphEventListenersMapping[operatorAddress].push({ event: 'mouseup', handler: graphMouseUpHandler, element: graphWrapper });
 
-  validatorsMainWrapper.insertBefore(graphWrapper, validatorWrapper.nextSibling);
+  validatorWrapper.nextSibling.appendChild(graphWrapper);
 }
