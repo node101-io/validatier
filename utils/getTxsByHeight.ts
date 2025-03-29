@@ -24,15 +24,20 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
   ])
     .then(([block_promise_res, block_results_promise_res]) => {
       
-      if (block_promise_res.status == 'rejected' || !block_promise_res.value || block_results_promise_res.status == 'rejected' || !block_results_promise_res.value) return callback('rejected', null);
+      if (block_promise_res.status == 'rejected' || !block_promise_res.value || block_results_promise_res.status == 'rejected' || !block_results_promise_res.value) return callback('rejected', { time: null, decodedTxs: []});
       
       const data = block_promise_res.value;
       const data_block_results = block_results_promise_res.value;
 
-      if (!data_block_results.result || !data_block_results.result.finalize_block_events || !data.result?.block?.data?.txs || data.result?.block?.data?.txs.length <= 0 || !data.result?.block?.header?.height) 
-        return callback(null, { time: data.result?.block?.header?.time ? data.result?.block?.header?.time : '', decodedTxs: []});
+      if (
+        !data_block_results.result || 
+        (!data_block_results.result.finalize_block_events && !data_block_results.result.end_block_events) || 
+        !data.result?.block?.data?.txs || 
+        data.result?.block?.data?.txs.length <= 0 || 
+        !data.result?.block?.header?.height
+      ) return callback(null, { time: data.result?.block?.header?.time ? data.result?.block?.header?.time : '', decodedTxs: []});
 
-      const finalizeBlockEvents = data_block_results.result.finalize_block_events;
+      const finalizeBlockEvents = data_block_results.result.finalize_block_events ? data_block_results.result.finalize_block_events : data_block_results.result.end_block_events;
       const time = data.result?.block?.header?.time;
       
       const slashMessages: DecodedMessage[] | null = getSlashEventsFromFinalizeBlockEvents(finalizeBlockEvents, bech32_prefix, time);

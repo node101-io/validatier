@@ -52,8 +52,6 @@ function handlePlotButtonClick () {
 
     const worker = new Worker('/js/functions/worker.js');
 
-    let pushedColumnIndex = -1;
-
     worker.onmessage = (event) => {
       const { data } = event.data;
       graphDataMapping[data.index] = data;
@@ -62,18 +60,6 @@ function handlePlotButtonClick () {
       document.documentElement.style.setProperty('--min-value', minValue);
       document.documentElement.style.setProperty('--max-value', maxValue);
 
-      if (data.index === pushedColumnIndex + 1) {
-        addColumnToGraph(data);
-        pushedColumnIndex++;
-
-        while (graphDataMapping[pushedColumnIndex + 1]) {
-          pushedColumnIndex++;
-          addColumnToGraph(graphDataMapping[pushedColumnIndex]);
-        }
-      }
-    };
-
-    function addColumnToGraph(data) {
       const insertedColumn = addColumnToExistingGraph({
         operatorAddress: operatorAddress,
         data: data,
@@ -89,7 +75,7 @@ function handlePlotButtonClick () {
       if (insertedColumn.previousSibling && insertedColumn.previousSibling.classList.contains('each-graph-column-wrapper')) {
         adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, operatorAddress);
       }
-    }
+    };
     
     eventSource.onmessage = (event) => {
       const response = JSON.parse(event.data);

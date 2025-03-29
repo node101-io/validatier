@@ -20,13 +20,14 @@ block content
             .network-switch-search-icon(class='center')
                 include ../icons/search.svg
             input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search')
-          each chain in chains 
-            .each-chain-wrapper(id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}` symbol=`${chain.symbol}` decimals=`${chain.decimals}` usd_exchange_rate=`${chain.usd_exchange_rate}`)
-              .network-switch-network-image-wrapper(class='center network-unselected-image-wrapper')
-                img(src=`${chain.image}`)
-              .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
-                .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
-                .network-switch-network-symbol(style='text-wrap: nowrap')= chain.symbol
+          .network-switch-chains-wrapper
+            each chain in chains 
+              .each-chain-wrapper(id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}` symbol=`${chain.symbol}` decimals=`${chain.decimals}` usd_exchange_rate=`${chain.usd_exchange_rate}`)
+                .network-switch-network-image-wrapper(class='center network-unselected-image-wrapper')
+                  img(src=`${chain.image}`)
+                .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
+                  .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
+                  .network-switch-network-symbol(style='text-wrap: nowrap')= chain.symbol
     .inner-main-wrapper#inner-main-wrapper
       .main-greeting-title-description-wrapper
         .main-greeting-title-content What Is Lorem Ipsum?
@@ -111,7 +112,7 @@ block content
                   button.apply#apply Apply
             .export-main-wrapper 
               .export-wrapper-header(class='center' isOpen='false')#export-wrapper-toggle
-                include ../icons/export.csv
+                include ../icons/export.svg
               .export-wrapper-content
                 .export-wrapper-content-title Lorem ipsum dolor?
                 div(style='display: none')
@@ -151,7 +152,7 @@ block content
             each header in headers_array
               .each-table-header-wrapper
                 .each-table-header-wrapper-popup-content
-                .each-table-header-wrapper(id=`${header.id}`)
+                .each-table-header-wrapper(id=`${header.id}` class=`${header.popup_text ? 'each-table-header-hover' : ''}`)
                   .each-table-header-title
                     if header.popup_text
                       .each-table-popup-wrapper

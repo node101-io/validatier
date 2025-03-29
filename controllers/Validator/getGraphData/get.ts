@@ -27,12 +27,13 @@ export default (req: Request, res: Response): any => {
 
   const bottomTimestamp = parseInt(bottom_timestamp, 10);
   const topTimestamp = parseInt(top_timestamp, 10);
-  const stepValue = 8000000000;
+  const stepValue = 1000000000;
+  let pushedIndex: number = -1;
+  const pendingData: Record<number, object> = {};
 
   async.times(
-    Math.ceil((topTimestamp - bottomTimestamp) / stepValue), 
+    Math.ceil((topTimestamp - bottomTimestamp) / stepValue),
     (i, next) => {
-
       CompositeEventBlock.getTotalPeriodicSelfStakeAndWithdraw(
         {
           operator_address,
@@ -46,10 +47,7 @@ export default (req: Request, res: Response): any => {
             return res.end();
           }
 
-          const ratio = (totalPeriodicSelfStakeAndWithdraw?.self_stake || 0) / (totalPeriodicSelfStakeAndWithdraw?.reward || 10 ** Number(decimals));
-          const sold = (totalPeriodicSelfStakeAndWithdraw?.reward || 0) - (totalPeriodicSelfStakeAndWithdraw?.self_stake || 0);
-          
-          sendData({
+          const data = {
             success: true,
             data: {
               self_stake: 3 * ((i ** 2) + 1) * 1e6 * Math.sin(i),
@@ -60,7 +58,15 @@ export default (req: Request, res: Response): any => {
               timestamp: bottomTimestamp + i * stepValue,
               index: i
             },
-          });
+          };
+
+          pendingData[i] = data;
+
+          while (pendingData[pushedIndex + 1]) {
+            pushedIndex++;
+            sendData(pendingData[pushedIndex]);
+            delete pendingData[pushedIndex];
+          }
 
           return next();
         }
@@ -69,7 +75,6 @@ export default (req: Request, res: Response): any => {
     (err) => {
       if (err) {
         sendData({ err: 'internal_error', success: false });
-        return res.end();
       }
       return res.end();
     }

@@ -63,7 +63,6 @@ const decodeTransactions = (txs: string[], events: Event[][], denom: string, tim
       if (!nativeRewardOrCommissionValue) continue;
       
       const decodedMessage = registry.decode(message);
-      
       decodedMessage.amount = { denom: denom, amount: nativeRewardOrCommissionValue };
       messages.push({ time: time, typeUrl: message.typeUrl, value: decodedMessage });
     }

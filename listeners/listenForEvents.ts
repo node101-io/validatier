@@ -172,27 +172,29 @@ export const listenForEvents = (
             (validators?.insertedValidators && validators?.insertedValidators.length > 0) ? console.log(`Validator | CREATED | ${insertedValidatorAddresses.length <= 0 ? 'NONE' : insertedValidatorAddresses}`) : '';
             (savedCompositeEventBlocks && savedCompositeEventBlocks.length > 0) ? console.log(`CompositeEventBlock | CREATED | ${savedCompositeEventBlocks.length <= 0 ? 'NONE' : savedCompositeEventBlocks}`) : '';
             console.log('\n')
+
+            if (!timestamp) return final_callback(null, true);
             const blockTimestamp = timestamp ? new Date(timestamp).getTime() : '';
             
             Validator.updateLastVisitedBlock({ chain_identifier: chain.name, block_height: bottom_block_height, block_time: timestamp }, (err, updated_chain) => {
               if (!blockTimestamp || blockTimestamp - chain.active_set_last_updated_block_time <= 86400000)
-              return final_callback(null, true);
+                return final_callback(null, true);
 
-            Validator
-              .updateActiveValidatorList({
-                chain_identifier: chain_identifier,
-                chain_rpc_url: chain.rpc_url,
-                height: bottom_block_height,
-                day: new Date(blockTimestamp).getDate(),
-                month: new Date(blockTimestamp).getMonth() + 1,
-                year: new Date(blockTimestamp).getFullYear(),
-              }, (err, savedActiveValidators) => {
-                if (err) return final_callback(null, false);
-                Chain.updateTimeOfLastActiveSetSave({ chain_identifier: chain_identifier, time: blockTimestamp }, (err, chain) => {
-                  console.log(`Active validators updated for ${savedActiveValidators?.active_validators.length}/${savedActiveValidators?.month}/${savedActiveValidators?.year}`)
-                  return final_callback(null, true);
+              Validator
+                .updateActiveValidatorList({
+                  chain_identifier: chain_identifier,
+                  chain_rpc_url: chain.rpc_url,
+                  height: bottom_block_height,
+                  day: new Date(blockTimestamp).getDate(),
+                  month: new Date(blockTimestamp).getMonth() + 1,
+                  year: new Date(blockTimestamp).getFullYear(),
+                }, (err, savedActiveValidators) => {
+                  if (err) return final_callback(null, false);
+                  Chain.updateTimeOfLastActiveSetSave({ chain_identifier: chain_identifier, time: blockTimestamp }, (err, chain) => {
+                    console.log(`Active validators updated for ${savedActiveValidators?.active_validators.length}/${savedActiveValidators?.month}/${savedActiveValidators?.year}`)
+                    return final_callback(null, true);
+                  })
                 })
-              })
             })
         })
       })

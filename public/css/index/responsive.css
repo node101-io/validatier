@@ -73,6 +73,12 @@
   }
 }
 
+@media only screen and (max-width: 695px) {
+  :root {
+    --validators-main-wrapper-padding-top: 110px;
+  }
+}
+
 @media only screen and (max-width: 500px) {
   :root {
 
