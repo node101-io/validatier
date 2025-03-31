@@ -9,16 +9,17 @@ block content
         .banner-title-content VALIDATIER
       .header-network-switch-wrapper
         .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}`)
-          .network-switch-network-image-wrapper 
-            img#current-network-img(src=`${selectedChain.image ? selectedChain.image : ''}`)
-          .network-switch-network-info-wrapper 
-            .network-switch-network-title#current-network-name= selectedChain.pretty_name ? selectedChain.pretty_name : 'Cosmos Hub'
+          .network-switch-header-chain-content-wrapper(class='center')
+            .network-switch-network-image-wrapper 
+              img#current-network-img(src=`${selectedChain.image ? selectedChain.image : ''}`)
+            .network-switch-network-info-wrapper 
+              .network-switch-network-title#current-network-name= selectedChain.pretty_name ? selectedChain.pretty_name : 'Cosmos Hub'
           .network-switch-drowdown-toggle#network-switch-dropdown-arrow
             include ../icons/chevron.pug
         .network-switch-dropdown#network-switch-dropdown
           .network-switch-search-bar
             .network-switch-search-icon(class='center')
-                include ../icons/search.svg
+              include ../icons/search.svg
             input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search')
           .network-switch-chains-wrapper
             each chain in chains 
@@ -27,7 +28,6 @@ block content
                   img(src=`${chain.image}`)
                 .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
                   .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
-                  .network-switch-network-symbol(style='text-wrap: nowrap')= chain.symbol
     .inner-main-wrapper#inner-main-wrapper
       .main-greeting-title-description-wrapper
         .main-greeting-title-content What Is Lorem Ipsum?
@@ -135,7 +135,7 @@ block content
                 .export-action-buttons-wrapper
                   button.export-choice-action-button(class='center export-choice-download-button')#export-choice-download-button Download
                   button.export-choice-action-button(class='center')#export-choice-cancel-button Cancel
-        .validators-main-wrapper#validators-main-wrapper(validators=validators)
+        .validators-main-wrapper#validators-main-wrapper(validators=validators, activeValidatorHistory=activeValidatorHistory)
           - 
             const headers_array = [
               {name: 'Avg Stake', id: 'total_stake'}, 

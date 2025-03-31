@@ -1,11 +1,8 @@
-import async from 'async';
+
 import { decodeTxRaw, Registry } from '@cosmjs/proto-signing';
 import { defaultRegistryTypes } from '@cosmjs/stargate';
 import { getSpecificAttributeOfAnEventFromTxEventsArray } from './getSpecificAttributeOfAnEventFromTxEventsArray.js';
-import { getOnlyNativeTokenValueFromCommissionOrRewardEvent } from '../listeners/functions/getOnlyNativeTokenValueFromCommissionOrRewardEvent.js';
 import { LISTENING_EVENTS } from '../listeners/listenForEvents.js';
-import { resolve } from 'path';
-import { reject } from 'lodash';
 
 export interface EventAttribute { 
   key: string; 

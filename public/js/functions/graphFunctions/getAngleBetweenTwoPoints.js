@@ -1,6 +1,6 @@
 
 function getAngleBetweenTwoPoints (column1, column2, operatorAddress) {
-
+  
   const self_stake_1 = column1.getAttribute('self_stake');
   const self_stake_2 = column2.getAttribute('self_stake');
 
@@ -11,10 +11,11 @@ function getAngleBetweenTwoPoints (column1, column2, operatorAddress) {
   const commission_2 = column2.getAttribute('commission');
 
   const deltaX = `--graph-column-width-${operatorAddress}`;
+
   const selfStakeDeltaY = `(
     (${(self_stake_2 - self_stake_1)} / 
     (var(--max-value) - var(--min-value)))
-    * ${column1.getBoundingClientRect().height}
+    * var(--column-height)
   )`
 
   const selfStakeHypotenuse = `calc(
@@ -27,7 +28,7 @@ function getAngleBetweenTwoPoints (column1, column2, operatorAddress) {
       ${(withdraw_2 - withdraw_1)} / 
       (var(--max-value) - var(--min-value))
     )
-    * ${column1.getBoundingClientRect().height}
+    * var(--column-height)
   )`
   
   const withdrawHypotenuse = `calc(
@@ -41,7 +42,7 @@ function getAngleBetweenTwoPoints (column1, column2, operatorAddress) {
       ${(commission_2 - commission_1)} / 
       (var(--max-value) - var(--min-value))
     )
-    * ${column1.getBoundingClientRect().height}
+    * var(--column-height)
   )`
   
   const commissionHypotenuse = `calc(

@@ -16,9 +16,17 @@ function handleNetworkSwitch () {
   const bottomTimestamp = Math.floor((new Date(bottomDate)).getTime());
   const topTimestamp = Math.floor((new Date(topDate)).getTime());
 
-  const validators = document.getElementById('validators-main-wrapper');
+  const validatorsMainWrapper = document.getElementById('validators-main-wrapper');
 
-  rankingResponsesCache[bottomTimestamp + '.' + topTimestamp + '.' + chainIdentifier] = validators ? { success: true, data: JSON.parse(validators.getAttribute('validators')) } : '';
+  const response = {
+    success: true,
+    data: {
+      validators: JSON.parse(validatorsMainWrapper.getAttribute('validators')),
+      activeValidatorHistory: JSON.parse(validatorsMainWrapper.getAttribute('activeValidatorHistory'))
+    }
+  };
+
+  rankingResponsesCache[bottomTimestamp + '.' + topTimestamp + '.' + chainIdentifier] = response;
 
   const networkSwitchInput = document.getElementById('network-switch-input');
   networkSwitchInput.addEventListener('keyup', (event) => {

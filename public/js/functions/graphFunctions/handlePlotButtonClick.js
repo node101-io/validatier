@@ -14,6 +14,12 @@ function calculateMaxAndMinValue (graphDataMapping) {
   return { minValue, maxValue }
 }
 
+const validatorGraphEventListenersMapping = {};
+let isSelectingRange = false;
+let rangeInitialColumn;
+let rangeFinalColumn;
+let isSelectionDirectionToLeft = false;
+
 function handlePlotButtonClick () {
   document.body.addEventListener('click', async (event) => {
     let target = event.target;
@@ -45,13 +51,14 @@ function handlePlotButtonClick () {
       decimals: document.getElementById('network-switch-header').getAttribute('current_chain_decimals')
     };
 
-    plotValidatorGraph({ operatorAddress, graphDataMapping, currency, decimals, usd_exchange_rate, symbol });
+    const graphWrapper = plotValidatorGraph({ operatorAddress, graphDataMapping, currency, decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping });
+    const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue("width").replace('px', '');
 
     const queryString = new URLSearchParams(requestData).toString();
     const eventSource = new EventSource(`/validator/get_graph_data?${queryString}`);
 
     const worker = new Worker('/js/functions/worker.js');
-
+    
     worker.onmessage = (event) => {
       const { data } = event.data;
       graphDataMapping[data.index] = data;
@@ -59,7 +66,7 @@ function handlePlotButtonClick () {
       const { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping);
       document.documentElement.style.setProperty('--min-value', minValue);
       document.documentElement.style.setProperty('--max-value', maxValue);
-
+      
       const insertedColumn = addColumnToExistingGraph({
         operatorAddress: operatorAddress,
         data: data,
@@ -69,11 +76,18 @@ function handlePlotButtonClick () {
         decimals: decimals,
         usd_exchange_rate: usd_exchange_rate,
         symbol: symbol,
-        graphDataMapping
+        graphDataMapping,
+        minValue,
+        maxValue,
+        graphWidth
       });
-
+      
+      
       if (insertedColumn.previousSibling && insertedColumn.previousSibling.classList.contains('each-graph-column-wrapper')) {
         adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, operatorAddress);
+      } else {
+        document.documentElement.style.setProperty('--column-height', insertedColumn.offsetHeight);
+        addColumnEventListener(operatorAddress);
       }
     };
     

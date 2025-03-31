@@ -1,4 +1,3 @@
-const validatorGraphEventListenersMapping = {};
 
 function plotValidatorGraph(params) {
   const { operatorAddress, graphDataMapping, currency, decimals, usd_exchange_rate, symbol } = params;
@@ -87,7 +86,7 @@ function plotValidatorGraph(params) {
       
       dataPointValueDisplay.classList.add('each-data-point-value-display-visible');
       dataPointValueDisplay.classList.add('range-value-display');
-      dataPointValueDisplay.style.left = ((((rangeFinalColumn.getBoundingClientRect().left) - (rangeInitialColumn.getBoundingClientRect().left)) / 2) - 120) + 'px';
+      dataPointValueDisplay.style.left = ((((rangeFinalColumn.getBoundingClientRect().left) - (rangeInitialColumn.getBoundingClientRect().left)) / 2) - 150) + 'px';
       rangeInitialColumn.appendChild(dataPointValueDisplay);
     }
   }
@@ -98,4 +97,5 @@ function plotValidatorGraph(params) {
   validatorGraphEventListenersMapping[operatorAddress].push({ event: 'mouseup', handler: graphMouseUpHandler, element: graphWrapper });
 
   validatorWrapper.nextSibling.appendChild(graphWrapper);
+  return graphWrapper;
 }

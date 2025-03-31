@@ -8,16 +8,11 @@ import mongoose from 'mongoose';
 import path from 'path';
 import { rateLimit } from 'express-rate-limit';
 
-import compositeEventBlockRouter from './routes/compositeEventBlockRouter.js';
 import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
 
 import { startFetchingData } from './utils/startFetchingData.js';
 import { startCronJobs } from './cron/startCronJobs.js';
-import { getGenesisTxs } from './utils/getGenesisTxs.js';
-import getTxsByHeight from './utils/getTxsByHeight.js';
-import Chain from './models/Chain/Chain.js';
-import decodeTransactions from './utils/decodeTxs.js';
 
 dotenv.config();
 
@@ -50,7 +45,6 @@ app.use(cookieParser());
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
 
 app.use('/', indexRouter);
-app.use('/composite_event_block', compositeEventBlockRouter);
 app.use('/validator', validatorRouter);
 
 // startFetchingData();

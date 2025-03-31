@@ -5,44 +5,64 @@ import ActiveValidators from '../../../models/ActiveValidators/ActiveValidators.
 
 const indexGetController = (req: Request, res: Response): void => {
 
-  Chain.getAllChains((err: string | null, chains: ChainInterface[] | null) => {
+  const activeNetworkIdentifier = req.cookies.network;
+  const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime()): 1;
+  const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()): 2e9;
 
-    let selectedChain: ChainInterface;
-    const activeNetworkIdentifier = req.cookies.network;
-    if (chains) chains.forEach(element => element.name == activeNetworkIdentifier ? selectedChain = element : (''));
-
-    const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime()): 1;
-    const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()): 2e9;
+  Promise.allSettled([
+    new Promise((resolve) => 
+      Chain.getAllChains(
+        (err, chains) => resolve({ err: err, chains: chains })
+      )
+    ),
+    new Promise((resolve) => 
+      Validator.rankValidators(
+        { sort_by: 'ratio', order: 'desc', bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp, chain_identifier: activeNetworkIdentifier, with_photos: true },
+        (err, validators) => resolve({ err: err, validators: validators })
+      )
+    ),
+    new Promise((resolve) => 
+      ActiveValidators.getActiveValidatorHistoryByChain(
+        { chain_identifier: activeNetworkIdentifier },
+        (err, activeValidatorHistory) => resolve({ err: err, activeValidatorHistory: activeValidatorHistory })
+      )
+    ),
+  ])
+    .then((results: Record<string, any>[]) => {
+      const [getAllChainsResult, rankValidatorsResult, getActiveValidatorHistoryByChainResult] = results;
+      if (
+        !getAllChainsResult.value.chains || 
+        !rankValidatorsResult.value.validators || 
+        !getActiveValidatorHistoryByChainResult.value.activeValidatorHistory
+      ) return res.json({ success: false, err: 'bad_request' })
     
-    Validator.rankValidators({ sort_by: 'ratio', order: 'desc', bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp, chain_identifier: activeNetworkIdentifier, with_photos: true }, (err, validators) => {
-      if (err) return res.json({ success: false, err: 'bad_request' })
+      const chains = getAllChainsResult.value.chains;
+      const validators = rankValidatorsResult.value.validators;
+      const activeValidatorHistory = getActiveValidatorHistoryByChainResult.value.activeValidatorHistory;
 
-      ActiveValidators.getActiveValidatorHistoryByChain({ chain_identifier: selectedChain.name }, (err, activeValidatorHistory) => {
-        if (err) return res.json({ success: false, err: 'bad_request' })
+      const selectedChain = chains.find((element: ChainInterface) => element.name == activeNetworkIdentifier);  
 
-        return res.render('index/index', {
-          page: 'index/index',
-          title: 'CosmosHub Validator Timeline',
-          includes: {
-            external: {
-              css: ['page', 'general'],
-              js: ['page', 'functions'],
-            },
+      return res.render('index/index', {
+        page: 'index/index',
+        title: 'CosmosHub Validator Timeline',
+        includes: {
+          external: {
+            css: ['page', 'general'],
+            js: ['page', 'functions'],
           },
-          validators,
-          selectedDateBottom: req.cookies.selectedDateBottom,
-          selectedDateTop: req.cookies.selectedDateTop,
-          specificRangeName: req.cookies.specificRangeName,
-          specificRange: req.cookies.specificRange,
-          startDay: req.cookies.startDay,
-          currency_type: req.cookies.currency_type,
-          chains,
-          selectedChain: selectedChain ? selectedChain : '',
-          activeValidatorHistory
-        });
-      })
-    })
-  })
+        },
+        validators,
+        selectedDateBottom: req.cookies.selectedDateBottom,
+        selectedDateTop: req.cookies.selectedDateTop,
+        specificRangeName: req.cookies.specificRangeName,
+        specificRange: req.cookies.specificRange,
+        startDay: req.cookies.startDay,
+        currency_type: req.cookies.currency_type,
+        chains,
+        selectedChain: selectedChain ? selectedChain : '',
+        activeValidatorHistory
+      });
+    });
 };
 
 export default indexGetController;

@@ -28,8 +28,10 @@
   --each-chain-wrapper-horizontal-margin: 20px;
   
   --network-switch-chains-wrapper-max-height: 200px;
-  --network-switch-dropdown-before-bottom: 8px;
-  --network-switch-dropdown-before-height: 10px;
+  --network-switch-dropdown-before-bottom: 0px;
+  --network-switch-dropdown-before-height: 20px;
+  --network-switch-dropdown-after-top: 58px;
+  --network-switch-dropdown-after-height: 20px;
 
   --network-switch-network-image-wrapper-margin-right: 5px;
   
@@ -87,7 +89,7 @@
   --each-table-popup-info-content-margin-top: -22px;
   
   --each-table-popup-info-content-before-width: 10px;
-  --each-table-popup-info-content-before-height: 10px;
+  --each-table-popup-info-content-before-height: 20px;
   --each-table-popup-info-content-before-bottom: 27px;
 
   --currency-switch-wrapper-gap: 30px;
@@ -324,8 +326,8 @@
   --network-switch-dropdown-border-size: 1px;
   --network-switch-dropdown-border-color: transparent;
   --network-switch-dropdown-background-color: rgb(236, 240, 255);
-  --network-switch-dropdown-gap: 10px;
-  --network-switch-dropdown-vertical-padding: 10px;
+  --network-switch-dropdown-gap: 0;
+  --network-switch-dropdown-top-padding: 10px;
   --network-switch-dropdown-horizontal-padding: 0px;
   --network-switch-dropdown-border-radius: 0px;
   --network-switch-dropdown-transition-duration: 0.25s;
@@ -340,6 +342,8 @@
   --network-switch-header-height: 30px;
   --network-switch-header-gap: 10px;
   --network-switch-header-border-radius: 0px;
+  --network-switch-header-chain-content-wrapper-gap: 10px;
+  --network-switch-header-chain-content-wrapper-margin-left: -1px;
 
   --network-switch-network-symbol-font-size: 20px;
   --network-switch-network-symbol-font-weight: 400;
@@ -406,12 +410,14 @@
   --horizontal-axis-label-transform-rotate-deg: 45deg;
   --horizontal-axis-label-transition-duration: 0.2s;
   --horizontal-axis-label-width: 20px;
-  --horizontal-axis-label-bottom: -5%;
+  --horizontal-axis-label-bottom: -10%;
   --horizontal-axis-label-left: -10px;
   --horizontal-axis-label-z-index: 20;
   
   --each-data-point-horizontal-label-hovered-font-weight: 800;
   
+  --vertical-axis-labels-width: 100px;
+  --vertical-axis-labels-width-int: 100;
   --vertical-axis-labels-border-right-size: 0.5px;
 
   --each-vertical-label-font-size: 14px;
@@ -440,6 +446,43 @@
   --each-graph-visibility-content-disabled-each-graph-visibility-indicator-background-color: #ccc;
   --each-graph-visibility-content-disabled-each-graph-visibility-text-color: #ccc;
   --graph-element-semi-visible-background-color: #eee;
+
+  --each-currency-switch-wrapper-margin-top: 2px;
+  --each-currency-switch-wrapper-gap: 8px;
+  --each-currency-switch-label-margin-top: -4px;
+
+  --calendar-start-day-wrapper-gap: 8px;
+  --each-start-day-choice-gap: 8px;
+  --each-start-day-choice-span-margin-top: -4px;
+
+  --each-validator-details-content-wrapper-width: 100%;
+  --each-validator-details-content-wrapper-padding: 0px;
+  --each-validator-details-content-wrapper-height: 0px;
+  --each-validator-details-content-wrapper-transition-duration: 0.25s;
+
+  
+  --each-validator-details-content-wrapper-visible-horiztontal-padding: 20px;
+  --each-validator-details-content-wrapper-visible-vertical-padding: 10px;
+  --each-validator-details-content-wrapper-visible-height: 400px;
+
+  --each-validator-info-details-content-width: 20%;
+  --each-validator-info-details-content-gap: 8px;
+
+  --validator-details-textual-info-wrapper-gap: 8px;
+
+  --each-inactivity-line-display-content-width: 100%;
+  --each-inactivity-line-display-content-background-color: lightcoral;
+  --each-inactivity-line-display-content-border-radius: 2px;
+  --each-inactivity-line-display-content-border-size: 4px;
+  --each-inactivity-line-display-content-border-color: red;
+  --each-inactivity-line-display-content-height: 30px;
+  
+  --validator-activeness-always-content-width: 100%;
+  --validator-activeness-always-content-background-color: lightgreen;
+  --validator-activeness-always-content-border-radius: 2px;
+  --validator-activeness-always-content-border-size: 4px;
+  --validator-activeness-always-content-border-color: green;
+  --validator-activeness-always-content-height: 30px;
 }
 
 .all-main-wrapper {
@@ -561,7 +604,8 @@
   transform: perspective(var(--network-switch-dropdown-transform-perspective)) rotateX(var(--network-switch-dropdown-transform-rotate-x));
   background-color: var(--color-powder-blue);
   gap: var(--network-switch-dropdown-gap);
-  padding: var(--network-switch-dropdown-vertical-padding) var(--network-switch-dropdown-horizontal-padding);
+  padding: 0 var(--network-switch-dropdown-horizontal-padding);
+  padding-top: var(--network-switch-dropdown-top-padding);
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -586,6 +630,16 @@
   background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, var(--color-powder-blue) 100%);
 }
 
+.network-switch-dropdown::after {
+  content: '';
+  position: absolute;
+  top: var(--network-switch-dropdown-after-top);
+  left: 0;
+  height: var(--network-switch-dropdown-after-height);
+  width: 100%;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, var(--color-powder-blue) 100%);
+}
+
 .network-switch-dropdown-open {
   opacity: var(--network-switch-dropdown-opacity-open);
   transform: perspective(var(--network-switch-dropdown-transform-perspective)) rotateX(var(--network-switch-dropdown-transform-open-rotate-x));
@@ -600,7 +654,14 @@
   display: flex;
   align-items: center;
   text-wrap: nowrap;
-  justify-content: flex-end;
+  justify-content: space-between;
+}
+
+.network-switch-header-chain-content-wrapper {
+  height: 100%;
+  justify-content: flex-start;
+  gap: var(--network-switch-header-chain-content-wrapper-gap);
+  margin-left: var(--network-switch-header-chain-content-wrapper-margin-left);
 }
 
 .network-switch-network-image-wrapper {
@@ -1412,7 +1473,7 @@
 
 .each-data-point-value-display-visible {
   width: var(--each-data-point-value-display-visible-width);
-  left: calc(((var(--each-data-point-value-display-visible-width) / 2) * -1) - var(--each-data-point-value-display-padding));
+  left: calc(((var(--each-data-point-value-display-visible-width) / 2) * -1) - (2 * var(--each-data-point-value-display-padding)));
   opacity: 1;
 }
 
@@ -1456,6 +1517,7 @@
 }
 
 .vertical-axis-labels {
+  width: var(--vertical-axis-labels-width);
   height: 100%;
   display: flex;
   flex-direction: column-reverse;
@@ -1494,7 +1556,7 @@
 .each-data-indicator-vertical-line {
   width: 0;
   border-right: var(--each-data-indicator-vertical-line-border-right-size) dashed var(--color-triangle-unselected);
-  height: calc(100% + var(--each-data-indicator-vertical-line-top));
+  height: calc(var(--each-data-indicator-vertical-line-height) - var(--each-data-indicator-vertical-line-top));
   top: var(--each-data-indicator-vertical-line-top);
   left: var(--each-data-indicator-vertical-line-left);
   position: absolute;
@@ -1526,6 +1588,7 @@
   padding: var(--graph-visibility-legend-wrapper-padding);
   right: 0;
   top: 0;
+  font-size: 14px;
   position: absolute;
 }
 
@@ -1557,15 +1620,15 @@
 }
 
 .each-currency-switch-wrapper {
-  margin-top: 2px;
+  margin-top: var(--each-currency-switch-wrapper-margin-top);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--each-currency-switch-wrapper-gap);
   cursor: var(--pointer-hand-dark);
 }
 
 .each-currency-switch-label {
-  margin-top: -4px;
+  margin-top: var(--each-currency-switch-label-margin-top);
   text-wrap: nowrap;
 }
 
@@ -1575,60 +1638,60 @@
   text-wrap: nowrap;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--calendar-start-day-wrapper-gap);
 }
 
 .each-start-day-choice {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--each-start-day-choice-gap);
   cursor: var(--pointer-hand-dark);
 }
 
 .each-start-day-choice span {
-  margin-top: -4px;
+  margin-top: var(--each-start-day-choice-span-margin-top);
 }
 
 .each-validator-details-content-wrapper {
-  width: calc(100% - 40px);
+  width: calc(var(--each-validator-details-content-wrapper-width) - (2 * var(--each-validator-details-content-wrapper-visible-horiztontal-padding)));
   padding: 0px;
   height: 0px;
   overflow: hidden;
-  transition: all 0.25s ease 0s;
+  transition: all var(--each-validator-details-content-wrapper-transition-duration) ease 0s;
   display: flex;
 }
 
 .each-validator-details-content-wrapper-visible {
-  padding: 10px 20px;
-  height: 400px;
+  padding: var(--each-validator-details-content-wrapper-visible-vertical-padding) var(--each-validator-details-content-wrapper-visible-horiztontal-padding);
+  height: var(--each-validator-details-content-wrapper-visible-height);
 }
 
 .each-validator-info-details-content {
-  width: 20%;
+  width: var(--each-validator-info-details-content-width);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--each-validator-info-details-content-gap);
 }
 
 .validator-details-textual-info-wrapper {
   text-wrap: wrap;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--validator-details-textual-info-wrapper-gap);
 }
 
 .each-inactivity-line-display-content {
-  width: 100%;
-  background-color: lightcoral;
-  border-radius: 2px;
-  border: 4px solid red;
-  height: 30px;
+  width: var(--each-inactivity-line-display-content-width);
+  background-color: var(--each-inactivity-line-display-content-background-color);
+  border-radius: var(--each-inactivity-line-display-content-border-radius);
+  border: var(--each-inactivity-line-display-content-border-size) solid var(--each-inactivity-line-display-content-border-color);
+  height: var(--each-inactivity-line-display-content-height);
 }
 
 .validator-activeness-always-content {
-  width: 100%;
-  background-color: lightgreen;
-  border-radius: 2px;
-  border: 4px solid green;
-  height: 30px;
+  width: var(--validator-activeness-always-content-width);
+  background-color: var(--validator-activeness-always-content-background-color);
+  border-radius: var(--validator-activeness-always-content-border-radius);
+  border: var(--validator-activeness-always-content-border-size) solid var(--validator-activeness-always-content-border-color);
+  height: var(--validator-activeness-always-content-height);
 }
