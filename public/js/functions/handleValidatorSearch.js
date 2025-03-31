@@ -13,11 +13,13 @@ function handleValidatorSearch () {
     document.documentElement.style.setProperty("--scrollbar-opacity", "1");
     if (!validatorFilterInput.value || validatorFilterInput.value.length <= 0) return document.querySelectorAll('.each-validator-wrapper').forEach(each => {
       each.style.display = 'flex';
-      each.nextSibling.style.display = 'unset';
+      each.nextSibling.style.display = 'flex';
+      each.nextSibling.nextSibling.style.display = 'unset';
     });
     document.querySelectorAll('.each-validator-wrapper').forEach(each => {
       each.style.display = 'none';
       each.nextSibling.style.display = 'none';
+      each.nextSibling.nextSibling.style.display = 'none';
     });
     for (let i = 0; i < monikers.length; i++) {
       const eachMoniker = monikers[i].trim().toLowerCase();
@@ -28,7 +30,9 @@ function handleValidatorSearch () {
         eachOperatorAddress.includes(validatorFilterInput.value.trim().toLowerCase())
       ) {
         document.getElementById(operatorAddresses[i]).style.display = 'flex';
-        document.getElementById(operatorAddresses[i]).nextSibling.style.display = 'unset';
+        if (document.getElementById(operatorAddresses[i]).nextSibling.classList.contains('each-validator-details-content-wrapper-visible'))
+          document.getElementById(operatorAddresses[i]).nextSibling.style.display = 'flex';
+        document.getElementById(operatorAddresses[i]).nextSibling.nextSibling.style.display = 'unset';
       }
     }
 

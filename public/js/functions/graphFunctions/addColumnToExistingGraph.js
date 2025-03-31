@@ -14,9 +14,9 @@ function addColumnToExistingGraph (params) {
   columnWrapper.classList.add('each-graph-column-wrapper');
   columnWrapper.classList.add(`column-wrapper-${operatorAddress}`);
 
-  const selfStakeBottom = `calc(((${data.self_stake} - var(--min-value)) / (var(--max-value) - var(--min-value))) * 100%)`;
-  const withdrawBottom = `calc(((${data.withdraw} - var(--min-value)) / (var(--max-value) - var(--min-value))) * 100%)`;  
-  const commissionBottom = `calc(((${data.commission} - var(--min-value)) / (var(--max-value) - var(--min-value))) * 100%)`;  
+  const selfStakeBottom = `calc(((${data.self_stake} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+  const withdrawBottom = `calc(((${data.withdraw} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;  
+  const commissionBottom = `calc(((${data.commission} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;  
 
   const horizontalAxisLabel = generateSingleHorizontalAxisLabel(timestamp);
 
@@ -31,11 +31,11 @@ function addColumnToExistingGraph (params) {
   eachDataDeltaVerticalLine.classList.add('each-data-delta-vertical-line');
   
   const paintBarSelfStake = document.createElement('div');
-  paintBarSelfStake.classList.add('graph-range-paint-bar');
+  paintBarSelfStake.classList.add('graph-range-paint-bar', `paint-bar-${operatorAddress}`);
   const paintBarWithdraw = document.createElement('div');
-  paintBarWithdraw.classList.add('graph-range-paint-bar');
+  paintBarWithdraw.classList.add('graph-range-paint-bar', `paint-bar-${operatorAddress}`);
   const paintBarCommission = document.createElement('div');
-  paintBarCommission.classList.add('graph-range-paint-bar');
+  paintBarCommission.classList.add('graph-range-paint-bar', `paint-bar-${operatorAddress}`);
 
   selfStakePoint.classList.add(`self_stake-graph-data-element-${operatorAddress}`);
   selfStakeLine.classList.add(`self_stake-graph-data-element-${operatorAddress}`);
@@ -64,7 +64,7 @@ function addColumnToExistingGraph (params) {
 
   document.documentElement.style.setProperty(
     `--graph-column-width-${operatorAddress}`, 
-    `calc((${graphWidth} - var(--vertical-axis-labels-width-int)) / ${graphWrapper.children.length - 1})`
+    `calc((${graphWidth} - var(--vertical-axis-labels-width-int)) / ${graphWrapper.children.length - 3})`
   );
   
   return columnWrapper;

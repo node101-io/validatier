@@ -14,7 +14,7 @@ function getAngleBetweenTwoPoints (column1, column2, operatorAddress) {
 
   const selfStakeDeltaY = `(
     (${(self_stake_2 - self_stake_1)} / 
-    (var(--max-value) - var(--min-value)))
+    (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress})))
     * var(--column-height)
   )`
 
@@ -26,7 +26,7 @@ function getAngleBetweenTwoPoints (column1, column2, operatorAddress) {
   const withdrawDeltaY = `(
     (
       ${(withdraw_2 - withdraw_1)} / 
-      (var(--max-value) - var(--min-value))
+      (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))
     )
     * var(--column-height)
   )`
@@ -40,7 +40,7 @@ function getAngleBetweenTwoPoints (column1, column2, operatorAddress) {
   const commissionDeltaY = `(
     (
       ${(commission_2 - commission_1)} / 
-      (var(--max-value) - var(--min-value))
+      (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))
     )
     * var(--column-height)
   )`

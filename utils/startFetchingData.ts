@@ -3,7 +3,7 @@ import Chain from "../models/Chain/Chain.js";
 import { getGenesisTxs } from "./getGenesisTxs.js";
 import { processBlocks } from "./processBlocks.js";
 
-const CHAINS_TO_LISTEN = ['dymension'];
+const CHAINS_TO_LISTEN = ['axelar'];
 
 export const startFetchingData = () => {
   Chain

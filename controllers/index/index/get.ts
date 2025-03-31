@@ -5,9 +5,9 @@ import ActiveValidators from '../../../models/ActiveValidators/ActiveValidators.
 
 const indexGetController = (req: Request, res: Response): void => {
 
-  const activeNetworkIdentifier = req.cookies.network;
-  const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime()): 1;
-  const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()): 2e9;
+  const activeNetworkIdentifier = req.cookies.network ? req.cookies.network : 'cosmoshub';
+  const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime()): (new Date(1)).getTime();
+  const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()): Date.now();
 
   Promise.allSettled([
     new Promise((resolve) => 
@@ -52,12 +52,12 @@ const indexGetController = (req: Request, res: Response): void => {
           },
         },
         validators,
-        selectedDateBottom: req.cookies.selectedDateBottom,
-        selectedDateTop: req.cookies.selectedDateTop,
-        specificRangeName: req.cookies.specificRangeName,
-        specificRange: req.cookies.specificRange,
-        startDay: req.cookies.startDay,
-        currency_type: req.cookies.currency_type,
+        selectedDateBottom: req.cookies.selectedDateBottom ? req.cookies.selectedDateBottom : (new Date(selectedChain.first_available_block_time)).toISOString().split('T')[0],
+        selectedDateTop: req.cookies.selectedDateTop ? req.cookies.selectedDateTop : (new Date()).toISOString().split('T')[0],
+        specificRangeName: req.cookies.specificRangeName ? req.cookies.specificRangeName : 'All time',
+        specificRange: req.cookies.specificRange ? req.cookies.specificRange : 'all_time',
+        startDay: req.cookies.startDay ? req.cookies.startDay : 'monday',
+        currency_type: req.cookies.currency_type ? req.cookies.currency_type : 'native',
         chains,
         selectedChain: selectedChain ? selectedChain : '',
         activeValidatorHistory

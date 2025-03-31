@@ -315,8 +315,8 @@ function renderValidators() {
 
     if (cacheResponse) {
       sortOrderMapping[sort_by] == 'desc'
-        ? cacheResponse.data.sort((a, b) => (b[sort_by] || 0) - (a[sort_by] || 0))
-        : cacheResponse.data.sort((a, b) => (a[sort_by] || 0) - (b[sort_by] || 0))
+        ? cacheResponse.data.validators.sort((a, b) => (b[sort_by] || 0) - (a[sort_by] || 0))
+        : cacheResponse.data.validators.sort((a, b) => (a[sort_by] || 0) - (b[sort_by] || 0))
 
       return generateValidatorRankingContent(cacheResponse, sort_by, sortOrderMapping)
     };

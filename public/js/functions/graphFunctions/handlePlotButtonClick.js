@@ -15,13 +15,12 @@ function calculateMaxAndMinValue (graphDataMapping) {
 }
 
 const validatorGraphEventListenersMapping = {};
-let isSelectingRange = false;
-let rangeInitialColumn;
-let rangeFinalColumn;
-let isSelectionDirectionToLeft = false;
+const validatorListenerVariablesMapping = {}
 
 function handlePlotButtonClick () {
+
   document.body.addEventListener('click', async (event) => {
+    
     let target = event.target;
     while (target != document.body && !target.classList.contains('each-validator-wrapper')) target = target.parentNode;
     if (!target.classList.contains('each-validator-wrapper')) return;
@@ -35,11 +34,18 @@ function handlePlotButtonClick () {
 
     const operatorAddress = target.id;
     const bottomTimestamp = Math.floor(new Date(bottomDate).getTime());
-    const topTimestamp = Math.floor(new Date(topDate).getTime());    
+    const topTimestamp = Math.floor(new Date(topDate).getTime());   
+    
+    validatorListenerVariablesMapping[operatorAddress] = {
+      isSelectingRange: false,
+      rangeInitialColumn: '',
+      rangeFinalColumn: '',
+      isSelectionDirectionToLeft: false
+    }
     
     const graphDataMapping = {};
 
-    const currency = document.getElementById('currency-toggle').value == 'native' ? document.getElementById('network-switch-header').getAttribute('current_chain_symbol') : 'usd';
+    const currency = document.getElementById('currency-toggle').getAttribute('value') == 'native' ? document.getElementById('network-switch-header').getAttribute('current_chain_symbol') : 'usd';
     const decimals = document.getElementById('network-switch-header').getAttribute('current_chain_decimals');
     const usd_exchange_rate = document.getElementById('network-switch-header').getAttribute('current_chain_usd_exhange_rate');
     const symbol = document.getElementById('network-switch-header').getAttribute('current_chain_symbol');
@@ -55,7 +61,7 @@ function handlePlotButtonClick () {
     const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue("width").replace('px', '');
 
     const queryString = new URLSearchParams(requestData).toString();
-    const eventSource = new EventSource(`/validator/get_graph_data?${queryString}`);
+    const eventSource = new EventSource(`/validator/get_graph_data?${queryString}`)
 
     const worker = new Worker('/js/functions/worker.js');
     
@@ -64,8 +70,8 @@ function handlePlotButtonClick () {
       graphDataMapping[data.index] = data;
 
       const { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping);
-      document.documentElement.style.setProperty('--min-value', minValue);
-      document.documentElement.style.setProperty('--max-value', maxValue);
+      document.documentElement.style.setProperty(`--min-value-${operatorAddress}`, minValue);
+      document.documentElement.style.setProperty(`--max-value-${operatorAddress}`, maxValue);
       
       const insertedColumn = addColumnToExistingGraph({
         operatorAddress: operatorAddress,
@@ -102,6 +108,10 @@ function handlePlotButtonClick () {
       });
     };
 
+    eventSource.addEventListener('end', () => {
+      eventSource.close();
+    });
+
     eventSource.onerror = (err) => eventSource.close();
   });
       
@@ -118,7 +128,7 @@ function handlePlotButtonClick () {
         const eachGraphWrapper = graphWrappersArray[i];
         const operatorAddress = eachGraphWrapper.getAttribute('operator_address');
         const columnWrapper = eachGraphWrapper.querySelector('.each-graph-column-wrapper');
-        
+        if (!columnWrapper) return;
         document.documentElement.style.setProperty(
           `--graph-column-width-${operatorAddress}`, 
           columnWrapper.getBoundingClientRect().width

@@ -391,7 +391,7 @@
   --each-data-point-value-display-padding: 5px;
   --each-data-point-value-display-border-radius: 5px;
   --each-data-point-value-display-top: -50px;
-  --each-data-point-value-display-transition-duration: 0.5s;
+  --each-data-point-value-display-transition-duration: 0s;
   --each-data-point-value-display-z-index: 30;
   --each-data-point-value-display-gap: 5px;
   
@@ -408,7 +408,7 @@
   
   --horizontal-axis-label-font-size: 16px;
   --horizontal-axis-label-transform-rotate-deg: 45deg;
-  --horizontal-axis-label-transition-duration: 0.2s;
+  --horizontal-axis-label-transition-duration: 0s;
   --horizontal-axis-label-width: 20px;
   --horizontal-axis-label-bottom: -10%;
   --horizontal-axis-label-left: -10px;
@@ -429,7 +429,7 @@
   --each-data-indicator-vertical-line-height: 100%;
   --each-data-indicator-vertical-line-top: -50px;
   --each-data-indicator-vertical-line-left: -1px;
-  --each-data-indicator-vertical-line-transition-duration: 0.2s;
+  --each-data-indicator-vertical-line-transition-duration: 0s;
   
   --graph-wrapper-horizontal-labels-background-absolute-height: 50px;
   --graph-wrapper-horizontal-labels-background-absolute-z-index: 10;
@@ -1517,7 +1517,8 @@
 }
 
 .vertical-axis-labels {
-  width: var(--vertical-axis-labels-width);
+  min-width: var(--vertical-axis-labels-width);
+  max-width: var(--vertical-axis-labels-width);
   height: 100%;
   display: flex;
   flex-direction: column-reverse;

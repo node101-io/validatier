@@ -76,8 +76,8 @@ function handleNetworkSwitch () {
     networkSwitchDropdown.classList.remove('network-switch-dropdown-open');
     setCookie('network', target.getAttribute('name'), 7);
         
-    const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
-    const topDate = document.getElementById('periodic-query-top-timestamp').value
+    const bottomDate = document.getElementById('periodic-query-bottom-timestamp').getAttribute('value');
+    const topDate = document.getElementById('periodic-query-top-timestamp').getAttribute('value');
     
     setCookie('selectedDateBottom', bottomDate, 7);
     setCookie('selectedDateTop', topDate, 7);

@@ -65,18 +65,17 @@ function handleExportEvents () {
       document.getElementById('export-choice-download-button').disabled = true;
       document.getElementById('export-choice-download-button').style.cursor = 'var(--pointer-default-dark)';
       fetch(url)
-      .then(async (response) => {
-          if (!response.ok) {
-              throw new Error(`${response.status}`);
-          }
+      .then((response) => {
+        if (!response.ok) throw new Error(`${response.status}`);
+  
+        return response.blob().then((blob) => {
+          if (blob.size === 0) throw new Error('file_empty');
   
           const contentType = response.headers.get('Content-Type');
           const isZip = contentType === 'application/zip';
   
-          const blob = await response.blob();
-          if (blob.size === 0) throw new Error('file_empty');
-  
           return { blob, isZip };
+        });
       })
       .then(({ blob, isZip }) => {
           const downloadUrl = URL.createObjectURL(blob);

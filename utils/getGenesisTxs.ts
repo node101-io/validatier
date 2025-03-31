@@ -12,9 +12,13 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
   Chain.findChainByIdentifier({ chain_identifier: chain_identifier }, (err, chain) => {
       if (err || !chain) return callback('bad_request', false);
 
-      request(`https://snapshots.kjnodes.com/${chain.name}/genesis.json`)
+      request(`http://${chain.rpc_url}/genesis`)
         .then(response => response.body.json())
         .then((data: any) => {
+
+          data = data.app_state
+            ? data
+            : data.result.genesis
 
           const validatorsData = data.app_state.staking.validators;
           const activeValidatorsData = data.validators; 

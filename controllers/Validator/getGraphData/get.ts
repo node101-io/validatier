@@ -30,62 +30,53 @@ export default (req: Request, res: Response): any => {
   const stepValue = 1000000000;
   let pushedIndex: number = -1;
   const pendingData: Record<number, object> = {};
-  
-  const promises = [];
 
-  let i = 0;
-  while (i <  Math.ceil((topTimestamp - bottomTimestamp) / stepValue)) {
-    promises.push(
-      new Promise((resolve) => 
-        CompositeEventBlock.getTotalPeriodicSelfStakeAndWithdraw(
-          {
-            operator_address,
-            bottomTimestamp: bottomTimestamp,
-            topTimestamp: bottomTimestamp + i * stepValue,
-            searchBy: 'timestamp',
-          },
-          (err, totalPeriodicSelfStakeAndWithdraw) => resolve({ err, totalPeriodicSelfStakeAndWithdraw })
-        )
-      )
-    );
-    i++;
-  }
+  async.times(
+    Math.ceil((topTimestamp - bottomTimestamp) / stepValue),
+    (i, next) => {
+      CompositeEventBlock.getTotalPeriodicSelfStakeAndWithdraw(
+        {
+          operator_address,
+          bottomTimestamp: bottomTimestamp,
+          topTimestamp: bottomTimestamp + i * stepValue,
+          searchBy: 'timestamp',
+        },
+        (err, totalPeriodicSelfStakeAndWithdraw) => {
+          if (err || !totalPeriodicSelfStakeAndWithdraw) {
+            sendData({ err: 'bad_request', success: false });
+            return res.end();
+          }
 
-  let j = 0;
-  while (promises.length) {
-    const eachPromise = promises.pop();
-    eachPromise?.then((result: any) => {
-    
-      if (result.err || !result.totalPeriodicSelfStakeAndWithdraw) {
-        sendData({ err: 'bad_request', success: false });
-        return res.end();
-      }
+          const data = {
+            success: true,
+            data: {
+              self_stake: 3 * ((i ** 2) + 1) * 1e6 * Math.sin(i),
+              withdraw: 1 * ((i ** 2) + 1) * 1e6 * Math.cos(i),
+              commission: 2 * ((i ** 2) + 1) * 1e6 * Math.sin(i),
+              ratio: 2 * ((i ** 2) + 1) * 1e6 * Math.cos(i),
+              sold: 2 * ((i ** 2) + 1) * 1e6 * Math.sin(i),
+              timestamp: bottomTimestamp + i * stepValue,
+              index: i
+            },
+          };
 
-      const totalPeriodicSelfStakeAndWithdraw = result.totalPeriodicSelfStakeAndWithdraw;
+          pendingData[i] = data;
 
-      const data = {
-        success: true,
-        data: {
-          self_stake: 3 * ((j ** 2) + 1) * 1e6,
-          withdraw: 1 * ((j ** 2) + 1) * 1e6,
-          commission: 2 * ((j ** 2) + 1) * 1e6,
-          ratio: 2 * ((j ** 2) + 1) * 1e6,
-          sold: 2 * ((j ** 2) + 1) * 1e6,
-          timestamp: bottomTimestamp + j * stepValue,
-          index: j
+          while (pendingData[pushedIndex + 1]) {
+            pushedIndex++;
+            sendData(pendingData[pushedIndex]);
+            delete pendingData[pushedIndex];
+          }
+
+          return next();
         }
-      };
-
-      pendingData[j] = data;
-
-      while (pendingData[pushedIndex + 1]) {
-        pushedIndex++;
-        sendData(pendingData[pushedIndex]);
-        delete pendingData[pushedIndex];
-      }
-      j++;
-    })
-  }
+      );
+    },
+    (err) => {
+      if (err) sendData({ err: 'internal_error', success: false });
+      return res.end();
+    }
+  );
 
   req.on('close', () => res.end());
 };

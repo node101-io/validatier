@@ -10,10 +10,10 @@ export default (req: Request, res: Response): any => {
   type SortBy = 'self_stake' | 'withdraw' | 'ratio' | 'sold'; 
 
   const { order, sort_by, bottom_timestamp, top_timestamp, chain_identifier } = req.query;
-  
+
   if (!isValidSortBy(sort_by)) return res.send({ err: 'bad_request', success: false})
   if (!isValidSortOrder(order)) return res.send({ err: 'bad_request', success: false})
-  if (typeof bottom_timestamp != 'string' || typeof top_timestamp != 'string' || typeof chain_identifier != 'string') return res.send({ err: 'bad_request', success: false });
+  if (typeof bottom_timestamp != 'string' || typeof top_timestamp != 'string' || typeof chain_identifier != 'string') return res.send({ err: 'bad_request', success: false });
   
   const sortBy: SortBy = sort_by;
   const sortOrder: SortOrder = order;
