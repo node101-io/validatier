@@ -11,10 +11,6 @@ import { rateLimit } from 'express-rate-limit';
 import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
 
-import { startFetchingData } from './utils/startFetchingData.js';
-import { startCronJobs } from './cron/startCronJobs.js';
-import { sendTelegramMessage } from './utils/sendTelegramMessage.js';
-
 dotenv.config();
 
 const app: Express = express();
@@ -50,6 +46,4 @@ app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.i
 app.use('/', indexRouter);
 app.use('/validator', validatorRouter);
 
-startFetchingData();
-// startCronJobs();
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
