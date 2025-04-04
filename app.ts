@@ -49,6 +49,6 @@ app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.i
 app.use('/', indexRouter);
 app.use('/validator', validatorRouter);
 
-// startFetchingData();
-startCronJobs();
+startFetchingData();
+// startCronJobs();
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
