@@ -11,8 +11,8 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
 
   Chain.findChainByIdentifier({ chain_identifier: chain_identifier }, (err, chain) => {
       if (err || !chain) return callback('bad_request', false);
-
-      request(`http://${chain.rpc_url}/genesis`)
+      
+      request(`https://snapshots.kjnodes.com/${chain.name}/genesis.json`)
         .then(response => response.body.json())
         .then((data: any) => {
 

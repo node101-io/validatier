@@ -66,19 +66,17 @@ block content
                     .dropdown
                       - 
                         const options = [
-                          { id: 'all-time', label: 'All time', selected: true },
-                          { id: 'last-week', label: 'Last week' },
-                          { id: 'last-7-days', label: 'Last 7 days' },
-                          { id: 'last-30-days', label: 'Last 30 days' },
-                          { id: 'last-90-days', label: 'Last 90 days' },
-                          { id: 'last-365-days', label: 'Last 365 days' },
+                          { id: 'last-30-days', label: 'Last month' },
+                          { id: 'last-90-days', label: 'Last 3 months', selected: true },
+                          { id: 'last-180-days', label: 'Last 6 months' },
+                          { id: 'last-365-days', label: 'Last year' },
                           { id: 'this-year', label: 'This year (Jan - Today)' },
-                          { id: 'last-calendar-year', label: 'Last calendar year' },
+                          { id: 'all-time', label: 'All time' },
                           { id: 'custom', label: 'Custom' }
                         ]
                       ul
                         each option in options
-                          li.left-wrapper-each-choice(class=`${specificRange == option.id ? 'selected' : ''}` id=option.id) #{option.label}
+                          li.left-wrapper-each-choice(class=`${(specificRange == option.id || (!specificRange && option.selected)) ? 'selected' : ''}` id=option.id) #{option.label}
 
                   .calendar-wrapper
                     .calendar 

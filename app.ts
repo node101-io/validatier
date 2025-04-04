@@ -32,8 +32,10 @@ app.use(rateLimit({
   message: 'maximum_request_per_second_reached',
 }));
 
+const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/validator-timeline-test-v5';
+
 mongoose
-  .connect('mongodb://127.0.0.1:27017/validator-timeline-test-v5')
+  .connect(mongoUri)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
@@ -48,5 +50,5 @@ app.use('/', indexRouter);
 app.use('/validator', validatorRouter);
 
 // startFetchingData();
-// startCronJobs();
+startCronJobs();
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));

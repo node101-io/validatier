@@ -180,17 +180,6 @@ chainSchema.statics.saveChain = function (
     .findOneAndUpdate(
       { chain_id: chain_id },
       { 
-        name: name,
-        pretty_name: pretty_name,
-        image: image,
-        symbol: symbol,
-        decimals: decimals,
-        denom: denom,
-        bech32_prefix: bech32_prefix,
-        rpc_url: rpc_url,
-        first_available_block_height: first_available_block_height,
-        last_available_block_height: last_available_block_height,
-        first_available_block_time: first_available_block_time,
         usd_exchange_rate: usd_exchange_rate
       }
     )
@@ -221,9 +210,9 @@ chainSchema.statics.saveChain = function (
           if (!newChain) return callback('creation_error', null);
           return callback(null, newChain);
         })
-        .catch(err => callback('creation_error', null))
+        .catch(err => callback(err, null))
     })
-    .catch(err => callback('save_error', null))
+    .catch(err => callback(err, null))
 }
 
 

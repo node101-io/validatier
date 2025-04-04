@@ -89,7 +89,8 @@
   --each-table-popup-info-content-margin-top: -22px;
   
   --each-table-popup-info-content-before-width: 10px;
-  --each-table-popup-info-content-before-height: 20px;
+  --each-table-popup-info-content-before-height: 10px;
+  --each-table-popup-info-content-before-rotate-deg: 45deg;
   --each-table-popup-info-content-before-bottom: 27px;
 
   --currency-switch-wrapper-gap: 30px;
@@ -106,7 +107,7 @@
   --each-table-popup-info-arrow-top: 100%;
   --each-table-popup-info-arrow-left: 50%;
 
-  --date-picker-z-index: 10;
+  --date-picker-z-index: 120;
   --date-picker-height: 48px;
 
   --selected-range-font-size: 16px;
@@ -280,7 +281,7 @@
   --export-wrapper-content-transform-rotate-x: -90deg;
   --export-wrapper-content-transform-perspective: 1000px;
   --export-wrapper-content-top: 48px;
-  --export-wrapper-content-z-index: 20;
+  --export-wrapper-content-z-index: 120;
   --export-wrapper-content-opacity: 0;
   --export-wrapper-content-right: 0;
   --export-wrapper-content-title-font-size: 18px;
@@ -320,7 +321,7 @@
 
   --network-switch-dropdown-top: 100%;
   --network-switch-dropdown-right: 0;
-  --network-switch-dropdown-z-index: 20;
+  --network-switch-dropdown-z-index: 120;
   --network-switch-dropdown-width: 260px;
   --network-switch-dropdown-height: 200px;
   --network-switch-dropdown-border-size: 1px;
@@ -773,7 +774,7 @@
   left: calc(50% - (var(--each-table-popup-info-content-before-width) / 2));
   width: var(--each-table-popup-info-content-before-width);
   height: var(--each-table-popup-info-content-before-height);
-  transform: rotateZ(45deg);
+  transform: rotateZ(var(--each-table-popup-info-content-before-rotate-deg));
   bottom: var(--each-table-popup-info-content-before-bottom);
   background-color: var(--color-table-header-popup);
 }

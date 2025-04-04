@@ -41,16 +41,11 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
         !data.result?.block?.header?.height
       ) return callback(null, { time: data.result?.block?.header?.time ? data.result?.block?.header?.time : '', decodedTxs: []});
 
-      const finalizeBlockEvents = data_block_results.result.finalize_block_events 
-        ? data_block_results.result.finalize_block_events 
-        : (data_block_results.result.begin_block_events && data_block_results.result.end_block_events)
-          ? [
-              ...data_block_results.result.begin_block_events,
-              ...data_block_results.result.end_block_events
-            ]
-          : data_block_results.result.begin_block_events
-            ? data_block_results.result.begin_block_events
-            : data_block_results.result.end_block_events;
+      const finalizeBlockEvents = [
+        ...data_block_results.result.begin_block_events || [],
+        ...data_block_results.result.end_block_events || [],
+        ...data_block_results.result.finalize_block_events || [],
+      ]
 
       const time = data.result?.block?.header?.time;
       

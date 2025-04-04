@@ -11,9 +11,7 @@ const indexGetController = (req: Request, res: Response): void => {
 
   Promise.allSettled([
     new Promise((resolve) => 
-      Chain.getAllChains(
-        (err, chains) => resolve({ err: err, chains: chains })
-      )
+      Chain.getAllChains((err, chains) => resolve({ err: err, chains: chains }))
     ),
     new Promise((resolve) => 
       Validator.rankValidators(

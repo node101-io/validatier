@@ -4,6 +4,15 @@ import Chain from '../models/Chain/Chain.js';
 import getTxsByHeight from '../utils/getTxsByHeight.js';
 import { DecodedMessage } from '../utils/decodeTxs.js';
 import { convertOperatorAddressToBech32 } from '../utils/convertOperatorAddressToBech32.js';
+import { ActiveValidatorsInterface } from '../models/ActiveValidators/ActiveValidators.js';
+
+interface ListenForEventsResult {
+  success: boolean,
+  inserted_validator_addresses?: string[] | null,
+  updated_validator_addresses?: string[] | null,
+  saved_composite_event_block_heights?: number[] | null,
+  saved_active_validators?: ActiveValidatorsInterface | null
+}
 
 export const LISTENING_EVENTS = [
   '/cosmos.staking.v1beta1.MsgCreateValidator',
@@ -21,7 +30,7 @@ export const listenForEvents = (
   bottom_block_height: number,
   top_block_height: number,
   chain_identifier: string,
-  final_callback: (err: string | null, success: Boolean) => any
+  final_callback: (err: string | null, result: ListenForEventsResult) => any
 ) => {
   Chain.findChainByIdentifier({ chain_identifier: chain_identifier }, (err, chain) => {
 
@@ -156,29 +165,38 @@ export const listenForEvents = (
             })
         )
       );
+
+    const result: ListenForEventsResult = {
+      inserted_validator_addresses: null,
+      updated_validator_addresses: null,
+      saved_composite_event_block_heights: null,
+      saved_active_validators: null,
+      success: true
+    }
     
     Promise.allSettled(promises)
       .then(values => {
         values.forEach(eachValue => (eachValue.status == 'rejected') ? console.log(eachValue) : '');
         Validator.saveManyValidators(validatorMap, (err, validators) => {
-          if (err) return final_callback(err, false);
+          if (err) return final_callback('save_many_validators_failed', { success: false });
 
           CompositeEventBlock.saveManyCompositeEventBlocks(compositeEventBlockMap, (err, compositeEventBlocks) => {
-            if (err) return final_callback(err, false);
+            if (err) return final_callback('save_many_composite_event_blocks_failed', { success: false });
             const insertedValidatorAddresses = validators?.insertedValidators ? validators?.insertedValidators.map(validator => validator.operator_address) : [];
+            result.inserted_validator_addresses = insertedValidatorAddresses;
             const updatedValidatorAddresses = validators?.updatedValidators ? validators?.updatedValidators.map(validator => validator.operator_address) : [];
-            const savedCompositeEventBlocks = compositeEventBlocks?.map(each => each.block_height);
-            
-            (validators?.insertedValidators && validators?.insertedValidators.length > 0) ? console.log(`Validator | CREATED | ${insertedValidatorAddresses.length <= 0 ? 'NONE' : insertedValidatorAddresses}`) : '';
-            (savedCompositeEventBlocks && savedCompositeEventBlocks.length > 0) ? console.log(`CompositeEventBlock | CREATED | ${savedCompositeEventBlocks.length <= 0 ? 'NONE' : savedCompositeEventBlocks}`) : '';
-            console.log('\n')
+            result.updated_validator_addresses = updatedValidatorAddresses;
+            const savedCompositeEventBlockHeights = compositeEventBlocks?.map(each => each.block_height);
+            result.saved_composite_event_block_heights = savedCompositeEventBlockHeights;
 
-            if (!timestamp) return final_callback(null, true);
+            if (!timestamp) return final_callback('no_timestamp_available', { success: false });
             const blockTimestamp = timestamp ? new Date(timestamp).getTime() : '';
             
             Validator.updateLastVisitedBlock({ chain_identifier: chain.name, block_height: bottom_block_height, block_time: timestamp }, (err, updated_chain) => {
+              if (err) return final_callback('update_last_visited_block_failed', { success: false });
+
               if (!blockTimestamp || blockTimestamp - chain.active_set_last_updated_block_time <= 86400000)
-                return final_callback(null, true);
+                return final_callback(null, result);
 
               Validator
                 .updateActiveValidatorList({
@@ -189,10 +207,11 @@ export const listenForEvents = (
                   month: new Date(blockTimestamp).getMonth() + 1,
                   year: new Date(blockTimestamp).getFullYear(),
                 }, (err, savedActiveValidators) => {
-                  if (err) return final_callback(null, false);
+                  if (err) return final_callback('save_active_validators_failed', { success: false });
                   Chain.updateTimeOfLastActiveSetSave({ chain_identifier: chain_identifier, time: blockTimestamp }, (err, chain) => {
-                    console.log(`Active validators updated for ${savedActiveValidators?.active_validators.length}/${savedActiveValidators?.month}/${savedActiveValidators?.year}`)
-                    return final_callback(null, true);
+                    if (err) return final_callback('update_time_of_last_active_set_save_failed', { success: false });
+                    result.saved_active_validators = savedActiveValidators;
+                    return final_callback(null, result);
                   })
                 })
             })
