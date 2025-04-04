@@ -1,6 +1,7 @@
 import winston from "winston";
 import { listenForEvents } from "../listeners/listenForEvents.js";
 import Chain from "../models/Chain/Chain.js";
+import { sendTelegramMessage } from "./sendTelegramMessage.js";
 
 const logger = winston.createLogger({
   levels: winston.config.syslog.levels,
@@ -35,7 +36,12 @@ export const processBlocks = (start: number, end: number, chain_identifier: stri
     logger.info(`Processing blocks from ${bottom_block_height} to ${top} | ${chain_identifier.toUpperCase()}`);
     
     listenForEvents(bottom_block_height, top, chain_identifier, (err, result) => {
-      if (err || !result.success) return logger.error(`Error: ${err} \nprocessing from block height ${bottom_block_height} to ${top}`);
+      if (err || !result.success) {
+        const message = `Error: ${err} \nprocessing from block height ${bottom_block_height} to ${top} | ${chain_identifier}`;
+        sendTelegramMessage(message, (err, success) => {
+          return logger.error(message);
+        })
+      };
 
       const logMessages = [];
 

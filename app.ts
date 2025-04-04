@@ -13,6 +13,7 @@ import validatorRouter from './routes/validatorRouter.js';
 
 import { startFetchingData } from './utils/startFetchingData.js';
 import { startCronJobs } from './cron/startCronJobs.js';
+import { sendTelegramMessage } from './utils/sendTelegramMessage.js';
 
 dotenv.config();
 
