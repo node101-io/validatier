@@ -1,4 +1,4 @@
-import { request } from 'undici';
+import fetch from 'node-fetch';
 import decodeTxs, { DecodedMessage, Event } from './decodeTxs.js';
 import { getSlashEventsFromFinalizeBlockEvents } from './getSlashEventsFromFinalizeBlockEvents.js';
 
@@ -18,13 +18,15 @@ export interface DataInterface {
 
 const getTxsByHeight = (base_url: string, block_height: number, denom: string, bech32_prefix: string, callback: (err: string | null, decodedTxs: any) => any) => {
 
+  
   Promise.allSettled([
-    request(`http://${base_url}/block?height=${block_height}`).then((response: any) => response.body.json()),
-    request(`http://${base_url}/block_results?height=${block_height}`).then((response: any) => response.body.json())
+    fetch(`http://${base_url}/block?height=${block_height}`).then((response: any) => response.json()),
+    fetch(`http://${base_url}/block_results?height=${block_height}`).then((response: any) => response.json())
   ])
     .then(([block_promise_res, block_results_promise_res]) => {
       
-      if (block_promise_res.status == 'rejected' || !block_promise_res.value || block_results_promise_res.status == 'rejected' || !block_results_promise_res.value) return callback('rejected', { time: null, decodedTxs: []});
+      if (block_promise_res.status == 'rejected' || !block_promise_res.value || block_results_promise_res.status == 'rejected' || !block_results_promise_res.value)
+        return callback(`rejected | block ${block_height}`, { time: null, decodedTxs: []});
       
       const data = block_promise_res.value;
       const data_block_results = block_results_promise_res.value;

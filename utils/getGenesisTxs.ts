@@ -1,5 +1,5 @@
 import async from 'async';
-import { request } from 'undici';
+import fetch from 'node-fetch';
 import { convertOperatorAddressToBech32 } from './convertOperatorAddressToBech32.js';
 import Chain from '../models/Chain/Chain.js';
 import Validator from '../models/Validator/Validator.js';
@@ -12,8 +12,8 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
   Chain.findChainByIdentifier({ chain_identifier: chain_identifier }, (err, chain) => {
       if (err || !chain) return callback('bad_request', false);
       
-      request(`https://snapshots.kjnodes.com/${chain.name}/genesis.json`)
-        .then(response => response.body.json())
+      fetch(`https://snapshots.kjnodes.com/${chain.name}/genesis.json`)
+        .then(response => response.json())
         .then((data: any) => {
 
           data = data.app_state

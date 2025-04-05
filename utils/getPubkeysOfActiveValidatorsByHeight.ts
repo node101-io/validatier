@@ -1,4 +1,4 @@
-import { request } from 'undici';
+import fetch from 'node-fetch';
 
 async function fetchActiveValidatorsRecursive(
   base_url: string,
@@ -8,8 +8,8 @@ async function fetchActiveValidatorsRecursive(
   total?: number
 ): Promise<string[]> {
   
-  return request(`http://${base_url}/validators?height=${block_height}&page=${page}&per_page=100`)
-    .then(response => response.body.json())
+  return fetch(`http://${base_url}/validators?height=${block_height}&page=${page}&per_page=100`)
+    .then(response => response.json())
     .then((response: any) => {
       const validators = response?.result.validators?.map((v: any) => v.pub_key.value) || [];
       allValidators.push(...validators);

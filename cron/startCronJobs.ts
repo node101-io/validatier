@@ -1,8 +1,5 @@
 import cron from 'node-cron';
 
-import { Job_RecordValidatorBalance } from './jobs/Job_RecordValidatorBalance.js';
-import { Job_RecordValidatorRewards } from './jobs/Job_RecordValidatorRewards.js';
-import { Job_SaveValidators } from './jobs/Job_SaveValidators.js';
 import { Job_UpdateValidatorsImageUri } from './jobs/Job_UpdateValidatorsImageUri.js';
 import { Job_SaveChains } from './jobs/Job_SaveChains.js';
 

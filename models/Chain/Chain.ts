@@ -180,6 +180,7 @@ chainSchema.statics.saveChain = function (
     .findOneAndUpdate(
       { chain_id: chain_id },
       { 
+        last_available_block_height: last_available_block_height,
         usd_exchange_rate: usd_exchange_rate
       }
     )

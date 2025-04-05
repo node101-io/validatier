@@ -10,7 +10,7 @@ const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
 });
 
-const MILISECONDS_TO_WAIT_FOR_RESTART = (1 / 24) * 86400 * 1000;
+const MILISECONDS_TO_WAIT_FOR_RESTART = 1000 * 60 * 60 * 6;
 
 export const processBlocks = (start: number, end: number, chain_identifier: string) => {
   let bottom_block_height = start;
