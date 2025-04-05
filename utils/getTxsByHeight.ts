@@ -20,8 +20,8 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
 
   
   Promise.allSettled([
-    fetch(`http://${base_url}/block?height=${block_height}`).then((response: any) => response.json()),
-    fetch(`http://${base_url}/block_results?height=${block_height}`).then((response: any) => response.json())
+    fetch(`http://${base_url}/block?height=${block_height}`, { signal: AbortSignal.timeout(60 * 100) }).then((response: any) => response.json()),
+    fetch(`http://${base_url}/block_results?height=${block_height}`, { signal: AbortSignal.timeout(60 * 100) }).then((response: any) => response.json())
   ])
     .then(([block_promise_res, block_results_promise_res]) => {
       
