@@ -181,7 +181,7 @@ export const listenForEvents = (
           if (err) return final_callback('save_many_validators_failed', { success: false });
 
           CompositeEventBlock.saveManyCompositeEventBlocks(compositeEventBlockMap, (err, compositeEventBlocks) => {
-            if (err) return final_callback('save_many_composite_event_blocks_failed', { success: false });
+            if (err) return final_callback(err, { success: false });
             const insertedValidatorAddresses = validators?.insertedValidators ? validators?.insertedValidators.map(validator => validator.operator_address) : [];
             result.inserted_validator_addresses = insertedValidatorAddresses;
             const updatedValidatorAddresses = validators?.updatedValidators ? validators?.updatedValidators.map(validator => validator.operator_address) : [];
