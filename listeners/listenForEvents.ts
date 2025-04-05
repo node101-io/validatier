@@ -119,6 +119,7 @@ export const listenForEvents = (
                     '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission'
                   ].includes(eachMessage.typeUrl)
                 ) {
+                  if (!eachMessage.value || !eachMessage.value.amount || !eachMessage.value.amount.amount) continue;
                   compositeEventBlockMap[key].total_withdraw += parseInt(eachMessage.value.amount.amount);
 
                   if (eachMessage.typeUrl == '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission') 
@@ -134,6 +135,7 @@ export const listenForEvents = (
                     'slash'
                   ].includes(eachMessage.typeUrl)
                 ) {
+                  if (!eachMessage.value || !eachMessage.value.amount || !eachMessage.value.amount.amount) continue;
 
                   const stakeAmount = parseInt(eachMessage.value.amount.amount);
                   const additiveTxs = ['/cosmos.staking.v1beta1.MsgDelegate', '/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation'];

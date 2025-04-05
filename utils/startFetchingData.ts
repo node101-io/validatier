@@ -4,7 +4,7 @@ import Chain from "../models/Chain/Chain.js";
 import { getGenesisTxs } from "./getGenesisTxs.js";
 import { processBlocks } from "./processBlocks.js";
 
-const CHAINS_TO_LISTEN = ['cosmoshub', 'lava', 'celestia', 'osmosis'];
+const CHAINS_TO_LISTEN = ['celestia', 'lava', 'cosmoshub', 'osmosis'];
 
 export const startFetchingData = () => {
   Job_SaveChains((err, success) => {

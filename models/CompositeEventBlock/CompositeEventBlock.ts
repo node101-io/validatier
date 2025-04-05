@@ -319,16 +319,16 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
   const operatorAddresses = compositeEventBlocksArray.map(each => each.operator_address);
 
   CompositeEventBlock.aggregate([
-    { $match: { operator_address: { $in: operatorAddresses } } }, 
-    { $sort: { created_at: -1 } }, 
+    { $match: { operator_address: { $in: operatorAddresses } } },
+    { $sort: { block_height: -1 } }, 
     {
       $group: {
         _id: "$operator_address",
         mostRecentRecord: { $first: "$$ROOT" }, 
       },
     },
-    { $replaceRoot: { newRoot: "$mostRecentRecord" } }, 
-  ])
+    { $replaceRoot: { newRoot: "$mostRecentRecord" } } 
+  ], { allowDiskUse: true })
   .then((mostRecendRecordsArray) => {
     if (mostRecendRecordsArray.length <= 0) mostRecendRecordsArray = compositeEventBlocksArray;
     
