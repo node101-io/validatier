@@ -6,11 +6,10 @@ import express, { Express } from 'express';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import path from 'path';
-import { rateLimit } from 'express-rate-limit';
+// import { rateLimit } from 'express-rate-limit';
 
 import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
-import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
 
 dotenv.config();
 
@@ -24,11 +23,11 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 app.use(cors());
 
-app.use(rateLimit({
-  windowMs: 1000,
-  max: 200,
-  message: 'maximum_request_per_second_reached',
-}));
+// app.use(rateLimit({
+//   windowMs: 1000,
+//   max: 200,
+//   message: 'maximum_request_per_second_reached',
+// }));
 
 const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/validator-timeline-test-v5';
 
