@@ -26,34 +26,36 @@ function addColumnEventListener (operatorAddress) {
     const left = event.clientX - rect.left;
     const right = rect.right - event.clientX;
     
-    columnWrapper.children[0].classList.add('each-data-point-hovered', visibleClassName);
-    columnWrapper.children[2].classList.add('each-data-point-hovered', visibleClassName);
-    columnWrapper.children[4].classList.add('each-data-point-hovered', visibleClassName);
+    columnWrapper.children[0].classList.add('each-data-point-hovered', visibleClassName.replace('\\@', '@'));
+    columnWrapper.children[2].classList.add('each-data-point-hovered', visibleClassName.replace('\\@', '@'));
+    columnWrapper.children[4].classList.add('each-data-point-hovered', visibleClassName.replace('\\@', '@'));
     
-    if (!validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn || !validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn)
-      columnWrapper.children[6].classList.add('each-data-point-value-display-visible', visibleClassName);
+    const operatorAddressM = operatorAddress.replace('\\@', '@');
+
+    if (!validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn || !validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn)
+      columnWrapper.children[6].classList.add('each-data-point-value-display-visible', visibleClassName.replace('\\@', '@'));
     
-    columnWrapper.children[7].classList.add('each-data-delta-vertical-line-visible', visibleClassName);
-    columnWrapper.children[8].classList.add('each-data-indicator-vertical-line-visible', visibleClassName);
+    columnWrapper.children[7].classList.add('each-data-delta-vertical-line-visible', visibleClassName.replace('\\@', '@'));
+    columnWrapper.children[8].classList.add('each-data-indicator-vertical-line-visible', visibleClassName.replace('\\@', '@'));
 
     if (index % 10 == 0) columnWrapper.children[12].classList.add('each-data-point-horizontal-label-hovered', visibleClassName);
     
-    if (!validatorListenerVariablesMapping[operatorAddress].isSelectingRange) return;
+    if (!validatorListenerVariablesMapping[operatorAddressM].isSelectingRange) return;
     const deltaX = columnWrapper.getBoundingClientRect().width;
 
-    let current = validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn;
+    let current = validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn;
 
-    if (target != validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn) {
+    if (target != validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn) {
       while (current != target) {
         let selfStakeBottom;
         let withdrawBottom;
         let commissionBottom;
-        if (target.getAttribute('timestamp') < validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.getAttribute('timestamp')) {
-          validatorListenerVariablesMapping[operatorAddress].isSelectionDirectionToLeft = true;
+        if (target.getAttribute('timestamp') < validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp')) {
+          validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft = true;
           if (!current.previousSibling) break;
-          validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.children[9].style.width = '0px';
-          validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.children[10].style.width = '0px';
-          validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.children[11].style.width = '0px';
+          validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.children[9].style.width = '0px';
+          validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.children[10].style.width = '0px';
+          validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.children[11].style.width = '0px';
           let targetPrevious = target.previousSibling;
           
           while(targetPrevious) {
@@ -73,7 +75,7 @@ function addColumnEventListener (operatorAddress) {
           withdrawBottom = `calc(((${current.nextSibling.getAttribute('withdraw')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
           commissionBottom = `calc(((${current.nextSibling.getAttribute('commission')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
         } else {
-          validatorListenerVariablesMapping[operatorAddress].isSelectionDirectionToLeft = false;
+          validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft = false;
           if (!current.nextSibling) break;
           let targetNext = target.nextSibling;
           while(targetNext) {
@@ -113,58 +115,64 @@ function addColumnEventListener (operatorAddress) {
         current.children[11].style.backgroundColor = 'orange';
         current.children[11].style.zIndex = '3';
 
-        validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn = current;
-        if (target.getAttribute('timestamp') < validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.getAttribute('timestamp')) current = current.previousSibling;
+        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn = current;
+        if (target.getAttribute('timestamp') < validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp')) current = current.previousSibling;
         else current = current.nextSibling;
       }
     }
 
     const { selfStakeAngle, withdrawAngle, commissionAngle } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling, operatorAddress);
-    if (target.getAttribute('timestamp') < validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.getAttribute('timestamp')) {
-      validatorListenerVariablesMapping[operatorAddress].isSelectionDirectionToLeft = true;
+    
+    if (target.getAttribute('timestamp') < validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp')) {
+      validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft = true;
       const { selfStakeHypotenuse, withdrawHypotenuse, commissionHypotenuse } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling, operatorAddress);
-      const selfStakeBottom = `calc(((${current.nextSibling.getAttribute('self_stake')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
-      const withdrawBottom = `calc(((${current.nextSibling.getAttribute('withdraw')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;          
-      const commissionBottom = `calc(((${current.nextSibling.getAttribute('commission')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;          
+      const selfStakeBottom = `calc(((${columnWrapper.nextSibling.getAttribute('self_stake')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+      const withdrawBottom = `calc(((${columnWrapper.nextSibling.getAttribute('withdraw')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;          
+      const commissionBottom = `calc(((${columnWrapper.nextSibling.getAttribute('commission')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;          
 
       
-      paintBarSelfStake.classList.add('graph-range-paint-bar-right');
-      paintBarSelfStake.classList.remove('graph-range-paint-bar-left');
-      paintBarWithdraw.classList.add('graph-range-paint-bar-right');
-      paintBarWithdraw.classList.remove('graph-range-paint-bar-left');
-      paintBarCommission.classList.add('graph-range-paint-bar-right');
-      paintBarCommission.classList.remove('graph-range-paint-bar-left');
+      columnWrapper.children[9].classList.add('graph-range-paint-bar-right');
+      columnWrapper.children[9].classList.remove('graph-range-paint-bar-left');
+      columnWrapper.children[10].classList.add('graph-range-paint-bar-right');
+      columnWrapper.children[10].classList.remove('graph-range-paint-bar-left');
+      columnWrapper.children[11].classList.add('graph-range-paint-bar-right');
+      columnWrapper.children[11].classList.remove('graph-range-paint-bar-left');
       
-      paintBarSelfStake.style.width = `calc((${right / deltaX}) * ${selfStakeHypotenuse.replace('calc', '')})`;
-      paintBarSelfStake.style.bottom = `calc((${selfStakeBottom.replace('calc', '')}) - 100%)`;
-      paintBarWithdraw.style.width = `calc((${right / deltaX}) * ${withdrawHypotenuse.replace('calc', '')})`;
-      paintBarWithdraw.style.bottom = `calc((${withdrawBottom.replace('calc', '')}) - 100%)`;
-      paintBarCommission.style.width = `calc((${right / deltaX}) * ${commissionHypotenuse.replace('calc', '')})`;
-      paintBarCommission.style.bottom = `calc((${commissionBottom.replace('calc', '')}) - 100%)`;
+      columnWrapper.children[9].style.width = `calc((${right / deltaX}) * ${selfStakeHypotenuse.replace('calc', '')})`;
+      columnWrapper.children[9].style.bottom = `calc((${selfStakeBottom.replace('calc', '')}) - 100%)`;
+      columnWrapper.children[10].style.width = `calc((${right / deltaX}) * ${withdrawHypotenuse.replace('calc', '')})`;
+      columnWrapper.children[10].style.bottom = `calc((${withdrawBottom.replace('calc', '')}) - 100%)`;
+      columnWrapper.children[11].style.width = `calc((${right / deltaX}) * ${commissionHypotenuse.replace('calc', '')})`;
+      columnWrapper.children[11].style.bottom = `calc((${commissionBottom.replace('calc', '')}) - 100%)`;
     } else {
-      validatorListenerVariablesMapping[operatorAddress].isSelectionDirectionToLeft = false;
+      validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft = false;
       
       const { selfStakeHypotenuse, withdrawHypotenuse, commissionHypotenuse } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling, operatorAddress);
-      paintBarSelfStake.classList.add('graph-range-paint-bar-left');
-      paintBarSelfStake.classList.remove('graph-range-paint-bar-right');
-      paintBarWithdraw.classList.add('graph-range-paint-bar-left');
-      paintBarWithdraw.classList.remove('graph-range-paint-bar-right');
-      paintBarCommission.classList.add('graph-range-paint-bar-left');
-      paintBarCommission.classList.remove('graph-range-paint-bar-right');
+      const selfStakeBottom = `calc(((${columnWrapper.getAttribute('self_stake')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+      const withdrawBottom = `calc(((${columnWrapper.getAttribute('withdraw')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;          
+      const commissionBottom = `calc(((${columnWrapper.getAttribute('commission')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;          
+
       
-      paintBarSelfStake.style.width = `calc((${left / deltaX}) * ${selfStakeHypotenuse.replace('calc', '')})`;
-      paintBarSelfStake.style.bottom = `calc((${selfStakeBottom.replace('calc', '')}) - 100%)`;
-      paintBarWithdraw.style.width = `calc((${left / deltaX}) * ${withdrawHypotenuse.replace('calc', '')})`;
-      paintBarWithdraw.style.bottom = `calc((${withdrawBottom.replace('calc', '')}) - 100%)`;
-      paintBarCommission.style.width = `calc((${left / deltaX}) * ${commissionHypotenuse.replace('calc', '')})`;
-      paintBarCommission.style.bottom = `calc((${commissionBottom.replace('calc', '')}) - 100%)`;
+      columnWrapper.children[9].classList.add('graph-range-paint-bar-left');
+      columnWrapper.children[9].classList.remove('graph-range-paint-bar-right');
+      columnWrapper.children[10].classList.add('graph-range-paint-bar-left');
+      columnWrapper.children[10].classList.remove('graph-range-paint-bar-right');
+      columnWrapper.children[11].classList.add('graph-range-paint-bar-left');
+      columnWrapper.children[11].classList.remove('graph-range-paint-bar-right');
+      
+      columnWrapper.children[9].style.width = `calc((${left / deltaX}) * ${selfStakeHypotenuse.replace('calc', '')})`;
+      columnWrapper.children[9].style.bottom = `calc((${selfStakeBottom.replace('calc', '')}) - 100%)`;
+      columnWrapper.children[10].style.width = `calc((${left / deltaX}) * ${withdrawHypotenuse.replace('calc', '')})`;
+      columnWrapper.children[10].style.bottom = `calc((${withdrawBottom.replace('calc', '')}) - 100%)`;
+      columnWrapper.children[11].style.width = `calc((${left / deltaX}) * ${commissionHypotenuse.replace('calc', '')})`;
+      columnWrapper.children[11].style.bottom = `calc((${commissionBottom.replace('calc', '')}) - 100%)`;
     }
-    paintBarSelfStake.style.transform = `rotateZ(${selfStakeAngle}) skewX(${selfStakeAngle})`;
-    paintBarSelfStake.style.backgroundColor = 'lightgreen';
-    paintBarWithdraw.style.transform = `rotateZ(${withdrawAngle}) skewX(${withdrawAngle})`;
-    paintBarWithdraw.style.backgroundColor = 'lightcoral';
-    paintBarCommission.style.transform = `rotateZ(${commissionAngle}) skewX(${commissionAngle})`;
-    paintBarCommission.style.backgroundColor = 'orange';
+    columnWrapper.children[9].style.transform = `rotateZ(${selfStakeAngle}) skewX(${selfStakeAngle})`;
+    columnWrapper.children[9].style.backgroundColor = 'lightgreen';
+    columnWrapper.children[10].style.transform = `rotateZ(${withdrawAngle}) skewX(${withdrawAngle})`;
+    columnWrapper.children[10].style.backgroundColor = 'lightcoral';
+    columnWrapper.children[11].style.transform = `rotateZ(${commissionAngle}) skewX(${commissionAngle})`;
+    columnWrapper.children[11].style.backgroundColor = 'orange';
   };
 
   document.body.addEventListener('mousemove', columnMouseHandler);

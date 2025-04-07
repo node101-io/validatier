@@ -3,10 +3,10 @@ function addVerticalAxisLabels(graphWrapper, operatorAddress, min, max, details,
   const step = (max - min) / (details - 1);
   let iter = min;
   
-  if (document.getElementById(`${operatorAddress}-graph-vertical-axis-labels`)) document.getElementById(`${operatorAddress}-graph-vertical-axis-labels`).remove();
+  if (document.getElementById(`${operatorAddress.replace('@', '\\@')}-graph-vertical-axis-labels`)) document.getElementById(`${operatorAddress.replace('@', '\\@')}-graph-vertical-axis-labels`).remove();
   const verticalAxisLabels = document.createElement('div');
   verticalAxisLabels.classList.add('vertical-axis-labels');
-  verticalAxisLabels.id = `${operatorAddress}-graph-vertical-axis-labels`;
+  verticalAxisLabels.id = `${operatorAddress.replace('@', '\\@')}-graph-vertical-axis-labels`;
 
   while (iter <= max) {
     const eachVerticalLabel = document.createElement('div');

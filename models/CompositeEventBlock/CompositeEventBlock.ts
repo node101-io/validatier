@@ -78,6 +78,46 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
       savedCompositeEventBlocks: CompositeEventBlockInterface[] | null
     ) => any
   ) => any;
+  getPeriodicDataForValidatorSet: (
+    body: {
+      operator_address_array: string[];
+      bottom_block_height?: number;
+      top_block_height?: number;
+      bottom_timestamp?: number;
+      top_timestamp?: number;
+      search_by: 'block_height' | 'timestamp';
+    },
+    callback: (
+      err: string | null,
+      validatorRecordMapping: Record<string, {
+        self_stake: number,
+        reward: number,
+        commission: number,
+        average_total_stake: number,
+        average_withdraw: number
+      }> | null
+    ) => any
+  ) => any;
+  getPeriodicDataForGraphGeneration: (
+    body: {
+      operator_address: string;
+      bottom_block_height?: number;
+      top_block_height?: number;
+      bottom_timestamp?: number;
+      top_timestamp?: number;
+      search_by: 'block_height' | 'timestamp';
+    },
+    callback: (
+      err: string | null,
+      validatorRecordMapping: Record<string, {
+        self_stake: number,
+        reward: number,
+        commission: number,
+        average_total_stake: number,
+        average_withdraw: number
+      }> | null
+    ) => any
+  ) => any;
   searchTillExists: (
     body: {
       operator_address: string;
@@ -182,6 +222,9 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
   }
 });
 
+compositeEventBlockSchema.index({ operator_address: 1, block_height: -1 });
+compositeEventBlockSchema.index({ operator_address: 1, timestamp: 1 });
+
 compositeEventBlockSchema.statics.searchTillExists = function (
   body: Parameters<CompositeEventBlockModel['searchTillExists']>[0],
   callback: Parameters<CompositeEventBlockModel['searchTillExists']>[1]
@@ -189,26 +232,175 @@ compositeEventBlockSchema.statics.searchTillExists = function (
 
   const { operator_address, block_height, timestamp, search_by, order } = body;
 
-  if ((order != 'asc' && order != 'desc') || (search_by != 'block_height' && search_by != 'timestamp')) return callback('bad_request', null);
+  if (search_by != 'block_height' && search_by != 'timestamp') return callback('bad_request', null);
 
   const condition = 
-    order == 'asc' 
-    ? (search_by == 'block_height' ? { $gt: block_height } : { $gt: timestamp }) 
-    : (search_by == 'block_height' ? { $lt: block_height } : { $lt: timestamp });
+    (order == 'asc' || order == 1)
+      ? (search_by == 'block_height' ? { $gt: block_height } : { $gt: timestamp }) 
+      : (search_by == 'block_height' ? { $lt: block_height } : { $lt: timestamp });
 
+  const sortBy = 
+    (order == 'asc' || order == 1)
+      ? 'timestamp'
+      : 'block_height';
 
   CompositeEventBlock
     .find({
       operator_address: operator_address,
       [search_by]: condition
     })
-    .sort({ [search_by]: order })
-    .then((compositeEventBlocksOfValidator: CompositeEventBlockInterface[]) => {
-      if (!compositeEventBlocksOfValidator || compositeEventBlocksOfValidator.length <= 0) return callback(null, null);
-      const foundCompositeBlockEvent = compositeEventBlocksOfValidator[0];
-      return callback(null, foundCompositeBlockEvent);
+    .sort({ [sortBy]: order })
+    .then(compositeEventBlocksOfValidator => {
+      if (!compositeEventBlocksOfValidator) return callback(null, null);
+      return callback(null, compositeEventBlocksOfValidator[0]);
     })
     .catch(err => callback(err, null));
+}
+
+compositeEventBlockSchema.statics.getPeriodicDataForGraphGeneration = function (
+  body: Parameters<CompositeEventBlockModel['getPeriodicDataForGraphGeneration']>[0],
+  callback: Parameters<CompositeEventBlockModel['getPeriodicDataForGraphGeneration']>[1]
+) {
+
+  const { operator_address, bottom_block_height, top_block_height, bottom_timestamp, top_timestamp, search_by } = body;
+
+  if (search_by != 'block_height' && search_by != 'timestamp') return callback('bad_request', null);
+
+  const condition =
+    search_by == 'block_height' 
+      ? { $gte: bottom_block_height, $lte: top_block_height }
+      : { $gte: bottom_timestamp, $lte: top_timestamp };
+
+      CompositeEventBlock.aggregate([
+        { $match: { operator_address: operator_address, [search_by]: condition }},
+        {
+          $setWindowFields: {
+            partitionBy: "$operator_address",
+            sortBy: { block_height: -1 },
+            output: {
+              mostRecent: { $first: "$$ROOT" },
+              leastRecent: { $last: "$$ROOT" }
+            }
+          }
+        },
+        {
+          $group: {
+            _id: "$operator_address",
+            mostRecentRecord: { $first: "$mostRecent" },
+            leastRecentRecord: { $first: "$leastRecent" }
+          }
+        }
+      ])
+        .then((records) => {
+          const mapping: Record<string, any> = {};
+          
+          records.forEach((record) => {
+            
+            const totalReward = (record.mostRecentRecord.reward_prefix_sum - record.leastRecentRecord.reward_prefix_sum || 0) + (record.leastRecentRecord.reward || 0);
+            const totalSelfStake = (record.mostRecentRecord.self_stake_prefix_sum - record.leastRecentRecord.self_stake_prefix_sum || 0) + (record.leastRecentRecord.self_stake || 0);
+            const totalCommission = (record.mostRecentRecord.commission_prefix_sum - record.leastRecentRecord.commission_prefix_sum || 0) + (record.leastRecentRecord.commission || 0);
+            const totalStake = (record.mostRecentRecord.total_stake_prefix_sum - record.leastRecentRecord.total_stake_prefix_sum || 0) + (record.leastRecentRecord.total_stake || 0);
+            const totalWithdraw = (record.mostRecentRecord.total_withdraw_prefix_sum - record.leastRecentRecord.total_withdraw_prefix_sum || 0) + (record.leastRecentRecord.total_withdraw || 0);
+            
+            const daysBetweenTimestamps = Math.ceil(((top_timestamp || 1) - (bottom_timestamp || 1)) / (86400 * 1000));
+            mapping[record._id] = {
+              self_stake: totalSelfStake || 0,
+              reward: totalReward || 0,
+              commission: totalCommission || 0,
+              average_total_stake: (totalStake || 0) / daysBetweenTimestamps,
+              average_withdraw: (totalWithdraw || 0) / daysBetweenTimestamps
+            };
+          });
+      
+          return callback(null, mapping);
+        })
+        .catch((err) => callback(err, null));
+}
+
+
+compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
+  body: Parameters<CompositeEventBlockModel['getPeriodicDataForValidatorSet']>[0],
+  callback: Parameters<CompositeEventBlockModel['getPeriodicDataForValidatorSet']>[1]
+) {
+
+  const { operator_address_array, bottom_block_height, top_block_height, bottom_timestamp, top_timestamp, search_by } = body;
+
+  if (search_by != 'block_height' && search_by != 'timestamp') return callback('bad_request', null);
+
+  const condition =
+    search_by == 'block_height' 
+      ? { $gte: bottom_block_height, $lte: top_block_height }
+      : { $gte: bottom_timestamp, $lte: top_timestamp };
+
+  
+  const promises = [];
+
+  const chunkSize = 16;
+  let iter = 0;
+
+  while (iter < operator_address_array.length) {
+    const chunkOperatorAddressArray = operator_address_array.slice(iter, iter + chunkSize);
+    promises.push(
+      new Promise((resolve, reject) => {
+
+        CompositeEventBlock.aggregate([
+          { $match: { operator_address: { $in: chunkOperatorAddressArray }, [search_by]: condition }},
+          {
+            $setWindowFields: {
+              partitionBy: "$operator_address",
+              sortBy: { block_height: -1 },
+              output: {
+                mostRecent: { $first: "$$ROOT" },
+                leastRecent: { $last: "$$ROOT" }
+              }
+            }
+          },
+          {
+            $group: {
+              _id: "$operator_address",
+              mostRecentRecord: { $first: "$mostRecent" },
+              leastRecentRecord: { $first: "$leastRecent" }
+            }
+          }
+        ])
+          .then((records) => {
+            const mapping: Record<string, any> = {};
+            
+            records.forEach((record) => {
+              
+              const totalReward = (record.mostRecentRecord.reward_prefix_sum - record.leastRecentRecord.reward_prefix_sum || 0) + (record.leastRecentRecord.reward || 0);
+              const totalSelfStake = (record.mostRecentRecord.self_stake_prefix_sum - record.leastRecentRecord.self_stake_prefix_sum || 0) + (record.leastRecentRecord.self_stake || 0);
+              const totalCommission = (record.mostRecentRecord.commission_prefix_sum - record.leastRecentRecord.commission_prefix_sum || 0) + (record.leastRecentRecord.commission || 0);
+              const totalStake = (record.mostRecentRecord.total_stake_prefix_sum - record.leastRecentRecord.total_stake_prefix_sum || 0) + (record.leastRecentRecord.total_stake || 0);
+              const totalWithdraw = (record.mostRecentRecord.total_withdraw_prefix_sum - record.leastRecentRecord.total_withdraw_prefix_sum || 0) + (record.leastRecentRecord.total_withdraw || 0);
+              
+              const daysBetweenTimestamps = Math.ceil(((top_timestamp || 1) - (bottom_timestamp || 1)) / (86400 * 1000));
+              mapping[record._id] = {
+                self_stake: totalSelfStake || 0,
+                reward: totalReward || 0,
+                commission: totalCommission || 0,
+                average_total_stake: (totalStake || 0) / daysBetweenTimestamps,
+                average_withdraw: (totalWithdraw || 0) / daysBetweenTimestamps
+              };
+            });
+        
+            return resolve(mapping);
+          })
+          .catch((err) => reject(err));
+      })
+    )
+    iter += chunkSize;
+  }
+
+  Promise.allSettled(promises)
+    .then(results => {
+      const resultMapping = {};
+      results.forEach(result => {
+        if (result.status != 'fulfilled') return;
+        Object.assign(resultMapping, result.value);
+      })
+      return callback(null, resultMapping);
+    })
 }
 
 compositeEventBlockSchema.statics.checkIfBlockExistsAndUpdate = function (
@@ -320,7 +512,7 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
 
   CompositeEventBlock.aggregate([
     { $match: { operator_address: { $in: operatorAddresses } } },
-    { $sort: { block_height: -1 } }, 
+    { $sort: { block_height: -1 } },
     {
       $group: {
         _id: "$operator_address",
@@ -444,76 +636,77 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
   if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
   if (!bottomTimestamp || !topTimestamp) return callback('format_error', null);
 
-  CompositeEventBlock.searchTillExists(
-    {
-      operator_address: operator_address,
-      block_height: bottomBlockHeight ? bottomBlockHeight : -1,
-      timestamp: bottomTimestamp ? bottomTimestamp : -1,
-      search_by: searchBy,
-      order: 'asc'
-    },
-    (err, bottomCompositeBlockEvent) => {
-      if (err) return callback(err, null);
+  Promise.all([
+    new Promise((resolve) => {
+      CompositeEventBlock.searchTillExists({
+        operator_address: operator_address,
+        block_height: bottomBlockHeight ? bottomBlockHeight : -1,
+        timestamp: bottomTimestamp ? bottomTimestamp : -1,
+        search_by: searchBy,
+        order: 1
+      },
+      (err, bottomCompositeBlockEvent) => {
+        resolve({ err, bottomCompositeBlockEvent })
+      })
+    }),
+    new Promise((resolve) => {
 
-      if (
-        ((searchBy == 'block_height' && topBlockHeight) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.block_height > topBlockHeight)) ||
-        ((searchBy == 'timestamp' && topTimestamp) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.timestamp > topTimestamp))
-      ) return callback(null, { self_stake: 0, reward: 0, commission: 0, average_total_stake: 0, average_withdraw: 0 });
+      CompositeEventBlock.searchTillExists({
+        operator_address: operator_address,
+        block_height: topBlockHeight ? topBlockHeight : -1,
+        timestamp: topTimestamp ? topTimestamp : -1,
+        search_by: searchBy,
+        order: -1
+      },
+      (err, topCompositeBlockEvent) => {
+        resolve({ err, topCompositeBlockEvent })
+      })
+    })
+  ])
+    .then(([bottomResult, topResult]: any) => {
 
-      CompositeEventBlock.searchTillExists(
+      const { err_bottom, bottomCompositeBlockEvent } = bottomResult;
+      const { err_top, topCompositeBlockEvent } = topResult;
+
+      if (err_bottom || err_top)
+        return callback(null, { self_stake: 0, reward: 0, commission: 0, average_total_stake: 0, average_withdraw: 0 });   
+
+      const bottomRewardPrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.reward_prefix_sum : 0;
+      const bottomSelfStakePrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.self_stake_prefix_sum : 0;
+      const bottomCommissionPrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.commission_prefix_sum : 0;
+      const bottomTotalStakePrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.total_stake_prefix_sum : 0;
+      const bottomTotalWithdrawPrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.total_withdraw_prefix_sum : 0;
+
+      const bottomReward = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.reward : 0;
+      const bottomSelfStake = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.self_stake : 0;
+      const bottomCommission = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.commission : 0;
+      const bottomTotalStake = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.total_stake : 0;
+      const bottomTotalWithdraw = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.total_withdraw : 0;
+
+      const topRewardPrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.reward_prefix_sum : 0;
+      const topSelfStakePrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.self_stake_prefix_sum : 0;
+      const topCommissionPrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.commission_prefix_sum : 0;
+      const topTotalStakePrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.total_stake_prefix_sum : 0;
+      const topTotalWithdrawPrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.total_withdraw_prefix_sum : 0;
+
+      const totalReward = (topRewardPrefixSum - bottomRewardPrefixSum) + bottomReward;
+      const totalSelfStake = (topSelfStakePrefixSum - bottomSelfStakePrefixSum) + bottomSelfStake;
+      const totalCommission = (topCommissionPrefixSum - bottomCommissionPrefixSum) + bottomCommission;
+
+      const daysBetweenTimestamps = Math.ceil(Math.abs(topTimestamp - bottomTimestamp) / 86400000);
+      const averageTotalStake = ((topTotalStakePrefixSum - bottomTotalStakePrefixSum) + bottomTotalStake) / daysBetweenTimestamps;
+      const averageTotalWithdraw = ((topTotalWithdrawPrefixSum - bottomTotalWithdrawPrefixSum) + bottomTotalWithdraw) / daysBetweenTimestamps;
+
+      return callback(
+        null,
         {
-          operator_address: operator_address,
-          block_height: topBlockHeight ? topBlockHeight : -1,
-          timestamp: topTimestamp ? topTimestamp : -1,
-          search_by: searchBy,
-          order: 'desc'
-        },
-        (err, topCompositeBlockEvent) => {
-          if (err) return callback(err, null);
-
-          if (
-            ((searchBy == 'block_height' && bottomBlockHeight) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.block_height < bottomBlockHeight)) ||
-            ((searchBy == 'timestamp' && bottomTimestamp) && (!bottomCompositeBlockEvent || bottomCompositeBlockEvent.timestamp < bottomTimestamp))
-          ) return callback(null, { self_stake: 0, reward: 0, commission: 0, average_total_stake: 0, average_withdraw: 0 });
-
-          const bottomRewardPrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.reward_prefix_sum : 0;
-          const bottomSelfStakePrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.self_stake_prefix_sum : 0;
-          const bottomCommissionPrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.commission_prefix_sum : 0;
-          const bottomTotalStakePrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.total_stake_prefix_sum : 0;
-          const bottomTotalWithdrawPrefixSum = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.total_withdraw_prefix_sum : 0;
-
-          const bottomReward = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.reward : 0;
-          const bottomSelfStake = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.self_stake : 0;
-          const bottomCommission = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.commission : 0;
-          const bottomTotalStake = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.total_stake : 0;
-          const bottomTotalWithdraw = bottomCompositeBlockEvent ? bottomCompositeBlockEvent.total_withdraw : 0;
-
-          const topRewardPrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.reward_prefix_sum : 0;
-          const topSelfStakePrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.self_stake_prefix_sum : 0;
-          const topCommissionPrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.commission_prefix_sum : 0;
-          const topTotalStakePrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.total_stake_prefix_sum : 0;
-          const topTotalWithdrawPrefixSum = topCompositeBlockEvent ? topCompositeBlockEvent.total_withdraw_prefix_sum : 0;
-
-          const totalReward = (topRewardPrefixSum - bottomRewardPrefixSum) + bottomReward;
-          const totalSelfStake = (topSelfStakePrefixSum - bottomSelfStakePrefixSum) + bottomSelfStake;
-          const totalCommission = (topCommissionPrefixSum - bottomCommissionPrefixSum) + bottomCommission;
-
-          const daysBetweenTimestamps = Math.ceil(Math.abs(topTimestamp - bottomTimestamp) / 86400000);
-          const averageTotalStake = ((topTotalStakePrefixSum - bottomTotalStakePrefixSum) + bottomTotalStake) / daysBetweenTimestamps;
-          const averageTotalWithdraw = ((topTotalWithdrawPrefixSum - bottomTotalWithdrawPrefixSum) + bottomTotalWithdraw) / daysBetweenTimestamps;
-
-          return callback(
-            null,
-            {
-              self_stake: totalSelfStake,
-              reward: totalReward,
-              commission: totalCommission,
-              average_total_stake: averageTotalStake,
-              average_withdraw: averageTotalWithdraw
-            }
-          );
+          self_stake: totalSelfStake,
+          reward: totalReward,
+          commission: totalCommission,
+          average_total_stake: averageTotalStake,
+          average_withdraw: averageTotalWithdraw
         }
-      )
+      );
     }
   )
 }

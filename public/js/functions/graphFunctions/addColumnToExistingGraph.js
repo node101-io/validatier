@@ -1,8 +1,8 @@
 function addColumnToExistingGraph (params) {
 
   const { operatorAddress, data, timestamp, index, currency, decimals, usd_exchange_rate, symbol, graphDataMapping, minValue, maxValue, graphWidth } = params;
-  const graphWrapper = document.getElementById(`validator-graph-wrapper-${operatorAddress}`);
   
+  const graphWrapper = document.getElementById(`validator-graph-wrapper-${operatorAddress}`);
   addVerticalAxisLabels(graphWrapper, operatorAddress, minValue, maxValue, 5, currency, decimals, usd_exchange_rate, symbol);
   
   const columnWrapper = document.createElement('div');
@@ -29,13 +29,14 @@ function addColumnToExistingGraph (params) {
   eachDataIndicatorVerticalLine.classList.add('each-data-indicator-vertical-line');
   const eachDataDeltaVerticalLine = document.createElement('div');
   eachDataDeltaVerticalLine.classList.add('each-data-delta-vertical-line');
-  
+
+
   const paintBarSelfStake = document.createElement('div');
-  paintBarSelfStake.classList.add('graph-range-paint-bar', `paint-bar-${operatorAddress}`);
+  paintBarSelfStake.classList.add('graph-range-paint-bar', `paint-bar-${operatorAddress.replace('\\@', '@')}`);
   const paintBarWithdraw = document.createElement('div');
-  paintBarWithdraw.classList.add('graph-range-paint-bar', `paint-bar-${operatorAddress}`);
+  paintBarWithdraw.classList.add('graph-range-paint-bar', `paint-bar-${operatorAddress.replace('\\@', '@')}`);
   const paintBarCommission = document.createElement('div');
-  paintBarCommission.classList.add('graph-range-paint-bar', `paint-bar-${operatorAddress}`);
+  paintBarCommission.classList.add('graph-range-paint-bar', `paint-bar-${operatorAddress.replace('\\@', '@')}`);
 
   selfStakePoint.classList.add(`self_stake-graph-data-element-${operatorAddress}`);
   selfStakeLine.classList.add(`self_stake-graph-data-element-${operatorAddress}`);
@@ -63,7 +64,7 @@ function addColumnToExistingGraph (params) {
   graphWrapper.appendChild(columnWrapper);
 
   document.documentElement.style.setProperty(
-    `--graph-column-width-${operatorAddress}`, 
+    `--graph-column-width-${operatorAddress.replace('\\@', '@')}`, 
     `calc((${graphWidth} - var(--vertical-axis-labels-width-int)) / ${graphWrapper.children.length - 3})`
   );
   

@@ -20,7 +20,7 @@ function generateGraphVisibilityLegend(params) {
       if (content.classList.contains('each-graph-visibility-content-disabled')) content.classList.remove('each-graph-visibility-content-disabled');
       else content.classList.add('each-graph-visibility-content-disabled');  
 
-      const graphElements = document.querySelectorAll(`.${legend.id}-graph-data-element-${operatorAddress}`);
+      const graphElements = document.querySelectorAll(`.${legend.id}-graph-data-element-${operatorAddress.replace('@', '\@')}`);
       graphElements.forEach(each => {
         if (each.classList.contains('graph-element-semi-visible')) return each.classList.remove('graph-element-semi-visible');
         return each.classList.add('graph-element-semi-visible');

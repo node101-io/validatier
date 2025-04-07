@@ -204,7 +204,7 @@ block content
               div.validator-each-numeric-info(native=`${getValue(validator.sold, symbol)}` usd=`${getValue(validator.sold, 'usd')}`)= currency_type == 'native' ? getValue(validator.sold, symbol) : getValue(validator.sold, 'usd')
             .each-validator-details-content-wrapper
               .each-validator-info-details-content
-                a.validator-action-button(href=`https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${validator.chain_id}&validator_address=${validator.operator_address}` target='_blank') Stake
+                a.validator-action-button(href=`https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${selectedChain.chain_id}&validator_address=${validator.operator_address}` target='_blank') Stake
                 .validator-operator-address
                   .validator-operator-address-content(operator_address=`${validator.operator_address}`)
                     div= validator.operator_address.slice(0,4)

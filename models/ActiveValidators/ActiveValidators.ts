@@ -28,6 +28,8 @@ interface ActiveValidatorsModel extends Model<ActiveValidatorsInterface> {
   getActiveValidatorHistoryByChain: (
     body: {
       chain_identifier: string;
+      bottom_timestamp: number;
+      top_timestamp: number;
     },
     callback: (
       err: string | null,
@@ -100,10 +102,14 @@ activeValidatorsSchema.statics.getActiveValidatorHistoryByChain = function (
   callback: Parameters<ActiveValidatorsModel['getActiveValidatorHistoryByChain']>[1]
 ) {
 
-  const { chain_identifier } = body;
+  const { chain_identifier, bottom_timestamp, top_timestamp  } = body;
 
   ActiveValidators
-    .find({ chain_identifier: chain_identifier })
+    .find({ 
+      chain_identifier: chain_identifier,
+      month: { $gte: (new Date(bottom_timestamp)).getMonth(), $lte: (new Date(top_timestamp)).getMonth() },
+      year: { $gte: (new Date(bottom_timestamp)).getFullYear(), $lte: (new Date(top_timestamp)).getFullYear() }
+    })
     .then(activeValidatorHistory => callback(null, activeValidatorHistory))
     .catch(err => callback(err, null))
 }

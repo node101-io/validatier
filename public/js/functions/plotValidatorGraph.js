@@ -7,7 +7,7 @@ function plotValidatorGraph(params) {
   if (!validatorGraphEventListenersMapping[operatorAddress]) validatorGraphEventListenersMapping[operatorAddress] = [];
   else validatorGraphEventListenersMapping[operatorAddress].forEach(eachEventHandler => eachEventHandler.element.removeEventListener(eachEventHandler.event, eachEventHandler.handler));
 
-  const validatorWrapper = document.getElementById(operatorAddress);
+  const validatorWrapper = document.getElementById(operatorAddress.replace('\\@', '@'));
   
   const graphWrapper = document.createElement('div');
   graphWrapper.className = 'validator-graph-wrapper';
@@ -35,55 +35,60 @@ function plotValidatorGraph(params) {
       each.classList.remove('each-data-indicator-vertical-line-visible');
     })
 
-    validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn = '';
-    validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn = '';
+    const operatorAddressM = operatorAddress.replace('\\@', '@');
 
-    validatorListenerVariablesMapping[operatorAddress].isSelectingRange = true;
+
+    validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn = '';
+    validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn = '';
+
+    validatorListenerVariablesMapping[operatorAddressM].isSelectingRange = true;
     let target = event.target;
     while (target != document.body && !target.classList.contains('each-graph-column-wrapper')) target = target.parentNode;
 
-    if (target.classList.contains('each-graph-column-wrapper')) return validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn = target;
-    return validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn = document.getElementById(`validator-graph-wrapper-${operatorAddress}`).querySelectorAll('.each-graph-column-wrapper')[0];
+    if (target.classList.contains('each-graph-column-wrapper')) return validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn = target;
+    return validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn = document.getElementById(`validator-graph-wrapper-${operatorAddressM}`).querySelectorAll('.each-graph-column-wrapper')[0];
   }
 
   const graphMouseUpHandler = (event) => {
-    validatorListenerVariablesMapping[operatorAddress].isSelectingRange = false;
-    if (!validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn || !validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn || (validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn == validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn)) {
+    const operatorAddressM = operatorAddress.replace('\\@', '@');
+
+    validatorListenerVariablesMapping[operatorAddressM].isSelectingRange = false;
+    if (!validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn || !validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn || (validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn == validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn)) {
       document.querySelectorAll(`.paint-bar-${operatorAddress}`).forEach(each => each.style.width = '0');
       document.querySelectorAll(`.range-edge-${operatorAddress}`).forEach(each => each.classList.remove('range-edges-indicator'));
     } else {
-      const deltaSelfStake = !validatorListenerVariablesMapping[operatorAddress].isSelectionDirectionToLeft 
-        ? validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.getAttribute('self_stake') - validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.getAttribute('self_stake') 
-        : validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.getAttribute('self_stake') - validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.getAttribute('self_stake');
+      const deltaSelfStake = !validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft 
+        ? validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute('self_stake') - validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('self_stake') 
+        : validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('self_stake') - validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute('self_stake');
       
-      const deltaWithdraw = !validatorListenerVariablesMapping[operatorAddress].isSelectionDirectionToLeft 
-        ? validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.getAttribute('withdraw') - validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.getAttribute('withdraw') 
-        : validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.getAttribute('withdraw') - validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.getAttribute('withdraw');
+      const deltaWithdraw = !validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft 
+        ? validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute('withdraw') - validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('withdraw') 
+        : validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('withdraw') - validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute('withdraw');
       
 
-      const initialTimestamp = !validatorListenerVariablesMapping[operatorAddress].isSelectionDirectionToLeft ? validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.getAttribute('timestamp') : validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.getAttribute('timestamp');
-      const timestamp = !validatorListenerVariablesMapping[operatorAddress].isSelectionDirectionToLeft ? validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.getAttribute('timestamp') : validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.getAttribute('timestamp');
+      const initialTimestamp = !validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft ? validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp') : validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute('timestamp');
+      const timestamp = !validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft ? validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute('timestamp') : validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp');
 
-      if (!validatorListenerVariablesMapping[operatorAddress].isSelectionDirectionToLeft) {
-        validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.nextSibling.children[9].style.width = '0px';
-        validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.nextSibling.children[10].style.width = '0px';
-        validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.nextSibling.children[11].style.width = '0px';
+      if (!validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft) {
+        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.nextSibling.children[9].style.width = '0px';
+        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.nextSibling.children[10].style.width = '0px';
+        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.nextSibling.children[11].style.width = '0px';
 
-        validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.nextSibling.children[8].classList.add('each-data-indicator-vertical-line-visible');
-        validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.nextSibling.children[8].classList.add('range-edges-indicator', `range-edge-${operatorAddress}`);
+        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.nextSibling.children[8].classList.add('each-data-indicator-vertical-line-visible');
+        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.nextSibling.children[8].classList.add('range-edges-indicator', `range-edge-${operatorAddressM}`);
       } else {
-        validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.children[9].style.width = '0px';
-        validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.children[10].style.width = '0px';
-        validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.previousSibling.children[9].style.width = '0px';
-        validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.previousSibling.children[10].style.width = '0px';
-        validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.previousSibling.children[11].style.width = '0px';
+        validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.children[9].style.width = '0px';
+        validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.children[10].style.width = '0px';
+        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.previousSibling.children[9].style.width = '0px';
+        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.previousSibling.children[10].style.width = '0px';
+        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.previousSibling.children[11].style.width = '0px';
 
-        validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.children[8].classList.add('each-data-indicator-vertical-line-visible');
-        validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.children[8].classList.add('range-edges-indicator', `range-edge-${operatorAddress}`);
+        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.children[8].classList.add('each-data-indicator-vertical-line-visible');
+        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.children[8].classList.add('range-edges-indicator', `range-edge-${operatorAddressM}`);
       }
 
-      validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.children[8].classList.add('each-data-indicator-vertical-line-visible');
-      validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.children[8].classList.add('range-edges-indicator', `range-edge-${operatorAddress}`);
+      validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.children[8].classList.add('each-data-indicator-vertical-line-visible');
+      validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.children[8].classList.add('range-edges-indicator', `range-edge-${operatorAddressM}`);
     
       const dataPointValueDisplay = generatePointValueDisplay({
         self_stake: deltaSelfStake,
@@ -93,9 +98,9 @@ function plotValidatorGraph(params) {
       }, graphDataMapping, currency, usd_exchange_rate, decimals, timestamp, symbol, true, initialTimestamp);
       
       dataPointValueDisplay.classList.add('each-data-point-value-display-visible');
-      dataPointValueDisplay.classList.add('range-value-display', `range-value-display-${operatorAddress}`);
-      dataPointValueDisplay.style.left = ((((validatorListenerVariablesMapping[operatorAddress].rangeFinalColumn.getBoundingClientRect().left) - (validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.getBoundingClientRect().left)) / 2) - 150) + 'px';
-      validatorListenerVariablesMapping[operatorAddress].rangeInitialColumn.appendChild(dataPointValueDisplay);
+      dataPointValueDisplay.classList.add('range-value-display', `range-value-display-${operatorAddressM}`);
+      dataPointValueDisplay.style.left = ((((validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getBoundingClientRect().left) - (validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getBoundingClientRect().left)) / 2) - 150) + 'px';
+      validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.appendChild(dataPointValueDisplay);
     }
   }
 

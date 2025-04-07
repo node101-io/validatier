@@ -10,23 +10,36 @@ const indexGetController = (req: Request, res: Response): void => {
   const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()): Date.now();
 
   Promise.allSettled([
-    new Promise((resolve) => 
-      Chain.getAllChains((err, chains) => resolve({ err: err, chains: chains }))
-    ),
-    new Promise((resolve) => 
+    new Promise((resolve) => {
+      console.time('1');
+      Chain.getAllChains((err, chains) => {
+        console.timeEnd('1');
+        resolve({ err: err, chains: chains });
+      })
+    }),
+    new Promise((resolve) => {
+      console.time('2');
       Validator.rankValidators(
         { sort_by: 'ratio', order: 'desc', bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp, chain_identifier: activeNetworkIdentifier, with_photos: true },
-        (err, validators) => resolve({ err: err, validators: validators })
+        (err, validators) => {
+          console.timeEnd('2');
+          resolve({ err: err, validators: validators });
+        }
       )
-    ),
-    new Promise((resolve) => 
+    }),
+    new Promise((resolve) => {
+      console.time('3');
       ActiveValidators.getActiveValidatorHistoryByChain(
-        { chain_identifier: activeNetworkIdentifier },
-        (err, activeValidatorHistory) => resolve({ err: err, activeValidatorHistory: activeValidatorHistory })
+        { chain_identifier: activeNetworkIdentifier, bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp },
+        (err, activeValidatorHistory) => {
+          console.timeEnd('3');
+          resolve({ err: err, activeValidatorHistory: activeValidatorHistory });
+        }
       )
-    ),
+    }),
   ])
     .then((results: Record<string, any>[]) => {
+      
       const [getAllChainsResult, rankValidatorsResult, getActiveValidatorHistoryByChainResult] = results;
       if (
         !getAllChainsResult.value.chains || 

@@ -12,6 +12,12 @@ import { getPubkeysOfActiveValidatorsByHeight } from '../../utils/getPubkeysOfAc
 import ActiveValidators, { ActiveValidatorsInterface } from '../ActiveValidators/ActiveValidators.js';
 
 const MAX_DATABASE_TEXT_FIELD_LENGTH = 1e4;
+const CHAIN_TO_DECIMALS_MAPPING: Record<string, any> = {
+  'cosmoshub': 6,
+  'lava': 6,
+  'celestia': 6,
+  'osmosis': 6,
+}
 
 export interface ValidatorInterface {
   pubkey: string;
@@ -361,98 +367,70 @@ validatorSchema.statics.rankValidators = function (
 
   const { sort_by, order, bottom_timestamp, top_timestamp, with_photos, chain_identifier } = body;
 
-  const validatorsArray: {
-    operator_address: string,
-    moniker: string,
-    temporary_image_uri: string,
-    self_stake: number,
-    reward: number,
-    commission: number,
-    ratio: number,
-    sold: number
-  }[] = [];
-  const pushedValidatorOperatorAddressArray: string[] = [];
-
+  console.time('validator_request')
   Validator.find({
     chain_identifier: chain_identifier ? chain_identifier : 'cosmoshub',
-    created_at: { $lte: new Date(top_timestamp * 1000) }
+    created_at: { $lte: new Date(top_timestamp) }
   })
-  .then((validators) => {
-    async.times(
-      validators.length,
-      (i, next) => {
-        const eachValidator: any = validators[i];
+    .then((validators) => {
+      console.timeEnd('validator_request')
+      const validatorAddresses = validators.map(each => each.operator_address);
+
+      console.time('periodic_data_request')
+      CompositeEventBlock.getPeriodicDataForValidatorSet({
+        operator_address_array: validatorAddresses,
+        search_by: 'timestamp',
+        bottom_timestamp: bottom_timestamp,
+        top_timestamp: top_timestamp
+      }, (err, validatorRecordMapping) => {
+        console.timeEnd('periodic_data_request')
         
-        CompositeEventBlock
-          .getTotalPeriodicSelfStakeAndWithdraw(
-            {
-              operator_address: eachValidator.operator_address,
-              bottomTimestamp: bottom_timestamp,
-              topTimestamp: top_timestamp,
-              searchBy: 'timestamp'
-            },
-            (err, totalPeriodicSelfStakeAndWithdraw) => {
-              
-              if (err) return callback('bad_request', null);
-              if (!totalPeriodicSelfStakeAndWithdraw) return next();
+        if (err || !validatorRecordMapping) return callback(err, null);
 
-              Chain
-                .findOne({ name: eachValidator.chain_identifier })
-                .then(chain => {
-                  if (!chain) return next();
+        const valueArray = [];
 
-                  const selfStake = totalPeriodicSelfStakeAndWithdraw?.self_stake;
-                  const reward = totalPeriodicSelfStakeAndWithdraw?.reward;
-                  const commission = totalPeriodicSelfStakeAndWithdraw?.commission;
-                  const totalStake = totalPeriodicSelfStakeAndWithdraw?.average_total_stake;
-                  const totalWithdraw = totalPeriodicSelfStakeAndWithdraw?.average_withdraw;
-                  const ratio = (totalPeriodicSelfStakeAndWithdraw?.self_stake ? (totalPeriodicSelfStakeAndWithdraw?.self_stake) : 0) / (totalPeriodicSelfStakeAndWithdraw?.reward ? totalPeriodicSelfStakeAndWithdraw?.reward : (10 ** chain?.decimals));
-                  const sold = (totalPeriodicSelfStakeAndWithdraw?.reward ? totalPeriodicSelfStakeAndWithdraw?.reward : 0) - (totalPeriodicSelfStakeAndWithdraw?.self_stake ? totalPeriodicSelfStakeAndWithdraw?.self_stake : 0);
+        let index = 0;
+        while (index < validators.length) {
+          const i = index;
+          const eachValidator: any = validators[i];
+          const { self_stake = 0, reward = 0, commission = 0, average_total_stake = 0, average_withdraw = 0 } = validatorRecordMapping[eachValidator.operator_address] || {};
 
-                  if (err) return next(new Error(err))
-                  const pushObjectData = {
-                    pubkey: eachValidator.pubkey ? eachValidator.pubkey : '',
-                    operator_address: eachValidator.operator_address ? eachValidator.operator_address : '',
-                    moniker: eachValidator.moniker ? eachValidator.moniker : '',
-                    website: eachValidator.website ? eachValidator.website : '',
-                    description: eachValidator.description ? eachValidator.description : '',
-                    temporary_image_uri: eachValidator.temporary_image_uri,
-                    self_stake: selfStake ? selfStake : 0,
-                    reward: reward ? reward : 0,
-                    commission: commission ? commission : 0,
-                    total_stake: totalStake ? totalStake : 0,
-                    total_withdraw: totalWithdraw ? totalWithdraw : 0,
-                    chain_identifier: chain_identifier,
-                    chain_id: chain.chain_id,
-                    ratio: ratio,
-                    sold: sold
-                  };
+          const ratio = (self_stake || 0) / (reward || (10 ** CHAIN_TO_DECIMALS_MAPPING[`${chain_identifier}`]));
+          const sold = (reward || 0) - (self_stake || 0);
 
-                  if (!with_photos) {
-                    delete eachValidator.website;
-                    delete eachValidator.description;
-                    delete pushObjectData.temporary_image_uri;
-                  }
+          const pushObjectData = {
+            pubkey: eachValidator.pubkey ? eachValidator.pubkey : '',
+            operator_address: eachValidator.operator_address ? eachValidator.operator_address : '',
+            moniker: eachValidator.moniker ? eachValidator.moniker : '',
+            website: eachValidator.website ? eachValidator.website : '',
+            description: eachValidator.description ? eachValidator.description : '',
+            temporary_image_uri: eachValidator.temporary_image_uri,
+            self_stake: self_stake,
+            reward: reward,
+            commission: commission,
+            total_stake: average_total_stake,
+            total_withdraw: average_withdraw,
+            chain_identifier: chain_identifier,
+            ratio: ratio,
+            sold: sold
+          };
+          
+          if (!with_photos) {
+            delete eachValidator.website;
+            delete eachValidator.description;
+            delete pushObjectData.temporary_image_uri;
+          }
+          valueArray.push(pushObjectData);
+          index++;
+        }
 
-                  validatorsArray.push(pushObjectData);
-                  pushedValidatorOperatorAddressArray.push(pushObjectData.operator_address);
-                  return next()
+        (order == 'desc' || order == -1)
+          ? valueArray.sort((a: any, b: any) => (b[sort_by] || 0) - (a[sort_by] || 0))
+          : valueArray.sort((a: any, b: any) => (a[sort_by] || 0) - (b[sort_by] || 0));
 
-                })
-            }
-          )
-      }, 
-      (err) => {
-        if (err) return callback('bad_request', null);
-        order == 'desc'
-          ? validatorsArray.sort((a: any, b: any) => (b[sort_by] || 0) - (a[sort_by] || 0))
-          : validatorsArray.sort((a: any, b: any) => (a[sort_by] || 0) - (b[sort_by] || 0))
-
-        return callback(null, validatorsArray)
-      }
-    )
-  })
-  .catch(err => callback(err, null));
+        callback(null, valueArray)
+      })
+    })
 }
 
 validatorSchema.statics.updateActiveValidatorList = async function (

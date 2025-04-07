@@ -10,12 +10,7 @@ import { rateLimit } from 'express-rate-limit';
 
 import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
-import { startFetchingData } from './utils/startFetchingData.js';
-import { processBlocks } from './utils/processBlocks.js';
-import { listenForEvents } from './listeners/listenForEvents.js';
-import { decodeTxRaw } from '@cosmjs/proto-signing';
-import decodeTransactions from './utils/decodeTxs.js';
-import getTxsByHeight from './utils/getTxsByHeight.js';
+import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
 
 dotenv.config();
 
@@ -51,7 +46,5 @@ app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.i
 
 app.use('/', indexRouter);
 app.use('/validator', validatorRouter);
-
-startFetchingData();
 
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));

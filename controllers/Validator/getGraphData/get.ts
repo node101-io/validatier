@@ -26,7 +26,7 @@ export default (req: Request, res: Response): any => {
 
   const bottomTimestamp = parseInt(bottom_timestamp, 10);
   const topTimestamp = parseInt(top_timestamp, 10);
-  const stepValue = 2000000000;
+  const stepValue = 1000000000;
   let pushedIndex = -1;
   const pendingData: Record<number, any> = {};
 
@@ -36,31 +36,37 @@ export default (req: Request, res: Response): any => {
 
   while (current < topTimestamp) {
     const start = current;
-    const end = Math.min(current + stepValue, topTimestamp);
+    const end = Math.min(start + stepValue, topTimestamp);
     const i = index;
 
     const promise = new Promise<void>((resolve) => {
-      CompositeEventBlock.getTotalPeriodicSelfStakeAndWithdraw(
+      CompositeEventBlock.getPeriodicDataForGraphGeneration(
         {
-          operator_address,
-          bottomTimestamp: start,
-          topTimestamp: end,
-          searchBy: 'timestamp',
+          operator_address: operator_address,
+          bottom_timestamp: bottomTimestamp,
+          top_timestamp: end,
+          search_by: 'timestamp',
         },
         (err, result) => {
+
           if (err || !result) {
             sendData({ index: i, err: 'bad_request', success: false });
             return resolve();
           }
 
+          const { self_stake = 0, reward = 0, commission = 0, average_total_stake = 0, average_withdraw = 0 } = result[operator_address] || {};
+
+          const ratio = (self_stake || 0) / (reward || (10 ** 10e6));
+          const sold = (reward || 0) - (self_stake || 0);
+
           const data = {
             success: true,
             data: {
-              self_stake: 3 * ((i ** 2) + 1) * 1e6,
-              withdraw: 1 * ((i ** 2) + 1) * 1e6,
-              commission: 2 * ((i ** 2) + 1) * 1e6,
-              ratio: 2 * ((i ** 2) + 1) * 1e6,
-              sold: 2 * ((i ** 2) + 1) * 1e6,
+              self_stake: self_stake || 1,
+              withdraw: reward || 1,
+              commission: commission || 1,
+              ratio: ratio || 1,
+              sold: sold || 1,
               timestamp: bottomTimestamp + i * stepValue,
               index: i
             },

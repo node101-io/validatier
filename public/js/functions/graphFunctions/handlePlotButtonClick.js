@@ -57,7 +57,7 @@ function handlePlotButtonClick () {
       decimals: document.getElementById('network-switch-header').getAttribute('current_chain_decimals')
     };
 
-    const graphWrapper = plotValidatorGraph({ operatorAddress, graphDataMapping, currency, decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping });
+    const graphWrapper = plotValidatorGraph({ operatorAddress: operatorAddress.replace('@', '\\@'), graphDataMapping, currency, decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping });
     const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue("width").replace('px', '');
 
     const queryString = new URLSearchParams(requestData).toString();
@@ -66,15 +66,19 @@ function handlePlotButtonClick () {
     const worker = new Worker('/js/functions/worker.js');
     
     worker.onmessage = (event) => {
+      
       const { data } = event.data;
       graphDataMapping[data.index] = data;
+      
+      let { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping);
 
-      const { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping);
       document.documentElement.style.setProperty(`--min-value-${operatorAddress}`, minValue);
       document.documentElement.style.setProperty(`--max-value-${operatorAddress}`, maxValue);
       
+      if (maxValue == minValue) minValue = maxValue / 2;
+
       const insertedColumn = addColumnToExistingGraph({
-        operatorAddress: operatorAddress,
+        operatorAddress: operatorAddress.replace('@', '\\@'),
         data: data,
         timestamp: data.timestamp,
         index: data.index,
@@ -88,12 +92,11 @@ function handlePlotButtonClick () {
         graphWidth
       });
       
-      
       if (insertedColumn.previousSibling && insertedColumn.previousSibling.classList.contains('each-graph-column-wrapper')) {
-        adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, operatorAddress);
+        adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, operatorAddress.replace('@', '\\@'));
       } else {
         document.documentElement.style.setProperty('--column-height', insertedColumn.offsetHeight);
-        addColumnEventListener(operatorAddress);
+        addColumnEventListener(operatorAddress.replace('@', '\\@'));
       }
     };
     
@@ -129,6 +132,7 @@ function handlePlotButtonClick () {
         const operatorAddress = eachGraphWrapper.getAttribute('operator_address');
         const columnWrapper = eachGraphWrapper.querySelector('.each-graph-column-wrapper');
         if (!columnWrapper) return;
+        
         document.documentElement.style.setProperty(
           `--graph-column-width-${operatorAddress}`, 
           columnWrapper.getBoundingClientRect().width
