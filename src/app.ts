@@ -13,8 +13,6 @@ import validatorRouter from './routes/validatorRouter.js';
 import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsImageUri.js';
 import { startFetchingData } from './utils/startFetchingData.js';
 
-dotenv.config();
-
 const app: Express = express();
 const PORT: number = 3000;
 
@@ -24,6 +22,8 @@ const __dirname = path.dirname(__filename);
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, '../views'));
 app.use(cors());
+
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 // app.use(rateLimit({
 //   windowMs: 1000,
