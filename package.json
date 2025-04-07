@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node build/app.js",
-    "dev": "nodemon --exec tsx app.ts",
+    "dev": "nodemon --exec tsx src/app.ts",
     "test": "vitest"
   },
   "author": "Dogu Boran Senturk",
