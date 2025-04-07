@@ -31,7 +31,7 @@ export default (req: Request, res: Response): any => {
     ),
     new Promise((resolve) => 
       ActiveValidators.getActiveValidatorHistoryByChain(
-        { chain_identifier: chainIdentifier },
+        { chain_identifier: chainIdentifier, bottom_timestamp: parseInt(bottomTimestamp), top_timestamp: parseInt(topTimestamp) },
         (err, activeValidatorHistory) => resolve({ err: err, activeValidatorHistory: activeValidatorHistory })
       )
     ),
