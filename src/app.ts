@@ -10,6 +10,8 @@ import path from 'path';
 
 import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
+import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsImageUri.js';
+import { startFetchingData } from './utils/startFetchingData.js';
 
 dotenv.config();
 

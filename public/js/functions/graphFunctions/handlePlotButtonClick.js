@@ -62,21 +62,25 @@ function handlePlotButtonClick () {
 
     const queryString = new URLSearchParams(requestData).toString();
     const eventSource = new EventSource(`/validator/get_graph_data?${queryString}`)
-
-    const worker = new Worker('/js/functions/worker.js');
     
-    worker.onmessage = (event) => {
-      
-      const { data } = event.data;
+    eventSource.onmessage = (event) => {
+      const response = JSON.parse(event.data);
+    
+      if (!response.success || response.err) {
+        eventSource.close();
+        return;
+      }
+    
+      const data = response.data;
       graphDataMapping[data.index] = data;
-      
+    
       let { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping);
-
+    
       document.documentElement.style.setProperty(`--min-value-${operatorAddress}`, minValue);
       document.documentElement.style.setProperty(`--max-value-${operatorAddress}`, maxValue);
-      
+    
       if (maxValue == minValue) minValue = maxValue / 2;
-
+    
       const insertedColumn = addColumnToExistingGraph({
         operatorAddress: operatorAddress.replace('@', '\\@'),
         data: data,
@@ -91,8 +95,11 @@ function handlePlotButtonClick () {
         maxValue,
         graphWidth
       });
-      
-      if (insertedColumn.previousSibling && insertedColumn.previousSibling.classList.contains('each-graph-column-wrapper')) {
+    
+      if (
+        insertedColumn.previousSibling &&
+        insertedColumn.previousSibling.classList.contains('each-graph-column-wrapper')
+      ) {
         adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, operatorAddress.replace('@', '\\@'));
       } else {
         document.documentElement.style.setProperty('--column-height', insertedColumn.offsetHeight);
@@ -100,16 +107,6 @@ function handlePlotButtonClick () {
       }
     };
     
-    eventSource.onmessage = (event) => {
-      const response = JSON.parse(event.data);
-      
-      if (!response.success || response.err) return eventSource.close();
-    
-      worker.postMessage({
-        action: 'processData',
-        data: { responseData: response }
-      });
-    };
 
     eventSource.addEventListener('end', () => {
       eventSource.close();

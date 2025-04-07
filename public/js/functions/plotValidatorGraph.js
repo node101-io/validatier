@@ -37,7 +37,6 @@ function plotValidatorGraph(params) {
 
     const operatorAddressM = operatorAddress.replace('\\@', '@');
 
-
     validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn = '';
     validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn = '';
 
