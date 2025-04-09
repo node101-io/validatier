@@ -26,7 +26,10 @@ export default (req: Request, res: Response): any => {
 
   const bottomTimestamp = parseInt(bottom_timestamp, 10);
   const topTimestamp = parseInt(top_timestamp, 10);
-  const stepValue = 1000000000;
+  
+  const NUMBER_OF_COLUMNS = 50;
+  const stepValue = Math.ceil((topTimestamp - bottomTimestamp) / NUMBER_OF_COLUMNS);
+
   let pushedIndex = -1;
   const pendingData: Record<number, any> = {};
 

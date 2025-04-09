@@ -367,69 +367,81 @@ validatorSchema.statics.rankValidators = function (
 
   const { sort_by, order, bottom_timestamp, top_timestamp, with_photos, chain_identifier } = body;
 
-  console.time('validator_request')
-  Validator.find({
-    chain_identifier: chain_identifier ? chain_identifier : 'cosmoshub',
-    created_at: { $lte: new Date(top_timestamp) }
-  })
-    .then((validators) => {
-      console.timeEnd('validator_request')
-      const validatorAddresses = validators.map(each => each.operator_address);
+  if (!chain_identifier) return callback('bad_request', null);
 
-      console.time('periodic_data_request')
+  Promise.allSettled([
+    new Promise((resolve, reject) => {
+      Validator.find({
+        chain_identifier: chain_identifier ? chain_identifier : 'cosmoshub',
+        created_at: { $lte: new Date(top_timestamp) }
+      })
+      .then((validators) => resolve(validators))
+      .catch(err => reject(err));
+    }),
+    new Promise((resolve, reject) => {
       CompositeEventBlock.getPeriodicDataForValidatorSet({
-        operator_address_array: validatorAddresses,
+        chain_identifier: chain_identifier,
         search_by: 'timestamp',
         bottom_timestamp: bottom_timestamp,
         top_timestamp: top_timestamp
       }, (err, validatorRecordMapping) => {
-        console.timeEnd('periodic_data_request')
-        
-        if (err || !validatorRecordMapping) return callback(err, null);
-
-        const valueArray = [];
-
-        let index = 0;
-        while (index < validators.length) {
-          const i = index;
-          const eachValidator: any = validators[i];
-          const { self_stake = 0, reward = 0, commission = 0, average_total_stake = 0, average_withdraw = 0 } = validatorRecordMapping[eachValidator.operator_address] || {};
-
-          const ratio = (self_stake || 0) / (reward || (10 ** CHAIN_TO_DECIMALS_MAPPING[`${chain_identifier}`]));
-          const sold = (reward || 0) - (self_stake || 0);
-
-          const pushObjectData = {
-            pubkey: eachValidator.pubkey ? eachValidator.pubkey : '',
-            operator_address: eachValidator.operator_address ? eachValidator.operator_address : '',
-            moniker: eachValidator.moniker ? eachValidator.moniker : '',
-            website: eachValidator.website ? eachValidator.website : '',
-            description: eachValidator.description ? eachValidator.description : '',
-            temporary_image_uri: eachValidator.temporary_image_uri,
-            self_stake: self_stake,
-            reward: reward,
-            commission: commission,
-            total_stake: average_total_stake,
-            total_withdraw: average_withdraw,
-            chain_identifier: chain_identifier,
-            ratio: ratio,
-            sold: sold
-          };
-          
-          if (!with_photos) {
-            delete eachValidator.website;
-            delete eachValidator.description;
-            delete pushObjectData.temporary_image_uri;
-          }
-          valueArray.push(pushObjectData);
-          index++;
-        }
-
-        (order == 'desc' || order == -1)
-          ? valueArray.sort((a: any, b: any) => (b[sort_by] || 0) - (a[sort_by] || 0))
-          : valueArray.sort((a: any, b: any) => (a[sort_by] || 0) - (b[sort_by] || 0));
-
-        callback(null, valueArray)
+        if (err) return reject(err);
+        return resolve(validatorRecordMapping);
       })
+    }),
+  ])
+    .then((results: Record<string, any>[]) => {
+      const [validatorsResult, getPeriodicDataForValidatorSetResult] = results;
+      if (
+        validatorsResult.status == 'rejected' || 
+        getPeriodicDataForValidatorSetResult.status == 'rejected'
+      ) return callback('bad_request', null);
+      
+      const validators = validatorsResult.value;
+      const validatorRecordMapping = getPeriodicDataForValidatorSetResult.value;
+
+      const valueArray = [];
+
+      let index = 0;
+      while (index < validators.length) {
+        const i = index;
+        const eachValidator: any = validators[i];
+        const { self_stake = 0, reward = 0, commission = 0, average_total_stake = 0, average_withdraw = 0 } = validatorRecordMapping[eachValidator.operator_address] || {};
+
+        const ratio = (self_stake || 0) / (reward || (10 ** CHAIN_TO_DECIMALS_MAPPING[`${chain_identifier}`]));
+        const sold = (reward || 0) - (self_stake || 0);
+
+        const pushObjectData = {
+          pubkey: eachValidator.pubkey ? eachValidator.pubkey : '',
+          operator_address: eachValidator.operator_address ? eachValidator.operator_address : '',
+          moniker: eachValidator.moniker ? eachValidator.moniker : '',
+          website: eachValidator.website ? eachValidator.website : '',
+          description: eachValidator.description ? eachValidator.description : '',
+          temporary_image_uri: eachValidator.temporary_image_uri,
+          self_stake: self_stake,
+          reward: reward,
+          commission: commission,
+          total_stake: average_total_stake,
+          total_withdraw: average_withdraw,
+          chain_identifier: chain_identifier,
+          ratio: ratio,
+          sold: sold
+        };
+        
+        if (!with_photos) {
+          delete eachValidator.website;
+          delete eachValidator.description;
+          delete pushObjectData.temporary_image_uri;
+        }
+        valueArray.push(pushObjectData);
+        index++;
+      }
+
+      (order == 'desc' || order == -1)
+        ? valueArray.sort((a: any, b: any) => (b[sort_by] || 0) - (a[sort_by] || 0))
+        : valueArray.sort((a: any, b: any) => (a[sort_by] || 0) - (b[sort_by] || 0));
+
+      callback(null, valueArray);
     })
 }
 

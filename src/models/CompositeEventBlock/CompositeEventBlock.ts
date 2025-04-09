@@ -5,6 +5,7 @@ import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
 const MAX_DENOM_LENGTH = 68;
 
 export interface CompositeEventBlockInterface {
+  chain_identifier: string;
   timestamp: number;
   block_height: number;
   operator_address: string;
@@ -46,6 +47,7 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
   ) => any;
   saveCompositeEventBlock: (
     body: {
+      chain_identifier: string;
       block_height: number;
       operator_address: string;
       timestamp: number;
@@ -63,6 +65,7 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
   ) => any;
   saveManyCompositeEventBlocks: (
     body: Record<string, {
+      chain_identifier: string;
       block_height: number;
       operator_address: string;
       timestamp: number;
@@ -80,11 +83,11 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
   ) => any;
   getPeriodicDataForValidatorSet: (
     body: {
-      operator_address_array: string[];
+      chain_identifier: string;
       bottom_block_height?: number;
       top_block_height?: number;
-      bottom_timestamp?: number;
-      top_timestamp?: number;
+      bottom_timestamp: number;
+      top_timestamp: number;
       search_by: 'block_height' | 'timestamp';
     },
     callback: (
@@ -155,6 +158,10 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
 
 
 const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
+  chain_identifier: {
+    type: String,
+    trim: true
+  },
   timestamp: {
     type: Number,
     required: true
@@ -224,6 +231,9 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
 
 compositeEventBlockSchema.index({ operator_address: 1, block_height: -1 });
 compositeEventBlockSchema.index({ operator_address: 1, timestamp: 1 });
+compositeEventBlockSchema.index({ chain_identifier: 1, timestamp: 1, operator_address: 1, block_height: -1 });
+compositeEventBlockSchema.index({ chain_identifier: 1, timestamp: 1 });
+
 
 compositeEventBlockSchema.statics.searchTillExists = function (
   body: Parameters<CompositeEventBlockModel['searchTillExists']>[0],
@@ -323,84 +333,112 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
   callback: Parameters<CompositeEventBlockModel['getPeriodicDataForValidatorSet']>[1]
 ) {
 
-  const { operator_address_array, bottom_block_height, top_block_height, bottom_timestamp, top_timestamp, search_by } = body;
+  const { chain_identifier, bottom_timestamp, top_timestamp, search_by } = body;
 
   if (search_by != 'block_height' && search_by != 'timestamp') return callback('bad_request', null);
 
-  const condition =
-    search_by == 'block_height' 
-      ? { $gte: bottom_block_height, $lte: top_block_height }
-      : { $gte: bottom_timestamp, $lte: top_timestamp };
-
-  
+  const oneMonthStepTimestamp = (1000 * 86400) * 30;
   const promises = [];
+  const validatorRecordsMapping: Record<string, any> = {}
 
-  const chunkSize = 16;
-  let iter = 0;
+  let bottom = bottom_timestamp;
+  let top = top_timestamp;
 
-  while (iter < operator_address_array.length) {
-    const chunkOperatorAddressArray = operator_address_array.slice(iter, iter + chunkSize);
+  while (bottom < top) {
+
+    const bottomBottomInside = bottom;
+    const bottomTopInside = bottom + oneMonthStepTimestamp;
+
+    const topBottomInside = top - oneMonthStepTimestamp;
+    const topTopInside = top;
+
     promises.push(
       new Promise((resolve, reject) => {
 
         CompositeEventBlock.aggregate([
-          { $match: { operator_address: { $in: chunkOperatorAddressArray }, [search_by]: condition }},
+          { 
+            $match: { 
+              chain_identifier: chain_identifier, 
+              $or: [
+                {
+                  timestamp: { $gte: bottomBottomInside, $lte: bottomTopInside }
+                },
+                {
+                  timestamp: { $gte: topBottomInside, $lte: topTopInside }
+                }
+              ]
+            } 
+          },
           {
-            $setWindowFields: {
-              partitionBy: "$operator_address",
-              sortBy: { block_height: -1 },
-              output: {
-                mostRecent: { $first: "$$ROOT" },
-                leastRecent: { $last: "$$ROOT" }
-              }
+            $sort: {
+              chain_identifier: 1,
+              timestamp: 1,
+              operator_address: 1,
+              block_height: -1
             }
           },
           {
             $group: {
-              _id: "$operator_address",
-              mostRecentRecord: { $first: "$mostRecent" },
-              leastRecentRecord: { $first: "$leastRecent" }
+              _id: "$operator_address",  
+              mostRecentRecord: { $last: "$$ROOT" },
+              leastRecentRecord: { $first: "$$ROOT" }
             }
           }
         ])
           .then((records) => {
-            const mapping: Record<string, any> = {};
             
-            records.forEach((record) => {
+            records.forEach(record => {
+
+              if (!validatorRecordsMapping[record._id]) {
+                return validatorRecordsMapping[record._id] = {
+                  leastRecentRecord: record.leastRecentRecord,
+                  mostRecentRecord: record.mostRecentRecord
+                };
+              }
+
+              if (record.leastRecentRecord.block_height < validatorRecordsMapping[record._id].leastRecentRecord.block_height)
+                return validatorRecordsMapping[record._id].leastRecentRecord = record.leastRecentRecord;
               
-              const totalReward = (record.mostRecentRecord.reward_prefix_sum - record.leastRecentRecord.reward_prefix_sum || 0) + (record.leastRecentRecord.reward || 0);
-              const totalSelfStake = (record.mostRecentRecord.self_stake_prefix_sum - record.leastRecentRecord.self_stake_prefix_sum || 0) + (record.leastRecentRecord.self_stake || 0);
-              const totalCommission = (record.mostRecentRecord.commission_prefix_sum - record.leastRecentRecord.commission_prefix_sum || 0) + (record.leastRecentRecord.commission || 0);
-              const totalStake = (record.mostRecentRecord.total_stake_prefix_sum - record.leastRecentRecord.total_stake_prefix_sum || 0) + (record.leastRecentRecord.total_stake || 0);
-              const totalWithdraw = (record.mostRecentRecord.total_withdraw_prefix_sum - record.leastRecentRecord.total_withdraw_prefix_sum || 0) + (record.leastRecentRecord.total_withdraw || 0);
-              
-              const daysBetweenTimestamps = Math.ceil(((top_timestamp || 1) - (bottom_timestamp || 1)) / (86400 * 1000));
-              mapping[record._id] = {
-                self_stake: totalSelfStake || 0,
-                reward: totalReward || 0,
-                commission: totalCommission || 0,
-                average_total_stake: (totalStake || 0) / daysBetweenTimestamps,
-                average_withdraw: (totalWithdraw || 0) / daysBetweenTimestamps
-              };
+              if (record.mostRecentRecord.block_height > validatorRecordsMapping[record._id].mostRecentRecord.block_height)
+                return validatorRecordsMapping[record._id].mostRecentRecord = record.mostRecentRecord;
             });
-        
-            return resolve(mapping);
+
+            resolve(true);
           })
-          .catch((err) => reject(err));
+          .catch(err => reject(err))
       })
-    )
-    iter += chunkSize;
+    );
+
+    bottom = bottomTopInside;
+    top = topBottomInside;
   }
 
   Promise.allSettled(promises)
-    .then(results => {
-      const resultMapping = {};
-      results.forEach(result => {
-        if (result.status != 'fulfilled') return;
-        Object.assign(resultMapping, result.value);
-      })
-      return callback(null, resultMapping);
-    })
+    .then((results: any) => {
+      
+      const mapping: Record<string, any> = {};
+      Object.entries(validatorRecordsMapping).forEach(([validatorId, record]: [string, any]) => {
+
+        const totalReward = (record.mostRecentRecord.reward_prefix_sum - record.leastRecentRecord.reward_prefix_sum || 0) + (record.leastRecentRecord.reward || 0);
+        const totalSelfStake = (record.mostRecentRecord.self_stake_prefix_sum - record.leastRecentRecord.self_stake_prefix_sum || 0) + (record.leastRecentRecord.self_stake || 0);
+        const totalCommission = (record.mostRecentRecord.commission_prefix_sum - record.leastRecentRecord.commission_prefix_sum || 0) + (record.leastRecentRecord.commission || 0);
+        const totalStake = (record.mostRecentRecord.total_stake_prefix_sum - record.leastRecentRecord.total_stake_prefix_sum || 0) + (record.leastRecentRecord.total_stake || 0);
+        const totalWithdraw = (record.mostRecentRecord.total_withdraw_prefix_sum - record.leastRecentRecord.total_withdraw_prefix_sum || 0) + (record.leastRecentRecord.total_withdraw || 0);
+      
+        const daysBetweenTimestamps = Math.ceil(((top_timestamp || 1) - (bottom_timestamp || 1)) / (86400 * 1000));
+      
+        mapping[validatorId] = {
+          self_stake: totalSelfStake || 0,
+          reward: totalReward || 0,
+          commission: totalCommission || 0,
+          average_total_stake: (totalStake || 0) / daysBetweenTimestamps,
+          average_withdraw: (totalWithdraw || 0) / daysBetweenTimestamps
+        };
+      });
+
+      return callback(null, mapping);
+  })
+
 }
 
 compositeEventBlockSchema.statics.checkIfBlockExistsAndUpdate = function (
@@ -525,6 +563,7 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
     if (mostRecendRecordsArray.length <= 0) mostRecendRecordsArray = compositeEventBlocksArray;
     
     const compositeEventBlocksArrayToInsertMany: {
+      chain_identifier: string;
       timestamp: number;
       block_height: number;
       operator_address: string;
@@ -559,6 +598,7 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
       if (!body[mostRecentCompositeEventBlock.operator_address].denom) continue;
 
       const saveObject = {
+        chain_identifier: body[mostRecentCompositeEventBlock.operator_address].chain_identifier,
         timestamp: body[mostRecentCompositeEventBlock.operator_address].timestamp,
         block_height: body[mostRecentCompositeEventBlock.operator_address].block_height,
         operator_address: mostRecentCompositeEventBlock.operator_address,

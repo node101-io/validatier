@@ -14,6 +14,8 @@ function addColumnToExistingGraph (params) {
   columnWrapper.classList.add('each-graph-column-wrapper');
   columnWrapper.classList.add(`column-wrapper-${operatorAddress}`);
 
+  columnWrapper.style.width = `calc((${graphWidth}px - var(--vertical-axis-labels-width)) / var(--number-of-columns))`;
+
   const selfStakeBottom = `calc(((${data.self_stake} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
   const withdrawBottom = `calc(((${data.withdraw} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;  
   const commissionBottom = `calc(((${data.commission} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;  
@@ -65,7 +67,7 @@ function addColumnToExistingGraph (params) {
 
   document.documentElement.style.setProperty(
     `--graph-column-width-${operatorAddress.replace('\\@', '@')}`, 
-    `calc((${graphWidth} - var(--vertical-axis-labels-width-int)) / ${graphWrapper.children.length - 3})`
+    `calc((${graphWidth} - var(--vertical-axis-labels-width-int)) / var(--number-of-columns))`
   );
   
   return columnWrapper;
