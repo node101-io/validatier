@@ -153,7 +153,14 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
         average_withdraw: number
       } | null
     ) => any
-  ) => any
+  ) => any;
+  removeDuplicates: (
+    body: { chain_identifier: string },
+    callback: (
+      err: string | null,
+      delete_count: number
+    ) => any
+  ) => any;
 }
 
 
@@ -229,10 +236,11 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
   }
 });
 
-compositeEventBlockSchema.index({ operator_address: 1, block_height: -1 });
+compositeEventBlockSchema.index({ operator_address: 1, block_height: -1 }, { unique: true });
 compositeEventBlockSchema.index({ operator_address: 1, timestamp: 1 });
 compositeEventBlockSchema.index({ chain_identifier: 1, timestamp: 1, operator_address: 1, block_height: -1 });
 compositeEventBlockSchema.index({ chain_identifier: 1, timestamp: 1 });
+compositeEventBlockSchema.index({ chain_identifier: 1, block_height: 1, operator_address: 1 });
 
 
 compositeEventBlockSchema.statics.searchTillExists = function (
@@ -544,6 +552,7 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
   body: Parameters<CompositeEventBlockModel['saveManyCompositeEventBlocks']>[0],
   callback: Parameters<CompositeEventBlockModel['saveManyCompositeEventBlocks']>[1],
 ) {
+  
   const compositeEventBlocksArray = Object.values(body);
 
   const operatorAddresses = compositeEventBlocksArray.map(each => each.operator_address);
@@ -602,14 +611,16 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
       const totalStakePrefixSum = mostRecentCompositeEventBlock.total_stake_prefix_sum ? (totalStake ? mostRecentCompositeEventBlock.total_stake_prefix_sum + totalStake : mostRecentCompositeEventBlock.total_stake_prefix_sum) : totalStake;
       const totalWithdrawPrefixSum = mostRecentCompositeEventBlock.total_withdraw_prefix_sum ? (totalWithdraw ? mostRecentCompositeEventBlock.total_withdraw_prefix_sum + totalWithdraw : mostRecentCompositeEventBlock.total_withdraw_prefix_sum) : totalWithdraw;
 
-      if (!body[mostRecentCompositeEventBlock.operator_address].denom) continue;
+      const key = `${newCompositeEventBlock.block_height}.${mostRecentCompositeEventBlock.operator_address}`;
+
+      if (!body[key].denom) continue;
 
       const saveObject = {
-        chain_identifier: body[mostRecentCompositeEventBlock.operator_address].chain_identifier,
-        timestamp: body[mostRecentCompositeEventBlock.operator_address].timestamp,
-        block_height: body[mostRecentCompositeEventBlock.operator_address].block_height,
+        chain_identifier: body[key].chain_identifier,
+        timestamp: body[key].timestamp,
+        block_height: body[key].block_height,
         operator_address: mostRecentCompositeEventBlock.operator_address,
-        denom: body[mostRecentCompositeEventBlock.operator_address].denom,
+        denom: body[key].denom,
         self_stake: selfStake ?? 0,
         reward: reward ?? 0,
         commission: commission ?? 0,
@@ -635,21 +646,15 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
     CompositeEventBlock.find({ $or: checkExistsOrQuery })
       .then((alreadyExistingCompositeEventBlocks) => {
 
-        const existingCredentials = alreadyExistingCompositeEventBlocks.map(each => {
-          return {
-            block_height: each.block_height,
-            operator_address: each.operator_address
-          }
-        });
+        const existingCredentials = alreadyExistingCompositeEventBlocks.map(each => `${each.block_height}.${each.operator_address}`);
 
-        const newCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each => !existingCredentials.includes({
-          block_height: each.block_height,
-          operator_address: each.operator_address
-        }));
-        const updateCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each => existingCredentials.includes({
-          block_height: each.block_height,
-          operator_address: each.operator_address
-        }));
+        const newCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each => 
+          !existingCredentials.includes(`${each.block_height}.${each.operator_address}`)
+        );
+
+        const updateCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each => 
+          existingCredentials.includes(`${each.block_height}.${each.operator_address}`)  
+        );
         
         CompositeEventBlock
           .insertMany(newCompositeEventBlocks, { ordered: false })
@@ -775,6 +780,40 @@ compositeEventBlockSchema.statics.getTotalPeriodicSelfStakeAndWithdraw = functio
     }
   )
 }
+
+compositeEventBlockSchema.statics.removeDuplicates = function (
+  body: Parameters<CompositeEventBlockModel['removeDuplicates']>[0],
+  callback: Parameters<CompositeEventBlockModel['removeDuplicates']>[1]
+) {
+
+  const { chain_identifier } = body;
+
+  CompositeEventBlock.aggregate([
+    { $match: { chain_identifier: chain_identifier } },
+    { $sort: { block_height: 1, operator_address: 1 } },
+    {
+      $group: {
+        _id: { block_height: "$block_height", operator_address: "$operator_address" },
+        ids: { $push: "$_id" },
+        count: { $sum: 1 }
+      }
+    },
+    { $match: { count: { $gt: 1 } } }
+  ], { allowDiskUse: true })
+    .then(duplicates => {
+      
+      const idsToDelete = duplicates.flatMap(doc => doc.ids.slice(1));
+
+      if (idsToDelete.length == 0) {
+        return callback(null, 0);
+      }
+
+      CompositeEventBlock.deleteMany({ _id: { $in: idsToDelete } })
+        .then(result => callback(null, result.deletedCount))
+        .catch(err => callback(err, 0));
+    })
+    .catch(err => callback(err, 0));
+};
 
 
 const CompositeEventBlock = mongoose.model<CompositeEventBlockInterface, CompositeEventBlockModel>('CompositeEventBlocks', compositeEventBlockSchema);

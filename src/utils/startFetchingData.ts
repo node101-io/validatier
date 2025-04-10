@@ -13,10 +13,10 @@ export const startFetchingData = () => {
         if (err || !chains) return;
         chains.forEach(chain => {
           if (!CHAINS_TO_LISTEN.includes(chain.name)) return;
-          if (chain.is_genesis_saved) processBlocks(chain.last_visited_block, chain.last_available_block_height, chain.name);
+          if (chain.is_genesis_saved) processBlocks(chain.last_visited_block, chain.last_available_block_height, chain);
           else getGenesisTxs(chain.name, (err, success) => {
             if (err || !success) return console.log(err);
-            processBlocks(chain.last_visited_block, chain.last_available_block_height, chain.name);
+            processBlocks(chain.last_visited_block, chain.last_available_block_height, chain);
           })
         })
       })
