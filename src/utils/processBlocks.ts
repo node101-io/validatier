@@ -15,7 +15,7 @@ const MILISECONDS_TO_WAIT_FOR_RESTART = 1000 * 60 * 60 * 6;
 export const processBlocks = (start: number, end: number, chain: ChainInterface) => {
   let bottom_block_height = start;
   const max_block_height = end;
-  const interval = 50;
+  const interval = 100;
 
   const startTime = Date.now();
 

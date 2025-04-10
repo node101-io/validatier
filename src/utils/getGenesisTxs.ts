@@ -51,6 +51,7 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
                 const selfStake = eachValidator.tokens ? 0 : eachValidator.value.amount;
                 
                 CompositeEventBlock.saveCompositeEventBlock({
+                  chain_identifier: chain_identifier,
                   block_height: chain.first_available_block_height,
                   operator_address: eachValidator.operator_address ? eachValidator.operator_address : eachValidator.validator_address,
                   timestamp: (new Date(chain.first_available_block_time)).getTime(),

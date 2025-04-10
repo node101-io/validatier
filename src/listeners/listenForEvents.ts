@@ -56,13 +56,11 @@ export const listenForEvents = (
             for (const eachMessage of flattenedDecodedTxs) {
 
               if (!LISTENING_EVENTS.includes(eachMessage.typeUrl)) continue;
-              const key = eachMessage.value.validatorAddress 
-                ? `${height}.${eachMessage.value.validatorAddress}` 
-                : '';
+              const key = eachMessage.value.validatorAddress || '';
 
               const NULL_COMPOSITE_EVENT_BLOCK = {
                 chain_identifier: chain.name,
-                block_height: height,
+                block_height: bottom_block_height,
                 operator_address: eachMessage.value.validatorAddress || '',
                 denom: chain.denom,
                 self_stake: 0,
@@ -74,10 +72,10 @@ export const listenForEvents = (
               }
               
               if (!key) {
-                if (!compositeEventBlockMap[`${height}.${eachMessage.value.validatorSrcAddress}`]) 
-                  compositeEventBlockMap[`${height}.${eachMessage.value.validatorSrcAddress}`] = NULL_COMPOSITE_EVENT_BLOCK;
-                if (!compositeEventBlockMap[`${height}.${eachMessage.value.validatorDstAddress}`])
-                  compositeEventBlockMap[`${height}.${eachMessage.value.validatorDstAddress}`] = NULL_COMPOSITE_EVENT_BLOCK;
+                if (!compositeEventBlockMap[eachMessage.value.validatorSrcAddress]) 
+                  compositeEventBlockMap[eachMessage.value.validatorSrcAddress] = NULL_COMPOSITE_EVENT_BLOCK;
+                if (!compositeEventBlockMap[eachMessage.value.validatorDstAddress])
+                  compositeEventBlockMap[eachMessage.value.validatorDstAddress] = NULL_COMPOSITE_EVENT_BLOCK;
               } else if (!compositeEventBlockMap[key]) 
                 compositeEventBlockMap[key] = NULL_COMPOSITE_EVENT_BLOCK;
               if (
@@ -143,12 +141,12 @@ export const listenForEvents = (
               ) {
                 const bech32SrcOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorSrcAddress, chain.denom);
                 const value = parseInt(eachMessage.value.amount.amount);
-                compositeEventBlockMap[`${height}.${eachMessage.value.validatorSrcAddress}`].operator_address = eachMessage.value.validatorSrcAddress;
-                compositeEventBlockMap[`${height}.${eachMessage.value.validatorSrcAddress}`].total_stake += (value * -1);
+                compositeEventBlockMap[eachMessage.value.validatorSrcAddress].operator_address = eachMessage.value.validatorSrcAddress;
+                compositeEventBlockMap[eachMessage.value.validatorSrcAddress].total_stake += (value * -1);
                 if (bech32SrcOperatorAddress == eachMessage.value.delegatorAddress)
-                  compositeEventBlockMap[`${height}.${eachMessage.value.validatorSrcAddress}`].self_stake += (value * -1);
-                compositeEventBlockMap[`${height}.${eachMessage.value.validatorDstAddress}`].operator_address = eachMessage.value.validatorDstAddress;
-                compositeEventBlockMap[`${height}.${eachMessage.value.validatorDstAddress}`].total_stake += value;
+                  compositeEventBlockMap[eachMessage.value.validatorSrcAddress].self_stake += (value * -1);
+                compositeEventBlockMap[eachMessage.value.validatorDstAddress].operator_address = eachMessage.value.validatorDstAddress;
+                compositeEventBlockMap[eachMessage.value.validatorDstAddress].total_stake += value;
               }
             }
             resolve();

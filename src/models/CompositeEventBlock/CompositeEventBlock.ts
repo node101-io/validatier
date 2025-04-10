@@ -240,7 +240,6 @@ compositeEventBlockSchema.index({ operator_address: 1, block_height: -1 }, { uni
 compositeEventBlockSchema.index({ operator_address: 1, timestamp: 1 });
 compositeEventBlockSchema.index({ chain_identifier: 1, timestamp: 1, operator_address: 1, block_height: -1 });
 compositeEventBlockSchema.index({ chain_identifier: 1, timestamp: 1 });
-compositeEventBlockSchema.index({ chain_identifier: 1, block_height: 1, operator_address: 1 });
 
 
 compositeEventBlockSchema.statics.searchTillExists = function (
@@ -611,7 +610,7 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
       const totalStakePrefixSum = mostRecentCompositeEventBlock.total_stake_prefix_sum ? (totalStake ? mostRecentCompositeEventBlock.total_stake_prefix_sum + totalStake : mostRecentCompositeEventBlock.total_stake_prefix_sum) : totalStake;
       const totalWithdrawPrefixSum = mostRecentCompositeEventBlock.total_withdraw_prefix_sum ? (totalWithdraw ? mostRecentCompositeEventBlock.total_withdraw_prefix_sum + totalWithdraw : mostRecentCompositeEventBlock.total_withdraw_prefix_sum) : totalWithdraw;
 
-      const key = `${newCompositeEventBlock.block_height}.${mostRecentCompositeEventBlock.operator_address}`;
+      const key = mostRecentCompositeEventBlock.operator_address;
 
       if (!body[key].denom) continue;
 
