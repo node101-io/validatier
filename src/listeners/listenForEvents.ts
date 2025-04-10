@@ -57,27 +57,50 @@ export const listenForEvents = (
 
               if (!LISTENING_EVENTS.includes(eachMessage.typeUrl)) continue;
               const key = eachMessage.value.validatorAddress || '';
-
-              const NULL_COMPOSITE_EVENT_BLOCK = {
-                chain_identifier: chain.name,
-                block_height: bottom_block_height,
-                operator_address: eachMessage.value.validatorAddress || '',
-                denom: chain.denom,
-                self_stake: 0,
-                reward: 0,
-                commission: 0,
-                total_stake: 0,
-                total_withdraw: 0,
-                timestamp: new Date(eachMessage.time).getTime()
-              }
               
               if (!key) {
-                if (!compositeEventBlockMap[eachMessage.value.validatorSrcAddress]) 
-                  compositeEventBlockMap[eachMessage.value.validatorSrcAddress] = NULL_COMPOSITE_EVENT_BLOCK;
-                if (!compositeEventBlockMap[eachMessage.value.validatorDstAddress])
-                  compositeEventBlockMap[eachMessage.value.validatorDstAddress] = NULL_COMPOSITE_EVENT_BLOCK;
+                if (!compositeEventBlockMap[eachMessage.value.validatorSrcAddress]) {
+                  compositeEventBlockMap[eachMessage.value.validatorSrcAddress] = {
+                    chain_identifier: chain.name,
+                    block_height: bottom_block_height,
+                    operator_address: eachMessage.value.validatorSrcAddress,
+                    denom: chain.denom,
+                    self_stake: 0,
+                    reward: 0,
+                    commission: 0,
+                    total_stake: 0,
+                    total_withdraw: 0,
+                    timestamp: new Date(eachMessage.time).getTime()
+                  };
+                }
+                if (!compositeEventBlockMap[eachMessage.value.validatorDstAddress]) {
+                  compositeEventBlockMap[eachMessage.value.validatorDstAddress] = {
+                    chain_identifier: chain.name,
+                    block_height: bottom_block_height,
+                    operator_address: eachMessage.value.validatorDstAddress,
+                    denom: chain.denom,
+                    self_stake: 0,
+                    reward: 0,
+                    commission: 0,
+                    total_stake: 0,
+                    total_withdraw: 0,
+                    timestamp: new Date(eachMessage.time).getTime()
+                  };
+                }
               } else if (!compositeEventBlockMap[key]) 
-                compositeEventBlockMap[key] = NULL_COMPOSITE_EVENT_BLOCK;
+                compositeEventBlockMap[key] = {
+                  chain_identifier: chain.name,
+                  block_height: bottom_block_height,
+                  operator_address: key,
+                  denom: chain.denom,
+                  self_stake: 0,
+                  reward: 0,
+                  commission: 0,
+                  total_stake: 0,
+                  total_withdraw: 0,
+                  timestamp: new Date(eachMessage.time).getTime()
+                };
+                
               if (
                 [
                   '/cosmos.staking.v1beta1.MsgCreateValidator',
@@ -141,11 +164,9 @@ export const listenForEvents = (
               ) {
                 const bech32SrcOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorSrcAddress, chain.denom);
                 const value = parseInt(eachMessage.value.amount.amount);
-                compositeEventBlockMap[eachMessage.value.validatorSrcAddress].operator_address = eachMessage.value.validatorSrcAddress;
                 compositeEventBlockMap[eachMessage.value.validatorSrcAddress].total_stake += (value * -1);
                 if (bech32SrcOperatorAddress == eachMessage.value.delegatorAddress)
                   compositeEventBlockMap[eachMessage.value.validatorSrcAddress].self_stake += (value * -1);
-                compositeEventBlockMap[eachMessage.value.validatorDstAddress].operator_address = eachMessage.value.validatorDstAddress;
                 compositeEventBlockMap[eachMessage.value.validatorDstAddress].total_stake += value;
               }
             }
@@ -163,7 +184,6 @@ export const listenForEvents = (
   
   Promise.allSettled(promises)
     .then(values => {
-      
       values.forEach(eachValue => (eachValue.status == 'rejected') ? console.log(eachValue) : '');
       Validator.saveManyValidators(validatorMap, (err, validators) => {
         if (err) return final_callback('save_many_validators_failed', { success: false });
