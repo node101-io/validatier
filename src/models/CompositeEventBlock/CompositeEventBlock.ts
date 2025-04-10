@@ -560,7 +560,10 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
     { $replaceRoot: { newRoot: "$mostRecentRecord" } } 
   ], { allowDiskUse: true })
   .then((mostRecendRecordsArray) => {
-    if (mostRecendRecordsArray.length <= 0) mostRecendRecordsArray = compositeEventBlocksArray;
+    const mostRecendRecordsMapping: Record<string, any> = {};
+    for (const record of mostRecendRecordsArray) {
+      mostRecendRecordsMapping[record.operator_address] = record;
+    }
     
     const compositeEventBlocksArrayToInsertMany: {
       chain_identifier: string;
@@ -580,14 +583,18 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
       total_withdraw_prefix_sum: number,
     }[] = [];
     
-    for (let i = 0; i < mostRecendRecordsArray.length; i++) {
-      const mostRecentCompositeEventBlock = mostRecendRecordsArray[i];
+    for (let i = 0; i < compositeEventBlocksArray.length; i++) {
       
-      const selfStake = body[mostRecentCompositeEventBlock.operator_address].self_stake;
-      const reward = body[mostRecentCompositeEventBlock.operator_address].reward;
-      const commission = body[mostRecentCompositeEventBlock.operator_address].commission;
-      const totalStake = body[mostRecentCompositeEventBlock.operator_address].total_stake;
-      const totalWithdraw = body[mostRecentCompositeEventBlock.operator_address].total_withdraw;
+      const newCompositeEventBlock = compositeEventBlocksArray[i];
+      const mostRecentCompositeEventBlock = mostRecendRecordsMapping[newCompositeEventBlock.operator_address]
+        ? mostRecendRecordsMapping[newCompositeEventBlock.operator_address]
+        : newCompositeEventBlock;
+      
+      const selfStake = newCompositeEventBlock.self_stake;
+      const reward = newCompositeEventBlock.reward;
+      const commission = newCompositeEventBlock.commission;
+      const totalStake = newCompositeEventBlock.total_stake;
+      const totalWithdraw = newCompositeEventBlock.total_withdraw;
 
       const selfStakePrefixSum = mostRecentCompositeEventBlock.self_stake_prefix_sum ? (selfStake ? mostRecentCompositeEventBlock.self_stake_prefix_sum + selfStake : mostRecentCompositeEventBlock.self_stake_prefix_sum) : selfStake;
       const rewardPrefixSum = mostRecentCompositeEventBlock.reward_prefix_sum ? (reward ? mostRecentCompositeEventBlock.reward_prefix_sum + reward : mostRecentCompositeEventBlock.reward_prefix_sum) : reward;
@@ -618,16 +625,32 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
       compositeEventBlocksArrayToInsertMany.push(saveObject);
     }
 
-    const blockHeightsArray = compositeEventBlocksArrayToInsertMany.map(each => each.block_height);
+    const checkExistsOrQuery = compositeEventBlocksArrayToInsertMany.map(each => {
+      return {
+        block_height: each.block_height,
+        operator_address: each.operator_address
+      }
+    });
 
-    CompositeEventBlock.find({ block_height: { $in: blockHeightsArray } })
+    CompositeEventBlock.find({ $or: checkExistsOrQuery })
       .then((alreadyExistingCompositeEventBlocks) => {
 
-        const existingBlockHeights = alreadyExistingCompositeEventBlocks.map(each => each.block_height);
+        const existingCredentials = alreadyExistingCompositeEventBlocks.map(each => {
+          return {
+            block_height: each.block_height,
+            operator_address: each.operator_address
+          }
+        });
 
-        const newCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each => !existingBlockHeights.includes(each.block_height));
-        const updateCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each => existingBlockHeights.includes(each.block_height));
-
+        const newCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each => !existingCredentials.includes({
+          block_height: each.block_height,
+          operator_address: each.operator_address
+        }));
+        const updateCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each => existingCredentials.includes({
+          block_height: each.block_height,
+          operator_address: each.operator_address
+        }));
+        
         CompositeEventBlock
           .insertMany(newCompositeEventBlocks, { ordered: false })
           .then(insertedCompositeEventBlocks => {
@@ -636,6 +659,8 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
 
               const updateObj: { [key: string]: any } = {};
              
+              if (each.chain_identifier != undefined) updateObj.chain_identifier = each.chain_identifier;
+
               if (each.self_stake != 0) updateObj.self_stake = each.self_stake;
               if (each.reward != 0) updateObj.reward = each.reward;
               if (each.commission != 0) updateObj.commission = each.commission;

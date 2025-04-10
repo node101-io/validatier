@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Validator from '../../../models/Validator/Validator.js';
 import Chain, { ChainInterface } from '../../../models/Chain/Chain.js';
 import ActiveValidators from '../../../models/ActiveValidators/ActiveValidators.js';
+import { NUMBER_OF_COLUMNS } from '../../Validator/getGraphData/get.js';
 
 const indexGetController = (req: Request, res: Response): void => {
 
@@ -69,7 +70,8 @@ const indexGetController = (req: Request, res: Response): void => {
         currency_type: req.cookies.currency_type ? req.cookies.currency_type : 'native',
         chains,
         selectedChain: selectedChain ? selectedChain : '',
-        activeValidatorHistory
+        activeValidatorHistory,
+        NUMBER_OF_COLUMNS
       });
     });
 };

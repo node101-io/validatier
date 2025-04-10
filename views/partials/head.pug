@@ -47,6 +47,10 @@ html(lang='tr')
           script(src=`/js/functions/renderTableHeader.js`)
           script(src=`/js/functions/renderValidators.js`)
           script(src=`/js/functions/worker.js`)
+    style.
+      :root {
+        --number-of-columns: #{NUMBER_OF_COLUMNS};
+      }
   body
     block content
   footer 

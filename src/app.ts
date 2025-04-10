@@ -13,6 +13,9 @@ import validatorRouter from './routes/validatorRouter.js';
 import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsImageUri.js';
 import { startFetchingData } from './utils/startFetchingData.js';
 import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
+import getTxsByHeight from './utils/getTxsByHeight.js';
+import { convertOperatorAddressToBech32 } from './utils/convertOperatorAddressToBech32.js';
+import { processBlocks } from './utils/processBlocks.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -48,5 +51,7 @@ app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.i
 
 app.use('/', indexRouter);
 app.use('/validator', validatorRouter);
+
+processBlocks(4742022, 4742024, 'celestia');
 
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));

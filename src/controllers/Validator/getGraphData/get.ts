@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import CompositeEventBlock from '../../../models/CompositeEventBlock/CompositeEventBlock.js';
 
+export const NUMBER_OF_COLUMNS = 50;
+
 export default (req: Request, res: Response): any => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -27,7 +29,6 @@ export default (req: Request, res: Response): any => {
   const bottomTimestamp = parseInt(bottom_timestamp, 10);
   const topTimestamp = parseInt(top_timestamp, 10);
   
-  const NUMBER_OF_COLUMNS = 50;
   const stepValue = Math.ceil((topTimestamp - bottomTimestamp) / NUMBER_OF_COLUMNS);
 
   let pushedIndex = -1;

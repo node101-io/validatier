@@ -64,6 +64,7 @@ export const listenForEvents = (
                 const key = eachMessage.value.validatorAddress ? eachMessage.value.validatorAddress : '';
 
                 const NULL_COMPOSITE_EVENT_BLOCK = {
+                  chain_identifier: chain_identifier,
                   block_height: height,
                   operator_address: key,
                   denom: chain.denom,
