@@ -59,6 +59,10 @@ export const processBlocks = (start: number, end: number, chain: ChainInterface)
       logger.info(logMessages.join('\n'));
 
       logger.info(`Finished processing blocks ${bottom_block_height}-${top}\n\n`);
+
+      if (result.new_active_set_last_updated_block_time)
+        chain.active_set_last_updated_block_time = result.new_active_set_last_updated_block_time;
+
       return listenInterval(bottom_block_height + interval, top_block_height + interval); 
     });
   }
