@@ -218,8 +218,9 @@ export const listenForEvents = (
                 year: new Date(blockTimestamp).getFullYear(),
               }, (err, savedActiveValidators) => {
                 if (err) return final_callback(err, { success: false });
-                Chain.updateTimeOfLastActiveSetSave({ chain_identifier: chain.name, time: blockTimestamp }, (err, chain) => {
-                  if (err) return final_callback(err, { success: false });
+                Chain.updateTimeOfLastActiveSetSave({ chain_identifier: chain.name, time: blockTimestamp }, (err, activeSetUpdatedChain) => {
+                  if (err || !activeSetUpdatedChain?.active_set_last_updated_block_time) return final_callback(err, { success: false });
+                  chain.active_set_last_updated_block_time = activeSetUpdatedChain?.active_set_last_updated_block_time;
                   result.saved_active_validators = savedActiveValidators;
                   return final_callback(null, result);
                 })
