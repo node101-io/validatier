@@ -205,11 +205,6 @@ export const listenForEvents = (
             if (!blockTimestamp || blockTimestamp - chain.active_set_last_updated_block_time <= 86400000)
               return final_callback(null, result);
 
-            console.log({
-              day: new Date(blockTimestamp).getDate(),
-                month: new Date(blockTimestamp).getMonth() + 1,
-                year: new Date(blockTimestamp).getFullYear(),
-            })
             Validator
               .updateActiveValidatorList({
                 chain_identifier: chain.name,
@@ -221,8 +216,8 @@ export const listenForEvents = (
               }, (err, savedActiveValidators) => {
                 if (err) return final_callback(err, { success: false });
                 Chain.updateTimeOfLastActiveSetSave({ chain_identifier: chain.name, time: blockTimestamp }, (err, activeSetUpdatedChain) => {
-                  if (err || !activeSetUpdatedChain?.active_set_last_updated_block_time) return final_callback(err, { success: false });
-                  result.new_active_set_last_updated_block_time = activeSetUpdatedChain?.active_set_last_updated_block_time;
+                  if (err) return final_callback(err, { success: false });
+                  result.new_active_set_last_updated_block_time = blockTimestamp;
                   result.saved_active_validators = savedActiveValidators;
                   return final_callback(null, result);
                 })

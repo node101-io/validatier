@@ -19,7 +19,7 @@ export const processBlocks = (start: number, end: number, chain: ChainInterface)
 
   const startTime = Date.now();
 
-  function listenInterval (bottom_block_height: number, top_block_height: number) {
+  function listenInterval (bottom_block_height: number, top_block_height: number, chain: ChainInterface) {
     if (bottom_block_height > max_block_height) {
       logger.info(`\n\nALL BLOCKES PROCESSED | ${(Date.now() - startTime) / 1000}s \n Restarting in ${MILISECONDS_TO_WAIT_FOR_RESTART / (1000 * 60 * 60)} hours`)
       
@@ -60,12 +60,16 @@ export const processBlocks = (start: number, end: number, chain: ChainInterface)
 
       logger.info(`Finished processing blocks ${bottom_block_height}-${top}\n\n`);
 
-      if (result.new_active_set_last_updated_block_time)
-        chain.active_set_last_updated_block_time = result.new_active_set_last_updated_block_time;
+      if (result.new_active_set_last_updated_block_time) {
+        return Chain.findChainByIdentifier({ chain_identifier: chain.name }, (err, updatedChain) => {
+          if (err || !updatedChain) throw new Error(`bad_request`);
+          return listenInterval(bottom_block_height + interval, top_block_height + interval, updatedChain); 
+        })
+      }
 
-      return listenInterval(bottom_block_height + interval, top_block_height + interval); 
+      return listenInterval(bottom_block_height + interval, top_block_height + interval, chain); 
     });
   }
 
-  listenInterval(bottom_block_height, bottom_block_height + interval);
+  listenInterval(bottom_block_height, bottom_block_height + interval, chain);
 };
