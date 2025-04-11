@@ -199,9 +199,15 @@ export const listenForEvents = (
           const blockTimestamp = timestamp ? new Date(timestamp).getTime() : '';
           
           Validator.updateLastVisitedBlock({ chain_identifier: chain.name, block_height: bottom_block_height, block_time: timestamp }, (err, updated_chain) => {
-            if (err) return final_callback('update_last_visited_block_failed', { success: false });
+            if (err) return final_callback(err, { success: false });
             if (!blockTimestamp || blockTimestamp - chain.active_set_last_updated_block_time <= 86400000)
               return final_callback(null, result);
+
+            console.log({
+              day: new Date(blockTimestamp).getDate(),
+                month: new Date(blockTimestamp).getMonth() + 1,
+                year: new Date(blockTimestamp).getFullYear(),
+            })
             Validator
               .updateActiveValidatorList({
                 chain_identifier: chain.name,
@@ -211,9 +217,9 @@ export const listenForEvents = (
                 month: new Date(blockTimestamp).getMonth() + 1,
                 year: new Date(blockTimestamp).getFullYear(),
               }, (err, savedActiveValidators) => {
-                if (err) return final_callback('save_active_validators_failed', { success: false });
+                if (err) return final_callback(err, { success: false });
                 Chain.updateTimeOfLastActiveSetSave({ chain_identifier: chain.name, time: blockTimestamp }, (err, chain) => {
-                  if (err) return final_callback('update_time_of_last_active_set_save_failed', { success: false });
+                  if (err) return final_callback(err, { success: false });
                   result.saved_active_validators = savedActiveValidators;
                   return final_callback(null, result);
                 })

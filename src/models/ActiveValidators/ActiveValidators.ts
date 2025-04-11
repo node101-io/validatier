@@ -68,11 +68,20 @@ activeValidatorsSchema.statics.saveActiveValidators = function (
   const { chain_identifier, day, month, year, active_validators_pubkeys_array } = body;
   ActiveValidators
     .findOneAndUpdate(
-      { chain_identifier: chain_identifier, month: month, year: year },
-      { $push: { active_validators: {
-        day: day,
-        pubkeys: active_validators_pubkeys_array
-      } } }
+      { 
+        chain_identifier: chain_identifier, 
+        month: month, 
+        year: year,
+        "active_validators.day": { $ne: day }
+      },
+      { 
+        $push: { 
+          active_validators: {
+            day: day,
+            pubkeys: active_validators_pubkeys_array
+          } 
+        } 
+      }
     )
     .then(activeValidatorsRecord => {
       
