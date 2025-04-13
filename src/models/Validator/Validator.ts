@@ -470,7 +470,7 @@ validatorSchema.statics.updateActiveValidatorList = async function (
     
     ActiveValidators.saveActiveValidators({
       chain_identifier: chain_identifier,
-      month: month,
+      month: month + 1,
       year: year,
       day: day,
       active_validators_pubkeys_array: pubkeysOfActiveValidators
