@@ -27,7 +27,7 @@ export interface ValidatorInterface {
   moniker: string;
   website: string;
   description: string;
-  secuirty_contact: string;
+  security_contact: string;
   commission_rate: string;
   keybase_id: string;
   temporary_image_uri: string;
@@ -44,7 +44,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       moniker: string;
       website: string;
       description: string;
-      secuirty_contact: string;
+      security_contact: string;
       commission_rate: string;
       keybase_id: string;
       created_at: Date;
@@ -63,7 +63,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       moniker: string;
       website: string;
       description: string;
-      secuirty_contact: string;
+      security_contact: string;
       commission_rate: string;
       keybase_id: string;
       created_at: Date;
@@ -82,7 +82,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       moniker: string;
       website: string;
       description: string;
-      secuirty_contact: string;
+      security_contact: string;
       commission_rate: string;
       keybase_id: string;
     }, 
@@ -130,7 +130,8 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       height: number,
       day: number,
       month: number,
-      year: number
+      year: number,
+      active_validators_pubkeys_array: string[] | null;
     },
     callback: (
       err: string | null,
@@ -205,7 +206,7 @@ const validatorSchema = new Schema<ValidatorInterface>({
     trim: true,
     required: false
   },
-  secuirty_contact: { 
+  security_contact: { 
     type: String, 
     trim: true,
     required: false
@@ -236,7 +237,7 @@ validatorSchema.statics.saveValidator = function (
   body: Parameters<ValidatorModel['saveValidator']>[0], 
   callback: Parameters<ValidatorModel['saveValidator']>[1],
 ) {
-  const { operator_address, moniker, commission_rate, keybase_id, chain_identifier, description, secuirty_contact, website } = body;
+  const { operator_address, moniker, commission_rate, keybase_id, chain_identifier, description, security_contact, website } = body;
   if (!isOperatorAddressValid(operator_address)) return callback('format_error', null);
 
   Validator
@@ -262,7 +263,7 @@ validatorSchema.statics.saveValidator = function (
         keybase_id: keybase_id,
         website: website,
         description: description,
-        secuirty_contact: secuirty_contact
+        security_contact: security_contact
       }
 
       Validator.updateValidator(updateAndChangeValidatorBody, (err, updatedValidator) => {
@@ -324,7 +325,7 @@ validatorSchema.statics.updateValidator = function (
   callback: Parameters<ValidatorModel['updateValidator']>[1],
 ) {
   
-  const { operator_address, moniker, commission_rate, keybase_id, website, secuirty_contact, description } = body;
+  const { operator_address, moniker, commission_rate, keybase_id, website, security_contact, description } = body;
   
   Validator
     .findOneAndUpdate(
@@ -334,7 +335,7 @@ validatorSchema.statics.updateValidator = function (
         commission_rate: commission_rate,
         keybase_id: keybase_id,
         website: website,
-        secuirty_contact: secuirty_contact,
+        security_contact: security_contact,
         description: description
       }  
     )
@@ -381,7 +382,6 @@ validatorSchema.statics.rankValidators = function (
     new Promise((resolve, reject) => {
       CompositeEventBlock.getPeriodicDataForValidatorSet({
         chain_identifier: chain_identifier,
-        search_by: 'timestamp',
         bottom_timestamp: bottom_timestamp,
         top_timestamp: top_timestamp
       }, (err, validatorRecordMapping) => {
@@ -450,9 +450,22 @@ validatorSchema.statics.updateActiveValidatorList = async function (
   callback: Parameters<ValidatorModel['updateActiveValidatorList']>[1]
 ) {
 
-  const { chain_identifier, chain_rpc_url, height, day, month, year } = body;
+  const { chain_identifier, chain_rpc_url, height, day, month, year, active_validators_pubkeys_array } = body;
  
-  getPubkeysOfActiveValidatorsByHeight(chain_rpc_url, height, (err, pubkeysOfActiveValidators) => {
+  if (active_validators_pubkeys_array && active_validators_pubkeys_array.length > 0) {
+    return ActiveValidators.saveActiveValidators({
+      chain_identifier: chain_identifier,
+      month: month + 1,
+      year: year,
+      day: day,
+      active_validators_pubkeys_array: active_validators_pubkeys_array
+    }, (err, savedActiveValidators) => {
+      if (err) return callback(err, null);
+      return callback(null, savedActiveValidators);    
+    })
+  }
+
+  return getPubkeysOfActiveValidatorsByHeight(chain_rpc_url, height, (err, pubkeysOfActiveValidators) => {
     if (err || !pubkeysOfActiveValidators) return callback(err, null);
     
     ActiveValidators.saveActiveValidators({

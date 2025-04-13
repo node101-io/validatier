@@ -17,6 +17,7 @@ export interface ChainInterface {
   last_visited_block: number;
   last_visited_block_time: number;
   active_set_last_updated_block_time: number;
+  active_set_last_updated_block_height: number;
   usd_exchange_rate: number;
   is_genesis_saved: boolean;
 }
@@ -64,7 +65,7 @@ interface ChainModel extends Model<ChainInterface> {
     ) => any
   ) => any;
   updateTimeOfLastActiveSetSave: (
-    body: { chain_identifier: string, time: number },
+    body: { chain_identifier: string, time: number, height: number },
     callback: (
       err: string | null,
       chain: ChainInterface | null
@@ -149,6 +150,10 @@ const chainSchema = new Schema<ChainInterface>({
     type: Number,
     required: false
   },
+  active_set_last_updated_block_height: {
+    type: Number,
+    required: false
+  },
   usd_exchange_rate: {
     type: Number,
     required: true
@@ -205,7 +210,8 @@ chainSchema.statics.saveChain = function (
           usd_exchange_rate: usd_exchange_rate,
           last_visited_block: first_available_block_height,
           last_visited_block_time: first_available_block_time,
-          active_set_last_updated_block_time: first_available_block_time
+          active_set_last_updated_block_time: first_available_block_time,
+          active_set_last_updated_block_height: first_available_block_height
         })
         .then((newChain: ChainInterface) => {
           if (!newChain) return callback('creation_error', null);
@@ -252,11 +258,14 @@ chainSchema.statics.updateTimeOfLastActiveSetSave = function (
   body: Parameters<ChainModel['updateTimeOfLastActiveSetSave']>[0],
   callback: Parameters<ChainModel['updateTimeOfLastActiveSetSave']>[1],
 ) {
-  const { chain_identifier, time } = body;
+  const { chain_identifier, time, height } = body;
   Chain
     .findOneAndUpdate(
       { name: chain_identifier },
-      { active_set_last_updated_block_time: time }
+      {
+        active_set_last_updated_block_time: time,
+        active_set_last_updated_block_height: height
+      }
     )
     .then(chain => callback(null, chain))
     .catch(err => callback(err, null));

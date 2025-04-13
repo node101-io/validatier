@@ -5,12 +5,13 @@ import getTxsByHeight from '../utils/getTxsByHeight.js';
 import { DecodedMessage } from '../utils/decodeTxs.js';
 import { convertOperatorAddressToBech32 } from '../utils/convertOperatorAddressToBech32.js';
 import { ActiveValidatorsInterface } from '../models/ActiveValidators/ActiveValidators.js';
+import { bulkSave, clearChainData, getBatchData } from '../utils/levelDb.js';
+import { sendTelegramMessage } from '../utils/sendTelegramMessage.js';
 
 interface ListenForEventsResult {
   success: boolean,
   inserted_validator_addresses?: string[] | null,
-  updated_validator_addresses?: string[] | null,
-  saved_composite_event_block_heights?: number[] | null,
+  saved_composite_events_operator_addresses?: string[] | null,
   new_active_set_last_updated_block_time?: number | null,
   saved_active_validators?: ActiveValidatorsInterface | null
 }
@@ -62,44 +63,29 @@ export const listenForEvents = (
               if (!key) {
                 if (!compositeEventBlockMap[eachMessage.value.validatorSrcAddress]) {
                   compositeEventBlockMap[eachMessage.value.validatorSrcAddress] = {
-                    chain_identifier: chain.name,
-                    block_height: bottom_block_height,
-                    operator_address: eachMessage.value.validatorSrcAddress,
-                    denom: chain.denom,
                     self_stake: 0,
                     reward: 0,
                     commission: 0,
                     total_stake: 0,
                     total_withdraw: 0,
-                    timestamp: new Date(eachMessage.time).getTime()
                   };
                 }
                 if (!compositeEventBlockMap[eachMessage.value.validatorDstAddress]) {
                   compositeEventBlockMap[eachMessage.value.validatorDstAddress] = {
-                    chain_identifier: chain.name,
-                    block_height: bottom_block_height,
-                    operator_address: eachMessage.value.validatorDstAddress,
-                    denom: chain.denom,
                     self_stake: 0,
                     reward: 0,
                     commission: 0,
                     total_stake: 0,
                     total_withdraw: 0,
-                    timestamp: new Date(eachMessage.time).getTime()
                   };
                 }
               } else if (!compositeEventBlockMap[key]) 
                 compositeEventBlockMap[key] = {
-                  chain_identifier: chain.name,
-                  block_height: bottom_block_height,
-                  operator_address: key,
-                  denom: chain.denom,
                   self_stake: 0,
                   reward: 0,
                   commission: 0,
                   total_stake: 0,
                   total_withdraw: 0,
-                  timestamp: new Date(eachMessage.time).getTime()
                 };
                 
               if (
@@ -113,10 +99,14 @@ export const listenForEvents = (
                 const byteArray = new Uint8Array(Object.values(pubkey).slice(2));
                 const pubkeyBase64 = btoa(String.fromCharCode(...byteArray));
                 
+                const delegatorAddress = eachMessage.value.delegatorAddress 
+                  ? eachMessage.value.delegatorAddress 
+                  : convertOperatorAddressToBech32(eachMessage.value.validatorAddress, chain.bech32_prefix);
+
                 validatorMap[key] = {
                   pubkey: pubkeyBase64,
                   operator_address: eachMessage.value.validatorAddress,
-                  delegator_address: eachMessage.value.delegatorAddress ? eachMessage.value.delegatorAddress : convertOperatorAddressToBech32(eachMessage.value.validatorAddress, chain.bech32_prefix),
+                  delegator_address: delegatorAddress,
                   keybase_id: eachMessage.value.description.identity,
                   moniker: eachMessage.value.description.moniker,
                   website: eachMessage.value.description.website,
@@ -127,8 +117,8 @@ export const listenForEvents = (
                   created_at: eachMessage.time,
                 };
                 if (eachMessage.value.value.denom && eachMessage.value.value.amount) {
-                  compositeEventBlockMap[key].self_stake += eachMessage.value.value.amount;
-                  compositeEventBlockMap[key].total_stake += eachMessage.value.value.amount;
+                  compositeEventBlockMap[key].self_stake += parseInt(eachMessage.value.value.amount);
+                  compositeEventBlockMap[key].total_stake += parseInt(eachMessage.value.value.amount);
                 }
               }
               const bech32OperatorAddress = eachMessage.value.validatorAddress ? convertOperatorAddressToBech32(eachMessage.value.validatorAddress, chain.bech32_prefix) : '';
@@ -158,8 +148,10 @@ export const listenForEvents = (
                 if (!eachMessage.value || !eachMessage.value.amount || !eachMessage.value.amount.amount) continue;
                 const stakeAmount = parseInt(eachMessage.value.amount.amount);
                 const additiveTxs = ['/cosmos.staking.v1beta1.MsgDelegate', '/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation'];
-                compositeEventBlockMap[key].total_stake += additiveTxs.includes(eachMessage.typeUrl) ? stakeAmount : -stakeAmount;
-                if (bech32OperatorAddress == eachMessage.value.delegatorAddress) compositeEventBlockMap[key].self_stake += additiveTxs.includes(eachMessage.typeUrl) ? stakeAmount : -stakeAmount;
+                compositeEventBlockMap[key].total_stake += additiveTxs.includes(eachMessage.typeUrl) ? stakeAmount : (stakeAmount * -1);
+                
+                if (bech32OperatorAddress == eachMessage.value.delegatorAddress) 
+                  compositeEventBlockMap[key].self_stake += additiveTxs.includes(eachMessage.typeUrl) ? stakeAmount : (stakeAmount * -1);
               } else if (
                 ['/cosmos.staking.v1beta1.MsgBeginRedelegate'].includes(eachMessage.typeUrl)
               ) {
@@ -177,8 +169,7 @@ export const listenForEvents = (
     );
   const result: ListenForEventsResult = {
     inserted_validator_addresses: null,
-    updated_validator_addresses: null,
-    saved_composite_event_block_heights: null,
+    saved_composite_events_operator_addresses: null,
     saved_active_validators: null,
     new_active_set_last_updated_block_time: null,
     success: true
@@ -186,17 +177,25 @@ export const listenForEvents = (
   
   Promise.allSettled(promises)
     .then(values => {
-      values.forEach(eachValue => (eachValue.status == 'rejected') ? console.log(eachValue) : '');
+      values.forEach(eachValue => (eachValue.status == 'rejected') 
+        ? sendTelegramMessage(`${chain.name.toUpperCase()} | ${eachValue.reason}`, (err, success) => {})
+        : ''
+      );
       Validator.saveManyValidators(validatorMap, (err, validators) => {
         if (err) return final_callback('save_many_validators_failed', { success: false });
-        CompositeEventBlock.saveManyCompositeEventBlocks(compositeEventBlockMap, (err, compositeEventBlocks) => {
-          if (err) return final_callback(err, { success: false });
-          const insertedValidatorAddresses = validators?.insertedValidators ? validators?.insertedValidators.map(validator => validator.operator_address) : [];
+        bulkSave({
+          chain_identifier: chain.name,
+          saveMapping: compositeEventBlockMap
+        }, (err, success) => {
+          if (err || !success) return final_callback(err, { success: false });
+
+          const insertedValidatorAddresses = validators?.insertedValidators 
+            ? validators?.insertedValidators.map(validator => 
+              `${validator.operator_address.slice(0,4)}...${validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)}`
+            )
+            : [];
           result.inserted_validator_addresses = insertedValidatorAddresses;
-          const updatedValidatorAddresses = validators?.updatedValidators ? validators?.updatedValidators.map(validator => validator.operator_address) : [];
-          result.updated_validator_addresses = updatedValidatorAddresses;
-          const savedCompositeEventBlockHeights = compositeEventBlocks?.map(each => each.block_height);
-          result.saved_composite_event_block_heights = savedCompositeEventBlockHeights;
+
           if (!timestamp) return final_callback('no_timestamp_available', { success: false });
           const blockTimestamp = timestamp ? new Date(timestamp).getTime() : '';
           
@@ -205,23 +204,54 @@ export const listenForEvents = (
             if (!blockTimestamp || blockTimestamp - chain.active_set_last_updated_block_time <= 86400000)
               return final_callback(null, result);
 
-            Validator
-              .updateActiveValidatorList({
+            getBatchData(chain.name, (err, data) => {
+              if (err) return final_callback(err, { success: false });
+
+              const day = new Date(blockTimestamp).getDate();
+              const month = new Date(blockTimestamp).getMonth();
+              const year = new Date(blockTimestamp).getFullYear();
+              
+              const saveManyCompositeEventBlocksBody = {
                 chain_identifier: chain.name,
-                chain_rpc_url: chain.rpc_url,
-                height: bottom_block_height,
-                day: new Date(blockTimestamp).getDate(),
-                month: new Date(blockTimestamp).getMonth() + 1,
-                year: new Date(blockTimestamp).getFullYear(),
-              }, (err, savedActiveValidators) => {
-                if (err) return final_callback(err, { success: false });
-                Chain.updateTimeOfLastActiveSetSave({ chain_identifier: chain.name, time: blockTimestamp }, (err, activeSetUpdatedChain) => {
-                  if (err) return final_callback(err, { success: false });
-                  result.new_active_set_last_updated_block_time = blockTimestamp;
-                  result.saved_active_validators = savedActiveValidators;
-                  return final_callback(null, result);
-                })
+                day: day,
+                month: month,
+                year: year,
+                block_height: top_block_height,
+                saveMapping: data
+              };
+
+              CompositeEventBlock.saveManyCompositeEventBlocks(saveManyCompositeEventBlocksBody, (err, savedCompositeEventBlocks) => {
+                Validator
+                  .updateActiveValidatorList({
+                    chain_identifier: chain.name,
+                    chain_rpc_url: chain.rpc_url,
+                    height: bottom_block_height,
+                    day: day,
+                    month: month,
+                    year: year,
+                    active_validators_pubkeys_array: null
+                  }, (err, savedActiveValidators) => {
+                    if (err) return final_callback(err, { success: false });
+
+                    const savedCompositeEventsOperatorAddresses = savedCompositeEventBlocks?.map(each => 
+                      `${each.operator_address.slice(0,4)}...${each.operator_address.slice(each.operator_address.length - 4, each.operator_address.length)}`
+                    );
+
+                    result.saved_composite_events_operator_addresses = savedCompositeEventsOperatorAddresses;
+
+                    Chain.updateTimeOfLastActiveSetSave({ chain_identifier: chain.name, time: blockTimestamp, height: top_block_height }, (err, activeSetUpdatedChain) => {
+                      if (err) return final_callback(err, { success: false });
+                      result.new_active_set_last_updated_block_time = blockTimestamp;
+                      result.saved_active_validators = savedActiveValidators;
+
+                      clearChainData(chain.name, (err, success) => {
+                        if (err || !success) return final_callback(err, { success: false });
+                        return final_callback(null, result);
+                      })
+                    })
+                  })
               })
+            })
           })
       })
     })

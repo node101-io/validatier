@@ -32,8 +32,6 @@ export const processBlocks = (start: number, end: number, chain: ChainInterface)
     };
 
     const top = Math.min(top_block_height, max_block_height);
-
-    logger.info(`${chain.name.toUpperCase()} | Processing blocks from ${bottom_block_height} to ${top}`);
     
     listenForEvents(bottom_block_height, top, chain, (err, result) => {
       if (err || !result.success) {
@@ -43,26 +41,19 @@ export const processBlocks = (start: number, end: number, chain: ChainInterface)
         })
       };
 
-      const logMessages = [];
-
       if (result.inserted_validator_addresses && result.inserted_validator_addresses.length) 
-        logMessages.push(`${chain.name.toUpperCase()} | CREATED | Validators with addresses: ${result.inserted_validator_addresses}`);
-      if (result.updated_validator_addresses && result.updated_validator_addresses.length) 
-        logMessages.push(`${chain.name.toUpperCase()} | UPDATED | Validators with addresses: ${result.updated_validator_addresses}`);
-      if (result.saved_composite_event_block_heights && result.saved_composite_event_block_heights.length)
-        logMessages.push(`${chain.name.toUpperCase()} | SAVED | Composite Event Blocks in these block heights: ${result.saved_composite_event_block_heights}`);
-      if (result.saved_active_validators && result.saved_active_validators.active_validators.length)
-        logMessages.push(`${chain.name.toUpperCase()} | SAVED | Active Validator set for ${result.saved_active_validators.month}/${result.saved_active_validators.year}: ${result.saved_active_validators.active_validators.length} currently in active list`);
-      if (logMessages.length === 0) 
-        logMessages.push("No data saved.");
-      
-      logger.info(logMessages.join('\n'));
-
-      logger.info(`Finished processing blocks ${bottom_block_height}-${top}\n\n`);
+        logger.info(`${chain.name.toUpperCase()} | CREATED | Validators with addresses: ${result.inserted_validator_addresses.join('    ')}`);
 
       if (result.new_active_set_last_updated_block_time) {
         return Chain.findChainByIdentifier({ chain_identifier: chain.name }, (err, updatedChain) => {
           if (err || !updatedChain) throw new Error(`bad_request`);
+          
+          if (result.saved_active_validators && result.saved_active_validators.active_validators.length) {
+            logger.info(`${chain.name.toUpperCase()} | SAVED | Active Validator set for ${result.saved_active_validators.month}/${result.saved_active_validators.year}: ${result.saved_active_validators.active_validators.length} currently in active list`);
+            logger.info(`${chain.name.toUpperCase()} | SAVED | CompositeEventBlocks | for ${result.saved_composite_events_operator_addresses?.join('    ')}`);
+            logger.info(`${chain.name.toUpperCase()} | Continuing from: ${bottom_block_height + interval}`);
+          }
+          
           return listenInterval(bottom_block_height + interval, top_block_height + interval, updatedChain); 
         })
       }
@@ -72,4 +63,5 @@ export const processBlocks = (start: number, end: number, chain: ChainInterface)
   }
 
   listenInterval(bottom_block_height, bottom_block_height + interval, chain);
+  logger.info(`${chain.name.toUpperCase()} | Started fetching from block_height: ${bottom_block_height}`);
 };

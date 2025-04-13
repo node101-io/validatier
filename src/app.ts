@@ -10,14 +10,8 @@ import path from 'path';
 
 import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
-import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsImageUri.js';
 import { startFetchingData } from './utils/startFetchingData.js';
-import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
-import getTxsByHeight from './utils/getTxsByHeight.js';
-import { convertOperatorAddressToBech32 } from './utils/convertOperatorAddressToBech32.js';
-import { processBlocks } from './utils/processBlocks.js';
-import Chain from './models/Chain/Chain.js';
-import ActiveValidators from './models/ActiveValidators/ActiveValidators.js';
+import { getBatchData, initDB } from './utils/levelDb.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -37,12 +31,17 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 //   message: 'maximum_request_per_second_reached',
 // }));
 
-const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/validator-timeline-test-v5';
+const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/validator-timeline-test-v6';
 
 mongoose
   .connect(mongoUri)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
+
+initDB((err) => {
+    if (err) return console.log(err);
+    console.log('Connected to LevelDB');
+  })
 
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(bodyParser.urlencoded({ extended: true }));

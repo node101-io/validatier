@@ -4,7 +4,7 @@ import { findNodeWithMinBlockHeight } from '../../utils/findNodeWithMinBlockHeig
 
 export const Job_SaveChains = (callback: (err: string | null, success: Boolean) => any) => {
   
-  const chainIdentifiers = ['cosmoshub', 'lava', 'celestia', 'osmosis'];
+  const chainIdentifiers = ['celestia'];
 
   async.timesSeries(
     chainIdentifiers.length,

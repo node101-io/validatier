@@ -1,11 +1,9 @@
-import async from 'async';
 import fetch from 'node-fetch';
-import { convertOperatorAddressToBech32 } from './convertOperatorAddressToBech32.js';
 import Chain from '../models/Chain/Chain.js';
-import Validator from '../models/Validator/Validator.js';
-import { DecodedMessage } from '../utils/decodeTxs.js';
 import CompositeEventBlock from '../models/CompositeEventBlock/CompositeEventBlock.js';
-import ActiveValidators from '../models/ActiveValidators/ActiveValidators.js';
+import Validator from '../models/Validator/Validator.js';
+import { convertOperatorAddressToBech32 } from './convertOperatorAddressToBech32.js';
+import { DecodedMessage } from '../utils/decodeTxs.js';
 
 export const getGenesisTxs = async (chain_identifier: string, callback: (err: string | null, success: Boolean) => any) => {
 
@@ -27,83 +25,96 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
           const flattenedGenesisTxs: DecodedMessage[] = genesisTxs.flatMap((obj: { body: { messages: DecodedMessage }}) => obj.body.messages);
           validatorsData.push(...flattenedGenesisTxs);
 
-          async.timesSeries(
-            validatorsData.length,
-            (i, next) => {
-              const eachValidator = validatorsData[i]
-              const delegatorAddress = eachValidator.delegator_address ? eachValidator.delegator_address : convertOperatorAddressToBech32(eachValidator.operator_address, chain.bech32_prefix);
-              Validator.saveValidator({
-                pubkey: eachValidator.consensus_pubkey ? eachValidator.consensus_pubkey.key : eachValidator.pubkey.key,
-                commission_rate: eachValidator.commission.commission_rates ? eachValidator.commission.commission_rates.rate : eachValidator.commission.rate,
-                operator_address: eachValidator.operator_address ? eachValidator.operator_address : eachValidator.validator_address,
-                delegator_address: delegatorAddress ? delegatorAddress : '',
-                chain_identifier: chain.name,
-                moniker: eachValidator.description.moniker,
-                description: eachValidator.description.details,
-                secuirty_contact: eachValidator.description.securityContact,
-                website: eachValidator.description.website,
-                keybase_id: eachValidator.description.identity,
-                created_at: chain.first_available_block_time
-              }, (err, validator) => {
-                if (err && !validator) return next(new Error(err));
+          const day = (new Date(chain.first_available_block_time)).getDate();
+          const month = (new Date(chain.first_available_block_time)).getMonth();
+          const year = (new Date(chain.first_available_block_time)).getFullYear();
 
-                const totalStake = eachValidator.tokens ? eachValidator.tokens : eachValidator.value.amount;
-                const selfStake = eachValidator.tokens ? 0 : eachValidator.value.amount;
-                
-                CompositeEventBlock.saveCompositeEventBlock({
-                  chain_identifier: chain_identifier,
-                  block_height: chain.first_available_block_height,
-                  operator_address: eachValidator.operator_address ? eachValidator.operator_address : eachValidator.validator_address,
-                  timestamp: (new Date(chain.first_available_block_time)).getTime(),
-                  denom: chain.denom,
-                  total_stake: totalStake,
-                  self_stake: selfStake
-                }, (err, newCompositeEventBlock) => {
-                  if (err && !newCompositeEventBlock) return next(new Error(err));
-                  return next();
-                })
-              })
-            },
-            (err) => {
-              if (err) return callback(err.message, false)
-              
+          const validatorMap: Record<string, any> = {};
+
+          const saveManyCompositeEventBlocksBody = {
+            chain_identifier: chain_identifier,
+            day: day,
+            month: month,
+            year: year,
+            block_height: chain.first_available_block_height,
+            saveMapping: {}
+          }
+          const compositeEventBlockMap: Record<string, any> = {};
+
+          for (let i = 0; i < validatorsData.length; i++) {
+            
+            const eachValidator = validatorsData[i];
+
+            const pubkey = eachValidator.consensus_pubkey 
+              ? eachValidator.consensus_pubkey.key 
+              : eachValidator.pubkey.key;
+
+            const operatorAddress = eachValidator.operator_address 
+              ? eachValidator.operator_address 
+              : eachValidator.validator_address;
+
+            const delegatorAddress = eachValidator.delegator_address 
+              ? eachValidator.delegator_address 
+              : convertOperatorAddressToBech32(eachValidator.operator_address, chain.bech32_prefix);
+
+            const commissionRate = eachValidator.commission.commission_rates 
+              ? eachValidator.commission.commission_rates.rate 
+              : eachValidator.commission.rate;
+            
+            validatorMap[operatorAddress] = {
+              pubkey: pubkey,
+              commission_rate: commissionRate,
+              operator_address: operatorAddress,
+              delegator_address: delegatorAddress,
+              chain_identifier: chain_identifier,
+              moniker: eachValidator.description.moniker,
+              description: eachValidator.description.details,
+              security_contact: eachValidator.description.securityContact,
+              website: eachValidator.description.website,
+              keybase_id: eachValidator.description.identity,
+              created_at: chain.first_available_block_time
+            };
+
+            const totalStake = eachValidator.tokens 
+              ? eachValidator.tokens 
+              : eachValidator.value.amount;
+            const selfStake = eachValidator.tokens 
+              ? 0 
+              : eachValidator.value.amount  
+            compositeEventBlockMap[operatorAddress] = {
+              total_stake: parseInt(totalStake),
+              self_stake: parseInt(selfStake)
+            }
+          }
+
+          saveManyCompositeEventBlocksBody.saveMapping = compositeEventBlockMap;
+
+          Validator.saveManyValidators(validatorMap, (err, validators) => {
+            if (err) return callback(err, false);
+            CompositeEventBlock.saveManyCompositeEventBlocks(saveManyCompositeEventBlocksBody, (err, savedCompositeEventBlocks) => {
+              if (err) return callback(err, false);
               Chain.markGenesisAsSaved({ chain_identifier: chain_identifier }, (err, chainGenesisMarkedAsSaved) => {
                 if (err) return callback(err, false);
+    
+                let pubkeysOfActiveValidators = null;
+                if (activeValidatorsData && activeValidatorsData.length > 0) pubkeysOfActiveValidators = activeValidatorsData.map((v: any) => v.pub_key.value) || [];
                 
-                const day = (new Date(chain.first_available_block_time)).getDate();
-                const month = (new Date(chain.first_available_block_time)).getMonth() + 1;
-                const year = (new Date(chain.first_available_block_time)).getFullYear();
-
-                if (!activeValidatorsData || activeValidatorsData.length <= 0) {
-                  Validator.updateActiveValidatorList({
-                    month: month,
-                    year: year,
-                    day: day,
-                    height: chain.first_available_block_height,
-                    chain_identifier: chain.name,
-                    chain_rpc_url: chain.rpc_url
-                  }, (err, savedActiveValidators) => {
-                    if (err) return callback(err, false);
-                    console.log(`ACTIVE VALIDATOR LIST UPDATED | TOTAL OF ${savedActiveValidators?.active_validators.length} ACTIVE`);
-                    return callback(null, true);
-                  });
-                } else {
-                  const pubkeysOfActiveValidators = activeValidatorsData.map((v: any) => v.pub_key.value) || [];           
-                  ActiveValidators.saveActiveValidators({
-                    chain_identifier: chain.name,
-                    month: month,
-                    year: year,
-                    day: day,
-                    active_validators_pubkeys_array: pubkeysOfActiveValidators
-                  }, (err, savedActiveValidators) => {
-                    if (err) return callback(err, false);
-                    console.log(`ACTIVE VALIDATOR LIST UPDATED | TOTAL OF ${savedActiveValidators?.active_validators.length} ACTIVE`);
-                    return callback(null, true);
-                  })
-                }
+                Validator.updateActiveValidatorList({
+                  month: month,
+                  year: year,
+                  day: day,
+                  height: chain.first_available_block_height,
+                  chain_identifier: chain_identifier,
+                  chain_rpc_url: chain.rpc_url,
+                  active_validators_pubkeys_array: pubkeysOfActiveValidators
+                }, (err, savedActiveValidators) => {
+                  if (err) return callback(err, false);
+                  console.log(`ACTIVE VALIDATOR LIST UPDATED | TOTAL OF ${savedActiveValidators?.active_validators.length} ACTIVE`);
+                  return callback(null, true);
+                });
               })
-            }
-          )
+            })
+          })
         })
         .catch(err => callback(err, false))
     })

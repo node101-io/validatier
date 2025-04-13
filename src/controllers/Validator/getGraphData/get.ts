@@ -48,8 +48,7 @@ export default (req: Request, res: Response): any => {
         {
           operator_address: operator_address,
           bottom_timestamp: bottomTimestamp,
-          top_timestamp: end,
-          search_by: 'timestamp',
+          top_timestamp: end
         },
         (err, result) => {
 
