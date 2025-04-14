@@ -92,6 +92,7 @@ function handleNetworkSwitch () {
     const chainSymbol = target.getAttribute('symbol');
     const chainDecimals = target.getAttribute('decimals');
     const usdExchangeRate = target.getAttribute('usd_exchange_rate');
+    const firstAvailableTime = target.getAttribute('first_available_time');
 
     const cacheResponse = rankingResponsesCache[bottomTimestamp + '.' + topTimestamp + '.' + chainIdentifier];
     
@@ -99,6 +100,7 @@ function handleNetworkSwitch () {
     document.getElementById('network-switch-header').setAttribute('current_chain_symbol', chainSymbol);
     document.getElementById('network-switch-header').setAttribute('current_chain_decimals', chainDecimals);
     document.getElementById('network-switch-header').setAttribute('current_chain_usd_exhange_rate', usdExchangeRate);
+    document.getElementById('network-switch-header').setAttribute('current_chain_first_available_time', firstAvailableTime);
 
     if (cacheResponse) return generateValidatorRankingContent(cacheResponse, 'ratio', 'desc');
 

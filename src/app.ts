@@ -10,8 +10,8 @@ import path from 'path';
 
 import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
+import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsImageUri.js';
 import { startFetchingData } from './utils/startFetchingData.js';
-import { getBatchData, initDB } from './utils/levelDb.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -38,10 +38,10 @@ mongoose
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-initDB((err) => {
-    if (err) return console.log(err);
-    console.log('Connected to LevelDB');
-  })
+// initDB((err) => {
+//     if (err) return console.log(err);
+//     console.log('Connected to LevelDB');
+//   })
 
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(bodyParser.urlencoded({ extended: true }));

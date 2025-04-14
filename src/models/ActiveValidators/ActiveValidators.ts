@@ -116,9 +116,10 @@ activeValidatorsSchema.statics.getActiveValidatorHistoryByChain = function (
   ActiveValidators
     .find({ 
       chain_identifier: chain_identifier,
-      month: { $gte: (new Date(bottom_timestamp)).getMonth(), $lte: (new Date(top_timestamp)).getMonth() },
+      month: { $gte: 1, $lte: 12 },
       year: { $gte: (new Date(bottom_timestamp)).getFullYear(), $lte: (new Date(top_timestamp)).getFullYear() }
     })
+    .sort({ year: 1, month: 1 })
     .then(activeValidatorHistory => callback(null, activeValidatorHistory))
     .catch(err => callback(err, null))
 }

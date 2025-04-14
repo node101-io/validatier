@@ -182,7 +182,7 @@ export const listenForEvents = (
         : ''
       );
       Validator.saveManyValidators(validatorMap, (err, validators) => {
-        if (err) return final_callback('save_many_validators_failed', { success: false });
+        if (err) return final_callback(`save_many_validators_failed: ${err}`, { success: false });
         bulkSave({
           chain_identifier: chain.name,
           saveMapping: compositeEventBlockMap
@@ -200,12 +200,12 @@ export const listenForEvents = (
           const blockTimestamp = timestamp ? new Date(timestamp).getTime() : '';
           
           Validator.updateLastVisitedBlock({ chain_identifier: chain.name, block_height: bottom_block_height, block_time: timestamp }, (err, updated_chain) => {
-            if (err) return final_callback(err, { success: false });
+            if (err) return final_callback(`update_last_visited_block_failed: ${err}`, { success: false });
             if (!blockTimestamp || blockTimestamp - chain.active_set_last_updated_block_time <= 86400000)
               return final_callback(null, result);
 
             getBatchData(chain.name, (err, data) => {
-              if (err) return final_callback(err, { success: false });
+              if (err) return final_callback(`get_batch_data_failed: ${err}`, { success: false });
 
               const day = new Date(blockTimestamp).getDate();
               const month = new Date(blockTimestamp).getMonth();
@@ -221,6 +221,7 @@ export const listenForEvents = (
               };
 
               CompositeEventBlock.saveManyCompositeEventBlocks(saveManyCompositeEventBlocksBody, (err, savedCompositeEventBlocks) => {
+                if (err) return final_callback(`save_many_blocks_failed: ${err}`, { success: false });
                 Validator
                   .updateActiveValidatorList({
                     chain_identifier: chain.name,
@@ -231,7 +232,7 @@ export const listenForEvents = (
                     year: year,
                     active_validators_pubkeys_array: null
                   }, (err, savedActiveValidators) => {
-                    if (err) return final_callback(err, { success: false });
+                    if (err) return final_callback(`update_active_validators_failed: ${err}`, { success: false });
 
                     const savedCompositeEventsOperatorAddresses = savedCompositeEventBlocks?.map(each => 
                       `${each.operator_address.slice(0,4)}...${each.operator_address.slice(each.operator_address.length - 4, each.operator_address.length)}`
@@ -240,12 +241,12 @@ export const listenForEvents = (
                     result.saved_composite_events_operator_addresses = savedCompositeEventsOperatorAddresses;
 
                     Chain.updateTimeOfLastActiveSetSave({ chain_identifier: chain.name, time: blockTimestamp, height: top_block_height }, (err, activeSetUpdatedChain) => {
-                      if (err) return final_callback(err, { success: false });
+                      if (err) return final_callback(`update_last_active_set_data_save_failed: ${err}`, { success: false });
                       result.new_active_set_last_updated_block_time = blockTimestamp;
                       result.saved_active_validators = savedActiveValidators;
 
                       clearChainData(chain.name, (err, success) => {
-                        if (err || !success) return final_callback(err, { success: false });
+                        if (err || !success) return final_callback(`clear_chain_data_failed: ${err}`, { success: false });
                         return final_callback(null, result);
                       })
                     })

@@ -10,9 +10,11 @@ function getDateRange(currentDate) {
 
   const formatDate = (date) => date.toISOString().split('T')[0];
 
+  const allTimeBottomTimestamp = document.getElementById('network-switch-header').getAttribute('current_chain_first_available_time');
+
   return {
     'all-time': {
-      bottom: formatDate(new Date(FIRST_AVAILABLE_BLOCK_DATE)),
+      bottom: formatDate(new Date(allTimeBottomTimestamp)),
       top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
     },
     'last-week': {

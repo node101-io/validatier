@@ -311,11 +311,11 @@ validatorSchema.statics.saveManyValidators = function (
             .then(updatedValidators => {
               return callback(null, { insertedValidators, updatedValidators: Object.values(updatedValidators.insertedIds) })
             })
-            .catch(err => callback('database_error', null))
+            .catch(err => callback(`database_error: ${err}`, null))
         })
-        .catch(err => callback('database_error', null))
+        .catch(err => callback(`database_error: ${err}`, null))
     })
-    .catch(err => callback('database_error', null))
+    .catch(err => callback(`database_error: ${err}`, null))
 }
 
 

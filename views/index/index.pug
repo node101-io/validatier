@@ -8,7 +8,7 @@ block content
           img(src='/res/images/logo.svg', alt='node101' class='center')
         .banner-title-content VALIDATIER
       .header-network-switch-wrapper
-        .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}`)
+        .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}` current_chain_first_available_time=`${selectedChain.first_available_block_time}`)
           .network-switch-header-chain-content-wrapper(class='center')
             .network-switch-network-image-wrapper 
               img#current-network-img(src=`${selectedChain.image ? selectedChain.image : ''}`)
@@ -23,7 +23,7 @@ block content
             input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search')
           .network-switch-chains-wrapper
             each chain in chains 
-              .each-chain-wrapper(id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}` symbol=`${chain.symbol}` decimals=`${chain.decimals}` usd_exchange_rate=`${chain.usd_exchange_rate}`)
+              .each-chain-wrapper(id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}` symbol=`${chain.symbol}` decimals=`${chain.decimals}` usd_exchange_rate=`${chain.usd_exchange_rate}` first_available_time=`${chain.first_available_block_time}`)
                 .network-switch-network-image-wrapper(class='center network-unselected-image-wrapper')
                   img(src=`${chain.image}`)
                 .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
