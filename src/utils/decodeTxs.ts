@@ -56,7 +56,10 @@ const decodeTransactions = (txs: string[], events: Event[][], denom: string, tim
         continue;
       }
       
-      const nativeRewardOrCommissionValue = getSpecificAttributeOfAnEventFromTxEventsArray(events[i], ['withdraw_rewards', 'withdraw_commission'], 'amount', denom);
+      const nativeRewardOrCommissionValue = message.typeUrl == '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward'
+        ? getSpecificAttributeOfAnEventFromTxEventsArray(events[i], ['withdraw_rewards'], 'amount', denom)
+        : getSpecificAttributeOfAnEventFromTxEventsArray(events[i], ['withdraw_commission'], 'amount', denom);
+
       if (!nativeRewardOrCommissionValue) continue;
       
       const decodedMessage = registry.decode(message);
