@@ -25,15 +25,23 @@ interface ActiveValidatorsModel extends Model<ActiveValidatorsInterface> {
       savedActiveValidators: ActiveValidatorsInterface | null
     ) => any
   ) => any;
-  getActiveValidatorHistoryByChain: (
+  getActiveValidatorHistoryOfValidator: (
     body: {
       chain_identifier: string;
       bottom_timestamp: number;
       top_timestamp: number;
+      pubkey: string;
     },
     callback: (
       err: string | null,
-      activeValidatorHistory: ActiveValidatorsInterface[] | null,
+      activeValidatorHistory: {
+        active_validators: {
+          day: number;
+          isActive: boolean;
+        }[];
+        month: number;
+        year: number;
+      }[] | null,
     ) => any
   ) => any
 }
@@ -59,7 +67,7 @@ const activeValidatorsSchema = new Schema<ActiveValidatorsInterface>({
   }]
 });
 
-activeValidatorsSchema.index({ chain_identifier: 1, month: 1, year: 1 }, { unique: true });
+activeValidatorsSchema.index({ chain_identifier: 1, year: 1, month: 1 }, { unique: true });
 
 activeValidatorsSchema.statics.saveActiveValidators = function (
   body: Parameters<ActiveValidatorsModel['saveActiveValidators']>[0],
@@ -83,43 +91,85 @@ activeValidatorsSchema.statics.saveActiveValidators = function (
         } 
       }
     )
-    .then(activeValidatorsRecord => {
+    .then(activeValidatorsRecordUpdate => {
       
-      if (activeValidatorsRecord) return callback(null, activeValidatorsRecord);
-
-      const newRecordActiveValidators = {
-        day: day,
-        pubkeys: active_validators_pubkeys_array
-      }
+      if (activeValidatorsRecordUpdate) return callback(null, activeValidatorsRecordUpdate);
 
       ActiveValidators
-        .create({
-          chain_identifier: chain_identifier,
-          month: month,
+      .findOne(
+        { 
+          chain_identifier: chain_identifier, 
+          month: month, 
           year: year,
-          active_validators: [newRecordActiveValidators]
-        })
-        .then(newActiveValidatorsRecord => callback(null, newActiveValidatorsRecord))
-        .catch(err => callback(err, null));
+        }
+      ).then(recordDuplicate => {
+
+        if (recordDuplicate) return callback(null, recordDuplicate);
+
+        const newRecordActiveValidators = {
+          day: day,
+          pubkeys: active_validators_pubkeys_array
+        }
+
+        ActiveValidators
+          .create({
+            chain_identifier: chain_identifier,
+            month: month,
+            year: year,
+            active_validators: [newRecordActiveValidators]
+          })
+          .then(newActiveValidatorsRecord => callback(null, newActiveValidatorsRecord))
+          .catch(err => callback(err, null));
+      })
     })
     .catch(err => callback(err, null));
 }
 
 
-activeValidatorsSchema.statics.getActiveValidatorHistoryByChain = function (
-  body: Parameters<ActiveValidatorsModel['getActiveValidatorHistoryByChain']>[0],
-  callback: Parameters<ActiveValidatorsModel['getActiveValidatorHistoryByChain']>[1]
+activeValidatorsSchema.statics.getActiveValidatorHistoryOfValidator = function (
+  body: Parameters<ActiveValidatorsModel['getActiveValidatorHistoryOfValidator']>[0],
+  callback: Parameters<ActiveValidatorsModel['getActiveValidatorHistoryOfValidator']>[1]
 ) {
 
-  const { chain_identifier, bottom_timestamp, top_timestamp  } = body;
+  const { chain_identifier, bottom_timestamp, top_timestamp, pubkey } = body;
 
-  ActiveValidators
-    .find({ 
-      chain_identifier: chain_identifier,
-      month: { $gte: 1, $lte: 12 },
-      year: { $gte: (new Date(bottom_timestamp)).getFullYear(), $lte: (new Date(top_timestamp)).getFullYear() }
-    })
-    .sort({ year: 1, month: 1 })
+  ActiveValidators.aggregate([
+    {
+      $match: {
+        chain_identifier: chain_identifier,
+        year: {
+          $gte: (new Date(bottom_timestamp).getFullYear()),
+          $lte: (new Date(top_timestamp).getFullYear()),
+        },
+      },
+    },
+    {
+      $project: {
+        year: 1,
+        month: 1,
+        active_validators: {
+          $map: {
+            input: "$active_validators",
+            as: "each",
+            in: {
+              day: "$$each.day",
+              isActive: {
+                $in: [pubkey, "$$each.pubkeys"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      $sort: {
+        chain_identifier: 1,
+        year: 1,
+        month: 1,
+      },
+    },
+  ])
+    .hint({ chain_identifier: 1, year: 1, month: 1 })
     .then(activeValidatorHistory => callback(null, activeValidatorHistory))
     .catch(err => callback(err, null))
 }

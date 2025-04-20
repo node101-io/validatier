@@ -153,7 +153,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
     ) => any
   ) => any;
   updateLastVisitedBlock: (
-    body: { chain_identifier: string, block_height?: number, block_time?: Date },
+    body: { chain_identifier: string, block_height?: number, block_time?: Date, isRejectionSave: boolean },
     callback: (
       err: string | null,
       updated_chain: ChainInterface | null
@@ -526,8 +526,10 @@ validatorSchema.statics.updateLastVisitedBlock = function (
   body: Parameters<ValidatorModel['updateLastVisitedBlock']>[0],
   callback: Parameters<ValidatorModel['updateLastVisitedBlock']>[1]
 ) {
-  const { chain_identifier, block_height, block_time } = body;
+  const { chain_identifier, block_height, block_time, isRejectionSave } = body;
   
+  if (isRejectionSave) return callback(null, null);
+
   Chain
     .findOneAndUpdate(
       { name: chain_identifier },
@@ -537,7 +539,7 @@ validatorSchema.statics.updateLastVisitedBlock = function (
       if (!updatedChain) return callback('database_error', null);
       return callback(null, updatedChain);
     })
-    .catch(err => callback('database_error', null))
+    .catch(err => callback(err, null))
 }
 
 

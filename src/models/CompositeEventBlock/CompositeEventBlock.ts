@@ -229,89 +229,35 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
   body: Parameters<CompositeEventBlockModel['getPeriodicDataForValidatorSet']>[0],
   callback: Parameters<CompositeEventBlockModel['getPeriodicDataForValidatorSet']>[1]
 ) {
-
   const { chain_identifier, bottom_timestamp, top_timestamp } = body;
 
-  const oneMonthStepTimestamp = (1000 * 86400) * 30;
-  const promises = [];
-  const validatorRecordsMapping: Record<string, any> = {}
-
-  let bottom = bottom_timestamp;
-  let top = top_timestamp;
-
-  while (bottom < top) {
-
-    const bottomBottomInside = bottom;
-    const bottomTopInside = bottom + oneMonthStepTimestamp;
-
-    const topBottomInside = top - oneMonthStepTimestamp;
-    const topTopInside = top;
-
-    promises.push(
-      new Promise((resolve, reject) => {
-
-        CompositeEventBlock.aggregate([
-          { 
-            $match: { 
-              chain_identifier: chain_identifier, 
-              $or: [
-                {
-                  timestamp: { $gte: bottomBottomInside, $lte: bottomTopInside }
-                },
-                {
-                  timestamp: { $gte: topBottomInside, $lte: topTopInside }
-                }
-              ]
-            } 
-          },
-          {
-            $sort: {
-              chain_identifier: 1,
-              timestamp: 1,
-              operator_address: 1,
-            }
-          },
-          {
-            $group: {
-              _id: "$operator_address",  
-              mostRecentRecord: { $last: "$$ROOT" },
-              leastRecentRecord: { $first: "$$ROOT" }
-            }
-          }
-        ])
-          .then((records) => {
-            
-            records.forEach(record => {
-
-              if (!validatorRecordsMapping[record._id]) {
-                return validatorRecordsMapping[record._id] = {
-                  leastRecentRecord: record.leastRecentRecord,
-                  mostRecentRecord: record.mostRecentRecord
-                };
-              }
-
-              if (record.leastRecentRecord.timestamp < validatorRecordsMapping[record._id].leastRecentRecord.timestamp)
-                return validatorRecordsMapping[record._id].leastRecentRecord = record.leastRecentRecord;
-              
-              if (record.mostRecentRecord.timestamp > validatorRecordsMapping[record._id].mostRecentRecord.timestamp)
-                return validatorRecordsMapping[record._id].mostRecentRecord = record.mostRecentRecord;
-            });
-
-            resolve(true);
-          })
-          .catch(err => reject(err))
-      })
-    );
-
-    bottom = bottomTopInside;
-    top = topBottomInside;
-  }
-
-  Promise.allSettled(promises)
-    .then((results: any) => {
+  CompositeEventBlock.aggregate([
+    { 
+      $match: { 
+        chain_identifier: chain_identifier, 
+        timestamp: { $gte: bottom_timestamp, $lte: top_timestamp }
+      } 
+    },
+    {
+      $sort: {
+        chain_identifier: 1,
+        timestamp: 1,
+        operator_address: 1
+      }
+    },
+    {
+      $group: {
+        _id: "$operator_address",
+        leastRecentRecord: { $first: "$$ROOT" },
+        mostRecentRecord: { $last: "$$ROOT" }
+      }
+    }
+  ])
+    .hint({ chain_identifier: 1, timestamp: 1, operator_address: 1 })
+    .then((records: any) => {
       
       const mapping: Record<string, any> = {};
-      Object.entries(validatorRecordsMapping).forEach(([validatorId, record]: [string, any]) => {
+      records.forEach((record: any) => {
 
         const totalReward = (record.mostRecentRecord.reward_prefix_sum - record.leastRecentRecord.reward_prefix_sum || 0) + (record.leastRecentRecord.reward || 0);
         const totalSelfStake = (record.mostRecentRecord.self_stake_prefix_sum - record.leastRecentRecord.self_stake_prefix_sum || 0) + (record.leastRecentRecord.self_stake || 0);
@@ -321,7 +267,7 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
       
         const daysBetweenTimestamps = Math.ceil(((top_timestamp || 1) - (bottom_timestamp || 1)) / (86400 * 1000));
       
-        mapping[validatorId] = {
+        mapping[record._id] = {
           self_stake: totalSelfStake || 0,
           reward: totalReward || 0,
           commission: totalCommission || 0,
@@ -332,7 +278,6 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
 
       return callback(null, mapping);
   })
-
 }
 
 compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (

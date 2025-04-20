@@ -13,7 +13,7 @@ const indexGetController = (req: Request, res: Response): void => {
   console.time('response_time');
 
   Promise.allSettled([
-    new Promise((resolve) => {
+    new Promise((resolve) => { 
       Chain.getAllChains((err, chains) => {
         resolve({ err: err, chains: chains });
       })
@@ -26,27 +26,17 @@ const indexGetController = (req: Request, res: Response): void => {
         }
       )
     }),
-    new Promise((resolve) => {
-      ActiveValidators.getActiveValidatorHistoryByChain(
-        { chain_identifier: activeNetworkIdentifier, bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp },
-        (err, activeValidatorHistory) => {
-          resolve({ err: err, activeValidatorHistory: activeValidatorHistory });
-        }
-      )
-    }),
   ])
     .then((results: Record<string, any>[]) => {
       
-      const [getAllChainsResult, rankValidatorsResult, getActiveValidatorHistoryByChainResult] = results;
+      const [getAllChainsResult, rankValidatorsResult] = results;
       if (
         !getAllChainsResult.value.chains || 
-        !rankValidatorsResult.value.validators || 
-        !getActiveValidatorHistoryByChainResult.value.activeValidatorHistory
+        !rankValidatorsResult.value.validators
       ) return res.json({ success: false, err: 'bad_request' })
     
       const chains = getAllChainsResult.value.chains;
       const validators = rankValidatorsResult.value.validators;
-      const activeValidatorHistory = getActiveValidatorHistoryByChainResult.value.activeValidatorHistory;
 
       const selectedChain = chains.find((element: ChainInterface) => element.name == activeNetworkIdentifier);  
 
@@ -70,7 +60,6 @@ const indexGetController = (req: Request, res: Response): void => {
         currency_type: req.cookies.currency_type ? req.cookies.currency_type : 'native',
         chains,
         selectedChain: selectedChain ? selectedChain : '',
-        activeValidatorHistory,
         NUMBER_OF_COLUMNS
       });
     });

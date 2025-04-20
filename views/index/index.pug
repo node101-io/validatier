@@ -162,7 +162,7 @@ block content
                     .triangle-up
                     .triangle-down
           each validator, index in validators
-            .each-validator-wrapper(id=`${validator.operator_address}`)
+            .each-validator-wrapper(id=`${validator.operator_address}` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}`)
               .each-validator-info-wrapper
                 .ranking-number-content= index + 1
                 .validator-image
@@ -218,27 +218,7 @@ block content
                 .validator-details-textual-info-wrapper 
                   .each-validator-details-textual-info Website: #{validator.website}
                   .each-validator-details-textual-info Description: #{validator.description}
-                .validator-details-inactivity-wrapper 
-                  - const eachValidatorInactivity = [];
-                  - var isCurrentlyActive = true;
-
-                  each month in activeValidatorHistory
-                    each day in month.active_validators
-                      if (!day.pubkeys.includes(validator.pubkey) && isCurrentlyActive)
-                        - isCurrentlyActive = false 
-                        - eachValidatorInactivity.push(`${day.day}/${month.month}/${month.year}`)
-                      else if (day.pubkeys.includes(validator.pubkey) && !isCurrentlyActive)
-                        - isCurrentlyActive = true
-                        - eachValidatorInactivity.push(`${day.day}/${month.month}/${month.year}`)
-
-                  if eachValidatorInactivity.length > 0
-                    .each-inactivity-line-display-content(class='center') Validator inactivity intervals
-                    - let i = 0
-                    while i < eachValidatorInactivity.length
-                      .each-inactivity-line-display-content(class='center') from #{eachValidatorInactivity[i]} to #{eachValidatorInactivity[i+1] ? eachValidatorInactivity[i+1] : 'today'}
-                      - i += 2
-                  else 
-                    .validator-activeness-always-content(class='center') Validator was always active
+                .validator-details-inactivity-wrapper(id=`${validator.operator_address}-inactivity-wrapper`)
                                   
             .each-validator-wrapper-seperator-line
     .footer-main-wrapper(class='center')

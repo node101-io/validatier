@@ -33,6 +33,8 @@ function handlePlotButtonClick () {
     const topDate = document.getElementById('periodic-query-top-timestamp').value
 
     const operatorAddress = target.id;
+    const pubkey = target.getAttribute('pubkey');
+    const chainIdentifier = target.getAttribute('chain_identifier');
     const bottomTimestamp = Math.floor(new Date(bottomDate).getTime());
     const topTimestamp = Math.floor(new Date(topDate).getTime());   
     
@@ -51,7 +53,9 @@ function handlePlotButtonClick () {
     const symbol = document.getElementById('network-switch-header').getAttribute('current_chain_symbol');
       
     const requestData = {
+      chain_identifier: chainIdentifier,
       operator_address: operatorAddress,
+      pubkey: pubkey,
       bottom_timestamp: bottomTimestamp,
       top_timestamp: topTimestamp,
       decimals: document.getElementById('network-switch-header').getAttribute('current_chain_decimals')
@@ -70,6 +74,8 @@ function handlePlotButtonClick () {
         eventSource.close();
         return;
       }
+
+      if (response.isInactivityIntervals) return addInactivityDetails(operatorAddress, response);
     
       const data = response.data;
       graphDataMapping[data.index] = data;

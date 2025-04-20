@@ -11,7 +11,8 @@ import path from 'path';
 import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
 import { startFetchingData } from './utils/startFetchingData.js';
-import { initDB } from './utils/levelDb.js';
+import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsImageUri.js';
+import { clearRejectedBlocksByChain, getRejectedBlocksByChain, initDB, updateRejectedBlocksByChain } from './utils/levelDb.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -31,7 +32,7 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 //   message: 'maximum_request_per_second_reached',
 // }));
 
-const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/validator-timeline-test-v6';
+const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/validator-timeline-test-v7';
 
 mongoose
   .connect(mongoUri)

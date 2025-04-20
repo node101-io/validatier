@@ -9,11 +9,11 @@ export const Job_UpdateValidatorsImageUri = (callback: (err: string | null, succ
         validators.length,
         (i, next) => {      
           const eachValidator = validators[i];
-          if (!eachValidator.keybase_id) return next();
+          if (!eachValidator.keybase_id || eachValidator.temporary_image_uri) return next();
           
-          getKeybasePicture(eachValidator.keybase_id, (err, imageUri) => {
+          getKeybasePicture(eachValidator.keybase_id.toLowerCase(), (err, imageUri) => {
             if (err) return next();
-
+            
             eachValidator.temporary_image_uri = imageUri;
             eachValidator.save();
             next(); 

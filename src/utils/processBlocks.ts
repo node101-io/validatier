@@ -33,7 +33,12 @@ export const processBlocks = (start: number, end: number, chain: ChainInterface)
 
     const top = Math.min(top_block_height, max_block_height);
     
-    listenForEvents(bottom_block_height, top, chain, (err, result) => {
+    listenForEvents({
+      bottom_block_height: bottom_block_height,
+      top_block_height: top,
+      chain: chain,
+      rejected_blocks: null
+    }, (err, result) => {
       if (err || !result.success) {
         const message = `Error: ${err} \nprocessing from block height ${bottom_block_height} to ${top} | ${chain.name}`;
         sendTelegramMessage(message, (err, success) => {
