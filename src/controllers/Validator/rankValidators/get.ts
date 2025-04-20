@@ -3,7 +3,6 @@ import Validator from '../../../models/Validator/Validator.js';
 import { SortOrder } from 'mongoose';
 import { isValidSortBy } from '../../../utils/isValidSortBy.js';
 import { isValidSortOrder } from '../../../utils/isValidSortOrder.js';
-import ActiveValidators from '../../../models/ActiveValidators/ActiveValidators.js';
 
 export default (req: Request, res: Response): any => {
 
@@ -22,35 +21,15 @@ export default (req: Request, res: Response): any => {
   const chainIdentifier: string = chain_identifier;
   const withPhotos: Boolean = 'with_photos' in req.query;
 
-  Promise.allSettled([
-    new Promise((resolve) => 
-      Validator.rankValidators(
-        { sort_by: sortBy, order: sortOrder, bottom_timestamp: parseInt(bottomTimestamp), top_timestamp: parseInt(topTimestamp), chain_identifier: chainIdentifier, with_photos: withPhotos },
-        (err, validators) => resolve({ err: err, validators: validators })
-      )
-    ),
-    new Promise((resolve) => 
-      ActiveValidators.getActiveValidatorHistoryByChain(
-        { chain_identifier: chainIdentifier, bottom_timestamp: parseInt(bottomTimestamp), top_timestamp: parseInt(topTimestamp) },
-        (err, activeValidatorHistory) => resolve({ err: err, activeValidatorHistory: activeValidatorHistory })
-      )
-    ),
-  ])
-    .then((results: Record<string, any>[]) => {
-      const [rankValidatorsResult, getActiveValidatorHistoryByChainResult] = results;
-      if (
-        !rankValidatorsResult.value.validators || 
-        !getActiveValidatorHistoryByChainResult.value.activeValidatorHistory
-      ) return res.json({ success: false, err: 'bad_request' })
-    
-      const validators = rankValidatorsResult.value.validators;
-      const activeValidatorHistory = getActiveValidatorHistoryByChainResult.value.activeValidatorHistory;
-      
+
+  Validator.rankValidators(
+    { sort_by: sortBy, order: sortOrder, bottom_timestamp: parseInt(bottomTimestamp), top_timestamp: parseInt(topTimestamp), chain_identifier: chainIdentifier, with_photos: withPhotos },
+    (err, validators) => {
+      if (err) return res.json({ success: false, err: 'bad_request' })
       return res.json({
         success: true,
         data: {
           validators: validators,
-          activeValidatorHistory: activeValidatorHistory
         }
       });
     });
