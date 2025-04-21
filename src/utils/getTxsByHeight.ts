@@ -25,7 +25,7 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
     .then(([block_promise_res, block_results_promise_res]) => {
       
       if (block_promise_res.status == 'rejected' || !block_promise_res.value || block_results_promise_res.status == 'rejected' || !block_results_promise_res.value)
-        return callback(`rejected | block ${block_height}`, { block_height: block_height });
+        return callback(`/block promise ${block_promise_res.status}\n/block_results promise ${block_results_promise_res.status}`, { block_height: block_height });
       
       const data = block_promise_res.value;
       const data_block_results = block_results_promise_res.value;
@@ -69,7 +69,7 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
         decodedTxs: decodedTxs
       });
     })
-    .catch(err => callback(`rejected | block ${block_height}`, { block_height: block_height }));
+    .catch(err => callback(err, { block_height: block_height }));
 }
 
 export default getTxsByHeight;

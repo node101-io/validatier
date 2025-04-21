@@ -57,13 +57,17 @@ export const listenForEvents = (
     promises.push(
       new Promise ((resolve, reject) => 
         getTxsByHeight(
-          chain.rpc_url, 
-          height, 
-          chain.denom, 
-          chain.bech32_prefix, 
+          chain.rpc_url,
+          height,
+          chain.denom,
+          chain.bech32_prefix,
           (err, result) => {
             const { time, decodedTxs } = result;
-            if (err || !time) return reject({err: err, block_height: result.block_height});
+            if (err || !time) 
+              return reject({
+                err: err || 'no_time_available',
+                block_height: result.block_height
+              });
             
             timestamp = new Date(time);
             if (!decodedTxs || decodedTxs.length <= 0) return resolve();
@@ -192,10 +196,13 @@ export const listenForEvents = (
     .then(values => {
 
       const rejectedBlockHeights: number[] = values
-        .filter(eachValue => eachValue.status === 'rejected')
+        .filter(eachValue => eachValue.status == 'rejected')
         .map((eachValue: any) => eachValue.reason.block_height);
 
-      if (rejected_blocks) return sendTelegramMessage(`${rejectedBlockHeights.toString()} these blocks are rejected twice. Execution stopped.`, (err, success) => final_callback('fatal_error', { success: false }))
+      values.forEach(each => {
+        if (each.status == 'rejected' && rejected_blocks)
+          sendTelegramMessage(`${chain.name} | ${each.reason.err} | ${each.reason.block_height} | rejected twice`, (err, success) => {})
+      })
 
       updateRejectedBlocksByChain({
         chain_identifier: chain.name,
