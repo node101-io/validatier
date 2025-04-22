@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import Validator from '../../../models/Validator/Validator.js';
 import Chain, { ChainInterface } from '../../../models/Chain/Chain.js';
-import ActiveValidators from '../../../models/ActiveValidators/ActiveValidators.js';
 import { NUMBER_OF_COLUMNS } from '../../Validator/getGraphData/get.js';
 
 const indexGetController = (req: Request, res: Response): void => {
@@ -10,8 +9,6 @@ const indexGetController = (req: Request, res: Response): void => {
   const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime()): (new Date(1)).getTime();
   const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()): Date.now();
 
-  console.time('response_time');
-
   Promise.allSettled([
     new Promise((resolve) => { 
       Chain.getAllChains((err, chains) => {
@@ -19,9 +16,11 @@ const indexGetController = (req: Request, res: Response): void => {
       })
     }),
     new Promise((resolve) => {
+      console.time('response_time');
       Validator.rankValidators(
         { sort_by: 'ratio', order: 'desc', bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp, chain_identifier: activeNetworkIdentifier, with_photos: true },
         (err, validators) => {
+          console.timeEnd('response_time');
           resolve({ err: err, validators: validators });
         }
       )
@@ -39,8 +38,6 @@ const indexGetController = (req: Request, res: Response): void => {
       const validators = rankValidatorsResult.value.validators;
 
       const selectedChain = chains.find((element: ChainInterface) => element.name == activeNetworkIdentifier);  
-
-      console.timeEnd('response_time');
 
       return res.render('index/index', {
         page: 'index/index',

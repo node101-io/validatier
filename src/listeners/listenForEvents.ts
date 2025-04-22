@@ -1,11 +1,11 @@
 import CompositeEventBlock from '../models/CompositeEventBlock/CompositeEventBlock.js';
 import Validator from '../models/Validator/Validator.js';
 import Chain, { ChainInterface } from '../models/Chain/Chain.js';
-import getTxsByHeight from '../utils/getTxsByHeight.js';
+import getTxsByHeight, { RETRY_TOTAL } from '../utils/getTxsByHeight.js';
 import { DecodedMessage } from '../utils/decodeTxs.js';
 import { convertOperatorAddressToBech32 } from '../utils/convertOperatorAddressToBech32.js';
 import { ActiveValidatorsInterface } from '../models/ActiveValidators/ActiveValidators.js';
-import { bulkSave, clearChainData, clearRejectedBlocksByChain, getBatchData, getRejectedBlocksByChain, updateRejectedBlocksByChain } from '../utils/levelDb.js';
+import { bulkSave, clearChainData, getBatchData } from '../utils/levelDb.js';
 import { sendTelegramMessage } from '../utils/sendTelegramMessage.js';
 
 interface ListenForEventsResult {
@@ -32,40 +32,33 @@ export const listenForEvents = (
   body: {
     bottom_block_height: number,
     top_block_height: number,
-    chain: ChainInterface,
-    rejected_blocks: number[] | null
+    chain: ChainInterface
   },
   final_callback: (err: string | null, result: ListenForEventsResult) => any
 ) => {
 
-  const { bottom_block_height, top_block_height, chain, rejected_blocks } = body;
+  const { bottom_block_height, top_block_height, chain } = body;
 
   const promises: Promise<void>[] = [];
   const validatorMap: Record<string, any> = {};
   const compositeEventBlockMap: Record<string, any> = {};
-  let timestamp: Date;  
+  let timestamp: Date;
 
-  const heightsArray = (!rejected_blocks || rejected_blocks.length <= 0)
-    ? Array.from(
-      { length: top_block_height - bottom_block_height },
-      (_, i) => bottom_block_height + i
-    )
-    : rejected_blocks;
-
-  for (let i = 0; i < heightsArray.length; i++) {
-    const height = heightsArray[i];
+  for (let height = bottom_block_height; height < top_block_height; height++) {
     promises.push(
-      new Promise ((resolve, reject) => 
+      new Promise ((resolve, reject) => {
         getTxsByHeight(
           chain.rpc_url,
           height,
           chain.denom,
           chain.bech32_prefix,
+          0,
           (err, result) => {
             const { time, decodedTxs } = result;
-            if (err || !time) 
+            
+            if (err)
               return reject({
-                err: err || 'no_time_available',
+                err: err,
                 block_height: result.block_height
               });
             
@@ -181,6 +174,7 @@ export const listenForEvents = (
             }
             resolve();
           })
+        }
       )
     );
   }
@@ -194,119 +188,75 @@ export const listenForEvents = (
   
   Promise.allSettled(promises)
     .then(values => {
+      const rejectedValues = values.filter(each => each.status == 'rejected')
+      if (rejectedValues.length)
+        return final_callback(`${rejectedValues.map((each: any) => each.reason.block_height)} | rejected for ${RETRY_TOTAL} times\nJSON: ${JSON.stringify(rejectedValues)}`, { success: false })
 
-      const rejectedBlockHeights: number[] = values
-        .filter(eachValue => eachValue.status == 'rejected')
-        .map((eachValue: any) => eachValue.reason.block_height);
+      Validator.saveManyValidators(validatorMap, (err, validators) => {
+        if (err) return final_callback(`save_many_validators_failed: ${err}`, { success: false });
+        bulkSave({
+          chain_identifier: chain.name,
+          saveMapping: compositeEventBlockMap
+        }, (err, success) => {
+          if (err || !success) return final_callback(err, { success: false });
+          const insertedValidatorAddresses = validators?.insertedValidators 
+            ? validators?.insertedValidators.map(validator => 
+              `${validator.operator_address.slice(0,4)}...${validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)}`
+            )
+            : [];
+          result.inserted_validator_addresses = insertedValidatorAddresses;
+          if (!timestamp) return final_callback('no_timestamp_available', { success: false });
+          const blockTimestamp = timestamp ? new Date(timestamp).getTime() : '';
+          
+          Validator.updateLastVisitedBlock({ chain_identifier: chain.name, block_height: bottom_block_height, block_time: timestamp }, (err, updated_chain) => {
+            if (err) return final_callback(`update_last_visited_block_failed: ${err}`, { success: false });
+            if (!blockTimestamp || blockTimestamp - chain.active_set_last_updated_block_time <= (86400 * 1000))
+              return final_callback(null, result);
 
-      values.forEach(each => {
-        if (each.status == 'rejected' && rejected_blocks)
-          sendTelegramMessage(`${chain.name} | ${each.reason.err} | ${each.reason.block_height} | rejected twice`, (err, success) => {})
-      })
-
-      updateRejectedBlocksByChain({
-        chain_identifier: chain.name,
-        rejected_blocks: rejectedBlockHeights
-      }, (err, currentRejectedBlocks) => {
-        if (err) return final_callback(`update_rejected_blocks_by_chain_failed: ${err}`, { success: false });
-
-        Validator.saveManyValidators(validatorMap, (err, validators) => {
-          if (err) return final_callback(`save_many_validators_failed: ${err}`, { success: false });
-          bulkSave({
-            chain_identifier: chain.name,
-            saveMapping: compositeEventBlockMap
-          }, (err, success) => {
-            if (err || !success) return final_callback(err, { success: false });
-
-            const insertedValidatorAddresses = validators?.insertedValidators 
-              ? validators?.insertedValidators.map(validator => 
-                `${validator.operator_address.slice(0,4)}...${validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)}`
-              )
-              : [];
-            result.inserted_validator_addresses = insertedValidatorAddresses;
-
-            if (!timestamp) return final_callback('no_timestamp_available', { success: false });
-            const blockTimestamp = timestamp ? new Date(timestamp).getTime() : '';
-            
-            Validator.updateLastVisitedBlock({ chain_identifier: chain.name, block_height: bottom_block_height, block_time: timestamp, isRejectionSave: rejected_blocks ? true : false }, (err, updated_chain) => {
-              if (err) return final_callback(`update_last_visited_block_failed: ${err}`, { success: false });
-              if (!blockTimestamp || blockTimestamp - chain.active_set_last_updated_block_time <= (86400 * 1000))
-                return final_callback(null, result);
-
-              getRejectedBlocksByChain({ chain_identifier: chain.name }, (err, currentRejectedBlocks) => {
-
-                let rejectionSavePromise = new Promise<void>((resolve) => resolve());
-
-                if (err) return final_callback(`get_rejected_blocks_by_chain_failed: ${err}`, { success: false });
-                if (currentRejectedBlocks && currentRejectedBlocks.length > 0) 
-                  rejectionSavePromise = new Promise<void>((resolve) => 
-                    clearRejectedBlocksByChain({ chain_identifier: chain.name }, (err, res) => 
-                      listenForEvents({
-                        bottom_block_height: NaN,
-                        top_block_height: NaN,
-                        chain: chain,
-                        rejected_blocks: currentRejectedBlocks
-                      }, (err, result) => {
-                        resolve()
+            getBatchData(chain.name, (err, data) => {
+              if (err) return final_callback(`get_batch_data_failed: ${err}`, { success: false });
+              const day = new Date(blockTimestamp).getDate();
+              const month = new Date(blockTimestamp).getMonth();
+              const year = new Date(blockTimestamp).getFullYear();
+              
+              const saveManyCompositeEventBlocksBody = {
+                chain_identifier: chain.name,
+                day: day,
+                month: month,
+                year: year,
+                block_height: top_block_height,
+                saveMapping: data
+              };
+              CompositeEventBlock.saveManyCompositeEventBlocks(saveManyCompositeEventBlocksBody, (err, savedCompositeEventBlocks) => {
+                if (err) return final_callback(`save_many_blocks_failed: ${err}`, { success: false });
+                Validator
+                  .updateActiveValidatorList({
+                    chain_identifier: chain.name,
+                    chain_rpc_url: chain.rpc_url,
+                    height: bottom_block_height,
+                    day: day,
+                    month: month,
+                    year: year,
+                    active_validators_pubkeys_array: null
+                  }, (err, savedActiveValidators) => {
+                    if (err) return final_callback(`update_active_validators_failed: ${err}`, { success: false });
+                    const savedCompositeEventsOperatorAddresses = savedCompositeEventBlocks?.map(each => 
+                      `${each.operator_address.slice(0,4)}...${each.operator_address.slice(each.operator_address.length - 4, each.operator_address.length)}`
+                    );
+                    result.saved_composite_events_operator_addresses = savedCompositeEventsOperatorAddresses;
+                    Chain.updateTimeOfLastActiveSetSave({ chain_identifier: chain.name, time: blockTimestamp, height: top_block_height }, (err, activeSetUpdatedChain) => {
+                      if (err) return final_callback(`update_last_active_set_data_save_failed: ${err}`, { success: false });
+                      result.new_active_set_last_updated_block_time = blockTimestamp;
+                      result.saved_active_validators = savedActiveValidators;
+                      clearChainData(chain.name, (err, success) => {
+                        if (err || !success) return final_callback(`clear_chain_data_failed: ${err}`, { success: false });
+                        return final_callback(null, result);
                       })
-                    )
-                  );
-
-                rejectionSavePromise.then(value => {
-
-                  getBatchData(chain.name, (err, data) => {
-                    if (err) return final_callback(`get_batch_data_failed: ${err}`, { success: false });
-
-                    const day = new Date(blockTimestamp).getDate();
-                    const month = new Date(blockTimestamp).getMonth();
-                    const year = new Date(blockTimestamp).getFullYear();
-                    
-                    const saveManyCompositeEventBlocksBody = {
-                      chain_identifier: chain.name,
-                      day: day,
-                      month: month,
-                      year: year,
-                      block_height: top_block_height,
-                      saveMapping: data
-                    };
-
-                    CompositeEventBlock.saveManyCompositeEventBlocks(saveManyCompositeEventBlocksBody, (err, savedCompositeEventBlocks) => {
-                      if (err) return final_callback(`save_many_blocks_failed: ${err}`, { success: false });
-                      Validator
-                        .updateActiveValidatorList({
-                          chain_identifier: chain.name,
-                          chain_rpc_url: chain.rpc_url,
-                          height: bottom_block_height,
-                          day: day,
-                          month: month,
-                          year: year,
-                          active_validators_pubkeys_array: null
-                        }, (err, savedActiveValidators) => {
-                          if (err) return final_callback(`update_active_validators_failed: ${err}`, { success: false });
-
-                          const savedCompositeEventsOperatorAddresses = savedCompositeEventBlocks?.map(each => 
-                            `${each.operator_address.slice(0,4)}...${each.operator_address.slice(each.operator_address.length - 4, each.operator_address.length)}`
-                          );
-
-                          result.saved_composite_events_operator_addresses = savedCompositeEventsOperatorAddresses;
-
-                          Chain.updateTimeOfLastActiveSetSave({ chain_identifier: chain.name, time: blockTimestamp, height: top_block_height }, (err, activeSetUpdatedChain) => {
-                            if (err) return final_callback(`update_last_active_set_data_save_failed: ${err}`, { success: false });
-                            result.new_active_set_last_updated_block_time = blockTimestamp;
-                            result.saved_active_validators = savedActiveValidators;
-
-                            clearChainData(chain.name, (err, success) => {
-                              if (err || !success) return final_callback(`clear_chain_data_failed: ${err}`, { success: false });
-                              return final_callback(null, result);
-                            })
-                          })
-                        })
                     })
                   })
-                })
               })
             })
-        })
+          })
       })
     })
   })

@@ -231,6 +231,7 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
 ) {
   const { chain_identifier, bottom_timestamp, top_timestamp } = body;
 
+  console.time('aggregate');
   CompositeEventBlock.aggregate([
     { 
       $match: { 
@@ -251,11 +252,34 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
         leastRecentRecord: { $first: "$$ROOT" },
         mostRecentRecord: { $last: "$$ROOT" }
       }
+    },
+    {
+      $project: {
+        leastRecentRecord: {
+          reward: 1,
+          commission: 1,
+          self_stake: 1,
+          total_stake: 1,
+          total_withdraw: 1,
+          reward_prefix_sum: 1,
+          commission_prefix_sum: 1,
+          self_stake_prefix_sum: 1,
+          total_stake_prefix_sum: 1,
+          total_withdraw_prefix_sum: 1,
+        },
+        mostRecentRecord: {
+          reward_prefix_sum: 1,
+          commission_prefix_sum: 1,
+          self_stake_prefix_sum: 1,
+          total_stake_prefix_sum: 1,
+          total_withdraw_prefix_sum: 1,
+        }
+      }
     }
   ])
-    .hint({ chain_identifier: 1, timestamp: 1, operator_address: 1 })
     .then((records: any) => {
       
+      console.timeEnd('aggregate');
       const mapping: Record<string, any> = {};
       records.forEach((record: any) => {
 

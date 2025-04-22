@@ -10,12 +10,12 @@ const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
 });
 
+const INTERVAL = 100;
 const MILISECONDS_TO_WAIT_FOR_RESTART = 1000 * 60 * 60 * 6;
 
 export const processBlocks = (start: number, end: number, chain: ChainInterface) => {
   let bottom_block_height = start;
   const max_block_height = end;
-  const interval = 100;
 
   const startTime = Date.now();
 
@@ -36,14 +36,11 @@ export const processBlocks = (start: number, end: number, chain: ChainInterface)
     listenForEvents({
       bottom_block_height: bottom_block_height,
       top_block_height: top,
-      chain: chain,
-      rejected_blocks: null
+      chain: chain
     }, (err, result) => {
       if (err || !result.success) {
-        const message = `Error: ${err} \nprocessing from block height ${bottom_block_height} to ${top} | ${chain.name}`;
-        sendTelegramMessage(message, (err, success) => {
-          return logger.error(message);
-        })
+        const message = `Error: ${err} \nprocessing from block height ${bottom_block_height} to ${top} | Stopped processing ${chain.name.toUpperCase()}`;
+        return sendTelegramMessage(message, (err, success) => logger.error(message));
       };
 
       if (result.inserted_validator_addresses && result.inserted_validator_addresses.length) 
@@ -56,17 +53,17 @@ export const processBlocks = (start: number, end: number, chain: ChainInterface)
           if (result.saved_active_validators && result.saved_active_validators.active_validators.length) {
             logger.info(`${chain.name.toUpperCase()} | SAVED | Active Validator set for ${result.saved_active_validators.month}/${result.saved_active_validators.year}: ${result.saved_active_validators.active_validators.length} currently in active list`);
             logger.info(`${chain.name.toUpperCase()} | SAVED | CompositeEventBlocks | for ${result.saved_composite_events_operator_addresses?.join('    ')}`);
-            logger.info(`${chain.name.toUpperCase()} | Continuing from: ${bottom_block_height + interval}`);
+            logger.info(`${chain.name.toUpperCase()} | Continuing from: ${bottom_block_height + INTERVAL}`);
           }
           
-          return listenInterval(bottom_block_height + interval, top_block_height + interval, updatedChain); 
+          return listenInterval(bottom_block_height + INTERVAL, top_block_height + INTERVAL, updatedChain); 
         })
       }
 
-      return listenInterval(bottom_block_height + interval, top_block_height + interval, chain); 
+      return listenInterval(bottom_block_height + INTERVAL, top_block_height + INTERVAL, chain); 
     });
   }
 
-  listenInterval(bottom_block_height, bottom_block_height + interval, chain);
+  listenInterval(bottom_block_height, bottom_block_height + INTERVAL, chain);
   logger.info(`${chain.name.toUpperCase()} | Started fetching from block_height: ${bottom_block_height}`);
 };

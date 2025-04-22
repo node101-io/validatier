@@ -12,8 +12,7 @@ import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
 import { startFetchingData } from './utils/startFetchingData.js';
 import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsImageUri.js';
-import { clearRejectedBlocksByChain, getRejectedBlocksByChain, initDB, updateRejectedBlocksByChain } from './utils/levelDb.js';
-import { Job_SaveChains } from './cron/jobs/Job_SaveChains.js';
+import { initDB } from './utils/levelDb.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -54,5 +53,7 @@ app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.i
 
 app.use('/', indexRouter);
 app.use('/validator', validatorRouter);
+
+startFetchingData();
 
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
