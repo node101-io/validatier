@@ -13,6 +13,7 @@ import validatorRouter from './routes/validatorRouter.js';
 import { startFetchingData } from './utils/startFetchingData.js';
 import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsImageUri.js';
 import { initDB } from './utils/levelDb.js';
+import { Job_SaveChains } from './cron/jobs/Job_SaveChains.js';
 
 const app: Express = express();
 const PORT: number = 3000;

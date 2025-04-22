@@ -5,7 +5,7 @@ import { getGenesisTxs } from "./getGenesisTxs.js";
 import { clearChainData } from "./levelDb.js";
 import { processBlocks } from "./processBlocks.js";
 
-const CHAINS_TO_LISTEN = ['osmosis'];
+const CHAINS_TO_LISTEN = ['celestia', 'lava', 'osmosis', 'cosmoshub'];
 
 export const startFetchingData = () => {
   Job_SaveChains((err, success) => {
