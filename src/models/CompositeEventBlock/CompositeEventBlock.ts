@@ -313,11 +313,18 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
 
   if (!saveMapping) return callback(null, []);
 
+  const timestamp = (new Date(year, month, day)).getTime();
+
   const operatorAddresses = Object.keys(saveMapping);
   const compositeEventBlocksArray = Object.values(saveMapping);
 
   CompositeEventBlock.aggregate([
-    { $match: { operator_address: { $in: operatorAddresses } } },
+    { 
+      $match: { 
+        operator_address: { $in: operatorAddresses },
+        timestamp: { $lte: timestamp }
+      }
+    },
     { $sort: { operator_address: 1, timestamp: 1 } },
     {
       $group: {
@@ -354,8 +361,6 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
       const commissionPrefixSum = mostRecentCompositeEventBlock.commission_prefix_sum ? (commission ? mostRecentCompositeEventBlock.commission_prefix_sum + commission : mostRecentCompositeEventBlock.commission_prefix_sum) : commission;
       const totalStakePrefixSum = mostRecentCompositeEventBlock.total_stake_prefix_sum ? (totalStake ? mostRecentCompositeEventBlock.total_stake_prefix_sum + totalStake : mostRecentCompositeEventBlock.total_stake_prefix_sum) : totalStake;
       const totalWithdrawPrefixSum = mostRecentCompositeEventBlock.total_withdraw_prefix_sum ? (totalWithdraw ? mostRecentCompositeEventBlock.total_withdraw_prefix_sum + totalWithdraw : mostRecentCompositeEventBlock.total_withdraw_prefix_sum) : totalWithdraw;
-
-      const timestamp = (new Date(year, month, day)).getTime();
 
       const saveObject = {
         chain_identifier: chain_identifier,
