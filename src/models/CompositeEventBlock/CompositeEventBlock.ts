@@ -322,7 +322,7 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
     { 
       $match: { 
         operator_address: { $in: operatorAddresses },
-        timestamp: { $lte: timestamp }
+        timestamp: { $lt: timestamp }
       }
     },
     { $sort: { operator_address: 1, timestamp: 1 } },
