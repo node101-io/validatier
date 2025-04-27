@@ -3,10 +3,6 @@ block content
   .all-main-wrapper#all-main-wrapper
     .inactivity-display-content
     .header-main-wrapper 
-      .header-banner-wrapper
-        .banner-logo-wrapper(class='center')
-          img(src='/res/images/logo.svg', alt='node101' class='center')
-        .banner-title-content VALIDATIER
       .header-network-switch-wrapper
         .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}` current_chain_first_available_time=`${selectedChain.first_available_block_time}`)
           .network-switch-header-chain-content-wrapper(class='center')
@@ -28,199 +24,288 @@ block content
                   img(src=`${chain.image}`)
                 .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
                   .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
-    .inner-main-wrapper#inner-main-wrapper
-      .main-greeting-title-description-wrapper
-        .main-greeting-title-content What Is Lorem Ipsum?
-        .main-greeting-description-content Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. 
-      .table-main-wrapper
-        .table-filters
-          .validator-filter-input-wrapper
-            .validator-filter-input-content-wrapper 
-              .validator-search-icon(class='center')
-                include ../icons/search.svg
-              input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search name / operator address')
-          .currency-switch-wrapper(id='currency-toggle' value=`${currency_type ? currency_type : 'native'}`)
-            .each-currency-switch-wrapper(value='native')
-              .general-choice-radio-button(class='center')
-                .general-choice-radio-button-inner-circle(value='native' style=`${currency_type == 'native' ? 'display: unset' : ''}`)
-              .each-currency-switch-label #{selectedChain.symbol ? selectedChain.symbol : 'ATOM'}
-            .each-currency-switch-wrapper(value='usd')
-              .general-choice-radio-button(class='center')
-                .general-choice-radio-button-inner-circle(value='usd' style=`${currency_type == 'usd' ? 'display: unset' : ''}`)
-              .each-currency-switch-label $ Dollar
-          .table-filters-subgroup 
-            .date-picker
-              .selected-range 
-                span.date-interval-description 
-                  include ../icons/calendar.pug
-                  span.date-interval-description-text#header-selected-range-description= specificRangeName ? specificRangeName : 'All time'
-                span.date-range
-                  span#header-range-bottom-block= selectedDateBottom ? new Date(selectedDateBottom).toLocaleDateString('en-GB') : 'Genesis'
-                  span  - 
-                  span#header-range-top-block= new Date(selectedDateTop ? selectedDateTop : '').toLocaleDateString('en-GB')
-                .dropdown-icon(style='margin-bottom: -6px;')
-                  include ../icons/chevron.pug
-              .picker-main-wrapper#picker-main-wrapper
-                .picker-content-wrapper
-                  .left-wrapper
-                    .dropdown
-                      - 
-                        const options = [
-                          { id: 'last-30-days', label: 'Last month' },
-                          { id: 'last-90-days', label: 'Last 3 months', selected: true },
-                          { id: 'last-180-days', label: 'Last 6 months' },
-                          { id: 'last-365-days', label: 'Last year' },
-                          { id: 'this-year', label: 'This year (Jan - Today)' },
-                          { id: 'all-time', label: 'All time' },
-                          { id: 'custom', label: 'Custom' }
-                        ]
-                      ul
-                        each option in options
-                          li.left-wrapper-each-choice(class=`${(specificRange == option.id || (!specificRange && option.selected)) ? 'selected' : ''}` id=option.id) #{option.label}
-
-                  .calendar-wrapper
-                    .calendar 
-                      .date-input(style='display: none')
-                        input.each-date-input(type='date' id='periodic-query-bottom-timestamp' value=`${selectedDateBottom ? selectedDateBottom : ''}`)
-                        span —
-                        input.each-date-input(type='date' id='periodic-query-top-timestamp' value=`${selectedDateTop ? selectedDateTop : ''}`)
-                      .date-input-month-year-info-content
-                        div.current-month-and-year-display#current-month-and-year-display
-                        .each-month-switch-arrow(style='transform: rotateZ(90deg); margin-right: 20px;')#previous-month
-                          include ../icons/chevron_dark.pug
-                        .each-month-switch-arrow(style='transform: rotateZ(-90deg)')#next-month
-                          include ../icons/chevron_dark.pug
-                      .days#days-main-wrapper(class='days-header-wrapper')
-                        each day in (`${startDay}` == 'sunday' ? ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] : ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'])
-                          span.day= day
-                      .month-wrapper
-                        .days#month-wrapper
-                .buttons
-                  .calendar-start-day-wrapper(id='calendar-format-toggle' value=`${startDay ? startDay : 'monday'}`)
-                    .calendar-start-day-toggle-title Week Starts on
-                    .each-start-day-choice(value='monday')
-                      .general-choice-radio-button(class='center')
-                        .general-choice-radio-button-inner-circle(style=`${startDay == 'monday' ? 'display: unset' : ''}` value='monday')
-                      span Monday
-                    .each-start-day-choice(value='sunday')
-                      .general-choice-radio-button(class='center')
-                        .general-choice-radio-button-inner-circle(style=`${startDay == 'sunday' ? 'display: unset' : ''}` value='sunday')
-                      span Sunday
-                  button.cancel#cancel Cancel
-                  button.apply#apply Apply
-            .export-main-wrapper 
-              .export-wrapper-header(class='center' isOpen='false')#export-wrapper-toggle
-                include ../icons/export.svg
-              .export-wrapper-content
-                .export-wrapper-content-title Lorem ipsum dolor?
-                div(style='display: none')
-                  div#export-sort-by ratio
-                  div#export-order desc
-                  div#export-bottom 24650450
-                  div#export-top 24650540
+      .date-picker
+        .selected-range 
+          span.date-interval-description 
+            include ../icons/calendar.pug
+            span.date-interval-description-text#header-selected-range-description= specificRangeName ? specificRangeName : 'All time'
+          span.date-range
+            span#header-range-bottom-block= selectedDateBottom ? new Date(selectedDateBottom).toLocaleDateString('en-GB') : 'Genesis'
+            span  - 
+            span#header-range-top-block= new Date(selectedDateTop ? selectedDateTop : '').toLocaleDateString('en-GB')
+          .dropdown-icon(style='margin-bottom: -6px;')
+            include ../icons/chevron.pug
+        .picker-main-wrapper#picker-main-wrapper
+          .picker-content-wrapper
+            .left-wrapper
+              .dropdown
                 -
-                  const export_choices = [
-                    { label: 'All time', range: 0, is_selected: true },
-                    { label: 'Weekly', range: 7 * 86400 * 1000 },
-                    { label: 'Monthly', range: 30 * 86400 * 1000 },
-                    { label: 'Yearly', range: 365 * 86400 * 1000 },
+                  const options = [
+                    { id: 'last-30-days', label: 'Last month' },
+                    { id: 'last-90-days', label: 'Last 3 months', selected: true },
+                    { id: 'last-180-days', label: 'Last 6 months' },
+                    { id: 'last-365-days', label: 'Last year' },
+                    { id: 'this-year', label: 'This year (Jan - Today)' },
+                    { id: 'all-time', label: 'All time' },
+                    { id: 'custom', label: 'Custom' }
                   ]
-                each export_choice in export_choices
-                  .each-export-choice(range=export_choice.range class=`${export_choice.is_selected ? 'export-choice-selected' : ''}`)
-                    .general-choice-radio-button(class='center')
-                      .general-choice-radio-button-inner-circle(style=`${export_choice.is_selected ? 'display: unset' : ''}`)
-                    span= export_choice.label
-                .export-action-buttons-wrapper
-                  button.export-choice-action-button(class='center export-choice-download-button')#export-choice-download-button Download
-                  button.export-choice-action-button(class='center')#export-choice-cancel-button Cancel
-        .validators-main-wrapper#validators-main-wrapper(validators=validators, activeValidatorHistory=activeValidatorHistory)
-          - 
-            const headers_array = [
-              {name: 'Avg Stake', id: 'total_stake'}, 
-              {name: 'Avg Withdraw', id: 'total_withdraw'}, 
-              {name: 'Self-stake', id: 'self_stake'}, 
-              {name: 'Reward', id: 'reward'}, 
-              {name: 'Commission', id: 'commission'}, 
-              {name: 'Ratio', id: 'ratio', popup_text: 'Self stake / Withdraw'}, 
-              {name: 'Sold', id: 'sold', popup_text: 'Withdraw - Self stake'}, 
-            ]
-          .validator-table-header
-            .each-table-header-wrapper(class='each-table-header-validator-info-header')
-              .each-table-header-title Validators
-            each header in headers_array
-              .each-table-header-wrapper
-                .each-table-header-wrapper-popup-content
-                .each-table-header-wrapper(id=`${header.id}` class=`${header.popup_text ? 'each-table-header-hover' : ''}`)
-                  .each-table-header-title
-                    if header.popup_text
-                      .each-table-popup-wrapper
-                        .each-table-popup-info-content(class='center')= header.popup_text
-                        .each-tooltip-info-hover(style='margin-bottom: -1px')
-                          img(src='/res/images/info.svg')
-                    div= header.name
-                  .each-table-header-sort-indicators 
-                    .triangle-up
-                    .triangle-down
-          each validator, index in validators
-            .each-validator-wrapper(id=`${validator.operator_address}` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}`)
-              .each-validator-info-wrapper
-                .ranking-number-content= index + 1
-                .validator-image
-                  img.validator-image-content(src=`${validator.temporary_image_uri ? validator.temporary_image_uri : '/res/images/default_validator_photo.png'}`)
-                .validator-textual-info-wrapper 
-                  .validator-moniker 
-                    .validator-moniker-text-content 
-                      span.validator-moniker-text #{validator.moniker}
-                    if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
-                      .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
-                        img(src='/res/images/warning.svg')
-              -
-                function shortNumberFormat(num) {
-                  const sign = num < 0 ? '-' : '';
-                  num = Math.abs(num);
-                  if (num >= 1_000_000) return sign + (num / 1_000_000).toFixed(1) + 'M';
-                  if (num >= 10_000) return sign + Math.floor(num / 1_000) + 'K';
+                ul
+                  each option in options
+                    li.left-wrapper-each-choice(class=`${(specificRange == option.id || (!specificRange && option.selected)) ? 'selected' : ''}` id=option.id) #{option.label}
+            .calendar-wrapper
+              .calendar 
+                .date-input(style='display: none')
+                  input.each-date-input(type='date' id='periodic-query-bottom-timestamp' value=`${selectedDateBottom ? selectedDateBottom : ''}`)
+                  span —
+                  input.each-date-input(type='date' id='periodic-query-top-timestamp' value=`${selectedDateTop ? selectedDateTop : ''}`)
+                .date-input-month-year-info-content
+                  div.current-month-and-year-display#current-month-and-year-display
+                  .each-month-switch-arrow(style='transform: rotateZ(90deg); margin-right: 20px;')#previous-month
+                    include ../icons/chevron_dark.pug
+                  .each-month-switch-arrow(style='transform: rotateZ(-90deg)')#next-month
+                    include ../icons/chevron_dark.pug
+                .days#days-main-wrapper(class='days-header-wrapper')
+                  each day in (`${startDay}` == 'sunday' ? ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] : ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'])
+                    span.day= day
+                .month-wrapper
+                  .days#month-wrapper
+          .buttons
+            .calendar-start-day-wrapper(id='calendar-format-toggle' value=`${startDay ? startDay : 'monday'}`)
+              .calendar-start-day-toggle-title Week Starts on
+              .each-start-day-choice(value='monday')
+                .general-choice-radio-button(class='center')
+                  .general-choice-radio-button-inner-circle(style=`${startDay == 'monday' ? 'display: unset' : ''}` value='monday')
+                span Monday
+              .each-start-day-choice(value='sunday')
+                .general-choice-radio-button(class='center')
+                  .general-choice-radio-button-inner-circle(style=`${startDay == 'sunday' ? 'display: unset' : ''}` value='sunday')
+                span Sunday
+            button.cancel#cancel Cancel
+            button.apply#apply Apply
+    .inner-main-wrapper#inner-main-wrapper
+      .inner-main-wrapper-header 
+        .inner-main-wrapper-title Dashboard 
+        .inner-main-wrapper-description Overview of the network's performance and validator metrics
+      .network-summary-main-wrapper 
+        .network-summary-main-wrapper-title(class='each-section-title-content') Network Summary
+        -
+          const stats = [
+            {
+              title: 'Total Capitulation',
+              icon: 'total_capitulation.svg',
+              value_native: 122342473.6,
+              value_usd: 34694.4,
+              percentage_change: '17.3%',
+              unit: '$ATOM'
+            },
+            {
+              title: 'Total Staked',
+              icon: 'total_staked.svg',
+              value_native: 1273.6,
+              value_usd: 34694.4,
+              percentage_change: '17.3%',
+              unit: '$ATOM'
+            },
+            {
+              title: 'Security Index',
+              icon: 'security_index.svg',
+              value_native: 86.4,
+              value_usd: null,
+              percentage_change: '17.3%',
+              unit: null
+            },
+          ]
+        .network-summary-network-stats-main-wrapper
+          .each-network-summary-stat
+          each stat in stats
+            .each-network-summary-stat
+              .each-network-summary-stat-header
+                .each-network-summary-stat-header-title= stat.title
+                img.each-network-summary-stat-header-icon(src=`/res/images/stats/${stat.icon}`)
+              if stat.unit
+                .each-network-summary-stat-content #{stat.value_native} #{stat.unit}
+              .each-network-summary-stat-footer
+                if stat.unit
+                  .each-network-summary-stat-footer-value #{stat.value_usd}
+                else 
+                  .each-network-summary-stat-content(class='stat-value-font-large') #{stat.value_native}
+                .each-network-summary-stat-footer-change 
+                  span(class='percentage-change-value-content') → #{stat.percentage_change} 
+                  span vs last week
+        .network-summary-network-graph-main-wrapper
+          .network-summary-network-graph-content-wrapper
+          .network-summary-network-graph-metrics-wrapper
+            .network-summary-network-graph-metrics-wrapper-title(class='each-section-title-content') Graph Metrics
+            -
+              const metrics = [
+                { unit: '$ATOM', icon: 'total_capitulation.svg', title: 'Total Capitulation', value_native: 12733453.6, value_usd: 34694.4, percentage_change: '17.3%' },
+                { unit: '$ATOM', icon: 'total_delegation.svg', title: 'Total Delegation', value_native: 12733453.6, value_usd: 34694.4, percentage_change: '17.3%' },
+                { unit: '$ATOM', icon: 'total_reward.svg', title: 'Total Reward', value_native: 12733453.6, value_usd: 34694.4, percentage_change: '17.3%' },
+                { unit: '$ATOM', icon: 'total_withdraw.svg', title: 'Total Withdraw', value_native: 12733453.6, value_usd: 34694.4, percentage_change: '17.3%' }
+              ]
+            each metric in metrics 
+              .each-metric-content-wrapper
+                .each-metric-content-wrapper-header
+                  img.each-metric-content-wrapper-header-icon(src=`/res/images/metrics/${metric.icon}`)
+                  .each-metric-content-wrapper-header-title= metric.title
+                .each-metric-content-wrapper-content
+                  .each-metric-content-wrapper-content-value-native #{metric.value_native} #{metric.unit}
+                  .each-metric-content-wrapper-content-value-usd #{metric.value_usd}
+                .each-metric-content-wrapper-footer 
+                  span(class='percentage-change-value-content') → #{metric.percentage_change} 
+                  span vs last week
+      .insights-main-wrapper
+        .insights-main-wrapper-title(class='each-section-title-content') Insights 
+        -
+          const insights = [
+            { title: 'Security Index', description: 'Overall Network Health', bar: false, line: true },
+            { title: 'Self-Staked & Delegation', description: 'Validator Self-Stake Distribution', bar: true, line: false },
+            { title: 'Percentage Sold', description: 'Rewards Withdrawn / Rewards Earned', bar: true, line: true },
+          ]
+        .insights-main-content-wrapper
+          each insight in insights
+            .each-insight-wrapper
+              .each-insight-text-wrapper
+                .each-insight-title= insight.title
+                .each-insight-description= insight.description
+              .each-insight-visual-wrapper
+                if insight.bar 
+                  include ../icons/bar_graph.pug
+                if insight.line
+                  if insight.bar
+                    img.each-insight-visual-icon(src=`/res/images/line_graph_1.svg`)
+                  else 
+                    img.each-insight-visual-icon(src=`/res/images/line_graph_2.svg`)
+      .all-validators-main-wrapper
+        .each-section-title-content Validators
+        .table-main-wrapper
+          .table-filters
+            .validator-filter-input-wrapper
+              .validator-filter-input-content-wrapper 
+                .validator-search-icon(class='center')
+                  include ../icons/search.svg
+                input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search name / operator address')
+            .currency-switch-wrapper(id='currency-toggle' value=`${currency_type ? currency_type : 'native'}`)
+              .each-currency-switch-wrapper(value='native')
+                .general-choice-radio-button(class='center')
+                  .general-choice-radio-button-inner-circle(value='native' style=`${currency_type == 'native' ? 'display: unset' : ''}`)
+                .each-currency-switch-label #{selectedChain.symbol ? selectedChain.symbol : 'ATOM'}
+              .each-currency-switch-wrapper(value='usd')
+                .general-choice-radio-button(class='center')
+                  .general-choice-radio-button-inner-circle(value='usd' style=`${currency_type == 'usd' ? 'display: unset' : ''}`)
+                .each-currency-switch-label $ Dollar
+            .table-filters-subgroup 
+              .export-main-wrapper 
+                .export-wrapper-header(class='center' isOpen='false')#export-wrapper-toggle
+                  include ../icons/export.svg
+                .export-wrapper-content
+                  .export-wrapper-content-title Lorem ipsum dolor?
+                  div(style='display: none')
+                    div#export-sort-by ratio
+                    div#export-order desc
+                    div#export-bottom 24650450
+                    div#export-top 24650540
+                  -
+                    const export_choices = [
+                      { label: 'All time', range: 0, is_selected: true },
+                      { label: 'Weekly', range: 7 * 86400 * 1000 },
+                      { label: 'Monthly', range: 30 * 86400 * 1000 },
+                      { label: 'Yearly', range: 365 * 86400 * 1000 },
+                    ]
+                  each export_choice in export_choices
+                    .each-export-choice(range=export_choice.range class=`${export_choice.is_selected ? 'export-choice-selected' : ''}`)
+                      .general-choice-radio-button(class='center')
+                        .general-choice-radio-button-inner-circle(style=`${export_choice.is_selected ? 'display: unset' : ''}`)
+                      span= export_choice.label
+                  .export-action-buttons-wrapper
+                    button.export-choice-action-button(class='center export-choice-download-button')#export-choice-download-button Download
+                    button.export-choice-action-button(class='center')#export-choice-cancel-button Cancel
+          .validators-main-wrapper#validators-main-wrapper(validators=validators, activeValidatorHistory=activeValidatorHistory)
+            - 
+              const headers_array = [
+                {name: 'Avg Stake', id: 'total_stake'}, 
+                {name: 'Avg Withdraw', id: 'total_withdraw'}, 
+                {name: 'Self-stake', id: 'self_stake'}, 
+                {name: 'Reward', id: 'reward'}, 
+                {name: 'Commission', id: 'commission'}, 
+                {name: 'Ratio', id: 'ratio', popup_text: 'Self stake / Withdraw'}, 
+                {name: 'Sold', id: 'sold', popup_text: 'Withdraw - Self stake'}, 
+              ]
+            .validator-table-header
+              .each-table-header-wrapper(class='each-table-header-validator-info-header')
+                .each-table-header-title Validators
+              each header in headers_array
+                .each-table-header-wrapper
+                  .each-table-header-wrapper-popup-content
+                  .each-table-header-wrapper(id=`${header.id}` class=`${header.popup_text ? 'each-table-header-hover' : ''}`)
+                    .each-table-header-title
+                      if header.popup_text
+                        .each-table-popup-wrapper
+                          .each-table-popup-info-content(class='center')= header.popup_text
+                          .each-tooltip-info-hover(style='margin-bottom: -1px')
+                            img(src='/res/images/info.svg')
+                      div= header.name
+                    .each-table-header-sort-indicators 
+                      .triangle-up
+                      .triangle-down
+            each validator, index in validators
+              .each-validator-wrapper(id=`${validator.operator_address}` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}`)
+                .each-validator-info-wrapper
+                  .ranking-number-content= index + 1
+                  .validator-image
+                    img.validator-image-content(src=`${validator.temporary_image_uri ? validator.temporary_image_uri : '/res/images/default_validator_photo.png'}`)
+                  .validator-textual-info-wrapper 
+                    .validator-moniker 
+                      .validator-moniker-text-content 
+                        span.validator-moniker-text #{validator.moniker}
+                      if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
+                        .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
+                          img(src='/res/images/warning.svg')
+                -
+                  function shortNumberFormat(num) {
+                    const sign = num < 0 ? '-' : '';
+                    num = Math.abs(num);
+                    if (num >= 1_000_000) return sign + (num / 1_000_000).toFixed(1) + 'M';
+                    if (num >= 10_000) return sign + Math.floor(num / 1_000) + 'K';
 
-                  if (num >= 1_000) return sign + num.toFixed(0).toString();
-                  if (num >= 100) return sign + num.toFixed(1).toString();
-                  if (num >= 0) return sign + num.toFixed(2).toString();
+                    if (num >= 1_000) return sign + num.toFixed(0).toString();
+                    if (num >= 100) return sign + num.toFixed(1).toString();
+                    if (num >= 0) return sign + num.toFixed(2).toString();
 
-                  return sign + num.toString();
-                }
-              - 
-                function getValue(value, currency) {
-                  const decimals = selectedChain ? selectedChain.decimals : 6;
-                  const exchangeRate = selectedChain ? selectedChain.usd_exchange_rate : 0;
-                  if (currency.toLowerCase().trim() != 'usd') return `${shortNumberFormat(value / (10 ** decimals))} ${currency}`
-                  return `${shortNumberFormat((value / (10 ** decimals)) * exchangeRate)} $`
-                }
-              - const symbol = selectedChain.symbol ? selectedChain.symbol : 'ATOM'
-              div.validator-each-numeric-info(native=`${getValue(validator.total_stake, symbol)}` usd=`${getValue(validator.total_stake, 'usd')}`)= currency_type == 'native' ? getValue(validator.total_stake, symbol) : getValue(validator.total_stake, 'usd')
-              div.validator-each-numeric-info(native=`${getValue(validator.total_withdraw, symbol)}` usd=`${getValue(validator.total_withdraw, 'usd')}`)= currency_type == 'native' ? getValue(validator.total_withdraw, symbol) : getValue(validator.total_withdraw, 'usd')
-              div.validator-each-numeric-info(native=`${getValue(validator.self_stake, symbol)}` usd=`${getValue(validator.self_stake, 'usd')}`)= currency_type == 'native' ? getValue(validator.self_stake, symbol) : getValue(validator.self_stake, 'usd')
-              div.validator-each-numeric-info(native=`${getValue(validator.reward, symbol)}` usd=`${getValue(validator.reward, 'usd')}`)= currency_type == 'native' ? getValue(validator.reward, symbol) : getValue(validator.reward, 'usd')
-              div.validator-each-numeric-info(native=`${getValue(validator.commission, symbol)}` usd=`${getValue(validator.commission, 'usd')}`)= currency_type == 'native' ? getValue(validator.commission, symbol) : getValue(validator.commission, 'usd')
-              div.validator-each-numeric-info(class='validator-ratio')= shortNumberFormat(validator.ratio)
-              div.validator-each-numeric-info(native=`${getValue(validator.sold, symbol)}` usd=`${getValue(validator.sold, 'usd')}`)= currency_type == 'native' ? getValue(validator.sold, symbol) : getValue(validator.sold, 'usd')
-            .each-validator-details-content-wrapper
-              .each-validator-info-details-content
-                a.validator-action-button(href=`https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${selectedChain.chain_id}&validator_address=${validator.operator_address}` target='_blank') Stake
-                .validator-operator-address
-                  .validator-operator-address-content(operator_address=`${validator.operator_address}`)
-                    div= validator.operator_address.slice(0,4)
-                    .hidden-part
-                      span.middle-address= validator.operator_address.slice(4, (validator.operator_address.length - 4) / 2)
-                      span.dots ....
-                      span.middle-address= validator.operator_address.slice((validator.operator_address.length - 4) / 2, validator.operator_address.length - 4)
-                    div= validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)
-                    .validator-operator-address-copy-button
-                      img(src='/res/images/clipboard.svg')
-                .validator-details-textual-info-wrapper 
-                  .each-validator-details-textual-info Website: #{validator.website}
-                  .each-validator-details-textual-info Description: #{validator.description}
-                .validator-details-inactivity-wrapper(id=`${validator.operator_address}-inactivity-wrapper`)
-                                  
-            .each-validator-wrapper-seperator-line
+                    return sign + num.toString();
+                  }
+                - 
+                  function getValue(value, currency) {
+                    const decimals = selectedChain ? selectedChain.decimals : 6;
+                    const exchangeRate = selectedChain ? selectedChain.usd_exchange_rate : 0;
+                    if (currency.toLowerCase().trim() != 'usd') return `${shortNumberFormat(value / (10 ** decimals))} ${currency}`
+                    return `${shortNumberFormat((value / (10 ** decimals)) * exchangeRate)} $`
+                  }
+                - const symbol = selectedChain.symbol ? selectedChain.symbol : 'ATOM'
+                div.validator-each-numeric-info(native=`${getValue(validator.total_stake, symbol)}` usd=`${getValue(validator.total_stake, 'usd')}`)= currency_type == 'native' ? getValue(validator.total_stake, symbol) : getValue(validator.total_stake, 'usd')
+                div.validator-each-numeric-info(native=`${getValue(validator.total_withdraw, symbol)}` usd=`${getValue(validator.total_withdraw, 'usd')}`)= currency_type == 'native' ? getValue(validator.total_withdraw, symbol) : getValue(validator.total_withdraw, 'usd')
+                div.validator-each-numeric-info(native=`${getValue(validator.self_stake, symbol)}` usd=`${getValue(validator.self_stake, 'usd')}`)= currency_type == 'native' ? getValue(validator.self_stake, symbol) : getValue(validator.self_stake, 'usd')
+                div.validator-each-numeric-info(native=`${getValue(validator.reward, symbol)}` usd=`${getValue(validator.reward, 'usd')}`)= currency_type == 'native' ? getValue(validator.reward, symbol) : getValue(validator.reward, 'usd')
+                div.validator-each-numeric-info(native=`${getValue(validator.commission, symbol)}` usd=`${getValue(validator.commission, 'usd')}`)= currency_type == 'native' ? getValue(validator.commission, symbol) : getValue(validator.commission, 'usd')
+                div.validator-each-numeric-info(class='validator-ratio')= shortNumberFormat(validator.ratio)
+                div.validator-each-numeric-info(native=`${getValue(validator.sold, symbol)}` usd=`${getValue(validator.sold, 'usd')}`)= currency_type == 'native' ? getValue(validator.sold, symbol) : getValue(validator.sold, 'usd')
+              .each-validator-details-content-wrapper
+                .each-validator-info-details-content
+                  a.validator-action-button(href=`https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${selectedChain.chain_id}&validator_address=${validator.operator_address}` target='_blank') Stake
+                  .validator-operator-address
+                    .validator-operator-address-content(operator_address=`${validator.operator_address}`)
+                      div= validator.operator_address.slice(0,4)
+                      .hidden-part
+                        span.middle-address= validator.operator_address.slice(4, (validator.operator_address.length - 4) / 2)
+                        span.dots ....
+                        span.middle-address= validator.operator_address.slice((validator.operator_address.length - 4) / 2, validator.operator_address.length - 4)
+                      div= validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)
+                      .validator-operator-address-copy-button
+                        img(src='/res/images/clipboard.svg')
+                  .validator-details-textual-info-wrapper 
+                    .each-validator-details-textual-info Website: #{validator.website}
+                    .each-validator-details-textual-info Description: #{validator.description}
+                  .validator-details-inactivity-wrapper(id=`${validator.operator_address}-inactivity-wrapper`)
     .footer-main-wrapper(class='center')
       .footer-main-title Connect us 
       .footer-socials-wrapper(class='center')

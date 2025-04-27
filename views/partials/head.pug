@@ -53,5 +53,40 @@ html(lang='tr')
         --number-of-columns: #{NUMBER_OF_COLUMNS};
       }
   body
-    block content
+    .all-wrapper
+      .navbar-wrapper
+        .header-banner-wrapper
+          .banner-logo-wrapper(class='center')
+            img(src='/res/images/logo.svg', alt='node101' class='center')
+          .banner-title-content VALIDATIER
+        -
+          const menu = [
+            {
+              title: 'Navigation',
+              links: [
+                { icon: 'dashboard.svg', title: 'Dashboard', description: 'Overview of the network\'s performance and validator metrics' },
+                { icon: 'validators.svg', title: 'Validators', description: 'Browse and analyze all validators on the network' },
+                { icon: 'analytics.svg', title: 'Analytics' },
+              ]
+            },
+            {
+              title: 'Insights',
+              links: [
+                { icon: 'reward_flow.svg', title: 'Reward Flow' },
+                { icon: 'security_index.svg', title: 'Security Index' },
+                { icon: 'self_staked_delegation.svg', title: 'Self-Staked & Delegation' },
+                { icon: 'percentage_sold_graph.svg', title: 'Percentage Sold Graph' },
+              ]
+            }
+          ]
+        .navbar-menu-wrapper
+          each subMenu in menu 
+            .each-sub-menu-wrapper
+              .each-sub-menu-title= subMenu.title 
+              .each-sub-menu-links-wrapper 
+                each link in subMenu.links 
+                  .each-sub-menu-link-content 
+                    img.each-sub-menu-link-icon(src=`/res/images/navbar/${link.icon}` alt='node101')
+                    .each-sub-menu-link-title= link.title
+      block content
   footer 

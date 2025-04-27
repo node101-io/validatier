@@ -1,5 +1,14 @@
 
 :root {
+
+  --all-wrapper-width: 100%;
+  --navbar-width: 237px;
+  --navbar-horizontal-padding: 22px;
+  --navbar-vertical-padding: 50px;
+  --navbar-gap: 52px;
+
+  --each-sub-menu-link-content-gap: 10px;
+
   --color-powder-blue: rgb(245, 245, 255);
   --color-pale-dark: rgb(22, 22, 22);
   --color-night-blue: rgba(41, 48, 80, 1);
@@ -85,7 +94,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: var(--website-main-font-family);
-  background-color: var(--website-master-background-color) !important;
+  background-color: rgb(232, 232, 254) !important;
   font-weight: var(--website-main-font-weight);
   background-color: var(--color-pale-white);
   color: var(--color-pale-dark);
@@ -112,6 +121,43 @@ input {
 input {
   outline: none;
   background-color: var(--color-pale-white);
+}
+
+.all-wrapper {
+  width: var(--all-wrapper-width);
+  display: flex;
+}
+
+.navbar-wrapper {
+  width: calc(var(--navbar-width) - 2 * var(--navbar-horizontal-padding));
+  padding: var(--navbar-vertical-padding) var(--navbar-horizontal-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--navbar-gap);
+  background-color: rgb(232, 232, 254);
+}
+
+.each-sub-menu-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+  font-size: 12px;
+}
+
+.each-sub-menu-links-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  font-size: 16px;
+  margin-left: 18px;
+}
+
+.each-sub-menu-link-content {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--each-sub-menu-link-content-gap);
 }
 
 .triangle-up {
