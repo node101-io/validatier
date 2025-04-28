@@ -185,15 +185,6 @@ block content
                 .validator-search-icon(class='center')
                   include ../icons/search.svg
                 input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search name / operator address')
-            .currency-switch-wrapper(id='currency-toggle' value=`${currency_type ? currency_type : 'native'}`)
-              .each-currency-switch-wrapper(value='native')
-                .general-choice-radio-button(class='center')
-                  .general-choice-radio-button-inner-circle(value='native' style=`${currency_type == 'native' ? 'display: unset' : ''}`)
-                .each-currency-switch-label #{selectedChain.symbol ? selectedChain.symbol : 'ATOM'}
-              .each-currency-switch-wrapper(value='usd')
-                .general-choice-radio-button(class='center')
-                  .general-choice-radio-button-inner-circle(value='usd' style=`${currency_type == 'usd' ? 'display: unset' : ''}`)
-                .each-currency-switch-label $ Dollar
             .table-filters-subgroup 
               .export-main-wrapper 
                 .export-wrapper-header(class='center' isOpen='false')#export-wrapper-toggle
@@ -223,13 +214,10 @@ block content
           .validators-main-wrapper#validators-main-wrapper(validators=validators, activeValidatorHistory=activeValidatorHistory)
             - 
               const headers_array = [
-                {name: 'Avg Stake', id: 'total_stake'}, 
-                {name: 'Avg Withdraw', id: 'total_withdraw'}, 
+                {name: 'Total Delegation', id: 'total_stake'}, 
+                {name: 'Total Withdrawn', id: 'total_withdraw'}, 
                 {name: 'Self-stake', id: 'self_stake'}, 
-                {name: 'Reward', id: 'reward'}, 
-                {name: 'Commission', id: 'commission'}, 
                 {name: 'Ratio', id: 'ratio', popup_text: 'Self stake / Withdraw'}, 
-                {name: 'Sold', id: 'sold', popup_text: 'Withdraw - Self stake'}, 
               ]
             .validator-table-header
               .each-table-header-wrapper(class='each-table-header-validator-info-header')
@@ -282,13 +270,13 @@ block content
                     return `${shortNumberFormat((value / (10 ** decimals)) * exchangeRate)} $`
                   }
                 - const symbol = selectedChain.symbol ? selectedChain.symbol : 'ATOM'
-                div.validator-each-numeric-info(native=`${getValue(validator.total_stake, symbol)}` usd=`${getValue(validator.total_stake, 'usd')}`)= currency_type == 'native' ? getValue(validator.total_stake, symbol) : getValue(validator.total_stake, 'usd')
-                div.validator-each-numeric-info(native=`${getValue(validator.total_withdraw, symbol)}` usd=`${getValue(validator.total_withdraw, 'usd')}`)= currency_type == 'native' ? getValue(validator.total_withdraw, symbol) : getValue(validator.total_withdraw, 'usd')
-                div.validator-each-numeric-info(native=`${getValue(validator.self_stake, symbol)}` usd=`${getValue(validator.self_stake, 'usd')}`)= currency_type == 'native' ? getValue(validator.self_stake, symbol) : getValue(validator.self_stake, 'usd')
-                div.validator-each-numeric-info(native=`${getValue(validator.reward, symbol)}` usd=`${getValue(validator.reward, 'usd')}`)= currency_type == 'native' ? getValue(validator.reward, symbol) : getValue(validator.reward, 'usd')
-                div.validator-each-numeric-info(native=`${getValue(validator.commission, symbol)}` usd=`${getValue(validator.commission, 'usd')}`)= currency_type == 'native' ? getValue(validator.commission, symbol) : getValue(validator.commission, 'usd')
-                div.validator-each-numeric-info(class='validator-ratio')= shortNumberFormat(validator.ratio)
-                div.validator-each-numeric-info(native=`${getValue(validator.sold, symbol)}` usd=`${getValue(validator.sold, 'usd')}`)= currency_type == 'native' ? getValue(validator.sold, symbol) : getValue(validator.sold, 'usd')
+                each header in headers_array
+                  if `${header.id}` == 'ratio'
+                    .validator-each-numeric-info(class='validator-ratio')= shortNumberFormat(validator.ratio)
+                  else
+                    .validator-each-numeric-info
+                      .validator-each-numeric-info-native= getValue(validator.self_stake, symbol)
+                      .validator-each-numeric-info-usd= getValue(validator.self_stake, 'usd')
               .each-validator-details-content-wrapper
                 .each-validator-info-details-content
                   a.validator-action-button(href=`https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${selectedChain.chain_id}&validator_address=${validator.operator_address}` target='_blank') Stake

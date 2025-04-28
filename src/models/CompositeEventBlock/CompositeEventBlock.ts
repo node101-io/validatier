@@ -231,7 +231,6 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
 ) {
   const { chain_identifier, bottom_timestamp, top_timestamp } = body;
 
-  console.time('aggregate');
   CompositeEventBlock.aggregate([
     { 
       $match: { 
@@ -278,8 +277,6 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
     }
   ])
     .then((records: any) => {
-      
-      console.timeEnd('aggregate');
       const mapping: Record<string, any> = {};
       records.forEach((record: any) => {
 
