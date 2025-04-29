@@ -406,23 +406,24 @@ validatorSchema.statics.rankValidators = function (
       while (index < validators.length) {
         const i = index;
         const eachValidator: any = validators[i];
-        const { self_stake = 0, reward = 0, commission = 0, average_total_stake = 0, average_withdraw = 0 } = validatorRecordMapping[eachValidator.operator_address] || {};
+        const { self_stake = 0, reward = 0, commission = 0, total_stake = 0, total_withdraw = 0 } = validatorRecordMapping[eachValidator.operator_address] || {};
 
         const ratio = (self_stake || 0) / (reward || (10 ** CHAIN_TO_DECIMALS_MAPPING[`${chain_identifier}`]));
         const sold = (reward || 0) - (self_stake || 0);
 
         const pushObjectData = {
-          pubkey: eachValidator.pubkey ? eachValidator.pubkey : '',
-          operator_address: eachValidator.operator_address ? eachValidator.operator_address : '',
-          moniker: eachValidator.moniker ? eachValidator.moniker : '',
-          website: eachValidator.website ? eachValidator.website : '',
-          description: eachValidator.description ? eachValidator.description : '',
+          pubkey: eachValidator.pubkey || '',
+          operator_address: eachValidator.operator_address || '',
+          moniker: eachValidator.moniker || '',
+          website: eachValidator.website || '',
+          commission_rate: eachValidator.commission_rate || '',
+          description: eachValidator.description || '',
           temporary_image_uri: eachValidator.temporary_image_uri,
           self_stake: self_stake,
           reward: reward,
           commission: commission,
-          total_stake: average_total_stake,
-          total_withdraw: average_withdraw,
+          total_stake: total_stake,
+          total_withdraw: total_withdraw,
           chain_identifier: chain_identifier,
           ratio: ratio,
           sold: sold

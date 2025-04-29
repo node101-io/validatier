@@ -47,7 +47,7 @@ html(lang='tr')
           script(src=`/js/functions/plotValidatorGraph.js`)
           script(src=`/js/functions/renderTableHeader.js`)
           script(src=`/js/functions/renderValidators.js`)
-          script(src=`/js/functions/worker.js`)
+          script(src=`/js/functions/handleSummaryGraphActions.js`)
     style.
       :root {
         --number-of-columns: #{NUMBER_OF_COLUMNS};
@@ -55,6 +55,7 @@ html(lang='tr')
   body
     .all-wrapper
       .navbar-wrapper
+        .navbar-view-toggle
         .header-banner-wrapper
           .banner-logo-wrapper(class='center')
             img(src='/res/images/logo.svg', alt='node101' class='center')
@@ -80,7 +81,7 @@ html(lang='tr')
             }
           ]
         .navbar-menu-wrapper
-          each subMenu in menu 
+          each subMenu in menu
             .each-sub-menu-wrapper
               .each-sub-menu-title= subMenu.title 
               .each-sub-menu-links-wrapper 
@@ -88,5 +89,15 @@ html(lang='tr')
                   .each-sub-menu-link-content 
                     img.each-sub-menu-link-icon(src=`/res/images/navbar/${link.icon}` alt='node101')
                     .each-sub-menu-link-title= link.title
+        -
+          const socials = [
+            { href: 'https://x.com/node_101', icon: 'x.svg' },
+            { href: 'https://t.me/node101', icon: 'telegram.svg' },
+            { href: 'https://github.com/node101-io', icon: 'github.svg' },
+          ]
+        .navbar-footer-wrapper
+          each social in socials
+            a(href=social.href target='_blank').each-social-icon 
+              img(src=`/res/images/socials/${social.icon}`)
       block content
   footer 

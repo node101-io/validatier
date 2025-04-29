@@ -54,8 +54,8 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
         self_stake: number,
         reward: number,
         commission: number,
-        average_total_stake: number,
-        average_withdraw: number
+        total_stake: number,
+        total_withdraw: number
       }> | null
     ) => any
   ) => any;
@@ -71,8 +71,8 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
         self_stake: number,
         reward: number,
         commission: number,
-        average_total_stake: number,
-        average_withdraw: number
+        total_stake: number,
+        total_withdraw: number
       }> | null
     ) => any
   ) => any;
@@ -214,8 +214,8 @@ compositeEventBlockSchema.statics.getPeriodicDataForGraphGeneration = function (
           self_stake: totalSelfStake || 0,
           reward: totalReward || 0,
           commission: totalCommission || 0,
-          average_total_stake: (totalStake || 0) / daysBetweenTimestamps,
-          average_withdraw: (totalWithdraw || 0) / daysBetweenTimestamps
+          total_stake: (totalStake || 0) / daysBetweenTimestamps,
+          total_withdraw: (totalWithdraw || 0) / daysBetweenTimestamps
         };
       });
   
@@ -285,15 +285,13 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
         const totalCommission = (record.mostRecentRecord.commission_prefix_sum - record.leastRecentRecord.commission_prefix_sum || 0) + (record.leastRecentRecord.commission || 0);
         const totalStake = (record.mostRecentRecord.total_stake_prefix_sum - record.leastRecentRecord.total_stake_prefix_sum || 0) + (record.leastRecentRecord.total_stake || 0);
         const totalWithdraw = (record.mostRecentRecord.total_withdraw_prefix_sum - record.leastRecentRecord.total_withdraw_prefix_sum || 0) + (record.leastRecentRecord.total_withdraw || 0);
-      
-        const daysBetweenTimestamps = Math.ceil(((top_timestamp || 1) - (bottom_timestamp || 1)) / (86400 * 1000));
-      
+            
         mapping[record._id] = {
           self_stake: totalSelfStake || 0,
           reward: totalReward || 0,
           commission: totalCommission || 0,
-          average_total_stake: (totalStake || 0) / daysBetweenTimestamps,
-          average_withdraw: (totalWithdraw || 0) / daysBetweenTimestamps
+          total_stake: (totalStake || 0),
+          total_withdraw: (totalWithdraw || 0)
         };
       });
 

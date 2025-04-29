@@ -1,8 +1,8 @@
 
 @media only screen and (max-width: 1200px) {
   :root {
-    --each-validator-wrapper-gap: 50px;
-    --validator-table-header-gap: 50px;
+    --each-validator-wrapper-gap: 0px;
+    --validator-table-header-gap: 0px;
     --table-filters-subgroup-gap: 40px;
   }
   .validator-operator-address:hover .dots {

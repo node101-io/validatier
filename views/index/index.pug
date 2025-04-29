@@ -7,12 +7,10 @@ block content
         .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}` current_chain_first_available_time=`${selectedChain.first_available_block_time}`)
           .network-switch-header-chain-content-wrapper(class='center')
             .network-switch-network-image-wrapper 
-              img#current-network-img(src=`${selectedChain.image ? selectedChain.image : ''}`)
-            .network-switch-network-info-wrapper 
-              .network-switch-network-title#current-network-name= selectedChain.pretty_name ? selectedChain.pretty_name : 'Cosmos Hub'
-          .network-switch-drowdown-toggle#network-switch-dropdown-arrow
+              img(class='current-network-img' src=`${selectedChain.image ? selectedChain.image : ''}`)
+          .network-switch-drowdown-toggle(class='network-switch-dropdown-arrow center')
             include ../icons/chevron.pug
-        .network-switch-dropdown#network-switch-dropdown
+        .network-switch-dropdown
           .network-switch-search-bar
             .network-switch-search-icon(class='center')
               include ../icons/search.svg
@@ -116,7 +114,32 @@ block content
             },
           ]
         .network-summary-network-stats-main-wrapper
-          .each-network-summary-stat
+          .each-network-summary-stat(class='header-network-switch-wrapper')
+            .network-switch-header#network-switch-header(class='network-switch-header-main' current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}` current_chain_first_available_time=`${selectedChain.first_available_block_time}`)
+              .network-switch-header-chain-content-wrapper(class='center')
+                .network-switch-network-image-wrapper 
+                  img(class='current-network-img' src=`${selectedChain.image ? selectedChain.image : ''}`)
+                .network-switch-network-info-wrapper 
+                  .network-switch-network-title-wrapper
+                    .network-switch-network-title(class='current-network-name')= selectedChain.pretty_name || 'Cosmos Hub'
+                    .network-switch-drowdown-toggle(class='network-switch-dropdown-arrow center')
+                      include ../icons/chevron.pug
+                  .network-switch-network-currency= selectedChain.symbol || 'ATOM'
+              .network-switch-main-numerical-values-wrapper
+                .each-network-switch-main-numerical-value(class='percentage-change-value-content') -> 17.3%
+                .each-network-switch-main-numerical-value $3.5
+            .network-switch-dropdown
+              .network-switch-search-bar
+                .network-switch-search-icon(class='center')
+                  include ../icons/search.svg
+                input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search')
+              .network-switch-chains-wrapper
+                each chain in chains 
+                  .each-chain-wrapper(id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}` symbol=`${chain.symbol}` decimals=`${chain.decimals}` usd_exchange_rate=`${chain.usd_exchange_rate}` first_available_time=`${chain.first_available_block_time}`)
+                    .network-switch-network-image-wrapper(class='center network-unselected-image-wrapper')
+                      img(src=`${chain.image}`)
+                    .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
+                      .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
           each stat in stats
             .each-network-summary-stat
               .each-network-summary-stat-header
@@ -134,6 +157,33 @@ block content
                   span vs last week
         .network-summary-network-graph-main-wrapper
           .network-summary-network-graph-content-wrapper
+            .network-summary-network-graph-content-header
+              .network-summary-network-graph-content-textual
+                .network-summary-network-graph-content-title Reward Flow Overview
+                .network-summary-network-graph-content-description Shows how validators respond to changes in total capitulation and delegation in the market
+              -
+                const dropdowns = [
+                  {
+                    id: 'network-summary-filters',
+                    title: 'Filter',
+                    options: ['Capitulation', 'Delegation', 'Rewards', 'Withdrawn']
+                  },
+                  {
+                    id: 'network-summary-interval',
+                    title: network_summary_interval || 'Weekly',
+                    options: ['Daily', 'Weekly', 'Monthly', 'Yearly']
+                  }
+                ]
+              .network-summary-network-graph-content-filters-wrapper
+                each dropdown in dropdowns
+                  .each-network-summary-network-graph-content-dropdown-wrapper
+                    .each-network-summary-network-graph-content-dropdown-header
+                      span= dropdown.title
+                      img.each-network-summary-network-graph-content-dropdown-arrow(src='/res/images/chevron_aestethic.svg' class='center')
+                    .each-network-summary-network-graph-content-dropdown-content
+                      each option in dropdown.options 
+                        .each-network-summary-network-graph-content-each-dropdown= option
+            .network-summary-network-graph-content
           .network-summary-network-graph-metrics-wrapper
             .network-summary-network-graph-metrics-wrapper-title(class='each-section-title-content') Graph Metrics
             -
@@ -184,7 +234,7 @@ block content
               .validator-filter-input-content-wrapper 
                 .validator-search-icon(class='center')
                   include ../icons/search.svg
-                input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search name / operator address')
+                input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search Validator')
             .table-filters-subgroup 
               .export-main-wrapper 
                 .export-wrapper-header(class='center' isOpen='false')#export-wrapper-toggle
@@ -212,12 +262,13 @@ block content
                     button.export-choice-action-button(class='center export-choice-download-button')#export-choice-download-button Download
                     button.export-choice-action-button(class='center')#export-choice-cancel-button Cancel
           .validators-main-wrapper#validators-main-wrapper(validators=validators, activeValidatorHistory=activeValidatorHistory)
-            - 
+            -
               const headers_array = [
                 {name: 'Total Delegation', id: 'total_stake'}, 
                 {name: 'Total Withdrawn', id: 'total_withdraw'}, 
                 {name: 'Self-stake', id: 'self_stake'}, 
-                {name: 'Ratio', id: 'ratio', popup_text: 'Self stake / Withdraw'}, 
+                {name: 'SI Score', id: 'ratio', popup_text: 'Self stake / Withdraw'},
+                {name: 'Commission', id: 'commission_rate'},
               ]
             .validator-table-header
               .each-table-header-wrapper(class='each-table-header-validator-info-header')
@@ -262,24 +313,44 @@ block content
 
                     return sign + num.toString();
                   }
-                - 
+                -
                   function getValue(value, currency) {
                     const decimals = selectedChain ? selectedChain.decimals : 6;
                     const exchangeRate = selectedChain ? selectedChain.usd_exchange_rate : 0;
                     if (currency.toLowerCase().trim() != 'usd') return `${shortNumberFormat(value / (10 ** decimals))} ${currency}`
                     return `${shortNumberFormat((value / (10 ** decimals)) * exchangeRate)} $`
                   }
+                -
+                  function formatCommission(value) {
+                    if (value.includes('.')) return `${(parseInt(value) * 100)}%`;
+                    return `${parseInt(value / 1e16)}%`;
+                  }
+                -
+                  function getScoreColor (value) {
+                    if (value >= 85) return { color: 'rgba(19, 167, 25, 1)', check: true };
+                    else if (value < 50) return { color: 'rgba(184, 34, 0, 1)', check: false };
+                    return { color: 'rgba(255, 111, 67, 1)', check: false };
+                  }
                 - const symbol = selectedChain.symbol ? selectedChain.symbol : 'ATOM'
                 each header in headers_array
                   if `${header.id}` == 'ratio'
-                    .validator-each-numeric-info(class='validator-ratio')= shortNumberFormat(validator.ratio)
+                    - const scoreResult = getScoreColor(validator.ratio)
+                    .validator-each-numeric-info(class='validator-ratio' style=`color: ${scoreResult.color};`)
+                      span= shortNumberFormat(validator.ratio)
+                      if scoreResult.check
+                        img(src='/res/images/check_green.svg' class='center')
+                  else if `${header.id}` == 'commission_rate'
+                    .validator-each-numeric-info(class='validator-commission-rate')
+                      span= formatCommission(validator.commission_rate)
+                      a.each-valdator-stake-button(href=`https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${selectedChain.chain_id}&validator_address=${validator.operator_address}` target='_blank')
+                        span Stake
+                        img(src='/res/images/external.svg' class='center')
                   else
                     .validator-each-numeric-info
-                      .validator-each-numeric-info-native= getValue(validator.self_stake, symbol)
-                      .validator-each-numeric-info-usd= getValue(validator.self_stake, 'usd')
+                      .validator-each-numeric-info-native= getValue(validator[`${header.id}`], symbol)
+                      .validator-each-numeric-info-usd= getValue(validator[`${header.id}`], 'usd')
               .each-validator-details-content-wrapper
                 .each-validator-info-details-content
-                  a.validator-action-button(href=`https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${selectedChain.chain_id}&validator_address=${validator.operator_address}` target='_blank') Stake
                   .validator-operator-address
                     .validator-operator-address-content(operator_address=`${validator.operator_address}`)
                       div= validator.operator_address.slice(0,4)
@@ -294,14 +365,3 @@ block content
                     .each-validator-details-textual-info Website: #{validator.website}
                     .each-validator-details-textual-info Description: #{validator.description}
                   .validator-details-inactivity-wrapper(id=`${validator.operator_address}-inactivity-wrapper`)
-    .footer-main-wrapper(class='center')
-      .footer-main-title Connect us 
-      .footer-socials-wrapper(class='center')
-        a(href='https://t.me/node101', target='_blank').each-social-icon 
-          img(src="/res/images/telegram.svg" alt='node_101_telegram')
-        a(href='https://x.com/node_101' target='_blank').each-social-icon 
-          img(src="/res/images/x.svg" alt='node_101_x_twitter')
-        a(href='https://github.com/node101-io' target='_blank').each-social-icon 
-          img(src="/res/images/github.svg" alt='node_101_github')
-        a(href='https://www.linkedin.com/company/node101/' target='_blank').each-social-icon 
-          img(src="/res/images/linkedin.svg" alt='node_101_linkedin')

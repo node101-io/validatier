@@ -84,7 +84,7 @@ export default (req: Request, res: Response): any => {
               return resolve();
             }
 
-            const { self_stake = 0, reward = 0, commission = 0, average_total_stake = 0, average_withdraw = 0 } = result[operator_address] || {};
+            const { self_stake = 0, reward = 0, commission = 0, total_stake = 0, total_withdraw = 0 } = result[operator_address] || {};
 
             const ratio = (self_stake || 0) / (reward || (10 ** 10e6));
             const sold = (reward || 0) - (self_stake || 0);

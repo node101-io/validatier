@@ -2,9 +2,9 @@
 const rankingResponsesCache = {};
 
 function setSelectedChain (pretty_name, symbol, src, name) {
-  document.getElementById('current-network-name').innerHTML = pretty_name;
-  document.getElementById('current-network-img').src = src;
-  document.getElementById('network-switch-header').setAttribute('chain_identifier', name);
+  document.querySelectorAll('.current-network-name').forEach(each => each.innerHTML = pretty_name);
+  document.querySelectorAll('.current-network-img').forEach(each => each.src = src);
+  document.querySelectorAll('.network-switch-header').forEach(each => each.setAttribute('chain_identifier', name));
 }
 
 function handleNetworkSwitch () {
@@ -41,29 +41,40 @@ function handleNetworkSwitch () {
     });
   })
 
-  const networkSwitchDropdown = document.getElementById('network-switch-dropdown');
   document.body.addEventListener('click', (event) => {
     
     let target = event.target;
     while (target != document.body && (!target.classList.contains('network-switch-header') && !target.classList.contains('network-switch-dropdown'))) target = target.parentNode;
     
     if (!target.classList.contains('network-switch-header') && !target.classList.contains('network-switch-dropdown')) {
-      document.getElementById('network-switch-dropdown-arrow').style.transform = 'rotateX(0deg)';
-      document.getElementById('network-switch-dropdown-arrow').style.marginTop = '2px';
-      return networkSwitchDropdown.classList.remove('network-switch-dropdown-open');
+      target.parentNode.querySelectorAll('.network-switch-dropdown-arrow').forEach(each => {
+        each.style.transform = 'rotateX(0deg)';
+        each.style.marginTop = '2px';
+      });
+      target.parentNode.querySelectorAll('.network-switch-dropdown').forEach(each => 
+        each.classList.remove('network-switch-dropdown-open'));
+      return;
     };
 
     if (target.classList.contains('network-switch-dropdown')) return;
+
+    const networkSwitchDropdown = target.nextSibling;
     
     if (!networkSwitchDropdown.classList.contains('network-switch-dropdown-open')) {
-      document.getElementById('network-switch-dropdown-arrow').style.transform = 'rotateX(180deg)';
-      document.getElementById('network-switch-dropdown-arrow').style.marginTop = '-8px';
-      networkSwitchDropdown.classList.add('network-switch-dropdown-open');
+      target.parentNode.querySelectorAll('.network-switch-dropdown-arrow').forEach(each => {
+        each.style.transform = 'rotateX(180deg)';
+        each.style.marginTop = '-8px';
+      });
+      target.parentNode.querySelectorAll('.network-switch-dropdown').forEach(each => 
+        each.classList.add('network-switch-dropdown-open'));
     }
     else {
-      document.getElementById('network-switch-dropdown-arrow').style.transform = 'rotateX(0deg)';
-      document.getElementById('network-switch-dropdown-arrow').style.marginTop = '2px';
-      networkSwitchDropdown.classList.remove('network-switch-dropdown-open');
+      target.parentNode.querySelectorAll('.network-switch-dropdown-arrow').forEach(each => {
+        each.style.transform = 'rotateX(0deg)';
+        each.style.marginTop = '2px';
+      });
+      target.parentNode.querySelectorAll('.network-switch-dropdown').forEach(each => 
+        each.classList.remove('network-switch-dropdown-open'));
     };
   })
 
@@ -71,6 +82,8 @@ function handleNetworkSwitch () {
     let target = event.target;
     while (target != document.body && !target.classList.contains('each-chain-wrapper')) target = target.parentNode;
     if (!target.classList.contains('each-chain-wrapper')) return;
+
+    const networkSwitchDropdown = target.parentNode.parentNode;
 
     setSelectedChain(target.getAttribute('pretty_name'), target.getAttribute('symbol'), target.getAttribute('image'));
     networkSwitchDropdown.classList.remove('network-switch-dropdown-open');

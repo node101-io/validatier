@@ -10,6 +10,7 @@ window.onload = () => {
   handleCalendarEvents(currentYearValue, currentMonthValue, document.getElementById('calendar-format-toggle').value)
   renderValidators();
   handleExportEvents();
-  handleCurrencyToggle(); 
+  handleCurrencyToggle();
   handlePlotButtonClick();
+  handleSummaryGraphActions();
 }

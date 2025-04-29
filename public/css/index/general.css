@@ -71,23 +71,7 @@ html {
   margin: 0;
   padding: 0;
   font-size: var(--website-main-font-size);
-  background-color: rgb(245, 245, 245);
-  overflow-y: scroll;
-}
-
-html::-webkit-scrollbar {
-  width: 8px;
-}
-
-html::-webkit-scrollbar-thumb {
-  background: rgba(100, 100, 100, var(--scrollbar-opacity, 1));
-  border-radius: 10px;
-  transition: background 0.3s ease-in-out;
-  letter-spacing: 1px;
-}
-
-html::-webkit-scrollbar-track {
-  background: transparent;
+  background-color: rgb(245, 245, 245); 
 }
 
 body {
@@ -110,6 +94,10 @@ input {
   font-family: var(--website-main-font-family);
   padding-bottom: 4px;
   line-height: 4px;
+}
+
+button {
+  font-family: var(--website-main-font-family);
 }
 
 .center {
@@ -135,6 +123,7 @@ input {
   flex-direction: column;
   gap: var(--navbar-gap);
   background-color: rgb(232, 232, 254);
+  position: relative;
 }
 
 .each-sub-menu-wrapper {
@@ -160,6 +149,13 @@ input {
   gap: var(--each-sub-menu-link-content-gap);
 }
 
+.navbar-footer-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  margin-top: auto;
+}
+
 .triangle-up {
   width: 0;
   height: 0;
@@ -174,38 +170,6 @@ input {
   border-left: var(--triangle-size) solid transparent;
   border-right: var(--triangle-size) solid transparent;
   border-top: var(--triangle-size) solid var(--color-triangle-unselected);
-}
-
-.footer-main-title {
-  font-size: var(--footer-main-title-font-size);
-  font-weight: var(--footer-main-title-font-weight);
-}
-
-.footer-socials-wrapper {
-  display: flex;
-  gap: var(--footer-socials-wrapper-gap);
-}
-
-.footer-main-wrapper {
-  padding: var(--footer-main-wrapper-vertical-padding) 0;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.each-social-icon {
-  width: var(--each-social-icon-size);
-  aspect-ratio: 1/1;
-  transition: all var(--each-social-icon-transition-duration) ease 0s;
-  cursor: var(--pointer-hand-dark);
-}
-
-.each-social-icon img {
-  width: 100%;
-  height: 100%;
-}
-
-.each-social-icon:hover {
-  scale: var(--each-social-icon-hover-scale);
 }
 
 .spinner {
@@ -253,4 +217,15 @@ input {
   border-radius: 100%;
   background-color: var(--color-night-blue);
   display: none;
+}
+
+.navbar-view-toggle {
+  width: 21px;
+  height: 21px;
+  background-color: rgba(144, 144, 245, 1);
+  border-radius: 100%;
+  position: absolute;
+  right: calc(-21px / 2);
+  top: 89px;
+  cursor: pointer;
 }
