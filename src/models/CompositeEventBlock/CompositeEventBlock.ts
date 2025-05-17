@@ -230,7 +230,6 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
   callback: Parameters<CompositeEventBlockModel['getPeriodicDataForValidatorSet']>[1]
 ) {
   const { chain_identifier, bottom_timestamp, top_timestamp } = body;
-
   CompositeEventBlock.aggregate([
     { 
       $match: { 
@@ -254,44 +253,49 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
     },
     {
       $project: {
-        leastRecentRecord: {
-          reward: 1,
-          commission: 1,
-          self_stake: 1,
-          total_stake: 1,
-          total_withdraw: 1,
-          reward_prefix_sum: 1,
-          commission_prefix_sum: 1,
-          self_stake_prefix_sum: 1,
-          total_stake_prefix_sum: 1,
-          total_withdraw_prefix_sum: 1,
+        totalReward: {
+          $add: [
+            { $subtract: ["$mostRecentRecord.reward_prefix_sum", "$leastRecentRecord.reward_prefix_sum"] },
+            { $ifNull: ["$leastRecentRecord.reward", 0] }
+          ]
         },
-        mostRecentRecord: {
-          reward_prefix_sum: 1,
-          commission_prefix_sum: 1,
-          self_stake_prefix_sum: 1,
-          total_stake_prefix_sum: 1,
-          total_withdraw_prefix_sum: 1,
-        }
+        totalSelfStake: {
+          $add: [
+            { $subtract: ["$mostRecentRecord.self_stake_prefix_sum", "$leastRecentRecord.self_stake_prefix_sum"] },
+            { $ifNull: ["$leastRecentRecord.self_stake", 0] }
+          ]
+        },
+        totalCommission: {
+          $add: [
+            { $subtract: ["$mostRecentRecord.commission_prefix_sum", "$leastRecentRecord.commission_prefix_sum"] },
+            { $ifNull: ["$leastRecentRecord.commission", 0] }
+          ]
+        },
+        totalStake: {
+          $add: [
+            { $subtract: ["$mostRecentRecord.total_stake_prefix_sum", "$leastRecentRecord.total_stake_prefix_sum"] },
+            { $ifNull: ["$leastRecentRecord.total_stake", 0] }
+          ]
+        },
+        totalWithdraw: {
+          $add: [
+            { $subtract: ["$mostRecentRecord.total_withdraw_prefix_sum", "$leastRecentRecord.total_withdraw_prefix_sum"] },
+            { $ifNull: ["$leastRecentRecord.total_withdraw", 0] }
+          ]
+        },
       }
     }
   ])
+    .hint({ chain_identifier: 1, timestamp: 1, operator_address: 1 })
     .then((records: any) => {
       const mapping: Record<string, any> = {};
       records.forEach((record: any) => {
-
-        const totalReward = (record.mostRecentRecord.reward_prefix_sum - record.leastRecentRecord.reward_prefix_sum || 0) + (record.leastRecentRecord.reward || 0);
-        const totalSelfStake = (record.mostRecentRecord.self_stake_prefix_sum - record.leastRecentRecord.self_stake_prefix_sum || 0) + (record.leastRecentRecord.self_stake || 0);
-        const totalCommission = (record.mostRecentRecord.commission_prefix_sum - record.leastRecentRecord.commission_prefix_sum || 0) + (record.leastRecentRecord.commission || 0);
-        const totalStake = (record.mostRecentRecord.total_stake_prefix_sum - record.leastRecentRecord.total_stake_prefix_sum || 0) + (record.leastRecentRecord.total_stake || 0);
-        const totalWithdraw = (record.mostRecentRecord.total_withdraw_prefix_sum - record.leastRecentRecord.total_withdraw_prefix_sum || 0) + (record.leastRecentRecord.total_withdraw || 0);
-            
         mapping[record._id] = {
-          self_stake: totalSelfStake || 0,
-          reward: totalReward || 0,
-          commission: totalCommission || 0,
-          total_stake: (totalStake || 0),
-          total_withdraw: (totalWithdraw || 0)
+          self_stake: record.totalSelfStake || 0,
+          reward: record.totalReward || 0,
+          commission: record.totalCommission || 0,
+          total_stake: record.totalStake || 0,
+          total_withdraw: record.totalWithdraw || 0
         };
       });
 

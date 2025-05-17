@@ -6,7 +6,7 @@ import { isValidSortOrder } from '../../../utils/isValidSortOrder.js';
 
 export default (req: Request, res: Response): any => {
 
-  type SortBy = 'self_stake' | 'withdraw' | 'ratio' | 'sold'; 
+  type SortBy = 'total_stake' | 'total_withdraw' | 'sold' | 'self_stake' | 'percentage_sold';
 
   const { order, sort_by, bottom_timestamp, top_timestamp, chain_identifier } = req.query;
 

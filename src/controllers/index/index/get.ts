@@ -18,7 +18,7 @@ const indexGetController = (req: Request, res: Response): void => {
     new Promise((resolve) => {
       console.time('response_time');
       Validator.rankValidators(
-        { sort_by: 'ratio', order: 'desc', bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp, chain_identifier: activeNetworkIdentifier, with_photos: true },
+        { sort_by: 'percentage_sold', order: 'asc', bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp, chain_identifier: activeNetworkIdentifier, with_photos: true },
         (err, validators) => {
           console.timeEnd('response_time');
           resolve({ err: err, validators: validators });
@@ -27,7 +27,14 @@ const indexGetController = (req: Request, res: Response): void => {
     }),
   ])
     .then((results: Record<string, any>[]) => {
-      
+      // Validator.getSummaryGraphData({
+      //   chain_identifier: activeNetworkIdentifier,
+      //   bottom_timestamp: bottomTimestamp,
+      //   top_timestamp: topTimestamp
+      // }, (err, results) => {
+      //   if (err) return console.log(err);
+      // })
+
       const [getAllChainsResult, rankValidatorsResult] = results;
       if (
         !getAllChainsResult.value.chains || 
@@ -56,8 +63,10 @@ const indexGetController = (req: Request, res: Response): void => {
         startDay: req.cookies.startDay ? req.cookies.startDay : 'monday',
         currency_type: req.cookies.currency_type ? req.cookies.currency_type : 'native',
         chains,
+        isNavbarClose: req.cookies.isNavbarClose,
         selectedChain: selectedChain ? selectedChain : '',
-        NUMBER_OF_COLUMNS
+        NUMBER_OF_COLUMNS,
+        url: req.originalUrl.replace('/', '')
       });
     });
 };

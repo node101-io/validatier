@@ -9,6 +9,7 @@ window.onload = () => {
   handleValidatorSearch();
   handleCalendarEvents(currentYearValue, currentMonthValue, document.getElementById('calendar-format-toggle').value)
   renderValidators();
+  handleNavbar();
   handleExportEvents();
   handleCurrencyToggle();
   handlePlotButtonClick();

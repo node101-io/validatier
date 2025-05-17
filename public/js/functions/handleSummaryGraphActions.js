@@ -7,6 +7,15 @@ function handleSummaryGraphActions() {
   const dropdownArrowClassName = 'each-network-summary-network-graph-content-dropdown-arrow';
 
   document.body.addEventListener('click', (event) => {
+    let target = event.target;
+    while (target != document.body && !target.classList.contains('each-network-summary-select-option')) target = target.parentNode;
+
+    if (!target.classList.contains('each-network-summary-select-option')) return;
+    document.querySelector('.each-network-summary-select-option-selected').classList.remove('each-network-summary-select-option-selected');
+    target.classList.add('each-network-summary-select-option-selected');
+  })
+
+  document.body.addEventListener('click', (event) => {
     
     let target = event.target;
     while (target != document.body && (!target.classList.contains(headerClassName) && !target.classList.contains(contentClassName))) target = target.parentNode;

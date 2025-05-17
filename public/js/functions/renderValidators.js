@@ -1,145 +1,32 @@
 function shortNumberFormat(num) {
   const sign = num < 0 ? '-' : '';
   num = Math.abs(num);
-  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + 'M';
-  if (num >= 10_000) return Math.floor(num / 1_000) + 'K';
-
-  if (num >= 1_000) return num.toFixed(0);
-  if (num >= 100) return num.toFixed(1);
-  if (num >= 0) return num.toFixed(2);
-
+  if (num >= 1000000) return sign + (num / 1000000).toFixed(1) + 'M';
+  if (num >= 10000) return sign + Math.floor(num / 1000) + 'K';
+  if (num >= 1000) return sign + num.toFixed(0).toString();
+  if (num >= 100) return sign + num.toFixed(1).toString();
+  if (num >= 0) return sign + num.toFixed(2).toString();
   return sign + num.toString();
 }
 
+function getScoreColor (value) {
+  if (value < 25) return { color: 'rgba(19, 167, 25, 1)', check: true };
+  else if (value < 50) return { color: 'rgba(255, 111, 67, 1)', check: false };
+  return { color: 'rgba(184, 34, 0, 1)', check: false };
+}
+
 function getValueWithDecimals(value, currency, exhange_rate, decimals) {
-  const exchangeRate = exhange_rate ? exhange_rate : 0;
-  if (currency.toLowerCase().trim() != 'usd') return `${shortNumberFormat(value / (10 ** decimals))} ${currency}`
-  return `${shortNumberFormat((value / (10 ** decimals)) * exchangeRate)} $`
+  const exchangeRate = exhange_rate || 0;
+  const normalized = value / (10 ** decimals);
+  return {
+    nativeValue: `${shortNumberFormat(normalized)} ${currency}`,
+    usdValue: `$${shortNumberFormat(normalized * exchangeRate)}`
+  }  ;
 }
-
-function createValidatorDetails(validator, activeValidatorHistory) {
-  const wrapper = document.createElement('div');
-  wrapper.classList.add('each-validator-details-content-wrapper');
-  
-  const infoDetails = document.createElement('div');
-  infoDetails.classList.add('each-validator-info-details-content');
-  
-  // Stake Button
-  const stakeButton = document.createElement('a');
-  stakeButton.classList.add('validator-action-button');
-  stakeButton.href = `https://wallet.keplr.app/chains/${validator.chain_identifier}?modal=validator&chain=${validator.chain_id}&validator_address=${validator.operator_address}`;
-  stakeButton.target = '_blank';
-  stakeButton.textContent = 'Stake';
-  infoDetails.appendChild(stakeButton);
-  
-  // Validator Operator Address
-  const operatorAddressDiv = document.createElement('div');
-  operatorAddressDiv.classList.add('validator-operator-address');
-  
-  const addressContent = document.createElement('div');
-  addressContent.classList.add('validator-operator-address-content');
-  
-  const start = document.createElement('div');
-  start.textContent = validator.operator_address.slice(0, 4);
-  addressContent.appendChild(start);
-  
-  const hiddenPart = document.createElement('div');
-  hiddenPart.classList.add('hidden-part');
-  
-  const middleStart = document.createElement('span');
-  middleStart.classList.add('middle-address');
-  middleStart.textContent = validator.operator_address.slice(4, (validator.operator_address.length - 4) / 2);
-  
-  const dots = document.createElement('span');
-  dots.classList.add('dots');
-  dots.textContent = '....';
-  
-  const middleEnd = document.createElement('span');
-  middleEnd.classList.add('middle-address');
-  middleEnd.textContent = validator.operator_address.slice((validator.operator_address.length - 4) / 2, validator.operator_address.length - 4);
-  
-  hiddenPart.append(middleStart, dots, middleEnd);
-  addressContent.appendChild(hiddenPart);
-  
-  const end = document.createElement('div');
-  end.textContent = validator.operator_address.slice(validator.operator_address.length - 4);
-  addressContent.appendChild(end);
-  
-  // Copy Button
-  const copyButton = document.createElement('div');
-  copyButton.classList.add('validator-operator-address-copy-button');
-  const copyImg = document.createElement('img');
-  copyImg.src = '/res/images/clipboard.svg';
-  copyButton.appendChild(copyImg);
-  addressContent.appendChild(copyButton);
-  
-  operatorAddressDiv.appendChild(addressContent);
-  infoDetails.appendChild(operatorAddressDiv);
-  
-  // Textual Info
-  const textualInfoWrapper = document.createElement('div');
-  textualInfoWrapper.classList.add('validator-details-textual-info-wrapper');
-  
-  const websiteInfo = document.createElement('div');
-  websiteInfo.classList.add('each-validator-details-textual-info');
-  websiteInfo.textContent = `Website: ${validator.website}`;
-  
-  const descriptionInfo = document.createElement('div');
-  descriptionInfo.classList.add('each-validator-details-textual-info');
-  descriptionInfo.textContent = `Description: ${validator.description}`;
-  
-  textualInfoWrapper.append(websiteInfo, descriptionInfo);
-  infoDetails.appendChild(textualInfoWrapper);
-  
-  // Inactivity Checker
-  const inactivityWrapper = document.createElement('div');
-  inactivityWrapper.classList.add('validator-details-inactivity-wrapper');
-  
-  let eachValidatorInactivity = [];
-  let isCurrentlyActive = true;
-  
-  activeValidatorHistory.forEach(month => {
-      month.active_validators.forEach(day => {
-          if (!day.pubkeys.includes(validator.pubkey) && isCurrentlyActive) {
-              isCurrentlyActive = false;
-              eachValidatorInactivity.push(`${day.day}/${month.month}/${month.year}`);
-          } else if (day.pubkeys.includes(validator.pubkey) && !isCurrentlyActive) {
-              isCurrentlyActive = true;
-              eachValidatorInactivity.push(`${day.day}/${month.month}/${month.year}`);
-          }
-      });
-  });
-  
-  if (eachValidatorInactivity.length > 0) {
-      const inactivityTitle = document.createElement('div');
-      inactivityTitle.classList.add('each-inactivity-line-display-content', 'center');
-      inactivityTitle.textContent = 'Validator inactivity intervals';
-      inactivityWrapper.appendChild(inactivityTitle);
-      
-      for (let i = 0; i < eachValidatorInactivity.length; i += 2) {
-          const inactivityLine = document.createElement('div');
-          inactivityLine.classList.add('each-inactivity-line-display-content', 'center');
-          inactivityLine.textContent = `from ${eachValidatorInactivity[i]} to ${eachValidatorInactivity[i + 1] ? eachValidatorInactivity[i + 1] : 'today'}`;
-          inactivityWrapper.appendChild(inactivityLine);
-      }
-  } else {
-      const alwaysActive = document.createElement('div');
-      alwaysActive.classList.add('validator-activeness-always-content', 'center');
-      alwaysActive.textContent = 'Validator was always active';
-      inactivityWrapper.appendChild(alwaysActive);
-  }
-  
-  infoDetails.appendChild(inactivityWrapper);
-  wrapper.appendChild(infoDetails);
-  
-  return wrapper;
-}
-
 
 function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
   if (response.err || !response.success) return;
   const data = response.data.validators;
-  const activeValidatorHistory = response.data.activeValidatorHistory; 
 
   document.getElementById('validators-main-wrapper').innerHTML = '';
   renderTableHeader(sort_by, sortOrderMapping[sort_by]);
@@ -201,11 +88,22 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     tdInfo.appendChild(validatorImageDiv);
     tdInfo.appendChild(textualInfoWrapper);
   
-    const createRatioTd = (value) => {
+    const createPercentageSoldTd = (value) => {
       const td = document.createElement('div');
+      const { color, check } = getScoreColor(value)
       td.classList.add('validator-each-numeric-info');
-      td.classList.add('validator-ratio');
-      td.textContent = value;
+      td.classList.add('validator-percentage-sold');
+      td.style.color = color;
+
+      const span = document.createElement('span');
+      span.innerHTML = `%${shortNumberFormat(value)}`;
+      td.appendChild(span);
+      if (check) {
+        const checkImgContent = document.createElement('img');
+        checkImgContent.classList.add('center');
+        checkImgContent.src = '/res/images/check_green.svg';
+        td.appendChild(checkImgContent);
+      }
       return td;
     };
 
@@ -215,41 +113,36 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
 
     const createCurrencyTd = (value) => {
       const td = document.createElement('div');
-      td.setAttribute('native', getValueWithDecimals(value, currentChainSymbol, exchangeRate, currentChainDecimals));
-      td.setAttribute('usd', getValueWithDecimals(value, 'usd', exchangeRate, currentChainDecimals));
       td.classList.add('validator-each-numeric-info');
+      const { nativeValue, usdValue } = getValueWithDecimals(value, currentChainSymbol, exchangeRate, currentChainDecimals);
+      
+      const nativeContentDiv = document.createElement('div');
+      nativeContentDiv.classList.add('validator-each-numeric-info-native')
+      const usdContentDiv = document.createElement('div');
+      usdContentDiv.classList.add('validator-each-numeric-info-usd')
 
-      const currency = document.getElementById('currency-toggle').value == 'native' ? currentChainSymbol : 'usd';
+      nativeContentDiv.innerHTML = nativeValue;
+      usdContentDiv.innerHTML = usdValue;
 
-      td.textContent = getValueWithDecimals(value, currency, exchangeRate, currentChainDecimals);
+      td.appendChild(nativeContentDiv);
+      td.appendChild(usdContentDiv);
       return td;
     };
 
-    const totalStakeTd = createCurrencyTd(validator.total_stake);
-    const totalWithdrawTd = createCurrencyTd(validator.total_withdraw);
+    const delegationTd = createCurrencyTd(validator.total_stake);
+    const totalRewardsTd = createCurrencyTd(validator.total_withdraw);
+    const totalSoldAmountTd = createCurrencyTd(validator.sold);
     const selfStakeTd = createCurrencyTd(validator.self_stake);
-    const rewardTd = createCurrencyTd(validator.reward);
-    const commissionTd = createCurrencyTd(validator.commission);
-    const ratioTd = createRatioTd(shortNumberFormat(validator.ratio));
-    const soldTd = createCurrencyTd(validator.sold);
-  
+    const percentageSoldTd = createPercentageSoldTd(validator.percentage_sold);
+
     tr.appendChild(tdInfo);
-    tr.appendChild(totalStakeTd);
-    tr.appendChild(totalWithdrawTd);
+    tr.appendChild(delegationTd);
+    tr.appendChild(totalRewardsTd);
     tr.appendChild(selfStakeTd);
-    tr.appendChild(rewardTd);
-    tr.appendChild(commissionTd);
-    tr.appendChild(ratioTd);
-    tr.appendChild(soldTd);
+    tr.appendChild(totalSoldAmountTd);
+    tr.appendChild(percentageSoldTd);
   
     document.getElementById('validators-main-wrapper').appendChild(tr);
-
-    const detailsWrapper = createValidatorDetails(validator, activeValidatorHistory);
-    document.getElementById('validators-main-wrapper').appendChild(detailsWrapper);
-
-    const eachValidatorSeperatorDiv = document.createElement('div');
-    eachValidatorSeperatorDiv.classList.add('each-validator-wrapper-seperator-line');
-    document.getElementById('validators-main-wrapper').appendChild(eachValidatorSeperatorDiv)
   }
 }
 
@@ -259,11 +152,9 @@ function renderValidators() {
   const sortOrderMapping = {
     total_stake: '',
     total_withdraw: '',
+    sold: '',
     self_stake: '',
-    reward: '',
-    commission: '',
-    ratio: '',
-    sold: ''
+    percentage_sold: '',
   };
 
   document.getElementById('cancel').addEventListener('click', (event) => {

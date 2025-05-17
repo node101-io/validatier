@@ -10,6 +10,7 @@ import { getCsvExportData } from './functions/getCsvExportData.js';
 import { formatTimestamp } from '../../utils/formatTimestamp.js';
 import { getPubkeysOfActiveValidatorsByHeight } from '../../utils/getPubkeysOfActiveValidatorsByHeight.js';
 import ActiveValidators, { ActiveValidatorsInterface } from '../ActiveValidators/ActiveValidators.js';
+import { NUMBER_OF_COLUMNS } from '../../controllers/Validator/getGraphData/get.js';
 
 const MAX_DATABASE_TEXT_FIELD_LENGTH = 1e4;
 const CHAIN_TO_DECIMALS_MAPPING: Record<string, any> = {
@@ -103,7 +104,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
   rankValidators: (
     body: {
       chain_identifier?: string;
-      sort_by: 'self_stake' | 'withdraw' | 'ratio' | 'sold' | 'total_stake' | 'total_withdraw',
+      sort_by: 'total_stake' | 'total_withdraw' | 'sold' | 'self_stake' | 'percentage_sold',
       bottom_timestamp: number,
       top_timestamp: number,
       order: SortOrder,
@@ -119,7 +120,9 @@ interface ValidatorModel extends Model<ValidatorInterface> {
         reward: number,
         commission: number,
         ratio: number,
-        sold: number
+        sold: number,
+        percentage_sold: number,
+        self_stake_ratio: number
       }[] | null
     ) => any
   ) => any;
@@ -141,7 +144,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
   exportCsv: (
     body: {
       chain_identifier?: string;
-      sort_by: 'self_stake' | 'withdraw' | 'ratio' | 'sold';
+      sort_by: 'total_stake' | 'total_withdraw' | 'sold' | 'self_stake' | 'percentage_sold';
       order: SortOrder;
       bottom_timestamp?: number | null;
       top_timestamp?: number | null;
@@ -150,6 +153,17 @@ interface ValidatorModel extends Model<ValidatorInterface> {
     callback: (
       err: string | null,
       csvDataMapping: any | null
+    ) => any
+  ) => any;
+  getSummaryGraphData: (
+    body: {
+      chain_identifier?: string;
+      bottom_timestamp: number,
+      top_timestamp: number
+    },
+    callback: (
+      err: string | null,
+      summaryGraphData: any
     ) => any
   ) => any;
   updateLastVisitedBlock: (
@@ -408,8 +422,10 @@ validatorSchema.statics.rankValidators = function (
         const eachValidator: any = validators[i];
         const { self_stake = 0, reward = 0, commission = 0, total_stake = 0, total_withdraw = 0 } = validatorRecordMapping[eachValidator.operator_address] || {};
 
-        const ratio = (self_stake || 0) / (reward || (10 ** CHAIN_TO_DECIMALS_MAPPING[`${chain_identifier}`]));
-        const sold = (reward || 0) - (self_stake || 0);
+        const ratio = (self_stake || 0) / ((reward + commission) || (10 ** CHAIN_TO_DECIMALS_MAPPING[`${chain_identifier}`]));
+        const sold = ((reward + commission) || 0) - (self_stake || 0);
+        const percentage_sold = Math.min(Math.abs((sold || 1) / ((reward + commission) || 1)), 1) * 100;
+        const self_stake_ratio = Math.min(Math.abs(self_stake / (total_stake || 1)), 1) * 100;
 
         const pushObjectData = {
           pubkey: eachValidator.pubkey || '',
@@ -424,6 +440,8 @@ validatorSchema.statics.rankValidators = function (
           commission: commission,
           total_stake: total_stake,
           total_withdraw: total_withdraw,
+          percentage_sold: percentage_sold,
+          self_stake_ratio: self_stake_ratio,
           chain_identifier: chain_identifier,
           ratio: ratio,
           sold: sold
@@ -522,6 +540,45 @@ validatorSchema.statics.exportCsv = function (
     }
   )
 }
+
+
+validatorSchema.statics.getSummaryGraphData = function (
+  body: Parameters<ValidatorModel['getSummaryGraphData']>[0],
+  callback: Parameters<ValidatorModel['getSummaryGraphData']>[1],
+) {
+  const { chain_identifier, bottom_timestamp, top_timestamp } = body;
+
+  console.time('big_graph');
+  CompositeEventBlock.aggregate([
+    {
+      $match: {
+        chain_identifier: chain_identifier,
+        timestamp: {
+          $gte: bottom_timestamp,
+          $lte: top_timestamp,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          year: '$year',
+          month: '$month',
+        },
+        selfStakeSum: { $sum: "$self_stake" },
+        rewardSum: { $sum: "$reward" },
+        commissionSum: { $sum: "$commission" },
+      }
+    }
+  ])
+    .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1 })
+    .then((results: any) => { 
+      console.timeEnd('big_graph');
+      return callback(null, results)
+    })
+    .catch(err => callback(err, null))
+}
+
 
 validatorSchema.statics.updateLastVisitedBlock = function (
   body: Parameters<ValidatorModel['updateLastVisitedBlock']>[0],
