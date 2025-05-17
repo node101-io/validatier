@@ -1,6 +1,4 @@
 
-const FIRST_AVAILABLE_BLOCK_DATE = '2019-12-11T16:11:34Z';
-
 function getDateRange(currentDate) {
   const currentDateObj = new Date(currentDate);
   const currentYear = currentDateObj.getFullYear();
@@ -15,14 +13,6 @@ function getDateRange(currentDate) {
   return {
     'all-time': {
       bottom: formatDate(new Date(allTimeBottomTimestamp)),
-      top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
-    },
-    'last-week': {
-      bottom: formatDate(new Date(currentYear, currentMonth, currentDay - currentDayOfWeek - 7)),
-      top: formatDate(new Date(currentYear, currentMonth, currentDay - currentDayOfWeek - 1))
-    },
-    'last-7-days': {
-      bottom: formatDate(new Date(currentYear, currentMonth, currentDay - 7)),
       top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
     },
     'last-30-days': {

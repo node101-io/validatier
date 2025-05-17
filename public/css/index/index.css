@@ -1003,15 +1003,27 @@
 
 .selected-date-bottom, .selected-date-top {
   border: var(--selected-date-border-size) solid var(--color-middle-date-background);
-  background-color: var(--color-selected-date-background);
-}
-
-.selected-date-bottom {
-  border-radius: var(--selected-date-border-radius) 0 0 var(--selected-date-border-radius);
+  background-color: var(--color-middle-date-background);
+  position: relative;
+  z-index: 10;
 }
 
 .selected-date-top {
-  border-radius: 0 var(--selected-date-border-radius) var(--selected-date-border-radius) 0;
+  border-radius: 0 var(--selected-date-border-radius) var(--selected-date-border-radius) 0 !important;
+}
+
+.selected-date-bottom {
+  border-radius: var(--selected-date-border-radius) 0 0 var(--selected-date-border-radius) !important;
+}
+
+.selected-date-bottom::after, .selected-date-top::after {
+  content: '';
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  border-radius: 100%;
+  position: absolute;
+  background-color: var(--color-selected-date-background);
 }
 
 .selected-date-bottom:hover, .selected-date-top:hover {

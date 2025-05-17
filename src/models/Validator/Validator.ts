@@ -157,9 +157,10 @@ interface ValidatorModel extends Model<ValidatorInterface> {
   ) => any;
   getSummaryGraphData: (
     body: {
-      chain_identifier?: string;
-      bottom_timestamp: number,
-      top_timestamp: number
+      chain_identifier: string;
+      bottom_timestamp: number;
+      top_timestamp: number;
+      by: 'd' | 'm' | 'y';
     },
     callback: (
       err: string | null,
@@ -546,9 +547,12 @@ validatorSchema.statics.getSummaryGraphData = function (
   body: Parameters<ValidatorModel['getSummaryGraphData']>[0],
   callback: Parameters<ValidatorModel['getSummaryGraphData']>[1],
 ) {
-  const { chain_identifier, bottom_timestamp, top_timestamp } = body;
+  const { chain_identifier, bottom_timestamp, top_timestamp, by } = body;
 
-  console.time('big_graph');
+  const groupId: Record<string, string> = { year: '$year' };
+  if (by == 'm' || by == 'd') groupId.month = '$month';
+  if (by == 'd') groupId.day = '$day';
+  
   CompositeEventBlock.aggregate([
     {
       $match: {
@@ -561,10 +565,7 @@ validatorSchema.statics.getSummaryGraphData = function (
     },
     {
       $group: {
-        _id: {
-          year: '$year',
-          month: '$month',
-        },
+        _id: groupId,
         selfStakeSum: { $sum: "$self_stake" },
         rewardSum: { $sum: "$reward" },
         commissionSum: { $sum: "$commission" },
@@ -573,7 +574,6 @@ validatorSchema.statics.getSummaryGraphData = function (
   ])
     .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1 })
     .then((results: any) => { 
-      console.timeEnd('big_graph');
       return callback(null, results)
     })
     .catch(err => callback(err, null))
