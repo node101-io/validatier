@@ -40,12 +40,12 @@ block content
         options: ['D', 'W', 'M', 'Y'],
         selected: 'M'
       },
-      {
-        type: 'dropdown',
-        id: 'network-summary-filters',
-        title: 'Filter',
-        options: ['Capitulation', 'Delegation', 'Rewards', 'Withdrawn']
-      },
+      //- {
+      //-   type: 'dropdown',
+      //-   id: 'network-summary-filters',
+      //-   title: 'Filter',
+      //-   options: ['Capitulation', 'Delegation', 'Rewards', 'Withdrawn']
+      //- },
     ]
     
     const metrics = [
@@ -175,129 +175,129 @@ block content
         let totalWithdrawn = 0;
         let totalSelfStakeRatio = 0;
         let numberOfValidatorsVisited = 0;
-      if !queryValidator
-        .network-summary-main-wrapper 
-          .network-summary-main-wrapper-title(class='each-section-title-content') Network Summary
-          -
-            const stats = [
-              {
-                title: 'Percentage sold',
-                id_native: 'summary-percentage-sold-native',
-                id_usd: null,
-                additional_class: 'summary-percentage-text-native',
-                value_usd: null,
-                percentage_change: '17.3%',
-                unit: '%'
-              },
-              {
-                title: 'Self Stake Amount',
-                id_native: 'summary-self-stake-amount-native',
-                id_usd: 'summary-self-stake-amount-usd',
-                percentage_change: '17.3%',
-                unit: selectedChain.symbol || '$ATOM'
-              },
-              {
-                title: 'Average Self Staked Ratio',
-                id_native: 'summary-average-self-stake-ratio-native',
-                id_usd: null,
-                additional_class: 'summary-percentage-text-native',
-                percentage_change: '17.3%',
-                unit: '%'
-              },
-            ]
-          .network-summary-network-stats-main-wrapper
-            each stat in stats
-              .each-network-summary-stat
-                .each-network-summary-stat-column
-                  .each-network-summary-stat-header-title= stat.title
-                  if stat.unit
-                    .each-network-summary-stat-content(id=`${stat.id_native}` class=`${stat.id_native} ${stat.additional_class}`)
-                  if stat.unit
-                    .each-network-summary-stat-footer-value(id=`${stat.id_usd}` class=`${stat.id_usd}`)
-                  else 
-                    .each-network-summary-stat-content(class='stat-value-font-large')
-                  .each-network-summary-stat-footer-change 
-                    span(class='percentage-change-value-content') → #{stat.percentage_change} 
-                .each-network-summary-stat-column
-                  if `${stat.id_native}` == 'summary-percentage-sold-native'
-                    .percentage-sold-main-circle
-                      span
-                      .percentage-sold-inner-circle(class=`${stat.id_native}`)
-          .network-summary-network-graph-main-wrapper
-            .network-summary-network-graph-metrics-wrapper
-              .network-summary-network-graph-metrics-wrapper-title(class='each-section-title-content') Graph Metrics
-              each metric in metrics 
-                .each-metric-content-wrapper
-                  .each-metric-content-wrapper-header
-                    .each-metric-content-wrapper-header-icon(style=`background-color: ${metric.color}`)
-                    .each-metric-content-wrapper-header-title= metric.title
-                  .each-metric-content-wrapper-content
-                    .each-metric-content-wrapper-content-value-native(id=`${metric.id}-native` class=`${metric.id}-native`)
-                    .each-metric-content-wrapper-content-value-usd(id=`${metric.id}-usd` class=`${metric.id}-usd`)
-                  .each-metric-content-wrapper-footer 
-                    span(class='percentage-change-value-content') → #{metric.percentage_change} 
-            .network-summary-network-graph-content-wrapper
-              .network-summary-network-graph-content-header
-                .network-summary-network-graph-content-textual
-                  .network-summary-network-graph-content-title Reward Flow Overview
-                  .network-summary-network-graph-content-description Shows how validators respond to changes in total capitulation and delegation in the market
-                .network-summary-network-graph-content-filters-wrapper
-                  each menu in summary_graph_menus
-                    if menu.type == 'dropdown'
-                      .each-network-summary-network-graph-content-dropdown-wrapper
-                        .each-network-summary-network-graph-content-dropdown-header
-                          span= menu.title
-                          img.each-network-summary-network-graph-content-dropdown-arrow(src='/res/images/chevron_aestethic.svg' class='center')
-                        .each-network-summary-network-graph-content-dropdown-content
-                          each option in menu.options 
-                            .each-network-summary-network-graph-content-each-dropdown= option
-                    else 
-                      .each-network-summary-select-wrapper 
-                        each option in menu.options 
-                          .each-network-summary-select-option(class=`${option == menu.selected ? 'each-network-summary-select-option-selected' : ''}`)= option
-
-              .network-summary-network-graph-content#network-summary-graph-container
-                script.
-                  createNetworkSummaryGraph();
-      if `${url}` == 'validators'
+      
+      .network-summary-main-wrapper#network-summary-main-wrapper(class=`${(queryValidator || url == 'validators') ? 'section-hidden' : ''}`)
+        .network-summary-main-wrapper-title(class='each-section-title-content') Network Summary
         -
-          const leaderboards = [
+          const stats = [
             {
-              id: 'percentage_sold',
-              title: 'Percentage Sold',
+              title: 'Percentage sold',
               id_native: 'summary-percentage-sold-native',
               id_usd: null,
               additional_class: 'summary-percentage-text-native',
+              value_usd: null,
               percentage_change: '17.3%',
-              unit: '%',
-              triangle_direction: 'up'
+              unit: '%'
             },
             {
-              id: 'self_stake',
               title: 'Self Stake Amount',
               id_native: 'summary-self-stake-amount-native',
               id_usd: 'summary-self-stake-amount-usd',
               percentage_change: '17.3%',
-              unit: selectedChain.symbol || '$ATOM',
-              dropdown_selected: 'amount',
-              dropdown: {
-                amount: 'by amount',
-                percentage: 'by percentage'
-              },
-              triangle_direction: 'down'
+              unit: selectedChain.symbol || '$ATOM'
             },
             {
-              id: 'sold',
-              title: 'Total Sold Amount',
-              id_native: 'metric-total-sold-amount-native',
-              id_usd: 'metric-total-sold-amount-usd',
+              title: 'Average Self Staked Ratio',
+              id_native: 'summary-average-self-stake-ratio-native',
+              id_usd: null,
+              additional_class: 'summary-percentage-text-native',
               percentage_change: '17.3%',
-              unit: selectedChain.symbol || '$ATOM',
-              triangle_direction: 'down'
+              unit: '%'
             },
           ]
-
-        .validators-leaderboards-main-wrapper 
+        .network-summary-network-stats-main-wrapper
+          each stat in stats
+            .each-network-summary-stat
+              .each-network-summary-stat-column
+                .each-network-summary-stat-header-title= stat.title
+                if stat.unit
+                  .each-network-summary-stat-content(id=`${stat.id_native}` class=`${stat.id_native} ${stat.additional_class}`)
+                if stat.unit
+                  .each-network-summary-stat-footer-value(id=`${stat.id_usd}` class=`${stat.id_usd}`)
+                else 
+                  .each-network-summary-stat-content(class='stat-value-font-large')
+                .each-network-summary-stat-footer-change 
+                  span(class='percentage-change-value-content') → #{stat.percentage_change} 
+              .each-network-summary-stat-column
+                if `${stat.id_native}` == 'summary-percentage-sold-native'
+                  .percentage-sold-main-circle
+                    span
+                    .percentage-sold-inner-circle(class=`${stat.id_native}`)
+        .network-summary-network-graph-main-wrapper
+          .network-summary-network-graph-metrics-wrapper
+            .network-summary-network-graph-metrics-wrapper-title(class='each-section-title-content') Graph Metrics
+            each metric in metrics 
+              .each-metric-content-wrapper
+                .each-metric-content-wrapper-header
+                  .each-metric-content-wrapper-header-icon(style=`background-color: ${metric.color}`)
+                  .each-metric-content-wrapper-header-title= metric.title
+                .each-metric-content-wrapper-content
+                  .each-metric-content-wrapper-content-value-native(id=`${metric.id}-native` class=`${metric.id}-native`)
+                  .each-metric-content-wrapper-content-value-usd(id=`${metric.id}-usd` class=`${metric.id}-usd`)
+                .each-metric-content-wrapper-footer 
+                  span(class='percentage-change-value-content') → #{metric.percentage_change} 
+          .network-summary-network-graph-content-wrapper
+            .network-summary-network-graph-content-header
+              .network-summary-network-graph-content-textual
+                .network-summary-network-graph-content-title Reward Flow Overview
+                .network-summary-network-graph-content-description Shows how validators respond to changes in total capitulation and delegation in the market
+              .network-summary-network-graph-content-filters-wrapper
+                each menu in summary_graph_menus
+                  if menu.type == 'dropdown'
+                    .each-network-summary-network-graph-content-dropdown-wrapper
+                      .each-network-summary-network-graph-content-dropdown-header
+                        span= menu.title
+                        img.each-network-summary-network-graph-content-dropdown-arrow(src='/res/images/chevron_aestethic.svg' class='center')
+                      .each-network-summary-network-graph-content-dropdown-content
+                        each option in menu.options 
+                          .each-network-summary-network-graph-content-each-dropdown= option
+                  else 
+                    .each-network-summary-select-wrapper 
+                      each option in menu.options 
+                        .each-network-summary-select-option(class=`${option == menu.selected ? 'each-network-summary-select-option-selected' : ''}`)= option
+            .network-summary-network-graph-content#network-summary-graph-container
+              script.
+                createNetworkSummaryGraph();
+      
+      -
+        const leaderboards = [
+          {
+            id: 'percentage_sold',
+            title: 'Percentage Sold',
+            id_native: 'summary-percentage-sold-native',
+            id_usd: null,
+            additional_class: 'summary-percentage-text-native',
+            percentage_change: '17.3%',
+            unit: '%',
+            triangle_direction: 'up'
+          },
+          {
+            id: 'self_stake',
+            title: 'Self Stake Amount',
+            id_native: 'summary-self-stake-amount-native',
+            id_usd: 'summary-self-stake-amount-usd',
+            percentage_change: '17.3%',
+            unit: selectedChain.symbol || '$ATOM',
+            dropdown_selected: 'amount',
+            dropdown: {
+              amount: 'by amount',
+              percentage: 'by percentage'
+            },
+            triangle_direction: 'down'
+          },
+          {
+            id: 'sold',
+            title: 'Total Sold Amount',
+            id_native: 'metric-total-sold-amount-native',
+            id_usd: 'metric-total-sold-amount-usd',
+            percentage_change: '17.3%',
+            unit: selectedChain.symbol || '$ATOM',
+            triangle_direction: 'down'
+          },
+        ]
+      .validators-leaderboards-all-wrapper#validators-leaderboards-all-wrapper(class=`${url == 'validators' ? '' : 'section-hidden'}`)
+        .each-section-title-content Leaderboards
+        .validators-leaderboards-main-wrapper
           each leaderboard in leaderboards
             - const sortedValidators = ([...validators].sort((a, b) => (a[leaderboard.id] || 0) - (b[leaderboard.id] || 0))).slice(0, 10);
             .each-leaderboard-main-wrapper 
@@ -333,32 +333,31 @@ block content
                   div
                   div
                   div
-      if queryValidator
-        - const validator = JSON.parse(queryValidator)
-        .validator-details-main-wrapper 
+        - const validator = queryValidator ? JSON.parse(queryValidator) : {}
+        .validator-details-main-wrapper#validator-details-main-wrapper(class=`${queryValidator ? '' : 'section-hidden'}`)
           .validator-details-header-wrapper(class='body-wrapper-cell')
             .validator-details-main-info
-              img.validator-details-image#validator-details-image(src=validator.temporary_image_uri)
+              img.validator-details-image#validator-details-image(src=(validator.temporary_image_uri || ''))
               .validator-details-textual-wrapper
-                .validator-details-moniker#validator-details-moniker= validator.moniker
+                .validator-details-moniker#validator-details-moniker= validator.moniker || ''
                 .validator-operator-address
                   .validator-operator-address
-                    .validator-operator-address-content#validator-details-operator-address(operator_address=`${validator.operator_address}`)
-                      div= validator.operator_address.slice(0,4)
+                    .validator-operator-address-content#validator-details-operator-address(operator_address=`${validator.operator_address || ''}`)
+                      div= queryValidator ? validator.operator_address.slice(0,4) : ''
                       .hidden-part
-                        span.middle-address= validator.operator_address.slice(4, (validator.operator_address.length - 4) / 2)
+                        span.middle-address= queryValidator ? validator.operator_address.slice(4, (validator.operator_address.length - 4) / 2) : ''
                         span.dots ....
-                        span.middle-address= validator.operator_address.slice((validator.operator_address.length - 4) / 2, validator.operator_address.length - 4)
-                      div= validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)
+                        span.middle-address= queryValidator ? validator.operator_address.slice((validator.operator_address.length - 4) / 2, validator.operator_address.length - 4) : ''
+                      div= queryValidator ? validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length) : ''
                       .validator-operator-address-copy-button
                         img(src='/res/images/clipboard.svg')
             .validators-details-actions-wrapper
               a(href=`${validator.website}` target='_blank').each-validator-details-action-content
                 img(src='/res/images/web.svg')
                 span Website
-              a(href=`https://www.mintscan.io/cosmos/validators/${validator.operator_address}` target='_blank').each-validator-details-action-content 
+              a(href=`https://www.mintscan.io/cosmos/validators/${validator.operator_address || ''}` target='_blank').each-validator-details-action-content 
                 span Explorer
-              a(href=`https://wallet.keplr.app/chains/${selectedChain.name}?modal=staking&chain=${selectedChain.chain_id}&validator_address=${validator.operator_address}` target='_blank' class='each-validator-details-action-stake center').each-validator-details-action-content
+              a(href=`https://wallet.keplr.app/chains/${selectedChain.name}?modal=staking&chain=${selectedChain.chain_id}&validator_address=${validator.operator_address || ''}` target='_blank' class='each-validator-details-action-stake center').each-validator-details-action-content
                 span Stake
           .validator-details-stats-wrapper
             -
@@ -374,11 +373,11 @@ block content
                 .each-validator-stat-content-wrapper
                   .each-validator-stat-content
                     if stat.field == 'commission_rate'
-                      .each-network-summary-stat-content(id=`${stat.id}-native` class=`${stat.id}-native ${stat.additional_class}`)= formatCommission(validator[`${stat.field}`])
+                      .each-network-summary-stat-content(id=`${stat.id}-native` class=`${stat.id}-native ${stat.additional_class}`)= queryValidator ? formatCommission(validator[`${stat.field}`]) : ''
                     else
-                      .each-network-summary-stat-content(id=`${stat.id}-native` class=`${stat.id}-native ${stat.additional_class}`)= stat.type == 'percentage' ? '%' + shortNumberFormat(validator[`${stat.field}`]) : getValue(validator[`${stat.field}`], symbol)
+                      .each-network-summary-stat-content(id=`${stat.id}-native` class=`${stat.id}-native ${stat.additional_class}`)= queryValidator ? stat.type == 'percentage' ? '%' + shortNumberFormat(validator[`${stat.field}`]) : getValue(validator[`${stat.field}`], symbol) : ''
                     if stat.usdContent
-                      .each-network-summary-stat-footer(id=`${stat.id}-usd` class=`${stat.id}-usd`)= getValue(validator[`${stat.field}`], 'usd')
+                      .each-network-summary-stat-footer(id=`${stat.id}-usd` class=`${stat.id}-usd`)= queryValidator ? getValue(validator[`${stat.field}`], 'usd') : ''
                   .each-validator-stat-helper(class=`${stat.percentageChange ? 'percentage-change-value-content' : ''}`)=stat.helperText || stat.percentageChange
           .network-summary-network-graph-main-wrapper
             .network-summary-network-graph-metrics-wrapper
@@ -413,8 +412,9 @@ block content
                         each option in menu.options 
                           .each-network-summary-select-option(class=`${option == menu.selected ? 'each-network-summary-select-option-selected' : ''}`)= option
               .network-summary-network-graph-content#validator-graph-container
-                script.
-                  generateGraph(!{JSON.stringify(validator)})
+                if queryValidator
+                  script.
+                    generateGraph(!{JSON.stringify(validator)})
       .all-validators-main-wrapper
         .each-section-title-content Validators
         .table-main-wrapper

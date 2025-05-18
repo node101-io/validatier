@@ -149,6 +149,7 @@ input {
   align-items: center;
   gap: var(--each-sub-menu-link-content-gap);
   transition: inherit;
+  cursor: var(--pointer-hand-dark);
 }
 
 .navbar-link-selected .each-sub-menu-link-title {

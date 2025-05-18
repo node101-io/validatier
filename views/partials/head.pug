@@ -83,7 +83,7 @@ html(lang='tr')
               .each-sub-menu-title= subMenu.title 
               .each-sub-menu-links-wrapper 
                 each link in subMenu.links 
-                  .each-sub-menu-link-content(class=`${link.id.includes(url) ? 'navbar-link-selected' : ''}`)
+                  .each-sub-menu-link-content(id=`${link.id[0]}` class=`${link.id.includes(url) ? 'navbar-link-selected' : ''}`)
                     img.each-sub-menu-link-icon(class='navbar-icon' src=`/res/images/navbar/${link.icon}` alt='node101')
                     .each-sub-menu-link-title(class='navbar-text')= link.title
         -

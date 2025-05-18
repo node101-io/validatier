@@ -168,6 +168,20 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       summaryGraphData: GraphDataInterface | null
     ) => any
   ) => any;
+  getInitialTotal: (
+    body: {
+      chain: ChainInterface;
+      bottom_timestamp: number;
+    },
+    callback: (
+      err: string | null,
+      initialTotalMapping: {
+        percentage_sold: number;
+        self_stake: number;
+        self_stake_ratio: number;
+      } | null
+    ) => any
+  ) => any;
   updateLastVisitedBlock: (
     body: { chain_identifier: string, block_height?: number, block_time?: Date },
     callback: (
@@ -541,6 +555,14 @@ validatorSchema.statics.exportCsv = function (
       })
     }
   )
+}
+
+validatorSchema.statics.getInitialTotal = function (
+  body: Parameters<ValidatorModel['getInitialTotal']>[0],
+  callback: Parameters<ValidatorModel['getInitialTotal']>[1],
+) {
+  const { chain, bottom_timestamp } = body;
+
 }
 
 

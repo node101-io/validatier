@@ -78,7 +78,7 @@ const indexGetController = (req: Request, res: Response): void => {
         NUMBER_OF_COLUMNS,
         url: req.originalUrl.replace('/', ''),
         cacheSummaryGraphDataMapping,
-        queryValidator: JSON.stringify(queryValidator)
+        queryValidator: queryValidator ? JSON.stringify(queryValidator) : null
       });
     });
 };

@@ -528,7 +528,7 @@
 .header-main-wrapper {
   width: calc(var(--header-main-wrapper-width) - (var(--header-main-wrapper-horizontal-padding) * 2));
   padding: var(--header-main-wrapper-vertical-padding) var(--header-main-wrapper-horizontal-padding);
-  padding-bottom: 0px;
+  padding-bottom: 20px;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -1834,7 +1834,7 @@
 
 .each-section-title-content {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   color: rgba(124, 112, 195, 1);
 }
 
@@ -2208,6 +2208,7 @@
   height: 352px;
   display: flex;
   gap: 20px;
+  margin-top: 10px;
 }
 
 .each-leaderboard-main-wrapper {
@@ -2417,4 +2418,9 @@
   position: absolute;
   left: 0;
   top: 0;
+}
+
+.section-hidden {
+  height: 0px;
+  overflow: hidden;
 }

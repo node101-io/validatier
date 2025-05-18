@@ -202,12 +202,19 @@ function generateGraph (validator) {
 function handlePlotButtonClick () {
 
   document.body.addEventListener('click', async (event) => {
-    
     let target = event.target;
     while (target != document.body && !target.classList.contains('each-validator-wrapper')) target = target.parentNode;
     if (!target.classList.contains('each-validator-wrapper')) return;
 
-    const validator = JSON.parse(target.getAttribute('validator'));    
+    const validator = JSON.parse(target.getAttribute('validator'));
+    document.getElementById('network-summary-main-wrapper').classList.add('section-hidden');
+    document.getElementById('validator-details-main-wrapper').classList.remove('section-hidden');
+    document.getElementById('all-main-wrapper').scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+    history.pushState(null, '', `/?validator=${validator.operator_address}`);
     generateGraph(validator)
   });
 }
