@@ -15,6 +15,7 @@ import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsIm
 import { initDB } from './utils/levelDb.js';
 import { Job_SaveChains } from './cron/jobs/Job_SaveChains.js';
 import { getGenesisTxs } from './utils/getGenesisTxs.js';
+import { startCronJobs } from './cron/startCronJobs.js';
 
 const app: Express = express();
 const PORT: number = 3000;

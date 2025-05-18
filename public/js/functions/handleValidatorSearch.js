@@ -10,7 +10,6 @@ function handleValidatorSearch () {
     const monikers = Array.from(document.querySelectorAll('.validator-moniker')).map(each => each.children[0].children[0].innerHTML);
     const operatorAddresses = Array.from(document.querySelectorAll('.operator-address')).map(each => each.id);  
 
-    console.log(operatorAddresses)
     document.documentElement.style.setProperty("--scrollbar-opacity", "1");
     if (!validatorFilterInput.value || validatorFilterInput.value.length <= 0) return document.querySelectorAll('.each-validator-wrapper').forEach(each => {
       each.style.display = 'flex';

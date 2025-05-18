@@ -9,6 +9,11 @@ function shortNumberFormat(num) {
   return sign + num.toString();
 }
 
+function formatCommission(value) {
+  if (value.includes('.')) return `${(parseInt(value) * 100)}%`;
+  return `${parseInt(value / 1e16)}%`;
+}
+
 function getScoreColor (value) {
   if (value < 25) return { color: 'rgba(19, 167, 25, 1)', check: true };
   else if (value < 50) return { color: 'rgba(255, 111, 67, 1)', check: false };

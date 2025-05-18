@@ -383,12 +383,13 @@
   
   --currency-switch-wrapper-horizontal-padding: 5px;
   
-  --validator-graph-wrapper-min-width: 80%;
-  --validator-graph-wrapper-max-width: 80%;
-  --validator-graph-wrapper-height: 300px;
+  --validator-graph-wrapper-min-width: 100%;
+  --validator-graph-wrapper-max-width: 100%;
+  --validator-graph-wrapper-height: 280px;
   --validator-graph-wrapper-transition-duration: 0.5s;
-  --validator-graph-wrapper-vertical-padding: 50px;
-  --validator-graph-wrapper-horizontal-padding: 100px;
+  --validator-graph-wrapper-vertical-padding: 10px;
+  --validator-graph-wrapper-horizontal-padding: 0;
+  --validator-graph-wrapper-bottom-padding: 0px;
   
   --each-data-point-max-width: 10px;
   --each-data-point-min-width: 10px;
@@ -417,23 +418,25 @@
   --each-data-point-value-display-title-font-weight: 600;
   --each-data-point-value-display-title-line-height: 12px;
   
-  --horizontal-axis-label-font-size: 16px;
-  --horizontal-axis-label-transform-rotate-deg: 45deg;
+  --horizontal-axis-label-font-size: 8px;
+  --horizontal-axis-label-font-weight: 400;
+  --horizontal-axis-label-transform-rotate-deg: 0deg;
   --horizontal-axis-label-transition-duration: 0s;
   --horizontal-axis-label-width: 20px;
-  --horizontal-axis-label-bottom: -10%;
+  --horizontal-axis-label-bottom: 0;
   --horizontal-axis-label-left: -10px;
   --horizontal-axis-label-z-index: 20;
   
   --each-data-point-horizontal-label-hovered-font-weight: 800;
   
-  --vertical-axis-labels-width: 100px;
-  --vertical-axis-labels-width-int: 100;
-  --vertical-axis-labels-border-right-size: 0.5px;
+  --vertical-axis-labels-width: 75px;
+  --vertical-axis-labels-width-int: 75;
+  --vertical-axis-labels-border-right-size: 0px;
 
-  --each-vertical-label-font-size: 14px;
+  --each-vertical-label-font-size: 12px;
   --each-vertical-label-margin-right: 20px;
   --each-vertical-label-width: 40px;
+  --each-vertical-label-color: rgba(124, 112, 195, 1);
   
   --graph-range-paint-bar-opacity: 0.75;
   --each-data-indicator-vertical-line-border-right-size: 2px;
@@ -444,7 +447,7 @@
   
   --graph-wrapper-horizontal-labels-background-absolute-height: 50px;
   --graph-wrapper-horizontal-labels-background-absolute-z-index: 10;
-  --graph-wrapper-horizontal-labels-background-absolute-border-size: 0.5px;
+  --graph-wrapper-horizontal-labels-background-absolute-border-size: 0;
   
   --graph-visibility-legend-wrapper-padding: 4px;
   
@@ -718,7 +721,7 @@
   justify-content: space-between !important;
   background-color: var(--header-main-background);
   padding: var(--network-switch-header-padding);
-  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-size);
+  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
 }
 
 .network-switch-header-main {
@@ -884,7 +887,7 @@
   gap: var(--selected-range-gap);
   padding: var(--selected-range-padding);
   background-color: var(--header-main-background);
-  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-size);
+  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
   border-radius: 16px;
 }
 
@@ -1541,6 +1544,7 @@
   transition: all var(--validator-graph-wrapper-transition-duration) ease-in-out 0s;
   overflow: hidden;
   padding: var(--validator-graph-wrapper-vertical-padding) var(--validator-graph-wrapper-horizontal-padding);
+  padding-bottom: var(--validator-graph-wrapper-bottom-padding);
   cursor: var(--pointer-hand-click-dark);
 }
 
@@ -1630,6 +1634,7 @@
 
 .horizontal-axis-label {
   font-size: var(--horizontal-axis-label-font-size);
+  font-weight: var(--horizontal-axis-label-font-weight);
   transform-origin: center;
   transform: rotateZ(var(--horizontal-axis-label-transform-rotate-deg));
   transition: font-weight var(--horizontal-axis-label-transition-duration) ease 0s;
@@ -1651,6 +1656,7 @@
   display: flex;
   flex-direction: column-reverse;
   justify-content: space-between;
+  text-wrap: nowrap;
   align-items: center;
   bottom: 0;
   border-right: var(--vertical-axis-labels-border-right-size) solid var(--color-triangle-unselected);
@@ -1660,7 +1666,9 @@
   font-size: var(--each-vertical-label-font-size);
   margin-right: var(--each-vertical-label-margin-right);
   width: var(--each-vertical-label-width);
+  color: var(--each-vertical-label-color);
   text-align: end;
+  text-wrap: nowrap;
 }
 
 .graph-range-paint-bar {
@@ -1703,7 +1711,6 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  background-color: var(--color-powder-blue);
   z-index: var(--graph-wrapper-horizontal-labels-background-absolute-z-index);
   border-top: var(--graph-wrapper-horizontal-labels-background-absolute-border-size) solid var(--color-triangle-unselected);
 }
@@ -1913,10 +1920,15 @@
 
 .network-summary-network-graph-content-wrapper {
   width: calc(100% - 300px - 50px);
+  height: 314;
   padding: 25px;
   background-color: var(--body-main-wrapper-background);
   border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
   border-radius: 20px;
+}
+
+.network-summary-network-graph-content {
+  width: 100%;
 }
 
 .network-summary-network-graph-content-title {
@@ -2395,4 +2407,14 @@
   aspect-ratio: 1/1;
   border-radius: 100%;
   background-color: rgba(144, 144, 245, 1);
+}
+
+.inactivity-display-background-area {
+  height: 100%;
+  background-color: red;
+  opacity: 0.1;
+  z-index: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
 }

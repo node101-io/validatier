@@ -86,17 +86,12 @@ export default (req: Request, res: Response): any => {
 
             const { self_stake = 0, reward = 0, commission = 0, total_stake = 0, total_withdraw = 0 } = result[operator_address] || {};
 
-            const ratio = (self_stake || 0) / (reward || (10 ** 10e6));
-            const sold = (reward || 0) - (self_stake || 0);
-
             const data = {
               success: true,
               data: {
-                self_stake: self_stake || 1,
-                withdraw: reward || 1,
-                commission: commission || 1,
-                ratio: ratio || 1,
-                sold: sold || 1,
+                total_stake: total_stake || 1,
+                total_withdraw: total_withdraw || 1,
+                total_sold: ((reward + commission) - self_stake) || 1,
                 timestamp: bottomTimestamp + i * stepValue,
                 index: i
               },

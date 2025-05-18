@@ -11,6 +11,7 @@ import { formatTimestamp } from '../../utils/formatTimestamp.js';
 import { getPubkeysOfActiveValidatorsByHeight } from '../../utils/getPubkeysOfActiveValidatorsByHeight.js';
 import ActiveValidators, { ActiveValidatorsInterface } from '../ActiveValidators/ActiveValidators.js';
 import { NUMBER_OF_COLUMNS } from '../../controllers/Validator/getGraphData/get.js';
+import { GraphDataInterface } from '../CacheSummaryGraph/CacheSummaryGraph.js';
 
 const MAX_DATABASE_TEXT_FIELD_LENGTH = 1e4;
 const CHAIN_TO_DECIMALS_MAPPING: Record<string, any> = {
@@ -160,11 +161,11 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       chain_identifier: string;
       bottom_timestamp: number;
       top_timestamp: number;
-      by: 'd' | 'm' | 'y';
+      by: string;
     },
     callback: (
       err: string | null,
-      summaryGraphData: any
+      summaryGraphData: GraphDataInterface | null
     ) => any
   ) => any;
   updateLastVisitedBlock: (
@@ -549,9 +550,14 @@ validatorSchema.statics.getSummaryGraphData = function (
 ) {
   const { chain_identifier, bottom_timestamp, top_timestamp, by } = body;
 
-  const groupId: Record<string, string> = { year: '$year' };
+  const groupId: Record<string, any> = { year: '$year' };
   if (by == 'm' || by == 'd') groupId.month = '$month';
-  if (by == 'd') groupId.day = '$day';
+  if (by === 'd') 
+    groupId.day = {
+      $floor: {
+        $divide: ['$day', 4]
+      }
+    };
   
   CompositeEventBlock.aggregate([
     {
@@ -566,11 +572,17 @@ validatorSchema.statics.getSummaryGraphData = function (
     {
       $group: {
         _id: groupId,
-        selfStakeSum: { $sum: "$self_stake" },
-        rewardSum: { $sum: "$reward" },
-        commissionSum: { $sum: "$commission" },
+        timestamp: { $first: '$timestamp' },
+        self_stake_sum: { $sum: '$self_stake' },
+        reward_sum: { $sum: '$reward' },
+        commission_sum: { $sum: '$commission' },
       }
-    }
+    },
+    {
+      $sort: {
+        timestamp: 1
+      }
+    },
   ])
     .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1 })
     .then((results: any) => { 

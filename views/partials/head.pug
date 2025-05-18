@@ -36,15 +36,12 @@ html(lang='tr')
           script(src=`/js/functions/graphFunctions/addColumnToExistingGraph.js`)
           script(src=`/js/functions/graphFunctions/addInactivityDetails.js`)
           script(src=`/js/functions/graphFunctions/addVerticalAxisLabels.js`)
-          script(src=`/js/functions/graphFunctions/generateLegendLine.js`)
           script(src=`/js/functions/graphFunctions/generatePointAndLine.js`)
-          script(src=`/js/functions/graphFunctions/generatePointValueDisplay.js`)
           script(src=`/js/functions/graphFunctions/generateSingleHorizontalAxisLabel.js`)
           script(src=`/js/functions/graphFunctions/getAngleBetweenTwoPoints.js`)
           script(src=`/js/functions/graphFunctions/handlePlotButtonClick.js`)
           script(src=`/js/functions/graphFunctions/prettyDate.js`)
           script(src=`/js/functions/graphFunctions/adjustLineWidthAndAngle.js`)
-          script(src=`/js/functions/graphFunctions/generateGraphVisibilityLegend.js`)
           script(src=`/js/functions/plotValidatorGraph.js`)
           script(src=`/js/functions/renderTableHeader.js`)
           script(src=`/js/functions/renderValidators.js`)
@@ -52,10 +49,9 @@ html(lang='tr')
     - const navbarWidth = isNavbarClose ? '50px' : '237px';
     style.
       :root {
-        --number-of-columns: #{NUMBER_OF_COLUMNS};
         --navbar-width: #{navbarWidth};
       }
-  body
+  body(cacheSummaryGraphDataMapping=cacheSummaryGraphDataMapping)    
     .all-wrapper
       .navbar-wrapper#navbar-wrapper(class=`${isNavbarClose ? 'navbar-close' : ''}`)
         .navbar-view-toggle#navbar-view-toggle

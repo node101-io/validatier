@@ -9,11 +9,14 @@ function addVerticalAxisLabels(graphWrapper, operatorAddress, min, max, details,
   verticalAxisLabels.id = `${operatorAddress.replace('@', '\\@')}-graph-vertical-axis-labels`;
 
   while (iter <= max) {
+    
     const eachVerticalLabel = document.createElement('div');
     eachVerticalLabel.classList.add('each-vertical-label');
-    eachVerticalLabel.setAttribute('native', getValueWithDecimals(iter, symbol, usd_exchange_rate, decimals));
-    eachVerticalLabel.setAttribute('usd', getValueWithDecimals(iter, 'usd', usd_exchange_rate, decimals));
-    eachVerticalLabel.innerHTML = getValueWithDecimals(iter, currency, usd_exchange_rate, decimals);
+    const { nativeValue, usdValue } = getValueWithDecimals(iter, symbol, usd_exchange_rate, decimals);
+
+    eachVerticalLabel.setAttribute('native', nativeValue);
+    eachVerticalLabel.setAttribute('usd', usdValue);
+    eachVerticalLabel.innerHTML = nativeValue;
     verticalAxisLabels.appendChild(eachVerticalLabel);
     iter += step;
   }

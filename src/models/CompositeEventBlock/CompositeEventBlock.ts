@@ -209,13 +209,12 @@ compositeEventBlockSchema.statics.getPeriodicDataForGraphGeneration = function (
         const totalStake = (record.mostRecentRecord.total_stake_prefix_sum - record.leastRecentRecord.total_stake_prefix_sum || 0) + (record.leastRecentRecord.total_stake || 0);
         const totalWithdraw = (record.mostRecentRecord.total_withdraw_prefix_sum - record.leastRecentRecord.total_withdraw_prefix_sum || 0) + (record.leastRecentRecord.total_withdraw || 0);
         
-        const daysBetweenTimestamps = Math.ceil(((top_timestamp || 1) - (bottom_timestamp || 1)) / (86400 * 1000));
         mapping[record._id] = {
           self_stake: totalSelfStake || 0,
           reward: totalReward || 0,
           commission: totalCommission || 0,
-          total_stake: (totalStake || 0) / daysBetweenTimestamps,
-          total_withdraw: (totalWithdraw || 0) / daysBetweenTimestamps
+          total_stake: (totalStake || 0),
+          total_withdraw: (totalWithdraw || 0)
         };
       });
   

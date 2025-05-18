@@ -1,6 +1,7 @@
 function animateOverflowMonikers(monikerWrapper) {
 
   const container = monikerWrapper.children[0];
+  if (!container) return;
   const monikerText = monikerWrapper.children[0].children[0];
 
   if (monikerText) {

@@ -1,5 +1,5 @@
 
-function addColumnEventListener (operatorAddress) {
+function addColumnEventListener (operatorAddress, dataFields, colors) {
 
   const columnMouseHandler = (event) => {
 
@@ -8,7 +8,6 @@ function addColumnEventListener (operatorAddress) {
     document.querySelectorAll(`.${visibleClassName}`).forEach(each => {
       if (!each.classList.contains('range-value-display') && !each.classList.contains('range-edges-indicator')) {
         each.classList.remove('each-data-point-hovered')
-        each.classList.remove('each-data-point-value-display-visible')
         each.classList.remove('each-data-delta-vertical-line-visible')
         each.classList.remove('each-data-point-horizontal-label-hovered')
         each.classList.remove('each-data-indicator-vertical-line-visible')
@@ -26,19 +25,16 @@ function addColumnEventListener (operatorAddress) {
     const left = event.clientX - rect.left;
     const right = rect.right - event.clientX;
     
-    columnWrapper.children[0].classList.add('each-data-point-hovered', visibleClassName.replace('\\@', '@'));
-    columnWrapper.children[2].classList.add('each-data-point-hovered', visibleClassName.replace('\\@', '@'));
-    columnWrapper.children[4].classList.add('each-data-point-hovered', visibleClassName.replace('\\@', '@'));
+    columnWrapper.querySelectorAll('.each-data-point').forEach(eachDataPoint => {
+      eachDataPoint.classList.add('each-data-point-hovered', visibleClassName.replace('\\@', '@'));
+    })
     
     const operatorAddressM = operatorAddress.replace('\\@', '@');
-
-    if (!validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn || !validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn)
-      columnWrapper.children[6].classList.add('each-data-point-value-display-visible', visibleClassName.replace('\\@', '@'));
     
-    columnWrapper.children[7].classList.add('each-data-delta-vertical-line-visible', visibleClassName.replace('\\@', '@'));
-    columnWrapper.children[8].classList.add('each-data-indicator-vertical-line-visible', visibleClassName.replace('\\@', '@'));
+    columnWrapper.querySelector('.each-data-delta-vertical-line').classList.add('each-data-delta-vertical-line-visible', visibleClassName.replace('\\@', '@'));
+    columnWrapper.querySelector('.each-data-indicator-vertical-line').classList.add('each-data-indicator-vertical-line-visible', visibleClassName.replace('\\@', '@'));
 
-    if (index % 10 == 0) columnWrapper.children[12].classList.add('each-data-point-horizontal-label-hovered', visibleClassName);
+    if (index % 10 == 0) columnWrapper.querySelector('.each-data-point-horizontal-label').classList.add('each-data-point-horizontal-label-hovered', visibleClassName);
     
     if (!validatorListenerVariablesMapping[operatorAddressM].isSelectingRange) return;
     const deltaX = columnWrapper.getBoundingClientRect().width;
@@ -47,73 +43,65 @@ function addColumnEventListener (operatorAddress) {
 
     if (target != validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn) {
       while (current != target) {
-        let selfStakeBottom;
-        let withdrawBottom;
-        let commissionBottom;
+        const bottomMapping = {}
+        dataFields.forEach(eachDataField => {
+          bottomMapping[eachDataField] = '';
+        })
         if (target.getAttribute('timestamp') < validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp')) {
           validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft = true;
           if (!current.previousSibling) break;
-          validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.children[9].style.width = '0px';
-          validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.children[10].style.width = '0px';
-          validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.children[11].style.width = '0px';
+          validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
+            eachPaintBar.style.width = '0px';
+          })
           let targetPrevious = target.previousSibling;
           
           while(targetPrevious) {
-            if (targetPrevious.children[9]) targetPrevious.children[9].style.width = '0px';
-            if (targetPrevious.children[10]) targetPrevious.children[10].style.width = '0px';
-            if (targetPrevious.children[11]) targetPrevious.children[11].style.width = '0px';
+            targetPrevious.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
+              eachPaintBar.style.width = '0px';
+            })
             targetPrevious = targetPrevious.previousSibling;
           }
-          
-          current.children[9].classList.add('graph-range-paint-bar-right');
-          current.children[9].classList.remove('graph-range-paint-bar-left');
-          current.children[10].classList.add('graph-range-paint-bar-right');
-          current.children[10].classList.remove('graph-range-paint-bar-left');
-          current.children[11].classList.add('graph-range-paint-bar-right');
-          current.children[11].classList.remove('graph-range-paint-bar-left');
-          selfStakeBottom = `calc(((${current.nextSibling.getAttribute('self_stake')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
-          withdrawBottom = `calc(((${current.nextSibling.getAttribute('withdraw')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
-          commissionBottom = `calc(((${current.nextSibling.getAttribute('commission')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+          current.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
+            eachPaintBar.classList.add('graph-range-paint-bar-right')
+            eachPaintBar.classList.remove('graph-range-paint-bar-left')
+          })
+
+          dataFields.forEach(eachDataField => {
+            bottomMapping[eachDataField] = `calc(((${current.nextSibling.getAttribute(eachDataField)} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+          })
         } else {
           validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft = false;
           if (!current.nextSibling) break;
           let targetNext = target.nextSibling;
           while(targetNext) {
-            targetNext.children[9].style.width = '0px';
-            targetNext.children[10].style.width = '0px';
-            targetNext.children[11].style.width = '0px';
+            targetNext.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
+              eachPaintBar.style.width = '0px';
+            });
             targetNext = targetNext.nextSibling;
           }
-          current.children[9].classList.add('graph-range-paint-bar-left');
-          current.children[9].classList.remove('graph-range-paint-bar-right');
-          current.children[10].classList.add('graph-range-paint-bar-left');
-          current.children[10].classList.remove('graph-range-paint-bar-right');
-          current.children[11].classList.add('graph-range-paint-bar-left');
-          current.children[11].classList.remove('graph-range-paint-bar-right');
 
-          selfStakeBottom = `calc(((${current.getAttribute('self_stake')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
-          withdrawBottom = `calc(((${current.getAttribute('withdraw')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
-          commissionBottom = `calc(((${current.getAttribute('commission')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+          current.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
+            eachPaintBar.classList.add('graph-range-paint-bar-left');
+            eachPaintBar.classList.remove('graph-range-paint-bar-right');
+          })
+
+          dataFields.forEach(eachDataField => {
+            bottomMapping[eachDataField] = `calc(((${current.getAttribute(eachDataField)} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+          })
         }
         
-        const { selfStakeHypotenuse, selfStakeAngle, withdrawHypotenuse, withdrawAngle, commissionHypotenuse, commissionAngle } = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress);
-        current.children[9].style.width = selfStakeHypotenuse;
-        current.children[9].style.bottom = `calc((${selfStakeBottom.replace('calc', '')}) - 100%)`;
-        current.children[9].style.transform = `rotateZ(${selfStakeAngle}) skewX(${selfStakeAngle})`;
-        current.children[9].style.backgroundColor = 'lightgreen';
-        current.children[9].style.zIndex = '0';
+        const angleHypotenuseMapping = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields);
+        
+        current.querySelectorAll('.graph-range-paint-bar').forEach((eachPaintBar, i) => {
+          const dataField = dataFields[i];
+          const color = colors[i];
 
-        current.children[10].style.width = withdrawHypotenuse;
-        current.children[10].style.bottom = `calc((${withdrawBottom.replace('calc', '')}) - 100%)`;
-        current.children[10].style.transform = `rotateZ(${withdrawAngle}) skewX(${withdrawAngle})`;
-        current.children[10].style.backgroundColor = 'lightcoral';
-        current.children[10].style.zIndex = '5';
-
-        current.children[11].style.width = commissionHypotenuse;
-        current.children[11].style.bottom = `calc((${commissionBottom.replace('calc', '')}) - 100%)`;
-        current.children[11].style.transform = `rotateZ(${commissionAngle}) skewX(${commissionAngle})`;
-        current.children[11].style.backgroundColor = 'orange';
-        current.children[11].style.zIndex = '3';
+          eachPaintBar.style.width = angleHypotenuseMapping[dataField].hypotenuse;
+          eachPaintBar.style.bottom = `calc((${bottomMapping[dataField].replace('calc', '')}) - 100%)`;
+          eachPaintBar.style.transform = `rotateZ(${angleHypotenuseMapping[dataField].angle}) skewX(${angleHypotenuseMapping[dataField].angle})`;
+          eachPaintBar.style.backgroundColor = color;
+          eachPaintBar.style.zIndex = `${i * 10}`;
+        })
 
         validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn = current;
         if (target.getAttribute('timestamp') < validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp')) current = current.previousSibling;
@@ -121,58 +109,54 @@ function addColumnEventListener (operatorAddress) {
       }
     }
 
-    const { selfStakeAngle, withdrawAngle, commissionAngle } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling, operatorAddress);
+    const angleHypotenuseMappingAnglesOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields);
     
     if (target.getAttribute('timestamp') < validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp')) {
       validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft = true;
-      const { selfStakeHypotenuse, withdrawHypotenuse, commissionHypotenuse } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling, operatorAddress);
-      const selfStakeBottom = `calc(((${columnWrapper.nextSibling.getAttribute('self_stake')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
-      const withdrawBottom = `calc(((${columnWrapper.nextSibling.getAttribute('withdraw')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;          
-      const commissionBottom = `calc(((${columnWrapper.nextSibling.getAttribute('commission')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;          
+      const angleHypotenuseMappingHypotenuseOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields);
+      
+      const bottomMapping = {}
+      dataFields.forEach(eachDataField => {
+        bottomMapping[eachDataField] = `calc(((${columnWrapper.nextSibling.getAttribute(eachDataField)} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+      });
 
-      
-      columnWrapper.children[9].classList.add('graph-range-paint-bar-right');
-      columnWrapper.children[9].classList.remove('graph-range-paint-bar-left');
-      columnWrapper.children[10].classList.add('graph-range-paint-bar-right');
-      columnWrapper.children[10].classList.remove('graph-range-paint-bar-left');
-      columnWrapper.children[11].classList.add('graph-range-paint-bar-right');
-      columnWrapper.children[11].classList.remove('graph-range-paint-bar-left');
-      
-      columnWrapper.children[9].style.width = `calc((${right / deltaX}) * ${selfStakeHypotenuse.replace('calc', '')})`;
-      columnWrapper.children[9].style.bottom = `calc((${selfStakeBottom.replace('calc', '')}) - 100%)`;
-      columnWrapper.children[10].style.width = `calc((${right / deltaX}) * ${withdrawHypotenuse.replace('calc', '')})`;
-      columnWrapper.children[10].style.bottom = `calc((${withdrawBottom.replace('calc', '')}) - 100%)`;
-      columnWrapper.children[11].style.width = `calc((${right / deltaX}) * ${commissionHypotenuse.replace('calc', '')})`;
-      columnWrapper.children[11].style.bottom = `calc((${commissionBottom.replace('calc', '')}) - 100%)`;
+      columnWrapper.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
+        eachPaintBar.classList.add('graph-range-paint-bar-right');
+        eachPaintBar.classList.remove('graph-range-paint-bar-left');
+      })
+            
+      columnWrapper.querySelectorAll('.graph-range-paint-bar').forEach((eachPaintBar, i) => {
+        const hypotenuse = angleHypotenuseMappingHypotenuseOnly[dataFields[i]].hypotenuse;
+        eachPaintBar.style.width = `calc((${right / deltaX}) * ${hypotenuse.replace('calc', '')})`;
+        eachPaintBar.style.bottom = `calc((${bottomMapping[dataFields[i]].replace('calc', '')}) - 100%)`;  
+      });
     } else {
       validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft = false;
       
-      const { selfStakeHypotenuse, withdrawHypotenuse, commissionHypotenuse } = getAngleBetweenTwoPoints(columnWrapper, columnWrapper.nextSibling, operatorAddress);
-      const selfStakeBottom = `calc(((${columnWrapper.getAttribute('self_stake')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
-      const withdrawBottom = `calc(((${columnWrapper.getAttribute('withdraw')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;          
-      const commissionBottom = `calc(((${columnWrapper.getAttribute('commission')} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;          
+      const angleHypotenuseMappingHypotenuseOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields);
+      
+      const bottomMapping = {}
+      dataFields.forEach(eachDataField => {
+        bottomMapping[eachDataField] = `calc(((${columnWrapper.getAttribute(eachDataField)} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+      });
+      
+      columnWrapper.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
+        eachPaintBar.classList.add('graph-range-paint-bar-left');
+        eachPaintBar.classList.remove('graph-range-paint-bar-right');
+      })
 
-      
-      columnWrapper.children[9].classList.add('graph-range-paint-bar-left');
-      columnWrapper.children[9].classList.remove('graph-range-paint-bar-right');
-      columnWrapper.children[10].classList.add('graph-range-paint-bar-left');
-      columnWrapper.children[10].classList.remove('graph-range-paint-bar-right');
-      columnWrapper.children[11].classList.add('graph-range-paint-bar-left');
-      columnWrapper.children[11].classList.remove('graph-range-paint-bar-right');
-      
-      columnWrapper.children[9].style.width = `calc((${left / deltaX}) * ${selfStakeHypotenuse.replace('calc', '')})`;
-      columnWrapper.children[9].style.bottom = `calc((${selfStakeBottom.replace('calc', '')}) - 100%)`;
-      columnWrapper.children[10].style.width = `calc((${left / deltaX}) * ${withdrawHypotenuse.replace('calc', '')})`;
-      columnWrapper.children[10].style.bottom = `calc((${withdrawBottom.replace('calc', '')}) - 100%)`;
-      columnWrapper.children[11].style.width = `calc((${left / deltaX}) * ${commissionHypotenuse.replace('calc', '')})`;
-      columnWrapper.children[11].style.bottom = `calc((${commissionBottom.replace('calc', '')}) - 100%)`;
+      columnWrapper.querySelectorAll('.graph-range-paint-bar').forEach((eachPaintBar, i) => {
+        const hypotenuse = angleHypotenuseMappingHypotenuseOnly[dataFields[i]].hypotenuse;
+        eachPaintBar.style.width = `calc((${left / deltaX}) * ${hypotenuse.replace('calc', '')})`;
+        eachPaintBar.style.bottom = `calc((${bottomMapping[dataFields[i]].replace('calc', '')}) - 100%)`;  
+      })
     }
-    columnWrapper.children[9].style.transform = `rotateZ(${selfStakeAngle}) skewX(${selfStakeAngle})`;
-    columnWrapper.children[9].style.backgroundColor = 'lightgreen';
-    columnWrapper.children[10].style.transform = `rotateZ(${withdrawAngle}) skewX(${withdrawAngle})`;
-    columnWrapper.children[10].style.backgroundColor = 'lightcoral';
-    columnWrapper.children[11].style.transform = `rotateZ(${commissionAngle}) skewX(${commissionAngle})`;
-    columnWrapper.children[11].style.backgroundColor = 'orange';
+
+    columnWrapper.querySelectorAll('.graph-range-paint-bar').forEach((eachPaintBar, i) => {
+      const angle = angleHypotenuseMappingAnglesOnly[dataFields[i]].angle;
+      eachPaintBar.style.transform = `rotateZ(${angle}) skewX(${angle})`;
+      eachPaintBar.style.backgroundColor = colors[i];
+    });
   };
 
   document.body.addEventListener('mousemove', columnMouseHandler);

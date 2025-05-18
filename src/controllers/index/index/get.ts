@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Validator from '../../../models/Validator/Validator.js';
 import Chain, { ChainInterface } from '../../../models/Chain/Chain.js';
 import { NUMBER_OF_COLUMNS } from '../../Validator/getGraphData/get.js';
+import CacheSummaryGraph, { CacheSummaryGraphInterface } from '../../../models/CacheSummaryGraph/CacheSummaryGraph.js';
 
 const indexGetController = (req: Request, res: Response): void => {
 
@@ -25,26 +26,35 @@ const indexGetController = (req: Request, res: Response): void => {
         }
       )
     }),
+    new Promise((resolve) => {
+      CacheSummaryGraph.getCacheSummaryGraphForChain({ chain_identifier: activeNetworkIdentifier }, (err, cacheSummaryGraphData) => {
+        resolve({ err: err, cacheSummaryGraphData: cacheSummaryGraphData });
+      })
+    })
   ])
     .then((results: Record<string, any>[]) => {
-      // Validator.getSummaryGraphData({
-      //   chain_identifier: activeNetworkIdentifier,
-      //   bottom_timestamp: bottomTimestamp,
-      //   top_timestamp: topTimestamp
-      // }, (err, results) => {
-      //   if (err) return console.log(err);
-      // })
 
-      const [getAllChainsResult, rankValidatorsResult] = results;
+      const [getAllChainsResult, rankValidatorsResult, summaryGraphResults] = results;
       if (
         !getAllChainsResult.value.chains || 
-        !rankValidatorsResult.value.validators
+        !rankValidatorsResult.value.validators || 
+        !summaryGraphResults.value.cacheSummaryGraphData
       ) return res.json({ success: false, err: 'bad_request' })
     
       const chains = getAllChainsResult.value.chains;
       const validators = rankValidatorsResult.value.validators;
+      const cacheSummaryGraphData = summaryGraphResults.value.cacheSummaryGraphData;
 
       const selectedChain = chains.find((element: ChainInterface) => element.name == activeNetworkIdentifier);  
+
+      const cacheSummaryGraphDataMapping: Record<string, any> = {};
+      cacheSummaryGraphData.forEach((eachCacheSummaryGraphData: CacheSummaryGraphInterface) => {
+        cacheSummaryGraphDataMapping[eachCacheSummaryGraphData.interval] = eachCacheSummaryGraphData;
+      });
+
+      const queryValidator = req.query.validator
+        ? (validators.filter((eachValidator: Record<string, any>) => eachValidator.operator_address == req.query.validator))[0]
+        : null;
 
       return res.render('index/index', {
         page: 'index/index',
@@ -66,7 +76,9 @@ const indexGetController = (req: Request, res: Response): void => {
         isNavbarClose: req.cookies.isNavbarClose,
         selectedChain: selectedChain ? selectedChain : '',
         NUMBER_OF_COLUMNS,
-        url: req.originalUrl.replace('/', '')
+        url: req.originalUrl.replace('/', ''),
+        cacheSummaryGraphDataMapping,
+        queryValidator: JSON.stringify(queryValidator)
       });
     });
 };
