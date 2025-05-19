@@ -35,5 +35,11 @@ function handleNavbar () {
       document.getElementById('network-summary-main-wrapper').classList.add('section-hidden');
       document.getElementById('validator-details-main-wrapper').classList.add('section-hidden');
     }
+
+    if (target.getAttribute('type') != 'insights') return;
+
+    const dataFields = JSON.parse(target.getAttribute('dataFields'));
+    const colors = JSON.parse(target.getAttribute('colors'));
+    createNetworkSummaryGraph(dataFields, colors)
   })
 }

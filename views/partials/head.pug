@@ -69,11 +69,30 @@ html(lang='tr')
               ]
             },
             {
+              type: 'insights',
               title: 'Insights',
               links: [
-                { id: ['reward_flow'], icon: 'reward_flow.svg', title: 'Reward Flow' },
-                { id: ['self_staked_and_delegation'], icon: 'self_staked_delegation.svg', title: 'Self-Staked & Delegation' },
-                { id: ['percentage_sold_graph'], icon: 'percentage_sold_graph.svg', title: 'Percentage Sold Graph' },
+                { 
+                  id: ['reward_flow'], 
+                  icon: 'reward_flow.svg', 
+                  title: 'Reward Flow', 
+                  dataFields: ['total_stake_sum', 'total_withdraw_sum', 'total_sold'],
+                  colors: ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)']
+                },
+                { 
+                  id: ['self_staked_and_delegation'], 
+                  icon: 'self_staked_delegation.svg', 
+                  title: 'Self-Staked & Delegation',
+                  dataFields: ['percentage_sold', 'self_stake_sum'],
+                  colors: ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)']
+                },
+                { 
+                  id: ['percentage_sold_graph'], 
+                  icon: 'percentage_sold_graph.svg', 
+                  title: 'Percentage Sold Graph',
+                  dataFields: ['percentage_sold'],
+                  colors: ['rgba(255, 149, 0, 1)']
+                },
               ]
             }
           ]
@@ -83,7 +102,7 @@ html(lang='tr')
               .each-sub-menu-title= subMenu.title 
               .each-sub-menu-links-wrapper 
                 each link in subMenu.links 
-                  .each-sub-menu-link-content(id=`${link.id[0]}` class=`${link.id.includes(url) ? 'navbar-link-selected' : ''}`)
+                  .each-sub-menu-link-content(type=`${subMenu.type}` dataFields=JSON.stringify(link.dataFields) colors=JSON.stringify(link.colors) id=`${link.id[0]}` class=`${link.id.includes(url) ? 'navbar-link-selected' : ''}`)
                     img.each-sub-menu-link-icon(class='navbar-icon' src=`/res/images/navbar/${link.icon}` alt='node101')
                     .each-sub-menu-link-title(class='navbar-text')= link.title
         -

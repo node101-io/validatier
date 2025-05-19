@@ -53,7 +53,7 @@ function handleSummaryGraphActions() {
   })
 }
 
-function createNetworkSummaryGraph () {
+function createNetworkSummaryGraph (dataFields, colors) {
   const cacheSummaryGraphDataMapping = JSON.parse(document.body.getAttribute('cacheSummaryGraphDataMapping'));
 
   const currency = 'native';
@@ -71,23 +71,18 @@ function createNetworkSummaryGraph () {
   const targetCacheSummaryGraphData = cacheSummaryGraphDataMapping['all_time']['m'];
   document.documentElement.style.setProperty('--number-of-columns-summary', targetCacheSummaryGraphData.length);
 
-  const dataFields = ['self_stake_sum', 'reward_sum', 'commission_sum'];
-  const colors = ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)'];
   const graphDataMapping = {};
   const graphContainer = document.getElementById('network-summary-graph-container');
   const graphWrapper = plotValidatorGraph({ operatorAddress: 'summary', graphDataMapping, currency, decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping, dataFields, colors, graphContainer });
   const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue("width").replace('px', '');
 
-  const currentSumMapping = {
-    self_stake_sum: 0,
-    reward_sum: 0,
-    commission_sum: 0,
-  };
+  const currentSumMapping = {};
 
   for (let i = 0; i < targetCacheSummaryGraphData.length; i++) {
     const data = targetCacheSummaryGraphData[i];
     
     dataFields.forEach(eachDataField => {
+      if (!currentSumMapping[eachDataField]) currentSumMapping[eachDataField] = 0;
       data[eachDataField] += currentSumMapping[eachDataField];
       currentSumMapping[eachDataField] = data[eachDataField];
     });

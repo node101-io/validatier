@@ -11,7 +11,7 @@ import { formatTimestamp } from '../../utils/formatTimestamp.js';
 import { getPubkeysOfActiveValidatorsByHeight } from '../../utils/getPubkeysOfActiveValidatorsByHeight.js';
 import ActiveValidators, { ActiveValidatorsInterface } from '../ActiveValidators/ActiveValidators.js';
 import { NUMBER_OF_COLUMNS } from '../../controllers/Validator/getGraphData/get.js';
-import { GraphDataInterface } from '../CacheSummaryGraph/CacheSummaryGraph.js';
+import { GraphDataInterface } from '../Cache/Cache.js';
 
 const MAX_DATABASE_TEXT_FIELD_LENGTH = 1e4;
 const CHAIN_TO_DECIMALS_MAPPING: Record<string, any> = {
@@ -573,11 +573,11 @@ validatorSchema.statics.getSummaryGraphData = function (
   const { chain_identifier, bottom_timestamp, top_timestamp, by } = body;
 
   const groupId: Record<string, any> = { year: '$year' };
-  if (by == 'm' || by == 'd') groupId.month = '$month';
-  if (by === 'd') 
+  if (by == 'm' || by == 'w' || by == 'd') groupId.month = '$month';
+  if (by == 'w' || by == 'd')
     groupId.day = {
       $floor: {
-        $divide: ['$day', 4]
+        $divide: ['$day', by == 'w' ? 7 : 4]
       }
     };
   
@@ -598,6 +598,42 @@ validatorSchema.statics.getSummaryGraphData = function (
         self_stake_sum: { $sum: '$self_stake' },
         reward_sum: { $sum: '$reward' },
         commission_sum: { $sum: '$commission' },
+        total_stake_sum: { $sum: '$total_stake' },
+        total_withdraw_sum: { $sum: '$total_withdraw' },
+      }
+    },
+    {
+      $addFields: {
+        total_sold: {
+          $subtract: [
+            { $add: ['$reward_sum', '$commission_sum'] },
+            '$self_stake_sum'
+          ]
+        },
+        percentage_sold: {
+          $cond: [
+            { $gt: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
+            {
+              $min: [
+                {
+                  $abs: {
+                    $divide: [
+                      {
+                        $subtract: [
+                          { $add: ['$reward_sum', '$commission_sum'] },
+                          '$self_stake_sum'
+                        ]
+                      },
+                      { $add: ['$reward_sum', '$commission_sum'] }
+                    ]
+                  }
+                },
+                1
+              ]
+            },
+            0
+          ]
+        }    
       }
     },
     {
@@ -606,7 +642,7 @@ validatorSchema.statics.getSummaryGraphData = function (
       }
     },
   ])
-    .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1 })
+    .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, total_withdraw: 1 })
     .then((results: any) => { 
       return callback(null, results)
     })

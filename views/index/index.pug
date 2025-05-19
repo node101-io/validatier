@@ -39,13 +39,7 @@ block content
         id: 'network-summary-interval',
         options: ['D', 'W', 'M', 'Y'],
         selected: 'M'
-      },
-      //- {
-      //-   type: 'dropdown',
-      //-   id: 'network-summary-filters',
-      //-   title: 'Filter',
-      //-   options: ['Capitulation', 'Delegation', 'Rewards', 'Withdrawn']
-      //- },
+      }
     ]
     
     const metrics = [
@@ -257,8 +251,22 @@ block content
                         .each-network-summary-select-option(class=`${option == menu.selected ? 'each-network-summary-select-option-selected' : ''}`)= option
             .network-summary-network-graph-content#network-summary-graph-container
               script.
-                createNetworkSummaryGraph();
-      
+                let dataFields = [];
+                let colors = [];
+                if ('#{url}' == 'self_staked_and_delegation') {
+                  dataFields = ['percentage_sold', 'self_stake_sum'];
+                  colors = ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)'];
+                }
+                else if ('#{url}' == 'percentage_sold_graph') {
+                  dataFields = ['percentage_sold'];
+                  colors = ['rgba(255, 149, 0, 1)'];
+                }
+                else {
+                  dataFields = ['total_stake_sum', 'total_withdraw_sum', 'total_sold'];
+                  colors = ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)'];
+                }
+
+                createNetworkSummaryGraph(dataFields, colors);
       -
         const leaderboards = [
           {

@@ -1,6 +1,6 @@
 import async from 'async';
 import Chain from "../../models/Chain/Chain.js"
-import CacheSummaryGraph from '../../models/CacheSummaryGraph/CacheSummaryGraph.js';
+import CacheSummaryGraph from '../../models/Cache/Cache.js';
 
 export const Job_SaveCacheSummaryGraphs = (
   callback: (
@@ -14,7 +14,7 @@ export const Job_SaveCacheSummaryGraphs = (
       chains?.length,
       (i, next) => {
         const eachChain = chains[i];
-        CacheSummaryGraph.saveCacheSummaryGraphForChain({ chain: eachChain }, (err, cacheSummaryGraph) => {
+        CacheSummaryGraph.saveCacheForChain({ chain: eachChain }, (err, cacheSummaryGraph) => {
           if (err) return next(new Error(err));
           return next();
         })

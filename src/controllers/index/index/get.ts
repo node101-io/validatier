@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import Validator from '../../../models/Validator/Validator.js';
 import Chain, { ChainInterface } from '../../../models/Chain/Chain.js';
 import { NUMBER_OF_COLUMNS } from '../../Validator/getGraphData/get.js';
-import CacheSummaryGraph, { CacheSummaryGraphInterface } from '../../../models/CacheSummaryGraph/CacheSummaryGraph.js';
+import Cache, { CacheInterface } from '../../../models/Cache/Cache.js';
 
 const indexGetController = (req: Request, res: Response): void => {
 
@@ -27,7 +27,7 @@ const indexGetController = (req: Request, res: Response): void => {
       )
     }),
     new Promise((resolve) => {
-      CacheSummaryGraph.getCacheSummaryGraphForChain({ chain_identifier: activeNetworkIdentifier }, (err, cacheSummaryGraphData) => {
+      Cache.getCacheForChain({ chain_identifier: activeNetworkIdentifier }, (err, cacheSummaryGraphData) => {
         resolve({ err: err, cacheSummaryGraphData: cacheSummaryGraphData });
       })
     })
@@ -48,7 +48,7 @@ const indexGetController = (req: Request, res: Response): void => {
       const selectedChain = chains.find((element: ChainInterface) => element.name == activeNetworkIdentifier);  
 
       const cacheSummaryGraphDataMapping: Record<string, any> = {};
-      cacheSummaryGraphData.forEach((eachCacheSummaryGraphData: CacheSummaryGraphInterface) => {
+      cacheSummaryGraphData.forEach((eachCacheSummaryGraphData: CacheInterface) => {
         cacheSummaryGraphDataMapping[eachCacheSummaryGraphData.interval] = eachCacheSummaryGraphData;
       });
 
