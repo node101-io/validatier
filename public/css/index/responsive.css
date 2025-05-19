@@ -29,7 +29,6 @@
     --each-validator-wrapper-gap: 10px;
     --validator-table-header-gap: 10px;
     --table-filters-subgroup-gap: 20px;
-    --currency-switch-wrapper-gap: 20px;
 
     --banner-title-content-font-size: 20px;
     --each-table-header-title-font-size: 20px;
@@ -69,7 +68,6 @@
     --each-validator-wrapper-gap: 0px;
     --validator-table-header-gap: 0px;
     --footer-main-title-font-size: 36px;
-    --currency-switch-wrapper-gap: 10px;
   }
 }
 
@@ -84,7 +82,6 @@
 
     --default-inner-image-content-height: 32px;
     --network-switch-header-height: 32px;
-    --currency-switch-wrapper-gap: 5px;
 
     --table-filters-subgroup-gap: 0px;
     --date-picker-z-index: 10;

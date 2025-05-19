@@ -11,7 +11,6 @@ window.onload = () => {
   renderValidators();
   handleNavbar();
   handleExportEvents();
-  handleCurrencyToggle();
   handlePlotButtonClick();
   handleSummaryGraphActions();
 }

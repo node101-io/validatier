@@ -61,7 +61,7 @@ const indexGetController = (req: Request, res: Response): void => {
         title: 'CosmosHub Validator Timeline',
         includes: {
           external: {
-            css: ['page', 'general'],
+            css: ['page', 'general', 'header', 'summary', 'validators', 'graph', 'export', 'table'],
             js: ['page', 'functions'],
           },
         },

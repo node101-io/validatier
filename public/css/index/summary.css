@@ -1,0 +1,395 @@
+:root {
+  --each-network-summary-network-graph-content-dropdown-content-background-color: rgba(242, 242, 242, 1);
+  --each-network-summary-network-graph-content-dropdown-content-padding: 10px;
+  --each-network-summary-network-graph-content-dropdown-content-gap: 10px;
+  --each-network-summary-network-graph-content-dropdown-content-transition-duration: 0.25s;
+  
+  --each-network-summary-select-wrapper-font-size: 14px;
+  --each-network-summary-select-wrapper-gap: 14px;
+  
+  --each-network-summary-select-option-font-weight: 400;
+  --each-network-summary-select-option-selected-font-weight: 600;
+
+  --summary-percentage-text-native-font-size: 32px !important;
+
+  --network-summary-main-wrapper-title-network-summary-network-graph-metrics-wrapper-title-font-size: 14px;
+  --network-summary-main-wrapper-title-network-summary-network-graph-metrics-wrapper-title-font-weight: 500;
+  
+  --network-summary-main-wrapper-gap: 10px;
+  --network-summary-main-wrapper-margin-bottom: 10px;
+  
+  --network-summary-network-stats-main-wrapper-gap: 10px;
+  
+  --each-network-summary-stat-height: 108px;
+  --each-network-summary-stat-width: 33%;
+  --each-network-summary-stat-padding: 10px;
+  --each-network-summary-stat-border-radius: 20px;
+  
+  --each-network-summary-stat-column-max-width: 50%;
+  
+  --each-network-summary-stat-header-title-font-weight: 600;
+  --each-network-summary-stat-header-title-font-size: 12px;
+  --each-network-summary-stat-header-title-color: rgba(124, 112, 195, 1);
+  
+  --each-network-summary-stat-content-font-size: 18px;
+  --each-network-summary-stat-content-font-weight: 700;
+  --each-network-summary-stat-content-color: rgba(73, 48, 111, 1);
+  
+  --stat-value-font-large-font-size: 28px !important;
+  --stat-value-font-large-color: rgba(73, 48, 111, 1);
+  
+  --each-network-summary-stat-footer-font-size: 12px;
+  --each-network-summary-stat-footer-color: rgba(124, 112, 195, 1);
+  --each-network-summary-stat-footer-font-weight: 400;
+  
+  --each-network-summary-stat-footer-value-font-weight: 500;
+  --each-network-summary-stat-footer-value-font-size: 14px;
+  --each-network-summary-stat-footer-value-color: rgba(124, 112, 195, 1);
+
+  --network-summary-network-graph-main-wrapper-height: 366px;
+  --network-summary-network-graph-main-wrapper-gap: 10px;
+
+  --network-summary-network-graph-content-wrapper-padding: 25px;
+  --network-summary-network-graph-content-wrapper-border-radius: 20px;
+  
+  --network-summary-network-graph-content-title-font-size: 16px;
+  --network-summary-network-graph-content-title-font-weight: 500;
+  --network-summary-network-graph-content-title-color: rgba(37, 0, 84, 1);
+  
+  --network-summary-network-graph-content-description-font-size: 12px;
+  --network-summary-network-graph-content-description-font-weight: 400;
+  --network-summary-network-graph-content-description-color: rgba(124, 112, 195, 1);
+  
+  --network-summary-network-graph-metrics-wrapper-width: 300px;
+  --network-summary-network-graph-metrics-wrapper-gap: 8px;
+  
+  --each-metric-content-wrapper-border-radius: 20px;
+  --each-metric-content-wrapper-height: 33%;
+  --each-metric-content-wrapper-padding: 10px;
+  
+  --each-metric-content-wrapper-header-icon-width: 7px;
+  
+  --each-metric-content-wrapper-content-width: 100%;
+  
+  --each-metric-content-wrapper-header-font-size: 12px;
+  --each-metric-content-wrapper-header-color: rgba(124, 112, 195, 1);
+  --each-metric-content-wrapper-header-gap: 10px;
+  
+  --each-metric-content-wrapper-header-div-margin-top: -2px;
+  
+  
+  --each-metric-content-wrapper-content-value-native-font-weight: 700;
+  --each-metric-content-wrapper-content-value-native-font-size: 16px;
+  --each-metric-content-wrapper-content-value-native-color: rgba(73, 48, 111, 1);
+  
+  --each-metric-content-wrapper-content-value-usd-font-weight: 600;
+  --each-metric-content-wrapper-content-value-usd-font-size: 16px;
+  --each-metric-content-wrapper-content-value-usd-color: rgba(124, 112, 195, 1);
+  
+  --insights-main-wrapper-gap: 12px;
+  --insights-main-wrapper-margin-bottom: 10px;
+
+  --insights-main-content-wrapper-gap: 34px;
+  
+  --each-metric-content-wrapper-footer-font-size: 12px;
+  --each-metric-content-wrapper-footer-font-weight: 400;
+  --each-metric-content-wrapper-footer-color: rgba(124, 112, 195, 1);
+  
+  --each-insight-wrapper-width: 33%;
+  --each-insight-wrapper-border-radius: 20px;
+  --each-insight-wrapper-height: 77px;
+  --each-insight-wrapper-padding: 16px;
+  
+  --each-insight-text-wrapper-gap: 5px;
+  
+  --each-insight-title-color: rgba(37, 0, 84, 1);
+  --each-insight-title-font-size: 20px;
+  --each-insight-title-font-weight: 600;
+  
+  --each-insight-description-color: rgba(175, 161, 255, 1);
+  --each-insight-description-font-size: 12px;
+  --each-insight-description-font-weight: 400;
+  
+  --each-insight-visual-wrapper-margin-right: 30px;
+  --each-insight-visual-icon-height: 100%;
+  --each-insight-visual-icon-max-width: 70px;
+   
+  --bar-graph-icon-main-wrapper-gap: 2px;
+
+  --bar-graph-icon-each-bar-wrapper-width: 8px;
+  --bar-graph-icon-each-bar-wrapper-background-color: rgba(194, 183, 255, 1);
+  --bar-graph-icon-each-bar-wrapper-border-radius: 10px;
+  
+  --bar-graph-icon-inside-bar-width: 100%;
+  --bar-graph-icon-inside-bar-border-radius: 10px;
+  --bar-graph-icon-inside-bar-background-color: rgba(87, 50, 143, 1);
+  
+  --all-validators-main-wrapper-gap: 10px;
+  
+  --percentage-change-value-content-color: rgba(19, 167, 25, 1) !important;
+  
+  --network-summary-network-graph-content-filters-wrapper-font-size: 14px;
+  --network-summary-network-graph-content-filters-wrapper-gap: 36px;
+  --network-summary-network-graph-content-filters-wrapper-margin-top: -20px;
+  
+  --each-network-summary-network-graph-content-dropdown-header-gap: 5px;
+  --each-network-summary-network-graph-content-dropdown-header-font-size: 14px;
+  
+  --each-network-summary-network-graph-content-dropdown-header-img-margin-top: 2px;
+}
+.network-summary-main-wrapper-title, .network-summary-network-graph-metrics-wrapper-title {
+  font-size: var(--network-summary-main-wrapper-title-network-summary-network-graph-metrics-wrapper-title-font-size);
+  font-weight: var(--network-summary-main-wrapper-title-network-summary-network-graph-metrics-wrapper-title-font-weight);
+}
+
+.network-summary-main-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--network-summary-main-wrapper-gap);
+  margin-bottom: var(--network-summary-main-wrapper-margin-bottom);
+}
+
+.network-summary-network-stats-main-wrapper {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: var(--network-summary-network-stats-main-wrapper-gap);
+}
+
+.each-network-summary-stat {
+  height: calc(var(--each-network-summary-stat-height) - (2 * var(--each-network-summary-stat-padding)));
+  width: var(--each-network-summary-stat-width);
+  display: flex;
+  padding: var(--each-network-summary-stat-padding);
+  background-color: var(--body-main-wrapper-background);
+  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
+  border-radius: var(--each-network-summary-stat-border-radius);
+  justify-content: space-between;
+}
+
+.each-network-summary-stat-column {
+  max-width: var(--each-network-summary-stat-column-max-width);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.each-network-summary-stat-header-title {
+  font-size: var(--each-network-summary-stat-header-title-font-size);
+  font-weight: var(--each-network-summary-stat-header-title-font-weight);
+  color: var(--each-network-summary-stat-header-title-color);
+}
+
+.each-network-summary-stat-content {
+  font-size: var(--each-network-summary-stat-content-font-size);
+  font-weight: var(--each-network-summary-stat-content-font-weight);
+  color: var(--each-network-summary-stat-content-color);
+}
+
+.stat-value-font-large {
+  font-size: var(--stat-value-font-large-font-size);
+  color: var(--stat-value-font-large-color);
+}
+
+.each-network-summary-stat-footer {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: var(--each-network-summary-stat-footer-font-size);
+  color: var(--each-network-summary-stat-footer-color);
+  font-weight: var(--each-network-summary-stat-footer-font-weight);
+}
+
+.each-network-summary-stat-footer-value {
+  font-weight: var(--each-network-summary-stat-footer-value-font-weight);
+  font-size: var(--each-network-summary-stat-footer-value-font-size);
+  color: var(--each-network-summary-stat-footer-value-color);
+}
+
+.network-summary-network-graph-main-wrapper {
+  width: 100%;
+  height: var(--network-summary-network-graph-main-wrapper-height);
+  display: flex;
+  gap: var(--network-summary-network-graph-main-wrapper-gap);
+}
+
+.network-summary-network-graph-content-wrapper {
+  width: calc(100% - var(--network-summary-network-graph-metrics-wrapper-width) - (2 * var(--network-summary-network-graph-content-wrapper-padding)));
+  padding: var(--network-summary-network-graph-content-wrapper-padding);
+  background-color: var(--body-main-wrapper-background);
+  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
+  border-radius: var(--network-summary-network-graph-content-wrapper-border-radius);
+}
+
+.network-summary-network-graph-content {
+  width: 100%;
+}
+
+.network-summary-network-graph-content-title {
+  font-size: var(--network-summary-network-graph-content-title-font-size);
+  font-weight: var(--network-summary-network-graph-content-title-font-weight);
+  color: var(--network-summary-network-graph-content-title-color);
+}
+
+.network-summary-network-graph-content-description {
+  font-size: var(--network-summary-network-graph-content-description-font-size);
+  font-weight: var(--network-summary-network-graph-content-description-font-weight);
+  color: var(--network-summary-network-graph-content-description-color);
+}
+
+.network-summary-network-graph-content-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.network-summary-network-graph-metrics-wrapper {
+  width: var(--network-summary-network-graph-metrics-wrapper-width);
+  display: flex;
+  flex-direction: column;
+  gap: var(--network-summary-network-graph-metrics-wrapper-gap);
+}
+
+.each-metric-content-wrapper {
+  border-radius: var(--each-metric-content-wrapper-border-radius);
+  height: var(--each-metric-content-wrapper-height);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: var(--body-main-wrapper-background);
+  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
+  padding: var(--each-metric-content-wrapper-padding);
+}
+
+.each-metric-content-wrapper-header-icon {
+  width: var(--each-metric-content-wrapper-header-icon-width);
+  aspect-ratio: 1/1;
+  border-radius: 100%;
+}
+
+.each-metric-content-wrapper-content {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.each-metric-content-wrapper-header {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  font-size: var(--each-metric-content-wrapper-header-font-size);
+  color: var(--each-metric-content-wrapper-header-color);
+  gap: var(--each-metric-content-wrapper-header-gap);
+}
+
+.each-metric-content-wrapper-header div {
+  margin-top: var(--each-metric-content-wrapper-header-div-margin-top);
+}
+
+.each-metric-content-wrapper-content-value-native {
+  font-weight: var(--each-metric-content-wrapper-content-value-native-font-weight);
+  font-size: var(--each-metric-content-wrapper-content-value-native-font-size);
+  color: var(--each-metric-content-wrapper-content-value-native-color);
+}
+
+.each-metric-content-wrapper-content-value-usd {
+  font-weight: var(--each-metric-content-wrapper-content-value-usd-font-weight);
+  font-size: var(--each-metric-content-wrapper-content-value-usd-font-size);
+  color: var(--each-metric-content-wrapper-content-value-usd-color);
+}
+
+.insights-main-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--insights-main-wrapper-gap);
+  margin-bottom: var(--insights-main-wrapper-margin-bottom);
+}
+
+.insights-main-content-wrapper {
+  width: 100%;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: var(--insights-main-content-wrapper-gap);
+}
+
+.each-metric-content-wrapper-footer {
+  font-size: var(--each-metric-content-wrapper-footer-font-size);
+  font-weight: var(--each-metric-content-wrapper-footer-font-weight);
+  color: var(--each-metric-content-wrapper-footer-color);
+}
+
+.each-insight-wrapper {
+  width: var(--each-insight-wrapper-width);
+  border-radius: var(--each-insight-wrapper-border-radius);
+  background-color: var(--body-main-wrapper-background);
+  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
+  padding: var(--each-insight-wrapper-padding);
+  height: var(--each-insight-wrapper-height);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.each-insight-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--each-insight-text-wrapper-gap);
+}
+
+.each-insight-title {
+  color: var(--each-insight-title-color);
+  font-size: var(--each-insight-title-font-size);
+  font-weight: var(--each-insight-title-font-weight);
+}
+
+.each-insight-description {
+  color: var(--each-insight-description-color);
+  font-size: var(--each-insight-description-font-size);
+  font-weight: var(--each-insight-description-font-weight);
+}
+
+.each-insight-visual-wrapper {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--each-insight-visual-wrapper-margin-right);
+}
+
+.each-insight-visual-icon {
+  position: absolute;
+  height: 100%;
+  max-width: var(--each-insight-visual-icon-max-width);
+}
+
+.bar-graph-icon-main-wrapper {
+  display: flex;
+  gap: var(--bar-graph-icon-main-wrapper-gap);
+  height: 100%;
+  align-items: end;
+}
+
+.bar-graph-icon-each-bar-wrapper {
+  width: var(--bar-graph-icon-each-bar-wrapper-width);
+  background-color: var(--bar-graph-icon-each-bar-wrapper-background-color);
+  position: relative;
+  border-radius: var(--bar-graph-icon-each-bar-wrapper-border-radius);
+  overflow: hidden;
+}
+
+.bar-graph-icon-inside-bar {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  border-radius: var(--bar-graph-icon-inside-bar-border-radius);
+  background-color: var(--bar-graph-icon-inside-bar-background-color);
+}
