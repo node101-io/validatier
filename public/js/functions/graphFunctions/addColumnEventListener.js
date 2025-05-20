@@ -1,5 +1,5 @@
 
-function addColumnEventListener (operatorAddress, dataFields, colors) {
+function addColumnEventListener (operatorAddress, dataFields, colors, currency, exchange_rate, decimals) {
 
   const columnMouseHandler = (event) => {
 
@@ -34,7 +34,14 @@ function addColumnEventListener (operatorAddress, dataFields, colors) {
     columnWrapper.querySelector('.each-data-delta-vertical-line').classList.add('each-data-delta-vertical-line-visible', visibleClassName.replace('\\@', '@'));
     columnWrapper.querySelector('.each-data-indicator-vertical-line').classList.add('each-data-indicator-vertical-line-visible', visibleClassName.replace('\\@', '@'));
 
-    if (index % 10 == 0) columnWrapper.querySelector('.each-data-point-horizontal-label').classList.add('each-data-point-horizontal-label-hovered', visibleClassName);
+    if (!validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn || !validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn)
+      dataFields.forEach(eachDataField => {
+        const { nativeValue, usdValue } = getValueWithDecimals(columnWrapper.getAttribute(eachDataField), currency, exchange_rate, decimals);
+        const metric = document.getElementById(`${operatorAddress}-metric-${eachDataField}`);
+        
+        metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
+        metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
+      });
     
     if (!validatorListenerVariablesMapping[operatorAddressM].isSelectingRange) return;
     const deltaX = columnWrapper.getBoundingClientRect().width;

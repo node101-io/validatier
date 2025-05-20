@@ -6,6 +6,10 @@
   --validator-graph-wrapper-vertical-padding: 10px;
   --validator-graph-wrapper-horizontal-padding: 0;
   --validator-graph-wrapper-bottom-padding: 0px;
+
+  --validator-graph-wrapper-small-min-width: 100px;
+  --validator-graph-wrapper-small-max-width: 100px;
+  --validator-graph-wrapper-small-height: 50px;
   
   --each-data-point-max-width: 10px;
   --each-data-point-min-width: 10px;
@@ -14,6 +18,7 @@
   
   --each-data-line-height: 2px;
   --each-data-line-z-index: 10;
+  --each-data-line-transition-duration: 0.25s;
   
   --horizontal-axis-label-font-size: 8px;
   --horizontal-axis-label-font-weight: 400;
@@ -36,27 +41,38 @@
   --each-vertical-label-color: rgba(124, 112, 195, 1);
   
   --graph-range-paint-bar-opacity: 0.75;
-  --each-data-indicator-vertical-line-border-right-size: 2px;
+  --each-data-indicator-vertical-line-border-right-size: 1px;
+  --each-data-indicator-vertical-line-border-color: rgba(124, 112, 195, 1);
   --each-data-indicator-vertical-line-height: 100%;
-  --each-data-indicator-vertical-line-top: -50px;
+  --each-data-indicator-vertical-line-top: 0px;
   --each-data-indicator-vertical-line-left: -1px;
   --each-data-indicator-vertical-line-transition-duration: 0s;
 }
 
 
 .validator-graph-wrapper {
-  user-select: none;
   min-width: calc(var(--validator-graph-wrapper-min-width) - (var(--validator-graph-wrapper-horizontal-padding) * 2));
   max-width: calc(var(--validator-graph-wrapper-max-width) - (var(--validator-graph-wrapper-horizontal-padding) * 2));
   height: var(--validator-graph-wrapper-height);
-  display: flex;
-  gap: 0;
-  position: relative;
   transition: all var(--validator-graph-wrapper-transition-duration) ease-in-out 0s;
-  overflow: hidden;
   padding: var(--validator-graph-wrapper-vertical-padding) var(--validator-graph-wrapper-horizontal-padding);
   padding-bottom: var(--validator-graph-wrapper-bottom-padding);
   cursor: var(--pointer-hand-click-dark);
+  user-select: none;
+  overflow: hidden;
+  display: flex;
+  gap: 0;
+  position: relative;
+}
+
+.validator-graph-wrapper-small {
+  min-width: var(--validator-graph-wrapper-small-min-width);
+  max-width: var(--validator-graph-wrapper-small-max-width);
+  height: var(--validator-graph-wrapper-small-height);
+  user-select: none;
+  display: flex;
+  gap: 0;
+  position: relative;
 }
 
 .validator-graph-wrapper:active {
@@ -65,7 +81,7 @@
 
 .each-graph-column-wrapper {
   height: 100%;
-  position: relative;
+  position: relative; 
 }
 
 .each-data-point {
@@ -91,6 +107,7 @@
   height: var(--each-data-line-height);
   transform-origin: left;
   z-index: var(--each-data-line-z-index);
+  transition: opacity var(--each-data-line-transition-duration) ease-in-out 0s;
 }
 
 .horizontal-axis-label {
@@ -150,10 +167,9 @@
   transform-origin: top right !important;
 }
 
-
 .each-data-indicator-vertical-line {
   width: 0;
-  border-right: var(--each-data-indicator-vertical-line-border-right-size) dashed var(--color-triangle-unselected);
+  border-right: var(--each-data-indicator-vertical-line-border-right-size) dashed var(--each-data-indicator-vertical-line-border-color);
   height: calc(var(--each-data-indicator-vertical-line-height) - var(--each-data-indicator-vertical-line-top));
   top: var(--each-data-indicator-vertical-line-top);
   left: var(--each-data-indicator-vertical-line-left);

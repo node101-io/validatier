@@ -48,7 +48,7 @@ html(lang='tr')
       :root {
         --navbar-width: #{navbarWidth};
       }
-  body(cacheSummaryGraphDataMapping=cacheSummaryGraphDataMapping)    
+  body(summaryGraphData=summaryGraphData smallGraphData=smallGraphData)
     .all-wrapper
       .navbar-wrapper#navbar-wrapper(class=`${isNavbarClose ? 'navbar-close' : ''}`)
         .navbar-view-toggle#navbar-view-toggle

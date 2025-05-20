@@ -10,7 +10,7 @@ export const Job_SaveCacheSummaryGraphs = (
 ) => {
   Chain.getAllChains((err, chains) => {
     if (err || !chains) return callback(err, false);
-    async.times(
+    async.timesSeries(
       chains?.length,
       (i, next) => {
         const eachChain = chains[i];

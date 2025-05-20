@@ -13,6 +13,11 @@ function handleSummaryGraphActions() {
     if (!target.classList.contains('each-network-summary-select-option')) return;
     document.querySelector('.each-network-summary-select-option-selected').classList.remove('each-network-summary-select-option-selected');
     target.classList.add('each-network-summary-select-option-selected');
+
+    const networkSummaryGraphContainer = document.getElementById('network-summary-graph-container');
+    const currentDataFields = JSON.parse(networkSummaryGraphContainer.getAttribute('currentDataFields'));
+    const currentColors = JSON.parse(networkSummaryGraphContainer.getAttribute('currentColors'));
+    createNetworkSummaryGraph(currentDataFields, currentColors, target.getAttribute('option'))
   })
 
   document.body.addEventListener('click', (event) => {
@@ -53,8 +58,15 @@ function handleSummaryGraphActions() {
   })
 }
 
-function createNetworkSummaryGraph (dataFields, colors) {
-  const cacheSummaryGraphDataMapping = JSON.parse(document.body.getAttribute('cacheSummaryGraphDataMapping'));
+function createNetworkSummaryGraph (dataFields, colors, by) {
+  const targetCacheSummaryGraphData = JSON.parse(document.body.getAttribute('summaryGraphData'))[by.toLowerCase()];
+
+  document.querySelectorAll('.each-network-summary-network-graph-content-each-dropdown').forEach(each => each.classList.add('section-hidden'));
+  document.querySelectorAll('.each-metric-content-wrapper').forEach(each => each.classList.add('section-hidden'));
+  dataFields.forEach(eachDataField => {
+    document.getElementById(`summary-graph-dropdown-option-${eachDataField}`).classList.remove('section-hidden');
+    document.getElementById(`summary-metric-${eachDataField}`).classList.remove('section-hidden');
+  });
 
   const currency = 'native';
   const decimals = document.getElementById('network-switch-header').getAttribute('current_chain_decimals');
@@ -68,12 +80,11 @@ function createNetworkSummaryGraph (dataFields, colors) {
     isSelectionDirectionToLeft: false
   }
 
-  const targetCacheSummaryGraphData = cacheSummaryGraphDataMapping['all_time']['m'];
   document.documentElement.style.setProperty('--number-of-columns-summary', targetCacheSummaryGraphData.length);
 
   const graphDataMapping = {};
   const graphContainer = document.getElementById('network-summary-graph-container');
-  const graphWrapper = plotValidatorGraph({ operatorAddress: 'summary', graphDataMapping, currency, decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping, dataFields, colors, graphContainer });
+  const graphWrapper = plotValidatorGraph({ type: 'summary', operatorAddress: 'summary', decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping, dataFields, graphContainer });
   const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue("width").replace('px', '');
 
   const currentSumMapping = {};
@@ -85,6 +96,12 @@ function createNetworkSummaryGraph (dataFields, colors) {
       if (!currentSumMapping[eachDataField]) currentSumMapping[eachDataField] = 0;
       data[eachDataField] += currentSumMapping[eachDataField];
       currentSumMapping[eachDataField] = data[eachDataField];
+
+      const { nativeValue, usdValue } = getValueWithDecimals(currentSumMapping[eachDataField], symbol, usd_exchange_rate, decimals);
+      const metric = document.getElementById(`summary-metric-${eachDataField}`);
+      
+      metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
+      metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
     });
     
     graphDataMapping[i] = data;
@@ -99,6 +116,7 @@ function createNetworkSummaryGraph (dataFields, colors) {
     if (maxValue == minValue) minValue = maxValue / 2;
   
     const insertedColumn = addColumnToExistingGraph({
+      type: 'summary',
       operatorAddress: 'summary',
       data: data,
       timestamp: timestamp,
@@ -121,8 +139,75 @@ function createNetworkSummaryGraph (dataFields, colors) {
     ) {
       adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, 'summary', dataFields);
     } else {
-      document.documentElement.style.setProperty('--column-height', insertedColumn.offsetHeight);
-      addColumnEventListener('summary', dataFields, colors);
+      document.documentElement.style.setProperty('--column-height-summary', insertedColumn.offsetHeight);
+      addColumnEventListener('summary', dataFields, colors, symbol, usd_exchange_rate, decimals);
     }
   }
+}
+
+function createSmallGraphs () {
+  const smallGraphData = JSON.parse(document.body.getAttribute('smallGraphData'));
+  const graphsDataFields = [
+    ['self_stake_sum'],
+    ['average_self_stake_ratio'],
+  ];
+  const colors = ['rgba(88, 86, 214, 1)'];
+
+  graphsDataFields.forEach(dataFields => {
+
+    const operatorAddress = dataFields[0];
+    document.documentElement.style.setProperty(`--number-of-columns-${operatorAddress}`, smallGraphData.length);
+
+    const graphDataMapping = {};
+    const graphContainer = document.getElementById(`small-graph-${operatorAddress}`);
+    const graphWrapper = plotValidatorGraph({ type: 'small', operatorAddress, decimals: null, usd_exchange_rate: null, symbol: null, validatorGraphEventListenersMapping: null, dataFields, graphContainer });
+    const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue("width").replace('px', '');
+    
+    const currentSumMapping = {};
+
+    for (let i = 0; i < smallGraphData.length; i++) {
+      const data = smallGraphData[i];
+
+      dataFields.forEach(eachDataField => {
+        if (!currentSumMapping[eachDataField]) currentSumMapping[eachDataField] = 0;
+        data[eachDataField] += currentSumMapping[eachDataField];
+        currentSumMapping[eachDataField] = data[eachDataField];
+      });
+
+      graphDataMapping[i] = data;    
+      let { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping, dataFields);
+    
+      document.documentElement.style.setProperty(`--min-value-${operatorAddress}`, minValue);
+      document.documentElement.style.setProperty(`--max-value-${operatorAddress}`, maxValue);
+    
+      if (maxValue == minValue) minValue = maxValue / 2;
+    
+      const insertedColumn = addColumnToExistingGraph({
+        type: 'small',
+        operatorAddress,
+        data: data,
+        timestamp: null,
+        index: i,
+        currency: null,
+        decimals: null,
+        usd_exchange_rate: null,
+        symbol: null,
+        graphDataMapping,
+        minValue,
+        maxValue,
+        graphWidth,
+        dataFields: dataFields,
+        colors: colors
+      });
+    
+      if (
+        insertedColumn.previousSibling &&
+        insertedColumn.previousSibling.classList.contains('each-graph-column-wrapper')
+      ) {
+        adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, operatorAddress, dataFields);
+      } else {
+        document.documentElement.style.setProperty(`--column-height-${operatorAddress}`, insertedColumn.offsetHeight);
+      }
+    }
+  })
 }

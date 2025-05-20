@@ -12,7 +12,7 @@ function getAngleBetweenTwoPoints (column1, column2, operatorAddress, dataFields
     const dataDeltaY = `(
       (${(data_2 - data_1)} / 
       (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress})))
-      * var(--column-height)
+      * var(--column-height-${operatorAddress})
     )`;
 
     const angle = `atan((${dataDeltaY} * -1) / var(${deltaX}))`;

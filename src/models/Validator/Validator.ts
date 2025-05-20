@@ -10,8 +10,24 @@ import { getCsvExportData } from './functions/getCsvExportData.js';
 import { formatTimestamp } from '../../utils/formatTimestamp.js';
 import { getPubkeysOfActiveValidatorsByHeight } from '../../utils/getPubkeysOfActiveValidatorsByHeight.js';
 import ActiveValidators, { ActiveValidatorsInterface } from '../ActiveValidators/ActiveValidators.js';
-import { NUMBER_OF_COLUMNS } from '../../controllers/Validator/getGraphData/get.js';
-import { GraphDataInterface } from '../Cache/Cache.js';
+
+export interface GraphDataInterface {
+  _id: {
+    year: number;
+    month?: number;
+    day?: number;
+  },
+  data: {
+    self_stake_sum: number;
+    reward_sum: number;
+    commission_sum: number;
+    total_stake_sum: number;
+    total_withdraw_sum: number;
+    total_sold: number;
+    percentage_sold: number;  
+  }
+}[]
+
 
 const MAX_DATABASE_TEXT_FIELD_LENGTH = 1e4;
 const CHAIN_TO_DECIMALS_MAPPING: Record<string, any> = {
@@ -113,18 +129,25 @@ interface ValidatorModel extends Model<ValidatorInterface> {
     },
     callback: (
       err: string | null,
-      validators: {
-        operator_address: string,
-        moniker: string,
-        temporary_image_uri: string,
-        self_stake: number,
-        reward: number,
-        commission: number,
-        ratio: number,
-        sold: number,
-        percentage_sold: number,
-        self_stake_ratio: number
-      }[] | null
+      results: {
+        summary_data: {
+          percentage_sold: number;
+          self_stake_amount: number;
+          average_self_stake_ratio: number;
+        } | null,
+        validators: {
+          operator_address: string,
+          moniker: string,
+          temporary_image_uri: string,
+          self_stake: number,
+          reward: number,
+          commission: number,
+          ratio: number,
+          sold: number,
+          percentage_sold: number,
+          self_stake_ratio: number
+        }[] | null
+      } | null
     ) => any
   ) => any;
   updateActiveValidatorList: (
@@ -161,25 +184,25 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       chain_identifier: string;
       bottom_timestamp: number;
       top_timestamp: number;
-      by: string;
+      by_array: string[];
     },
     callback: (
       err: string | null,
-      summaryGraphData: GraphDataInterface | null
+      summaryGraphData: Record<string, GraphDataInterface> | null
     ) => any
   ) => any;
-  getInitialTotal: (
+  getSmallGraphData: (
     body: {
-      chain: ChainInterface;
+      chain_identifier: string;
       bottom_timestamp: number;
+      top_timestamp: number;
     },
     callback: (
       err: string | null,
-      initialTotalMapping: {
-        percentage_sold: number;
-        self_stake: number;
-        self_stake_ratio: number;
-      } | null
+      smallGraphData: {
+        self_stake_amount: number;
+        average_self_stake_ratio: number;
+      }[] | null
     ) => any
   ) => any;
   updateLastVisitedBlock: (
@@ -421,6 +444,13 @@ validatorSchema.statics.rankValidators = function (
     }),
   ])
     .then((results: Record<string, any>[]) => {
+
+      let totalSelfStaked = 0;
+      let totalWithdrawnValidator = 0;
+      let totalDelegation = 0;
+      let totalWithdrawn = 0;
+      let totalSelfStakeRatio = 0;
+
       const [validatorsResult, getPeriodicDataForValidatorSetResult] = results;
       if (
         validatorsResult.status == 'rejected' || 
@@ -442,6 +472,13 @@ validatorSchema.statics.rankValidators = function (
         const sold = ((reward + commission) || 0) - (self_stake || 0);
         const percentage_sold = Math.min(Math.abs((sold || 1) / ((reward + commission) || 1)), 1) * 100;
         const self_stake_ratio = Math.min(Math.abs(self_stake / (total_stake || 1)), 1) * 100;
+
+        totalDelegation += total_stake;
+        totalWithdrawn += total_withdraw;
+        
+        totalSelfStaked += self_stake;
+        totalWithdrawnValidator += (reward + commission);
+        totalSelfStakeRatio += self_stake_ratio;
 
         const pushObjectData = {
           pubkey: eachValidator.pubkey || '',
@@ -476,7 +513,14 @@ validatorSchema.statics.rankValidators = function (
         ? valueArray.sort((a: any, b: any) => (b[sort_by] || 0) - (a[sort_by] || 0))
         : valueArray.sort((a: any, b: any) => (a[sort_by] || 0) - (b[sort_by] || 0));
 
-      callback(null, valueArray);
+      callback(null, {
+        summary_data: {
+          percentage_sold: (((totalWithdrawnValidator - totalSelfStaked) / totalWithdrawnValidator) * 100),
+          self_stake_amount: totalSelfStaked,
+          average_self_stake_ratio: totalSelfStakeRatio / valueArray.length
+        },
+        validators: valueArray
+      });
     })
 }
 
@@ -557,30 +601,116 @@ validatorSchema.statics.exportCsv = function (
   )
 }
 
-validatorSchema.statics.getInitialTotal = function (
-  body: Parameters<ValidatorModel['getInitialTotal']>[0],
-  callback: Parameters<ValidatorModel['getInitialTotal']>[1],
-) {
-  const { chain, bottom_timestamp } = body;
-
-}
-
-
 validatorSchema.statics.getSummaryGraphData = function (
   body: Parameters<ValidatorModel['getSummaryGraphData']>[0],
   callback: Parameters<ValidatorModel['getSummaryGraphData']>[1],
 ) {
-  const { chain_identifier, bottom_timestamp, top_timestamp, by } = body;
+  const { chain_identifier, bottom_timestamp, top_timestamp, by_array } = body;
+  const graphDataMapping: Record<string, any> = {};
 
-  const groupId: Record<string, any> = { year: '$year' };
-  if (by == 'm' || by == 'w' || by == 'd') groupId.month = '$month';
-  if (by == 'w' || by == 'd')
-    groupId.day = {
-      $floor: {
-        $divide: ['$day', by == 'w' ? 7 : 4]
-      }
-    };
-  
+  async.times(
+    by_array.length,
+    (i, next) => {
+      const by = by_array[i];
+
+      const groupId: Record<string, any> = { year: '$year' };
+      if (by == 'm' || by == 'w' || by == 'd') groupId.month = '$month';
+      if (by == 'w' || by == 'd')
+        groupId.day = {
+          $floor: {
+            $divide: ['$day', by == 'w' ? 7 : 4]
+          }
+        };
+      
+      CompositeEventBlock.aggregate([
+        {
+          $match: {
+            chain_identifier: chain_identifier,
+            timestamp: {
+              $gte: bottom_timestamp,
+              $lte: top_timestamp,
+            },
+          },
+        },
+        {
+          $group: {
+            _id: groupId,
+            timestamp: { $first: '$timestamp' },
+            self_stake_sum: { $sum: '$self_stake' },
+            reward_sum: { $sum: '$reward' },
+            commission_sum: { $sum: '$commission' },
+            total_stake_sum: { $sum: '$total_stake' },
+            total_withdraw_sum: { $sum: '$total_withdraw' },
+          }
+        },
+        {
+          $addFields: {
+            total_sold: {
+              $subtract: [
+                { $add: ['$reward_sum', '$commission_sum'] },
+                '$self_stake_sum'
+              ]
+            },
+            percentage_sold: {
+              $cond: [
+                { $gt: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
+                {
+                  $min: [
+                    {
+                      $abs: {
+                        $divide: [
+                          {
+                            $subtract: [
+                              { $add: ['$reward_sum', '$commission_sum'] },
+                              '$self_stake_sum'
+                            ]
+                          },
+                          {
+                            $cond: [
+                              { $eq: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
+                              1,
+                              { $add: ['$reward_sum', '$commission_sum'] }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    1
+                  ]
+                },
+                0
+              ]
+            }    
+          }
+        },
+        {
+          $sort: {
+            timestamp: 1
+          }
+        },
+      ])
+        .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, total_withdraw: 1 })
+        .then((results: any) => {
+          graphDataMapping[by] = results;
+          next();
+        })
+        .catch(err => next(err))
+    },
+    (err) => {
+      if (err) return callback(err.toString(), null);
+      return callback(null, graphDataMapping);
+    }
+  )
+}
+
+
+validatorSchema.statics.getSmallGraphData = function (
+  body: Parameters<ValidatorModel['getSmallGraphData']>[0],
+  callback: Parameters<ValidatorModel['getSmallGraphData']>[1],
+) {
+  const { chain_identifier, bottom_timestamp, top_timestamp } = body;
+  const numberOfColumns = 20;
+  const step = (top_timestamp - bottom_timestamp) / numberOfColumns;
   CompositeEventBlock.aggregate([
     {
       $match: {
@@ -592,48 +722,49 @@ validatorSchema.statics.getSummaryGraphData = function (
       },
     },
     {
+      $addFields: {
+        groupId: {
+          $floor: {
+            $divide: [
+              {
+                $subtract: [
+                  '$timestamp',
+                  bottom_timestamp
+                ]
+              },
+              step
+            ]
+          }
+        }
+      }
+    },
+    {
       $group: {
-        _id: groupId,
+        _id: '$groupId',
         timestamp: { $first: '$timestamp' },
         self_stake_sum: { $sum: '$self_stake' },
-        reward_sum: { $sum: '$reward' },
-        commission_sum: { $sum: '$commission' },
         total_stake_sum: { $sum: '$total_stake' },
-        total_withdraw_sum: { $sum: '$total_withdraw' },
       }
     },
     {
       $addFields: {
-        total_sold: {
-          $subtract: [
-            { $add: ['$reward_sum', '$commission_sum'] },
-            '$self_stake_sum'
+        average_self_stake_ratio: {
+          $multiply: [
+            100,
+            {
+              $divide: [
+                '$self_stake_sum',
+                {
+                  $cond: [
+                    { $eq: ['$total_stake_sum', 0] },
+                    1,
+                    '$total_stake_sum'
+                  ]
+                }
+              ]
+            }
           ]
         },
-        percentage_sold: {
-          $cond: [
-            { $gt: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
-            {
-              $min: [
-                {
-                  $abs: {
-                    $divide: [
-                      {
-                        $subtract: [
-                          { $add: ['$reward_sum', '$commission_sum'] },
-                          '$self_stake_sum'
-                        ]
-                      },
-                      { $add: ['$reward_sum', '$commission_sum'] }
-                    ]
-                  }
-                },
-                1
-              ]
-            },
-            0
-          ]
-        }    
       }
     },
     {
@@ -643,9 +774,7 @@ validatorSchema.statics.getSummaryGraphData = function (
     },
   ])
     .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, total_withdraw: 1 })
-    .then((results: any) => { 
-      return callback(null, results)
-    })
+    .then(results => callback(null, results))
     .catch(err => callback(err, null))
 }
 

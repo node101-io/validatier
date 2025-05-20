@@ -11,27 +11,27 @@ function getDateRange(currentDate) {
   const allTimeBottomTimestamp = document.getElementById('network-switch-header').getAttribute('current_chain_first_available_time');
 
   return {
-    'all-time': {
+    all_time: {
       bottom: formatDate(new Date(allTimeBottomTimestamp)),
       top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
     },
-    'last-30-days': {
+    last_30_days: {
       bottom: formatDate(new Date(currentYear, currentMonth, currentDay - 30)),
       top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
     },
-    'last-90-days': {
+    last_90_days: {
       bottom: formatDate(new Date(currentYear, currentMonth, currentDay - 90)),
       top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
     },
-    'last-365-days': {
+    last_365_days: {
       bottom: formatDate(new Date(currentYear, currentMonth, currentDay - 365)),
       top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
     },
-    'this-year': {
+    this_year: {
       bottom: formatDate(new Date(currentYear, 0, 1)),
       top: formatDate(new Date(currentYear, 11, 31))
     },
-    'last-calendar-year': {
+    last_calendar_year: {
       bottom: formatDate(new Date(currentYear - 1, 0, 1)),
       top: formatDate(new Date(currentYear - 1, 11, 31))
     }

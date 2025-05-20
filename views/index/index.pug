@@ -19,11 +19,13 @@ block content
       return sign + num.toString();
     }
   
-    function getValue(value, currency) {
-      const decimals = selectedChain ? selectedChain.decimals : 6;
-      const exchangeRate = selectedChain ? selectedChain.usd_exchange_rate : 0;
-      if (currency.toLowerCase().trim() != 'usd') return `${shortNumberFormat(value / (10 ** decimals))} ${currency}`
-      return '$' + shortNumberFormat((value / Math.pow(10, decimals)) * exchangeRate);
+    function getValue(value, unit) {
+      const decimals = selectedChain.decimals || 6;
+      const exchangeRate = selectedChain.usd_exchange_rate || 0;
+      return {
+        nativeValue: unit != '%' ? `${shortNumberFormat(value / (10 ** decimals))} ${unit}` : `${Math.round(value)}${unit}`,
+        usdValue: unit != '%' ? '$' + shortNumberFormat((value / Math.pow(10, decimals)) * exchangeRate) : null
+      }
     }
   
     function getScoreColor (value) {
@@ -39,41 +41,28 @@ block content
         id: 'network-summary-interval',
         options: ['D', 'W', 'M', 'Y'],
         selected: 'M'
-      }
+      },
+      {
+        type: 'dropdown',
+        id: 'network-summary-filter',
+        title: 'Filter',
+        options: [
+          { id: 'total_stake_sum', title: 'Total Delegation' },
+          { id: 'total_withdraw_sum', title: 'Total Reward' },
+          { id: 'total_sold', title: 'Total Sold' },
+          { id: 'percentage_sold', title: 'Percentage Sold' },
+          { id: 'self_stake_sum', title: 'Self-Staked Amount' }
+        ]
+      },
     ]
     
     const metrics = [
-      { id: 'metric-total-delegation', unit: selectedChain.symbol || '$ATOM', color: 'rgb(254, 148, 4)', title: 'Total Delegation', percentage_change: '17.3%' },
-      { id: 'metric-total-withdraw', unit: selectedChain.symbol || '$ATOM', color: 'rgb(50, 173, 230)', title: 'Total Reward', percentage_change: '17.3%' },
-      { id: 'metric-total-sold-amount', unit: selectedChain.symbol || '$ATOM', color: 'rgb(88, 86, 214)', title: 'Total Sold Amount', percentage_change: '17.3%' }
+      { id: 'total_stake_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgb(254, 148, 4)', title: 'Total Delegation', percentage_change: '17.3%' },
+      { id: 'total_withdraw_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgb(50, 173, 230)', title: 'Total Reward', percentage_change: '17.3%' },
+      { id: 'total_sold', unit: selectedChain.symbol || '$ATOM', color: 'rgb(88, 86, 214)', title: 'Total Sold Amount', percentage_change: '17.3%' },
+      { id: 'percentage_sold', unit: selectedChain.symbol || '$ATOM', color: 'rgba(255, 149, 0, 1)', title: 'Percentage Sold', percentage_change: '17.3%' },
+      { id: 'self_stake_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgba(88, 86, 214, 1)', title: 'Self-Staked Amount', percentage_change: '17.3%' }
     ]
-  script.
-    function shortNumberFormat(num) {
-      const sign = num < 0 ? '-' : '';
-      num = Math.abs(num);
-      if (num >= 1000000) return sign + (num / 1000000).toFixed(1) + 'M';
-      if (num >= 10000) return sign + Math.floor(num / 1000) + 'K';
-      if (num >= 1000) return sign + num.toFixed(0).toString();
-      if (num >= 100) return sign + num.toFixed(1).toString();
-      if (num >= 0) return sign + num.toFixed(2).toString();
-      return sign + num.toString();
-    }
-
-    function getValue(value, currency) {
-      const decimals = #{selectedChain.decimals || 6};
-      const exchangeRate = #{selectedChain.usd_exchange_rate || 0};
-      if (currency.toLowerCase().trim() !== 'usd') {
-        return shortNumberFormat(value / Math.pow(10, decimals)) + ' ' + currency;
-      }
-      return '$' + shortNumberFormat((value / Math.pow(10, decimals)) * exchangeRate);
-    }
-
-    function getScoreColor (value) {
-      if (value < 25) return { color: 'rgba(19, 167, 25, 1)', check: true };
-      else if (value < 50) return { color: 'rgba(255, 111, 67, 1)', check: false };
-      return { color: 'rgba(184, 34, 0, 1)', check: false };
-    }
-
   .all-main-wrapper#all-main-wrapper
     .inactivity-display-content
     .header-main-wrapper
@@ -89,7 +78,7 @@ block content
                   include ../icons/chevron.pug
               .network-switch-network-currency= selectedChain.symbol || 'ATOM'
           .network-switch-main-numerical-values-wrapper
-            .each-network-switch-main-numerical-value(class='percentage-change-value-content') -> 17.3%
+            .each-network-switch-main-numerical-value(class='percentage-change-value-content') → 17.3%
             .each-network-switch-main-numerical-value $#{selectedChain.usd_exchange_rate}
         .network-switch-dropdown
           .network-switch-search-bar
@@ -120,12 +109,12 @@ block content
               .dropdown
                 -
                   const options = [
-                    { id: 'last-30-days', label: 'Last month' },
-                    { id: 'last-90-days', label: 'Last 3 months', selected: true },
-                    { id: 'last-180-days', label: 'Last 6 months' },
-                    { id: 'last-365-days', label: 'Last year' },
-                    { id: 'this-year', label: 'This year (Jan - Today)' },
-                    { id: 'all-time', label: 'All time' },
+                    { id: 'last_30_days', label: 'Last month' },
+                    { id: 'last_90_days', label: 'Last 3 months', selected: true },
+                    { id: 'last_180_days', label: 'Last 6 months' },
+                    { id: 'last_365_days', label: 'Last year' },
+                    { id: 'this_year', label: 'This year (Jan - Today)' },
+                    { id: 'all_time', label: 'All time' },
                     { id: 'custom', label: 'Custom' }
                   ]
                 ul
@@ -162,19 +151,12 @@ block content
             button.cancel#cancel Cancel
             button.apply#apply Apply
     .inner-main-wrapper#inner-main-wrapper
-      script.
-        let totalSelfStaked = 0;
-        let totalWithdrawnValidator = 0;
-        let totalDelegation = 0;
-        let totalWithdrawn = 0;
-        let totalSelfStakeRatio = 0;
-        let numberOfValidatorsVisited = 0;
-      
       .network-summary-main-wrapper#network-summary-main-wrapper(class=`${(queryValidator || url == 'validators') ? 'section-hidden' : ''}`)
         .network-summary-main-wrapper-title(class='each-section-title-content') Network Summary
         -
           const stats = [
             {
+              field: 'percentage_sold',
               title: 'Percentage sold',
               id_native: 'summary-percentage-sold-native',
               id_usd: null,
@@ -184,19 +166,23 @@ block content
               unit: '%'
             },
             {
+              field: 'self_stake_amount',
               title: 'Self Stake Amount',
               id_native: 'summary-self-stake-amount-native',
               id_usd: 'summary-self-stake-amount-usd',
               percentage_change: '17.3%',
-              unit: selectedChain.symbol || '$ATOM'
+              unit: selectedChain.symbol || '$ATOM',
+              small_graph_id: 'self_stake_sum'
             },
             {
+              field: 'average_self_stake_ratio',
               title: 'Average Self Staked Ratio',
               id_native: 'summary-average-self-stake-ratio-native',
               id_usd: null,
               additional_class: 'summary-percentage-text-native',
               percentage_change: '17.3%',
-              unit: '%'
+              unit: '%',
+              small_graph_id: 'average_self_stake_ratio'
             },
           ]
         .network-summary-network-stats-main-wrapper
@@ -204,10 +190,10 @@ block content
             .each-network-summary-stat
               .each-network-summary-stat-column
                 .each-network-summary-stat-header-title= stat.title
-                if stat.unit
-                  .each-network-summary-stat-content(id=`${stat.id_native}` class=`${stat.id_native} ${stat.additional_class}`)
-                if stat.unit
-                  .each-network-summary-stat-footer-value(id=`${stat.id_usd}` class=`${stat.id_usd}`)
+                if stat.id_native
+                  .each-network-summary-stat-content(id=`${stat.id_native}` class=`${stat.id_native} ${stat.additional_class}`)= getValue(summaryData[stat.field], stat.unit).nativeValue
+                if stat.id_usd
+                  .each-network-summary-stat-footer-value(id=`${stat.id_usd}` class=`${stat.id_usd}`)= getValue(summaryData[stat.field], 'usd').usdValue
                 else 
                   .each-network-summary-stat-content(class='stat-value-font-large')
                 .each-network-summary-stat-footer-change 
@@ -215,20 +201,24 @@ block content
               .each-network-summary-stat-column
                 if `${stat.id_native}` == 'summary-percentage-sold-native'
                   .percentage-sold-main-circle
-                    span
-                    .percentage-sold-inner-circle(class=`${stat.id_native}`)
+                    span= getValue(100 - summaryData[stat.field], stat.unit).nativeValue
+                    .percentage-sold-inner-circle(class=`${stat.id_native}` style=`width: calc(var(--percentage-sold-main-circle-diameter) * ${Math.sqrt(parseInt(summaryData[stat.field]) / 100)});`) #{getValue(summaryData[stat.field], stat.unit).nativeValue}
+                else 
+                  .network-summary-small-graph-container(id=`small-graph-${stat.small_graph_id}`)
+          script.
+            createSmallGraphs();
         .network-summary-network-graph-main-wrapper
           .network-summary-network-graph-metrics-wrapper
             .network-summary-network-graph-metrics-wrapper-title(class='each-section-title-content') Graph Metrics
             each metric in metrics 
-              .each-metric-content-wrapper
+              .each-metric-content-wrapper(id=`summary-metric-${metric.id}` class=`${dataFields.includes(metric.id) ? '' : 'section-hidden'}`)
                 .each-metric-content-wrapper-header
                   .each-metric-content-wrapper-header-icon(style=`background-color: ${metric.color}`)
                   .each-metric-content-wrapper-header-title= metric.title
                 .each-metric-content-wrapper-content
-                  .each-metric-content-wrapper-content-value-native(id=`${metric.id}-native` class=`${metric.id}-native`)
-                  .each-metric-content-wrapper-content-value-usd(id=`${metric.id}-usd` class=`${metric.id}-usd`)
-                .each-metric-content-wrapper-footer 
+                  .each-metric-content-wrapper-content-value-native
+                  .each-metric-content-wrapper-content-value-usd
+                .each-metric-content-wrapper-footer
                   span(class='percentage-change-value-content') → #{metric.percentage_change} 
           .network-summary-network-graph-content-wrapper
             .network-summary-network-graph-content-header
@@ -244,29 +234,14 @@ block content
                         img.each-network-summary-network-graph-content-dropdown-arrow(src='/res/images/chevron_aestethic.svg' class='center')
                       .each-network-summary-network-graph-content-dropdown-content
                         each option in menu.options 
-                          .each-network-summary-network-graph-content-each-dropdown= option
+                          .each-network-summary-network-graph-content-each-dropdown(id=`summary-graph-dropdown-option-${option.id}` class=`dropdown-option-checked ${dataFields.includes(option.id) ? '' : 'section-hidden'}`)= option.title
                   else 
-                    .each-network-summary-select-wrapper 
+                    .each-network-summary-select-wrapper
                       each option in menu.options 
-                        .each-network-summary-select-option(class=`${option == menu.selected ? 'each-network-summary-select-option-selected' : ''}`)= option
-            .network-summary-network-graph-content#network-summary-graph-container
+                        .each-network-summary-select-option(class=`${option == menu.selected ? 'each-network-summary-select-option-selected' : ''}` option=option.toLowerCase())= option
+            .network-summary-network-graph-content#network-summary-graph-container(currentDataFields=dataFields currentColors=colors)
               script.
-                let dataFields = [];
-                let colors = [];
-                if ('#{url}' == 'self_staked_and_delegation') {
-                  dataFields = ['percentage_sold', 'self_stake_sum'];
-                  colors = ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)'];
-                }
-                else if ('#{url}' == 'percentage_sold_graph') {
-                  dataFields = ['percentage_sold'];
-                  colors = ['rgba(255, 149, 0, 1)'];
-                }
-                else {
-                  dataFields = ['total_stake_sum', 'total_withdraw_sum', 'total_sold'];
-                  colors = ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)'];
-                }
-
-                createNetworkSummaryGraph(dataFields, colors);
+                createNetworkSummaryGraph(!{dataFields}, !{colors}, 'm');
       -
         const leaderboards = [
           {
@@ -334,9 +309,9 @@ block content
                       img.each-leaderboard-table-validator-info-image(src=src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.png'}`)
                       .each-leaderboard-table-validator-info-moniker= validator.moniker
                     .each-leaderboard-table-validator-data-wrapper 
-                      .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], selectedChain.symbol)
+                      .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], selectedChain.symbol).nativeValue
                       if leaderboard.id_usd 
-                        .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], 'usd')
+                        .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], 'usd').usdValue
                 .each-leaderboard-more-wrapper
                   div
                   div
@@ -396,9 +371,9 @@ block content
                     .each-metric-content-wrapper-header-icon(style=`background-color: ${metric.color}`)
                     .each-metric-content-wrapper-header-title= metric.title
                   .each-metric-content-wrapper-content
-                    .each-metric-content-wrapper-content-value-native(id=`${metric.id}-native` class=`${metric.id}-native`)
-                    .each-metric-content-wrapper-content-value-usd(id=`${metric.id}-usd` class=`${metric.id}-usd`)
-                  .each-metric-content-wrapper-footer 
+                    .each-metric-content-wrapper-content-value-native
+                    .each-metric-content-wrapper-content-value-usd
+                  .each-metric-content-wrapper-footer
                     span(class='percentage-change-value-content') → #{metric.percentage_change} 
             .network-summary-network-graph-content-wrapper
               .network-summary-network-graph-content-header
@@ -484,39 +459,7 @@ block content
                     .each-table-header-sort-indicators 
                       .triangle-up
                       .triangle-down
-            script.
-              function updateSummary() {
-                document.querySelectorAll('.metric-total-delegation-native').forEach(each => each.innerText = getValue(totalDelegation, `#{selectedChain.symbol}`));
-                document.querySelectorAll('.metric-total-withdraw-native').forEach(each => each.innerText = getValue(totalWithdrawn, `#{selectedChain.symbol}`));
-                document.querySelectorAll('.metric-total-sold-amount-native').forEach(each => each.innerText = getValue(totalWithdrawnValidator - totalSelfStaked, `#{selectedChain.symbol}`));
-
-                document.querySelectorAll('.metric-total-delegation-usd').forEach(each => each.innerText = getValue(totalDelegation, `usd`));
-                document.querySelectorAll('.metric-total-withdraw-usd').forEach(each => each.innerText = getValue(totalWithdrawn, `usd`));
-                document.querySelectorAll('.metric-total-sold-amount-usd').forEach(each => each.innerText = getValue(totalWithdrawnValidator - totalSelfStaked, `usd`));
-
-                const percentageSold = (((totalWithdrawnValidator - totalSelfStaked) / totalWithdrawnValidator) * 100).toFixed(1);
-                document.querySelectorAll('.summary-percentage-sold-native').forEach(each => {
-                  each.innerText = percentageSold + '%';
-                  if (each.parentNode.classList.contains('percentage-sold-main-circle')) {
-                    each.previousSibling.innerText = (100 - percentageSold).toFixed(1) + '%';
-                    each.style.width = `calc(var(--percentage-sold-main-circle-diameter) * ${Math.sqrt(percentageSold / 100)})`
-                  }
-                });
-
-                document.querySelectorAll('.summary-self-stake-amount-native').forEach(each => each.innerText = getValue(totalSelfStaked, `#{selectedChain.symbol}`));
-                document.querySelectorAll('.summary-self-stake-amount-usd').forEach(each => each.innerText = getValue(totalSelfStaked, `usd`));
-                document.querySelectorAll('.summary-average-self-stake-ratio-native').forEach(each => each.innerText = (totalSelfStakeRatio / numberOfValidatorsVisited).toFixed(0) + '%');
-              }
             each validator, index in validators
-              script.
-                totalDelegation += #{validator.total_stake};
-                totalWithdrawn += #{validator.total_withdraw};
-                
-                totalSelfStaked += #{validator.self_stake};
-                totalWithdrawnValidator += (#{validator.reward} + #{validator.commission});
-                totalSelfStakeRatio += Math.min(Math.abs((#{validator.self_stake || 0} / #{validator.total_stake || 1})), 1) * 100;
-                numberOfValidatorsVisited++;
-                updateSummary();
               .each-validator-wrapper(validator=validator id=`${validator.operator_address}` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}` class='operator-address')
                 .each-validator-info-wrapper
                   .ranking-number-content= index + 1
@@ -538,8 +481,8 @@ block content
                         img(src='/res/images/check_green.svg' class='center')
                   else
                     .validator-each-numeric-info
-                      .validator-each-numeric-info-native= getValue(validator[`${header.id}`], symbol)
-                      .validator-each-numeric-info-usd= getValue(validator[`${header.id}`], 'usd')
+                      .validator-each-numeric-info-native= getValue(validator[`${header.id}`], symbol).nativeValue
+                      .validator-each-numeric-info-usd= getValue(validator[`${header.id}`], 'usd').usdValue
     .footer-main-wrapper
       .each-footer-column
         .header-banner-wrapper

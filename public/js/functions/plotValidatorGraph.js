@@ -1,20 +1,53 @@
 
 function plotValidatorGraph(params) {
-  const { operatorAddress, graphDataMapping, currency, decimals, usd_exchange_rate, symbol, dataFields, colors, graphContainer } = params;
+  const { type, operatorAddress, decimals, usd_exchange_rate, symbol, dataFields, graphContainer } = params;
 
   if (document.getElementById(`validator-graph-wrapper-${operatorAddress}`)) document.getElementById(`validator-graph-wrapper-${operatorAddress}`).remove();
-
-  if (!validatorGraphEventListenersMapping[operatorAddress]) validatorGraphEventListenersMapping[operatorAddress] = [];
-  else validatorGraphEventListenersMapping[operatorAddress].forEach(eachEventHandler => eachEventHandler.element.removeEventListener(eachEventHandler.event, eachEventHandler.handler));
   
   const graphWrapper = document.createElement('div');
-  graphWrapper.className = 'validator-graph-wrapper';
+  type != 'small'
+    ? graphWrapper.classList.add('validator-graph-wrapper') 
+    : graphWrapper.classList.add('validator-graph-wrapper-small');
+  
   graphWrapper.id = `validator-graph-wrapper-${operatorAddress}`;
   graphWrapper.setAttribute('operator_address', operatorAddress);
 
   const graphWrapperHorizontalLabelsBackgroundAbsolute = document.createElement('div');
-  graphWrapperHorizontalLabelsBackgroundAbsolute.classList.add('graph-wrapper-horizontal-labels-background-absolute')
-  graphWrapper.appendChild(graphWrapperHorizontalLabelsBackgroundAbsolute);
+  if (type != 'small') {
+    graphWrapperHorizontalLabelsBackgroundAbsolute.classList.add('graph-wrapper-horizontal-labels-background-absolute')
+    graphWrapper.appendChild(graphWrapperHorizontalLabelsBackgroundAbsolute);  
+
+    if (!validatorGraphEventListenersMapping[operatorAddress]) validatorGraphEventListenersMapping[operatorAddress] = [];
+    else validatorGraphEventListenersMapping[operatorAddress].forEach(eachEventHandler => eachEventHandler.element.removeEventListener(eachEventHandler.event, eachEventHandler.handler));  
+  
+    dataFields.forEach(eachDataField => {
+      const metric = document.getElementById(`${operatorAddress}-metric-${eachDataField}`);
+      const dropdownOptionId = `${operatorAddress == 'summary' ? 'summary' : 'validator'}-graph-dropdown-option-${eachDataField}`;
+      const dropdownOption = document.getElementById(dropdownOptionId);
+
+      document.addEventListener('click', (event) => {
+        
+        let target = event.target;
+        while (target != document.body && ![metric.id, dropdownOption.id].includes(target.id)) target = target.parentNode;
+        if (![metric.id, dropdownOption.id].includes(target.id)) return;
+
+        if (metric.classList.contains('each-metric-content-wrapper-faded')) {
+          document.querySelectorAll(`.${eachDataField}-graph-data-line-${operatorAddress}`).forEach(eachElement => {
+            eachElement.style.opacity = '1';
+          })
+          dropdownOption.classList.add('dropdown-option-checked');
+          metric.classList.remove('each-metric-content-wrapper-faded');
+        }
+        else {
+          document.querySelectorAll(`.${eachDataField}-graph-data-line-${operatorAddress}`).forEach(eachElement => {
+            eachElement.style.opacity = '0.2';
+          })
+          dropdownOption.classList.remove('dropdown-option-checked');
+          metric.classList.add('each-metric-content-wrapper-faded');
+        }
+      })
+    })
+  }
 
   const graphMouseDownHandler = (event) => {
     document.querySelectorAll(`.paint-bar-${operatorAddress}`).forEach(each => each.style.width = '0');
@@ -55,6 +88,12 @@ function plotValidatorGraph(params) {
           : validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute(eachDataField) - validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute(eachDataField);
 
         deltaMapping[eachDataField] = deltaValue;
+
+        const { nativeValue, usdValue } = getValueWithDecimals(deltaValue, symbol, usd_exchange_rate, decimals);
+        const metric = document.getElementById(`${operatorAddress}-metric-${eachDataField}`);
+
+        metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
+        metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
       })
 
       const initialTimestamp = !validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft ? validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp') : validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute('timestamp');
@@ -82,10 +121,12 @@ function plotValidatorGraph(params) {
     }
   }
 
-  graphWrapper.addEventListener('mousedown', graphMouseDownHandler);
-  validatorGraphEventListenersMapping[operatorAddress].push({ event: 'mousedown', handler: graphMouseDownHandler, element: graphWrapper });
-  graphWrapper.addEventListener('mouseup', graphMouseUpHandler);
-  validatorGraphEventListenersMapping[operatorAddress].push({ event: 'mouseup', handler: graphMouseUpHandler, element: graphWrapper });
+  if (type != 'small') {
+    graphWrapper.addEventListener('mousedown', graphMouseDownHandler);
+    validatorGraphEventListenersMapping[operatorAddress].push({ event: 'mousedown', handler: graphMouseDownHandler, element: graphWrapper });
+    graphWrapper.addEventListener('mouseup', graphMouseUpHandler);
+    validatorGraphEventListenersMapping[operatorAddress].push({ event: 'mouseup', handler: graphMouseUpHandler, element: graphWrapper });  
+  }
 
   graphContainer.appendChild(graphWrapper);
   return graphWrapper;

@@ -97,7 +97,7 @@ function generateGraph (validator) {
     decimals: decimals
   };
 
-  const graphWrapper = plotValidatorGraph({ operatorAddress: operatorAddress.replace('@', '\\@'), graphDataMapping, currency, decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping, dataFields, colors, graphContainer });
+  const graphWrapper = plotValidatorGraph({ type: 'validator', operatorAddress: operatorAddress.replace('@', '\\@'), decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping, dataFields, graphContainer });
   const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue("width").replace('px', '');
 
   const queryString = new URLSearchParams(requestData).toString();
@@ -141,6 +141,7 @@ function generateGraph (validator) {
     if (maxValue == minValue) minValue = maxValue / 2;
   
     const insertedColumn = addColumnToExistingGraph({
+      type: 'validator',
       operatorAddress: operatorAddress.replace('@', '\\@'),
       data: data,
       timestamp: data.timestamp,
@@ -163,8 +164,8 @@ function generateGraph (validator) {
     ) {
       adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, operatorAddress.replace('@', '\\@'), dataFields);
     } else {
-      document.documentElement.style.setProperty('--column-height', insertedColumn.offsetHeight);
-      addColumnEventListener(operatorAddress.replace('@', '\\@'), dataFields, colors);
+      document.documentElement.style.setProperty(`--column-height-${operatorAddress}`, insertedColumn.offsetHeight);
+      addColumnEventListener(operatorAddress.replace('@', '\\@'), dataFields, colors, symbol, usd_exchange_rate, decimals);
     }
   };
   
@@ -174,29 +175,6 @@ function generateGraph (validator) {
   });
 
   eventSource.onerror = (err) => eventSource.close();
-
-  let isResizing = false;
-  window.onresize = () => {
-    if (isResizing) return;
-    isResizing = true;
-
-    const graphWrappersArray = document.querySelectorAll('.validator-graph-wrapper');
-    setTimeout(() => {
-  
-      for (let i = 0; i < graphWrappersArray.length; i++) {
-        const eachGraphWrapper = graphWrappersArray[i];
-        const operatorAddress = eachGraphWrapper.getAttribute('operator_address');
-        const columnWrapper = eachGraphWrapper.querySelector('.each-graph-column-wrapper');
-        if (!columnWrapper) return;
-        
-        document.documentElement.style.setProperty(
-          `--graph-column-width-${operatorAddress}`, 
-          columnWrapper.getBoundingClientRect().width
-        );
-      }
-      isResizing = false;
-    }, 10);
-  }
 }
 
 function handlePlotButtonClick () {
@@ -217,4 +195,27 @@ function handlePlotButtonClick () {
     history.pushState(null, '', `/?validator=${validator.operator_address}`);
     generateGraph(validator)
   });
+
+  let isResizing = false;
+  window.onresize = () => {
+    if (isResizing) return;
+    isResizing = true;
+
+    const graphWrappersArray = [...document.querySelectorAll('.validator-graph-wrapper'), ...document.querySelectorAll('.validator-graph-small')];
+    setTimeout(() => {
+  
+      for (let i = 0; i < graphWrappersArray.length; i++) {
+        const eachGraphWrapper = graphWrappersArray[i];
+        const operatorAddress = eachGraphWrapper.getAttribute('operator_address');
+        const columnWrapper = eachGraphWrapper.querySelector('.each-graph-column-wrapper');
+        if (!columnWrapper) return;
+        
+        document.documentElement.style.setProperty(
+          `--graph-column-width-${operatorAddress}`,
+          columnWrapper.getBoundingClientRect().width
+        );
+      }
+      isResizing = false;
+    }, 10);
+  }
 }

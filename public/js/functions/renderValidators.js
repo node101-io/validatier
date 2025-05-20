@@ -240,9 +240,10 @@ function renderValidators() {
     }, 1000);
   })
 
-  document.body.addEventListener('mouseover', (event) => {
+  document.addEventListener('mouseover', (event) => {
     let target = event.target;
     while (target != document.body && !target.classList.contains('each-validator-wrapper')) target = target.parentNode;
+    if (!target.classList.contains('each-validator-wrapper')) return;
     
     document.querySelectorAll('.validator-moniker-text').forEach(each => {
       if (each.innerHTML == target.querySelector('.validator-moniker-text').innerHTML) return;
