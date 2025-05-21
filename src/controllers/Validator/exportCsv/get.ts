@@ -9,10 +9,10 @@ import { isValidSortOrder } from '../../../utils/isValidSortOrder.js';
 
 export default (req: Request, res: Response): any => {
 
-  type SortBy = 'self_stake' | 'withdraw' | 'ratio' | 'sold'; 
+  type SortBy = 'total_stake' | 'total_withdraw' | 'sold' | 'self_stake' | 'percentage_sold';
 
   const { order, sort_by, bottom_timestamp, top_timestamp, range, chain_identifier } = req.query;
-  
+
   if (!isValidSortBy(sort_by)) return res.send({ err: 'bad_request', success: false})
   if (!isValidSortOrder(order)) return res.send({ err: 'bad_request', success: false})
   if (typeof chain_identifier != 'string' || typeof bottom_timestamp !== 'string' || typeof top_timestamp !== 'string' || typeof range !== 'string') return res.send({ err: 'bad_request', success: false });

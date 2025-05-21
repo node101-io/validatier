@@ -1,9 +1,12 @@
 :root {
-  --each-network-summary-network-graph-content-dropdown-content-background-color: rgba(242, 242, 242, 1);
-  --each-network-summary-network-graph-content-dropdown-content-padding: 10px;
+  --each-network-summary-network-graph-content-dropdown-content-background-color: rgba(245, 245, 255, 1);
+  --each-network-summary-network-graph-content-dropdown-content-padding: 16px;
   --each-network-summary-network-graph-content-dropdown-content-gap: 10px;
   --each-network-summary-network-graph-content-dropdown-content-z-index: 100;
   --each-network-summary-network-graph-content-dropdown-content-transition-duration: 0.25s;
+  --each-network-summary-network-graph-content-dropdown-content-border-radius: 24px;
+  --each-network-summary-network-graph-content-dropdown-content-border-size: 0.5px;
+  --each-network-summary-network-graph-content-dropdown-content-border-color: rgba(190, 190, 231, 1);;
   
   --each-network-summary-select-wrapper-font-size: 14px;
   --each-network-summary-select-wrapper-gap: 14px;
@@ -448,6 +451,8 @@
   gap: var(--each-network-summary-network-graph-content-dropdown-content-gap);
   opacity: 0;
   transform: rotateX(-90deg);
+  border: var(--each-network-summary-network-graph-content-dropdown-content-border-size) solid var(--each-network-summary-network-graph-content-dropdown-content-border-color);
+  border-radius: var(--each-network-summary-network-graph-content-dropdown-content-border-radius);
   transition: all var(--each-network-summary-network-graph-content-dropdown-content-transition-duration) ease 0s;
   transform-origin: top;
   z-index: var(--each-network-summary-network-graph-content-dropdown-content-z-index);
@@ -460,14 +465,25 @@
 }
 
 .each-network-summary-network-graph-content-each-dropdown {
-  width: 120px;
+  width: fit-content;
+  display: flex;
+  align-items: center;
   text-wrap: nowrap;
-  opacity: 0.25;
+  gap: 5px;
   transition: opacity 0.25s ease-in-out 0s;
 }
 
-.dropdown-option-checked {
-  opacity: 1;
+.each-network-summary-network-graph-content-each-dropdown span {
+  margin-bottom: 2px;
+  font-size: 16px;
+}
+
+.each-network-summary-network-graph-content-each-dropdown .general-choice-checkbox-inner-circle {
+  opacity: 0 !important;
+}
+
+.dropdown-option-checked .general-choice-checkbox-inner-circle {
+  opacity: 1 !important;
 }
 
 .each-network-summary-select-wrapper {

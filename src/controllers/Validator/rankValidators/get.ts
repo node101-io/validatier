@@ -21,15 +21,14 @@ export default (req: Request, res: Response): any => {
   const chainIdentifier: string = chain_identifier;
   const withPhotos: Boolean = 'with_photos' in req.query;
 
-
   Validator.rankValidators(
     { sort_by: sortBy, order: sortOrder, bottom_timestamp: parseInt(bottomTimestamp), top_timestamp: parseInt(topTimestamp), chain_identifier: chainIdentifier, with_photos: withPhotos },
-    (err, validators) => {
+    (err, results) => {
       if (err) return res.json({ success: false, err: 'bad_request' })
       return res.json({
         success: true,
         data: {
-          validators: validators,
+          validators: results?.validators,
         }
       });
     });

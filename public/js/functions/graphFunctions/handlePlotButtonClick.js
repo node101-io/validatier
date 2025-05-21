@@ -36,7 +36,7 @@ function generateGraph (validator) {
   const pubkey = validator.pubkey;
   const chainIdentifier = validator.chain_identifier;
 
-  document.documentElement.style.setProperty(`--number-of-columns-${operatorAddress}`, 50);
+  document.documentElement.style.setProperty(`--number-of-columns-${operatorAddress}`, 49);
 
   const decimals = document.getElementById('network-switch-header').getAttribute('current_chain_decimals');
   const usd_exchange_rate = document.getElementById('network-switch-header').getAttribute('current_chain_usd_exhange_rate');
@@ -62,10 +62,15 @@ function generateGraph (validator) {
       validatorDetailsImage.src = validator.temporary_image_uri || '/res/images/default_validator_photo.png';
       return;
     }
+
+    const { nativeValue, usdValue } = getValueWithDecimals(validator[stat.field], symbol, usd_exchange_rate, decimals)
+
     document.getElementById(`${stat.id}-native`).innerHTML = stat.field == 'commission_rate'
       ? (formatCommission(validator[stat.field]))
-      : stat.type == 'percentage' ? '%' + (shortNumberFormat(validator[stat.field])) : getValue(validator[stat.field], symbol);
-    if (stat.usdContent) document.getElementById(`${stat.id}-usd`).innerHTML = getValue(validator[stat.field], 'usd');
+      : stat.type == 'percentage' ? '%' + (shortNumberFormat(validator[stat.field])) : nativeValue;
+
+    if (stat.usdContent) 
+      document.getElementById(`${stat.id}-usd`).innerHTML = usdValue;
   });
   
 
@@ -82,7 +87,7 @@ function generateGraph (validator) {
   }
   
   const graphDataMapping = {};
-  const dataFields = ['total_stake', 'total_withdraw', 'total_sold'];
+  const dataFields = ['total_stake_sum', 'total_withdraw_sum', 'total_sold'];
   const colors = ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)'];
     
   const graphContainer = document.getElementById('validator-graph-container');
@@ -132,6 +137,14 @@ function generateGraph (validator) {
       return;
     }
     graphDataMapping[data.index] = data;
+
+    dataFields.forEach(eachDataField => {
+      const { nativeValue, usdValue } = getValueWithDecimals(data[eachDataField], symbol, usd_exchange_rate, decimals);
+      const metric = document.getElementById(`validator-metric-${eachDataField}`);
+      
+      metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
+      metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
+    });
   
     let { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping, dataFields);
   
@@ -155,7 +168,8 @@ function generateGraph (validator) {
       maxValue,
       graphWidth,
       dataFields: dataFields,
-      colors: colors
+      colors: colors,
+      by: 'm'
     });
   
     if (
@@ -197,7 +211,7 @@ function handlePlotButtonClick () {
   });
 
   let isResizing = false;
-  window.onresize = () => {
+  document.getElementById('inner-main-wrapper').onresize = () => {
     if (isResizing) return;
     isResizing = true;
 

@@ -21,12 +21,13 @@ function plotValidatorGraph(params) {
     else validatorGraphEventListenersMapping[operatorAddress].forEach(eachEventHandler => eachEventHandler.element.removeEventListener(eachEventHandler.event, eachEventHandler.handler));  
   
     dataFields.forEach(eachDataField => {
-      const metric = document.getElementById(`${operatorAddress}-metric-${eachDataField}`);
-      const dropdownOptionId = `${operatorAddress == 'summary' ? 'summary' : 'validator'}-graph-dropdown-option-${eachDataField}`;
+      const key = operatorAddress == 'summary' ? 'summary' : 'validator';
+      const metric = document.getElementById(`${key}-metric-${eachDataField}`);
+      
+      const dropdownOptionId = `${key}-graph-dropdown-option-${eachDataField}`;
       const dropdownOption = document.getElementById(dropdownOptionId);
 
       document.addEventListener('click', (event) => {
-        
         let target = event.target;
         while (target != document.body && ![metric.id, dropdownOption.id].includes(target.id)) target = target.parentNode;
         if (![metric.id, dropdownOption.id].includes(target.id)) return;
@@ -50,7 +51,10 @@ function plotValidatorGraph(params) {
   }
 
   const graphMouseDownHandler = (event) => {
-    document.querySelectorAll(`.paint-bar-${operatorAddress}`).forEach(each => each.style.width = '0');
+    document.querySelectorAll(`.paint-bar-${operatorAddress}`).forEach(each => {
+      each.style.width = '0';
+      each.style.borderRight = `none`;
+    });
     document.querySelectorAll(`.range-edge-${operatorAddress}`).forEach(each => each.classList.remove('range-edges-indicator'));
 
     document.querySelectorAll(`.visible-${operatorAddress}`).forEach(each => {
@@ -90,7 +94,8 @@ function plotValidatorGraph(params) {
         deltaMapping[eachDataField] = deltaValue;
 
         const { nativeValue, usdValue } = getValueWithDecimals(deltaValue, symbol, usd_exchange_rate, decimals);
-        const metric = document.getElementById(`${operatorAddress}-metric-${eachDataField}`);
+        const key = operatorAddress == 'summary' ? 'summary' : 'validator';
+        const metric = document.getElementById(`${key}-metric-${eachDataField}`);
 
         metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
         metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
@@ -102,16 +107,19 @@ function plotValidatorGraph(params) {
       if (!validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft) {
         validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.nextSibling.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
           eachPaintBar.style.width = '0px';
+          eachPaintBar.style.borderRight = `none`;
         });
 
         validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.nextSibling.querySelector('.each-data-indicator-vertical-line').classList.add('each-data-indicator-vertical-line-visible', 'range-edges-indicator', `range-edge-${operatorAddressM}`);
       } else {
         validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
           eachPaintBar.style.width = '0px';
+          eachPaintBar.style.borderRight = `none`;
         });
 
         validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.previousSibling.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
           eachPaintBar.style.width = '0px';
+          eachPaintBar.style.borderRight = `none`;
         });
 
         validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.querySelector('.each-data-indicator-vertical-line').classList.add('each-data-indicator-vertical-line-visible', 'range-edges-indicator', `range-edge-${operatorAddressM}`);

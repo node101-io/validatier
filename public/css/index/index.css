@@ -1,7 +1,7 @@
 
 :root {
   --all-main-wrapper-width: 100%;
-  --all-main-wrapper-background-color: rgb(250, 250, 250);
+  --all-main-wrapper-background-color: rgb(247, 248, 255);
   --all-main-wrapper-border-radius: 50px 0 0 50px;
 
   --all-main-wrapper-webkit-scrollbar-width: 8px;
@@ -54,6 +54,7 @@
 
 .all-main-wrapper {
   width: calc(var(--all-main-wrapper-width) - var(--navbar-width));
+  transition: all 0.1s linear 0s;
   height: 100vh;
   background-color: var(--all-main-wrapper-background-color);
   overflow-x: hidden;

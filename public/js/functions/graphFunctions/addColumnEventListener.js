@@ -1,10 +1,7 @@
 
 function addColumnEventListener (operatorAddress, dataFields, colors, currency, exchange_rate, decimals) {
-
   const columnMouseHandler = (event) => {
-
     const visibleClassName = `visible-${operatorAddress}`;
-
     document.querySelectorAll(`.${visibleClassName}`).forEach(each => {
       if (!each.classList.contains('range-value-display') && !each.classList.contains('range-edges-indicator')) {
         each.classList.remove('each-data-point-hovered')
@@ -15,8 +12,8 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
     })
 
     let target = event.target;
-    while (target != document.body && !target.classList.contains('each-graph-column-wrapper')) target = target.parentNode;
-    if (!target.classList.contains('each-graph-column-wrapper')) return;
+    while (target != document.body && !target.classList.contains(`column-wrapper-${operatorAddress}`)) target = target.parentNode;
+    if (!target.classList.contains(`column-wrapper-${operatorAddress}`)) return;
     
     const columnWrapper = target;
     const index = columnWrapper.getAttribute('index');
@@ -37,8 +34,9 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
     if (!validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn || !validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn)
       dataFields.forEach(eachDataField => {
         const { nativeValue, usdValue } = getValueWithDecimals(columnWrapper.getAttribute(eachDataField), currency, exchange_rate, decimals);
-        const metric = document.getElementById(`${operatorAddress}-metric-${eachDataField}`);
-        
+        const key = operatorAddress == 'summary' ? 'summary' : 'validator';
+        const metric = document.getElementById(`${key}-metric-${eachDataField}`);
+
         metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
         metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
       });
@@ -59,12 +57,14 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
           if (!current.previousSibling) break;
           validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
             eachPaintBar.style.width = '0px';
+            eachPaintBar.style.borderRight = `none`;
           })
           let targetPrevious = target.previousSibling;
           
           while(targetPrevious) {
             targetPrevious.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
               eachPaintBar.style.width = '0px';
+              eachPaintBar.style.borderRight = `none`;
             })
             targetPrevious = targetPrevious.previousSibling;
           }
@@ -83,6 +83,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
           while(targetNext) {
             targetNext.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
               eachPaintBar.style.width = '0px';
+              eachPaintBar.style.borderRight = `none`;
             });
             targetNext = targetNext.nextSibling;
           }
@@ -98,7 +99,20 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
         }
         
         const angleHypotenuseMapping = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields);
-        
+
+        const dataMapping = {};
+        dataFields.forEach(eachDataField => {
+          dataMapping[eachDataField] = parseFloat(current.getAttribute(eachDataField));
+        });
+        const sortedKeys = Object.entries(dataMapping)
+          .sort(([, valA], [, valB]) => valB - valA)
+          .map(([key]) => key);
+
+        current.querySelectorAll('.each-data-line').forEach((eachLine, i) => {
+          const dataField = dataFields[i];
+          eachLine.style.zIndex = `${(sortedKeys.indexOf(dataField) + 1) * 10}`;
+        })
+
         current.querySelectorAll('.graph-range-paint-bar').forEach((eachPaintBar, i) => {
           const dataField = dataFields[i];
           const color = colors[i];
@@ -107,7 +121,9 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
           eachPaintBar.style.bottom = `calc((${bottomMapping[dataField].replace('calc', '')}) - 100%)`;
           eachPaintBar.style.transform = `rotateZ(${angleHypotenuseMapping[dataField].angle}) skewX(${angleHypotenuseMapping[dataField].angle})`;
           eachPaintBar.style.backgroundColor = color;
-          eachPaintBar.style.zIndex = `${i * 10}`;
+          eachPaintBar.style.borderRight = `1px solid ${color}`;
+          
+          eachPaintBar.style.zIndex = `${(sortedKeys.indexOf(dataField) + 1) * 10}`;
         })
 
         validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn = current;

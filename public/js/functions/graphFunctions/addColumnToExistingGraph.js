@@ -1,6 +1,5 @@
 function addColumnToExistingGraph (params) {
-
-  const { type, operatorAddress, data, timestamp, index, currency, decimals, usd_exchange_rate, symbol, graphDataMapping, minValue, maxValue, graphWidth, dataFields, colors } = params;
+  const { type, operatorAddress, data, timestamp, index, currency, decimals, usd_exchange_rate, symbol, graphDataMapping, minValue, maxValue, graphWidth, dataFields, colors, by } = params;
   
   const graphWrapper = document.getElementById(`validator-graph-wrapper-${operatorAddress}`);
   if (type != 'small') addVerticalAxisLabels(graphWrapper, operatorAddress, minValue, maxValue, 10, currency, decimals, usd_exchange_rate, symbol);
@@ -49,7 +48,11 @@ function addColumnToExistingGraph (params) {
     const columnsPer = 10;
     const linePer = columnsPer / 2;
     if (index % columnsPer == 0) columnWrapper.appendChild(horizontalAxisLabel);
-    if (index % linePer == 0 && index % columnsPer != 0) columnWrapper.style.borderLeft = '1px dashed rgba(124, 112, 195, 0.125)';  
+    if (index % linePer == 0 && index % columnsPer != 0) {
+      const referenceLine = document.createElement('div');
+      referenceLine.classList.add('each-data-vertical-reference-line');
+      columnWrapper.appendChild(referenceLine);
+    };
   }
 
   graphWrapper.appendChild(columnWrapper);

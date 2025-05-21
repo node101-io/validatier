@@ -40,6 +40,10 @@ function handleNavbar () {
 
     const dataFields = JSON.parse(target.getAttribute('dataFields'));
     const colors = JSON.parse(target.getAttribute('colors'));
-    createNetworkSummaryGraph(dataFields, colors)
+    
+    const selectedOption = document.querySelector('.each-network-summary-select-option-selected');
+    const by = selectedOption.getAttribute('option');
+    
+    createNetworkSummaryGraph(dataFields, colors, by);
   })
 }

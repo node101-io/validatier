@@ -418,7 +418,6 @@ validatorSchema.statics.rankValidators = function (
   body: Parameters<ValidatorModel['rankValidators']>[0], 
   callback: Parameters<ValidatorModel['rankValidators']>[1],
 ) {
-
   const { sort_by, order, bottom_timestamp, top_timestamp, with_photos, chain_identifier } = body;
 
   if (!chain_identifier) return callback('bad_request', null);
@@ -583,9 +582,11 @@ validatorSchema.statics.exportCsv = function (
         bottom_timestamp: bottomTimestamp,
         top_timestamp: bottomTimestamp + timestampRange,
         with_photos: false
-      }, (err, validators) => {
+      }, (err, results) => {
+        if (err || !results) return next();
 
-        if (err || !validators) return next();
+        const { validators } = results;
+        
         csvDataMapping[`validator-ranking-${formatTimestamp(bottomTimestamp)}_${formatTimestamp(bottomTimestamp + timestampRange)}.csv`] = validators;
         bottomTimestamp += timestampRange;
         return next();

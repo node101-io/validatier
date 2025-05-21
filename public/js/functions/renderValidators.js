@@ -209,6 +209,9 @@ function renderValidators() {
 
     const cacheResponse = rankingResponsesCache[bottomTimestamp + '.' + topTimestamp + '.' + chainIdentifier];
 
+    document.getElementById('validators-main-wrapper').setAttribute('sort_by', sort_by);
+    document.getElementById('validators-main-wrapper').setAttribute('order', sortOrderMapping[sort_by]);
+
     if (cacheResponse) {
       sortOrderMapping[sort_by] == 'desc'
         ? cacheResponse.data.validators.sort((a, b) => (b[sort_by] || 0) - (a[sort_by] || 0))

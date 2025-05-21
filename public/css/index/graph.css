@@ -40,7 +40,7 @@
   --each-vertical-label-width: 40px;
   --each-vertical-label-color: rgba(124, 112, 195, 1);
   
-  --graph-range-paint-bar-opacity: 0.75;
+  --graph-range-paint-bar-opacity: 1;
   --each-data-indicator-vertical-line-border-right-size: 1px;
   --each-data-indicator-vertical-line-border-color: rgba(124, 112, 195, 1);
   --each-data-indicator-vertical-line-height: 100%;
@@ -81,7 +81,15 @@
 
 .each-graph-column-wrapper {
   height: 100%;
-  position: relative; 
+  position: relative;
+}
+
+.each-graph-column-wrapper-last {
+  width: 10px !important;
+}
+
+.each-graph-column-wrapper-last .each-data-line {
+  display: none !important;
 }
 
 .each-data-point {
@@ -102,7 +110,7 @@
 
 .each-data-line {
   width: 100%;
-  left: 0;
+  left: 0px;
   position: absolute;
   height: var(--each-data-line-height);
   transform-origin: left;
@@ -180,4 +188,12 @@
 
 .each-data-indicator-vertical-line-visible {
   opacity: 1;
+}
+
+.each-data-vertical-reference-line {
+  position: absolute;
+  border-right: 1px dashed rgba(124, 112, 195, 1);
+  height: 100%;
+  right: 0;
+  z-index: 0;
 }

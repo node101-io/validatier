@@ -6,7 +6,7 @@ function formatTimestamp (timestamp) {
 function handleExportEvents () {
 
   let selectedRangeValue = 0;
-
+  const validatorsMainWrapper = document.getElementById('validators-main-wrapper');
 
   document.addEventListener('click', (event) => {
     
@@ -20,7 +20,7 @@ function handleExportEvents () {
     });
     target.classList.add('export-choice-selected');
     target.children[0].children[0].style.display = 'unset';
-    selectedRangeValue = event.target.getAttribute('range');
+    selectedRangeValue = target.getAttribute('range');
   })
 
   document.getElementById('export-choice-cancel-button').addEventListener('click', (event) => {
@@ -52,10 +52,10 @@ function handleExportEvents () {
 
       const bottomTimestamp = Math.floor(new Date(bottomDate).getTime());
       const topTimestamp = Math.floor(new Date(topDate).getTime());
-      const sortBy = document.getElementById('export-sort-by').innerHTML;
-      const sortOrder = document.getElementById('export-order').innerHTML;
+      const sortBy = validatorsMainWrapper.getAttribute('sort_by');
+      const sortOrder = validatorsMainWrapper.getAttribute('order');
       const range = parseInt(selectedRangeValue);
-
+      
       const chainIdentifier = document.getElementById('network-switch-header').getAttribute('current_chain_identifier');
       const url = BASE_URL + EXPORT_API_ENDPOINT + `?sort_by=${sortBy}&order=${sortOrder}&range=${range}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&chain_identifier=${chainIdentifier}`;
 

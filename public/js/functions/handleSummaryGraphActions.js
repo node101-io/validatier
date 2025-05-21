@@ -9,8 +9,8 @@ function handleSummaryGraphActions() {
   document.body.addEventListener('click', (event) => {
     let target = event.target;
     while (target != document.body && !target.classList.contains('each-network-summary-select-option')) target = target.parentNode;
-
     if (!target.classList.contains('each-network-summary-select-option')) return;
+
     document.querySelector('.each-network-summary-select-option-selected').classList.remove('each-network-summary-select-option-selected');
     target.classList.add('each-network-summary-select-option-selected');
 
@@ -38,20 +38,19 @@ function handleSummaryGraphActions() {
     if (target.classList.contains(contentClassName)) return;
 
     const networkSwitchDropdown = target.nextSibling;
+    const dropdownArrow = networkSwitchDropdown.parentNode.querySelector('.each-network-summary-network-graph-content-dropdown-arrow')
     
     if (!networkSwitchDropdown.classList.contains(openContentClassName)) {
-      target.parentNode.querySelectorAll('.' + dropdownArrowClassName).forEach(each => {
-        each.style.transform = 'rotateX(180deg)';
-        each.style.marginTop = '-8px';
-      });
+      dropdownArrow.style.marginTop = '4px';
+      dropdownArrow.style.transform = 'rotateX(180deg)';
+
       target.parentNode.querySelectorAll('.' + contentClassName).forEach(each => 
         each.classList.add(openContentClassName));
     }
     else {
-      target.parentNode.querySelectorAll('.' + dropdownArrowClassName).forEach(each => {
-        each.style.transform = 'rotateX(0deg)';
-        each.style.marginTop = '2px';
-      });
+      dropdownArrow.style.marginTop = '2px';
+      dropdownArrow.style.transform = 'rotateX(0deg)';
+
       target.parentNode.querySelectorAll('.' + contentClassName).forEach(each => 
         each.classList.remove(openContentClassName));
     };
@@ -80,7 +79,7 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
     isSelectionDirectionToLeft: false
   }
 
-  document.documentElement.style.setProperty('--number-of-columns-summary', targetCacheSummaryGraphData.length);
+  document.documentElement.style.setProperty('--number-of-columns-summary', targetCacheSummaryGraphData.length - 1);
 
   const graphDataMapping = {};
   const graphContainer = document.getElementById('network-summary-graph-container');
@@ -88,7 +87,6 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
   const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue("width").replace('px', '');
 
   const currentSumMapping = {};
-
   for (let i = 0; i < targetCacheSummaryGraphData.length; i++) {
     const data = targetCacheSummaryGraphData[i];
     
@@ -106,7 +104,7 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
     
     graphDataMapping[i] = data;
 
-    const timestamp = (new Date(data._id.year, (data._id.month || 1) - 1, (data._id.day || 1))).getTime()
+    const timestamp = (new Date(data._id.year, (data._id.month || 1) - 1, (data._id.day || 1))).getTime();
   
     let { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping, dataFields);
   
@@ -114,7 +112,7 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
     document.documentElement.style.setProperty(`--max-value-summary`, maxValue);
   
     if (maxValue == minValue) minValue = maxValue / 2;
-  
+
     const insertedColumn = addColumnToExistingGraph({
       type: 'summary',
       operatorAddress: 'summary',
@@ -130,7 +128,8 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
       maxValue,
       graphWidth,
       dataFields: dataFields,
-      colors: colors
+      colors: colors,
+      by: by.toLowerCase()
     });
   
     if (
@@ -143,6 +142,10 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
       addColumnEventListener('summary', dataFields, colors, symbol, usd_exchange_rate, decimals);
     }
   }
+
+  const graphColumns = graphWrapper.querySelectorAll('.each-graph-column-wrapper');
+  const lastColumn = graphColumns[graphColumns.length - 1];
+  lastColumn.classList.add('each-graph-column-wrapper-last');
 }
 
 function createSmallGraphs () {
@@ -156,7 +159,7 @@ function createSmallGraphs () {
   graphsDataFields.forEach(dataFields => {
 
     const operatorAddress = dataFields[0];
-    document.documentElement.style.setProperty(`--number-of-columns-${operatorAddress}`, smallGraphData.length);
+    document.documentElement.style.setProperty(`--number-of-columns-${operatorAddress}`, smallGraphData.length - 1);
 
     const graphDataMapping = {};
     const graphContainer = document.getElementById(`small-graph-${operatorAddress}`);
@@ -197,7 +200,8 @@ function createSmallGraphs () {
         maxValue,
         graphWidth,
         dataFields: dataFields,
-        colors: colors
+        colors: colors,
+        by: null
       });
     
       if (
@@ -209,5 +213,9 @@ function createSmallGraphs () {
         document.documentElement.style.setProperty(`--column-height-${operatorAddress}`, insertedColumn.offsetHeight);
       }
     }
+
+    const graphColumns = graphWrapper.querySelectorAll('.each-graph-column-wrapper');
+    const lastColumn = graphColumns[graphColumns.length - 1];
+    lastColumn.classList.add('each-graph-column-wrapper-last');
   })
 }

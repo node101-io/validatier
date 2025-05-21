@@ -159,6 +159,10 @@ const indexGetController = (req: Request, res: Response): void => {
         queryValidator: queryValidator ? JSON.stringify(queryValidator) : null,
         dataFields: JSON.stringify(graphMapping[url].dataFields),
         colors: JSON.stringify(graphMapping[url].colors),    
+        validatorGraph: {
+          dataFields: ['total_stake_sum', 'total_withdraw_sum', 'total_sold'],
+          colors: ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)']
+        }
       });
     });
 };
