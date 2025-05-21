@@ -75,10 +75,6 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
               created_at: chain.first_available_block_time
             };
 
-            if (operatorAddress == 'celestiavaloper135w0ugccxxjjz6n4wn2mw2qzreevu67x6u70cd') {
-              console.log(validatorMap[operatorAddress]);
-            }
-
             const totalStake = eachValidator.tokens 
               ? eachValidator.tokens 
               : eachValidator.value.amount;

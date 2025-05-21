@@ -50,8 +50,7 @@ html(lang='tr')
       }
   body(summaryGraphData=summaryGraphData smallGraphData=smallGraphData)
     .all-wrapper
-      .navbar-wrapper#navbar-wrapper(class=`${isNavbarClose ? 'navbar-close' : ''}`)
-        .navbar-view-toggle#navbar-view-toggle
+      .navbar-wrapper#navbar-wrapper(class=`${isNavbarClose ? 'navbar-close' : ''}`)        
         .header-banner-wrapper
           .banner-logo-wrapper(class='center')
             img(src='/res/images/logo.svg', alt='node101' class='center')
@@ -110,6 +109,6 @@ html(lang='tr')
           ]
         .navbar-footer-wrapper
           each social in socials
-            a(href=social.href target='_blank').each-social-icon 
+            a(href=social.href target='_blank').each-social-icon
               img(src=`/res/images/socials/${social.icon}`)
       block content

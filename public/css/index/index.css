@@ -54,10 +54,10 @@
 
 .all-main-wrapper {
   width: calc(var(--all-main-wrapper-width) - var(--navbar-width));
-  transition: all 0.1s linear 0s;
+  transition: all var(--navbar-toggle-transition-duration) linear 0s;
   height: 100vh;
   background-color: var(--all-main-wrapper-background-color);
-  overflow-x: hidden;
+  overflow-x: visible;
   overflow-y: scroll;
   border-radius: var(--all-main-wrapper-border-radius);
 }

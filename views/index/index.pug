@@ -64,7 +64,7 @@ block content
       { id: 'self_stake_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgba(88, 86, 214, 1)', title: 'Self-Staked Amount', percentage_change: '17.3%' }
     ]
   .all-main-wrapper#all-main-wrapper
-    .inactivity-display-content
+    .navbar-view-toggle#navbar-view-toggle
     .header-main-wrapper
       .header-network-switch-wrapper
         .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}` current_chain_first_available_time=`${selectedChain.first_available_block_time}`)
@@ -391,10 +391,6 @@ block content
                       .each-network-summary-network-graph-content-dropdown-content
                         each option in menu.options 
                           .each-network-summary-network-graph-content-each-dropdown(id=`validator-graph-dropdown-option-${option.id}` class=`dropdown-option-checked ${dataFields.includes(option.id) ? '' : 'section-hidden'}`)= option.title
-                  else 
-                    .each-network-summary-select-wrapper 
-                      each option in menu.options 
-                        .each-network-summary-select-option(class=`${option == menu.selected ? 'each-network-summary-select-option-selected' : ''}`)= option
             .network-summary-network-graph-content#validator-graph-container
               if queryValidator
                 script.
