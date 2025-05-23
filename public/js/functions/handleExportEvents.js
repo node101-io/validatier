@@ -6,6 +6,7 @@ function formatTimestamp (timestamp) {
 function handleExportEvents () {
 
   let selectedRangeValue = 0;
+  let selectedRangeId = '';
   const validatorsMainWrapper = document.getElementById('validators-main-wrapper');
 
   document.addEventListener('click', (event) => {
@@ -21,6 +22,7 @@ function handleExportEvents () {
     target.classList.add('export-choice-selected');
     target.children[0].children[0].style.display = 'unset';
     selectedRangeValue = target.getAttribute('range');
+    selectedRangeId = target.getAttribute('id');
   })
 
   document.getElementById('export-choice-cancel-button').addEventListener('click', (event) => {
@@ -55,9 +57,10 @@ function handleExportEvents () {
       const sortBy = validatorsMainWrapper.getAttribute('sort_by');
       const sortOrder = validatorsMainWrapper.getAttribute('order');
       const range = parseInt(selectedRangeValue);
+      const specificRange = document.querySelector('.selected').id;
       
       const chainIdentifier = document.getElementById('network-switch-header').getAttribute('current_chain_identifier');
-      const url = BASE_URL + EXPORT_API_ENDPOINT + `?sort_by=${sortBy}&order=${sortOrder}&range=${range}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&chain_identifier=${chainIdentifier}`;
+      const url = BASE_URL + EXPORT_API_ENDPOINT + `?sort_by=${sortBy}&order=${sortOrder}&range=${range}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&chain_identifier=${chainIdentifier}&specific_range=${specificRange}&range_id=${selectedRangeId}`;
 
       const downloadButtonInnerHTML = document.getElementById('export-choice-download-button').innerHTML;
       document.getElementById('export-choice-download-button').innerHTML = '';

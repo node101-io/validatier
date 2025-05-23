@@ -48,7 +48,7 @@ html(lang='tr')
       :root {
         --navbar-width: #{navbarWidth};
       }
-  body(summaryGraphData=summaryGraphData smallGraphData=smallGraphData)
+  body(summaryGraphData=summaryGraphData smallGraphData=smallGraphData, summaryData=summaryData, validators=validators)
     .all-wrapper
       .navbar-wrapper#navbar-wrapper(class=`${isNavbarClose ? 'navbar-close' : ''}`)        
         .header-banner-wrapper

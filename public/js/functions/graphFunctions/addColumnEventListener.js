@@ -1,5 +1,5 @@
 
-function addColumnEventListener (operatorAddress, dataFields, colors, currency, exchange_rate, decimals) {
+function addColumnEventListener (operatorAddress, dataFields, colors, currency, exchange_rate, decimals, summaryData) {
   const columnMouseHandler = (event) => {
     const visibleClassName = `visible-${operatorAddress}`;
     document.querySelectorAll(`.${visibleClassName}`).forEach(each => {
@@ -39,6 +39,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
 
         metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
         metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
+        metric.querySelector('.percentage-change-value-content').innerHTML = '→' + Math.round((columnWrapper.getAttribute(eachDataField) / summaryData[`initial_${eachDataField}`]) * 100) + '%';
       });
     
     if (!validatorListenerVariablesMapping[operatorAddressM].isSelectingRange) return;

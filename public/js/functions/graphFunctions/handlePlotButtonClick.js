@@ -24,14 +24,17 @@ const validator_stats = [
   { id: 'validator-details-moniker', field: 'moniker' },
   { id: 'validator-details-operator-address', field: 'operator_address' },
   { id: 'validator-details-image', field: 'temporary_image_uri' },
-  { id: 'validator-stat-percentage-sold', field: 'percentage_sold', title: 'Percentage sold', usdContent: false, additional_class: 'summary-percentage-text-native', percentageChange: '17.3%', type: 'percentage' },
-  { id: 'validator-stat-self-stake', field: 'self_stake', title: 'Self Stake Amount', usdContent: true },
-  { id: 'validator-stat-self-stake-ratio', field: 'self_stake_ratio', title: 'Average Self Stake Ratio', usdContent: false, additional_class: 'summary-percentage-text-native', type: 'percentage' },
-  { id: 'validator-stat-commission-rate', title: 'Commission', field: 'commission_rate', usdContent: false, helperText: 'fee from rewards', additional_class: 'summary-percentage-text-native' }
+  { id: 'validator-stat-percentage-sold', field: 'percentage_sold', title: 'Percentage sold', usdContent: false, additional_class: 'summary-percentage-text-native', type: 'percentage', helperType: 'percentage_change' },
+  { id: 'validator-stat-self-stake', field: 'self_stake', title: 'Self Stake Amount', usdContent: true, helperType: 'rank' },
+  { id: 'validator-stat-self-stake-ratio', field: 'self_stake_ratio', title: 'Average Self Stake Ratio', usdContent: false, additional_class: 'summary-percentage-text-native', type: 'percentage', helperType: 'rank' },
+  { id: 'validator-stat-commission-rate', title: 'Commission', field: 'commission_rate', usdContent: false, additional_class: 'summary-percentage-text-native', helperType: 'text', helperText: 'fee from rewards' }
 ];
 
 function generateGraph (validator) {
   if (typeof validator == 'string') validator = JSON.parse(validator);
+  const summaryData = JSON.parse(document.body.getAttribute('summaryData'));
+  const validators = JSON.parse(document.body.getAttribute('validators'));
+  
   const operatorAddress = validator.operator_address;
   const pubkey = validator.pubkey;
   const chainIdentifier = validator.chain_identifier;
@@ -71,6 +74,13 @@ function generateGraph (validator) {
 
     if (stat.usdContent) 
       document.getElementById(`${stat.id}-usd`).innerHTML = usdValue;
+
+    if (stat.helperType == 'text')
+     document.getElementById(`${stat.id}-helper`).innerHTML = stat.helperText;
+    else if (stat.helperType == 'percentage_change')
+      document.getElementById(`${stat.id}-helper`).innerHTML = '→' + Math.round((validator[stat.field] / summaryData[`initial_${stat.field}`]) * 100) + '%';
+    else if (stat.helperType == 'rank')
+      document.getElementById(`${stat.id}-helper`).innerHTML = [...validators].sort((a, b) => a[stat.field] - b[stat.field]).findIndex(v => v.operator_address === validator.operator_address) + '/' + validators.length;
   });
   
 
@@ -102,7 +112,7 @@ function generateGraph (validator) {
     decimals: decimals
   };
 
-  const graphWrapper = plotValidatorGraph({ type: 'validator', operatorAddress: operatorAddress.replace('@', '\\@'), decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping, dataFields, graphContainer });
+  const graphWrapper = plotValidatorGraph({ type: 'validator', operatorAddress: operatorAddress.replace('@', '\\@'), decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping, dataFields, graphContainer, summaryData });
   const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue("width").replace('px', '');
 
   const queryString = new URLSearchParams(requestData).toString();
@@ -179,7 +189,7 @@ function generateGraph (validator) {
       adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, operatorAddress.replace('@', '\\@'), dataFields);
     } else {
       document.documentElement.style.setProperty(`--column-height-${operatorAddress}`, insertedColumn.offsetHeight);
-      addColumnEventListener(operatorAddress.replace('@', '\\@'), dataFields, colors, symbol, usd_exchange_rate, decimals);
+      addColumnEventListener(operatorAddress.replace('@', '\\@'), dataFields, colors, symbol, usd_exchange_rate, decimals, summaryData);
     }
   };
   

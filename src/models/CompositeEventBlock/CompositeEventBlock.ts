@@ -55,7 +55,12 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
         reward: number,
         commission: number,
         total_stake: number,
-        total_withdraw: number
+        total_withdraw: number,
+        initial_self_stake_prefix_sum: number,
+        initial_reward_prefix_sum: number,
+        initial_total_stake_prefix_sum: number,
+        initial_total_withdraw_prefix_sum: number,
+        initial_commission_prefix_sum: number,
       }> | null
     ) => any
   ) => any;
@@ -252,31 +257,36 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
     },
     {
       $project: {
-        totalReward: {
+        initial_self_stake_prefix_sum: '$leastRecentRecord.self_stake_prefix_sum',
+        initial_reward_prefix_sum: '$leastRecentRecord.reward_prefix_sum',
+        initial_total_stake_prefix_sum: '$leastRecentRecord.total_stake_prefix_sum',
+        initial_total_withdraw_prefix_sum: '$leastRecentRecord.reward_prefix_sum',
+        initial_commission_prefix_sum: '$leastRecentRecord.commission_prefix_sum',
+        reward: {
           $add: [
             { $subtract: ["$mostRecentRecord.reward_prefix_sum", "$leastRecentRecord.reward_prefix_sum"] },
             { $ifNull: ["$leastRecentRecord.reward", 0] }
           ]
         },
-        totalSelfStake: {
+        self_stake: {
           $add: [
             { $subtract: ["$mostRecentRecord.self_stake_prefix_sum", "$leastRecentRecord.self_stake_prefix_sum"] },
             { $ifNull: ["$leastRecentRecord.self_stake", 0] }
           ]
         },
-        totalCommission: {
+        commission: {
           $add: [
             { $subtract: ["$mostRecentRecord.commission_prefix_sum", "$leastRecentRecord.commission_prefix_sum"] },
             { $ifNull: ["$leastRecentRecord.commission", 0] }
           ]
         },
-        totalStake: {
+        total_stake: {
           $add: [
             { $subtract: ["$mostRecentRecord.total_stake_prefix_sum", "$leastRecentRecord.total_stake_prefix_sum"] },
             { $ifNull: ["$leastRecentRecord.total_stake", 0] }
           ]
         },
-        totalWithdraw: {
+        total_withdraw: {
           $add: [
             { $subtract: ["$mostRecentRecord.total_withdraw_prefix_sum", "$leastRecentRecord.total_withdraw_prefix_sum"] },
             { $ifNull: ["$leastRecentRecord.total_withdraw", 0] }
@@ -290,13 +300,18 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
       const mapping: Record<string, any> = {};
       records.forEach((record: any) => {
         mapping[record._id] = {
-          self_stake: record.totalSelfStake || 0,
-          reward: record.totalReward || 0,
-          commission: record.totalCommission || 0,
-          total_stake: record.totalStake || 0,
-          total_withdraw: record.totalWithdraw || 0
+          initial_self_stake_prefix_sum: record.initial_self_stake_prefix_sum,
+          initial_reward_prefix_sum: record.initial_reward_prefix_sum,
+          initial_total_stake_prefix_sum: record.initial_total_stake_prefix_sum,
+          initial_total_withdraw_prefix_sum: record.initial_total_withdraw_prefix_sum,
+          initial_commission_prefix_sum: record.initial_commission_prefix_sum,
+          self_stake: record.self_stake || 0,
+          reward: record.reward || 0,
+          commission: record.commission || 0,
+          total_stake: record.total_stake || 0,
+          total_withdraw: record.total_withdraw || 0
         };
-      });
+      });  
 
       return callback(null, mapping);
   })

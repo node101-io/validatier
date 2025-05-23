@@ -236,6 +236,7 @@
   font-size: var(--each-validator-stat-helper-font-size);
   font-weight: var(--each-validator-stat-helper-font-weight);
   color: var(--each-validator-stat-helper-color);
+  margin-top: auto;
 }
 
 .each-leaderboard-table-wrapper {

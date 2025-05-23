@@ -16,13 +16,10 @@ function handleNetworkSwitch () {
   const bottomTimestamp = Math.floor((new Date(bottomDate)).getTime());
   const topTimestamp = Math.floor((new Date(topDate)).getTime());
 
-  const validatorsMainWrapper = document.getElementById('validators-main-wrapper');
-
   const response = {
     success: true,
     data: {
-      validators: JSON.parse(validatorsMainWrapper.getAttribute('validators')),
-      activeValidatorHistory: JSON.parse(validatorsMainWrapper.getAttribute('activeValidatorHistory'))
+      validators: JSON.parse(document.body.getAttribute('validators')),
     }
   };
 

@@ -1,6 +1,6 @@
 
 function plotValidatorGraph(params) {
-  const { type, operatorAddress, decimals, usd_exchange_rate, symbol, dataFields, graphContainer } = params;
+  const { type, operatorAddress, decimals, usd_exchange_rate, symbol, dataFields, graphContainer, summaryData } = params;
 
   if (document.getElementById(`validator-graph-wrapper-${operatorAddress}`)) document.getElementById(`validator-graph-wrapper-${operatorAddress}`).remove();
   
@@ -87,9 +87,11 @@ function plotValidatorGraph(params) {
     } else {
       const deltaMapping = {}
       dataFields.forEach(eachDataField => {
+        const value_1 = validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute(eachDataField);
+        const value_2 = validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute(eachDataField);
         const deltaValue = !validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft 
-          ? validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute(eachDataField) - validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute(eachDataField) 
-          : validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute(eachDataField) - validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute(eachDataField);
+          ? value_1 - value_2
+          : value_2 - value_1;
 
         deltaMapping[eachDataField] = deltaValue;
 
@@ -99,6 +101,7 @@ function plotValidatorGraph(params) {
 
         metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
         metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
+        metric.querySelector('.percentage-change-value-content').innerHTML = '→' + Math.round((deltaValue / (summaryData[`initial_${eachDataField}`] + Math.min(value_1, value_2))) * 100) + '%';
       })
 
       const initialTimestamp = !validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft ? validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp') : validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute('timestamp');

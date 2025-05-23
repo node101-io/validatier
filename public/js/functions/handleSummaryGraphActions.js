@@ -58,6 +58,7 @@ function handleSummaryGraphActions() {
 }
 
 function createNetworkSummaryGraph (dataFields, colors, by) {
+  const summaryData = JSON.parse(document.body.getAttribute('summaryData'));
   const targetCacheSummaryGraphData = JSON.parse(document.body.getAttribute('summaryGraphData'))[by.toLowerCase()];
 
   document.querySelectorAll('.each-network-summary-network-graph-content-each-dropdown').forEach(each => each.classList.add('section-hidden'));
@@ -83,7 +84,7 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
 
   const graphDataMapping = {};
   const graphContainer = document.getElementById('network-summary-graph-container');
-  const graphWrapper = plotValidatorGraph({ type: 'summary', operatorAddress: 'summary', decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping, dataFields, graphContainer });
+  const graphWrapper = plotValidatorGraph({ type: 'summary', operatorAddress: 'summary', decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping, dataFields, graphContainer, summaryData });
   const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue("width").replace('px', '');
 
   const currentSumMapping = {};
@@ -100,6 +101,7 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
       
       metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
       metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
+      metric.querySelector('.percentage-change-value-content').innerHTML = '→' + Math.round((currentSumMapping[eachDataField] / summaryData[`initial_${eachDataField}`]) * 100) + '%';
     });
     
     graphDataMapping[i] = data;
@@ -139,7 +141,7 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
       adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, 'summary', dataFields);
     } else {
       document.documentElement.style.setProperty('--column-height-summary', insertedColumn.offsetHeight);
-      addColumnEventListener('summary', dataFields, colors, symbol, usd_exchange_rate, decimals);
+      addColumnEventListener('summary', dataFields, colors, symbol, usd_exchange_rate, decimals, summaryData);
     }
   }
 

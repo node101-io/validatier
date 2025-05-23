@@ -16,7 +16,7 @@ export const byArrayMapping: Record<string, string[]> = {
 };
 
 export interface CacheInterface {
-  type: 'summary_graph' | 'validators' | 'small_graph' | 'summary_data',
+  type: 'summary_graph' | 'validators' | 'small_graph' | 'summary_data' | 'export',
   chain_identifier: string;
   interval: 'all_time' | 'last_30_days' | 'last_90_days' | 'this_year' | 'last_calendar_year';
   data: {
@@ -50,6 +50,11 @@ export interface CacheInterface {
     percentage_sold: number;
     self_stake_amount: number;
     average_self_stake_ratio: number;
+  } | {
+    all_time: string;
+    yearly: string;
+    monthly: string;
+    weekly: string;
   }
 }
 
@@ -66,7 +71,8 @@ interface CacheModel extends Model<CacheInterface> {
   getCacheForChain: (
     body: {
       chain_identifier: string,
-      interval: string
+      interval?: string,
+      type?: string
     },
     callback: (
       err: string | null,
@@ -122,54 +128,60 @@ cacheSchema.statics.saveCacheForChain = function (
 
           const { summary_data, validators } = results;
 
-          Validator.getSmallGraphData({
-            chain_identifier: chain.name,
-            bottom_timestamp: bottomTimestamp,
-            top_timestamp: topTimestamp
-          }, (err, resultsSmallGraphData) => {
-            if (err || !resultsSmallGraphData) return next1(err);
+          Validator.exportCsvForAllRanges(
+            { sort_by: 'percentage_sold', order: 'asc', bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp, chain_identifier: chain.name },
+            (err, rangeToCsvDataMapping) => {
+              if (err) return next1({ success: false, err: err });
+            
+              Validator.getSmallGraphData({
+                chain_identifier: chain.name,
+                bottom_timestamp: bottomTimestamp,
+                top_timestamp: topTimestamp
+              }, (err, resultsSmallGraphData) => {
+                if (err || !resultsSmallGraphData) return next1(err);
 
-            Validator.getSummaryGraphData({
-              chain_identifier: chain.name,
-              bottom_timestamp: bottomTimestamp,
-              top_timestamp: topTimestamp,
-              by_array: byArrayMapping[eachDateRangeKey as keyof typeof byArrayMapping]
-            }, (err, resultsSummaryGraphData) => {
-                if (err) return next1(err);
+                Validator.getSummaryGraphData({
+                  chain_identifier: chain.name,
+                  bottom_timestamp: bottomTimestamp,
+                  top_timestamp: topTimestamp,
+                  by_array: byArrayMapping[eachDateRangeKey as keyof typeof byArrayMapping]
+                }, (err, resultsSummaryGraphData) => {
+                    if (err) return next1(err);
 
-                const cacheMapping: Record<string, any> = {};
-                const cacheDataMapping = {summary_data, validators, summary_graph: resultsSummaryGraphData, small_graph: resultsSmallGraphData};
+                    const cacheMapping: Record<string, any> = {};
+                    const cacheDataMapping = { summary_data, validators, summary_graph: resultsSummaryGraphData, small_graph: resultsSmallGraphData, export: rangeToCsvDataMapping };
 
-                Object.keys(cacheDataMapping).forEach(eachCacheType => {
-                  cacheMapping[eachCacheType] = {
-                    type: eachCacheType,
-                    chain_identifier: chain.name,
-                    interval: eachDateRangeKey,
-                    data: cacheDataMapping[eachCacheType as keyof typeof cacheDataMapping]
+                    Object.keys(cacheDataMapping).forEach(eachCacheType => {
+                      cacheMapping[eachCacheType] = {
+                        type: eachCacheType,
+                        chain_identifier: chain.name,
+                        interval: eachDateRangeKey,
+                        data: cacheDataMapping[eachCacheType as keyof typeof cacheDataMapping]
+                      }
+                    });
+
+                    const bulkOps = Object.values(cacheMapping).map((eachCacheMapping: Record<string, any>) => ({
+                      updateOne: {
+                        filter: {
+                          type: eachCacheMapping.type,
+                          chain_identifier: eachCacheMapping.chain_identifier,
+                          interval: eachCacheMapping.interval
+                        },
+                        update: { $set: eachCacheMapping },
+                        upsert: true
+                      }
+                    }));
+
+                    Cache.bulkWrite(bulkOps, { ordered: false })
+                      .then(bulkResult => {
+                        resultsArray.push(Object.values(cacheMapping));
+                        return next1();
+                      })
+                      .catch(err => next1(err));
                   }
-                });
-
-                const bulkOps = Object.values(cacheMapping).map((eachCacheMapping: Record<string, any>) => ({
-                  updateOne: {
-                    filter: {
-                      type: eachCacheMapping.type,
-                      chain_identifier: eachCacheMapping.chain_identifier,
-                      interval: eachCacheMapping.interval
-                    },
-                    update: { $set: eachCacheMapping },
-                    upsert: true
-                  }
-                }));
-                
-                Cache.bulkWrite(bulkOps, { ordered: false })
-                  .then(bulkResult => {
-                    resultsArray.push(Object.values(cacheMapping));
-                    return next1();
-                  })
-                  .catch(err => next1(err));
-              }
-            )
-          })
+                )
+              })
+            })
         }
       )
     },
@@ -185,12 +197,8 @@ cacheSchema.statics.getCacheForChain = function (
   body: Parameters<CacheModel['getCacheForChain']>[0],
   callback: Parameters<CacheModel['getCacheForChain']>[1]
 ) {
-  const { chain_identifier, interval } = body;
   Cache
-    .find({
-      chain_identifier: chain_identifier, 
-      interval: interval
-    })
+    .find(body)
     .then(results => callback(null, results))
     .catch(err => callback(err, null))
 }

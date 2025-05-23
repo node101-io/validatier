@@ -131,8 +131,15 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       err: string | null,
       results: {
         summary_data: {
+          initial_total_stake_sum: number;
+          initial_total_withdraw_sum: number;
+          initial_total_sold: number;
+          total_sold: number;
+          initial_percentage_sold: number;
           percentage_sold: number;
+          initial_self_stake_amount: number;
           self_stake_amount: number;
+          initial_average_self_stake_ratio: number;
           average_self_stake_ratio: number;
         } | null,
         validators: {
@@ -179,6 +186,19 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       csvDataMapping: any | null
     ) => any
   ) => any;
+  exportCsvForAllRanges: (
+    body: {
+      chain_identifier?: string;
+      sort_by: 'total_stake' | 'total_withdraw' | 'sold' | 'self_stake' | 'percentage_sold';
+      order: SortOrder;
+      bottom_timestamp?: number | null;
+      top_timestamp?: number | null;
+    },
+    callback: (
+      err: string | null,
+      rangeToCsvDataMapping: Record<string, any> | null
+    ) => any
+  ) => any
   getSummaryGraphData: (
     body: {
       chain_identifier: string;
@@ -445,10 +465,19 @@ validatorSchema.statics.rankValidators = function (
     .then((results: Record<string, any>[]) => {
 
       let totalSelfStaked = 0;
+      let initialTotalSelfStaked = 0;
+
       let totalWithdrawnValidator = 0;
+      let initialTotalWithdrawnValidator = 0;
+
       let totalDelegation = 0;
+      let initialTotalDelegation = 0;
+
       let totalWithdrawn = 0;
+      let initialTotalWithdrawn = 0;
+      
       let totalSelfStakeRatio = 0;
+      let initialTotalSelfStakeRatio = 0;
 
       const [validatorsResult, getPeriodicDataForValidatorSetResult] = results;
       if (
@@ -465,19 +494,43 @@ validatorSchema.statics.rankValidators = function (
       while (index < validators.length) {
         const i = index;
         const eachValidator: any = validators[i];
-        const { self_stake = 0, reward = 0, commission = 0, total_stake = 0, total_withdraw = 0 } = validatorRecordMapping[eachValidator.operator_address] || {};
+        const {
+          self_stake = 0,
+          reward = 0,
+          commission = 0,
+          total_stake = 0,
+          total_withdraw = 0,
+          initial_commission_prefix_sum = 0,
+          initial_reward_prefix_sum = 0,
+          initial_self_stake_prefix_sum = 0,
+          initial_total_stake_prefix_sum = 0,
+          initial_total_withdraw_prefix_sum = 0,
+        } = validatorRecordMapping[eachValidator.operator_address] || {};
 
         const ratio = (self_stake || 0) / ((reward + commission) || (10 ** CHAIN_TO_DECIMALS_MAPPING[`${chain_identifier}`]));
         const sold = ((reward + commission) || 0) - (self_stake || 0);
+        const initial_sold = ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 0) - (initial_self_stake_prefix_sum || 0);
+        
         const percentage_sold = Math.min(Math.abs((sold || 1) / ((reward + commission) || 1)), 1) * 100;
+        const initial_percentage_sold = Math.min(Math.abs((initial_sold || 1) / ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 1)), 1) * 100;
+
         const self_stake_ratio = Math.min(Math.abs(self_stake / (total_stake || 1)), 1) * 100;
+        const initial_self_stake_ratio = Math.min(Math.abs(initial_self_stake_prefix_sum / (initial_total_stake_prefix_sum || 1)), 1) * 100;
 
         totalDelegation += total_stake;
+        initialTotalDelegation += initial_total_stake_prefix_sum;
+        
         totalWithdrawn += total_withdraw;
+        initialTotalWithdrawn += initial_total_withdraw_prefix_sum;
         
         totalSelfStaked += self_stake;
+        initialTotalSelfStaked += initial_self_stake_prefix_sum;
+
         totalWithdrawnValidator += (reward + commission);
+        initialTotalWithdrawnValidator += (initial_reward_prefix_sum + initial_commission_prefix_sum);
+
         totalSelfStakeRatio += self_stake_ratio;
+        initialTotalSelfStakeRatio += initial_self_stake_ratio;
 
         const pushObjectData = {
           pubkey: eachValidator.pubkey || '',
@@ -487,13 +540,13 @@ validatorSchema.statics.rankValidators = function (
           commission_rate: eachValidator.commission_rate || '',
           description: eachValidator.description || '',
           temporary_image_uri: eachValidator.temporary_image_uri,
-          self_stake: self_stake,
-          reward: reward,
-          commission: commission,
-          total_stake: total_stake,
-          total_withdraw: total_withdraw,
-          percentage_sold: percentage_sold,
-          self_stake_ratio: self_stake_ratio,
+          self_stake, initial_self_stake_prefix_sum,
+          reward, initial_reward_prefix_sum,
+          commission, initial_commission_prefix_sum,
+          total_stake, initial_total_stake_prefix_sum,
+          total_withdraw, initial_total_withdraw_prefix_sum,
+          percentage_sold, initial_percentage_sold,
+          self_stake_ratio, initial_self_stake_ratio,
           chain_identifier: chain_identifier,
           ratio: ratio,
           sold: sold
@@ -514,8 +567,15 @@ validatorSchema.statics.rankValidators = function (
 
       callback(null, {
         summary_data: {
+          initial_total_stake_sum: initialTotalDelegation,
+          initial_total_withdraw_sum: initialTotalWithdrawn,
+          total_sold: totalWithdrawnValidator - totalSelfStaked,
+          initial_total_sold: initialTotalWithdrawnValidator - initialTotalSelfStaked,
+          initial_percentage_sold: (((initialTotalWithdrawnValidator - initialTotalSelfStaked) / initialTotalWithdrawnValidator) * 100),
           percentage_sold: (((totalWithdrawnValidator - totalSelfStaked) / totalWithdrawnValidator) * 100),
+          initial_self_stake_amount: initialTotalSelfStaked,
           self_stake_amount: totalSelfStaked,
+          initial_average_self_stake_ratio: initialTotalSelfStakeRatio / valueArray.length,
           average_self_stake_ratio: totalSelfStakeRatio / valueArray.length
         },
         validators: valueArray
@@ -564,12 +624,15 @@ validatorSchema.statics.exportCsv = function (
   body: Parameters<ValidatorModel['exportCsv']>[0], 
   callback: Parameters<ValidatorModel['exportCsv']>[1]
 ) {
-  const { sort_by, order, bottom_timestamp, top_timestamp, range, chain_identifier } = body;
+  const { sort_by, order, bottom_timestamp, top_timestamp, range = 1, chain_identifier } = body;
 
   let bottomTimestamp = bottom_timestamp ? bottom_timestamp : 0;
   const topTimestamp = top_timestamp ? top_timestamp : 2e9;
-  const timestampRange = Math.min((topTimestamp - bottomTimestamp), (range ? range : (topTimestamp - bottomTimestamp)));
 
+  const timestampDifference = topTimestamp - bottomTimestamp;
+  if ((timestampDifference / range) > 50 && range != 0) return callback('bad_request', null);
+
+  const timestampRange = Math.min((topTimestamp - bottomTimestamp), (range ? range : (topTimestamp - bottomTimestamp)));
   const csvDataMapping: any = {};
 
   async.whilst(
@@ -598,6 +661,44 @@ validatorSchema.statics.exportCsv = function (
         if (err) return callback('bad_request', null);
         return callback(null, csvExportData);
       })
+    }
+  )
+}
+
+validatorSchema.statics.exportCsvForAllRanges = function(
+  body: Parameters<ValidatorModel['exportCsvForAllRanges']>[0], 
+  callback: Parameters<ValidatorModel['exportCsvForAllRanges']>[1]
+) {
+  const { sort_by, order, bottom_timestamp, top_timestamp, chain_identifier } = body;
+
+  const rangeArray = [
+    { id: 'all_time', range: 0 },
+    { id: 'weekly', range: 7 * 86400 * 1000 },
+    { id: 'monthly', range: 30 * 86400 * 1000 },
+    { id: 'yearly', range: 365 * 86400 * 1000 },
+  ];
+
+  const rangeToCsvDataMapping: Record<string, any> = {};
+
+  async.timesSeries(
+    rangeArray.length,
+    (i, next) => {
+      Validator.exportCsv({
+        sort_by: sort_by,
+        order: order,
+        bottom_timestamp: bottom_timestamp,
+        top_timestamp: top_timestamp,
+        chain_identifier: chain_identifier,
+        range: rangeArray[i].range
+      }, (err, csvDataMapping) => {
+        if (err) return next();
+        rangeToCsvDataMapping[rangeArray[i].id] = csvDataMapping;
+        return next();
+      })
+    },
+    (err: any) => {
+      if (err) return callback(err, null);
+      return callback(null, rangeToCsvDataMapping);
     }
   )
 }
