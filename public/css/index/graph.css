@@ -40,7 +40,7 @@
   --each-vertical-label-width: 40px;
   --each-vertical-label-color: rgba(124, 112, 195, 1);
   
-  --graph-range-paint-bar-opacity: 1;
+  --graph-range-paint-bar-opacity: 0.1;
   --each-data-indicator-vertical-line-border-right-size: 1px;
   --each-data-indicator-vertical-line-border-color: rgba(124, 112, 195, 1);
   --each-data-indicator-vertical-line-height: 100%;

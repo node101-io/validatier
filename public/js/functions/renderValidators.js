@@ -257,4 +257,23 @@ function renderValidators() {
     const monikerWrapper = target.children[0].children[2].children[0];
     animateOverflowMonikers(monikerWrapper);
   })
+
+  document.addEventListener('click', (event) => {
+    let target = event.target;
+    while (target != document.body && !target.classList.contains('leaderboard-dropdown-option')) target = target.parentNode;
+    if (!target.classList.contains('leaderboard-dropdown-option') || target.classList.contains('dropdown-option-selected') || target.classList.contains('leaderboard-dropdown-title')) return;
+
+    target.parentNode.querySelectorAll('.leaderboard-dropdown-option').forEach(each => {
+      each.classList.remove('dropdown-option-selected');
+    });
+    target.classList.add('dropdown-option-selected');
+
+    const sortBy = target.getAttribute('leaderboard_sort_by');
+    const leaderboardContent = document.getElementById(`leaderboard-content-${sortBy}`);
+    
+    leaderboardContent.parentNode.querySelectorAll('.each-leaderboard-table-wrapper').forEach(each => {
+      each.classList.add('section-hidden');
+    });
+    leaderboardContent.classList.remove('section-hidden');
+  })
 }

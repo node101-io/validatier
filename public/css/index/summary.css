@@ -486,6 +486,15 @@
   opacity: 1 !important;
 }
 
+.dropdown-option-selected {
+  opacity: 0.5;
+  cursor: var(--pointer-default-dark) !important;
+}
+
+.leaderboard-dropdown-option {
+  color: rgba(124, 112, 195, 1);
+}
+
 .each-network-summary-select-wrapper {
   display: flex;
   font-size: var(--each-network-summary-select-wrapper-font-size);

@@ -241,88 +241,102 @@ block content
               script.
                 createNetworkSummaryGraph(!{dataFields}, !{colors}, 'm');
       -
+        const sortByArray = [
+          { order: 'asc', sort_by: 'percentage_sold' },
+          { order: 'desc', sort_by: 'self_stake' },
+          { order: 'desc', sort_by: 'self_stake_ratio' },
+          { order: 'desc', sort_by: 'sold' }
+        ]
         const leaderboards = [
           {
             id: 'percentage_sold',
             title: 'Percentage Sold',
+            fields: ['percentage_sold'],
+            selected_option: 'percentage_sold',
             summary_field: 'percentage_sold',
             id_native: 'summary-percentage-sold-native',
             id_usd: null,
             additional_class: 'summary-percentage-text-native',
             unit: '%',
             triangle_direction: 'up',
-            order: 'asc'
           },
           {
             id: 'self_stake',
             title: 'Self Stake Amount',
+            fields: ['self_stake', 'self_stake_ratio'],
             summary_field: 'self_stake_amount',
             id_native: 'summary-self-stake-amount-native',
             id_usd: 'summary-self-stake-amount-usd',
             unit: selectedChain.symbol || '$ATOM',
-            dropdown_selected: 'amount',
+            selected_option: 'self_stake',
             dropdown: {
-              amount: 'by amount',
-              percentage: 'by percentage'
+              self_stake: { label: 'by amount', is_selected: true },
+              self_stake_ratio: { label: 'by percentage' }
             },
             triangle_direction: 'down',
-            order: 'desc'
           },
           {
             id: 'sold',
             title: 'Total Sold Amount',
+            fields: ['sold'],
+            selected_option: 'sold',
             summary_field: 'total_sold',
             id_native: 'metric-total-sold-amount-native',
             id_usd: 'metric-total-sold-amount-usd',
             unit: selectedChain.symbol || '$ATOM',
             triangle_direction: 'down',
-            order: 'desc'
           },
         ]
       .validators-leaderboards-all-wrapper#validators-leaderboards-all-wrapper(class=`${url == 'validators' ? '' : 'section-hidden'}`)
         .each-section-title-content Leaderboards
+        -
+          const sortedValidatorsMapping = {};
+          sortByArray.forEach(field => {
+            const sortedValidators = field.order == 'asc'
+              ? ([...validators].sort((a, b) => (a[field.sort_by] || 0) - (b[field.sort_by] || 0))).slice(0, 10)
+              : ([...validators].sort((a, b) => (b[field.sort_by] || 0) - (a[field.sort_by] || 0))).slice(0, 10);
+            sortedValidatorsMapping[field.sort_by] = sortedValidators;
+          })
         .validators-leaderboards-main-wrapper
           each leaderboard in leaderboards
-            -
-              const sortedValidators = leaderboard.order == 'asc'
-                ? ([...validators].sort((a, b) => (a[leaderboard.id] || 0) - (b[leaderboard.id] || 0))).slice(0, 10)
-                : ([...validators].sort((a, b) => (b[leaderboard.id] || 0) - (a[leaderboard.id] || 0))).slice(0, 10);
-            .each-leaderboard-main-wrapper 
+            .each-leaderboard-main-wrapper
               .each-leaderboard-header
                 .each-leaderboard-table-type-content(type=`${leaderboard.id}`)
                   .each-leaderboard-header-title= leaderboard.title
                   .each-table-header-sort-indicators
                     div(class=`triangle-${leaderboard.triangle_direction}`)
                 if leaderboard.dropdown
-                  .each-leaderboard-dropdown
-                    .each-leaderboard-dropdown-title= leaderboard.dropdown[leaderboard.dropdown_selected]
-                    each val, key in leaderboard.dropdown
-                      if key != leaderboard.dropdown_selected
-                        .each-leaderboard-dropdown-title= val
+                  .each-network-summary-network-graph-content-dropdown-wrapper
+                    .each-network-summary-network-graph-content-dropdown-header
+                      span(class='leaderboard-dropdown-option leaderboard-dropdown-title')= leaderboard.dropdown[leaderboard.selected_option].label
+                      img.each-network-summary-network-graph-content-dropdown-arrow(src='/res/images/chevron_aestethic.svg' class='center')
+                    .each-network-summary-network-graph-content-dropdown-content
+                      each option, key in leaderboard.dropdown 
+                        .each-network-summary-network-graph-content-each-dropdown(leaderboard_sort_by=key class=`leaderboard-dropdown-option ${option.is_selected ? 'dropdown-option-selected' : ''}`)= option.label
               .each-leaderboard-summary
                 .each-leaderboard-summary-data
                   .each-network-summary-stat-content= getValue(summaryData[leaderboard.summary_field], leaderboard.unit).nativeValue
                   if leaderboard.id_usd
                     .each-network-summary-stat-footer= getValue(summaryData[leaderboard.summary_field], selectedChain.symbol).usdValue
                 .each-leaderboard-summary-percentage-change(class='percentage-change-value-content')= '' + Math.round((summaryData[leaderboard.summary_field] / summaryData[`initial_${leaderboard.summary_field}`]) * 100) + '%'
-              .each-leaderboard-table-wrapper
-                each validator, index in sortedValidators
-                  .each-leaderboard-table-validator-wrapper
-                    .each-leaderboard-table-validator-info-wrapper 
-                      span= index + 1
-                      img.each-leaderboard-table-validator-info-image(src=src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.png'}`)
-                      .each-leaderboard-table-validator-info-moniker= validator.moniker
-                    .each-leaderboard-table-validator-data-wrapper 
-                      .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], leaderboard.unit).nativeValue
-                      if leaderboard.id_usd 
-                        .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], 'usd').usdValue
-                      if leaderboard.id == 'self_stake'
-                        .each-leaderboard-table-validator-data(class='percentage-change-value-content')= getValue(validator['self_stake_ratio'], '%').nativeValue
-
-                .each-leaderboard-more-wrapper
-                  div
-                  div
-                  div
+              each field in leaderboard.fields
+                .each-leaderboard-table-wrapper(id=`leaderboard-content-${field}` class=`${leaderboard.selected_option != field ? 'section-hidden' : ''}`)
+                  each validator, index in sortedValidatorsMapping[field]
+                    .each-leaderboard-table-validator-wrapper
+                      .each-leaderboard-table-validator-info-wrapper 
+                        span= index + 1
+                        img.each-leaderboard-table-validator-info-image(src=src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.png'}`)
+                        .each-leaderboard-table-validator-info-moniker= validator.moniker
+                      .each-leaderboard-table-validator-data-wrapper 
+                        .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], leaderboard.unit).nativeValue
+                        if leaderboard.id_usd 
+                          .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], 'usd').usdValue
+                        if leaderboard.id == 'self_stake'
+                          .each-leaderboard-table-validator-data(class='percentage-change-value-content')= getValue(validator['self_stake_ratio'], '%').nativeValue
+                  .each-leaderboard-more-wrapper
+                    div
+                    div
+                    div
         - const validator = queryValidator ? JSON.parse(queryValidator) : {}
       .validator-details-main-wrapper#validator-details-main-wrapper(class=`${queryValidator ? '' : 'section-hidden'}`)
         .validator-details-header-wrapper(class='body-wrapper-cell')
