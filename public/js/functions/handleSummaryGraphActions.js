@@ -85,7 +85,7 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
   const graphDataMapping = {};
   const graphContainer = document.getElementById('network-summary-graph-container');
   const graphWrapper = plotValidatorGraph({ type: 'summary', operatorAddress: 'summary', decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping, dataFields, graphContainer, summaryData });
-  const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue("width").replace('px', '');
+  const graphWidth = window.getComputedStyle(graphContainer, null).getPropertyValue("width").replace('px', '');
 
   const currentSumMapping = {};
   for (let i = 0; i < targetCacheSummaryGraphData.length; i++) {

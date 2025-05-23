@@ -51,8 +51,7 @@
 
 
 .validator-graph-wrapper {
-  min-width: calc(var(--validator-graph-wrapper-min-width) - (var(--validator-graph-wrapper-horizontal-padding) * 2));
-  max-width: calc(var(--validator-graph-wrapper-max-width) - (var(--validator-graph-wrapper-horizontal-padding) * 2));
+  width: 100%;
   height: var(--validator-graph-wrapper-height);
   transition: all var(--validator-graph-wrapper-transition-duration) ease-in-out 0s;
   padding: var(--validator-graph-wrapper-vertical-padding) var(--validator-graph-wrapper-horizontal-padding);

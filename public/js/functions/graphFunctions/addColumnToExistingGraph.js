@@ -12,7 +12,11 @@ function addColumnToExistingGraph (params) {
 
   const addOnPx = type != 'small' ? ' - var(--vertical-axis-labels-width)' : '';
   const addOnInt = type != 'small' ? ' - var(--vertical-axis-labels-width-int)' : '';
-  columnWrapper.style.width = `calc((${graphWidth}px${addOnPx}) / var(--number-of-columns-${operatorAddress}))`;
+  document.documentElement.style.setProperty(
+    `--graph-column-width-px-${operatorAddress.replace('\\@', '@')}`,
+    `calc((${graphWidth}px${addOnPx}) / var(--number-of-columns-${operatorAddress}))`
+  );
+  columnWrapper.style.width = `var(--graph-column-width-px-${operatorAddress.replace('\\@', '@')})`;
 
   if (type != 'small') {
     const eachDataIndicatorVerticalLine = document.createElement('div');

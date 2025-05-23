@@ -9,7 +9,7 @@ function handleNavbar () {
       navbarWrapper.classList.remove('navbar-close');
       setCookie('isNavbarClose', '');
     } else {
-      document.documentElement.style.setProperty("--navbar-width", "50px");
+      document.documentElement.style.setProperty("--navbar-width", "36px");
       navbarWrapper.classList.add('navbar-close');
       setCookie('isNavbarClose', true);
     }
@@ -46,4 +46,13 @@ function handleNavbar () {
     
     createNetworkSummaryGraph(dataFields, colors, by);
   })
+
+  window.addEventListener('resize', (event) => {
+    if (window.innerWidth < 900) {
+      document.documentElement.style.setProperty("--navbar-width", "36px");      
+      return navbarWrapper.classList.add('navbar-close');
+    }
+    document.documentElement.style.setProperty("--navbar-width", "237px");
+    return navbarWrapper.classList.remove('navbar-close');
+  });
 }
