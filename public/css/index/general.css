@@ -116,6 +116,8 @@ input {
 
 .all-wrapper {
   width: var(--all-wrapper-width);
+  height: 100vh;
+  overflow: hidden;
   display: flex;
 }
 
@@ -291,10 +293,23 @@ input {
   background-color: rgba(144, 144, 245, 1);
   border-radius: 100%;
   position: absolute;
-  top: 89px;
-  justify-self: center;
+  top: 114px;
+  left: -10px;
   cursor: var(--pointer-hand-dark);
   z-index: 1100;
+}
+
+.navbar-view-toggle span {
+  margin-bottom: 4px;
+  margin-left: 2px;
+  transform: rotateY(0deg);
+  transition: all 0.25s ease-in-out 0s;
+  transform-origin: center;
+}
+
+.navbar-arrow-close {
+  margin-left: -2px !important;
+  transform: rotateY(180deg) !important;
 }
 
 .navbar-text {

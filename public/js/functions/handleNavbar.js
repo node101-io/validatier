@@ -41,16 +41,19 @@ function handleNavbar () {
   if (window.innerWidth < 900 && navbarWrapper.classList.contains('navbar-close')) {
     document.getElementById('all-main-wrapper').style.marginLeft = '76px';
     document.documentElement.style.setProperty("--navbar-width", "30px");
+    navbarViewToggle.querySelector('span').classList.add('navbar-arrow-close');
   }
 
   navbarViewToggle.addEventListener('click', (event) => {
     if (navbarWrapper.classList.contains('navbar-close')) {
       document.documentElement.style.setProperty("--navbar-width", "237px");
       navbarWrapper.classList.remove('navbar-close');
+      navbarViewToggle.querySelector('span').classList.remove('navbar-arrow-close');
       setCookie('isNavbarClose', '');
     } else {
       document.documentElement.style.setProperty("--navbar-width", "30px");
       navbarWrapper.classList.add('navbar-close');
+      navbarViewToggle.querySelector('span').classList.add('navbar-arrow-close');
       setCookie('isNavbarClose', true);
     }
   })

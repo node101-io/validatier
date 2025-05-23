@@ -17,6 +17,7 @@ import { Job_SaveChains } from './cron/jobs/Job_SaveChains.js';
 import { getGenesisTxs } from './utils/getGenesisTxs.js';
 import { startCronJobs } from './cron/startCronJobs.js';
 import { Job_SaveCacheSummaryGraphs } from './cron/jobs/Job_SaveCacheSummaryGraphs.js';
+import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
 
 const app: Express = express();
 const PORT: number = 3000;

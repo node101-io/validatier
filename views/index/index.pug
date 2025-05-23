@@ -64,6 +64,9 @@ block content
       { id: 'self_stake_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgba(88, 86, 214, 1)', title: 'Self-Staked Amount' }
     ]
   .all-main-wrapper#all-main-wrapper
+    .navbar-view-toggle#navbar-view-toggle(class='center')
+      span(class=`${isNavbarClose ? 'navbar-arrow-close' : ''}`)
+        include ../icons/chevron_left.pug
     .header-main-wrapper
       .header-network-switch-wrapper
         .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}` current_chain_first_available_time=`${selectedChain.first_available_block_time}`)
@@ -506,22 +509,22 @@ block content
                     .validator-each-numeric-info
                       .validator-each-numeric-info-native= getValue(validator[`${header.id}`], symbol).nativeValue
                       .validator-each-numeric-info-usd= getValue(validator[`${header.id}`], 'usd').usdValue
-    .footer-main-wrapper
-      .each-footer-column
-        .header-banner-wrapper
-          .banner-logo-wrapper(class='center')
-            img(src='/res/images/logo.svg', alt='node101' class='center')
-          .banner-title-content(class='navbar-text') VALIDATIER
-        .footer-description-text Validatier allows everyone to track the behavior of validators simultaneously.
-        .footer-email-wrapper
-          .footer-email-content hello@node101.io
-          img(src='/res/images/top_right_arrow.svg').footer-email-icon
-      .each-footer-column
-        .footer-mini-menu
-          a(href="") Dashboard
-          a(href="") Validators
-        .footer-contact-wrapper 
-          .footer-contact-label-text Please contact us if you would like to contribute.
-          .footer-contact-input-wrapper 
-            input.footer-contact-input-content(placeholder='name@gmail.com')#contact-message-input
-            .footer-contact-input-submit#contact-submit(class='center') Send
+      .footer-main-wrapper
+        .each-footer-column
+          .header-banner-wrapper
+            .banner-logo-wrapper(class='center')
+              img(src='/res/images/logo.svg', alt='node101' class='center')
+            .banner-title-content(class='navbar-text') VALIDATIER
+          .footer-description-text Validatier allows everyone to track the behavior of validators simultaneously.
+          .footer-email-wrapper
+            .footer-email-content hello@node101.io
+            img(src='/res/images/top_right_arrow.svg').footer-email-icon
+        .each-footer-column
+          .footer-mini-menu
+            a(href="") Dashboard
+            a(href="") Validators
+          .footer-contact-wrapper 
+            .footer-contact-label-text Please contact us if you would like to contribute.
+            .footer-contact-input-wrapper 
+              input.footer-contact-input-content(placeholder='name@gmail.com')#contact-message-input
+              .footer-contact-input-submit#contact-submit(class='center') Send

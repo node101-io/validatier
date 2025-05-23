@@ -57,23 +57,22 @@
   transition: all var(--navbar-toggle-transition-duration) linear 0s;
   height: 100vh;
   background-color: var(--all-main-wrapper-background-color);
-  overflow-x: visible;
-  overflow-y: scroll;
+  position: relative;
   border-radius: var(--all-main-wrapper-border-radius);
 }
 
-.all-main-wrapper::-webkit-scrollbar {
+.inner-main-wrapper::-webkit-scrollbar {
   width: var(--all-main-wrapper-webkit-scrollbar-width);
 }
 
-.all-main-wrapper::-webkit-scrollbar-thumb {
+.inner-main-wrapper::-webkit-scrollbar-thumb {
   background: var(--all-main-wrapper-webkit-scrollbar-thumb-background);
   border-radius: var(--all-main-wrapper-webkit-scrollbar-thumb-border-radius);
   transition: background var(--all-main-wrapper-webkit-scrollbar-thumb-transition-duration) ease-in-out;
   letter-spacing: var(--all-main-wrapper-webkit-scrollbar-thumb-letter-spacing);
 }
 
-.all-main-wrapper::-webkit-scrollbar-track {
+.inner-main-wrapper::-webkit-scrollbar-track {
   background: transparent;
 }
 
@@ -88,8 +87,10 @@
 }
 
 .inner-main-wrapper {
-  margin: var(--inner-main-wrapper-vertical-padding) var(--inner-main-wrapper-horizontal-padding);
+  height: 100%;
+  padding: var(--inner-main-wrapper-vertical-padding) var(--inner-main-wrapper-horizontal-padding);
   margin-top: var(--inner-main-wrapper-margin-top);
+  overflow-y: scroll;
 }
 
 .inner-main-wrapper-header {

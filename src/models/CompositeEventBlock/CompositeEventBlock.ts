@@ -238,7 +238,10 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
     { 
       $match: { 
         chain_identifier: chain_identifier, 
-        timestamp: { $gte: bottom_timestamp, $lte: top_timestamp }
+        timestamp: {
+          $gte: bottom_timestamp - (top_timestamp - bottom_timestamp),
+          $lte: top_timestamp
+        }
       } 
     },
     {
@@ -250,7 +253,16 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
     },
     {
       $group: {
-        _id: "$operator_address",
+        _id: {
+          range_id: {
+            $cond: [
+              { $lt: ['$timestamp', bottom_timestamp]},
+              0,
+              1
+            ]
+          },
+          operator_address: "$operator_address"
+        },
         leastRecentRecord: { $first: "$$ROOT" },
         mostRecentRecord: { $last: "$$ROOT" }
       }
@@ -297,20 +309,29 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
   ])
     .hint({ chain_identifier: 1, timestamp: 1, operator_address: 1 })
     .then((records: any) => {
+      
       const mapping: Record<string, any> = {};
       records.forEach((record: any) => {
-        mapping[record._id] = {
-          initial_self_stake_prefix_sum: record.initial_self_stake_prefix_sum,
-          initial_reward_prefix_sum: record.initial_reward_prefix_sum,
-          initial_total_stake_prefix_sum: record.initial_total_stake_prefix_sum,
-          initial_total_withdraw_prefix_sum: record.initial_total_withdraw_prefix_sum,
-          initial_commission_prefix_sum: record.initial_commission_prefix_sum,
-          self_stake: record.self_stake || 0,
-          reward: record.reward || 0,
-          commission: record.commission || 0,
-          total_stake: record.total_stake || 0,
-          total_withdraw: record.total_withdraw || 0
-        };
+        
+        const { range_id, operator_address } = record._id;
+        if (!mapping[operator_address]) mapping[operator_address] = {};
+
+        if (range_id == 1) {
+          mapping[operator_address] = {
+            self_stake: record.self_stake || 0,
+            reward: record.reward || 0,
+            commission: record.commission || 0,
+            total_stake: record.total_stake || 0,
+            total_withdraw: record.total_withdraw || 0
+          };
+          
+          mapping[operator_address].initial_self_stake_prefix_sum = record.initial_self_stake_prefix_sum;
+          mapping[operator_address].initial_total_stake_prefix_sum = record.initial_total_stake_prefix_sum;
+        } else {
+          mapping[operator_address].initial_reward_prefix_sum = record.reward;
+          mapping[operator_address].initial_total_withdraw_prefix_sum = record.total_withdraw;
+          mapping[operator_address].initial_commission_prefix_sum = record.commission;
+        }
       });  
 
       return callback(null, mapping);
