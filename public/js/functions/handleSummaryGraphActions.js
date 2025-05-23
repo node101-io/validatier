@@ -87,6 +87,9 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
   const graphWrapper = plotValidatorGraph({ type: 'summary', operatorAddress: 'summary', decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping, dataFields, graphContainer, summaryData });
   const graphWidth = window.getComputedStyle(graphContainer, null).getPropertyValue("width").replace('px', '');
 
+  let columnsPer = Math.round(targetCacheSummaryGraphData.length / 5);
+  columnsPer = columnsPer % 2 == 0 ? columnsPer : columnsPer + 1;
+  
   const currentSumMapping = {};
   for (let i = 0; i < targetCacheSummaryGraphData.length; i++) {
     const data = targetCacheSummaryGraphData[i];
@@ -101,7 +104,14 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
       
       metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
       metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
-      metric.querySelector('.percentage-change-value-content').innerHTML = '→' + Math.round((currentSumMapping[eachDataField] / summaryData[`initial_${eachDataField}`]) * 100) + '%';
+      
+      metric.querySelector('.percentage-change-value-content').innerHTML = '';
+      const arrow = document.createElement('img');
+      arrow.src = '/res/images/pretty_arrow.svg';
+      metric.querySelector('.percentage-change-value-content').appendChild(arrow);
+      const text = document.createElement('span');
+      text.innerHTML = Math.round((currentSumMapping[eachDataField] / summaryData[`initial_${eachDataField}`]) * 100) + '%';
+      metric.querySelector('.percentage-change-value-content').appendChild(text);
     });
     
     graphDataMapping[i] = data;
@@ -131,7 +141,8 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
       graphWidth,
       dataFields: dataFields,
       colors: colors,
-      by: by.toLowerCase()
+      by: by.toLowerCase(),
+      columnsPer
     });
   
     if (

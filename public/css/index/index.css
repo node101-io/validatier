@@ -114,3 +114,17 @@
 .section-hidden {
   display: none !important;
 }
+
+@media only screen and (max-width: 750px) {
+  :root {
+    --all-main-wrapper-webkit-scrollbar-width: 2px;
+    --all-main-wrapper-border-radius: 24px 0 0 24px;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  :root {
+    --all-main-wrapper-webkit-scrollbar-width: 2px;
+    --all-main-wrapper-border-radius: 20px 0 0 20px;
+  }
+}

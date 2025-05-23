@@ -179,7 +179,8 @@ function generateGraph (validator) {
       graphWidth,
       dataFields: dataFields,
       colors: colors,
-      by: 'm'
+      by: 'm',
+      columnsPer: 10
     });
   
     if (
@@ -224,28 +225,6 @@ function handlePlotButtonClick () {
   window.onresize = () => {
     if (isResizing) return;
     isResizing = true;
-
-    const graphWrappersArray = document.querySelectorAll('.validator-graph-wrapper');
-    setTimeout(() => {
-  
-      for (let i = 0; i < graphWrappersArray.length; i++) {
-        const eachGraphWrapper = graphWrappersArray[i];
-        const operatorAddress = eachGraphWrapper.getAttribute('operator_address');
-        const columnWrapper = eachGraphWrapper.querySelector('.each-graph-column-wrapper');
-        if (!columnWrapper) return;
-        
-        const graphWidth = eachGraphWrapper.getBoundingClientRect().width;
-
-        document.documentElement.style.setProperty(
-          `--graph-column-width-px-${operatorAddress.replace('\\@', '@')}`,
-          `calc((${graphWidth - 10}px - var(--vertical-axis-labels-width)) / var(--number-of-columns-${operatorAddress}))`
-        );
-        document.documentElement.style.setProperty(
-          `--graph-column-width-${operatorAddress.replace('\\@', '@')}`, 
-          `calc((${graphWidth - 10} - var(--vertical-axis-labels-width-int)) / var(--number-of-columns-${operatorAddress}))`
-        );
-      }
-      isResizing = false;
-    }, 10);
+    resizeAllGraphs();
   }
 }

@@ -18,11 +18,18 @@
 
   --network-summary-main-wrapper-title-network-summary-network-graph-metrics-wrapper-title-font-size: 14px;
   --network-summary-main-wrapper-title-network-summary-network-graph-metrics-wrapper-title-font-weight: 500;
-  
+  --network-summary-network-graph-metrics-wrapper-title-width: fit-content;
+
   --network-summary-main-wrapper-gap: 10px;
   --network-summary-main-wrapper-margin-bottom: 10px;
   
   --network-summary-network-stats-main-wrapper-gap: 10px;
+  --network-summary-network-stats-main-wrapper-flex-wrap: nowrap;
+
+  --network-summary-network-graph-content-header-height: 30px;
+  --network-summary-network-graph-content-header-padding-vertical: 16px;
+  --network-summary-network-graph-content-header-padding-horizontal: 16px;
+  --network-summary-network-graph-content-header-flex-direction: row;
   
   --each-network-summary-stat-height: 108px;
   --each-network-summary-stat-width: 33%;
@@ -50,11 +57,15 @@
   --each-network-summary-stat-footer-value-font-size: 14px;
   --each-network-summary-stat-footer-value-color: rgba(124, 112, 195, 1);
 
-  --network-summary-network-graph-main-wrapper-height: 366px;
+  --network-summary-network-graph-main-wrapper-height: fit-content;
   --network-summary-network-graph-main-wrapper-gap: 10px;
+  --network-summary-network-graph-main-wrapper-flex-direction: row;
 
-  --network-summary-network-graph-content-wrapper-padding: 25px;
+  --network-summary-network-graph-content-wrapper-padding-vertical: 8px;
+  --network-summary-network-graph-content-wrapper-padding-horizontal: 8px;
   --network-summary-network-graph-content-wrapper-border-radius: 20px;
+  --network-summary-network-graph-content-wrapper-gap: 14px;
+  --network-summary-network-graph-content-wrapper-width: calc(100% - var(--network-summary-network-graph-metrics-wrapper-width) - (2 * var(--network-summary-network-graph-content-wrapper-padding-horizontal)));
   
   --network-summary-network-graph-content-title-font-size: 16px;
   --network-summary-network-graph-content-title-font-weight: 500;
@@ -64,8 +75,11 @@
   --network-summary-network-graph-content-description-font-weight: 400;
   --network-summary-network-graph-content-description-color: rgba(124, 112, 195, 1);
   
-  --network-summary-network-graph-metrics-wrapper-width: 300px;
+  --network-summary-network-graph-metrics-wrapper-width: 30%;
   --network-summary-network-graph-metrics-wrapper-gap: 12px;
+  --network-summary-network-graph-metrics-wrapper-flex-direction: column;
+
+  --network-summary-network-graph-metrics-content-wrapper-gap: 10px;
   
   --each-metric-content-wrapper-border-radius: 20px;
   --each-metric-content-wrapper-height: 100px;
@@ -75,14 +89,13 @@
   
   --each-metric-content-wrapper-header-icon-width: 7px;
   
-  --each-metric-content-wrapper-content-width: 100%;
-  
   --each-metric-content-wrapper-header-font-size: 12px;
   --each-metric-content-wrapper-header-color: rgba(124, 112, 195, 1);
   --each-metric-content-wrapper-header-gap: 10px;
   
   --each-metric-content-wrapper-header-div-margin-top: -2px;
-  
+
+  --each-metric-content-wrapper-content-flex-direction: row;
   
   --each-metric-content-wrapper-content-value-native-font-weight: 700;
   --each-metric-content-wrapper-content-value-native-font-size: 16px;
@@ -92,33 +105,9 @@
   --each-metric-content-wrapper-content-value-usd-font-size: 16px;
   --each-metric-content-wrapper-content-value-usd-color: rgba(124, 112, 195, 1);
   
-  --insights-main-wrapper-gap: 12px;
-  --insights-main-wrapper-margin-bottom: 10px;
-
-  --insights-main-content-wrapper-gap: 34px;
-  
   --each-metric-content-wrapper-footer-font-size: 12px;
   --each-metric-content-wrapper-footer-font-weight: 400;
   --each-metric-content-wrapper-footer-color: rgba(124, 112, 195, 1);
-  
-  --each-insight-wrapper-width: 33%;
-  --each-insight-wrapper-border-radius: 20px;
-  --each-insight-wrapper-height: 77px;
-  --each-insight-wrapper-padding: 16px;
-  
-  --each-insight-text-wrapper-gap: 5px;
-  
-  --each-insight-title-color: rgba(37, 0, 84, 1);
-  --each-insight-title-font-size: 20px;
-  --each-insight-title-font-weight: 600;
-  
-  --each-insight-description-color: rgba(175, 161, 255, 1);
-  --each-insight-description-font-size: 12px;
-  --each-insight-description-font-weight: 400;
-  
-  --each-insight-visual-wrapper-margin-right: 30px;
-  --each-insight-visual-icon-height: 100%;
-  --each-insight-visual-icon-max-width: 70px;
    
   --bar-graph-icon-main-wrapper-gap: 2px;
 
@@ -148,6 +137,10 @@
   font-weight: var(--network-summary-main-wrapper-title-network-summary-network-graph-metrics-wrapper-title-font-weight);
 }
 
+.network-summary-network-graph-metrics-wrapper-title {
+  width: var(--network-summary-network-graph-metrics-wrapper-title-width);
+}
+
 .network-summary-main-wrapper {
   display: flex;
   flex-direction: column;
@@ -158,7 +151,7 @@
 .network-summary-network-stats-main-wrapper {
   display: flex;
   flex-direction: row;
-  flex-wrap: nowrap;
+  flex-wrap: var(--network-summary-network-stats-main-wrapper-flex-wrap);
   justify-content: space-between;
   gap: var(--network-summary-network-stats-main-wrapper-gap);
 }
@@ -220,13 +213,16 @@
   width: 100%;
   height: var(--network-summary-network-graph-main-wrapper-height);
   display: flex;
+  flex-direction: var(--network-summary-network-graph-main-wrapper-flex-direction);
   gap: var(--network-summary-network-graph-main-wrapper-gap);
 }
 
 .network-summary-network-graph-content-wrapper {
-  width: calc(100% - var(--network-summary-network-graph-metrics-wrapper-width) - (2 * var(--network-summary-network-graph-content-wrapper-padding)));
-  padding: var(--network-summary-network-graph-content-wrapper-padding);
+  width: var(--network-summary-network-graph-content-wrapper-width);
+  padding: var(--network-summary-network-graph-content-wrapper-padding-vertical) var(--network-summary-network-graph-content-wrapper-padding-horizontal);
   background-color: var(--body-main-wrapper-background);
+  display: flex;
+  flex-direction: column;
   border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
   border-radius: var(--network-summary-network-graph-content-wrapper-border-radius);
 }
@@ -245,12 +241,23 @@
   font-size: var(--network-summary-network-graph-content-description-font-size);
   font-weight: var(--network-summary-network-graph-content-description-font-weight);
   color: var(--network-summary-network-graph-content-description-color);
+  width: 100%;
+  text-align: start;
 }
 
 .network-summary-network-graph-content-header {
+  width: calc(100% - (2 * var(--network-summary-network-graph-content-header-padding-horizontal)));
+  height: calc(var(--network-summary-network-graph-content-header-height) + var(--network-summary-network-graph-content-wrapper-gap));
+  padding: var(--network-summary-network-graph-content-header-padding-vertical) var(--network-summary-network-graph-content-header-padding-horizontal);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.network-summary-network-graph-content-header-main {
   width: 100%;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
 }
 
@@ -261,7 +268,15 @@
   gap: var(--network-summary-network-graph-metrics-wrapper-gap);
 }
 
+.network-summary-network-graph-metrics-content-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: var(--network-summary-network-graph-metrics-wrapper-flex-direction);
+  gap: var(--network-summary-network-graph-metrics-content-wrapper-gap);
+}
+
 .each-metric-content-wrapper {
+  width: calc(100% - (2 * var(--each-metric-content-wrapper-padding)));
   border-radius: var(--each-metric-content-wrapper-border-radius);
   height: calc(var(--each-metric-content-wrapper-height) - (2 * var(--each-metric-content-wrapper-padding)));
   display: flex;
@@ -292,12 +307,13 @@
 .each-metric-content-wrapper-content {
   width: 100%;
   display: flex;
+  flex-direction: var(--each-metric-content-wrapper-content-flex-direction);
   justify-content: space-between;
 }
 
 .each-metric-content-wrapper-header {
-  display: flex;
   width: 100%;
+  display: flex;
   align-items: center;
   font-size: var(--each-metric-content-wrapper-header-font-size);
   color: var(--each-metric-content-wrapper-header-color);
@@ -546,3 +562,40 @@
 }
 
 
+@media only screen and (max-width: 1200px) {
+  :root {
+    --network-summary-network-graph-content-header-flex-direction: row;
+  }
+}
+
+@media only screen and (max-width: 750px) {
+  :root {
+    --network-summary-network-graph-main-wrapper-flex-direction: column;
+    --network-summary-network-graph-metrics-wrapper-flex-direction: row;
+    --network-summary-network-graph-metrics-wrapper-width: 100%;
+    --network-summary-network-graph-content-wrapper-width: calc(100% - (2 * var(--network-summary-network-graph-content-wrapper-padding-horizontal)));
+    --each-network-summary-stat-width: 100%;
+    --network-summary-network-stats-main-wrapper-flex-wrap: wrap;
+    --inner-main-wrapper-horizontal-padding: 10px;
+    --network-summary-network-graph-metrics-content-wrapper-gap: 10px;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  :root {
+    --each-metric-content-wrapper-content-value-native-font-size: 14px;
+    --each-metric-content-wrapper-content-value-usd-font-size: 12px;
+    --each-metric-content-wrapper-content-flex-direction: column;
+    --network-summary-network-graph-content-filters-wrapper-gap: 6px;
+    --each-network-summary-select-wrapper-gap: 8px;
+    --network-summary-network-graph-content-header-padding-vertical: 4px;
+    --network-summary-network-graph-content-header-padding-horizontal: 6px;
+  }
+}
+
+@media only screen and (max-width: 450px) {
+  :root {
+    --each-metric-content-wrapper-content-flex-direction: row;
+    --network-summary-network-graph-metrics-wrapper-flex-direction: column;
+  }
+}

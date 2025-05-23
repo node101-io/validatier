@@ -65,14 +65,20 @@ const indexGetController = (req: Request, res: Response): void => {
 
       const rawGraphMapping = {
         self_staked_and_delegation: {
+          graph_title: 'Self-Staked & Delegation',
+          graph_description: 'Total Self-Staked & Total Delegation',
           dataFields: ['percentage_sold', 'self_stake_sum'],
           colors: ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)']
         },
         percentage_sold_graph: {
+          graph_title: 'Percentage Sold Graph',
+          graph_description: 'Total Sold / Total Reward Withdrawn',
           dataFields: ['percentage_sold'],
           colors: ['rgba(255, 149, 0, 1)']
         },
         other: {
+          graph_title: 'Reward Flow Overview',
+          graph_description: 'Shows how validators respond to changes in total capitulation and delegation in the market',
           dataFields: ['total_stake_sum', 'total_withdraw_sum', 'total_sold'],
           colors: ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)']
         },
@@ -158,7 +164,9 @@ const indexGetController = (req: Request, res: Response): void => {
         url,
         queryValidator: queryValidator ? JSON.stringify(queryValidator) : null,
         dataFields: JSON.stringify(graphMapping[url].dataFields),
-        colors: JSON.stringify(graphMapping[url].colors),    
+        colors: JSON.stringify(graphMapping[url].colors),
+        graph_title: graphMapping[url].graph_title,
+        graph_description: graphMapping[url].graph_description,
         validatorGraph: {
           dataFields: ['total_stake_sum', 'total_withdraw_sum', 'total_sold'],
           colors: ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)']

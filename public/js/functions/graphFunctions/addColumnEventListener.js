@@ -39,7 +39,14 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
 
         metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
         metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
-        metric.querySelector('.percentage-change-value-content').innerHTML = '→' + Math.round((columnWrapper.getAttribute(eachDataField) / summaryData[`initial_${eachDataField}`]) * 100) + '%';
+        
+        metric.querySelector('.percentage-change-value-content').innerHTML = '';
+        const arrow = document.createElement('img');
+        arrow.src = '/res/images/pretty_arrow.svg';
+        metric.querySelector('.percentage-change-value-content').appendChild(arrow);
+        const text = document.createElement('span');
+        text.innerHTML = Math.round((columnWrapper.getAttribute(eachDataField) / summaryData[`initial_${eachDataField}`]) * 100) + '%';
+        metric.querySelector('.percentage-change-value-content').appendChild(text);
       });
     
     if (!validatorListenerVariablesMapping[operatorAddressM].isSelectingRange) return;

@@ -4,6 +4,9 @@
   --navbar-horizontal-padding: 22px;
   --navbar-vertical-padding: 50px;
   --navbar-gap: 52px;
+  --navbar-position: unset;
+  --navbar-z-index: 100;
+  --navbar-background-color: rgb(232, 232, 254);
 
   --each-sub-menu-link-content-gap: 10px;
 
@@ -207,15 +210,17 @@ input {
 
 .navbar-wrapper {
   width: calc(var(--navbar-width) - 2 * var(--navbar-horizontal-padding));
+  height: calc(100% - (2 * var(--navbar-vertical-padding)));
   padding: var(--navbar-vertical-padding) var(--navbar-horizontal-padding);
   display: flex;
   flex-direction: column;
   align-items: center;
   overflow: hidden;
   gap: var(--navbar-gap);
-  background-color: rgb(232, 232, 254);
-  position: relative;
+  background-color: var(--navbar-background-color);
+  position: var(--navbar-position);
   transition: all var(--navbar-toggle-transition-duration) ease-in-out 0s;
+  z-index: var(--navbar-z-index);
 }
 
 .navbar-wrapper .header-banner-wrapper {
@@ -269,6 +274,8 @@ input {
   display: flex;
   gap: 30px;
   margin-top: auto;
+  position: absolute;
+  bottom: 20px;
   transition: inherit;
 }
 
@@ -284,10 +291,10 @@ input {
   background-color: rgba(144, 144, 245, 1);
   border-radius: 100%;
   position: absolute;
-  margin-left: calc(-21px / 2);
   top: 89px;
+  justify-self: center;
   cursor: var(--pointer-hand-dark);
-  z-index: 100;
+  z-index: 1100;
 }
 
 .navbar-text {
@@ -299,7 +306,7 @@ input {
 }
 
 .navbar-close {
-  width: 36px;
+  width: 30px;
 }
 
 .banner-title-content {
@@ -409,4 +416,11 @@ input {
   border-radius: 57px;
   background-color: rgba(102, 84, 125, 1);
   color: rgb(255, 255, 255);
+}
+
+@media only screen and (max-width: 900px) {
+  :root {
+    --navbar-position: absolute;
+    --all-main-wrapper-width: var(--all-main-wrapper-width) + var(--navbar-width)
+  }
 }

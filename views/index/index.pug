@@ -64,14 +64,13 @@ block content
       { id: 'self_stake_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgba(88, 86, 214, 1)', title: 'Self-Staked Amount' }
     ]
   .all-main-wrapper#all-main-wrapper
-    .navbar-view-toggle#navbar-view-toggle
     .header-main-wrapper
       .header-network-switch-wrapper
         .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}` current_chain_first_available_time=`${selectedChain.first_available_block_time}`)
           .network-switch-header-chain-content-wrapper(class='center')
-            .network-switch-network-image-wrapper 
+            .network-switch-network-image-wrapper
               img(class='current-network-img' src=`${selectedChain.image ? selectedChain.image : ''}`)
-            .network-switch-network-info-wrapper 
+            .network-switch-network-info-wrapper
               .network-switch-network-title-wrapper
                 .network-switch-network-title(class='current-network-name')= selectedChain.pretty_name || 'Cosmos Hub'
                 .network-switch-drowdown-toggle(class='network-switch-dropdown-arrow center')
@@ -192,7 +191,9 @@ block content
                 else 
                   .each-network-summary-stat-content(class='stat-value-font-large')
                 .each-network-summary-stat-footer-change 
-                  span(class='percentage-change-value-content')= '→' + Math.round((summaryData[stat.field] / summaryData[`initial_${stat.field}`]) * 100) + '%'
+                  span(class='percentage-change-value-content')
+                    img(src='/res/images/pretty_arrow.svg')
+                    span= Math.round((summaryData[stat.field] / summaryData[`initial_${stat.field}`]) * 100) + '%'
               .each-network-summary-stat-column
                 if `${stat.id_native}` == 'summary-percentage-sold-native'
                   .percentage-sold-main-circle
@@ -205,38 +206,39 @@ block content
         .network-summary-network-graph-main-wrapper
           .network-summary-network-graph-metrics-wrapper
             .network-summary-network-graph-metrics-wrapper-title(class='each-section-title-content') Graph Metrics
-            each metric in metrics 
-              .each-metric-content-wrapper(id=`summary-metric-${metric.id}` class=`${dataFields.includes(metric.id) ? '' : 'section-hidden'}`)
-                .each-metric-content-wrapper-header
-                  .each-metric-content-wrapper-header-icon(style=`background-color: ${metric.color}`)
-                  .each-metric-content-wrapper-header-title= metric.title
-                .each-metric-content-wrapper-content
-                  .each-metric-content-wrapper-content-value-native
-                  .each-metric-content-wrapper-content-value-usd
-                .each-metric-content-wrapper-footer
-                  span(class='percentage-change-value-content')
+            .network-summary-network-graph-metrics-content-wrapper
+              each metric in metrics 
+                .each-metric-content-wrapper(id=`summary-metric-${metric.id}` class=`${dataFields.includes(metric.id) ? '' : 'section-hidden'}`)
+                  .each-metric-content-wrapper-header
+                    .each-metric-content-wrapper-header-icon(style=`background-color: ${metric.color}`)
+                    .each-metric-content-wrapper-header-title= metric.title
+                  .each-metric-content-wrapper-content
+                    .each-metric-content-wrapper-content-value-native
+                    .each-metric-content-wrapper-content-value-usd
+                  .each-metric-content-wrapper-footer
+                    span(class='percentage-change-value-content')
           .network-summary-network-graph-content-wrapper
             .network-summary-network-graph-content-header
-              .network-summary-network-graph-content-textual
-                .network-summary-network-graph-content-title Reward Flow Overview
-                .network-summary-network-graph-content-description Shows how validators respond to changes in total capitulation and delegation in the market
-              .network-summary-network-graph-content-filters-wrapper
-                each menu in summary_graph_menus
-                  if menu.type == 'dropdown'
-                    .each-network-summary-network-graph-content-dropdown-wrapper
-                      .each-network-summary-network-graph-content-dropdown-header
-                        span= menu.title
-                        img.each-network-summary-network-graph-content-dropdown-arrow(src='/res/images/chevron_aestethic.svg' class='center')
-                      .each-network-summary-network-graph-content-dropdown-content
+              .network-summary-network-graph-content-header-main
+                .network-summary-network-graph-content-title#summary-graph-title= graph_title
+                .network-summary-network-graph-content-filters-wrapper
+                  each menu in summary_graph_menus
+                    if menu.type == 'dropdown'
+                      .each-network-summary-network-graph-content-dropdown-wrapper
+                        .each-network-summary-network-graph-content-dropdown-header
+                          span= menu.title
+                          img.each-network-summary-network-graph-content-dropdown-arrow(src='/res/images/chevron_aestethic.svg' class='center')
+                        .each-network-summary-network-graph-content-dropdown-content
+                          each option in menu.options 
+                            .each-network-summary-network-graph-content-each-dropdown(id=`summary-graph-dropdown-option-${option.id}` class=`dropdown-option-checked ${dataFields.includes(option.id) ? '' : 'section-hidden'}`)
+                              .general-choice-checkbox(class='center')
+                                .general-choice-checkbox-inner-circle(style=`${dataFields.includes(option.id) ? 'display: unset' : ''}`) ✓
+                              span= option.title
+                    else 
+                      .each-network-summary-select-wrapper
                         each option in menu.options 
-                          .each-network-summary-network-graph-content-each-dropdown(id=`summary-graph-dropdown-option-${option.id}` class=`dropdown-option-checked ${dataFields.includes(option.id) ? '' : 'section-hidden'}`)
-                            .general-choice-checkbox(class='center')
-                              .general-choice-checkbox-inner-circle(style=`${dataFields.includes(option.id) ? 'display: unset' : ''}`) ✓
-                            span= option.title
-                  else 
-                    .each-network-summary-select-wrapper
-                      each option in menu.options 
-                        .each-network-summary-select-option(class=`${option == menu.selected ? 'each-network-summary-select-option-selected' : ''}` option=option.toLowerCase())= option
+                          .each-network-summary-select-option(class=`${option == menu.selected ? 'each-network-summary-select-option-selected' : ''}` option=option.toLowerCase())= option
+              .network-summary-network-graph-content-description#summary-graph-description= graph_description
             .network-summary-network-graph-content#network-summary-graph-container(currentDataFields=dataFields currentColors=colors)
               script.
                 createNetworkSummaryGraph(!{dataFields}, !{colors}, 'm');
@@ -328,7 +330,14 @@ block content
                         img.each-leaderboard-table-validator-info-image(src=src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.png'}`)
                         .each-leaderboard-table-validator-info-moniker= validator.moniker
                       .each-leaderboard-table-validator-data-wrapper 
-                        .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], leaderboard.unit).nativeValue
+                        if leaderboard.id == 'percentage_sold'
+                          - const scoreResult = getScoreColor(validator[`${leaderboard.id}`])
+                          .each-leaderboard-table-validator-data(class='validator-percentage-sold' style=`color: ${scoreResult.color}`) 
+                            span %#{shortNumberFormat(validator.percentage_sold)}
+                            if scoreResult.check
+                              img(src='/res/images/check_green.svg' class='center')
+                        else 
+                          .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], leaderboard.unit).nativeValue
                         if leaderboard.id_usd 
                           .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], 'usd').usdValue
                         if leaderboard.id == 'self_stake'
@@ -386,31 +395,32 @@ block content
         .network-summary-network-graph-main-wrapper
           .network-summary-network-graph-metrics-wrapper
             .network-summary-network-graph-metrics-wrapper-title(class='each-section-title-content') Graph Metrics
-            each metric in metrics 
-              .each-metric-content-wrapper(id=`validator-metric-${metric.id}` class=`${validatorGraph.dataFields.includes(metric.id) ? '' : 'section-hidden'}`)
-                .each-metric-content-wrapper-header
-                  .each-metric-content-wrapper-header-icon(style=`background-color: ${metric.color}`)
-                  .each-metric-content-wrapper-header-title= metric.title
-                .each-metric-content-wrapper-content
-                  .each-metric-content-wrapper-content-value-native
-                  .each-metric-content-wrapper-content-value-usd
-                .each-metric-content-wrapper-footer
-                  span(class='percentage-change-value-content')
+            .network-summary-network-graph-metrics-content-wrapper
+              each metric in metrics 
+                .each-metric-content-wrapper(id=`validator-metric-${metric.id}` class=`${validatorGraph.dataFields.includes(metric.id) ? '' : 'section-hidden'}`)
+                  .each-metric-content-wrapper-header
+                    .each-metric-content-wrapper-header-icon(style=`background-color: ${metric.color}`)
+                    .each-metric-content-wrapper-header-title= metric.title
+                  .each-metric-content-wrapper-content
+                    .each-metric-content-wrapper-content-value-native
+                    .each-metric-content-wrapper-content-value-usd
+                  .each-metric-content-wrapper-footer
+                    span(class='percentage-change-value-content')
           .network-summary-network-graph-content-wrapper
             .network-summary-network-graph-content-header
-              .network-summary-network-graph-content-textual
+              .network-summary-network-graph-content-header-main
                 .network-summary-network-graph-content-title Reward Flow Overview
-                .network-summary-network-graph-content-description Shows how validators respond to changes in total capitulation and delegation in the market
-              .network-summary-network-graph-content-filters-wrapper
-                each menu in summary_graph_menus
-                  if menu.type == 'dropdown'
-                    .each-network-summary-network-graph-content-dropdown-wrapper
-                      .each-network-summary-network-graph-content-dropdown-header
-                        span= menu.title
-                        img.each-network-summary-network-graph-content-dropdown-arrow(src='/res/images/chevron_aestethic.svg' class='center')
-                      .each-network-summary-network-graph-content-dropdown-content
-                        each option in menu.options 
-                          .each-network-summary-network-graph-content-each-dropdown(id=`validator-graph-dropdown-option-${option.id}` class=`dropdown-option-checked ${dataFields.includes(option.id) ? '' : 'section-hidden'}`)= option.title
+                .network-summary-network-graph-content-filters-wrapper
+                  each menu in summary_graph_menus
+                    if menu.type == 'dropdown'
+                      .each-network-summary-network-graph-content-dropdown-wrapper
+                        .each-network-summary-network-graph-content-dropdown-header
+                          span= menu.title
+                          img.each-network-summary-network-graph-content-dropdown-arrow(src='/res/images/chevron_aestethic.svg' class='center')
+                        .each-network-summary-network-graph-content-dropdown-content
+                          each option in menu.options 
+                            .each-network-summary-network-graph-content-each-dropdown(id=`validator-graph-dropdown-option-${option.id}` class=`dropdown-option-checked ${dataFields.includes(option.id) ? '' : 'section-hidden'}`)= option.title
+              .network-summary-network-graph-content-description Shows how validators respond to changes in total capitulation and delegation in the market
             .network-summary-network-graph-content#validator-graph-container
               if queryValidator
                 script.
@@ -468,7 +478,7 @@ block content
                           .each-table-popup-info-content(class='center')= header.popup_text
                           .each-tooltip-info-hover(style='margin-bottom: -1px')
                             img(src='/res/images/info.svg')
-                      div= header.name
+                      .each-table-header-title= header.name
                     .each-table-header-sort-indicators 
                       .triangle-up
                       .triangle-down

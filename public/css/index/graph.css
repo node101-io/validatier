@@ -1,7 +1,7 @@
 :root {
   --validator-graph-wrapper-min-width: 100%;
   --validator-graph-wrapper-max-width: 100%;
-  --validator-graph-wrapper-height: 280px;
+  --validator-graph-wrapper-height: 260px;
   --validator-graph-wrapper-transition-duration: 0.5s;
   --validator-graph-wrapper-vertical-padding: 10px;
   --validator-graph-wrapper-horizontal-padding: 0;
@@ -36,7 +36,8 @@
   --vertical-axis-labels-border-right-size: 0px;
 
   --each-vertical-label-font-size: 12px;
-  --each-vertical-label-margin-right: 20px;
+  --each-vertical-label-font-weight: 400;
+  --each-vertical-label-margin-right: auto;
   --each-vertical-label-width: 40px;
   --each-vertical-label-color: rgba(124, 112, 195, 1);
   
@@ -149,10 +150,11 @@
 
 .each-vertical-label {
   font-size: var(--each-vertical-label-font-size);
+  font-weight: var(--each-vertical-label-font-weight);
   margin-right: var(--each-vertical-label-margin-right);
   width: var(--each-vertical-label-width);
   color: var(--each-vertical-label-color);
-  text-align: end;
+  text-align: start;
   text-wrap: nowrap;
 }
 

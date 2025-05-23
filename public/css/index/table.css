@@ -634,4 +634,6 @@
 
 .percentage-change-value-content {
   color: var(--percentage-change-value-content-color);
+  display: flex;
+  align-items: center;
 }

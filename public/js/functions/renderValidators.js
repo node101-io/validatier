@@ -146,7 +146,9 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     tr.appendChild(selfStakeTd);
     tr.appendChild(totalSoldAmountTd);
     tr.appendChild(percentageSoldTd);
-  
+
+    tr.setAttribute('validator', JSON.stringify(validator));
+    tr.classList.add('operator-address');
     document.getElementById('validators-main-wrapper').appendChild(tr);
   }
 }
@@ -191,8 +193,9 @@ function renderValidators() {
     const GET_VALIDATORS_API_ENDPOINT = 'validator/rank_validators';
     const BASE_URL = !window.location.href.includes('#') ? window.location.href : window.location.href.split('#')[0];
     
-    document.getElementById('export-sort-by').innerHTML = sort_by;
-    document.getElementById('export-order').innerHTML = sortOrderMapping[sort_by];
+    const validatorsMainWrapper = document.getElementById('validators-main-wrapper');
+    validatorsMainWrapper.setAttribute('sort_by', sort_by);
+    validatorsMainWrapper.setAttribute('order', sortOrderMapping[sort_by]);
 
     const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
     const topDate = document.getElementById('periodic-query-top-timestamp').value
@@ -260,7 +263,10 @@ function renderValidators() {
 
   document.addEventListener('click', (event) => {
     let target = event.target;
-    while (target != document.body && !target.classList.contains('leaderboard-dropdown-option')) target = target.parentNode;
+    while (target != document.body && !target.classList.contains('leaderboard-dropdown-option')) {
+      console.log(target, target.classList)
+      target = target.parentNode
+    };
     if (!target.classList.contains('leaderboard-dropdown-option') || target.classList.contains('dropdown-option-selected') || target.classList.contains('leaderboard-dropdown-title')) return;
 
     target.parentNode.querySelectorAll('.leaderboard-dropdown-option').forEach(each => {

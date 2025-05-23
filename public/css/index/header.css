@@ -1,6 +1,6 @@
 :root {
-  --date-picker-z-index: 120;
   --date-picker-height: 56px;
+  --date-picker-z-index: 1000;
 
   --selected-range-height: 56px;
   --selected-range-font-size: 16px;
@@ -17,7 +17,8 @@
   --picker-main-wrapper-transform-rotate-x: -90deg;
   --picker-main-wrapper-opacity: 0;
   --picker-main-wrapper-right: 0;
-  --picker-main-wrapper-top: 48px;
+  --picker-main-wrapper-top: 60px;
+  --picker-main-wrapper-z-index: 1000;
   --picker-main-wrapper-border-radius: 24px;
   
   --picker-content-wrapper-font-size: 14px;
@@ -57,6 +58,7 @@
 
   --date-range-gap: 2px;
   --date-range-margin-top: -2px;
+  --date-range-width: fit-content;
     
   --selected-date-border-size: 4px;
   --selected-date-border-radius: 20px;
@@ -99,6 +101,8 @@
   
   --network-switch-header-width: 250px;
   --network-switch-header-padding: 10px;
+  --network-switch-header-background-color: rgba(232, 232, 255, 1);
+  --network-switch-header-border-size: 0.5px;
   --network-switch-header-height: 56px;
   --network-switch-header-gap: 0px;
   --network-switch-header-border-radius: 16px;
@@ -108,9 +112,19 @@
   --network-switch-network-symbol-font-weight: 400;
   --network-switch-network-symbol-margin-top: -5px;
 
+  --network-switch-text-display: block;
+  --network-switch-network-title-color: rgba(37, 0, 84, 1);
   --network-switch-network-title-margin-top: -4px;
   --network-switch-network-title-font-size: 20px;
   --network-switch-network-title-font-weight: 500;
+
+  --network-switch-network-currency-font-size: 12px;
+  --network-switch-network-currency-font-weight: 400;
+  --network-switch-network-currency-color: rgba(73, 48, 111, 1);
+  
+  --each-network-switch-main-numerical-value-color: rgba(73, 48, 111, 1);
+  --each-network-switch-main-numerical-value-font-weight: 500;
+  --each-network-switch-main-numerical-value-font-size: 16px;
   
   --unselected-network-title-font-size: 20px;
   --unselected-network-title-font-weight: 400;
@@ -137,9 +151,11 @@
 }
 
 .date-picker {
-  position: relative;
   width: fit-content;
   overflow: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
   z-index: var(--date-picker-z-index);
   height: var(--date-picker-height);
 }
@@ -176,10 +192,10 @@
   transition: all var(--picker-main-wrapper-transition-duration) ease 0s;
   transform: perspective(var(--picker-main-wrapper-transform-perspective)) rotateX(var(--picker-main-wrapper-transform-rotate-x));
   opacity: var(--picker-main-wrapper-opacity);
-  right: var(--picker-main-wrapper-right);
   top: var(--picker-main-wrapper-top);
   border-radius: var(--picker-main-wrapper-border-radius);
   background: var(--color-dropdown-background);
+  z-index: var(--picker-main-wrapper-z-index);
   transform-origin: top;
   position: absolute;
 }
@@ -269,7 +285,13 @@
   display: flex;
   gap: var(--date-range-gap);
   margin-top: var(--date-range-margin-top);
-  width: fit-content;
+  width: var(--date-range-width);
+  overflow: hidden;
+}
+
+.date-range span {
+  display: inline;
+  text-overflow: ellipsis;
 }
 
 .selected-date-bottom, .selected-date-top {
@@ -364,12 +386,22 @@
   margin-top: var(--network-switch-network-title-margin-top);
   font-size: var(--network-switch-network-title-font-size);
   font-weight: var(--network-switch-network-title-font-weight);
+  color: var(--network-switch-network-title-color);
+  display: var(--network-switch-text-display);
 }
 
 .network-switch-network-currency {
-  font-size: 12px;
-  font-weight: 400;
-  color: rgba(73, 48, 111, 1);
+  font-size: var(--network-switch-network-currency-font-size);
+  font-weight: var(--network-switch-network-currency-font-weight);
+  color: var(--network-switch-network-currency-color);
+  display: var(--network-switch-text-display);
+}
+
+.each-network-switch-main-numerical-value {
+  color: var(--each-network-switch-main-numerical-value-color);
+  font-weight: var(--each-network-switch-main-numerical-value-font-weight);
+  font-size: var(--each-network-switch-main-numerical-value-font-size);
+  display: var(--network-switch-text-display);
 }
 
 .unselected-network-title {
@@ -492,9 +524,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between !important;
-  background-color: var(--header-main-background);
+  background-color: var(--network-switch-header-background-color);
   padding: var(--network-switch-header-padding);
-  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
+  border: var(--network-switch-header-border-size) solid var(--general-main-wrapper-border-color);
 }
 
 .network-switch-header-main {
@@ -513,12 +545,6 @@
   flex-direction: column;
   align-items: flex-end;
   position: relative;
-}
-
-.each-network-switch-main-numerical-value {
-  color: rgba(73, 48, 111, 1);
-  font-weight: 500;
-  font-size: 16px;
 }
 
 .network-switch-network-image-wrapper {
@@ -558,6 +584,7 @@
 .network-switch-drowdown-toggle {
   transform-origin: center;
   transition: all var(--dropdown-icon-transition-duration) ease 0s; 
+  color: var(--network-switch-network-title-color);
 }
 
 
@@ -577,6 +604,19 @@
   }
 }
 
+@media only screen and (max-width: 750px) {
+  :root {
+    --network-switch-header-background-color: transparent;
+    --network-switch-header-border-size: 0px;
+    --network-switch-text-display: none;
+    --network-switch-header-width: fit-content;
+    --header-main-wrapper-horizontal-padding: 10px;
+    --header-main-wrapper-gap: 0px;
+    --network-switch-header-chain-content-wrapper-gap: 0px;
+    --date-range-width: 100px;
+  }
+}
+
 @media only screen and (max-width: 500px) {
   :root {
 
@@ -584,7 +624,6 @@
     --network-switch-header-height: 32px;
 
     --table-filters-subgroup-gap: 0px;
-    --date-picker-z-index: 10;
     --date-picker-height: 48px;
   
     --selected-range-font-size: 14px;
@@ -607,5 +646,7 @@
     --date-font-size: 14px;
     --date-border-size: 4px;
     --date-padding: 0px;
+    
+    --date-range-width: 50px;
   }
 }

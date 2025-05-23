@@ -101,7 +101,14 @@ function plotValidatorGraph(params) {
 
         metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
         metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
-        metric.querySelector('.percentage-change-value-content').innerHTML = '→' + Math.round((deltaValue / (summaryData[`initial_${eachDataField}`] + Math.min(value_1, value_2))) * 100) + '%';
+      
+        metric.querySelector('.percentage-change-value-content').innerHTML = '';
+        const arrow = document.createElement('img');
+        arrow.src = '/res/images/pretty_arrow.svg';
+        metric.querySelector('.percentage-change-value-content').appendChild(arrow);
+        const text = document.createElement('span');
+        text.innerHTML = Math.round((deltaValue / (summaryData[`initial_${eachDataField}`] + Math.min(value_1, value_2))) * 100) + '%';
+        metric.querySelector('.percentage-change-value-content').appendChild(text);
       })
 
       const initialTimestamp = !validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft ? validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp') : validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute('timestamp');
