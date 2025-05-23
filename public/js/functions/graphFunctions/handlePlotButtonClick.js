@@ -44,8 +44,13 @@ function generateGraph (validator) {
   const decimals = document.getElementById('network-switch-header').getAttribute('current_chain_decimals');
   const usd_exchange_rate = document.getElementById('network-switch-header').getAttribute('current_chain_usd_exhange_rate');
   const symbol = document.getElementById('network-switch-header').getAttribute('current_chain_symbol');
+  const chainId = document.getElementById('network-switch-header').getAttribute('current_chain_id');
   const currency = 'native';
 
+  document.getElementById('validator-details-website').href = `${validator.website || ''}`;
+  document.getElementById('validator-details-explorer').href = `https://www.mintscan.io/cosmos/validators/${validator.operator_address || ''}`;
+  document.getElementById('validator-details-stake').href = `https://wallet.keplr.app/chains/${chainIdentifier == 'cosmoshub' ? 'cosmos-hub' : chainIdentifier}?modal=validator&chain=${chainId}&validator_address=${validator.operator_address || ''}`;
+  
   validator_stats.forEach(stat => {
     if (stat.field == 'operator_address') {
       const validatorOperatorAddressContent = document.getElementById('validator-details-operator-address');

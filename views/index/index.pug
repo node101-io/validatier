@@ -69,7 +69,7 @@ block content
         include ../icons/chevron_left.pug
     .header-main-wrapper
       .header-network-switch-wrapper
-        .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}` current_chain_first_available_time=`${selectedChain.first_available_block_time}`)
+        .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_id=`${selectedChain.chain_id}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}` current_chain_first_available_time=`${selectedChain.first_available_block_time}`)
           .network-switch-header-chain-content-wrapper(class='center')
             .network-switch-network-image-wrapper
               img(class='current-network-img' src=`${selectedChain.image ? selectedChain.image : ''}`)
@@ -368,12 +368,12 @@ block content
                     .validator-operator-address-copy-button
                       img(src='/res/images/clipboard.svg')
           .validators-details-actions-wrapper
-            a(href=`${validator.website}` target='_blank').each-validator-details-action-content
+            a(href=`${validator.website || ''}` target='_blank').each-validator-details-action-content#validator-details-website
               img(src='/res/images/web.svg')
               span Website
-            a(href=`https://www.mintscan.io/cosmos/validators/${validator.operator_address || ''}` target='_blank').each-validator-details-action-content 
+            a(href=`https://www.mintscan.io/cosmos/validators/${validator.operator_address || ''}` target='_blank').each-validator-details-action-content#validator-details-explorer
               span Explorer
-            a(href=`https://wallet.keplr.app/chains/${selectedChain.name}?modal=staking&chain=${selectedChain.chain_id}&validator_address=${validator.operator_address || ''}` target='_blank' class='each-validator-details-action-stake center').each-validator-details-action-content
+            a(href=`https://wallet.keplr.app/chains/${selectedChain.name == 'cosmoshub' ? 'cosmos-hub' : selectedChain.name}?modal=staking&chain=${selectedChain.chain_id}&validator_address=${validator.operator_address || ''}` target='_blank' class='each-validator-details-action-stake center').each-validator-details-action-content#validator-details-stake
               span Stake
         .validator-details-stats-wrapper
           -

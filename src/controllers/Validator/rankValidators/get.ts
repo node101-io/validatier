@@ -24,7 +24,7 @@ export default (req: Request, res: Response): any => {
   Validator.rankValidators(
     { sort_by: sortBy, order: sortOrder, bottom_timestamp: parseInt(bottomTimestamp), top_timestamp: parseInt(topTimestamp), chain_identifier: chainIdentifier, with_photos: withPhotos },
     (err, results) => {
-      if (err) return res.json({ success: false, err: 'bad_request' })
+      if (err) return res.json({ success: false, err: 'bad_request' });
       return res.json({
         success: true,
         data: {

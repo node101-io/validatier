@@ -263,10 +263,7 @@ function renderValidators() {
 
   document.addEventListener('click', (event) => {
     let target = event.target;
-    while (target != document.body && !target.classList.contains('leaderboard-dropdown-option')) {
-      console.log(target, target.classList)
-      target = target.parentNode
-    };
+    while (target != document.body && !target.classList.contains('leaderboard-dropdown-option')) target = target.parentNode;
     if (!target.classList.contains('leaderboard-dropdown-option') || target.classList.contains('dropdown-option-selected') || target.classList.contains('leaderboard-dropdown-title')) return;
 
     target.parentNode.querySelectorAll('.leaderboard-dropdown-option').forEach(each => {

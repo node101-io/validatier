@@ -112,16 +112,16 @@ function handleNetworkSwitch () {
     document.getElementById('network-switch-header').setAttribute('current_chain_usd_exhange_rate', usdExchangeRate);
     document.getElementById('network-switch-header').setAttribute('current_chain_first_available_time', firstAvailableTime);
 
-    if (cacheResponse) return generateValidatorRankingContent(cacheResponse, 'ratio', 'desc');
+    if (cacheResponse) return generateValidatorRankingContent(cacheResponse, 'percentage_sold', 'asc');
 
     displaySkeleton();
 
     serverRequest(
-      BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=ratio&order=desc&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&chain_identifier=${chainIdentifier}&with_photos`,
+      BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=percentage_sold&order=asc&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&chain_identifier=${chainIdentifier}&with_photos`,
       'GET',
       {},
       (response) => {
-        generateValidatorRankingContent(response, 'ratio', 'desc');
+        generateValidatorRankingContent(response, 'percentage_sold', 'asc');
         rankingResponsesCache[bottomTimestamp + '.' + topTimestamp + '.' + chainIdentifier] = response;
       }
     )

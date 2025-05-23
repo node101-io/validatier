@@ -149,7 +149,7 @@ input {
   100% { transform: rotate(360deg); }
 }
 
-.skeleton-text {
+.skeleton-text, .skeleton-text div {
   color: transparent !important;
   background-color: var(--skeleton-background-color);
   border-radius: var(--skeleton-text-border-radius) !important;
