@@ -4,11 +4,11 @@ export function getDateRange(allTimeBottomTimestamp: number): {
     bottom: number,
     top: number
   },
-  last_30_days: {
+  last_90_days: {
     bottom: number,
     top: number
   },
-  last_90_days: {
+  last_180_days: {
     bottom: number,
     top: number
   },
@@ -31,12 +31,12 @@ export function getDateRange(allTimeBottomTimestamp: number): {
       bottom: allTimeBottomTimestamp - (dayMiliseconds * 7),
       top: currentDateTimestamp
     },
-    last_30_days: {
-      bottom: currentDateTimestamp - (dayMiliseconds * 30),
-      top: currentDateTimestamp
-    },
     last_90_days: {
       bottom: currentDateTimestamp - (dayMiliseconds * 90),
+      top: currentDateTimestamp
+    },
+    last_180_days: {
+      bottom: currentDateTimestamp - (dayMiliseconds * 180),
       top: currentDateTimestamp
     },
     this_year: {

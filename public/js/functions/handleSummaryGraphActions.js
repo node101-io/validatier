@@ -99,7 +99,7 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
       data[eachDataField] += currentSumMapping[eachDataField];
       currentSumMapping[eachDataField] = data[eachDataField];
 
-      const { nativeValue, usdValue } = getValueWithDecimals(currentSumMapping[eachDataField], symbol, usd_exchange_rate, decimals);
+      const { nativeValue, usdValue } = getValueWithDecimals(currentSumMapping[eachDataField], eachDataField != 'percentage_sold' ? symbol : '%', usd_exchange_rate, decimals);
       const metric = document.getElementById(`summary-metric-${eachDataField}`);
       
       metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
@@ -134,7 +134,7 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
       currency: currency,
       decimals: decimals,
       usd_exchange_rate: usd_exchange_rate,
-      symbol: symbol,
+      symbol: dataFields[0] != 'percentage_sold' ? symbol : '%',
       graphDataMapping,
       minValue,
       maxValue,

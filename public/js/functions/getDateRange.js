@@ -15,16 +15,12 @@ function getDateRange(currentDate) {
       bottom: formatDate(new Date(allTimeBottomTimestamp)),
       top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
     },
-    last_30_days: {
-      bottom: formatDate(new Date(currentYear, currentMonth, currentDay - 30)),
-      top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
-    },
     last_90_days: {
       bottom: formatDate(new Date(currentYear, currentMonth, currentDay - 90)),
       top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
     },
-    last_365_days: {
-      bottom: formatDate(new Date(currentYear, currentMonth, currentDay - 365)),
+    last_180_days: {
+      bottom: formatDate(new Date(currentYear, currentMonth, currentDay - 180)),
       top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
     },
     this_year: {

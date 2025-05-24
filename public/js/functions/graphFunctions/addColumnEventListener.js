@@ -33,7 +33,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
 
     if (!validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn || !validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn)
       dataFields.forEach(eachDataField => {
-        const { nativeValue, usdValue } = getValueWithDecimals(columnWrapper.getAttribute(eachDataField), currency, exchange_rate, decimals);
+        const { nativeValue, usdValue } = getValueWithDecimals(columnWrapper.getAttribute(eachDataField), eachDataField != 'percentage_sold' ? currency : '%', exchange_rate, decimals);
         const key = operatorAddress == 'summary' ? 'summary' : 'validator';
         const metric = document.getElementById(`${key}-metric-${eachDataField}`);
 

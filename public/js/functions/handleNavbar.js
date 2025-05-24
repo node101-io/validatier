@@ -1,29 +1,6 @@
 
-function resizeAllGraphs() {
-  const graphWrappersArray = document.querySelectorAll('.validator-graph-wrapper');
-  setTimeout(() => {
-
-    for (let i = 0; i < graphWrappersArray.length; i++) {
-      const eachGraphWrapper = graphWrappersArray[i];
-      const operatorAddress = eachGraphWrapper.getAttribute('operator_address');
-      const columnWrapper = eachGraphWrapper.querySelector('.each-graph-column-wrapper');
-      if (!columnWrapper) return;
-      
-      const graphWidth = eachGraphWrapper.getBoundingClientRect().width;
-      document.documentElement.style.setProperty(
-        `--graph-column-width-px-${operatorAddress.replace('\\@', '@')}`,
-        `calc((${graphWidth - 10}px - var(--vertical-axis-labels-width)) / var(--number-of-columns-${operatorAddress}))`
-      );
-      document.documentElement.style.setProperty(
-        `--graph-column-width-${operatorAddress.replace('\\@', '@')}`, 
-        `calc((${graphWidth - 10} - var(--vertical-axis-labels-width-int)) / var(--number-of-columns-${operatorAddress}))`
-      );
-    }
-    isResizing = false;
-  }, 10);
-}
-
 function resizeNavbar (navbarWrapper) {
+
   if (window.innerWidth < 900) {
     document.documentElement.style.setProperty("--navbar-width", "36px");
     document.getElementById('all-main-wrapper').style.marginLeft = '76px';
@@ -45,6 +22,24 @@ function handleNavbar () {
   }
 
   navbarViewToggle.addEventListener('click', (event) => {
+    setTimeout(() => {
+      const graphWrappersArray = document.querySelectorAll('.validator-graph-wrapper');
+
+      for (let i = 0; i < graphWrappersArray.length; i++) {
+        const eachGraphWrapper = graphWrappersArray[i];
+        const operatorAddress = eachGraphWrapper.getAttribute('operator_address');
+        const graphWidth = eachGraphWrapper.parentNode.offsetWidth;
+        console.log(graphWidth)
+        document.documentElement.style.setProperty(
+          `--graph-column-width-px-${operatorAddress.replace('\\@', '@')}`,
+          `calc((${graphWidth - 10}px - var(--vertical-axis-labels-width)) / var(--number-of-columns-${operatorAddress}))`
+        );
+        document.documentElement.style.setProperty(
+          `--graph-column-width-${operatorAddress.replace('\\@', '@')}`, 
+          `calc((${graphWidth - 10} - var(--vertical-axis-labels-width-int)) / var(--number-of-columns-${operatorAddress}))`
+        );
+      }
+    }, 0.25 * 1000);
     if (navbarWrapper.classList.contains('navbar-close')) {
       document.documentElement.style.setProperty("--navbar-width", "237px");
       navbarWrapper.classList.remove('navbar-close');

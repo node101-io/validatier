@@ -24,9 +24,9 @@ function getValueWithDecimals(value, currency, exhange_rate, decimals) {
   const exchangeRate = exhange_rate || 0;
   const normalized = value / (10 ** decimals);
   return {
-    nativeValue: `${shortNumberFormat(normalized)} ${currency}`,
-    usdValue: `$${shortNumberFormat(normalized * exchangeRate)}`
-  }  ;
+    nativeValue: currency != '%' ? `${shortNumberFormat(normalized)} ${currency}` : `${Math.round(value)}%`,
+    usdValue: currency != '%' ? `$${shortNumberFormat(normalized * exchangeRate)}` : null
+  };
 }
 
 function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
@@ -187,8 +187,12 @@ function renderValidators() {
     const sort_by = (target.id != 'apply') ? target.id : 'ratio';
 
     sortOrderMapping[sort_by] == 'desc'
-      ? target.id ? sortOrderMapping[sort_by] = 'asc' : 'desc'
-      : sortOrderMapping[sort_by] = 'desc'
+      ? target.id 
+        ? sortOrderMapping[sort_by] = 'asc' 
+        : 'desc'
+      : sort_by != 'percentage_sold'
+        ? sortOrderMapping[sort_by] = 'desc'
+        : sortOrderMapping[sort_by] = 'asc';
 
     const GET_VALIDATORS_API_ENDPOINT = 'validator/rank_validators';
     const BASE_URL = !window.location.href.includes('#') ? window.location.href : window.location.href.split('#')[0];

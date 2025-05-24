@@ -95,7 +95,7 @@ function plotValidatorGraph(params) {
 
         deltaMapping[eachDataField] = deltaValue;
 
-        const { nativeValue, usdValue } = getValueWithDecimals(deltaValue, symbol, usd_exchange_rate, decimals);
+        const { nativeValue, usdValue } = getValueWithDecimals(deltaValue, eachDataField != 'percentage_sold' ? symbol : '%', usd_exchange_rate, decimals);
         const key = operatorAddress == 'summary' ? 'summary' : 'validator';
         const metric = document.getElementById(`${key}-metric-${eachDataField}`);
 

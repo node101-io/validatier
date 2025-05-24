@@ -67,8 +67,8 @@ const indexGetController = (req: Request, res: Response): void => {
         self_staked_and_delegation: {
           graph_title: 'Self-Staked & Delegation',
           graph_description: 'Total Self-Staked & Total Delegation',
-          dataFields: ['percentage_sold', 'self_stake_sum'],
-          colors: ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)']
+          dataFields: ['total_stake_sum', 'self_stake_sum'],
+          colors: ['rgba(255, 149, 0, 1)', 'rgba(88, 86, 214, 1)']
         },
         percentage_sold_graph: {
           graph_title: 'Percentage Sold Graph',
@@ -140,7 +140,7 @@ const indexGetController = (req: Request, res: Response): void => {
 
       return res.render('index/index', {
         page: 'index/index',
-        title: 'CosmosHub Validator Timeline',
+        title: 'Validatier',
         includes: {
           external: {
             css: ['page', 'general', 'header', 'summary', 'validators', 'graph', 'export', 'table'],

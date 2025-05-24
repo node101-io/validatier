@@ -85,7 +85,7 @@ function generateGraph (validator) {
     else if (stat.helperType == 'percentage_change')
       document.getElementById(`${stat.id}-helper`).innerHTML = '→' + Math.round((validator[stat.field] / summaryData[`initial_${stat.field}`]) * 100) + '%';
     else if (stat.helperType == 'rank')
-      document.getElementById(`${stat.id}-helper`).innerHTML = [...validators].sort((a, b) => a[stat.field] - b[stat.field]).findIndex(v => v.operator_address === validator.operator_address) + '/' + validators.length;
+      document.getElementById(`${stat.id}-helper`).innerHTML = ([...validators].sort((a, b) => b[stat.field] - a[stat.field]).findIndex(v => v.operator_address === validator.operator_address) + 1) + '/' + validators.length;
   });
   
 
@@ -154,7 +154,7 @@ function generateGraph (validator) {
     graphDataMapping[data.index] = data;
 
     dataFields.forEach(eachDataField => {
-      const { nativeValue, usdValue } = getValueWithDecimals(data[eachDataField], symbol, usd_exchange_rate, decimals);
+      const { nativeValue, usdValue } = getValueWithDecimals(data[eachDataField], eachDataField != 'percentage_sold' ? symbol : '%', usd_exchange_rate, decimals);
       const metric = document.getElementById(`validator-metric-${eachDataField}`);
       
       metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
@@ -230,6 +230,24 @@ function handlePlotButtonClick () {
   window.onresize = () => {
     if (isResizing) return;
     isResizing = true;
-    resizeAllGraphs();
+    const graphWrappersArray = document.querySelectorAll('.validator-graph-wrapper');
+    setTimeout(() => {
+  
+      for (let i = 0; i < graphWrappersArray.length; i++) {
+        const eachGraphWrapper = graphWrappersArray[i];
+        const operatorAddress = eachGraphWrapper.getAttribute('operator_address');
+        const graphWidth = eachGraphWrapper.parentNode.offsetWidth;
+  
+        document.documentElement.style.setProperty(
+          `--graph-column-width-px-${operatorAddress.replace('\\@', '@')}`,
+          `calc((${graphWidth - 10}px - var(--vertical-axis-labels-width)) / var(--number-of-columns-${operatorAddress}))`
+        );
+        document.documentElement.style.setProperty(
+          `--graph-column-width-${operatorAddress.replace('\\@', '@')}`, 
+          `calc((${graphWidth - 10} - var(--vertical-axis-labels-width-int)) / var(--number-of-columns-${operatorAddress}))`
+        );
+      }
+      isResizing = false;
+    }, 10);
   }
 }
