@@ -8,8 +8,8 @@ import { GraphDataInterface } from '../Validator/Validator.js';
 
 export const byArrayMapping: Record<string, string[]> = {
   all_time: ['d', 'm', 'w', 'y'],
-  last_30_days: ['d', 'w'],
   last_90_days: ['d', 'w', 'm'],
+  last_180_days: ['d', 'w', 'm'],
   this_year: ['d', 'm', 'w'],
   last_calendar_year: ['d', 'm', 'w'],
   custom: ['d', 'm', 'w', 'y']

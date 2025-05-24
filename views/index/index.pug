@@ -183,7 +183,7 @@ block content
           ]
         .network-summary-network-stats-main-wrapper
           each stat in stats
-            .each-network-summary-stat
+            .each-network-summary-stat(class=`network-summary-stat-${stat.field}` id=`network-summary-stat-${stat.field}`)
               .each-network-summary-stat-column
                 .each-network-summary-stat-header-title= stat.title
                 if stat.id_native

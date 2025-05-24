@@ -1,4 +1,37 @@
 
+function changeSummaryGraph (target) {
+  document.querySelectorAll('.each-sub-menu-link-content').forEach(eachLink => {
+    eachLink.classList.remove('navbar-link-selected');
+  });
+
+  target.classList.add('navbar-link-selected');
+  history.replaceState(null, '', `/${target.id}`);
+  if (target.id != 'validators') {
+    document.getElementById('validators-leaderboards-all-wrapper').classList.add('section-hidden');
+    document.getElementById('network-summary-main-wrapper').classList.remove('section-hidden');
+    document.getElementById('validator-details-main-wrapper').classList.add('section-hidden');
+  } else {
+    document.getElementById('validators-leaderboards-all-wrapper').classList.remove('section-hidden');
+    document.getElementById('network-summary-main-wrapper').classList.add('section-hidden');
+    document.getElementById('validator-details-main-wrapper').classList.add('section-hidden');
+  }
+
+  const dataFields = JSON.parse(target.getAttribute('dataFields'));
+  const colors = JSON.parse(target.getAttribute('colors'));
+  const graphTitle = target.getAttribute('graph_title');
+  const graphDescription = target.getAttribute('graph_description');
+
+  if (!dataFields || !colors || !graphTitle || !graphDescription) return;
+
+  document.getElementById('summary-graph-title').innerHTML = graphTitle;
+  document.getElementById('summary-graph-description').innerHTML = graphDescription;
+  
+  const selectedOption = document.querySelector('.each-network-summary-select-option-selected');
+  const by = selectedOption.getAttribute('option');
+  
+  createNetworkSummaryGraph(dataFields, colors, by);
+}
+
 function resizeNavbar (navbarWrapper) {
 
   if (window.innerWidth < 900) {
@@ -55,39 +88,11 @@ function handleNavbar () {
 
   document.addEventListener('click', (event) => {
     let target = event.target;
-    while (target != document.body && !target.classList.contains('each-sub-menu-link-content')) target = target.parentNode;
-    if (!target.classList.contains('each-sub-menu-link-content')) return;
+    while (target != document.body && !target.classList.contains('each-sub-menu-link-content') && target.id != 'network-summary-stat-percentage_sold') target = target.parentNode;
+    if (!target.classList.contains('each-sub-menu-link-content') && target.id != 'network-summary-stat-percentage_sold') return;
 
-    document.querySelectorAll('.each-sub-menu-link-content').forEach(eachLink => {
-      eachLink.classList.remove('navbar-link-selected');
-    });
-
-    target.classList.add('navbar-link-selected');
-    history.replaceState(null, '', `/${target.id}`);
-    if (target.id != 'validators') {
-      document.getElementById('validators-leaderboards-all-wrapper').classList.add('section-hidden');
-      document.getElementById('network-summary-main-wrapper').classList.remove('section-hidden');
-      document.getElementById('validator-details-main-wrapper').classList.add('section-hidden');
-    } else {
-      document.getElementById('validators-leaderboards-all-wrapper').classList.remove('section-hidden');
-      document.getElementById('network-summary-main-wrapper').classList.add('section-hidden');
-      document.getElementById('validator-details-main-wrapper').classList.add('section-hidden');
-    }
-
-    const dataFields = JSON.parse(target.getAttribute('dataFields'));
-    const colors = JSON.parse(target.getAttribute('colors'));
-    const graphTitle = target.getAttribute('graph_title');
-    const graphDescription = target.getAttribute('graph_description');
-
-    if (!dataFields || !colors || !graphTitle || !graphDescription) return;
-
-    document.getElementById('summary-graph-title').innerHTML = graphTitle;
-    document.getElementById('summary-graph-description').innerHTML = graphDescription;
-    
-    const selectedOption = document.querySelector('.each-network-summary-select-option-selected');
-    const by = selectedOption.getAttribute('option');
-    
-    createNetworkSummaryGraph(dataFields, colors, by);
+    if (target.id == 'network-summary-stat-percentage_sold') return changeSummaryGraph(document.getElementById('percentage_sold_graph'));
+    return changeSummaryGraph(target);
   })
 
   window.addEventListener('resize', (event) => resizeNavbar(navbarWrapper));

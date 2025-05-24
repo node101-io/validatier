@@ -561,6 +561,9 @@
   font-size: var(--summary-percentage-text-native-font-size) !important;
 }
 
+.network-summary-stat-percentage_sold {
+  cursor: var(--pointer-hand-dark);
+}
 
 @media only screen and (max-width: 1200px) {
   :root {

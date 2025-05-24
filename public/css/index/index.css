@@ -24,6 +24,9 @@
   --header-main-wrapper-horizontal-padding: 40px;
   --header-main-wrapper-gap: 16px;
   --header-main-wrapper-padding-bottom: 20px;
+  --header-main-wrapper-border-bottom-size: 10px;
+  --header-main-wrapper-border-bottom-gradient-from: rgba(246, 247, 255, 0) 1%;
+  --header-main-wrapper-border-bottom-gradient-to: rgba(246, 247, 255, 1);
   --header-main-background: rgba(232, 232, 255, 1);
   
   --body-main-wrapper-background: rgba(245, 245, 255, 1);
@@ -80,10 +83,24 @@
   width: calc(var(--header-main-wrapper-width) - (var(--header-main-wrapper-horizontal-padding) * 2));
   padding: var(--header-main-wrapper-vertical-padding) var(--header-main-wrapper-horizontal-padding);
   padding-bottom: var(--header-main-wrapper-padding-bottom);
+  border-bottom: var(--header-main-wrapper-border-bottom-size) solid var(--header-main-wrapper-border-bottom-color);
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  position: relative;
   gap: var(--header-main-wrapper-gap);
+}
+
+.header-main-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: calc(var(--header-main-wrapper-width) - (var(--header-main-wrapper-horizontal-padding) * 2));
+  height: var(--header-main-wrapper-border-bottom-size);
+  background: var(--header-main-wrapper-border-bottom-gradient-from);
+  background: linear-gradient(0deg,var(--header-main-wrapper-border-bottom-gradient-from) 1%, var(--header-main-wrapper-border-bottom-gradient-to) 100%);
+  z-index: 100;
 }
 
 .inner-main-wrapper {

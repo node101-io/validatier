@@ -117,10 +117,10 @@ const indexGetController = (req: Request, res: Response): void => {
           cache[eachCacheSummaryGraphData.type] = eachCacheSummaryGraphData;
         });
 
-        summaryData = cache.summary_data.data;
-        validators = cache.validators.data;
-        summaryGraphData = cache.summary_graph.data;
-        smallGraphData = cache.small_graph.data;
+        summaryData = cache.summary_data.data || {};
+        validators = cache.validators.data || {};
+        summaryGraphData = cache.summary_graph.data || {};
+        smallGraphData = cache.small_graph.data || {};
       } else {
         summaryData = rankValidatorsResult.value.results.summary_data;
         validators = rankValidatorsResult.value.results.validators;
