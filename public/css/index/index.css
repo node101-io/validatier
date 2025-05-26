@@ -3,6 +3,7 @@
   --all-main-wrapper-width: 100%;
   --all-main-wrapper-background-color: rgb(247, 248, 255);
   --all-main-wrapper-border-radius: 50px 0 0 50px;
+  --all-main-wrapper-margin-left: 0px;
 
   --all-main-wrapper-webkit-scrollbar-width: 8px;
   
@@ -62,6 +63,7 @@
   background-color: var(--all-main-wrapper-background-color);
   position: relative;
   border-radius: var(--all-main-wrapper-border-radius);
+  margin-left: var(--all-main-wrapper-margin-left);
 }
 
 .inner-main-wrapper::-webkit-scrollbar {
@@ -96,11 +98,11 @@
   position: absolute;
   top: 100%;
   left: 0;
-  width: calc(var(--header-main-wrapper-width) - (var(--header-main-wrapper-horizontal-padding) * 2));
+  width: 100%;
   height: var(--header-main-wrapper-border-bottom-size);
   background: var(--header-main-wrapper-border-bottom-gradient-from);
   background: linear-gradient(0deg,var(--header-main-wrapper-border-bottom-gradient-from) 1%, var(--header-main-wrapper-border-bottom-gradient-to) 100%);
-  z-index: 100;
+  z-index: 10;
 }
 
 .inner-main-wrapper {
@@ -131,6 +133,12 @@
 
 .section-hidden {
   display: none !important;
+}
+
+@media only screen and (max-width: 900px) {
+  :root {
+    --all-main-wrapper-margin-left: 74px;
+  }
 }
 
 @media only screen and (max-width: 750px) {

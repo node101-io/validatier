@@ -10,7 +10,9 @@ function changeSummaryGraph (target) {
     document.getElementById('validators-leaderboards-all-wrapper').classList.add('section-hidden');
     document.getElementById('network-summary-main-wrapper').classList.remove('section-hidden');
     document.getElementById('validator-details-main-wrapper').classList.add('section-hidden');
+    document.getElementById('all-validators-main-wrapper').classList.remove('section-hidden');
   } else {
+    document.getElementById('all-validators-main-wrapper').classList.remove('section-hidden');
     document.getElementById('validators-leaderboards-all-wrapper').classList.remove('section-hidden');
     document.getElementById('network-summary-main-wrapper').classList.add('section-hidden');
     document.getElementById('validator-details-main-wrapper').classList.add('section-hidden');
@@ -49,7 +51,6 @@ function handleNavbar () {
   const navbarWrapper = document.getElementById('navbar-wrapper');
 
   if (window.innerWidth < 900 && navbarWrapper.classList.contains('navbar-close')) {
-    document.getElementById('all-main-wrapper').style.marginLeft = '76px';
     document.documentElement.style.setProperty("--navbar-width", "30px");
     navbarViewToggle.querySelector('span').classList.add('navbar-arrow-close');
   }
@@ -62,7 +63,7 @@ function handleNavbar () {
         const eachGraphWrapper = graphWrappersArray[i];
         const operatorAddress = eachGraphWrapper.getAttribute('operator_address');
         const graphWidth = eachGraphWrapper.parentNode.offsetWidth;
-        console.log(graphWidth)
+        
         document.documentElement.style.setProperty(
           `--graph-column-width-px-${operatorAddress.replace('\\@', '@')}`,
           `calc((${graphWidth - 10}px - var(--vertical-axis-labels-width)) / var(--number-of-columns-${operatorAddress}))`
@@ -77,11 +78,16 @@ function handleNavbar () {
       document.documentElement.style.setProperty("--navbar-width", "237px");
       navbarWrapper.classList.remove('navbar-close');
       navbarViewToggle.querySelector('span').classList.remove('navbar-arrow-close');
+      
+      if (window.innerWidth <= 900)
+        navbarViewToggle.style.left = 'calc(237px - 32px - (2 * var(--navbar-horizontal-padding)) + var(--navbar-view-toggle-left))';
+
       setCookie('isNavbarClose', '');
     } else {
       document.documentElement.style.setProperty("--navbar-width", "30px");
       navbarWrapper.classList.add('navbar-close');
       navbarViewToggle.querySelector('span').classList.add('navbar-arrow-close');
+      navbarViewToggle.style.left = 'var(--navbar-view-toggle-left)';
       setCookie('isNavbarClose', true);
     }
   })
@@ -94,6 +100,11 @@ function handleNavbar () {
     if (target.id == 'network-summary-stat-percentage_sold') return changeSummaryGraph(document.getElementById('percentage_sold_graph'));
     return changeSummaryGraph(target);
   })
+
+  window.addEventListener('popstate', function(event) {
+    const target = document.getElementById(window.location.pathname.replace('/', '') || 'dashboard');
+    return changeSummaryGraph(target);
+  });
 
   window.addEventListener('resize', (event) => resizeNavbar(navbarWrapper));
 }

@@ -11,6 +11,8 @@
   --validators-details-actions-wrapper-gap: 20px;
   --validators-details-actions-wrapper-font-size: 12px;
   
+  --each-validator-details-action-content-gap: 4px;
+  --each-validator-details-action-content-span-margin-bottom: 2px;
   --each-validator-details-action-stake-border-radius: 12px;
   --each-validator-details-action-stake-padding-vertical: 6px;
   --each-validator-details-action-stake-padding-horizontal: 10px;
@@ -49,11 +51,11 @@
   --inactivity-display-background-area-background-color: red;
   --inactivity-display-background-area-opacity: 0.1;
 
-  --validators-leaderboards-main-wrapper-height: 352px;
+  --validators-leaderboards-main-wrapper-height: fit-content;
   --validators-leaderboards-main-wrapper-gap: 20px;
   --validators-leaderboards-main-wrapper-margin-top: 10px;
   
-  --each-leaderboard-main-wrapper-width: 33%;
+  --each-leaderboard-main-wrapper-width: 330px;
   --each-leaderboard-main-wrapper-height: 100%;
   --each-leaderboard-main-wrapper-padding: 11px;
   --each-leaderboard-main-wrapper-background-color: var(--body-main-wrapper-background);
@@ -94,6 +96,8 @@
 .validators-leaderboards-main-wrapper {
   height: var(--validators-leaderboards-main-wrapper-height);
   display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
   gap: var(--validators-leaderboards-main-wrapper-gap);
   margin-top: var(--validators-leaderboards-main-wrapper-margin-top);
 }
@@ -215,6 +219,11 @@
 .each-validator-details-action-content {
   display: flex;
   align-items: center;
+  gap: var(--each-validator-details-action-content-gap);
+}
+
+.each-validator-details-action-content span {
+  margin-bottom: var(--each-validator-details-action-content-span-margin-bottom);
 }
 
 .each-validator-details-action-stake {
@@ -242,6 +251,7 @@
 .each-leaderboard-table-wrapper {
   display: flex;
   flex-direction: column;
+  height: fit-content;
   gap: var(--each-leaderboard-table-wrapper-gap);
 }
 

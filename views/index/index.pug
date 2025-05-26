@@ -63,6 +63,7 @@ block content
       { id: 'percentage_sold', unit: selectedChain.symbol || '$ATOM', color: 'rgba(255, 149, 0, 1)', title: 'Percentage Sold' },
       { id: 'self_stake_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgba(88, 86, 214, 1)', title: 'Self-Staked Amount' }
     ]
+    const timestampDifference = new Date(selectedDateTop).getTime() - new Date(selectedDateBottom).getTime()
   .all-main-wrapper#all-main-wrapper
     .navbar-view-toggle#navbar-view-toggle(class='center')
       span(class=`${isNavbarClose ? 'navbar-arrow-close' : ''}`)
@@ -95,7 +96,7 @@ block content
                 .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
                   .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
       .date-picker
-        .selected-range 
+        .selected-range#selected-range
           span.date-interval-description 
             include ../icons/calendar.pug
             span.date-interval-description-text#header-selected-range-description= specificRangeName ? specificRangeName : 'All time'
@@ -164,7 +165,7 @@ block content
               unit: '%'
             },
             {
-              field: 'self_stake_amount',
+              field: 'self_stake_sum',
               title: 'Self Stake Amount',
               id_native: 'summary-self-stake-amount-native',
               id_usd: 'summary-self-stake-amount-usd',
@@ -192,15 +193,16 @@ block content
                   .each-network-summary-stat-footer-value(id=`${stat.id_usd}` class=`${stat.id_usd}`)= getValue(summaryData[stat.field], 'usd').usdValue
                 else 
                   .each-network-summary-stat-content(class='stat-value-font-large')
-                .each-network-summary-stat-footer-change 
+                .each-network-summary-stat-footer-change
                   span(class='percentage-change-value-content')
                     img(src='/res/images/pretty_arrow.svg')
                     span= Math.round((summaryData[stat.field] / summaryData[`initial_${stat.field}`]) * 100) + '%'
               .each-network-summary-stat-column
                 if `${stat.id_native}` == 'summary-percentage-sold-native'
                   .percentage-sold-main-circle
-                    span= getValue(100 - summaryData[stat.field], stat.unit).nativeValue
-                    .percentage-sold-inner-circle(class=`${stat.id_native}` style=`width: calc(var(--percentage-sold-main-circle-diameter) * ${Math.sqrt(parseInt(summaryData[stat.field]) / 100)});`) #{getValue(summaryData[stat.field], stat.unit).nativeValue}
+                    span(class=`${(100 - summaryData[stat.field]) < 20 ? 'section-hidden' : ''}`)= getValue(100 - summaryData[stat.field], stat.unit).nativeValue
+                    .percentage-sold-inner-circle(class=`${stat.id_native}` style=`width: calc(var(--percentage-sold-main-circle-diameter) * ${Math.min(1, Math.sqrt(parseInt(summaryData[stat.field]) / 100))});`) 
+                      span #{getValue(summaryData[stat.field], stat.unit).nativeValue}
                 else
                   .network-summary-small-graph-container(id=`small-graph-${stat.small_graph_id}`)
           script.
@@ -268,7 +270,7 @@ block content
             id: 'self_stake',
             title: 'Self Stake Amount',
             fields: ['self_stake', 'self_stake_ratio'],
-            summary_field: 'self_stake_amount',
+            summary_field: 'self_stake_sum',
             id_native: 'summary-self-stake-amount-native',
             id_usd: 'summary-self-stake-amount-usd',
             unit: selectedChain.symbol || '$ATOM',
@@ -427,7 +429,7 @@ block content
               if queryValidator
                 script.
                   generateGraph(!{JSON.stringify(validator)})
-      .all-validators-main-wrapper
+      .all-validators-main-wrapper#all-validators-main-wrapper(class=`${queryValidator ? 'section-hidden' : ''}`)
         .each-section-title-content Validators
         .table-main-wrapper
           .table-filters
@@ -449,15 +451,16 @@ block content
                       { id: 'monthly', label: 'Monthly', range: 30 * 86400 * 1000 },
                       { id: 'yearly', label: 'Yearly', range: 365 * 86400 * 1000 },
                     ]
-                  - const timestampDifference = new Date(selectedDateTop).getTime() - new Date(selectedDateBottom).getTime()
                   each export_choice in export_choices
                     .each-export-choice(id=export_choice.id range=export_choice.range class=`${export_choice.is_selected ? 'export-choice-selected' : ''} ${(timestampDifference / export_choice.range > 50 && export_choice.range != 0) ? 'section-hidden' : ''}`)
                       .general-choice-radio-button(class='center')
                         .general-choice-radio-button-inner-circle(style=`${export_choice.is_selected ? 'display: unset' : ''}`)
                       span= export_choice.label
                   .export-action-buttons-wrapper
-                    button.export-choice-action-button(class='center export-choice-download-button')#export-choice-download-button Download
-                    button.export-choice-action-button(class='center')#export-choice-cancel-button Cancel
+                    button.export-choice-action-button(class='center export-choice-download-button')#export-choice-download-button
+                      span Download
+                    button.export-choice-action-button(class='center')#export-choice-cancel-button
+                      span Cancel
           .validators-main-wrapper#validators-main-wrapper(sort_by='percentage_sold' order='asc')
             -
               const headers_array = [
@@ -518,7 +521,7 @@ block content
           .footer-email-wrapper
             .footer-email-content hello@node101.io
             img(src='/res/images/top_right_arrow.svg').footer-email-icon
-        .each-footer-column
+        .each-footer-column(class='each-footer-right-column')
           .footer-mini-menu
             a(href="") Dashboard
             a(href="") Validators

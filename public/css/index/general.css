@@ -14,7 +14,7 @@
   --color-pale-dark: rgb(22, 22, 22);
   --color-night-blue: rgba(37, 0, 84, 1);
   --color-pale-white: rgb(248, 248, 248);
-  --color-dropdown-background: rgba(242, 242, 242, 1);
+  --color-dropdown-background: rgba(245, 245, 254, 1);
   --color-triangle-unselected: rgba(183, 166, 198, 1);
   --color-middle-date-background: rgba(232, 232, 255, 1);
   --color-selected-date-background: rgba(202, 200, 255, 1);
@@ -68,6 +68,8 @@
   --switch-button-background-color: rgba(183, 166, 198, 1);
   --switch-button-border-radius: 50%;
   --switch-button-transition-duration: 0.3s;
+
+  --navbar-view-toggle-left: -10.5px;
 }
 
 html {
@@ -231,6 +233,7 @@ input {
 
 .navbar-menu-wrapper {
   align-self: flex-start;
+  transition: all var(--navbar-toggle-transition-duration) ease-in-out 0s;
 }
 
 .each-sub-menu-wrapper {
@@ -294,7 +297,7 @@ input {
   border-radius: 100%;
   position: absolute;
   top: 114px;
-  left: -10px;
+  left: var(--navbar-view-toggle-left);
   cursor: var(--pointer-hand-dark);
   z-index: 1100;
 }
@@ -317,6 +320,8 @@ input {
 }
 
 .navbar-icon {
+  width: 15px;
+  height: 15px;
   transition: all var(--navbar-toggle-transition-duration) ease 0s;
 }
 
@@ -324,8 +329,20 @@ input {
   width: 30px;
 }
 
+.banner-logo-wrapper {
+  transition: all var(--navbar-toggle-transition-duration) ease-in-out 0s;
+}
+
 .banner-title-content {
   transition: all var(--navbar-toggle-transition-duration) ease-in-out 0s;
+}
+
+.navbar-close .banner-logo-wrapper {
+  margin-left: -2px;
+}
+
+.navbar-close .navbar-menu-wrapper {
+  margin-left: -6px;
 }
 
 .navbar-close .banner-title-content {
@@ -339,7 +356,9 @@ input {
 }
 
 .navbar-close .navbar-icon {
-  scale: 1.5;
+  width: 20px;
+  height: 20px;
+  margin-left: -2px;
 }
 
 .navbar-close .navbar-footer-wrapper {
@@ -358,7 +377,7 @@ input {
 
 .footer-main-wrapper {
   width: calc(100% - 80px);
-  height: 200px;
+  height: 300px;
   padding: 40px;
   display: flex;
   justify-content: space-between;
@@ -411,6 +430,10 @@ input {
   justify-content: space-between;
 }
 
+.each-footer-right-column {
+  align-items: flex-end;
+}
+
 .footer-contact-input-wrapper {
   display: flex;
   align-items: center;
@@ -436,6 +459,7 @@ input {
 @media only screen and (max-width: 900px) {
   :root {
     --navbar-position: absolute;
-    --all-main-wrapper-width: var(--all-main-wrapper-width) + var(--navbar-width)
+    --all-main-wrapper-width: 100% + var(--navbar-width) - 76px;
+    --inner-main-wrapper-horizontal-padding: 20px;
   }
 }

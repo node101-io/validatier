@@ -137,8 +137,8 @@ interface ValidatorModel extends Model<ValidatorInterface> {
           total_sold: number;
           initial_percentage_sold: number;
           percentage_sold: number;
-          initial_self_stake_amount: number;
-          self_stake_amount: number;
+          initial_self_stake_sum: number;
+          self_stake_sum: number;
           initial_average_self_stake_ratio: number;
           average_self_stake_ratio: number;
         } | null,
@@ -573,8 +573,8 @@ validatorSchema.statics.rankValidators = function (
           initial_total_sold: initialTotalWithdrawnValidator - initialTotalSelfStaked,
           initial_percentage_sold: (((initialTotalWithdrawnValidator - initialTotalSelfStaked) / initialTotalWithdrawnValidator) * 100),
           percentage_sold: (((totalWithdrawnValidator - totalSelfStaked) / totalWithdrawnValidator) * 100),
-          initial_self_stake_amount: initialTotalSelfStaked,
-          self_stake_amount: totalSelfStaked,
+          initial_self_stake_sum: initialTotalSelfStaked,
+          self_stake_sum: totalSelfStaked,
           initial_average_self_stake_ratio: initialTotalSelfStakeRatio / valueArray.length,
           average_self_stake_ratio: totalSelfStakeRatio / valueArray.length
         },

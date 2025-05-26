@@ -150,14 +150,14 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
       let target = event.target;
       while (!target.classList.contains('selected-range')) target = target.parentNode;
 
-      if (target.nextSibling.style.opacity == 0) {
-        target.nextSibling.style.transform = 'perspective(1000px) rotateX(0deg)';
-        target.nextSibling.style.opacity = 1;
+      if (!target.classList.contains('selected-range-open')) {
+        target.classList.add('selected-range-open');
+        target.nextSibling.classList.add('picker-main-wrapper-open');
   
         target.children[target.children.length - 1].style.transform = 'rotateX(180deg) translateY(5px)';
       } else {
-        target.nextSibling.style.transform = 'perspective(1000px) rotateX(-90deg)';
-        target.nextSibling.style.opacity = 0;
+        target.classList.remove('selected-range-open')
+        target.nextSibling.classList.remove('picker-main-wrapper-open');
   
         target.children[target.children.length - 1].style.transform = 'rotateX(0deg)';
       }
@@ -214,9 +214,8 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
       let target = event.target;
       while (target != document.documentElement && !target.classList.contains('date-picker')) target = target.parentNode;
       if (target.classList.contains('date-picker')) return;
-      document.getElementById('picker-main-wrapper').style.transform = 'perspective(1000px) rotateX(-90deg)';
-      document.getElementById('picker-main-wrapper').style.opacity = 0;
-      document.getElementById('picker-main-wrapper').previousSibling.children[document.getElementById('picker-main-wrapper').previousSibling.children.length - 1].style.transform = 'rotateX(0deg)';
+      document.getElementById('selected-range').classList.remove('selected-range-open');
+      document.getElementById('picker-main-wrapper').classList.remove('picker-main-wrapper-open');
     }
   }
 

@@ -35,6 +35,7 @@
   --export-choice-download-button-border-radius: 2px;
   --export-choice-download-button-font-weight: 500;
   --export-choice-download-button-background-color: rgba(202, 200, 255, 1);
+  --export-choice-download-button-span-margin-bottom: 2px;
 }
 
 .export-main-wrapper {
@@ -110,6 +111,10 @@
   border-radius: var(--export-choice-download-button-border-radius);
   font-weight: var(--export-choice-download-button-font-weight);
   background-color: transparent;
+}
+
+.export-choice-action-button span {
+  margin-bottom: var(--export-choice-download-button-span-margin-bottom);
 }
 
 .export-choice-download-button {

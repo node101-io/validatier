@@ -1,8 +1,8 @@
 function addColumnToExistingGraph (params) {
-  const { type, operatorAddress, data, timestamp, index, currency, decimals, usd_exchange_rate, symbol, graphDataMapping, minValue, maxValue, graphWidth, dataFields, colors, columnsPer } = params;
+  const { type, operatorAddress, data, timestamp, index, currency, decimals, usd_exchange_rate, symbol, graphDataMapping, minValue, maxValue, graphWidth, dataFields, colors, columnsPer, summaryData } = params;
   
   const graphWrapper = document.getElementById(`validator-graph-wrapper-${operatorAddress}`);
-  if (type != 'small') addVerticalAxisLabels(graphWrapper, operatorAddress, minValue, maxValue, 10, currency, decimals, usd_exchange_rate, symbol);
+  if (type != 'small') addVerticalAxisLabels(graphWrapper, operatorAddress, minValue, maxValue, 6, currency, decimals, usd_exchange_rate, symbol);
   
   const columnWrapper = document.createElement('div');
   columnWrapper.setAttribute('timestamp', timestamp);
@@ -29,8 +29,10 @@ function addColumnToExistingGraph (params) {
   }
 
   dataFields.forEach((eachDataField, i) => {
-    columnWrapper.setAttribute(eachDataField, data[eachDataField]);
-    const bottom = `calc(((${data[eachDataField]} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+   
+    const value = data[eachDataField];
+    columnWrapper.setAttribute(eachDataField, value);
+    const bottom = `calc(((${value} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
     const { point, line } = generatePointAndLine(colors[i], bottom);
 
     point.classList.add(`${eachDataField}-graph-data-element-${operatorAddress}`);

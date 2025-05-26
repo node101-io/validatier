@@ -28,7 +28,7 @@ export function getDateRange(allTimeBottomTimestamp: number): {
 
   return {
     all_time: {
-      bottom: allTimeBottomTimestamp - (dayMiliseconds * 7),
+      bottom: allTimeBottomTimestamp,
       top: currentDateTimestamp
     },
     last_90_days: {

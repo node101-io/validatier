@@ -226,15 +226,7 @@ function renderValidators() {
 
       return generateValidatorRankingContent(cacheResponse, sort_by, sortOrderMapping)
     };
-    serverRequest(
-      BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=${sort_by}&order=${sortOrderMapping[sort_by]}&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&chain_identifier=${chainIdentifier}&with_photos`,
-      'GET',
-      {},
-      (response) => {
-        generateValidatorRankingContent(response, sort_by, sortOrderMapping);
-        rankingResponsesCache[bottomTimestamp + '.' + topTimestamp + '.' + chainIdentifier] = response;
-      }
-    )
+    window.location.reload();
   })
 
 

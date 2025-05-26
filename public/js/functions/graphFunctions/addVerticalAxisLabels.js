@@ -1,5 +1,12 @@
 
 function addVerticalAxisLabels(graphWrapper, operatorAddress, min, max, details, currency, decimals, usd_exchange_rate, symbol) {
+  
+  const maxBase = 10 ** (Math.ceil(max).toString().length - 1);
+  const minBase = 10 ** (Math.ceil(min).toString().length - 1);
+
+  max = Math.ceil(max / maxBase) * maxBase;
+  min = Math.ceil(min / minBase) * minBase;
+
   const step = (max - min) / (details - 1);
   let iter = min;
 
@@ -12,6 +19,7 @@ function addVerticalAxisLabels(graphWrapper, operatorAddress, min, max, details,
     
     const eachVerticalLabel = document.createElement('div');
     eachVerticalLabel.classList.add('each-vertical-label');
+    
     const { nativeValue, usdValue } = getValueWithDecimals(iter, symbol, usd_exchange_rate, decimals);
 
     eachVerticalLabel.setAttribute('native', nativeValue);

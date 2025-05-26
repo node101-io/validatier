@@ -105,6 +105,11 @@ function generateGraph (validator) {
   const dataFields = ['total_stake_sum', 'total_withdraw_sum', 'total_sold'];
   const colors = ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)'];
     
+  dataFields.forEach(eachDataField => {
+    const metric = document.getElementById(`validator-metric-${eachDataField}`);
+    metric.classList.remove('section-hidden');
+  })
+
   const graphContainer = document.getElementById('validator-graph-container');
   graphContainer.innerHTML = '';
 
@@ -216,8 +221,11 @@ function handlePlotButtonClick () {
 
     const validator = JSON.parse(target.getAttribute('validator'));
     document.getElementById('network-summary-main-wrapper').classList.add('section-hidden');
+    document.getElementById('all-validators-main-wrapper').classList.add('section-hidden');
+    document.getElementById('validators-leaderboards-all-wrapper').classList.add('section-hidden');
     document.getElementById('validator-details-main-wrapper').classList.remove('section-hidden');
-    document.getElementById('all-main-wrapper').scrollTo({
+
+    document.getElementById('inner-main-wrapper').scrollTo({
       top: 0,
       left: 0,
       behavior: 'smooth'

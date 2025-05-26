@@ -48,7 +48,8 @@ html(lang='tr')
       :root {
         --navbar-width: #{navbarWidth};
       }
-  body(summaryGraphData=summaryGraphData smallGraphData=smallGraphData, summaryData=summaryData, validators=validators)
+  - const showPercentageChange = ((new Date(selectedDateTop).getTime() + new Date(selectedChain.first_available_block_time).getTime()) / 2) <= (new Date(selectedDateBottom)) ? true : false;
+  body(summaryGraphData=summaryGraphData smallGraphData=smallGraphData, summaryData=summaryData, validators=validators, showPercentageChange=showPercentageChange)
     .all-wrapper
       .navbar-wrapper#navbar-wrapper(class=`${isNavbarClose ? 'navbar-close' : ''}`)        
         .header-banner-wrapper

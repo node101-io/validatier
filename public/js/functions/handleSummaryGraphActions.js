@@ -61,7 +61,9 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
   const summaryData = JSON.parse(document.body.getAttribute('summaryData'));
   const targetCacheSummaryGraphData = JSON.parse(document.body.getAttribute('summaryGraphData'))[by.toLowerCase()];
 
-  document.querySelectorAll('.each-network-summary-network-graph-content-each-dropdown').forEach(each => each.classList.add('section-hidden'));
+  document.querySelectorAll('.each-network-summary-network-graph-content-each-dropdown').forEach(each => {
+    if (!each.classList.contains('leaderboard-dropdown-option')) each.classList.add('section-hidden')
+  });
   document.querySelectorAll('.each-metric-content-wrapper').forEach(each => each.classList.add('section-hidden'));
   dataFields.forEach(eachDataField => {
     document.getElementById(`summary-graph-dropdown-option-${eachDataField}`).classList.remove('section-hidden');
@@ -91,11 +93,17 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
   columnsPer = columnsPer % 2 == 0 ? columnsPer : columnsPer + 1;
   
   const currentSumMapping = {};
+  const showPercentageChange = document.body.getAttribute('showPercentageChange');
+
   for (let i = 0; i < targetCacheSummaryGraphData.length; i++) {
     const data = targetCacheSummaryGraphData[i];
     
     dataFields.forEach(eachDataField => {
-      if (!currentSumMapping[eachDataField]) currentSumMapping[eachDataField] = 0;
+      if (!currentSumMapping[eachDataField]) 
+        !['total_stake_sum', 'self_stake_sum'].includes(eachDataField)
+          ? currentSumMapping[eachDataField] = 0
+          : currentSumMapping[eachDataField] = summaryData[`initial_${eachDataField}`];
+          
       data[eachDataField] += currentSumMapping[eachDataField];
       currentSumMapping[eachDataField] = data[eachDataField];
 
@@ -105,6 +113,8 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
       metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
       metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
       
+      if(!showPercentageChange && eachDataField == 'total_withdraw_sum') return;
+
       metric.querySelector('.percentage-change-value-content').innerHTML = '';
       const arrow = document.createElement('img');
       arrow.src = '/res/images/pretty_arrow.svg';
@@ -142,7 +152,8 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
       dataFields: dataFields,
       colors: colors,
       by: by.toLowerCase(),
-      columnsPer
+      columnsPer,
+      summaryData
     });
   
     if (

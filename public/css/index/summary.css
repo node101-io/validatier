@@ -540,7 +540,7 @@
 
 .percentage-sold-main-circle span {
   position: absolute;
-  left: 0;
+  left: 4px;
   z-index: var(--percentage-sold-main-circle-span-z-index);
 }
 
@@ -555,6 +555,12 @@
   background-color: var(--percentage-sold-inner-circle-background-color);
   color: var(--percentage-sold-inner-circle-color);
   border-radius: 100%;
+}
+
+.percentage-sold-inner-circle span {
+  position: absolute;
+  right: 4px;
+  text-align: end;
 }
 
 .summary-percentage-text-native {
