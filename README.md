@@ -1,2 +1,3 @@
-# node101 | CosmosHub Validator Timeline
-node101's journey as a CosmosHub validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.
+# Validatier
+
+Validatier aims to rank the validators on Interchain ecosystem based on the usage of the rewarded tokens and visualize them.
