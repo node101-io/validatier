@@ -134,18 +134,18 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
       return td;
     };
 
+    const percentageSoldTd = createPercentageSoldTd(validator.percentage_sold);
     const delegationTd = createCurrencyTd(validator.total_stake);
     const totalRewardsTd = createCurrencyTd(validator.total_withdraw);
     const totalSoldAmountTd = createCurrencyTd(validator.sold);
     const selfStakeTd = createCurrencyTd(validator.self_stake);
-    const percentageSoldTd = createPercentageSoldTd(validator.percentage_sold);
 
     tr.appendChild(tdInfo);
+    tr.appendChild(percentageSoldTd);
     tr.appendChild(delegationTd);
     tr.appendChild(totalRewardsTd);
     tr.appendChild(selfStakeTd);
     tr.appendChild(totalSoldAmountTd);
-    tr.appendChild(percentageSoldTd);
 
     tr.setAttribute('validator', JSON.stringify(validator));
     tr.classList.add('operator-address');
@@ -157,11 +157,11 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
 function renderValidators() {
 
   const sortOrderMapping = {
+    percentage_sold: '',
     total_stake: '',
     total_withdraw: '',
     sold: '',
     self_stake: '',
-    percentage_sold: '',
   };
 
   document.getElementById('cancel').addEventListener('click', (event) => {

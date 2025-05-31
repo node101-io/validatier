@@ -2,13 +2,13 @@ import { Request, Response } from 'express';
 import Validator from '../../../models/Validator/Validator.js';
 import Chain, { ChainInterface } from '../../../models/Chain/Chain.js';
 import { NUMBER_OF_COLUMNS } from '../../Validator/getGraphData/get.js';
-import Cache, { CacheInterface, byArrayMapping } from '../../../models/Cache/Cache.js';
+import Cache, { CacheInterface } from '../../../models/Cache/Cache.js';
 
 const indexGetController = (req: Request, res: Response): void => {
 
   console.time('response_time');
 
-  const activeNetworkIdentifier = req.cookies.network ? req.cookies.network : 'cosmoshub';
+  const activeNetworkIdentifier = 'cosmoshub';
   const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime()): (new Date(1)).getTime();
   const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()): Date.now();
 
@@ -45,7 +45,6 @@ const indexGetController = (req: Request, res: Response): void => {
         chain_identifier: activeNetworkIdentifier,
         bottom_timestamp: bottomTimestamp,
         top_timestamp: topTimestamp,
-        by_array: byArrayMapping[specificRange]
       }, (err, summaryGraphData) => {
         resolve({ err: err, summaryGraphData: summaryGraphData });
       })
@@ -64,12 +63,12 @@ const indexGetController = (req: Request, res: Response): void => {
     .then((results: Record<string, any>[]) => {
 
       const rawGraphMapping = {
-        self_staked_and_delegation: {
-          graph_title: 'Self-Staked & Delegation',
-          graph_description: 'Total Self-Staked & Total Delegation',
-          dataFields: ['total_stake_sum', 'self_stake_sum'],
-          colors: ['rgba(255, 149, 0, 1)', 'rgba(88, 86, 214, 1)']
-        },
+        // self_staked_and_delegation: {
+        //   graph_title: 'Self-Staked & Delegation',
+        //   graph_description: 'Total Self-Staked & Total Delegation',
+        //   dataFields: ['total_stake_sum', 'self_stake_sum'],
+        //   colors: ['rgba(255, 149, 0, 1)', 'rgba(88, 86, 214, 1)']
+        // },
         percentage_sold_graph: {
           graph_title: 'Percentage Sold Graph',
           graph_description: 'Total Sold / Total Reward Withdrawn',

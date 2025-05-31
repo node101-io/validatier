@@ -75,23 +75,23 @@ html(lang='tr')
               type: 'insights',
               title: 'Insights',
               links: [
-                { 
-                  id: ['reward_flow'], 
-                  icon: 'reward_flow.svg', 
-                  title: 'Reward Flow',
-                  graph: reward_flow_graph_data
-                },
-                { 
-                  id: ['self_staked_and_delegation'], 
-                  icon: 'self_staked_delegation.svg', 
-                  title: 'Self-Staked & Delegation',
-                  graph: {
-                    title: 'Self-Staked & Delegation',
-                    description: 'Total Self-Staked & Total Delegation',
-                    dataFields: ['total_stake_sum', 'self_stake_sum'],
-                    colors: ['rgba(255, 149, 0, 1)', 'rgba(88, 86, 214, 1)']
-                  }
-                },
+                //- { 
+                //-   id: ['reward_flow'], 
+                //-   icon: 'reward_flow.svg', 
+                //-   title: 'Reward Flow',
+                //-   graph: reward_flow_graph_data
+                //- },
+                //- { 
+                //-   id: ['self_staked_and_delegation'], 
+                //-   icon: 'self_staked_delegation.svg', 
+                //-   title: 'Self-Staked & Delegation',
+                //-   graph: {
+                //-     title: 'Self-Staked & Delegation',
+                //-     description: 'Total Self-Staked & Total Delegation',
+                //-     dataFields: ['total_stake_sum', 'self_stake_sum'],
+                //-     colors: ['rgba(255, 149, 0, 1)', 'rgba(88, 86, 214, 1)']
+                //-   }
+                //- },
                 { 
                   id: ['percentage_sold_graph'], 
                   icon: 'percentage_sold_graph.svg', 
@@ -109,7 +109,7 @@ html(lang='tr')
         .navbar-menu-wrapper
           each subMenu in menu
             .each-sub-menu-wrapper
-              .each-sub-menu-title= subMenu.title 
+              //- .each-sub-menu-title= subMenu.title 
               .each-sub-menu-links-wrapper 
                 each link in subMenu.links 
                   .each-sub-menu-link-content(graph_title=`${link.graph.title}`, graph_description=`${link.graph.description}` type=`${subMenu.type}` dataFields=JSON.stringify(link.graph.dataFields) colors=JSON.stringify(link.graph.colors) id=`${link.id[0]}` class=`${link.id.includes(url) ? 'navbar-link-selected' : ''}`)

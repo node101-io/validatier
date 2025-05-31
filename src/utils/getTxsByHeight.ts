@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import decodeTxs, { DecodedMessage, Event } from './decodeTxs.js';
-import { getSlashEventsFromFinalizeBlockEvents } from './getSlashEventsFromFinalizeBlockEvents.js';
+import { convertEventsToMessageFormat } from './convertEventsToMessageFormat.js';
 
 export const RETRY_TOTAL = 10;
 
@@ -59,7 +59,7 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
 
       const time = data.result?.block?.header?.time;
       
-      const slashMessages: DecodedMessage[] | null = getSlashEventsFromFinalizeBlockEvents(finalizeBlockEvents, bech32_prefix, time);
+      const messages: DecodedMessage[] | null = convertEventsToMessageFormat(finalizeBlockEvents, bech32_prefix, time, denom);
       const txs: string[] = [];
       const events: Event[][] = [];
 
@@ -71,7 +71,7 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
       }
         
       const decodedTxs = decodeTxs(txs, events, denom, data.result?.block?.header?.time)
-      if (slashMessages && slashMessages.length > 0) decodedTxs.push({ messages: slashMessages });
+      if (messages && messages.length > 0) decodedTxs.push({ messages: messages });
       
       return callback(null, {
         time: time,

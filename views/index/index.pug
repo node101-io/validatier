@@ -36,12 +36,12 @@ block content
     const symbol = selectedChain.symbol ? selectedChain.symbol : 'ATOM'
 
     const summary_graph_menus = [
-      {
-        type: 'select',
-        id: 'network-summary-interval',
-        options: ['D', 'W', 'M', 'Y'],
-        selected: 'M'
-      },
+      //- {
+      //-   type: 'select',
+      //-   id: 'network-summary-interval',
+      //-   options: ['D', 'W', 'M', 'Y'],
+      //-   selected: 'M'
+      //- },
       {
         type: 'dropdown',
         id: 'network-summary-filter',
@@ -77,24 +77,24 @@ block content
             .network-switch-network-info-wrapper
               .network-switch-network-title-wrapper
                 .network-switch-network-title(class='current-network-name')= selectedChain.pretty_name || 'Cosmos Hub'
-                .network-switch-drowdown-toggle(class='network-switch-dropdown-arrow center')
-                  include ../icons/chevron.pug
+                //- .network-switch-drowdown-toggle(class='network-switch-dropdown-arrow center')
+                //-   include ../icons/chevron.pug
               .network-switch-network-currency= selectedChain.symbol || 'ATOM'
           .network-switch-main-numerical-values-wrapper
             //- .each-network-switch-main-numerical-value(class='percentage-change-value-content') → %17.3 
             .each-network-switch-main-numerical-value $#{selectedChain.usd_exchange_rate}
-        .network-switch-dropdown
-          .network-switch-search-bar
-            .network-switch-search-icon(class='center')
-              include ../icons/search.svg
-            input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search')
-          .network-switch-chains-wrapper
-            each chain in chains 
-              .each-chain-wrapper(id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}` symbol=`${chain.symbol}` decimals=`${chain.decimals}` usd_exchange_rate=`${chain.usd_exchange_rate}` first_available_time=`${chain.first_available_block_time}`)
-                .network-switch-network-image-wrapper(class='center network-unselected-image-wrapper')
-                  img(src=`${chain.image}`)
-                .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
-                  .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
+        //- .network-switch-dropdown
+        //-   .network-switch-search-bar
+        //-     .network-switch-search-icon(class='center')
+        //-       include ../icons/search.svg
+        //-     input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search')
+        //-   .network-switch-chains-wrapper
+        //-     each chain in chains 
+        //-       .each-chain-wrapper(id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}` symbol=`${chain.symbol}` decimals=`${chain.decimals}` usd_exchange_rate=`${chain.usd_exchange_rate}` first_available_time=`${chain.first_available_block_time}`)
+        //-         .network-switch-network-image-wrapper(class='center network-unselected-image-wrapper')
+        //-           img(src=`${chain.image}`)
+        //-         .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
+        //-           .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
       .date-picker
         .selected-range#selected-range
           span.date-interval-description 
@@ -114,10 +114,9 @@ block content
                   const options = [
                     { id: 'last_90_days', label: 'Last 3 months', selected: true },
                     { id: 'last_180_days', label: 'Last 6 months' },
-                    { id: 'this_year', label: 'This year (Jan - Today)' },
-                    { id: 'last_calendar_year', label: 'Last Calendar Year' },
+                    { id: 'last_365_days', label: 'Last year' },
                     { id: 'all_time', label: 'All time' },
-                    { id: 'custom', label: 'Custom' }
+                    { id: 'custom', label: 'Custom' },
                   ]
                 ul
                   each option in options
@@ -139,15 +138,15 @@ block content
                     span.day= day
                 .month-wrapper
                   .days#month-wrapper
-          .buttons
-            .calendar-start-day-wrapper(id='calendar-format-toggle' value=`${startDay ? startDay : 'monday'}`)
-              .calendar-start-day-toggle-title Week Starts on
-              - const weekStartsOnArray = ['monday', 'sunday']
-              each day in weekStartsOnArray
-                .each-start-day-choice(value=`${day}`)
-                  .general-choice-radio-button(class='center')
-                    .general-choice-radio-button-inner-circle(style=`${`${startDay}` == `${day}` ? 'display: flex' : ''}` value=`${day}`)
-                  span= day
+          .buttons            
+            //- .calendar-start-day-wrapper(id='calendar-format-toggle' value=`${startDay ? startDay : 'monday'}`)
+            //-   .calendar-start-day-toggle-title Week Starts on
+            //-   - const weekStartsOnArray = ['monday', 'sunday']
+            //-   each day in weekStartsOnArray
+            //-     .each-start-day-choice(value=`${day}`)
+            //-       .general-choice-radio-button(class='center')
+            //-         .general-choice-radio-button-inner-circle(style=`${`${startDay}` == `${day}` ? 'display: flex' : ''}` value=`${day}`)
+            //-       span= day
             button.cancel#cancel Cancel
             button.apply#apply Apply
     .inner-main-wrapper#inner-main-wrapper
@@ -245,7 +244,7 @@ block content
               .network-summary-network-graph-content-description#summary-graph-description= graph_description
             .network-summary-network-graph-content#network-summary-graph-container(currentDataFields=dataFields currentColors=colors)
               script.
-                createNetworkSummaryGraph(!{dataFields}, !{colors}, 'm');
+                createNetworkSummaryGraph(!{dataFields}, !{colors});
       -
         const sortByArray = [
           { order: 'asc', sort_by: 'percentage_sold' },
@@ -464,11 +463,11 @@ block content
           .validators-main-wrapper#validators-main-wrapper(sort_by='percentage_sold' order='asc')
             -
               const headers_array = [
+                {name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Withdraw - Self Stake) / Withdraw'},
                 {name: 'Delegation', id: 'total_stake'},
                 {name: 'Total Rewards', id: 'total_withdraw'},
                 {name: 'Total Sold Amount', id: 'sold', popup_text: 'Total withdraw - Self stake'},
                 {name: 'Self Stake', id: 'self_stake'},
-                {name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Withdraw - Self Stake) / Withdraw'},
               ]
             .validator-table-header
               .each-table-header-wrapper(class='each-table-header-validator-info-header')

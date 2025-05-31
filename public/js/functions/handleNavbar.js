@@ -27,11 +27,8 @@ function changeSummaryGraph (target) {
 
   document.getElementById('summary-graph-title').innerHTML = graphTitle;
   document.getElementById('summary-graph-description').innerHTML = graphDescription;
-  
-  const selectedOption = document.querySelector('.each-network-summary-select-option-selected');
-  const by = selectedOption.getAttribute('option');
-  
-  createNetworkSummaryGraph(dataFields, colors, by);
+    
+  createNetworkSummaryGraph(dataFields, colors);
 }
 
 function resizeNavbar (navbarWrapper) {

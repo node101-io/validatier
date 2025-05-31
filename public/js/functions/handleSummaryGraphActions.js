@@ -17,7 +17,7 @@ function handleSummaryGraphActions() {
     const networkSummaryGraphContainer = document.getElementById('network-summary-graph-container');
     const currentDataFields = JSON.parse(networkSummaryGraphContainer.getAttribute('currentDataFields'));
     const currentColors = JSON.parse(networkSummaryGraphContainer.getAttribute('currentColors'));
-    createNetworkSummaryGraph(currentDataFields, currentColors, target.getAttribute('option'))
+    createNetworkSummaryGraph(currentDataFields, currentColors)
   })
 
   document.body.addEventListener('click', (event) => {
@@ -57,9 +57,9 @@ function handleSummaryGraphActions() {
   })
 }
 
-function createNetworkSummaryGraph (dataFields, colors, by) {
+function createNetworkSummaryGraph (dataFields, colors) {
   const summaryData = JSON.parse(document.body.getAttribute('summaryData'));
-  const targetCacheSummaryGraphData = JSON.parse(document.body.getAttribute('summaryGraphData'))[by.toLowerCase()];
+  const targetCacheSummaryGraphData = JSON.parse(document.body.getAttribute('summaryGraphData'));
 
   document.querySelectorAll('.each-network-summary-network-graph-content-each-dropdown').forEach(each => {
     if (!each.classList.contains('leaderboard-dropdown-option')) each.classList.add('section-hidden')
@@ -128,12 +128,38 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
 
     const timestamp = (new Date(data._id.year, (data._id.month || 1) - 1, (data._id.day || 1))).getTime();
   
-    let { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping, dataFields);
-  
-    document.documentElement.style.setProperty(`--min-value-summary`, minValue);
-    document.documentElement.style.setProperty(`--max-value-summary`, maxValue);
-  
-    if (maxValue == minValue) minValue = maxValue / 2;
+    const subplotGroupMapping = dataFields[0] != 'percentage_sold' ? {
+      number_of_groups: 2,
+      total_stake_sum: 1,
+      total_withdraw_sum: 0,
+      total_sold: 0,
+    } : {
+      number_of_groups: 1,
+      percentage_sold: 0
+    };
+
+    const subplotGroupArray = dataFields[0] != 'percentage_sold' 
+      ? [
+        ['total_withdraw_sum', 'total_sold'],
+        ['total_stake_sum']
+      ]
+      : [
+        ['percentage_sold']
+      ];
+
+    
+    const minValueArray = [];
+    const maxValueArray = [];
+    for (let i = 0; i < subplotGroupArray.length; i++) {
+      const eachSubplotGroup = subplotGroupArray[i];
+      let { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping, eachSubplotGroup);
+
+      minValueArray.push(minValue);
+      maxValueArray.push(maxValue);
+      
+      document.documentElement.style.setProperty(`--min-value-summary-${i}`, minValue);
+      document.documentElement.style.setProperty(`--max-value-summary-${i}`, maxValue);
+    }
 
     const insertedColumn = addColumnToExistingGraph({
       type: 'summary',
@@ -145,25 +171,23 @@ function createNetworkSummaryGraph (dataFields, colors, by) {
       decimals: decimals,
       usd_exchange_rate: usd_exchange_rate,
       symbol: dataFields[0] != 'percentage_sold' ? symbol : '%',
-      graphDataMapping,
-      minValue,
-      maxValue,
+      minValue: minValueArray,
+      maxValue: maxValueArray,
       graphWidth,
       dataFields: dataFields,
       colors: colors,
-      by: by.toLowerCase(),
       columnsPer,
-      summaryData
+      subplotGroupMapping,
     });
   
     if (
       insertedColumn.previousSibling &&
       insertedColumn.previousSibling.classList.contains('each-graph-column-wrapper')
     ) {
-      adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, 'summary', dataFields);
+      adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, 'summary', dataFields, subplotGroupMapping);
     } else {
       document.documentElement.style.setProperty('--column-height-summary', insertedColumn.offsetHeight);
-      addColumnEventListener('summary', dataFields, colors, symbol, usd_exchange_rate, decimals, summaryData);
+      addColumnEventListener('summary', dataFields, colors, symbol, usd_exchange_rate, decimals, summaryData, subplotGroupMapping);
     }
   }
 
@@ -219,13 +243,11 @@ function createSmallGraphs () {
         decimals: null,
         usd_exchange_rate: null,
         symbol: null,
-        graphDataMapping,
-        minValue,
-        maxValue,
+        minValue: null,
+        maxValue: null,
         graphWidth,
         dataFields: dataFields,
-        colors: colors,
-        by: null
+        colors: colors
       });
     
       if (

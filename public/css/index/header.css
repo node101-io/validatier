@@ -193,7 +193,7 @@
 
 .selected-range-open {
   background-color: var(--color-dropdown-background);
-  border-bottom: none;
+  border-bottom: 0px solid var(--general-main-wrapper-border-color);
   border-radius: var(--selected-range-border-radius) var(--selected-range-border-radius) 0 0;
 }
 
@@ -208,7 +208,7 @@
   background-color: var(--color-dropdown-background);
   z-index: var(--picker-main-wrapper-z-index);
   border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
-  border-top: none;
+  border-top: 0px solid var(--general-main-wrapper-border-color);
   transform-origin: top;
   position: absolute;
 }
@@ -489,7 +489,8 @@
   z-index: var(--network-switch-dropdown-z-index);
   width: calc(var(--network-switch-dropdown-width) - 1px);
   max-height: var(--network-switch-dropdown-height);
-  border: var(--network-switch-dropdown-border-size) solid var(--network-switch-dropdown-border-color);
+  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
+  border-top: 0px solid var(--network-switch-dropdown-border-color);
   border-radius: var(--network-switch-dropdown-border-radius);
   transition: all var(--network-switch-dropdown-transition-duration) ease 0s;
   opacity: var(--network-switch-dropdown-opacity);
@@ -498,7 +499,6 @@
   gap: var(--network-switch-dropdown-gap);
   padding: 0 var(--network-switch-dropdown-horizontal-padding);
   padding-top: var(--network-switch-dropdown-top-padding);
-  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -539,7 +539,7 @@
   opacity: var(--network-switch-dropdown-opacity-open);
   transform: perspective(var(--network-switch-dropdown-transform-perspective)) rotateX(var(--network-switch-dropdown-transform-open-rotate-x));
   border-radius: 0 0 var(--network-switch-dropdown-border-radius) var(--network-switch-dropdown-border-radius);
-  border-top: none;
+  border-top: 0px solid var(--general-main-wrapper-border-color);
 }
 
 .network-switch-header {
@@ -557,8 +557,8 @@
 }
 
 .network-switch-header-open {
+  border-bottom: 0px solid var(--general-main-wrapper-border-color);
   border-radius: var(--network-switch-header-border-radius) var(--network-switch-header-border-radius) 0 0;
-  border-bottom: none;
   background-color: var(--body-main-wrapper-background);
 }
 

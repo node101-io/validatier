@@ -6,25 +6,12 @@ import Validator from '../Validator/Validator.js';
 import { getDateRange } from './functions/getRangeFromIntervalId.js';
 import { GraphDataInterface } from '../Validator/Validator.js';
 
-export const byArrayMapping: Record<string, string[]> = {
-  all_time: ['d', 'm', 'w', 'y'],
-  last_90_days: ['d', 'w', 'm'],
-  last_180_days: ['d', 'w', 'm'],
-  this_year: ['d', 'm', 'w'],
-  last_calendar_year: ['d', 'm', 'w'],
-  custom: ['d', 'm', 'w', 'y']
-};
-
 export interface CacheInterface {
   type: 'summary_graph' | 'validators' | 'small_graph' | 'summary_data' | 'export',
   chain_identifier: string;
-  interval: 'all_time' | 'last_30_days' | 'last_90_days' | 'this_year' | 'last_calendar_year';
-  data: {
-    d?: GraphDataInterface;
-    w?: GraphDataInterface;
-    m?: GraphDataInterface;
-    y?: GraphDataInterface;
-  } | {
+  interval: 'all_time' | 'last_30_days' | 'last_90_days' | 'last_365_days';
+  data: GraphDataInterface 
+  | {
     pubkey: string;
     operator_address: string;
     moniker: string;
@@ -144,7 +131,6 @@ cacheSchema.statics.saveCacheForChain = function (
                   chain_identifier: chain.name,
                   bottom_timestamp: bottomTimestamp,
                   top_timestamp: topTimestamp,
-                  by_array: byArrayMapping[eachDateRangeKey as keyof typeof byArrayMapping]
                 }, (err, resultsSummaryGraphData) => {
                     if (err) return next1(err);
 

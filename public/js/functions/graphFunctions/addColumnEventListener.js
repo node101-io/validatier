@@ -1,5 +1,5 @@
 
-function addColumnEventListener (operatorAddress, dataFields, colors, currency, exchange_rate, decimals, summaryData) {
+function addColumnEventListener (operatorAddress, dataFields, colors, currency, exchange_rate, decimals, summaryData, subplotGroupMapping) {
   const columnMouseHandler = (event) => {
     const visibleClassName = `visible-${operatorAddress}`;
     document.querySelectorAll(`.${visibleClassName}`).forEach(each => {
@@ -82,7 +82,10 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
           })
 
           dataFields.forEach(eachDataField => {
-            bottomMapping[eachDataField] = `calc(((${current.nextSibling.getAttribute(eachDataField)} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+            const groupId = subplotGroupMapping ? subplotGroupMapping[eachDataField] : 0;
+            const addOn = subplotGroupMapping ? `-${groupId}` : '';
+            const numberOfGroups = subplotGroupMapping ? subplotGroupMapping['number_of_groups'] : 1;
+            bottomMapping[eachDataField] = `calc(${(100 / numberOfGroups) * groupId}% + ((${current.nextSibling.getAttribute(eachDataField)} - var(--min-value-${operatorAddress}${addOn})) / (var(--max-value-${operatorAddress}${addOn}) - var(--min-value-${operatorAddress}${addOn}))) * ${100 / numberOfGroups}%)`;
           })
         } else {
           validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft = false;
@@ -102,11 +105,14 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
           })
 
           dataFields.forEach(eachDataField => {
-            bottomMapping[eachDataField] = `calc(((${current.getAttribute(eachDataField)} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+            const groupId = subplotGroupMapping ? subplotGroupMapping[eachDataField] : 0;
+            const addOn = subplotGroupMapping ? `-${groupId}` : '';
+            const numberOfGroups = subplotGroupMapping ? subplotGroupMapping['number_of_groups'] : 1;
+            bottomMapping[eachDataField] = `calc(${(100 / numberOfGroups) * groupId}% + ((${current.getAttribute(eachDataField)} - var(--min-value-${operatorAddress}${addOn})) / (var(--max-value-${operatorAddress}${addOn}) - var(--min-value-${operatorAddress}${addOn}))) * ${100 / numberOfGroups}%)`;
           })
         }
         
-        const angleHypotenuseMapping = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields);
+        const angleHypotenuseMapping = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields, subplotGroupMapping);
 
         const dataMapping = {};
         dataFields.forEach(eachDataField => {
@@ -140,11 +146,11 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
       }
     }
 
-    const angleHypotenuseMappingAnglesOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields);
+    const angleHypotenuseMappingAnglesOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields, subplotGroupMapping);
     
     if (target.getAttribute('timestamp') < validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp')) {
       validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft = true;
-      const angleHypotenuseMappingHypotenuseOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields);
+      const angleHypotenuseMappingHypotenuseOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields, subplotGroupMapping);
       
       const bottomMapping = {}
       dataFields.forEach(eachDataField => {
@@ -164,7 +170,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
     } else {
       validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft = false;
       
-      const angleHypotenuseMappingHypotenuseOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields);
+      const angleHypotenuseMappingHypotenuseOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields, subplotGroupMapping);
       
       const bottomMapping = {}
       dataFields.forEach(eachDataField => {

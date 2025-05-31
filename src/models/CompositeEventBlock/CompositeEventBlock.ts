@@ -14,11 +14,13 @@ export interface CompositeEventBlockInterface {
   self_stake: number;
   total_stake: number;
   total_withdraw: number;
+  balance_change: number;
   reward_prefix_sum: number;
   commission_prefix_sum: number;
   self_stake_prefix_sum: number;
   total_stake_prefix_sum: number;
   total_withdraw_prefix_sum: number;
+  balance_change_prefix_sum: number,
 }
 
 interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
@@ -35,6 +37,7 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
         commission?: number;
         total_stake?: number;
         total_withdraw?: number;
+        balance_change?: number;
       }> | null
     }, 
     callback: (
@@ -56,11 +59,13 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
         commission: number,
         total_stake: number,
         total_withdraw: number,
+        balance_change: number,
         initial_self_stake_prefix_sum: number,
         initial_reward_prefix_sum: number,
         initial_total_stake_prefix_sum: number,
         initial_total_withdraw_prefix_sum: number,
         initial_commission_prefix_sum: number,
+        initial_balance_change_prefix_sum: number,
       }> | null
     ) => any
   ) => any;
@@ -77,7 +82,7 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
         reward: number,
         commission: number,
         total_stake: number,
-        total_withdraw: number
+        total_withdraw: number,
       }> | null
     ) => any
   ) => any;
@@ -150,6 +155,11 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
     required: false,
     default: 0
   },
+  balance_change: {
+    type: Number,
+    required: false,
+    default: 0
+  },
   self_stake_prefix_sum: {
     type: Number, 
     required: true
@@ -169,7 +179,11 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
   total_withdraw_prefix_sum: {
     type: Number,
     required: true
-  }
+  },
+  balance_change_prefix_sum: {
+    type: Number,
+    required: true
+  },
 });
 
 compositeEventBlockSchema.index({ operator_address: 1, timestamp: 1 });
@@ -380,6 +394,12 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
       const operatorAddress = operatorAddresses[i];
       const newCompositeEventBlock = compositeEventBlocksArray[i];
       
+      if (
+        !mostRecendRecordsMapping[operatorAddress] && 
+        newCompositeEventBlock.self_stake == 0 &&
+        newCompositeEventBlock.total_stake == 0
+      ) continue;
+
       const mostRecentCompositeEventBlock = mostRecendRecordsMapping[operatorAddress]
         ? mostRecendRecordsMapping[operatorAddress]
         : newCompositeEventBlock;
@@ -389,12 +409,14 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
       const commission = newCompositeEventBlock.commission || 0;
       const totalStake = newCompositeEventBlock.total_stake || 0;
       const totalWithdraw = newCompositeEventBlock.total_withdraw || 0;
+      const balanceChange = newCompositeEventBlock.balance_change || 0;
 
       const selfStakePrefixSum = mostRecentCompositeEventBlock.self_stake_prefix_sum ? (selfStake ? mostRecentCompositeEventBlock.self_stake_prefix_sum + selfStake : mostRecentCompositeEventBlock.self_stake_prefix_sum) : selfStake;
       const rewardPrefixSum = mostRecentCompositeEventBlock.reward_prefix_sum ? (reward ? mostRecentCompositeEventBlock.reward_prefix_sum + reward : mostRecentCompositeEventBlock.reward_prefix_sum) : reward;
       const commissionPrefixSum = mostRecentCompositeEventBlock.commission_prefix_sum ? (commission ? mostRecentCompositeEventBlock.commission_prefix_sum + commission : mostRecentCompositeEventBlock.commission_prefix_sum) : commission;
       const totalStakePrefixSum = mostRecentCompositeEventBlock.total_stake_prefix_sum ? (totalStake ? mostRecentCompositeEventBlock.total_stake_prefix_sum + totalStake : mostRecentCompositeEventBlock.total_stake_prefix_sum) : totalStake;
       const totalWithdrawPrefixSum = mostRecentCompositeEventBlock.total_withdraw_prefix_sum ? (totalWithdraw ? mostRecentCompositeEventBlock.total_withdraw_prefix_sum + totalWithdraw : mostRecentCompositeEventBlock.total_withdraw_prefix_sum) : totalWithdraw;
+      const balanceChangePrefixSum = mostRecentCompositeEventBlock.balance_change_prefix_sum ? (balanceChange ? mostRecentCompositeEventBlock.balance_change_prefix_sum + balanceChange : mostRecentCompositeEventBlock.balance_change_prefix_sum) : balanceChange;
 
       const saveObject = {
         chain_identifier: chain_identifier,
@@ -409,11 +431,13 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
         commission: commission || 0,
         total_stake: totalStake || 0,
         total_withdraw: totalWithdraw || 0,
+        balance_change: balanceChange || 0,
         reward_prefix_sum: rewardPrefixSum,
         self_stake_prefix_sum: selfStakePrefixSum,
         commission_prefix_sum: commissionPrefixSum,
         total_stake_prefix_sum: totalStakePrefixSum,
-        total_withdraw_prefix_sum: totalWithdrawPrefixSum
+        total_withdraw_prefix_sum: totalWithdrawPrefixSum,
+        balance_change_prefix_sum: balanceChangePrefixSum
       }
 
       compositeEventBlocksArrayToInsertMany.push(saveObject);
@@ -454,12 +478,14 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
               if (each.commission != 0) updateObj.commission = each.commission;
               if (each.total_stake != 0) updateObj.total_stake = each.total_stake;
               if (each.total_withdraw != 0) updateObj.total_withdraw = each.total_withdraw;
+              if (each.balance_change != 0) updateObj.balance_change = each.balance_change;
 
               if (each.reward_prefix_sum != 0) updateObj.reward_prefix_sum = each.reward_prefix_sum;
               if (each.self_stake_prefix_sum != 0) updateObj.self_stake_prefix_sum = each.self_stake_prefix_sum;
               if (each.commission_prefix_sum != 0) updateObj.commission_prefix_sum = each.commission_prefix_sum;
               if (each.total_stake_prefix_sum != 0) updateObj.total_stake_prefix_sum = each.total_stake_prefix_sum;
               if (each.total_withdraw_prefix_sum != 0) updateObj.total_withdraw_prefix_sum = each.total_withdraw_prefix_sum;
+              if (each.balance_change_prefix_sum != 0) updateObj.balance_change_prefix_sum = each.balance_change_prefix_sum;
 
               return {
                 updateOne: {

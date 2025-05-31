@@ -1,5 +1,5 @@
 function addColumnToExistingGraph (params) {
-  const { type, operatorAddress, data, timestamp, index, currency, decimals, usd_exchange_rate, symbol, graphDataMapping, minValue, maxValue, graphWidth, dataFields, colors, columnsPer, summaryData } = params;
+  const { type, operatorAddress, data, timestamp, index, currency, decimals, usd_exchange_rate, symbol, minValue, maxValue, graphWidth, dataFields, colors, columnsPer, subplotGroupMapping } = params;
   
   const graphWrapper = document.getElementById(`validator-graph-wrapper-${operatorAddress}`);
   if (type != 'small') addVerticalAxisLabels(graphWrapper, operatorAddress, minValue, maxValue, 6, currency, decimals, usd_exchange_rate, symbol);
@@ -32,7 +32,15 @@ function addColumnToExistingGraph (params) {
    
     const value = data[eachDataField];
     columnWrapper.setAttribute(eachDataField, value);
-    const bottom = `calc(((${value} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+    let bottom;
+    if (!subplotGroupMapping) {
+      bottom = `calc(((${value} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+    } else {
+      console.log("hwnjalnsjkndaskjnd")
+      const subPlotGroup = subplotGroupMapping[eachDataField];
+      const numberOfGroups = subplotGroupMapping['number_of_groups'];
+      bottom = `calc(${(100 / numberOfGroups) * subPlotGroup}% + ((${value} - var(--min-value-${operatorAddress}-${subPlotGroup})) / (var(--max-value-${operatorAddress}-${subPlotGroup}) - var(--min-value-${operatorAddress}-${subPlotGroup}))) * ${100 / numberOfGroups}%)`;
+    }
     const { point, line } = generatePointAndLine(colors[i], bottom);
 
     point.classList.add(`${eachDataField}-graph-data-element-${operatorAddress}`);

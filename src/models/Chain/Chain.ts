@@ -166,7 +166,7 @@ const chainSchema = new Schema<ChainInterface>({
 });
 
 chainSchema.statics.getAllChains = function (callback: Parameters<ChainModel['getAllChains']>[0]) {
-  const skipChainIdentifiers = ['osmosis'];
+  const skipChainIdentifiers = ['osmosis', 'celestia', 'lava'];
   Chain
     .find({ name: { $nin: skipChainIdentifiers } })
     .then(chains => {

@@ -2,11 +2,11 @@
 function renderTableHeader (sort_by, order) {
   const validatorsWrapper = document.getElementById('validators-main-wrapper');
   const headersArray = [
+    { name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Withdraw - Self Stake) / Withdraw '},
     { name: 'Delegation', id: 'total_stake' },
     { name: 'Total Rewards', id: 'total_withdraw' },
     { name: 'Total Sold Amount', id: 'sold', popup_text: 'Total withdraw - Self stake' },
     { name: 'Self Stake', id: 'self_stake' },
-    { name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Withdraw - Self Stake) / Withdraw '}
   ]
   const headersRow = document.createElement('div');
   headersRow.classList.add('validator-table-header')
@@ -34,19 +34,22 @@ function renderTableHeader (sort_by, order) {
     let popupWrapper;
 
     if (header.popup_text) {
+
+      td.classList.add('each-table-header-hover')
+
       popupWrapper = document.createElement('div');
       popupWrapper.classList.add('each-table-popup-wrapper')
   
       const contentWrapper = document.createElement('div');
       contentWrapper.classList.add('each-table-popup-info-content', 'center');
       contentWrapper.innerHTML = header.popup_text
+      contentWrapper.style.marginBottom = '5px';
   
       const tooltipWrapper = document.createElement('div');
       tooltipWrapper.classList.add('each-tooltip-info-hover', 'center');
   
       const infoIcon = document.createElement('img');
       infoIcon.src = '/res/images/info.svg';
-      infoIcon.style.marginBottom = '-5px';
       
       tooltipWrapper.appendChild(infoIcon);
       popupWrapper.appendChild(contentWrapper);

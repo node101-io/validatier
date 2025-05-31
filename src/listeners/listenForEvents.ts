@@ -6,7 +6,6 @@ import { DecodedMessage } from '../utils/decodeTxs.js';
 import { convertOperatorAddressToBech32 } from '../utils/convertOperatorAddressToBech32.js';
 import { ActiveValidatorsInterface } from '../models/ActiveValidators/ActiveValidators.js';
 import { bulkSave, clearChainData, getBatchData } from '../utils/levelDb.js';
-import { sendTelegramMessage } from '../utils/sendTelegramMessage.js';
 
 interface ListenForEventsResult {
   success: boolean,
@@ -25,7 +24,9 @@ export const LISTENING_EVENTS = [
   '/cosmos.staking.v1beta1.MsgBeginRedelegate',
   '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
   '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission',
-  'slash'
+  'slash',
+  'coin_spent',
+  'coin_received'
 ];
 
 export const listenForEvents = (
@@ -79,6 +80,7 @@ export const listenForEvents = (
                     commission: 0,
                     total_stake: 0,
                     total_withdraw: 0,
+                    balance_change: 0,
                   };
                 }
                 if (!compositeEventBlockMap[eachMessage.value.validatorDstAddress]) {
@@ -88,6 +90,7 @@ export const listenForEvents = (
                     commission: 0,
                     total_stake: 0,
                     total_withdraw: 0,
+                    balance_change: 0,
                   };
                 }
               } else if (!compositeEventBlockMap[key]) 
@@ -97,6 +100,7 @@ export const listenForEvents = (
                   commission: 0,
                   total_stake: 0,
                   total_withdraw: 0,
+                  balance_change: 0,
                 };
                 
               if (
@@ -170,6 +174,13 @@ export const listenForEvents = (
                 if (bech32SrcOperatorAddress == eachMessage.value.delegatorAddress)
                   compositeEventBlockMap[eachMessage.value.validatorSrcAddress].self_stake += (value * -1);
                 compositeEventBlockMap[eachMessage.value.validatorDstAddress].total_stake += value;
+              } else if (
+                ['coin_spent', 'coin_received'].includes(eachMessage.typeUrl)
+              ) {
+                const changeAmount = parseInt(eachMessage.value.amount.amount);
+                compositeEventBlockMap[key].balance_change += eachMessage.typeUrl == 'coin_received'
+                  ? changeAmount
+                  : -changeAmount;
               }
             }
             resolve();

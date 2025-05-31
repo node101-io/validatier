@@ -165,13 +165,32 @@ function generateGraph (validator) {
       metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
       metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
     });
-  
-    let { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping, dataFields);
-  
-    document.documentElement.style.setProperty(`--min-value-${operatorAddress}`, minValue);
-    document.documentElement.style.setProperty(`--max-value-${operatorAddress}`, maxValue);
-  
-    if (maxValue == minValue) minValue = maxValue / 2;
+
+    const subplotGroupMapping = {
+      number_of_groups: 2,
+      total_stake_sum: 1,
+      total_withdraw_sum: 0,
+      total_sold: 0,
+    };
+
+    const subplotGroupArray = [
+      ['total_withdraw_sum', 'total_sold'],
+      ['total_stake_sum']
+    ];
+
+    
+    const minValueArray = [];
+    const maxValueArray = [];
+    for (let i = 0; i < subplotGroupArray.length; i++) {
+      const eachSubplotGroup = subplotGroupArray[i];
+      let { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping, eachSubplotGroup);
+
+      minValueArray.push(minValue);
+      maxValueArray.push(maxValue);
+      
+      document.documentElement.style.setProperty(`--min-value-${operatorAddress}-${i}`, minValue);
+      document.documentElement.style.setProperty(`--max-value-${operatorAddress}-${i}`, maxValue);
+    }
   
     const insertedColumn = addColumnToExistingGraph({
       type: 'validator',
@@ -183,24 +202,23 @@ function generateGraph (validator) {
       decimals: decimals,
       usd_exchange_rate: usd_exchange_rate,
       symbol: symbol,
-      graphDataMapping,
-      minValue,
-      maxValue,
+      minValue: minValueArray,
+      maxValue: maxValueArray,
       graphWidth,
       dataFields: dataFields,
       colors: colors,
-      by: 'm',
-      columnsPer: 10
+      columnsPer: 10,
+      subplotGroupMapping
     });
   
     if (
       insertedColumn.previousSibling &&
       insertedColumn.previousSibling.classList.contains('each-graph-column-wrapper')
     ) {
-      adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, operatorAddress.replace('@', '\\@'), dataFields);
+      adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, operatorAddress.replace('@', '\\@'), dataFields, subplotGroupMapping);
     } else {
       document.documentElement.style.setProperty(`--column-height-${operatorAddress}`, insertedColumn.offsetHeight);
-      addColumnEventListener(operatorAddress.replace('@', '\\@'), dataFields, colors, symbol, usd_exchange_rate, decimals, summaryData);
+      addColumnEventListener(operatorAddress.replace('@', '\\@'), dataFields, colors, symbol, usd_exchange_rate, decimals, summaryData, subplotGroupMapping);
     }
   };
   

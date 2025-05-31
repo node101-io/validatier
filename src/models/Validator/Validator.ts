@@ -204,11 +204,10 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       chain_identifier: string;
       bottom_timestamp: number;
       top_timestamp: number;
-      by_array: string[];
     },
     callback: (
       err: string | null,
-      summaryGraphData: Record<string, GraphDataInterface> | null
+      summaryGraphData: GraphDataInterface | null
     ) => any
   ) => any;
   getSmallGraphData: (
@@ -707,102 +706,95 @@ validatorSchema.statics.getSummaryGraphData = function (
   body: Parameters<ValidatorModel['getSummaryGraphData']>[0],
   callback: Parameters<ValidatorModel['getSummaryGraphData']>[1],
 ) {
-  const { chain_identifier, bottom_timestamp, top_timestamp, by_array } = body;
-  const graphDataMapping: Record<string, any> = {};
+  const { chain_identifier, bottom_timestamp, top_timestamp } = body;
 
-  async.times(
-    by_array.length,
-    (i, next) => {
-      const by = by_array[i];
+    const dayMiliseconds = 1000 * 60 * 60 * 24;
+    const numberOfDays = (Math.abs(top_timestamp - bottom_timestamp) / dayMiliseconds);
+    const numberOfDataPoints = 90;
 
-      const groupId: Record<string, any> = { year: '$year' };
-      if (by == 'm' || by == 'w' || by == 'd') groupId.month = '$month';
-      if (by == 'w' || by == 'd')
-        groupId.day = {
-          $floor: {
-            $divide: ['$day', by == 'w' ? 7 : 4]
-          }
-        };
-      
-      CompositeEventBlock.aggregate([
-        {
-          $match: {
-            chain_identifier: chain_identifier,
-            timestamp: {
-              $gte: bottom_timestamp,
-              $lte: top_timestamp,
-            },
+    const groupId: Record<string, any> = {
+      year: '$year',
+      month: '$month',
+      day: {
+        $floor: {
+          $divide: ['$day', Math.ceil(Math.min((numberOfDays / numberOfDataPoints), 15))]
+        }
+      }
+    };
+
+    CompositeEventBlock.aggregate([
+      {
+        $match: {
+          chain_identifier: chain_identifier,
+          timestamp: {
+            $gte: bottom_timestamp,
+            $lte: top_timestamp,
           },
         },
-        {
-          $group: {
-            _id: groupId,
-            timestamp: { $first: '$timestamp' },
-            self_stake_sum: { $sum: '$self_stake' },
-            reward_sum: { $sum: '$reward' },
-            commission_sum: { $sum: '$commission' },
-            total_stake_sum: { $sum: '$total_stake' },
-            total_withdraw_sum: { $sum: '$total_withdraw' },
-          }
-        },
-        {
-          $addFields: {
-            total_sold: {
-              $subtract: [
-                { $add: ['$reward_sum', '$commission_sum'] },
-                '$self_stake_sum'
-              ]
-            },
-            percentage_sold: {
-              $cond: [
-                { $gt: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
-                {
-                  $min: [
-                    {
-                      $abs: {
-                        $divide: [
-                          {
-                            $subtract: [
-                              { $add: ['$reward_sum', '$commission_sum'] },
-                              '$self_stake_sum'
-                            ]
-                          },
-                          {
-                            $cond: [
-                              { $eq: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
-                              1,
-                              { $add: ['$reward_sum', '$commission_sum'] }
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    1
-                  ]
-                },
-                0
-              ]
-            }    
-          }
-        },
-        {
-          $sort: {
-            timestamp: 1
-          }
-        },
-      ])
-        .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, total_withdraw: 1 })
-        .then((results: any) => {
-          graphDataMapping[by] = results;
-          next();
-        })
-        .catch(err => next(err))
-    },
-    (err) => {
-      if (err) return callback(err.toString(), null);
-      return callback(null, graphDataMapping);
-    }
-  )
+      },
+      {
+        $group: {
+          _id: groupId,
+          timestamp: { $first: '$timestamp' },
+          self_stake_sum: { $sum: '$self_stake' },
+          reward_sum: { $sum: '$reward' },
+          commission_sum: { $sum: '$commission' },
+          total_stake_sum: { $sum: '$total_stake' },
+          total_withdraw_sum: { $sum: '$total_withdraw' },
+        }
+      },
+      {
+        $addFields: {
+          total_sold: {
+            $subtract: [
+              { $add: ['$reward_sum', '$commission_sum'] },
+              '$self_stake_sum'
+            ]
+          },
+          percentage_sold: {
+            $cond: [
+              { $gt: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
+              {
+                $min: [
+                  {
+                    $abs: {
+                      $divide: [
+                        {
+                          $subtract: [
+                            { $add: ['$reward_sum', '$commission_sum'] },
+                            '$self_stake_sum'
+                          ]
+                        },
+                        {
+                          $cond: [
+                            { $eq: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
+                            1,
+                            { $add: ['$reward_sum', '$commission_sum'] }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  1
+                ]
+              },
+              0
+            ]
+          }    
+        }
+      },
+      {
+        $sort: {
+          timestamp: 1
+        }
+      },
+    ])
+      .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, total_withdraw: 1 })
+      .then((results: any) => {
+        return callback(null, results);
+      })
+      .catch(err => callback(err, null))
+    
 }
 
 

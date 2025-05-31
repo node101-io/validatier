@@ -242,7 +242,7 @@ input {
   flex-direction: column;
   gap: 16px;
   transition: inherit;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   font-size: 12px;
 }
 

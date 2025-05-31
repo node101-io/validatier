@@ -120,7 +120,7 @@ function plotValidatorGraph(params) {
           eachPaintBar.style.borderRight = `none`;
         });
 
-        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.nextSibling.querySelector('.each-data-indicator-vertical-line').classList.add('each-data-indicator-vertical-line-visible', 'range-edges-indicator', `range-edge-${operatorAddressM}`);
+        // validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.nextSibling.querySelector('.each-data-indicator-vertical-line').classList.add('each-data-indicator-vertical-line-visible', 'range-edges-indicator', `range-edge-${operatorAddressM}`);
       } else {
         validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
           eachPaintBar.style.width = '0px';
@@ -132,10 +132,10 @@ function plotValidatorGraph(params) {
           eachPaintBar.style.borderRight = `none`;
         });
 
-        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.querySelector('.each-data-indicator-vertical-line').classList.add('each-data-indicator-vertical-line-visible', 'range-edges-indicator', `range-edge-${operatorAddressM}`);
+        // validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.querySelector('.each-data-indicator-vertical-line').classList.add('each-data-indicator-vertical-line-visible', 'range-edges-indicator', `range-edge-${operatorAddressM}`);
       }
 
-      validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.querySelector('each-data-indicator-vertical-line-visible', 'range-edges-indicator', `range-edge-${operatorAddressM}`);      
+      // validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.querySelector('each-data-indicator-vertical-line-visible', 'range-edges-indicator', `range-edge-${operatorAddressM}`);      
     }
   }
 
