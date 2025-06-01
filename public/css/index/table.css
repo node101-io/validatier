@@ -131,6 +131,7 @@
   --validator-table-header-left-padding: 4%;
   --validator-table-header-gap: 0px;
   --validator-table-header-horizontal-padding: 10px;
+  --validator-table-header-margin-bottom: 5px;
   --table-filters-subgroup-gap: 50px;
   --table-filters-subgroup-flex-grow: 0.5;
 
@@ -272,13 +273,24 @@
   height: var(--each-validator-wrapper-height);
   gap: var(--each-validator-wrapper-gap);
   padding: var(--each-validator-wrapper-vertical-padding) var(--each-validator-wrapper-horizontal-padding);
-  transition: all var(--each-validator-wrapper-transition-duration) ease 0s;
   border-bottom: var(--each-validator-wrapper-border-bottom-size) solid var(--color-triangle-unselected);
   min-width: calc(var(--each-validator-wrapper-min-width) - (var(--each-validator-wrapper-horizontal-padding) * 2));
   cursor: var(--pointer-hand-dark);
   position: relative;
   display: flex;
   align-items: center;
+}
+
+.each-validator-wrapper:hover {
+  background-color: var(--network-switch-header-background-color) !important;
+}
+
+.each-validator-wrapper:hover .each-validator-info-wrapper  {
+  background-color: var(--network-switch-header-background-color) !important;
+}
+
+.each-validator-wrapper:hover .validator-moniker-text-content::after {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, var(--network-switch-header-background-color) 100%);
 }
 
 .each-validator-info-wrapper {
@@ -288,7 +300,6 @@
   height: calc(var(--each-validator-info-wrapper-height) - (var(--each-validator-info-wrapper-vertical-padding) * 2));
   left: var(--each-validator-info-wrapper-left);
   padding: var(--each-validator-info-wrapper-vertical-padding) 0;
-  transition: all var(--each-validator-wrapper-transition-duration) ease 0s;
   background-color: var(--color-powder-blue);
   display: flex; 
   align-items: center; 
@@ -486,6 +497,7 @@
   display: flex;
   padding: 0 var(--validator-table-header-horizontal-padding);
   align-items: center;
+  margin-bottom: var(--validator-table-header-margin-bottom);
   gap: var(--validator-table-header-gap);
 }
 

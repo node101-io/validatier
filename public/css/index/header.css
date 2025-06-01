@@ -1,6 +1,6 @@
 :root {
   --date-picker-height: 56px;
-  --date-picker-z-index: 99;
+  --date-picker-z-index: 1000;
   --date-picker-width: 450px;
 
   --selected-range-height: 56px;
@@ -20,7 +20,7 @@
   --picker-main-wrapper-opacity: 0;
   --picker-main-wrapper-right: 0;
   --picker-main-wrapper-top: 100%;
-  --picker-main-wrapper-z-index: 1000;
+  --picker-main-wrapper-z-index: 10000;
   --picker-main-wrapper-border-radius: 24px;
   
   --picker-content-wrapper-font-size: 14px;
@@ -685,6 +685,23 @@
     --date-border-size: 4px;
     --date-padding: 0px;
     
-    --date-range-width: 50px;
+    --date-range-width: 100px;
+  }
+}
+
+
+@media only screen and (max-width: 450px) {
+  .picker-main-wrapper-open {
+    border-radius: var(--picker-main-wrapper-border-radius);
+    transform: perspective(1000px) rotateX(0deg);
+    opacity: 1;
+    right: 0;
+    width: 125% !important;
+  }
+
+  .selected-range-open {
+    background-color: var(--header-main-background);
+    border-bottom: 1px solid var(--general-main-wrapper-border-color);
+    border-radius: var(--selected-range-border-radius);
   }
 }
