@@ -51,11 +51,14 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
         data.result?.block?.data?.txs.length <= 0
       ) return callback(null, { time: data.result?.block?.header?.time ? data.result?.block?.header?.time : '', decodedTxs: []});
 
+      const defaultEvents = data_block_results.result.txs_results.flatMap((eachTx: any) => eachTx.events);
+      
       const finalizeBlockEvents = [
         ...data_block_results.result.begin_block_events || [],
         ...data_block_results.result.end_block_events || [],
         ...data_block_results.result.finalize_block_events || [],
-      ]
+        ...defaultEvents
+      ];
 
       const time = data.result?.block?.header?.time;
       
@@ -71,6 +74,7 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
       }
         
       const decodedTxs = decodeTxs(txs, events, denom, data.result?.block?.header?.time)
+      
       if (messages && messages.length > 0) decodedTxs.push({ messages: messages });
       
       return callback(null, {

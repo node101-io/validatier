@@ -8,7 +8,7 @@ const indexGetController = (req: Request, res: Response): void => {
 
   console.time('response_time');
 
-  const activeNetworkIdentifier = 'cosmoshub';
+  const activeNetworkIdentifier = req.cookies.network ? req.cookies.network : 'cosmoshub';
   const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime()): (new Date(1)).getTime();
   const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()): Date.now();
 
@@ -94,7 +94,7 @@ const indexGetController = (req: Request, res: Response): void => {
       });
 
       const [getAllChainsResult, rankValidatorsResult, cacheResults, summaryGraphResults, smallGraphResults] = results;
-
+      
       if (
         !getAllChainsResult.value.chains || 
         !rankValidatorsResult.value.results ||

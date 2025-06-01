@@ -33,8 +33,8 @@ function addVerticalAxisLabels(graphWrapper, operatorAddress, min, max, details,
       iter += step;
     }
 
-  i++;
-}
+    i++;
+  }
 
   graphWrapper.insertBefore(verticalAxisLabels, graphWrapper.children[0]);
 }

@@ -95,6 +95,33 @@ function createNetworkSummaryGraph (dataFields, colors) {
   const currentSumMapping = {};
   const showPercentageChange = document.body.getAttribute('showPercentageChange');
 
+  const subplotGroupMapping = dataFields[0] != 'percentage_sold' ? {
+    number_of_groups: 2,
+    total_stake_sum: 1,
+    total_withdraw_sum: 0,
+    total_sold: 0,
+  } : {
+    number_of_groups: 1,
+    percentage_sold: 0
+  };
+
+  const subplotGroupArray = dataFields[0] != 'percentage_sold' 
+    ? [
+      ['total_withdraw_sum', 'total_sold'],
+      ['total_stake_sum']
+    ]
+    : [
+      ['percentage_sold']
+    ];
+
+  for (let i = 0; i < subplotGroupArray.length; i++) {
+    if (i == 0) continue;
+    const subplotSeperator = document.createElement('div');
+    subplotSeperator.classList.add('subplot-seperator');
+    subplotSeperator.style.bottom = `calc(${(i / subplotGroupArray.length) * 100}% - 5px)`;
+    graphWrapper.appendChild(subplotSeperator);
+  }
+
   for (let i = 0; i < targetCacheSummaryGraphData.length; i++) {
     const data = targetCacheSummaryGraphData[i];
     
@@ -127,26 +154,6 @@ function createNetworkSummaryGraph (dataFields, colors) {
     graphDataMapping[i] = data;
 
     const timestamp = (new Date(data._id.year, (data._id.month || 1) - 1, (data._id.day || 1))).getTime();
-  
-    const subplotGroupMapping = dataFields[0] != 'percentage_sold' ? {
-      number_of_groups: 2,
-      total_stake_sum: 1,
-      total_withdraw_sum: 0,
-      total_sold: 0,
-    } : {
-      number_of_groups: 1,
-      percentage_sold: 0
-    };
-
-    const subplotGroupArray = dataFields[0] != 'percentage_sold' 
-      ? [
-        ['total_withdraw_sum', 'total_sold'],
-        ['total_stake_sum']
-      ]
-      : [
-        ['percentage_sold']
-      ];
-
     
     const minValueArray = [];
     const maxValueArray = [];

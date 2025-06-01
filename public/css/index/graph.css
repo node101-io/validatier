@@ -193,3 +193,10 @@
   right: 0;
   z-index: 0;
 }
+
+.subplot-seperator {
+  width: calc(100% - var(--vertical-axis-labels-width));
+  border-top: 1px dashed var(--each-data-indicator-vertical-line-border-color);
+  position: absolute;
+  left: var(--vertical-axis-labels-width);
+}

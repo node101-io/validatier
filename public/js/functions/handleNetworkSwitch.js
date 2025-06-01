@@ -7,7 +7,7 @@ function setSelectedChain (pretty_name, symbol, src, name) {
   document.querySelectorAll('.network-switch-header').forEach(each => each.setAttribute('chain_identifier', name));
 }
 
-function handleNetworkSwitch () {
+function initializeCache () {
 
   const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
   const topDate = document.getElementById('periodic-query-top-timestamp').value;
@@ -24,6 +24,9 @@ function handleNetworkSwitch () {
   };
 
   rankingResponsesCache[bottomTimestamp + '.' + topTimestamp + '.' + chainIdentifier] = response;
+}
+
+function handleNetworkSwitch () {
 
   const networkSwitchInput = document.getElementById('network-switch-input');
   networkSwitchInput.addEventListener('keyup', (event) => {

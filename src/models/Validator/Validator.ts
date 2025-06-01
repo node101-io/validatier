@@ -510,8 +510,14 @@ validatorSchema.statics.rankValidators = function (
         const sold = ((reward + commission) || 0) - (self_stake || 0);
         const initial_sold = ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 0) - (initial_self_stake_prefix_sum || 0);
         
-        const percentage_sold = Math.min(Math.abs((sold || 1) / ((reward + commission) || 1)), 1) * 100;
-        const initial_percentage_sold = Math.min(Math.abs((initial_sold || 1) / ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 1)), 1) * 100;
+        const percentage_sold = Math.min(
+          Math.max(
+            ((sold || 1) / ((reward + commission) || 1) * 100), 
+            -100
+          ), 
+          100
+        );
+        const initial_percentage_sold = (initial_sold || 1) / ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 1) * 100;
 
         const self_stake_ratio = Math.min(Math.abs(self_stake / (total_stake || 1)), 1) * 100;
         const initial_self_stake_ratio = Math.min(Math.abs(initial_self_stake_prefix_sum / (initial_total_stake_prefix_sum || 1)), 1) * 100;
@@ -559,10 +565,23 @@ validatorSchema.statics.rankValidators = function (
         valueArray.push(pushObjectData);
         index++;
       }
-
-      (order == 'desc' || order == -1)
-        ? valueArray.sort((a: any, b: any) => (b[sort_by] || 0) - (a[sort_by] || 0))
-        : valueArray.sort((a: any, b: any) => (a[sort_by] || 0) - (b[sort_by] || 0));
+      
+      valueArray.sort((a: any, b: any) => {
+        const valA = a[sort_by] || 0;
+        const valB = b[sort_by] || 0;
+    
+        if (valA == valB && sort_by == 'percentage_sold') {
+            const secA = a['total_stake'] || 0;
+            const secB = b['total_stake'] || 0;
+            return (order == 'asc' || order == 1)
+                ? secB - secA
+                : secA - secB;
+        }
+    
+        return (order == 'desc' || order == -1)
+            ? valB - valA
+            : valA - valB;
+      });
 
       callback(null, {
         summary_data: {

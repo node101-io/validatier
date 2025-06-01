@@ -6,6 +6,7 @@ window.onload = () => {
   let currentMonthValue = (currentDate.getMonth() + 1);
   
   // handleNetworkSwitch(getCookie('network'));
+  initializeCache();
   handleValidatorSearch();
   handleCalendarEvents(currentYearValue, currentMonthValue, "monday" /* document.getElementById('calendar-format-toggle').value */)
   renderValidators();

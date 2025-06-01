@@ -144,10 +144,12 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     tr.appendChild(percentageSoldTd);
     tr.appendChild(delegationTd);
     tr.appendChild(totalRewardsTd);
-    tr.appendChild(selfStakeTd);
     tr.appendChild(totalSoldAmountTd);
+    tr.appendChild(selfStakeTd);
 
     tr.setAttribute('validator', JSON.stringify(validator));
+    tr.setAttribute('pubkey', validator.pubkey);
+    tr.setAttribute('chain_identifier', validator.chain_identifier);
     tr.classList.add('operator-address');
     document.getElementById('validators-main-wrapper').appendChild(tr);
   }
@@ -165,10 +167,8 @@ function renderValidators() {
   };
 
   document.getElementById('cancel').addEventListener('click', (event) => {
-    document.getElementById('picker-main-wrapper').style.transform = 'perspective(1000px) rotateX(-90deg)';
-    document.getElementById('picker-main-wrapper').style.opacity = 0;
-
-    document.getElementById('picker-main-wrapper').children[document.getElementById('picker-main-wrapper').children.length - 1].style.transform = 'rotateX(0deg)';
+    document.getElementById('selected-range').classList.remove('selected-range-open');
+    document.getElementById('picker-main-wrapper').classList.remove('picker-main-wrapper-open');
   })
 
   document.addEventListener('click', (event) => {
@@ -178,8 +178,8 @@ function renderValidators() {
 
     displaySkeleton();
 
-    document.querySelector('.picker-main-wrapper').style.transform = 'perspective(1000px) rotateX(-90deg)';
-    document.querySelector('.picker-main-wrapper').style.opacity = 0;
+    document.getElementById('selected-range').classList.remove('selected-range-open');
+    document.getElementById('picker-main-wrapper').classList.remove('picker-main-wrapper-open');
     
     let target = event.target;
     while (isHeaderClickedChecker && !target.classList.contains('each-table-header-wrapper')) target = target.parentNode;
