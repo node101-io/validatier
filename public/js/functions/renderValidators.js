@@ -176,8 +176,6 @@ function renderValidators() {
     const isApplyClickedChecker = event.target.classList.contains('apply') || event.target.parentNode.classList.contains('apply')
     if (!isHeaderClickedChecker && !isApplyClickedChecker) return;
 
-    displaySkeleton();
-
     document.getElementById('selected-range').classList.remove('selected-range-open');
     document.getElementById('picker-main-wrapper').classList.remove('picker-main-wrapper-open');
     

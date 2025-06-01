@@ -117,7 +117,6 @@ function handleNetworkSwitch () {
 
     if (cacheResponse) return generateValidatorRankingContent(cacheResponse, 'percentage_sold', 'asc');
 
-    displaySkeleton();
     window.location.reload();
   })
 }
