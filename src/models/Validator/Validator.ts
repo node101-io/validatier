@@ -152,7 +152,8 @@ interface ValidatorModel extends Model<ValidatorInterface> {
           ratio: number,
           sold: number,
           percentage_sold: number,
-          self_stake_ratio: number
+          self_stake_ratio: number,
+          average_total_stake: number
         }[] | null
       } | null
     ) => any
@@ -504,6 +505,7 @@ validatorSchema.statics.rankValidators = function (
           initial_self_stake_prefix_sum = 0,
           initial_total_stake_prefix_sum = 0,
           initial_total_withdraw_prefix_sum = 0,
+          average_total_stake = 0
         } = validatorRecordMapping[eachValidator.operator_address] || {};
 
         const ratio = (self_stake || 0) / ((reward + commission) || (10 ** CHAIN_TO_DECIMALS_MAPPING[`${chain_identifier}`]));
@@ -552,6 +554,7 @@ validatorSchema.statics.rankValidators = function (
           total_withdraw, initial_total_withdraw_prefix_sum,
           percentage_sold, initial_percentage_sold,
           self_stake_ratio, initial_self_stake_ratio,
+          average_total_stake: average_total_stake,
           chain_identifier: chain_identifier,
           ratio: ratio,
           sold: sold
@@ -727,93 +730,118 @@ validatorSchema.statics.getSummaryGraphData = function (
 ) {
   const { chain_identifier, bottom_timestamp, top_timestamp } = body;
 
-    const dayMiliseconds = 1000 * 60 * 60 * 24;
-    const numberOfDays = (Math.abs(top_timestamp - bottom_timestamp) / dayMiliseconds);
-    const numberOfDataPoints = 90;
-
-    const groupId: Record<string, any> = {
-      year: '$year',
-      month: '$month',
-      day: {
-        $floor: {
-          $divide: ['$day', Math.ceil(Math.min((numberOfDays / numberOfDataPoints), 15))]
-        }
+  const numberOfDataPoints = 90;
+  const intervalMs = Math.ceil((top_timestamp - bottom_timestamp) / numberOfDataPoints);
+  
+  const groupId: Record<string, any> = {
+    bucket: {
+      $floor: {
+        $divide: [{ $toLong: '$timestamp' }, intervalMs]
       }
-    };
+    }
+  };
 
-    CompositeEventBlock.aggregate([
-      {
-        $match: {
-          chain_identifier: chain_identifier,
-          timestamp: {
-            $gte: bottom_timestamp,
-            $lte: top_timestamp,
-          },
+  const startBucket = Math.floor(bottom_timestamp / intervalMs);
+
+  CompositeEventBlock.aggregate([
+    {
+      $match: {
+        chain_identifier: chain_identifier,
+        timestamp: {
+          $gte: bottom_timestamp,
+          $lte: top_timestamp,
         },
       },
-      {
-        $group: {
-          _id: groupId,
-          timestamp: { $first: '$timestamp' },
-          self_stake_sum: { $sum: '$self_stake' },
-          reward_sum: { $sum: '$reward' },
-          commission_sum: { $sum: '$commission' },
-          total_stake_sum: { $sum: '$total_stake' },
-          total_withdraw_sum: { $sum: '$total_withdraw' },
+    },
+    {
+      $group: {
+        _id: groupId,
+        timestamp: { $first: '$timestamp' },
+        self_stake_sum: { $sum: '$self_stake' },
+        reward_sum: { $sum: '$reward' },
+        commission_sum: { $sum: '$commission' },
+        total_stake_sum: { $sum: '$total_stake' },
+        total_withdraw_sum: { $sum: '$total_withdraw' },
+      }
+    },
+    {
+      $addFields: {
+        total_sold: {
+          $subtract: [
+            { $add: ['$reward_sum', '$commission_sum'] },
+            '$self_stake_sum'
+          ]
+        },
+        percentage_sold: {
+          $cond: [
+            { $gt: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
+            {
+              $min: [
+                {
+                  $abs: {
+                    $divide: [
+                      {
+                        $subtract: [
+                          { $add: ['$reward_sum', '$commission_sum'] },
+                          '$self_stake_sum'
+                        ]
+                      },
+                      {
+                        $cond: [
+                          { $eq: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
+                          1,
+                          { $add: ['$reward_sum', '$commission_sum'] }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                1
+              ]
+            },
+            0
+          ]
+        }    
+      }
+    },
+    {
+      $sort: {
+        timestamp: 1
+      }
+    },
+  ])
+    .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, total_withdraw: 1 })
+    .then((buckets: any) => {
+
+      const result: any = [];
+
+      let lastValue: any = null;
+      for (let i = 0; i < numberOfDataPoints; i++) {
+        const bucketIndex = startBucket + i;
+        const found = buckets.find((b: any) => b._id.bucket === bucketIndex);
+
+        if (found) {
+          lastValue = found;
+          result.push(found);
+        } else {
+          
+          const fake = {
+            _id: { bucket: bucketIndex },
+            timestamp: lastValue ? lastValue.timestamp : 0,
+            self_stake_sum: lastValue ? lastValue.self_stake_sum : 0,
+            reward_sum: lastValue ? lastValue.reward_sum : 0,
+            commission_sum: lastValue ? lastValue.commission_sum : 0,
+            total_stake_sum: lastValue ? lastValue.total_stake_sum : 0,
+            total_withdraw_sum: lastValue ? lastValue.total_withdraw_sum : 0,
+            total_sold: lastValue ? lastValue.total_sold : 0,
+            percentage_sold: lastValue ? lastValue.percentage_sold : 0,
+          };
+          result.push(fake);
         }
-      },
-      {
-        $addFields: {
-          total_sold: {
-            $subtract: [
-              { $add: ['$reward_sum', '$commission_sum'] },
-              '$self_stake_sum'
-            ]
-          },
-          percentage_sold: {
-            $cond: [
-              { $gt: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
-              {
-                $min: [
-                  {
-                    $abs: {
-                      $divide: [
-                        {
-                          $subtract: [
-                            { $add: ['$reward_sum', '$commission_sum'] },
-                            '$self_stake_sum'
-                          ]
-                        },
-                        {
-                          $cond: [
-                            { $eq: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
-                            1,
-                            { $add: ['$reward_sum', '$commission_sum'] }
-                          ]
-                        }
-                      ]
-                    }
-                  },
-                  1
-                ]
-              },
-              0
-            ]
-          }    
-        }
-      },
-      {
-        $sort: {
-          timestamp: 1
-        }
-      },
-    ])
-      .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, total_withdraw: 1 })
-      .then((results: any) => {
-        return callback(null, results);
-      })
-      .catch(err => callback(err, null))
-    
+      }
+      return callback(null, result);
+    })
+    .catch(err => callback(err, null))
 }
 
 

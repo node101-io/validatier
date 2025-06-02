@@ -1,20 +1,46 @@
+function roundToFirstTwoDigits(number, method = 'floor') {
+  if (number === 0) return 0;
 
-function calculateMaxAndMinValue (graphDataMapping, dataFields) {
+  const isNegative = number < 0;
+  number = Math.abs(number);
+
+  const digits = Math.floor(Math.log10(number));
+  const factor = Math.pow(10, digits - 1);
+  const twoDigits = number / factor;
+
+  let roundedTwoDigits;
+  if (method === 'floor') {
+    roundedTwoDigits = Math.floor(twoDigits);
+  } else if (method === 'ceil') {
+    roundedTwoDigits = Math.ceil(twoDigits);
+  } else {
+    roundedTwoDigits = Math.round(twoDigits);
+  }
+
+  const rounded = roundedTwoDigits * factor;
+  return isNegative ? -rounded : rounded;
+}
+
+function calculateMaxAndMinValue(graphDataMapping, dataFields) {
   const values = Object.values(graphDataMapping);
 
   const minArray = [];
   const maxArray = [];
-  
+
   dataFields.forEach(eachDataField => {
     const min = Math.min(...values.map(item => item[eachDataField]));
     const max = Math.max(...values.map(item => item[eachDataField]));
     minArray.push(min);
     maxArray.push(max);
-  })
+  });
 
-  const minValue = Math.min(...minArray);
-  const maxValue = Math.max(...maxArray);
-  return { minValue, maxValue }
+  const rawMin = Math.min(...minArray);
+  const rawMax = Math.max(...maxArray);
+
+  return {
+    minValue: roundToFirstTwoDigits(rawMin, rawMin <= 0 ? 'ceil' : 'floor'),
+    maxValue: roundToFirstTwoDigits(rawMax, 'ceil'),
+  };
 }
 
 const validatorGraphEventListenersMapping = {};
@@ -26,7 +52,6 @@ const validator_stats = [
   { id: 'validator-details-image', field: 'temporary_image_uri' },
   { id: 'validator-stat-percentage-sold', field: 'percentage_sold', title: 'Percentage sold', usdContent: false, additional_class: 'summary-percentage-text-native', type: 'percentage', helperType: 'percentage_change' },
   { id: 'validator-stat-self-stake', field: 'self_stake', title: 'Self Stake Amount', usdContent: true, helperType: 'rank' },
-  { id: 'validator-stat-self-stake-ratio', field: 'self_stake_ratio', title: 'Average Self Stake Ratio', usdContent: false, additional_class: 'summary-percentage-text-native', type: 'percentage', helperType: 'rank' },
   { id: 'validator-stat-commission-rate', title: 'Commission', field: 'commission_rate', usdContent: false, additional_class: 'summary-percentage-text-native', helperType: 'text', helperText: 'fee from rewards' }
 ];
 
@@ -73,9 +98,15 @@ function generateGraph (validator) {
 
     const { nativeValue, usdValue } = getValueWithDecimals(validator[stat.field], symbol, usd_exchange_rate, decimals)
 
-    document.getElementById(`${stat.id}-native`).innerHTML = stat.field == 'commission_rate'
-      ? (formatCommission(validator[stat.field]))
-      : stat.type == 'percentage' ? '%' + (shortNumberFormat(validator[stat.field])) : nativeValue;
+    if (stat.field == 'commission_rate') {
+      document.getElementById(`${stat.id}-native`).innerHTML = formatCommission(validator[stat.field]);
+    } else if (stat.field == 'self_stake') {
+      const wrapper = document.getElementById(`${stat.id}-native`);
+      wrapper.children[0].innerHTML = nativeValue;
+      wrapper.children[1].innerHTML = '%' + (shortNumberFormat(validator['self_stake_ratio']));
+    } else {
+      document.getElementById(`${stat.id}-native`).innerHTML = '%' + (shortNumberFormat(validator[stat.field]));
+    }
 
     if (stat.usdContent) 
       document.getElementById(`${stat.id}-usd`).innerHTML = usdValue;
@@ -84,8 +115,15 @@ function generateGraph (validator) {
      document.getElementById(`${stat.id}-helper`).innerHTML = stat.helperText;
     else if (stat.helperType == 'percentage_change')
       document.getElementById(`${stat.id}-helper`).innerHTML = '→' + Math.round((validator[stat.field] / summaryData[`initial_${stat.field}`]) * 100) + '%';
-    else if (stat.helperType == 'rank')
-      document.getElementById(`${stat.id}-helper`).innerHTML = ([...validators].sort((a, b) => b[stat.field] - a[stat.field]).findIndex(v => v.operator_address === validator.operator_address) + 1) + '/' + validators.length;
+    else if (stat.helperType == 'rank') {
+      if (stat.field == 'self_stake') {
+        const ssRank = ([...validators].sort((a, b) => b['self_stake'] - a['self_stake']).findIndex(v => v.operator_address === validator.operator_address) + 1);
+        const ssrRank = ([...validators].sort((a, b) => b['self_stake_ratio'] - a['self_stake_ratio']).findIndex(v => v.operator_address === validator.operator_address) + 1);
+        document.getElementById(`${stat.id}-helper`).innerHTML = (Math.floor((ssRank + ssrRank) / 2)) + '/' + validators.length;
+      } else {
+        document.getElementById(`${stat.id}-helper`).innerHTML = ([...validators].sort((a, b) => b[stat.field] - a[stat.field]).findIndex(v => v.operator_address === validator.operator_address) + 1) + '/' + validators.length;
+      }
+    }
   });
   
 
@@ -162,8 +200,8 @@ function generateGraph (validator) {
       const { nativeValue, usdValue } = getValueWithDecimals(data[eachDataField], eachDataField != 'percentage_sold' ? symbol : '%', usd_exchange_rate, decimals);
       const metric = document.getElementById(`validator-metric-${eachDataField}`);
       
-      metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
-      metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
+      metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + data[eachDataField].toFixed(2);
+      if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
     });
 
     const subplotGroupMapping = {
@@ -183,7 +221,15 @@ function generateGraph (validator) {
     const maxValueArray = [];
     for (let i = 0; i < subplotGroupArray.length; i++) {
       const eachSubplotGroup = subplotGroupArray[i];
-      let { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping, eachSubplotGroup);
+
+      let minValue;
+      let maxValue;
+
+      let { minValue: min, maxValue: max } = calculateMaxAndMinValue(graphDataMapping, eachSubplotGroup);
+      
+      if (eachSubplotGroup[0] != 'total_stake_sum') minValue = min
+      else minValue = 0;
+      maxValue = max;
 
       minValueArray.push(minValue);
       maxValueArray.push(maxValue);

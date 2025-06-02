@@ -51,6 +51,7 @@ block content
           { id: 'total_withdraw_sum', title: 'Total Reward' },
           { id: 'total_sold', title: 'Total Sold' },
           { id: 'percentage_sold', title: 'Percentage Sold' },
+          { id: 'price', title: `1 ${selectedChain.symbol} Price In USD` },
           { id: 'self_stake_sum', title: 'Self-Staked Amount' }
         ]
       },
@@ -61,6 +62,7 @@ block content
       { id: 'total_withdraw_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgb(50, 173, 230)', title: 'Total Reward' },
       { id: 'total_sold', unit: selectedChain.symbol || '$ATOM', color: 'rgb(88, 86, 214)', title: 'Total Sold Amount' },
       { id: 'percentage_sold', unit: selectedChain.symbol || '$ATOM', color: 'rgba(255, 149, 0, 1)', title: 'Percentage Sold' },
+      { id: 'price', unit: '$' || '$', color: 'rgba(88, 86, 214, 1)', title: `1 ${selectedChain.symbol} Price In USD` },
       { id: 'self_stake_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgba(88, 86, 214, 1)', title: 'Self-Staked Amount' }
     ]
     const timestampDifference = new Date(selectedDateTop).getTime() - new Date(selectedDateBottom).getTime()
@@ -81,7 +83,9 @@ block content
                 //-   include ../icons/chevron.pug
               .network-switch-network-currency= selectedChain.symbol || 'ATOM'
           .network-switch-main-numerical-values-wrapper
-            //- .each-network-switch-main-numerical-value(class='percentage-change-value-content') → %17.3 
+            .each-network-switch-main-numerical-value(class='percentage-change-value-content')
+              img(src='/res/images/pretty_arrow.svg')
+              span= Math.round(((priceGraphData[priceGraphData.length - 1] - priceGraphData[0]) / priceGraphData[0]) * 100) + '%'
             .each-network-switch-main-numerical-value $#{selectedChain.usd_exchange_rate}
         //- .network-switch-dropdown
         //-   .network-switch-search-bar
@@ -215,6 +219,11 @@ block content
                   .each-metric-content-wrapper-header
                     .each-metric-content-wrapper-header-icon(style=`background-color: ${metric.color}`)
                     .each-metric-content-wrapper-header-title= metric.title
+                    if metric.id == 'total_sold'
+                      .each-table-popup-wrapper(class='each-table-popup-wrapper-metric')
+                        .each-table-popup-info-content(class='center') Negative means şıngır dıngır
+                        .each-tooltip-info-hover(style='height: 10px;')
+                          img(src='/res/images/info.svg')
                   .each-metric-content-wrapper-content
                     .each-metric-content-wrapper-content-value-native
                     .each-metric-content-wrapper-content-value-usd
@@ -309,7 +318,7 @@ block content
                 .each-leaderboard-table-type-content(type=`${leaderboard.id}`)
                   .each-leaderboard-header-title= leaderboard.title
                   .each-table-header-sort-indicators
-                    div(class=`triangle-${leaderboard.triangle_direction}`)
+                    div(class=`triangle-${leaderboard.triangle_direction}` style=`margin-top: ${leaderboard.triangle_direction == 'asc' ? '-4px' : '-3px'};`)
                 if leaderboard.dropdown
                   .each-network-summary-network-graph-content-dropdown-wrapper
                     .each-network-summary-network-graph-content-dropdown-header
@@ -322,7 +331,7 @@ block content
                 .each-leaderboard-summary-data
                   .each-network-summary-stat-content= getValue(summaryData[leaderboard.summary_field], leaderboard.unit).nativeValue
                   if leaderboard.id_usd
-                    .each-network-summary-stat-footer= getValue(summaryData[leaderboard.summary_field], selectedChain.symbol).usdValue
+                    .each-network-summary-stat-footer(class='leaderboard-usd-value')= getValue(summaryData[leaderboard.summary_field], selectedChain.symbol).usdValue
                 .each-leaderboard-summary-percentage-change(class='percentage-change-value-content')= '' + Math.round((summaryData[leaderboard.summary_field] / summaryData[`initial_${leaderboard.summary_field}`]) * 100) + '%'
               each field in leaderboard.fields
                 .each-leaderboard-table-wrapper(id=`leaderboard-content-${field}` class=`${leaderboard.selected_option != field ? 'section-hidden' : ''}`)
@@ -339,12 +348,12 @@ block content
                             span %#{shortNumberFormat(validator.percentage_sold)}
                             if scoreResult.check
                               img(src='/res/images/check_green.svg' class='center')
-                        else 
-                          .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], leaderboard.unit).nativeValue
+                        else
+                          .each-leaderboard-table-validator-data(class=`${field == 'self_stake_ratio' ? 'leaderboard-value-responsive-conceal' : ''}`)= getValue(validator[`${leaderboard.id}`], leaderboard.unit).nativeValue
                         if leaderboard.id_usd 
-                          .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], 'usd').usdValue
+                          .each-leaderboard-table-validator-data(class='leaderboard-usd-value')= getValue(validator[`${leaderboard.id}`], 'usd').usdValue
                         if leaderboard.id == 'self_stake'
-                          .each-leaderboard-table-validator-data(class='percentage-change-value-content')= getValue(validator['self_stake_ratio'], '%').nativeValue
+                          .each-leaderboard-table-validator-data(class=`percentage-change-value-content ${field == 'self_stake' ? 'leaderboard-value-responsive-conceal' : ''}`)= getValue(validator['self_stake_ratio'], '%').nativeValue
                   .each-leaderboard-more-wrapper
                     div
                     div
@@ -379,19 +388,26 @@ block content
           -
             const validator_stats = [
               { id: 'validator-stat-percentage-sold', field: 'percentage_sold', title: 'Percentage sold', usdContent: false, additional_class: 'summary-percentage-text-native', type: 'percentage', helperType: 'percentage_change' },
-              { id: 'validator-stat-self-stake', field: 'self_stake', title: 'Self Stake Amount', usdContent: true, helperType: 'rank' },
-              { id: 'validator-stat-self-stake-ratio', field: 'self_stake_ratio', title: 'Average Self Stake Ratio', usdContent: false, additional_class: 'summary-percentage-text-native', type: 'percentage', helperType: 'rank' },
+              { id: 'validator-stat-self-stake', field: 'self_stake', title: 'Self Stake', usdContent: true, helperType: 'rank' },
               { id: 'validator-stat-commission-rate', title: 'Commission', field: 'commission_rate', usdContent: false, helperText: 'fee from rewards', additional_class: 'summary-percentage-text-native', helperText: 'fee from rewards' }
             ]
           each stat in validator_stats 
             .each-validator-stat-wrapper(class='body-wrapper-cell')
-              .each-network-summary-stat-header-title= stat.title
+              .each-network-summary-stat-header-title
+                span= stat.title
+                if stat.field == 'self_stake'
+                  .each-table-popup-wrapper(class='each-table-popup-wrapper-metric')
+                    .each-table-popup-info-content(class='center') Validator's own stake on itself
+                    .each-tooltip-info-hover(style='height: 10px;')
+                      img(src='/res/images/info.svg')
               .each-validator-stat-content-wrapper
                 .each-validator-stat-content
                   if stat.field == 'commission_rate'
                     .each-network-summary-stat-content(id=`${stat.id}-native` class=`${stat.id}-native ${stat.additional_class}`)= queryValidator ? formatCommission(validator[`${stat.field}`]) : ''
                   else
-                    .each-network-summary-stat-content(id=`${stat.id}-native` class=`${stat.id}-native ${stat.additional_class}`)= queryValidator ? stat.type == 'percentage' ? '%' + shortNumberFormat(validator[`${stat.field}`]) : getValue(validator[`${stat.field}`], symbol) : ''
+                    .each-network-summary-stat-content(id=`${stat.id}-native` class=`${stat.id}-native ${stat.additional_class}`) 
+                      span= queryValidator ? stat.type == 'percentage' ? '%' + shortNumberFormat(validator[`${stat.field}`]) : getValue(validator[`${stat.field}`], symbol) : ''
+                      span(class='validator-details-percentage-near-value')= queryValidator ? '%' + shortNumberFormat(validator['self_stake_ratio']) : ''
                   if stat.usdContent
                     .each-network-summary-stat-footer(id=`${stat.id}-usd` class=`${stat.id}-usd`)= queryValidator ? getValue(validator[`${stat.field}`], 'usd') : ''
                 .each-validator-stat-helper(class=`${stat.helperType == 'percentage_change' ? 'percentage-change-value-content' : ''}` id=`${stat.id}-helper`)
@@ -423,7 +439,7 @@ block content
                         .each-network-summary-network-graph-content-dropdown-content
                           each option in menu.options 
                             .each-network-summary-network-graph-content-each-dropdown(id=`validator-graph-dropdown-option-${option.id}` class=`dropdown-option-checked ${dataFields.includes(option.id) ? '' : 'section-hidden'}`)= option.title
-              .network-summary-network-graph-content-description Shows how validators respond to changes in total capitulation and delegation in the market
+              .network-summary-network-graph-content-description Shows how validators respond to changes in total capitalization and delegation in the market
             .network-summary-network-graph-content#validator-graph-container
               if queryValidator
                 script.
@@ -464,10 +480,10 @@ block content
             -
               const headers_array = [
                 {name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Withdraw - Self Stake) / Withdraw'},
-                {name: 'Delegation', id: 'total_stake'},
+                {name: 'Avg Delegation', id: 'average_total_stake'},
                 {name: 'Total Rewards', id: 'total_withdraw'},
                 {name: 'Total Sold Amount', id: 'sold', popup_text: 'Total withdraw - Self stake'},
-                {name: 'Self Stake', id: 'self_stake'},
+                {name: 'Self Stake', id: 'self_stake', popup_text: 'Validator\'s own stake on itself'},
               ]
             .validator-table-header
               .each-table-header-wrapper(class='each-table-header-validator-info-header')

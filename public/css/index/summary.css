@@ -179,6 +179,8 @@
   font-size: var(--each-network-summary-stat-header-title-font-size);
   font-weight: var(--each-network-summary-stat-header-title-font-weight);
   color: var(--each-network-summary-stat-header-title-color);
+  display: flex;
+  align-items: center;
 }
 
 .each-network-summary-stat-content {
@@ -288,10 +290,6 @@
   cursor: var(--pointer-hand-dark);
   opacity: 1;
   transition: all var(--each-metric-content-wrapper-transition-duration) ease-in-out 0s;
-}
-
-.each-metric-content-wrapper:hover {
-  opacity: calc(var(--each-metric-content-wrapper-faded-opacity) * 1.5);
 }
 
 .each-metric-content-wrapper-faded {

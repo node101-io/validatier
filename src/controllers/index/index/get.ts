@@ -3,6 +3,7 @@ import Validator from '../../../models/Validator/Validator.js';
 import Chain, { ChainInterface } from '../../../models/Chain/Chain.js';
 import { NUMBER_OF_COLUMNS } from '../../Validator/getGraphData/get.js';
 import Cache, { CacheInterface } from '../../../models/Cache/Cache.js';
+import Price from '../../../models/Price/Price.js';
 
 const indexGetController = (req: Request, res: Response): void => {
 
@@ -58,6 +59,14 @@ const indexGetController = (req: Request, res: Response): void => {
       }, (err, smallGraphData) => {
         resolve({ err: err, smallGraphData: smallGraphData });
       })
+    }),
+    new Promise((resolve) => {
+      Price.getPriceGraphData({
+        bottom_timestamp: bottomTimestamp,
+        top_timestamp: topTimestamp
+      }, (err, priceGraphData) => {
+        resolve({ err: err, priceGraphData: priceGraphData })
+      })
     })
   ])
     .then((results: Record<string, any>[]) => {
@@ -72,8 +81,8 @@ const indexGetController = (req: Request, res: Response): void => {
         percentage_sold_graph: {
           graph_title: 'Percentage Sold Graph',
           graph_description: 'Total Sold / Total Reward Withdrawn',
-          dataFields: ['percentage_sold'],
-          colors: ['rgba(255, 149, 0, 1)']
+          dataFields: ['percentage_sold', 'price'],
+          colors: ['rgba(255, 149, 0, 1)', 'rgba(88, 86, 214, 1)']
         },
         other: {
           graph_title: 'Reward Flow Overview',
@@ -93,14 +102,15 @@ const indexGetController = (req: Request, res: Response): void => {
         }
       });
 
-      const [getAllChainsResult, rankValidatorsResult, cacheResults, summaryGraphResults, smallGraphResults] = results;
+      const [getAllChainsResult, rankValidatorsResult, cacheResults, summaryGraphResults, smallGraphResults, priceGraphResults] = results;
       
       if (
-        !getAllChainsResult.value.chains || 
+        !getAllChainsResult.value.chains ||
         !rankValidatorsResult.value.results ||
-        !cacheResults.value.cache || 
+        !cacheResults.value.cache ||
         !summaryGraphResults.value.summaryGraphData ||
-        !smallGraphResults.value.smallGraphData
+        !smallGraphResults.value.smallGraphData ||
+        !priceGraphResults.value.priceGraphData
       ) return res.json({ success: false, err: 'bad_request' })
     
       const chains = getAllChainsResult.value.chains;
@@ -109,6 +119,7 @@ const indexGetController = (req: Request, res: Response): void => {
       let validators;
       let summaryGraphData;
       let smallGraphData;
+      const priceGraphData = priceGraphResults.value.priceGraphData;
 
       if (specificRange && specificRange != 'custom') {
         const cache: Record<string, any> = {};
@@ -169,7 +180,8 @@ const indexGetController = (req: Request, res: Response): void => {
         validatorGraph: {
           dataFields: ['total_stake_sum', 'total_withdraw_sum', 'total_sold'],
           colors: ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)']
-        }
+        },
+        priceGraphData
       });
     });
 };

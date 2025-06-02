@@ -3,10 +3,10 @@ function renderTableHeader (sort_by, order) {
   const validatorsWrapper = document.getElementById('validators-main-wrapper');
   const headersArray = [
     { name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Withdraw - Self Stake) / Withdraw '},
-    { name: 'Delegation', id: 'total_stake' },
+    { name: 'Avg Delegation', id: 'average_total_stake' },
     { name: 'Total Rewards', id: 'total_withdraw' },
     { name: 'Total Sold Amount', id: 'sold', popup_text: 'Total withdraw - Self stake' },
-    { name: 'Self Stake', id: 'self_stake' },
+    { name: 'Self Stake', id: 'self_stake', popup_text: 'Validator\'s own stake on itself' },
   ]
   const headersRow = document.createElement('div');
   headersRow.classList.add('validator-table-header')

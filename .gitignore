@@ -134,3 +134,5 @@ dist
 /genesis.json
 /self_stakes.json
 /total_stakes.json
+/atom_price.json
+/scrape.js

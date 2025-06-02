@@ -18,6 +18,8 @@ import { Job_SaveCache } from './cron/jobs/Job_SaveCache.js';
 import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
 import { convertOperatorAddressToBech32 } from './utils/convertOperatorAddressToBech32.js';
 import { Job_SaveChains } from './cron/jobs/Job_SaveChains.js';
+import Price from './models/Price/Price.js';
+import getTxsByHeight from './utils/getTxsByHeight.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -60,28 +62,3 @@ app.use('/', indexRouter);
 app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
-
-// const content: any = fs.readFileSync('genesis.json');
-// const stakeData = JSON.parse(content);
-
-// const validatorTotalStakeMapping: Record<string, any> = {};
-// stakeData.delegator_starting_infos.forEach((each: any) => {
-//   if (!validatorTotalStakeMapping[each.validator_address]) validatorTotalStakeMapping[each.validator_address] = 0;
-//   validatorTotalStakeMapping[each.validator_address] += parseInt(each.starting_info.stake);
-// })
-
-// fs.writeFileSync('total_stakes.json', JSON.stringify(validatorTotalStakeMapping));
-// const content: any = fs.readFileSync('total_stakes.json');
-// const totalStakesJson = JSON.parse(content);
-// const contentSelfStakes: any = fs.readFileSync('self_stakes.json');
-// const selfStakesJson = JSON.parse(contentSelfStakes);
-
-// Object.keys(totalStakesJson).forEach(eachKey => {
-//   CompositeEventBlock.findOneAndUpdate(
-//     { operator_address: eachKey, block_height: 5200791 },
-//     { total_stake: totalStakesJson[eachKey], self_stake: selfStakesJson[eachKey] || 0, total_stake_prefix_sum: totalStakesJson[eachKey], self_stake_prefix_sum: selfStakesJson[eachKey] || 0 }
-//   )
-//     .then(result => {
-//       console.log('done')
-//     })
-// })

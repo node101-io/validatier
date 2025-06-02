@@ -23,9 +23,9 @@
   --each-table-popup-info-content-bottom: 105%;
   --each-table-popup-info-content-transition-duration: 0.25s;
   --each-table-popup-info-content-height: 24px;
-  --each-table-popup-info-content-width: 108px;
-  --each-table-popup-info-content-left: -51px;
-  --each-table-popup-info-content-horizontal-padding: 5px;
+  --each-table-popup-info-content-width: fit-content;
+  --each-table-popup-info-content-left: -50%;
+  --each-table-popup-info-content-horizontal-padding: 20px;
   --each-table-popup-info-content-margin-top: -22px;
   
   --each-table-popup-info-content-before-width: 10px;
@@ -135,7 +135,7 @@
   --table-filters-subgroup-gap: 50px;
   --table-filters-subgroup-flex-grow: 0.5;
 
-  --each-table-header-sort-indicators-margin-bottom: -5px;
+  --each-table-header-sort-indicators-margin-bottom: -3px;
   --each-table-header-sort-indicators-margin-left: 5px;
   --each-table-header-sort-indicators-gap: 2px;
 
@@ -209,6 +209,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 1px;
 }
 
 .each-table-popup-info-content {
@@ -222,7 +223,7 @@
   transition: transform, opacity var(--each-table-popup-info-content-transition-duration) ease 0s;
   height: var(--each-table-popup-info-content-height);
   width: var(--each-table-popup-info-content-width);
-  left: var(--each-table-popup-info-content-left);
+  margin-left: calc(var(--each-table-popup-info-content-left) + (0.4s * var(--each-table-popup-info-content-horizontal-padding)));
   padding: 0 var(--each-table-popup-info-content-horizontal-padding);
   margin-top: var(--each-table-popup-info-content-margin-top);
   text-wrap: nowrap;
@@ -244,6 +245,14 @@
 
 .each-table-header-hover:hover .each-table-popup-info-content {
   opacity: 1;
+}
+
+.each-table-popup-wrapper-metric:hover .each-table-popup-info-content {
+  opacity: 1;
+}
+
+.each-table-popup-wrapper-metric .each-table-popup-info-content {
+  bottom: 14px;
 }
 
 .each-table-popup-info-content-hover {

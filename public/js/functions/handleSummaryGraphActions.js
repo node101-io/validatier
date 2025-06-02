@@ -60,6 +60,11 @@ function handleSummaryGraphActions() {
 function createNetworkSummaryGraph (dataFields, colors) {
   const summaryData = JSON.parse(document.body.getAttribute('summaryData'));
   const targetCacheSummaryGraphData = JSON.parse(document.body.getAttribute('summaryGraphData'));
+  
+  let priceGraphData = null;
+  if (dataFields[0] == 'percentage_sold') {
+    priceGraphData = JSON.parse(document.body.getAttribute('priceGraphData'));
+  }
 
   document.querySelectorAll('.each-network-summary-network-graph-content-each-dropdown').forEach(each => {
     if (!each.classList.contains('leaderboard-dropdown-option')) each.classList.add('section-hidden')
@@ -102,7 +107,8 @@ function createNetworkSummaryGraph (dataFields, colors) {
     total_sold: 0,
   } : {
     number_of_groups: 1,
-    percentage_sold: 0
+    percentage_sold: 0,
+    price: 0
   };
 
   const subplotGroupArray = dataFields[0] != 'percentage_sold' 
@@ -111,19 +117,22 @@ function createNetworkSummaryGraph (dataFields, colors) {
       ['total_stake_sum']
     ]
     : [
-      ['percentage_sold']
+      ['percentage_sold'],
+      ['price']
     ];
 
-  for (let i = 0; i < subplotGroupArray.length; i++) {
-    if (i == 0) continue;
-    const subplotSeperator = document.createElement('div');
-    subplotSeperator.classList.add('subplot-seperator');
-    subplotSeperator.style.bottom = `calc(${(i / subplotGroupArray.length) * 100}% - 5px)`;
-    graphWrapper.appendChild(subplotSeperator);
-  }
+  if (dataFields[0] != 'percentage_sold')
+    for (let i = 0; i < subplotGroupArray.length; i++) {
+      if (i == 0) continue;
+      const subplotSeperator = document.createElement('div');
+      subplotSeperator.classList.add('subplot-seperator');
+      subplotSeperator.style.bottom = `calc(${(i / subplotGroupArray.length) * 100}% + 5px)`;
+      graphWrapper.appendChild(subplotSeperator);
+    }
 
   for (let i = 0; i < targetCacheSummaryGraphData.length; i++) {
     const data = targetCacheSummaryGraphData[i];
+    if (priceGraphData) data['price'] = priceGraphData[i];
     
     dataFields.forEach(eachDataField => {
       if (!currentSumMapping[eachDataField]) 
@@ -131,14 +140,14 @@ function createNetworkSummaryGraph (dataFields, colors) {
           ? currentSumMapping[eachDataField] = 0
           : currentSumMapping[eachDataField] = summaryData[`initial_${eachDataField}`];
           
-      data[eachDataField] += currentSumMapping[eachDataField];
+      if (eachDataField != 'price') data[eachDataField] += currentSumMapping[eachDataField];
       currentSumMapping[eachDataField] = data[eachDataField];
 
       const { nativeValue, usdValue } = getValueWithDecimals(currentSumMapping[eachDataField], eachDataField != 'percentage_sold' ? symbol : '%', usd_exchange_rate, decimals);
       const metric = document.getElementById(`summary-metric-${eachDataField}`);
       
-      metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
-      metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
+      metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + data[eachDataField].toFixed(2);
+      if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
       
       if(!showPercentageChange && eachDataField == 'total_withdraw_sum') return;
 
@@ -153,13 +162,21 @@ function createNetworkSummaryGraph (dataFields, colors) {
     
     graphDataMapping[i] = data;
 
-    const timestamp = (new Date(data._id.year, (data._id.month || 1) - 1, (data._id.day || 1))).getTime();
+    const timestamp = data.timestamp;
     
     const minValueArray = [];
     const maxValueArray = [];
     for (let i = 0; i < subplotGroupArray.length; i++) {
       const eachSubplotGroup = subplotGroupArray[i];
-      let { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping, eachSubplotGroup);
+
+      let minValue;
+      let maxValue;
+
+      let { minValue: min, maxValue: max } = calculateMaxAndMinValue(graphDataMapping, eachSubplotGroup);
+      
+      if (eachSubplotGroup[0] != 'total_stake_sum') minValue = min
+      else minValue = 0;
+      maxValue = max;
 
       minValueArray.push(minValue);
       maxValueArray.push(maxValue);
@@ -198,6 +215,9 @@ function createNetworkSummaryGraph (dataFields, colors) {
     }
   }
 
+  const rightVerticalAxisWrapper = document.getElementById('summary-graph-vertical-axis-labels1')
+  graphWrapper.appendChild(rightVerticalAxisWrapper);
+  
   const graphColumns = graphWrapper.querySelectorAll('.each-graph-column-wrapper');
   const lastColumn = graphColumns[graphColumns.length - 1];
   lastColumn.classList.add('each-graph-column-wrapper-last');

@@ -5,7 +5,7 @@ function changeSummaryGraph (target) {
   });
 
   target.classList.add('navbar-link-selected');
-  history.replaceState(null, '', `/${target.id}`);
+  history.replaceState(null, '', `/${target.id != 'dashboard' ? target.id : ''}`);
   if (target.id != 'validators') {
     document.getElementById('validators-leaderboards-all-wrapper').classList.add('section-hidden');
     document.getElementById('network-summary-main-wrapper').classList.remove('section-hidden');
@@ -33,7 +33,7 @@ function changeSummaryGraph (target) {
 
 function resizeNavbar (navbarWrapper) {
 
-  if (window.innerWidth < 900) {
+  if (window.innerWidth < 1000) {
     document.documentElement.style.setProperty("--navbar-width", "36px");
     document.getElementById('all-main-wrapper').style.marginLeft = '76px';
     return navbarWrapper.classList.add('navbar-close');
@@ -47,7 +47,7 @@ function handleNavbar () {
   const navbarViewToggle = document.getElementById('navbar-view-toggle');
   const navbarWrapper = document.getElementById('navbar-wrapper');
 
-  if (window.innerWidth < 900 && navbarWrapper.classList.contains('navbar-close')) {
+  if (window.innerWidth < 1000 && navbarWrapper.classList.contains('navbar-close')) {
     document.documentElement.style.setProperty("--navbar-width", "30px");
     navbarViewToggle.querySelector('span').classList.add('navbar-arrow-close');
   }
@@ -76,7 +76,7 @@ function handleNavbar () {
       navbarWrapper.classList.remove('navbar-close');
       navbarViewToggle.querySelector('span').classList.remove('navbar-arrow-close');
       
-      if (window.innerWidth <= 900)
+      if (window.innerWidth <= 1000)
         navbarViewToggle.style.left = 'calc(237px - 32px - (2 * var(--navbar-horizontal-padding)) + var(--navbar-view-toggle-left))';
 
       setCookie('isNavbarClose', '');
@@ -99,7 +99,7 @@ function handleNavbar () {
   })
 
   window.addEventListener('popstate', function(event) {
-    const target = document.getElementById(window.location.pathname.replace('/', '') || 'dashboard');
+    const target = document.getElementById(window.location.pathname.replace('/', '') || '');
     return changeSummaryGraph(target);
   });
 

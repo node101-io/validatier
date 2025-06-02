@@ -632,7 +632,7 @@
   }
 }
 
-@media only screen and (max-width: 900px) {
+@media only screen and (max-width: 1000px) {
   :root {
     --selected-range-font-size: 14px;
     --picker-content-wrapper-font-size: 14px;

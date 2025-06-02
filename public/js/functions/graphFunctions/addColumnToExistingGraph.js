@@ -2,7 +2,14 @@ function addColumnToExistingGraph (params) {
   const { type, operatorAddress, data, timestamp, index, currency, decimals, usd_exchange_rate, symbol, minValue, maxValue, graphWidth, dataFields, colors, columnsPer, subplotGroupMapping } = params;
   
   const graphWrapper = document.getElementById(`validator-graph-wrapper-${operatorAddress}`);
-  if (type != 'small') addVerticalAxisLabels(graphWrapper, operatorAddress, minValue, maxValue, 6, currency, decimals, usd_exchange_rate, symbol);
+  if (type != 'small') {
+    if (dataFields[0] != 'percentage_sold')
+      addVerticalAxisLabels(graphWrapper, operatorAddress, minValue, maxValue, 6, currency, decimals, usd_exchange_rate, symbol)
+    else
+      for (let i = 0; i < minValue.length; i++) {
+        addVerticalAxisLabels(graphWrapper, operatorAddress, [minValue[i]], [maxValue[i]], 6, currency, decimals, usd_exchange_rate, symbol, i, ['%', '$'])
+      }
+  };
   
   const columnWrapper = document.createElement('div');
   columnWrapper.setAttribute('timestamp', timestamp);
@@ -10,8 +17,16 @@ function addColumnToExistingGraph (params) {
   columnWrapper.classList.add('each-graph-column-wrapper');
   columnWrapper.classList.add(`column-wrapper-${operatorAddress}`);
 
-  const addOnPx = type != 'small' ? ' - var(--vertical-axis-labels-width)' : '';
-  const addOnInt = type != 'small' ? ' - var(--vertical-axis-labels-width-int)' : '';
+  const addOnPx = type != 'small'
+    ? dataFields[0] != 'percentage_sold'
+      ? ' - var(--vertical-axis-labels-width)'
+      : ' - (var(--vertical-axis-labels-width) * 2)'
+    : '';
+  const addOnInt = type != 'small'
+    ? dataFields[0] != 'percentage_sold'
+      ? ' - var(--vertical-axis-labels-width-int)'
+      : ' - (var(--vertical-axis-labels-width-int) * 2)'
+    : '';
   document.documentElement.style.setProperty(
     `--graph-column-width-px-${operatorAddress.replace('\\@', '@')}`,
     `calc((${graphWidth}px${addOnPx}) / var(--number-of-columns-${operatorAddress}))`
@@ -36,10 +51,9 @@ function addColumnToExistingGraph (params) {
     if (!subplotGroupMapping) {
       bottom = `calc(((${value} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
     } else {
-      console.log("hwnjalnsjkndaskjnd")
       const subPlotGroup = subplotGroupMapping[eachDataField];
       const numberOfGroups = subplotGroupMapping['number_of_groups'];
-      bottom = `calc(${(100 / numberOfGroups) * subPlotGroup}% + ((${value} - var(--min-value-${operatorAddress}-${subPlotGroup})) / (var(--max-value-${operatorAddress}-${subPlotGroup}) - var(--min-value-${operatorAddress}-${subPlotGroup}))) * ${100 / numberOfGroups}%)`;
+      bottom = `calc(${(100 / numberOfGroups) * subPlotGroup}% + ((${value} - var(--min-value-${operatorAddress}-${eachDataField != 'price' ? subPlotGroup : '1'})) / (var(--max-value-${operatorAddress}-${eachDataField != 'price' ? subPlotGroup : '1'}) - var(--min-value-${operatorAddress}-${eachDataField != 'price' ? subPlotGroup : '1'}))) * ${100 / numberOfGroups}%)`;
     }
     const { point, line } = generatePointAndLine(colors[i], bottom);
 

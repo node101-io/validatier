@@ -50,7 +50,7 @@ html(lang='tr')
         --navbar-width: #{navbarWidth};
       }
   - const showPercentageChange = ((new Date(selectedDateTop).getTime() + new Date(selectedChain.first_available_block_time).getTime()) / 2) <= (new Date(selectedDateBottom)) ? true : false;
-  body(summaryGraphData=summaryGraphData smallGraphData=smallGraphData, summaryData=summaryData, validators=validators, showPercentageChange=showPercentageChange)
+  body(summaryGraphData=summaryGraphData smallGraphData=smallGraphData, summaryData=summaryData, validators=validators, showPercentageChange=showPercentageChange, priceGraphData=priceGraphData)
     .all-wrapper
       .navbar-wrapper#navbar-wrapper(class=`${isNavbarClose ? 'navbar-close' : ''}`)        
         .header-banner-wrapper
@@ -100,8 +100,8 @@ html(lang='tr')
                   graph: {
                     title: 'Percentage Sold Graph',
                     description: 'Total Sold / Total Reward Withdrawn',
-                    dataFields: ['percentage_sold'],
-                    colors: ['rgba(255, 149, 0, 1)']
+                    dataFields: ['percentage_sold', 'price'],
+                    colors: ['rgba(255, 149, 0, 1)', 'rgba(88, 86, 214, 1)']
                   }
                 },
               ]

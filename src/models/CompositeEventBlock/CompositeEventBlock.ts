@@ -38,6 +38,7 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
         total_stake?: number;
         total_withdraw?: number;
         balance_change?: number;
+        slash?: number;
       }> | null
     }, 
     callback: (
@@ -60,6 +61,7 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
         total_stake: number,
         total_withdraw: number,
         balance_change: number,
+        average_total_stake: number;
         initial_self_stake_prefix_sum: number,
         initial_reward_prefix_sum: number,
         initial_total_stake_prefix_sum: number,
@@ -278,11 +280,13 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
           operator_address: "$operator_address"
         },
         leastRecentRecord: { $first: "$$ROOT" },
-        mostRecentRecord: { $last: "$$ROOT" }
+        mostRecentRecord: { $last: "$$ROOT" },
+        average_total_stake: { $avg: '$total_stake_prefix_sum' }
       }
     },
     {
       $project: {
+        average_total_stake: '$average_total_stake',
         initial_self_stake_prefix_sum: '$leastRecentRecord.self_stake_prefix_sum',
         initial_reward_prefix_sum: '$leastRecentRecord.reward_prefix_sum',
         initial_total_stake_prefix_sum: '$leastRecentRecord.total_stake_prefix_sum',
@@ -332,6 +336,7 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
 
         if (range_id == 1) {
           mapping[operator_address] = {
+            average_total_stake: record.average_total_stake || 0,
             self_stake: record.self_stake || 0,
             reward: record.reward || 0,
             commission: record.commission || 0,
@@ -410,6 +415,7 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
       const totalStake = newCompositeEventBlock.total_stake || 0;
       const totalWithdraw = newCompositeEventBlock.total_withdraw || 0;
       const balanceChange = newCompositeEventBlock.balance_change || 0;
+      const slash = newCompositeEventBlock.slash || 0;
 
       const selfStakePrefixSum = mostRecentCompositeEventBlock.self_stake_prefix_sum ? (selfStake ? mostRecentCompositeEventBlock.self_stake_prefix_sum + selfStake : mostRecentCompositeEventBlock.self_stake_prefix_sum) : selfStake;
       const rewardPrefixSum = mostRecentCompositeEventBlock.reward_prefix_sum ? (reward ? mostRecentCompositeEventBlock.reward_prefix_sum + reward : mostRecentCompositeEventBlock.reward_prefix_sum) : reward;
@@ -426,16 +432,16 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
         timestamp: timestamp,
         block_height: block_height,
         operator_address: operatorAddress,
-        self_stake: selfStake || 0,
+        self_stake: (selfStake || 0) - (slash * (slash / (totalStakePrefixSum || 1))),
         reward: reward || 0,
         commission: commission || 0,
-        total_stake: totalStake || 0,
+        total_stake: (totalStake || 0) - slash,
         total_withdraw: totalWithdraw || 0,
         balance_change: balanceChange || 0,
         reward_prefix_sum: rewardPrefixSum,
         self_stake_prefix_sum: selfStakePrefixSum,
         commission_prefix_sum: commissionPrefixSum,
-        total_stake_prefix_sum: totalStakePrefixSum,
+        total_stake_prefix_sum: totalStakePrefixSum - slash,
         total_withdraw_prefix_sum: totalWithdrawPrefixSum,
         balance_change_prefix_sum: balanceChangePrefixSum
       }

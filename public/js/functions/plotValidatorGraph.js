@@ -2,6 +2,8 @@
 function plotValidatorGraph(params) {
   const { type, operatorAddress, decimals, usd_exchange_rate, symbol, dataFields, graphContainer, summaryData } = params;
 
+  const priceGraphData = JSON.parse(document.body.getAttribute('priceGraphData'));
+
   if (document.getElementById(`validator-graph-wrapper-${operatorAddress}`)) document.getElementById(`validator-graph-wrapper-${operatorAddress}`).remove();
   
   const graphWrapper = document.createElement('div');
@@ -99,8 +101,8 @@ function plotValidatorGraph(params) {
         const key = operatorAddress == 'summary' ? 'summary' : 'validator';
         const metric = document.getElementById(`${key}-metric-${eachDataField}`);
 
-        metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
-        metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
+        metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + parseFloat(deltaMapping[eachDataField]).toFixed(2);
+        if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
       
         metric.querySelector('.percentage-change-value-content').innerHTML = '';
         const arrow = document.createElement('img');
@@ -108,6 +110,7 @@ function plotValidatorGraph(params) {
         metric.querySelector('.percentage-change-value-content').appendChild(arrow);
         const text = document.createElement('span');
         text.innerHTML = Math.round((deltaValue / (summaryData[`initial_${eachDataField}`] + Math.min(value_1, value_2))) * 100) + '%';
+        if (eachDataField == 'price') text.innerHTML = Math.round((deltaValue / (priceGraphData[priceGraphData.length - 1] + Math.min(value_1, value_2))) * 100) + '%';
         metric.querySelector('.percentage-change-value-content').appendChild(text);
       })
 

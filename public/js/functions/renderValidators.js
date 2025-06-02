@@ -135,7 +135,7 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     };
 
     const percentageSoldTd = createPercentageSoldTd(validator.percentage_sold);
-    const delegationTd = createCurrencyTd(validator.total_stake);
+    const delegationTd = createCurrencyTd(validator.average_total_stake);
     const totalRewardsTd = createCurrencyTd(validator.total_withdraw);
     const totalSoldAmountTd = createCurrencyTd(validator.sold);
     const selfStakeTd = createCurrencyTd(validator.self_stake);
@@ -160,7 +160,7 @@ function renderValidators() {
 
   const sortOrderMapping = {
     percentage_sold: '',
-    total_stake: '',
+    average_total_stake: '',
     total_withdraw: '',
     sold: '',
     self_stake: '',

@@ -3,25 +3,23 @@ function handleNewsLetter() {
   const contactTextContent = document.getElementById('contact-text');
   const contactInput = document.getElementById('contact-message-input');
 
-  const { protocol, host } = window.location;
-  const BASE_URL = `${protocol}//${host}/`;
-  const API_ENDPOINT = 'validator/contact';
-
   contactSubmit.addEventListener('click', (event) => {
-    if (!contactInput.value) return;
-    const url = BASE_URL + API_ENDPOINT + `?email_address=${contactInput.value}`;
-    serverRequest(url, 'GET', {}, (response) => {
-      if (response.success) {
-        contactTextContent.innerHTML = 'Thank you for joining our community!'
-        setTimeout(() => {
-          contactTextContent.innerHTML = 'Please contact us if you would like to contribute.'
-        }, 10 * 1000);
-      } else {
-        contactTextContent.innerHTML = 'Please enter a valid email address.'
-        setTimeout(() => {
-          contactTextContent.innerHTML = 'Please contact us if you would like to contribute.'
-        }, 2 * 1000);
-      }
-    })
+    fetch("https://node101.io/subscribe", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+      email: contactInput.value, type: 'validatier'
+    }),
+  })
+    .then(res => res.json()).then(res => {
+      console.log(res)
+      if ((!res || res.error) && res.error !== 'duplicated_unique_field') throw new Error(res.error);
+      if (res.error) return contactTextContent.innerHTML = 'You have already joinned the waitlist!';
+      return contactTextContent.innerHTML = 'Thank you for joining the community!';;
+    }).catch(err => {
+      contactTextContent.innerHTML = 'Please enter an valid input.'
+      setTimeout(() => {
+        contactTextContent.innerHTML = 'Please contact us if you would like to contribute.'
+      }, 2000);
+    });
   })
 }

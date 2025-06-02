@@ -81,6 +81,7 @@ export const listenForEvents = (
                     total_stake: 0,
                     total_withdraw: 0,
                     balance_change: 0,
+                    slash: 0
                   };
                 }
                 if (!compositeEventBlockMap[eachMessage.value.validatorDstAddress]) {
@@ -91,6 +92,7 @@ export const listenForEvents = (
                     total_stake: 0,
                     total_withdraw: 0,
                     balance_change: 0,
+                    slash: 0
                   };
                 }
               } else if (!compositeEventBlockMap[key]) 
@@ -101,6 +103,7 @@ export const listenForEvents = (
                   total_stake: 0,
                   total_withdraw: 0,
                   balance_change: 0,
+                  slash: 0
                 };
                 
               if (
@@ -155,7 +158,6 @@ export const listenForEvents = (
                   '/cosmos.staking.v1beta1.MsgDelegate',
                   '/cosmos.staking.v1beta1.MsgUndelegate',
                   '/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation',
-                  'slash'
                 ].includes(eachMessage.typeUrl)
               ) {
                 if (!eachMessage.value || !eachMessage.value.amount || !eachMessage.value.amount.amount) continue;
@@ -181,6 +183,8 @@ export const listenForEvents = (
                 compositeEventBlockMap[key].balance_change += eachMessage.typeUrl == 'coin_received'
                   ? changeAmount
                   : -changeAmount;
+              } else if (['slash'].includes(eachMessage.typeUrl)) {
+                compositeEventBlockMap[key].slash += eachMessage.value.amount;
               }
             }
             resolve();

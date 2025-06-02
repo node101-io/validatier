@@ -1,11 +1,11 @@
 :root {
   --validator-graph-wrapper-min-width: 100%;
   --validator-graph-wrapper-max-width: 100%;
-  --validator-graph-wrapper-height: 260px;
+  --validator-graph-wrapper-height: 240px;
   --validator-graph-wrapper-transition-duration: 0.5s;
   --validator-graph-wrapper-vertical-padding: 10px;
   --validator-graph-wrapper-horizontal-padding: 0;
-  --validator-graph-wrapper-bottom-padding: 0px;
+  --validator-graph-wrapper-bottom-padding: 10px;
 
   --validator-graph-wrapper-small-min-width: 100px;
   --validator-graph-wrapper-small-max-width: 100px;
@@ -31,8 +31,8 @@
   
   --each-data-point-horizontal-label-hovered-font-weight: 800;
   
-  --vertical-axis-labels-width: 75px;
-  --vertical-axis-labels-width-int: 75;
+  --vertical-axis-labels-width: 40px;
+  --vertical-axis-labels-width-int: 40;
   --vertical-axis-labels-border-right-size: 0px;
 
   --each-vertical-label-font-size: 12px;
@@ -133,13 +133,13 @@
 .vertical-axis-labels {
   min-width: var(--vertical-axis-labels-width);
   max-width: var(--vertical-axis-labels-width);
-  height: 100%;
+  height: calc(100% + 20px);
   display: flex;
   flex-direction: column-reverse;
   justify-content: space-between;
   text-wrap: nowrap;
   align-items: center;
-  bottom: 0;
+  margin-top: -10px;
   border-right: var(--vertical-axis-labels-border-right-size) solid var(--color-triangle-unselected);
 }
 
