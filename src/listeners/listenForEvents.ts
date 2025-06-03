@@ -174,11 +174,17 @@ export const listenForEvents = (
                 ['/cosmos.staking.v1beta1.MsgBeginRedelegate'].includes(eachMessage.typeUrl)
               ) {
                 const bech32SrcOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorSrcAddress, chain.denom);
+                const bech32DstOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorDstAddress, chain.denom);
+                
                 const value = parseInt(eachMessage.value.amount.amount);
+                
                 compositeEventBlockMap[eachMessage.value.validatorSrcAddress].total_stake += (value * -1);
                 if (bech32SrcOperatorAddress == eachMessage.value.delegatorAddress)
                   compositeEventBlockMap[eachMessage.value.validatorSrcAddress].self_stake += (value * -1);
+                
                 compositeEventBlockMap[eachMessage.value.validatorDstAddress].total_stake += value;
+                if (bech32DstOperatorAddress == eachMessage.value.delegatorAddress)
+                  compositeEventBlockMap[eachMessage.value.validatorDstAddress].self_stake += value;
               } else if (
                 ['coin_spent', 'coin_received'].includes(eachMessage.typeUrl)
               ) {
