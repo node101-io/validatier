@@ -112,6 +112,9 @@ export const listenForEvents = (
                   '/cosmos.staking.v1beta1.MsgEditValidator'
                 ].includes(eachMessage.typeUrl)
               ) {
+                if (
+                  !eachMessage.value.pubkey || !eachMessage.value.description.moniker
+                ) continue;
                 const pubkey: ArrayBuffer = eachMessage.value.pubkey.value;
                 const byteArray = new Uint8Array(Object.values(pubkey).slice(2));
                 const pubkeyBase64 = btoa(String.fromCharCode(...byteArray));
