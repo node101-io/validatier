@@ -479,6 +479,9 @@ validatorSchema.statics.rankValidators = function (
       let totalSelfStakeRatio = 0;
       let initialTotalSelfStakeRatio = 0;
 
+      let totalPercentageSold = 0;
+      let initialTotalPercentageSold = 0;
+
       const [validatorsResult, getPeriodicDataForValidatorSetResult] = results;
       if (
         validatorsResult.status == 'rejected' || 
@@ -512,14 +515,26 @@ validatorSchema.statics.rankValidators = function (
         const sold = ((reward + commission) || 0) - (self_stake || 0);
         const initial_sold = ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 0) - (initial_self_stake_prefix_sum || 0);
         
-        const percentage_sold = Math.min(
+        let percentage_sold = 101;
+        if (self_stake != 0 && (reward + commission) != 0) {
+          percentage_sold = Math.min(
+            Math.max(
+              ((sold <= 0 ? 0 : sold) / ((reward + commission) || 1) * 100), 
+              0
+            ), 
+            100
+          );
+
+          totalPercentageSold += percentage_sold;
+        }
+
+        const initial_percentage_sold = Math.min(
           Math.max(
-            ((sold || 1) / ((reward + commission) || 1) * 100), 
-            -100
+            ((initial_sold <= 0 ? 0 : initial_sold) / ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 1) * 100), 
+            0
           ), 
           100
         );
-        const initial_percentage_sold = (initial_sold || 1) / ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 1) * 100;
 
         const self_stake_ratio = Math.min(Math.abs(self_stake / (total_stake || 1)), 1) * 100;
         const initial_self_stake_ratio = Math.min(Math.abs(initial_self_stake_prefix_sum / (initial_total_stake_prefix_sum || 1)), 1) * 100;
@@ -527,8 +542,8 @@ validatorSchema.statics.rankValidators = function (
         totalDelegation += total_stake;
         initialTotalDelegation += initial_total_stake_prefix_sum;
         
-        totalWithdrawn += total_withdraw;
-        initialTotalWithdrawn += initial_total_withdraw_prefix_sum;
+        totalWithdrawn += (reward + commission);
+        initialTotalWithdrawn += (initial_reward_prefix_sum + initial_commission_prefix_sum);
         
         totalSelfStaked += self_stake;
         initialTotalSelfStaked += initial_self_stake_prefix_sum;
@@ -538,6 +553,8 @@ validatorSchema.statics.rankValidators = function (
 
         totalSelfStakeRatio += self_stake_ratio;
         initialTotalSelfStakeRatio += initial_self_stake_ratio;
+
+        initialTotalPercentageSold += initial_percentage_sold;
 
         const pushObjectData = {
           pubkey: eachValidator.pubkey || '',
@@ -551,7 +568,8 @@ validatorSchema.statics.rankValidators = function (
           reward, initial_reward_prefix_sum,
           commission, initial_commission_prefix_sum,
           total_stake, initial_total_stake_prefix_sum,
-          total_withdraw, initial_total_withdraw_prefix_sum,
+          total_withdraw: (reward + commission),
+          initial_total_withdraw_prefix_sum: (initial_reward_prefix_sum + initial_commission_prefix_sum),
           percentage_sold, initial_percentage_sold,
           self_stake_ratio, initial_self_stake_ratio,
           average_total_stake: average_total_stake,
@@ -574,8 +592,8 @@ validatorSchema.statics.rankValidators = function (
         const valB = b[sort_by] || 0;
     
         if (valA == valB && sort_by == 'percentage_sold') {
-            const secA = a['total_stake'] || 0;
-            const secB = b['total_stake'] || 0;
+            const secA = a['average_total_stake'] || 0;
+            const secB = b['average_total_stake'] || 0;
             return (order == 'asc' || order == 1)
                 ? secB - secA
                 : secA - secB;
@@ -593,8 +611,8 @@ validatorSchema.statics.rankValidators = function (
           total_sold: totalWithdrawnValidator - totalSelfStaked,
           initial_total_sold: initialTotalWithdrawnValidator - initialTotalSelfStaked,
           initial_percentage_sold: (((initialTotalWithdrawnValidator - initialTotalSelfStaked) / initialTotalWithdrawnValidator) * 100),
-          percentage_sold: (((totalWithdrawnValidator - totalSelfStaked) / totalWithdrawnValidator) * 100),
-          initial_self_stake_sum: initialTotalSelfStaked,
+          percentage_sold: (totalPercentageSold / valueArray.length),
+          initial_self_stake_sum: (initialTotalPercentageSold / valueArray.length),
           self_stake_sum: totalSelfStaked,
           initial_average_self_stake_ratio: initialTotalSelfStakeRatio / valueArray.length,
           average_self_stake_ratio: totalSelfStakeRatio / valueArray.length
@@ -773,35 +791,37 @@ validatorSchema.statics.getSummaryGraphData = function (
           ]
         },
         percentage_sold: {
-          $cond: [
-            { $gt: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
+          $multiply: [
+            100,
             {
-              $min: [
+              $max: [
                 {
-                  $abs: {
-                    $divide: [
-                      {
-                        $subtract: [
-                          { $add: ['$reward_sum', '$commission_sum'] },
-                          '$self_stake_sum'
-                        ]
-                      },
-                      {
-                        $cond: [
-                          { $eq: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
-                          1,
-                          { $add: ['$reward_sum', '$commission_sum'] }
-                        ]
-                      }
-                    ]
-                  }
+                  $min: [
+                    {
+                      $divide: [
+                        {
+                          $subtract: [
+                            { $add: ['$reward_sum', '$commission_sum'] },
+                            '$self_stake_sum'
+                          ]
+                        },
+                        {
+                          $cond: [
+                            { $eq: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
+                            1,
+                            { $add: ['$reward_sum', '$commission_sum'] }
+                          ]
+                        }
+                      ]
+                    },
+                    1
+                  ]
                 },
-                1
+                0
               ]
-            },
-            0
+            }
           ]
-        }    
+        }
       }
     },
     {
@@ -828,12 +848,12 @@ validatorSchema.statics.getSummaryGraphData = function (
           const fake = {
             _id: { bucket: bucketIndex },
             timestamp: lastValue ? lastValue.timestamp : 0,
-            self_stake_sum: lastValue ? lastValue.self_stake_sum : 0,
-            reward_sum: lastValue ? lastValue.reward_sum : 0,
-            commission_sum: lastValue ? lastValue.commission_sum : 0,
-            total_stake_sum: lastValue ? lastValue.total_stake_sum : 0,
-            total_withdraw_sum: lastValue ? lastValue.total_withdraw_sum : 0,
-            total_sold: lastValue ? lastValue.total_sold : 0,
+            self_stake_sum: 0,
+            reward_sum: 0,
+            commission_sum: 0,
+            total_stake_sum: 0,
+            total_withdraw_sum: 0,
+            total_sold: 0,
             percentage_sold: lastValue ? lastValue.percentage_sold : 0,
           };
           result.push(fake);

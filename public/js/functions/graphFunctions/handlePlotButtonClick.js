@@ -140,7 +140,7 @@ function generateGraph (validator) {
   }
   
   const graphDataMapping = {};
-  const dataFields = ['total_stake_sum', 'total_withdraw_sum', 'total_sold'];
+  const dataFields = ['total_stake_sum', 'total_withdraw_sum', 'self_stake_sum'];
   const colors = ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)'];
     
   dataFields.forEach(eachDataField => {
@@ -207,12 +207,12 @@ function generateGraph (validator) {
     const subplotGroupMapping = {
       number_of_groups: 2,
       total_stake_sum: 1,
-      total_withdraw_sum: 0,
-      total_sold: 0,
+      total_withdraw_sum: 1,
+      self_stake_sum: 0,
     };
 
     const subplotGroupArray = [
-      ['total_withdraw_sum', 'total_sold'],
+      ['total_withdraw_sum', 'self_stake_sum'],
       ['total_stake_sum']
     ];
 

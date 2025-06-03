@@ -145,6 +145,7 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
   monthWrapper.innerHTML = '';
 
   const clickEventListener = (event) => {
+
     if (event.target.classList.contains('selected-range') || event.target.parentNode.classList.contains('selected-range') || event.target.parentNode.parentNode.classList.contains('selected-range')) {
       
       let target = event.target;
@@ -241,15 +242,13 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
     updateDateInputs();
   }
 
-  const calendarFormatToggle = document.getElementById('calendar-format-toggle');
-
   const previousMonthListener = (event) => {
     currentMonthValue--;
     if (currentMonthValue == 0) {
       currentMonthValue = 12;
       currentYearValue--;
     }
-    handleCalendarEvents(currentYearValue, currentMonthValue, calendarFormatToggle.value);
+    handleCalendarEvents(currentYearValue, currentMonthValue, 'monday');
   }
 
   const nextMonthListener = (event) => {
@@ -258,36 +257,7 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
       currentMonthValue = 1;
       currentYearValue++;
     }
-    handleCalendarEvents(currentYearValue, currentMonthValue, calendarFormatToggle.value);
-  }
-
-  const changeCalendarFormat = (event) => {
-    let target = event.target;
-    while (target != document.body && !target.classList.contains('each-start-day-choice')) target = target.parentNode;
-    if (!target.classList.contains('each-start-day-choice')) return;
-
-    calendarFormatToggle.value = target.getAttribute('value');
-    target.parentNode.querySelectorAll('.general-choice-radio-button-inner-circle')
-      .forEach(each => {
-        if (each.getAttribute('value') == target.getAttribute('value')) return each.style.display = 'unset';
-        return each.style.display = 'none';
-      })
-
-    const startDayMonday = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-    const startDaySunday = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-
-    const arrayToBeUsedToGenerateTopDaysContent = calendarFormatToggle.value == 'sunday' ? startDaySunday : startDayMonday;
-    const daysMainWrapper = document.getElementById('days-main-wrapper');
-    daysMainWrapper.innerHTML = '';
-    arrayToBeUsedToGenerateTopDaysContent.forEach(eachDayLabel => {
-      const eachDayLabelSpan = document.createElement('span');
-      eachDayLabelSpan.classList.add('day');
-      eachDayLabelSpan.innerHTML = eachDayLabel;
-      daysMainWrapper.appendChild(eachDayLabelSpan);
-    })
-
-    setCookie('startDay', calendarFormatToggle.value);
-    handleCalendarEvents(currentYearValue, currentMonthValue, calendarFormatToggle.value);
+    handleCalendarEvents(currentYearValue, currentMonthValue, 'monday');
   }
 
   generateMonthContent(currentYearValue, currentMonthValue, startDay);
@@ -304,7 +274,4 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
   
   document.addEventListener('click', clickEventListener);
   eventListeners.push({ element: document, event: 'click', listener: clickEventListener });
-
-  document.body.addEventListener('click', changeCalendarFormat);
-  eventListeners.push({ element: document.body, event: 'click', listener: changeCalendarFormat });
 }

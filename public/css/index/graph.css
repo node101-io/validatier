@@ -196,7 +196,10 @@
 
 .subplot-seperator {
   width: calc(100% - var(--vertical-axis-labels-width));
-  border-top: 1px dashed var(--each-data-indicator-vertical-line-border-color);
+  height: 1px; 
+  background-color: var(--each-data-indicator-vertical-line-border-color);
+  border: 4px solid var(--body-main-wrapper-background);
   position: absolute;
   left: var(--vertical-axis-labels-width);
+  z-index: 101;
 }

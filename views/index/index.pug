@@ -519,7 +519,10 @@ block content
                   if `${header.id}` == 'percentage_sold'
                     - const scoreResult = getScoreColor(validator.percentage_sold)
                     .validator-each-numeric-info(class='validator-percentage-sold' style=`color: ${scoreResult.color}`)
-                      span %#{shortNumberFormat(validator.percentage_sold)}
+                      if validator.percentage_sold <= 100
+                        span %#{shortNumberFormat(validator.percentage_sold)}
+                      else
+                        span % N/A
                       if scoreResult.check
                         img(src='/res/images/check_green.svg' class='center')
                   else

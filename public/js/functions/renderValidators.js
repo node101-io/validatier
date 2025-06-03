@@ -101,7 +101,10 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
       td.style.color = color;
 
       const span = document.createElement('span');
-      span.innerHTML = `%${shortNumberFormat(value)}`;
+      if (value <= 100)
+        span.innerHTML = `%${shortNumberFormat(value)}`;
+      else
+        span.innerHTML = `% N/A`;
       td.appendChild(span);
       if (check) {
         const checkImgContent = document.createElement('img');

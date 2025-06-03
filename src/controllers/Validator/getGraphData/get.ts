@@ -91,6 +91,7 @@ export default (req: Request, res: Response): any => {
               data: {
                 total_stake_sum: total_stake || 1,
                 total_withdraw_sum: total_withdraw || 1,
+                self_stake_sum: self_stake || 1,
                 total_sold: ((reward + commission) - self_stake) || 1,
                 timestamp: bottomTimestamp + i * stepValue,
                 index: i

@@ -140,7 +140,10 @@ function createNetworkSummaryGraph (dataFields, colors) {
           ? currentSumMapping[eachDataField] = 0
           : currentSumMapping[eachDataField] = summaryData[`initial_${eachDataField}`];
           
-      if (eachDataField != 'price') data[eachDataField] += currentSumMapping[eachDataField];
+      if (
+        eachDataField != 'price' &&
+        eachDataField != 'percentage_sold'
+      ) data[eachDataField] += currentSumMapping[eachDataField];
       currentSumMapping[eachDataField] = data[eachDataField];
 
       const { nativeValue, usdValue } = getValueWithDecimals(currentSumMapping[eachDataField], eachDataField != 'percentage_sold' ? symbol : '%', usd_exchange_rate, decimals);
@@ -174,7 +177,11 @@ function createNetworkSummaryGraph (dataFields, colors) {
 
       let { minValue: min, maxValue: max } = calculateMaxAndMinValue(graphDataMapping, eachSubplotGroup);
       
-      if (eachSubplotGroup[0] != 'total_stake_sum') minValue = min
+      if (
+        eachSubplotGroup[0] != 'total_stake_sum' &&
+        eachSubplotGroup[0] != 'percentage_sold' &&
+        eachSubplotGroup[0] != 'price'
+      ) minValue = min
       else minValue = 0;
       maxValue = max;
 
