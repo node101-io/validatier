@@ -136,7 +136,7 @@ function createNetworkSummaryGraph (dataFields, colors) {
     
     dataFields.forEach(eachDataField => {
       if (!currentSumMapping[eachDataField]) 
-        !['total_stake_sum', 'self_stake_sum'].includes(eachDataField)
+        !['total_stake_sum'].includes(eachDataField)
           ? currentSumMapping[eachDataField] = 0
           : currentSumMapping[eachDataField] = summaryData[`initial_${eachDataField}`];
           

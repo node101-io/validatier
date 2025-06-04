@@ -24,9 +24,7 @@ export const LISTENING_EVENTS = [
   '/cosmos.staking.v1beta1.MsgBeginRedelegate',
   '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
   '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission',
-  'slash',
-  'coin_spent',
-  'coin_received'
+  'slash'
 ];
 
 export const listenForEvents = (
@@ -172,8 +170,8 @@ export const listenForEvents = (
               } else if (
                 ['/cosmos.staking.v1beta1.MsgBeginRedelegate'].includes(eachMessage.typeUrl)
               ) {
-                const bech32SrcOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorSrcAddress, chain.denom);
-                const bech32DstOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorDstAddress, chain.denom);
+                const bech32SrcOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorSrcAddress, chain.bech32_prefix);
+                const bech32DstOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorDstAddress, chain.bech32_prefix);
                 
                 const value = parseInt(eachMessage.value.amount.amount);
                 
