@@ -14,10 +14,10 @@
   --each-data-point-max-width: 10px;
   --each-data-point-min-width: 10px;
   --each-data-point-margin-bottom: -5px;
-  --each-data-point-z-index: 20; 
+  --each-data-point-z-index: 32; 
   
   --each-data-line-height: 2px;
-  --each-data-line-z-index: 10;
+  --each-data-line-z-index: 32;
   --each-data-line-transition-duration: 0.25s;
   
   --horizontal-axis-label-font-size: 8px;
@@ -25,9 +25,9 @@
   --horizontal-axis-label-transform-rotate-deg: 0deg;
   --horizontal-axis-label-transition-duration: 0s;
   --horizontal-axis-label-width: 20px;
-  --horizontal-axis-label-bottom: 0;
+  --horizontal-axis-label-bottom: -10px;
   --horizontal-axis-label-left: -10px;
-  --horizontal-axis-label-z-index: 20;
+  --horizontal-axis-label-z-index: 50;
   
   --each-data-point-horizontal-label-hovered-font-weight: 800;
   
@@ -35,7 +35,7 @@
   --vertical-axis-labels-width-int: 40;
   --vertical-axis-labels-border-right-size: 0px;
 
-  --each-vertical-label-font-size: 12px;
+  --each-vertical-label-font-size: 14px;
   --each-vertical-label-font-weight: 400;
   --each-vertical-label-margin-right: auto;
   --each-vertical-label-width: 40px;
@@ -77,6 +77,21 @@
 .each-graph-column-wrapper {
   height: 100%;
   position: relative;
+}
+
+.each-graph-column-wrapper::before, .column-wrapper-summary-subplot::after {
+  content: '';
+  width: 100%;
+  background-color: var(--body-main-wrapper-background);
+  position: absolute;
+  bottom: -10px;
+  height: 10px;
+  z-index: 35;
+}
+
+.column-wrapper-summary-subplot::after {
+  height: calc(50% + 15px);
+  z-index: 15;
 }
 
 .each-graph-column-wrapper-last {
@@ -139,7 +154,7 @@
   justify-content: space-between;
   text-wrap: nowrap;
   align-items: center;
-  margin-top: -10px;
+  margin-top: -15px;
   border-right: var(--vertical-axis-labels-border-right-size) solid var(--color-triangle-unselected);
 }
 
@@ -180,6 +195,7 @@
   position: absolute;
   opacity: 0;
   transition: all var(--each-data-indicator-vertical-line-transition-duration) ease 0s;
+  z-index: 32;
 }
 
 .each-data-indicator-vertical-line-visible {
@@ -192,13 +208,14 @@
   height: 100%;
   right: 0;
   z-index: 0;
+  z-index: 32;
 }
 
 .subplot-seperator {
   width: calc(100% - var(--vertical-axis-labels-width));
   height: 1px; 
   background-color: var(--each-data-indicator-vertical-line-border-color);
-  border: 4px solid var(--body-main-wrapper-background);
+  border: 1px solid var(--body-main-wrapper-background);
   position: absolute;
   left: var(--vertical-axis-labels-width);
   z-index: 101;

@@ -52,7 +52,17 @@ html(lang='tr')
   - const showPercentageChange = ((new Date(selectedDateTop).getTime() + new Date(selectedChain.first_available_block_time).getTime()) / 2) <= (new Date(selectedDateBottom)) ? true : false;
   body(summaryGraphData=summaryGraphData smallGraphData=smallGraphData, summaryData=summaryData, validators=validators, showPercentageChange=showPercentageChange, priceGraphData=priceGraphData)
     .all-wrapper
-      .navbar-wrapper#navbar-wrapper(class=`${isNavbarClose ? 'navbar-close' : ''}`)        
+      .navbar-wrapper#navbar-wrapper
+        script.
+          (function () {
+            const navbar = document.getElementById('navbar-wrapper');
+            const isNavbarClose = '#{isNavbarClose}';
+            if (window.innerWidth < 1000 || isNavbarClose == 'false') {
+              navbar.classList.add('navbar-close');
+            } else {
+              navbar.classList.remove('navbar-close');
+            }
+          })();
         .header-banner-wrapper
           .banner-logo-wrapper(class='center')
             img(src='/res/images/logo.svg', alt='node101' class='center')

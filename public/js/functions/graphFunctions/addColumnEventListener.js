@@ -49,7 +49,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
         arrow.src = '/res/images/pretty_arrow.svg';
         metric.querySelector('.percentage-change-value-content').appendChild(arrow);
         const text = document.createElement('span');
-        text.innerHTML = Math.round((columnWrapper.getAttribute(eachDataField) / summaryData[`initial_${eachDataField}`]) * 100) + '%';
+        text.innerHTML = (Math.round((columnWrapper.getAttribute(eachDataField) / summaryData[`initial_${eachDataField}`]) * 100) + '%').toString().replace('Infinity', '-');
         metric.querySelector('.percentage-change-value-content').appendChild(text);
       });
     
@@ -128,7 +128,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
 
         current.querySelectorAll('.each-data-line').forEach((eachLine, i) => {
           const dataField = dataFields[i];
-          eachLine.style.zIndex = `${(sortedKeys.indexOf(dataField) + 1) * 10}`;
+          eachLine.style.zIndex = (i + 1) * 10;
         })
 
         current.querySelectorAll('.graph-range-paint-bar').forEach((eachPaintBar, i) => {
@@ -141,7 +141,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
           eachPaintBar.style.backgroundColor = color;
           eachPaintBar.style.borderRight = `1px solid ${color}`;
           
-          eachPaintBar.style.zIndex = `${(sortedKeys.indexOf(dataField) + 1) * 10}`;
+          eachPaintBar.style.zIndex = (i + 1) * 10;
         })
 
         validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn = current;

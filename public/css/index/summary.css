@@ -33,13 +33,13 @@
   
   --each-network-summary-stat-height: 108px;
   --each-network-summary-stat-width: 33%;
-  --each-network-summary-stat-padding: 10px;
+  --each-network-summary-stat-padding: 16px;
   --each-network-summary-stat-border-radius: 20px;
   
   --each-network-summary-stat-column-max-width: 50%;
   
-  --each-network-summary-stat-header-title-font-weight: 600;
-  --each-network-summary-stat-header-title-font-size: 12px;
+  --each-network-summary-stat-header-title-font-weight: 400;
+  --each-network-summary-stat-header-title-font-size: 14px;
   --each-network-summary-stat-header-title-color: rgba(124, 112, 195, 1);
   
   --each-network-summary-stat-content-font-size: 18px;
@@ -49,7 +49,7 @@
   --stat-value-font-large-font-size: 28px !important;
   --stat-value-font-large-color: rgba(73, 48, 111, 1);
   
-  --each-network-summary-stat-footer-font-size: 12px;
+  --each-network-summary-stat-footer-font-size: 14px;
   --each-network-summary-stat-footer-color: rgba(124, 112, 195, 1);
   --each-network-summary-stat-footer-font-weight: 400;
   
@@ -71,7 +71,7 @@
   --network-summary-network-graph-content-title-font-weight: 500;
   --network-summary-network-graph-content-title-color: rgba(37, 0, 84, 1);
   
-  --network-summary-network-graph-content-description-font-size: 12px;
+  --network-summary-network-graph-content-description-font-size: 14px;
   --network-summary-network-graph-content-description-font-weight: 400;
   --network-summary-network-graph-content-description-color: rgba(124, 112, 195, 1);
   
@@ -79,17 +79,17 @@
   --network-summary-network-graph-metrics-wrapper-gap: 12px;
   --network-summary-network-graph-metrics-wrapper-flex-direction: column;
 
-  --network-summary-network-graph-metrics-content-wrapper-gap: 10px;
+  --network-summary-network-graph-metrics-content-wrapper-gap: 16px;
   
   --each-metric-content-wrapper-border-radius: 20px;
   --each-metric-content-wrapper-height: 100px;
-  --each-metric-content-wrapper-padding: 10px;
+  --each-metric-content-wrapper-padding: 16px;
   --each-metric-content-wrapper-faded-opacity: 0.5;
   --each-metric-content-wrapper-transition-duration: 0.25s;
   
   --each-metric-content-wrapper-header-icon-width: 7px;
   
-  --each-metric-content-wrapper-header-font-size: 12px;
+  --each-metric-content-wrapper-header-font-size: 14px;
   --each-metric-content-wrapper-header-color: rgba(124, 112, 195, 1);
   --each-metric-content-wrapper-header-gap: 10px;
   
@@ -105,7 +105,7 @@
   --each-metric-content-wrapper-content-value-usd-font-size: 16px;
   --each-metric-content-wrapper-content-value-usd-color: rgba(124, 112, 195, 1);
   
-  --each-metric-content-wrapper-footer-font-size: 12px;
+  --each-metric-content-wrapper-footer-font-size: 14px;
   --each-metric-content-wrapper-footer-font-weight: 400;
   --each-metric-content-wrapper-footer-color: rgba(124, 112, 195, 1);
    
@@ -165,6 +165,7 @@
   border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
   border-radius: var(--each-network-summary-stat-border-radius);
   justify-content: space-between;
+  position: relative;
 }
 
 .each-network-summary-stat-column {
@@ -187,6 +188,8 @@
   font-size: var(--each-network-summary-stat-content-font-size);
   font-weight: var(--each-network-summary-stat-content-font-weight);
   color: var(--each-network-summary-stat-content-color);
+  line-height: 12px;
+  margin-bottom: 2px;
 }
 
 .stat-value-font-large {
@@ -538,6 +541,7 @@
 
 .percentage-sold-main-circle span {
   position: absolute;
+  margin-bottom: 4px;
   left: 4px;
   z-index: var(--percentage-sold-main-circle-span-z-index);
 }
@@ -557,17 +561,46 @@
 
 .percentage-sold-inner-circle span {
   position: absolute;
+  margin-bottom: 4px;
   right: 4px;
   text-align: end;
 }
 
 .summary-percentage-text-native {
   font-size: var(--summary-percentage-text-native-font-size) !important;
+  line-height: 22px;
 }
 
 .network-summary-stat-percentage_sold {
   cursor: var(--pointer-hand-dark);
 }
+
+.network-summary-stat-close-button {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 12px;
+  aspect-ratio: 1/1;
+  background-color: rgba(190, 190, 231, 1);
+  border: 0.2px solid rgba(37, 0, 84, 1);
+  border-radius: 100%;
+  display: none;
+}
+
+.network-summary-stat-close-button svg {
+  margin-right: -1px;
+}
+
+.network-summary-stat-percentage_sold-clicked {
+  background-color: rgba(232, 232, 255, 1);
+  padding: calc(var(--each-network-summary-stat-padding) - 1px);
+  border: 1px solid rgba(190, 190, 231, 1);
+}
+
+.network-summary-stat-percentage_sold-clicked .network-summary-stat-close-button {
+  display: flex !important;
+}
+
 
 @media only screen and (max-width: 1200px) {
   :root {
@@ -591,7 +624,7 @@
 @media only screen and (max-width: 600px) {
   :root {
     --each-metric-content-wrapper-content-value-native-font-size: 14px;
-    --each-metric-content-wrapper-content-value-usd-font-size: 12px;
+    --each-metric-content-wrapper-content-value-usd-font-size: 14px;
     --each-metric-content-wrapper-content-flex-direction: column;
     --network-summary-network-graph-content-filters-wrapper-gap: 6px;
     --each-network-summary-select-wrapper-gap: 8px;

@@ -1,7 +1,7 @@
 :root {
   --date-picker-height: 56px;
   --date-picker-z-index: 1000;
-  --date-picker-width: 450px;
+  --date-picker-width: 250px;
 
   --selected-range-height: 56px;
   --selected-range-font-size: 16px;
@@ -120,7 +120,7 @@
   --network-switch-network-title-font-size: 20px;
   --network-switch-network-title-font-weight: 500;
 
-  --network-switch-network-currency-font-size: 12px;
+  --network-switch-network-currency-font-size: 14px;
   --network-switch-network-currency-font-weight: 400;
   --network-switch-network-currency-color: rgba(73, 48, 111, 1);
   
@@ -156,11 +156,16 @@
   width: var(--date-picker-width);
   height: var(--date-picker-height);
   z-index: var(--date-picker-z-index);
+  transition: all var(--picker-main-wrapper-transition-duration) ease-in-out 0s;
   overflow: visible;
   display: flex;
   position: relative;
   flex-direction: column;
   align-items: end;
+}
+
+.date-picker-open {
+  width: calc(1.8 * var(--date-picker-width));
 }
 
 .selected-range {
@@ -199,7 +204,6 @@
 
 .picker-main-wrapper {
   width: 100%;
-  /* box-shadow: 0px 16px 32px 0px var(--picker-main-wrapper-box-shadow-color); */
   transition: all var(--picker-main-wrapper-transition-duration) ease 0s;
   transform: perspective(var(--picker-main-wrapper-transform-perspective)) rotateX(var(--picker-main-wrapper-transform-rotate-x));
   opacity: var(--picker-main-wrapper-opacity);
@@ -352,27 +356,6 @@
 
 .middle-date:hover {
   background-color: var(--color-middle-date-background) !important;
-}
-
-.buttons {
-  display: flex;
-  justify-content: flex-end;
-  padding: var(--calendar-action-buttons-padding);
-  gap: var(--calendar-action-buttons-gap);
-}
-
-.cancel, .apply {
-  padding: var(--calendar-action-buttons-padding);
-  border: none;
-  font-size: var(--each-calendar-action-button-font-size) !important;
-  font-weight: var(--each-calendar-action-button-font-weight);
-  cursor: var(--pointer-hand-dark);
-  background: var(--color-dark-violet);
-}
-
-.apply {
-  display: flex;
-  align-items: center;
 }
 
 
@@ -545,7 +528,7 @@
 }
 
 .network-switch-header {
-  width: var(--network-switch-header-width);  
+  width: calc(var(--network-switch-header-width) - (2 * var(--network-switch-header-padding)));
   height: calc(var(--network-switch-header-height) - 2 * var(--network-switch-header-padding));
   gap: var(--network-switch-header-gap);
   border-radius: var(--network-switch-header-border-radius);

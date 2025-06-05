@@ -2,7 +2,7 @@
 :root {
   --all-main-wrapper-width: 100%;
   --all-main-wrapper-background-color: rgb(247, 248, 255);
-  --all-main-wrapper-border-radius: 50px 0 0 50px;
+  --all-main-wrapper-border-radius: 50px 0 0 0;
   --all-main-wrapper-margin-left: 0px;
 
   --all-main-wrapper-webkit-scrollbar-width: 8px;
@@ -21,7 +21,7 @@
   --text-placeholder-color: rgba(168, 168, 168, 1);
 
   --header-main-wrapper-width: 100%;
-  --header-main-wrapper-vertical-padding: 20px;
+  --header-main-wrapper-vertical-padding: 30px;
   --header-main-wrapper-horizontal-padding: 40px;
   --header-main-wrapper-gap: 16px;
   --header-main-wrapper-padding-bottom: 20px;
@@ -42,7 +42,7 @@
   --inner-main-wrapper-title-font-size: 24px;
   --inner-main-wrapper-title-color: rgba(37, 0, 84, 1);
 
-  --inner-main-wrapper-description-font-size: 12px;
+  --inner-main-wrapper-description-font-size: 14px;
   --inner-main-wrapper-description-color: rgba(73, 48, 111, 1); 
 
   --header-banner-wrapper-gap: 10px;
@@ -82,7 +82,7 @@
 }
 
 .header-main-wrapper {
-  width: calc(var(--header-main-wrapper-width) - (var(--header-main-wrapper-horizontal-padding) * 2));
+  width: calc(var(--header-main-wrapper-width) - (var(--header-main-wrapper-horizontal-padding) * 2) - 8px);
   padding: var(--header-main-wrapper-vertical-padding) var(--header-main-wrapper-horizontal-padding);
   padding-bottom: var(--header-main-wrapper-padding-bottom);
   border-bottom: var(--header-main-wrapper-border-bottom-size) solid var(--header-main-wrapper-border-bottom-color);
@@ -144,13 +144,13 @@
 @media only screen and (max-width: 750px) {
   :root {
     --all-main-wrapper-webkit-scrollbar-width: 2px;
-    --all-main-wrapper-border-radius: 24px 0 0 24px;
+    --all-main-wrapper-border-radius: 24px 0 0 0;
   }
 }
 
 @media only screen and (max-width: 500px) {
   :root {
     --all-main-wrapper-webkit-scrollbar-width: 2px;
-    --all-main-wrapper-border-radius: 20px 0 0 20px;
+    --all-main-wrapper-border-radius: 20px 0 0 0;
   }
 }

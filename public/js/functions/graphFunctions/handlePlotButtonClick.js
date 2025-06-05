@@ -165,6 +165,26 @@ function generateGraph (validator) {
 
   const queryString = new URLSearchParams(requestData).toString();
   const eventSource = new EventSource(`/validator/get_graph_data?${queryString}`)
+
+  const subplotGroupMapping = {
+    number_of_groups: 2,
+    total_stake_sum: 1,
+    total_withdraw_sum: 0,
+    total_sold: 0,
+  };
+
+  const subplotGroupArray = [
+    ['total_withdraw_sum', 'total_sold'],
+    ['total_stake_sum']
+  ];
+  
+  for (let i = 0; i < subplotGroupArray.length; i++) {
+    if (i == 0) continue;
+    const subplotSeperator = document.createElement('div');
+    subplotSeperator.classList.add('subplot-seperator');
+    subplotSeperator.style.bottom = `calc(${(i / subplotGroupArray.length) * 100}%)`;
+    graphWrapper.appendChild(subplotSeperator);
+  }
   
   eventSource.onmessage = (event) => {
     const response = JSON.parse(event.data);
@@ -204,19 +224,6 @@ function generateGraph (validator) {
       if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
     });
 
-    const subplotGroupMapping = {
-      number_of_groups: 2,
-      total_stake_sum: 0,
-      total_withdraw_sum: 1,
-      total_sold: 1,
-    };
-
-    const subplotGroupArray = [
-      ['total_withdraw_sum', 'total_sold'],
-      ['total_stake_sum']
-    ];
-
-    
     const minValueArray = [];
     const maxValueArray = [];
     for (let i = 0; i < subplotGroupArray.length; i++) {

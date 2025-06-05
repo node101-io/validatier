@@ -51,7 +51,11 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
 
     const rankingDiv = document.createElement('div');
     rankingDiv.classList.add('ranking-number-content', 'center');
-    rankingDiv.textContent = i + 1;
+    const rankingDivSpan = document.createElement('span');
+    rankingDivSpan.textContent = i + 1;
+    rankingDiv.appendChild(rankingDivSpan);
+
+    validatorImageDiv.appendChild(rankingDiv);
   
     const img = document.createElement('img');
     img.src = validator.temporary_image_uri
@@ -89,7 +93,6 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
 
     textualInfoWrapper.appendChild(monikerDiv);
   
-    tdInfo.appendChild(rankingDiv);
     tdInfo.appendChild(validatorImageDiv);
     tdInfo.appendChild(textualInfoWrapper);
   
@@ -162,22 +165,16 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
 function renderValidators() {
 
   const sortOrderMapping = {
-    percentage_sold: '',
-    average_total_stake: '',
-    total_withdraw: '',
-    sold: '',
-    self_stake: '',
+    percentage_sold: 'desc',
+    average_total_stake: 'asc',
+    total_withdraw: 'asc',
+    sold: 'asc',
+    self_stake: 'asc',
   };
-
-  document.getElementById('cancel').addEventListener('click', (event) => {
-    document.getElementById('selected-range').classList.remove('selected-range-open');
-    document.getElementById('picker-main-wrapper').classList.remove('picker-main-wrapper-open');
-  })
 
   document.addEventListener('click', (event) => {
     const isHeaderClickedChecker = event.target.classList.contains('each-table-header-wrapper') || event.target.parentNode.classList.contains('each-table-header-wrapper') || event.target.parentNode.parentNode.classList.contains('each-table-header-wrapper');
-    const isApplyClickedChecker = event.target.classList.contains('apply') || event.target.parentNode.classList.contains('apply')
-    if (!isHeaderClickedChecker && !isApplyClickedChecker) return;
+    if (!isHeaderClickedChecker) return;
 
     document.getElementById('selected-range').classList.remove('selected-range-open');
     document.getElementById('picker-main-wrapper').classList.remove('picker-main-wrapper-open');
@@ -185,18 +182,13 @@ function renderValidators() {
     let target = event.target;
     while (isHeaderClickedChecker && !target.classList.contains('each-table-header-wrapper')) target = target.parentNode;
 
-    const sort_by = (target.id != 'apply') ? target.id : 'ratio';
+    const sort_by = target.id;
 
     sortOrderMapping[sort_by] == 'desc'
       ? target.id 
         ? sortOrderMapping[sort_by] = 'asc' 
         : 'desc'
-      : sort_by != 'percentage_sold'
-        ? sortOrderMapping[sort_by] = 'desc'
-        : sortOrderMapping[sort_by] = 'asc';
-
-    const GET_VALIDATORS_API_ENDPOINT = 'validator/rank_validators';
-    const BASE_URL = !window.location.href.includes('#') ? window.location.href : window.location.href.split('#')[0];
+      : sortOrderMapping[sort_by] = 'desc';
     
     const validatorsMainWrapper = document.getElementById('validators-main-wrapper');
     validatorsMainWrapper.setAttribute('sort_by', sort_by);
@@ -205,10 +197,10 @@ function renderValidators() {
     const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
     const topDate = document.getElementById('periodic-query-top-timestamp').value
 
-    if (isApplyClickedChecker) {
-      setCookie('selectedDateBottom', bottomDate, 7);
-      setCookie('selectedDateTop', topDate, 7);
-    }
+    if (!bottomDate || !topDate) return;
+
+    setCookie('selectedDateBottom', bottomDate, 7);
+    setCookie('selectedDateTop', topDate, 7);
 
     const bottomTimestamp = Math.floor(new Date(bottomDate).getTime());
     const topTimestamp = Math.floor(new Date(topDate).getTime());

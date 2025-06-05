@@ -16,6 +16,8 @@ function addColumnToExistingGraph (params) {
   columnWrapper.setAttribute('index', index);
   columnWrapper.classList.add('each-graph-column-wrapper');
   columnWrapper.classList.add(`column-wrapper-${operatorAddress}`);
+  if (dataFields[0] != 'percentage_sold')
+    columnWrapper.classList.add(`column-wrapper-summary-subplot`);
 
   const addOnPx = type != 'small'
     ? dataFields[0] != 'percentage_sold'
@@ -58,6 +60,7 @@ function addColumnToExistingGraph (params) {
     const { point, line } = generatePointAndLine(colors[i], bottom);
 
     point.classList.add(`${eachDataField}-graph-data-element-${operatorAddress}`);
+    point.classList.add(`${eachDataField}-graph-data-point-${operatorAddress}`);
     line.classList.add(`${eachDataField}-graph-data-element-${operatorAddress}`);
     line.classList.add(`${eachDataField}-graph-data-line-${operatorAddress}`);
 
@@ -66,7 +69,7 @@ function addColumnToExistingGraph (params) {
 
     if (type != 'small') {
       const paintBar = document.createElement('div');
-      paintBar.classList.add('graph-range-paint-bar', `paint-bar-${operatorAddress.replace('\\@', '@')}`);
+      paintBar.classList.add('graph-range-paint-bar', `paint-bar-${operatorAddress.replace('\\@', '@')}`, `${eachDataField}-graph-data-paint-bar-${operatorAddress}`);
       columnWrapper.appendChild(paintBar);  
     }
   })
@@ -74,7 +77,9 @@ function addColumnToExistingGraph (params) {
   if (type != 'small') {
     const horizontalAxisLabel = generateSingleHorizontalAxisLabel(timestamp);
     const linePer = columnsPer / 2;
-    if (index % columnsPer == 0) columnWrapper.appendChild(horizontalAxisLabel);
+    if (
+      index % columnsPer == 0
+    ) columnWrapper.appendChild(horizontalAxisLabel);
     if (index % linePer == 0 && index % columnsPer != 0) {
       const referenceLine = document.createElement('div');
       referenceLine.classList.add('each-data-vertical-reference-line');

@@ -41,6 +41,7 @@
 .export-main-wrapper {
   position: relative;
   color: var(--export-main-wrapper-color);
+  margin-right: 20px;
 }
 
 .export-wrapper-header {

@@ -64,6 +64,13 @@ function createNetworkSummaryGraph (dataFields, colors) {
   let priceGraphData = null;
   if (dataFields[0] == 'percentage_sold') {
     priceGraphData = JSON.parse(document.body.getAttribute('priceGraphData'));
+
+    while (priceGraphData.length != targetCacheSummaryGraphData.length) {
+      if (priceGraphData.length > targetCacheSummaryGraphData.length)
+        priceGraphData.pop();
+      else 
+        targetCacheSummaryGraphData.pop();
+    }
   }
 
   document.querySelectorAll('.each-network-summary-network-graph-content-each-dropdown').forEach(each => {
@@ -159,7 +166,7 @@ function createNetworkSummaryGraph (dataFields, colors) {
       arrow.src = '/res/images/pretty_arrow.svg';
       metric.querySelector('.percentage-change-value-content').appendChild(arrow);
       const text = document.createElement('span');
-      text.innerHTML = Math.round((currentSumMapping[eachDataField] / summaryData[`initial_${eachDataField}`]) * 100) + '%';
+      text.innerHTML = (Math.round((currentSumMapping[eachDataField] / summaryData[`initial_${eachDataField}`]) * 100) + '%').toString().replace('Infinity', '-');
       metric.querySelector('.percentage-change-value-content').appendChild(text);
     });
     
@@ -222,8 +229,9 @@ function createNetworkSummaryGraph (dataFields, colors) {
     }
   }
 
-  const rightVerticalAxisWrapper = document.getElementById('summary-graph-vertical-axis-labels1')
-  graphWrapper.appendChild(rightVerticalAxisWrapper);
+  const rightVerticalAxisWrapper = document.getElementById('summary-graph-vertical-axis-labels1');
+  if (rightVerticalAxisWrapper)
+    graphWrapper.appendChild(rightVerticalAxisWrapper);
   
   const graphColumns = graphWrapper.querySelectorAll('.each-graph-column-wrapper');
   const lastColumn = graphColumns[graphColumns.length - 1];

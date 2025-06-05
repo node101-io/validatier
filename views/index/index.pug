@@ -142,7 +142,7 @@ block content
                     span.day= day
                 .month-wrapper
                   .days#month-wrapper
-          .buttons            
+          //- .buttons
             //- .calendar-start-day-wrapper(id='calendar-format-toggle' value=`${startDay ? startDay : 'monday'}`)
             //-   .calendar-start-day-toggle-title Week Starts on
             //-   - const weekStartsOnArray = ['monday', 'sunday']
@@ -151,8 +151,8 @@ block content
             //-       .general-choice-radio-button(class='center')
             //-         .general-choice-radio-button-inner-circle(style=`${`${startDay}` == `${day}` ? 'display: flex' : ''}` value=`${day}`)
             //-       span= day
-            button.cancel#cancel Cancel
-            button.apply#apply Apply
+            //- button.cancel#cancel Cancel
+            //- button.apply#apply Apply
     .inner-main-wrapper#inner-main-wrapper
       .network-summary-main-wrapper#network-summary-main-wrapper(class=`${(queryValidator || url == 'validators') ? 'section-hidden' : ''}`)
         .network-summary-main-wrapper-title(class='each-section-title-content') Network Summary
@@ -187,7 +187,10 @@ block content
           ]
         .network-summary-network-stats-main-wrapper
           each stat in stats
-            .each-network-summary-stat(class=`network-summary-stat-${stat.field}` id=`network-summary-stat-${stat.field}`)
+            .each-network-summary-stat(class=`network-summary-stat-${stat.field} ${(url == 'percentage_sold_graph' && stat.field == 'percentage_sold' ) ? 'network-summary-stat-percentage_sold-clicked' : ''}` id=`network-summary-stat-${stat.field}`)
+              if stat.field == 'percentage_sold'
+                .network-summary-stat-close-button#network-summary-stat-close-button-percentage-sold(class='center')
+                  include ../icons/cross.pug
               .each-network-summary-stat-column
                 .each-network-summary-stat-header-title= stat.title
                 if stat.id_native
@@ -199,7 +202,7 @@ block content
                 .each-network-summary-stat-footer-change
                   span(class='percentage-change-value-content')
                     img(src='/res/images/pretty_arrow.svg')
-                    span= Math.round((summaryData[stat.field] / summaryData[`initial_${stat.field}`]) * 100) + '%'
+                    span= (Math.round((summaryData[stat.field] / summaryData[`initial_${stat.field}`]) * 100) + '%').toString().replace('Infinity', '-')
               .each-network-summary-stat-column
                 if `${stat.id_native}` == 'summary-percentage-sold-native'
                   .percentage-sold-main-circle
@@ -221,14 +224,15 @@ block content
                     .each-metric-content-wrapper-header-title= metric.title
                     if metric.id == 'total_sold'
                       .each-table-popup-wrapper(class='each-table-popup-wrapper-metric')
-                        .each-table-popup-info-content(class='center') Negative means şıngır dıngır
+                        .each-table-popup-info-content(class='center') Negative sold means more token are added than transferred
                         .each-tooltip-info-hover(style='height: 10px;')
                           img(src='/res/images/info.svg')
                   .each-metric-content-wrapper-content
-                    .each-metric-content-wrapper-content-value-native
-                    .each-metric-content-wrapper-content-value-usd
-                  .each-metric-content-wrapper-footer
-                    span(class='percentage-change-value-content')
+                    .each-metric-content-wrapper-content-value-native(class=`${metric.id == 'percentage_sold' ? 'graph-metric-percentage-change-content' : ''}`)
+                    .each-metric-content-wrapper-content-value-usd(class=`${metric.id == 'percentage_sold' ? 'percentage-change-value-content' : ''}`)
+                  if metric.id != 'percentage_sold'
+                    .each-metric-content-wrapper-footer
+                      span(class='percentage-change-value-content')
           .network-summary-network-graph-content-wrapper
             .network-summary-network-graph-content-header
               .network-summary-network-graph-content-header-main
@@ -332,7 +336,7 @@ block content
                   .each-network-summary-stat-content= getValue(summaryData[leaderboard.summary_field], leaderboard.unit).nativeValue
                   if leaderboard.id_usd
                     .each-network-summary-stat-footer(class='leaderboard-usd-value')= getValue(summaryData[leaderboard.summary_field], selectedChain.symbol).usdValue
-                .each-leaderboard-summary-percentage-change(class='percentage-change-value-content')= '' + Math.round((summaryData[leaderboard.summary_field] / summaryData[`initial_${leaderboard.summary_field}`]) * 100) + '%'
+                .each-leaderboard-summary-percentage-change(class='percentage-change-value-content')= (Math.round((summaryData[leaderboard.summary_field] / summaryData[`initial_${leaderboard.summary_field}`]) * 100)).toString().replace('Infinity', '-') + '%'
               each field in leaderboard.fields
                 .each-leaderboard-table-wrapper(id=`leaderboard-content-${field}` class=`${leaderboard.selected_option != field ? 'section-hidden' : ''}`)
                   each validator, index in sortedValidatorsMapping[field]
@@ -354,10 +358,6 @@ block content
                           .each-leaderboard-table-validator-data(class='leaderboard-usd-value')= getValue(validator[`${leaderboard.id}`], 'usd').usdValue
                         if leaderboard.id == 'self_stake'
                           .each-leaderboard-table-validator-data(class=`percentage-change-value-content ${field == 'self_stake' ? 'leaderboard-value-responsive-conceal' : ''}`)= getValue(validator['self_stake_ratio'], '%').nativeValue
-                  .each-leaderboard-more-wrapper
-                    div
-                    div
-                    div
         - const validator = queryValidator ? JSON.parse(queryValidator) : {}
       .validator-details-main-wrapper#validator-details-main-wrapper(class=`${queryValidator ? '' : 'section-hidden'}`)
         .validator-details-header-wrapper(class='body-wrapper-cell')
@@ -505,8 +505,9 @@ block content
             each validator, index in validators
               .each-validator-wrapper(validator=validator id=`${validator.operator_address}` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}` class='operator-address')
                 .each-validator-info-wrapper
-                  .ranking-number-content= index + 1
                   .validator-image
+                    .ranking-number-content(class='center') 
+                      span= index + 1
                     img.validator-image-content(src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.png'}`)
                   .validator-textual-info-wrapper 
                     .validator-moniker 

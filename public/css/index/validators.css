@@ -6,11 +6,11 @@
   
   --each-validator-stat-wrapper-width: 33%;
   --each-validator-stat-wrapper-height: 76px;
-  --each-validator-stat-wrapper-padding-vertical: 8px;
+  --each-validator-stat-wrapper-padding-vertical: 14px;
   --each-validator-stat-wrapper-padding-horizontal: 16px;
   
   --validators-details-actions-wrapper-gap: 20px;
-  --validators-details-actions-wrapper-font-size: 12px;
+  --validators-details-actions-wrapper-font-size: 14px;
   
   --each-validator-details-action-content-gap: 4px;
   --each-validator-details-action-content-span-margin-bottom: 2px;
@@ -24,7 +24,7 @@
 
   --each-validator-stat-content-wrapper-flex-direction: row;
   
-  --each-validator-stat-helper-font-size: 12px;
+  --each-validator-stat-helper-font-size: 14px;
   --each-validator-stat-helper-font-weight: 500;
   --each-validator-stat-helper-color: rgba(124, 112, 195, 1);
   
@@ -40,12 +40,12 @@
   --each-leaderboard-table-validator-info-image-border-radius: 100%;
   
   --each-leaderboard-table-validator-info-moniker-width: 75px;
-  --each-leaderboard-table-validator-info-moniker-font-size: 12px;
+  --each-leaderboard-table-validator-info-moniker-font-size: 14px;
   --each-leaderboard-table-validator-info-moniker-color: rgba(73, 48, 111, 1);
   
   --each-leaderboard-table-validator-data-wrapper-gap: 20px;
   --each-leaderboard-table-validator-data-wrapper-color: rgba(124, 112, 195, 1);
-  --each-leaderboard-table-validator-data-wrapper-font-size: 12px;
+  --each-leaderboard-table-validator-data-wrapper-font-size: 14px;
   --leaderboard-usd-value-display: block;
   --leaderboard-value-responsive-conceal-display: flex;
   
@@ -76,7 +76,7 @@
   
   --each-leaderboard-header-title-color: rgba(124, 112, 195, 1);
   --each-leaderboard-header-title-font-weight: 400;
-  --each-leaderboard-header-title-font-size: 12px;
+  --each-leaderboard-header-title-font-size: 14px;
   
   --each-leaderboard-table-type-content-gap: 5px;
   
@@ -247,6 +247,9 @@
   width: var(--each-validator-stat-wrapper-width);
   height: calc(var(--each-validator-stat-wrapper-height) - (2 * var(--each-validator-stat-wrapper-padding-vertical)));
   padding: var(--each-validator-stat-wrapper-padding-vertical) var(--each-validator-stat-wrapper-padding-horizontal);
+  display: flex;
+  flex-direction: column;
+  justify-content: baseline;
 }
 
 .validators-details-actions-wrapper {
