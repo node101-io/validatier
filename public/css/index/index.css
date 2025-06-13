@@ -2,7 +2,7 @@
 :root {
   --all-main-wrapper-width: 100%;
   --all-main-wrapper-background-color: rgb(247, 248, 255);
-  --all-main-wrapper-border-radius: 50px 0 0 0;
+  --all-main-wrapper-border-radius: 0;
   --all-main-wrapper-margin-left: 0px;
 
   --all-main-wrapper-webkit-scrollbar-width: 8px;
@@ -42,13 +42,17 @@
   --inner-main-wrapper-title-font-size: 24px;
   --inner-main-wrapper-title-color: rgba(37, 0, 84, 1);
 
-  --inner-main-wrapper-description-font-size: 14px;
+  --inner-main-wrapper-description-font-size: 16px;
   --inner-main-wrapper-description-color: rgba(73, 48, 111, 1); 
 
   --header-banner-wrapper-gap: 10px;
-  --banner-title-content-font-size: 24px;
+  --header-banner-wrapper-height: 28px;
+  --header-banner-wrapper-margin-bottom: 10px;
+
+  --banner-title-content-color: rgba(37, 0, 84, 1);
+  --banner-title-content-font-size: 42px;
   --banner-title-content-font-weight: 700;
-  --banner-title-content-margin-top: -12px;
+  --banner-title-content-margin-top: -8px;
   --banner-logo-wrapper-height: 100%;
 
   --each-section-title-content-font-size: 16px;
@@ -87,9 +91,10 @@
   padding-bottom: var(--header-main-wrapper-padding-bottom);
   border-bottom: var(--header-main-wrapper-border-bottom-size) solid var(--header-main-wrapper-border-bottom-color);
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   position: relative;
+  flex-wrap: wrap;
   gap: var(--header-main-wrapper-gap);
 }
 
@@ -135,22 +140,26 @@
   display: none !important;
 }
 
-@media only screen and (max-width: 1000px) {
+.info-parapgraph-main-wrapper p {
+  font-size: 18px;
+}
+
+/* @media only screen and (max-width: 1000px) {
   :root {
     --all-main-wrapper-margin-left: 74px;
   }
-}
+} */
 
 @media only screen and (max-width: 750px) {
   :root {
     --all-main-wrapper-webkit-scrollbar-width: 2px;
-    --all-main-wrapper-border-radius: 24px 0 0 0;
+    --all-main-wrapper-border-radius: 0;
   }
 }
 
 @media only screen and (max-width: 500px) {
   :root {
     --all-main-wrapper-webkit-scrollbar-width: 2px;
-    --all-main-wrapper-border-radius: 20px 0 0 0;
+    --all-main-wrapper-border-radius: 0;
   }
 }

@@ -25,6 +25,7 @@ function updateDateInputs () {
 }
 
 function generateMonthContent (currentYearValue, currentMonthValue, startDay) {
+  const currentChainFirstAvailableTime = document.getElementById('network-switch-header').getAttribute('current_chain_first_available_time');
   document.getElementById('month-wrapper').innerHTML = '';
   document.getElementById('current-month-and-year-display').innerHTML = new Date(currentYearValue, currentMonthValue - 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
 
@@ -42,6 +43,14 @@ function generateMonthContent (currentYearValue, currentMonthValue, startDay) {
         date.style.color = '#888';
         date.innerHTML = prevDateToBePushed.date;
 
+        if (
+          new Date(currentYearValue, currentMonthValue - 1, eachDay.date).getTime() > new Date().getTime() ||
+          new Date(currentChainFirstAvailableTime).getTime() > new Date(currentYearValue, currentMonthValue - 1, eachDay.date).getTime()
+        ) {
+          date.style.pointerEvents = 'none';
+          date.style.cursor = 'var(--pointer-default-dark)';
+        }
+
         const dayToBeUsedAsDayInTheId = prevDateToBePushed.date.toString().length == 1 ? '0' + (prevDateToBePushed.date).toString() : prevDateToBePushed.date;
         const monthToBeUsedInTheId = (currentMonthValue - 1).toString().length == 1 ? '0' + (currentMonthValue - 1).toString() : currentMonthValue - 1;
         
@@ -55,8 +64,14 @@ function generateMonthContent (currentYearValue, currentMonthValue, startDay) {
     const date = document.createElement('div');
     date.classList.add('date');
     date.innerHTML = eachDay.date;
-    if (new Date(currentYearValue, currentMonthValue - 1, eachDay.date).getTime() > new Date().getTime())
+    if (
+      new Date(currentYearValue, currentMonthValue - 1, eachDay.date).getTime() > new Date().getTime() ||
+      new Date(currentChainFirstAvailableTime).getTime() > new Date(currentYearValue, currentMonthValue - 1, eachDay.date).getTime()
+    ) {
       date.style.color = '#888';
+      date.style.pointerEvents = 'none';
+      date.style.cursor = 'var(--pointer-default-dark)';
+    }
 
     const dayToBeUsedAsDayInTheId = eachDay.date.toString().length == 1 ? '0' + (eachDay.date).toString() : eachDay.date;
     const monthToBeUsedInTheId = (currentMonthValue).toString().length == 1 ? '0' + (currentMonthValue).toString() : currentMonthValue;
@@ -76,6 +91,14 @@ function generateMonthContent (currentYearValue, currentMonthValue, startDay) {
         date.style.color = '#888';
         date.innerHTML = nextDateToBePushed.date;
         
+        if (
+          new Date(currentYearValue, currentMonthValue - 1, eachDay.date).getTime() > new Date().getTime() ||
+          new Date(currentChainFirstAvailableTime).getTime() > new Date(currentYearValue, currentMonthValue - 1, eachDay.date).getTime()
+        ) {
+          date.style.pointerEvents = 'none';
+          date.style.cursor = 'var(--pointer-default-dark)';
+        }
+
         const dayToBeUsedAsDayInTheId = nextDateToBePushed.date.toString().length == 1 ? '0' + (nextDateToBePushed.date).toString() : nextDateToBePushed.date;
         const monthToBeUsedInTheId = (currentMonthValue + 1).toString().length == 1 ? '0' + (currentMonthValue + 1).toString() : currentMonthValue + 1;
         

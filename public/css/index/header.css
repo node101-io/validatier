@@ -1,10 +1,10 @@
 :root {
   --date-picker-height: 56px;
   --date-picker-z-index: 1000;
-  --date-picker-width: 250px;
+  --date-picker-width: 400px;
 
   --selected-range-height: 56px;
-  --selected-range-font-size: 16px;
+  --selected-range-font-size: 20px;
   --selected-range-border-radius: 16px;
   --selected-range-gap: 8px;
   --selected-range-padding: 10px;
@@ -23,7 +23,7 @@
   --picker-main-wrapper-z-index: 10000;
   --picker-main-wrapper-border-radius: 24px;
   
-  --picker-content-wrapper-font-size: 14px;
+  --picker-content-wrapper-font-size: 20px;
   --picker-content-wrapper-margin-top: 5px;
 
   --calendar-left-wrapper-width: 145px;
@@ -34,12 +34,12 @@
   --calendar-left-wrapper-dropdown-li-transition-duration: 0.25s;
   --calendar-left-wrapper-dropdown-li-selected-font-weight: 600;
 
-  --calendar-left-wrapper-each-choice-font-size: 16px;
+  --calendar-left-wrapper-each-choice-font-size: 20px;
   --calendar-left-wrapper-each-choice-font-weight: 400;
 
   --calendar-wrapper-padding: 10px;
 
-  --date-input-month-year-info-content-font-size: 16px;
+  --date-input-month-year-info-content-font-size: 20px;
 
   --days-header-wrapper-horizontal-margin: -10px;
   --days-header-wrapper-vertical-margin: 10px;
@@ -49,11 +49,11 @@
 
   --days-width: 100%;
   --day-width-font-weight: 400;
-  --day-width-font-size: 16px;
+  --day-width-font-size: 20px;
 
   --date-aspect-ratio: 1/1;
   --date-margin: 0;
-  --date-font-size: 16px;
+  --date-font-size: 20px;
   --date-border-size: 4px;
   --date-padding: 4px;
   --date-hover-background-color: rgb(221, 221, 221);
@@ -120,7 +120,7 @@
   --network-switch-network-title-font-size: 20px;
   --network-switch-network-title-font-weight: 500;
 
-  --network-switch-network-currency-font-size: 14px;
+  --network-switch-network-currency-font-size: 16px;
   --network-switch-network-currency-font-weight: 400;
   --network-switch-network-currency-color: rgba(73, 48, 111, 1);
   
@@ -165,7 +165,7 @@
 }
 
 .date-picker-open {
-  width: calc(1.8 * var(--date-picker-width));
+  width: calc(1.2 * var(--date-picker-width));
 }
 
 .selected-range {
@@ -360,10 +360,12 @@
 
 
 .header-banner-wrapper{
+  height: var(--header-banner-wrapper-height);
   gap: var(--header-banner-wrapper-gap);
+  margin: var(--header-banner-wrapper-margin-bottom) 0;  
   display: flex;
-  flex-direction: column;
-  align-items: start;
+  flex-direction: row;
+  align-items: center;
 }
 
 .banner-title-content {
@@ -371,6 +373,7 @@
   letter-spacing: var(--banner-title-content-letter-spacing);
   font-size: var(--banner-title-content-font-size);
   font-weight: var(--banner-title-content-font-weight);
+  color: var(--banner-title-content-color);
 }
 
 .banner-logo-wrapper {
@@ -409,6 +412,10 @@
   color: var(--each-network-switch-main-numerical-value-color);
   font-weight: var(--each-network-switch-main-numerical-value-font-weight);
   font-size: var(--each-network-switch-main-numerical-value-font-size);
+  display: var(--network-switch-text-display);
+}
+
+.each-network-switch-main-numerical-value span, .each-network-switch-main-numerical-value img {
   display: var(--network-switch-text-display);
 }
 
@@ -611,7 +618,6 @@
     --network-switch-header-border-size: 0px;
     --network-switch-text-display: none;
     --network-switch-header-width: fit-content;
-    --header-main-wrapper-horizontal-padding: 10px;
     --header-main-wrapper-gap: 0px;
     --network-switch-header-chain-content-wrapper-gap: 0px;
   }
@@ -619,17 +625,17 @@
 
 @media only screen and (max-width: 1000px) {
   :root {
-    --selected-range-font-size: 14px;
-    --picker-content-wrapper-font-size: 14px;
-    --calendar-left-wrapper-each-choice-font-size: 14px;
-    --date-input-month-year-info-content-font-size: 14px;
-    --day-width-font-size: 14px;
-    --date-font-size: 14px;
-    --each-calendar-action-button-font-size: 14px;
-    --header-network-switch-wrapper-font-size: 16px;
-    --network-switch-network-symbol-font-size: 14px;
-    --validator-filter-input-font-size: 14px;
-    --current-month-and-year-display-font-size: 16px;
+    --selected-range-font-size: 20px;
+    --picker-content-wrapper-font-size: 20px;
+    --calendar-left-wrapper-each-choice-font-size: 20px;
+    --date-input-month-year-info-content-font-size: 20px;
+    --day-width-font-size: 20px;
+    --date-font-size: 20px;
+    --each-calendar-action-button-font-size: 20px;
+    --header-network-switch-wrapper-font-size: 20px;
+    --network-switch-network-symbol-font-size: 20px;
+    --validator-filter-input-font-size: 20px;
+    --current-month-and-year-display-font-size: 20px;
   }
 }
 
@@ -649,24 +655,24 @@
     --table-filters-subgroup-gap: 0px;
     --date-picker-height: 48px;
   
-    --selected-range-font-size: 14px;
+    --selected-range-font-size: 16px;
 
     --calendar-left-wrapper-dropdown-li-padding: 4px;
   
-    --calendar-left-wrapper-each-choice-font-size: 14px;
+    --calendar-left-wrapper-each-choice-font-size: 16px;
     --calendar-left-wrapper-each-choice-font-weight: 400;
   
     --calendar-wrapper-padding: 10px;
     --picker-main-wrapper-right: -50px;
   
-    --date-input-month-year-info-content-font-size: 14px;
+    --date-input-month-year-info-content-font-size: 16px;
     --calendar-left-wrapper-width: 120px;
   
     --days-header-wrapper-horizontal-margin: -5px;
     --days-header-wrapper-horizontal-padding: 5px;
     --days-header-wrapper-gap: 5px;
   
-    --date-font-size: 14px;
+    --date-font-size: 16px;
     --date-border-size: 4px;
     --date-padding: 0px;
     
@@ -681,12 +687,16 @@
     transform: perspective(1000px) rotateX(0deg);
     opacity: 1;
     right: 0;
-    width: 125% !important;
+    width: 100% !important;
   }
 
   .selected-range-open {
     background-color: var(--header-main-background);
     border-bottom: 1px solid var(--general-main-wrapper-border-color);
     border-radius: var(--selected-range-border-radius);
+  }
+
+  :root {
+    --date-picker-width: 300px;
   }
 }

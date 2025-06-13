@@ -10,7 +10,7 @@ window.onload = () => {
   handleValidatorSearch();
   handleCalendarEvents(currentYearValue, currentMonthValue, "monday" /* document.getElementById('calendar-format-toggle').value */)
   renderValidators();
-  handleNavbar();
+  // handleNavbar();
   handleExportEvents();
   handlePlotButtonClick();
   handleSummaryGraphActions();

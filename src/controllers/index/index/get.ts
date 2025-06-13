@@ -103,7 +103,7 @@ const indexGetController = (req: Request, res: Response): void => {
       });
 
       const [getAllChainsResult, rankValidatorsResult, cacheResults, summaryGraphResults, smallGraphResults, priceGraphResults] = results;
-      
+
       if (
         !getAllChainsResult.value.chains ||
         !rankValidatorsResult.value.results ||

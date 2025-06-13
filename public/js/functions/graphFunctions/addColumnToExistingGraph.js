@@ -1,6 +1,5 @@
 function addColumnToExistingGraph (params) {
   const { type, operatorAddress, data, timestamp, index, currency, decimals, usd_exchange_rate, symbol, minValue, maxValue, graphWidth, dataFields, colors, columnsPer, subplotGroupMapping } = params;
-  
   const graphWrapper = document.getElementById(`validator-graph-wrapper-${operatorAddress}`);
   if (type != 'small') {
     if (dataFields[0] != 'percentage_sold')

@@ -108,9 +108,9 @@ function createNetworkSummaryGraph (dataFields, colors) {
   const showPercentageChange = document.body.getAttribute('showPercentageChange');
 
   const subplotGroupMapping = dataFields[0] != 'percentage_sold' ? {
-    number_of_groups: 2,
-    total_stake_sum: 1,
-    total_withdraw_sum: 0,
+    number_of_groups: 3,
+    total_stake_sum: 2,
+    total_withdraw_sum: 1,
     total_sold: 0,
   } : {
     number_of_groups: 1,
@@ -120,7 +120,8 @@ function createNetworkSummaryGraph (dataFields, colors) {
 
   const subplotGroupArray = dataFields[0] != 'percentage_sold' 
     ? [
-      ['total_withdraw_sum', 'total_sold'],
+      ['total_sold'],
+      ['total_withdraw_sum'],
       ['total_stake_sum']
     ]
     : [
@@ -130,10 +131,10 @@ function createNetworkSummaryGraph (dataFields, colors) {
 
   if (dataFields[0] != 'percentage_sold')
     for (let i = 0; i < subplotGroupArray.length; i++) {
-      if (i == 0) continue;
       const subplotSeperator = document.createElement('div');
       subplotSeperator.classList.add('subplot-seperator');
-      subplotSeperator.style.bottom = `calc(${(i / subplotGroupArray.length) * 100}% + 5px)`;
+      subplotSeperator.style.zIndex = `${((subplotGroupArray.length - i + 1) * 10)}`;
+      subplotSeperator.style.top = `calc(${100 - ((i / subplotGroupArray.length) * 100)}% + ${(subplotGroupArray.length - i) * -10}px)`;
       graphWrapper.appendChild(subplotSeperator);
     }
 
@@ -159,15 +160,15 @@ function createNetworkSummaryGraph (dataFields, colors) {
       metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + data[eachDataField].toFixed(2);
       if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
       
-      if(!showPercentageChange && eachDataField == 'total_withdraw_sum') return;
+      // if(!showPercentageChange && eachDataField == 'total_withdraw_sum') return;
 
-      metric.querySelector('.percentage-change-value-content').innerHTML = '';
-      const arrow = document.createElement('img');
-      arrow.src = '/res/images/pretty_arrow.svg';
-      metric.querySelector('.percentage-change-value-content').appendChild(arrow);
-      const text = document.createElement('span');
-      text.innerHTML = (Math.round((currentSumMapping[eachDataField] / summaryData[`initial_${eachDataField}`]) * 100) + '%').toString().replace('Infinity', '-');
-      metric.querySelector('.percentage-change-value-content').appendChild(text);
+      // metric.querySelector('.percentage-change-value-content').innerHTML = '';
+      // const arrow = document.createElement('img');
+      // arrow.src = '/res/images/pretty_arrow.svg';
+      // metric.querySelector('.percentage-change-value-content').appendChild(arrow);
+      // const text = document.createElement('span');
+      // text.innerHTML = (Math.round((currentSumMapping[eachDataField] / summaryData[`initial_${eachDataField}`]) * 100) + '%').toString().replace('Infinity', '-');
+      // metric.querySelector('.percentage-change-value-content').appendChild(text);
     });
     
     graphDataMapping[i] = data;

@@ -5,7 +5,7 @@ function roundToFirstTwoDigits(number, method = 'floor') {
   number = Math.abs(number);
 
   const digits = Math.floor(Math.log10(number));
-  const factor = Math.pow(10, digits - 1);
+  const factor = Math.pow(10, digits);
   const twoDigits = number / factor;
 
   let roundedTwoDigits;
@@ -167,22 +167,23 @@ function generateGraph (validator) {
   const eventSource = new EventSource(`/validator/get_graph_data?${queryString}`)
 
   const subplotGroupMapping = {
-    number_of_groups: 2,
-    total_stake_sum: 1,
-    total_withdraw_sum: 0,
+    number_of_groups: 3,
+    total_stake_sum: 2,
+    total_withdraw_sum: 1,
     total_sold: 0,
   };
 
   const subplotGroupArray = [
-    ['total_withdraw_sum', 'total_sold'],
+    ['total_sold'],
+    ['total_withdraw_sum'],
     ['total_stake_sum']
   ];
   
   for (let i = 0; i < subplotGroupArray.length; i++) {
-    if (i == 0) continue;
     const subplotSeperator = document.createElement('div');
     subplotSeperator.classList.add('subplot-seperator');
-    subplotSeperator.style.bottom = `calc(${(i / subplotGroupArray.length) * 100}%)`;
+    subplotSeperator.style.zIndex = `${((subplotGroupArray.length - i + 1) * 10)}`;
+    subplotSeperator.style.top = `calc(${100 - ((i / subplotGroupArray.length) * 100)}% + ${(subplotGroupArray.length - i) * -10}px)`;
     graphWrapper.appendChild(subplotSeperator);
   }
   

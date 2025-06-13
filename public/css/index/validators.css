@@ -10,7 +10,7 @@
   --each-validator-stat-wrapper-padding-horizontal: 16px;
   
   --validators-details-actions-wrapper-gap: 20px;
-  --validators-details-actions-wrapper-font-size: 14px;
+  --validators-details-actions-wrapper-font-size: 16px;
   
   --each-validator-details-action-content-gap: 4px;
   --each-validator-details-action-content-span-margin-bottom: 2px;
@@ -24,30 +24,33 @@
 
   --each-validator-stat-content-wrapper-flex-direction: row;
   
-  --each-validator-stat-helper-font-size: 14px;
+  --each-validator-stat-helper-font-size: 16px;
   --each-validator-stat-helper-font-weight: 500;
   --each-validator-stat-helper-color: rgba(124, 112, 195, 1);
   
-  --each-leaderboard-table-wrapper-gap: 6px;
+  --each-leaderboard-table-wrapper-gap: 12px;
   
   --each-leaderboard-table-validator-info-wrapper-gap: 8px;
 
   --each-leaderboard-table-validator-info-wrapper-span-font-size: 10px;
   --each-leaderboard-table-validator-info-wrapper-span-width: 10px;
   
-  --each-leaderboard-table-validator-info-image-width: 20px;
+  --each-leaderboard-table-validator-info-image-width: 32px;
   --each-leaderboard-table-validator-info-image-aspect-ratio: 1/1;
   --each-leaderboard-table-validator-info-image-border-radius: 100%;
   
-  --each-leaderboard-table-validator-info-moniker-width: 75px;
-  --each-leaderboard-table-validator-info-moniker-font-size: 14px;
+  --each-leaderboard-table-validator-info-moniker-width: 250px;
+  --each-leaderboard-table-validator-info-moniker-font-size: 20px;
   --each-leaderboard-table-validator-info-moniker-color: rgba(73, 48, 111, 1);
   
   --each-leaderboard-table-validator-data-wrapper-gap: 20px;
   --each-leaderboard-table-validator-data-wrapper-color: rgba(124, 112, 195, 1);
-  --each-leaderboard-table-validator-data-wrapper-font-size: 14px;
+  --each-leaderboard-table-validator-data-wrapper-font-size: 16px;
   --leaderboard-usd-value-display: block;
   --leaderboard-value-responsive-conceal-display: flex;
+
+  --each-leaderboard-table-validator-data-width: 100px;
+  --each-leaderboard-table-validator-data-font-size: 20px;
   
   --each-leaderboard-more-wrapper-width: 100%;
   --each-leaderboard-more-wrapper-gap: 4px;
@@ -57,7 +60,7 @@
   --inactivity-display-background-area-background-color: red;
   --inactivity-display-background-area-opacity: 0.1;
 
-  --validators-leaderboards-main-wrapper-height: 352px;
+  --validators-leaderboards-main-wrapper-height: 520px;
   --validators-leaderboards-main-wrapper-gap: 20px;
   --validators-leaderboards-main-wrapper-margin-top: 10px;
   --validators-leaderboards-main-wrapper-margin-bottom: 10px;
@@ -65,9 +68,9 @@
   --validators-leaderboards-main-wrapper-webkit-scrollbar-thumb-background: rgba(232, 232, 255, 1);
   
   --each-leaderboard-main-wrapper-min-width: 150px;
-  --each-leaderboard-main-wrapper-width: 30%;
+  --each-leaderboard-main-wrapper-width: 50%;
   --each-leaderboard-main-wrapper-height: 100%;
-  --each-leaderboard-main-wrapper-padding: 11px;
+  --each-leaderboard-main-wrapper-padding: 20px;
   --each-leaderboard-main-wrapper-background-color: var(--body-main-wrapper-background);
   --each-leaderboard-main-wrapper-border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
   --each-leaderboard-main-wrapper-border-radius: 20px;
@@ -76,7 +79,7 @@
   
   --each-leaderboard-header-title-color: rgba(124, 112, 195, 1);
   --each-leaderboard-header-title-font-weight: 400;
-  --each-leaderboard-header-title-font-size: 14px;
+  --each-leaderboard-header-title-font-size: 20px;
   
   --each-leaderboard-table-type-content-gap: 5px;
   
@@ -85,7 +88,7 @@
   
   --each-leaderboard-summary-data-gap: 5px;
   
-  --each-leaderboard-summary-data-each-network-summary-stat-content-font-size: 22px;
+  --each-leaderboard-summary-data-each-network-summary-stat-content-font-size: 32px;
 
   --validator-details-main-wrapper-gap: 20px;
   --validator-details-main-wrapper-margin-top: 20px;
@@ -104,7 +107,7 @@
   
   --validator-details-image-width: 42px;
 
-  --validator-details-percentage-near-value-font-size: 14px;
+  --validator-details-percentage-near-value-font-size: 16px;
   --validator-details-percentage-near-value-font-weight: 500;
   --validator-details-percentage-near-value-color: rgba(124, 112, 195, 1);
   --validator-details-percentage-near-value-margin-left: 4px;
@@ -145,6 +148,7 @@
   background-color: var(--body-main-wrapper-background);
   border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
   border-radius: var(--each-leaderboard-main-wrapper-border-radius);
+  gap: 5px;
   display: flex;
   flex-direction: column;
 }
@@ -334,10 +338,20 @@
 
 .each-leaderboard-table-validator-data-wrapper {
   display: flex;
-  align-items: center;
   gap: var(--each-leaderboard-table-validator-data-wrapper-gap);
   color: var(--each-leaderboard-table-validator-data-wrapper-color);
   font-size: var(--each-leaderboard-table-validator-data-wrapper-font-size);
+}
+
+.each-leaderboard-table-validator-data {
+  width: var(--each-leaderboard-table-validator-data-width);
+  max-width: var(--each-leaderboard-table-validator-data-width);
+  min-width: var(--each-leaderboard-table-validator-data-width);
+  font-size: var(--each-leaderboard-table-validator-data-font-size);
+  display: flex;
+  text-align: end;
+  align-items: center;
+  justify-content: end !important;
 }
 
 .leaderboard-usd-value {
@@ -383,8 +397,7 @@
 
 @media only screen and (max-width: 1200px) {
   :root {
-    --leaderboard-usd-value-display: none;
-    --each-leaderboard-table-validator-info-moniker-width: 50px;
+    --each-leaderboard-table-validator-info-moniker-width: 150px;
   }
 
   .validator-operator-address:hover .dots {
@@ -398,10 +411,17 @@
   }
 }
 
-@media only screen and (max-width: 1100px) {
+/* @media only screen and (max-width: 1100px) {
   :root {
     --leaderboard-value-responsive-conceal-display: none !important;
   }
+} */
+
+@media only screen and (max-width: 950px) {
+  :root {
+    --each-leaderboard-main-wrapper-min-width: 450px !important;
+    --each-leaderboard-main-wrapper-width: 450px !important;
+  }  
 }
 
 @media only screen and (max-width: 800px) {
@@ -416,8 +436,6 @@
 @media only screen and (max-width: 750px) {
   :root {
     --validators-leaderboards-main-wrapper-overflow: scroll;
-    --each-leaderboard-main-wrapper-min-width: 300px !important;
-    --each-leaderboard-main-wrapper-width: 300px !important;
     --leaderboard-usd-value-display: block;
     --leaderboard-value-responsive-conceal-display: flex;
   }

@@ -89,27 +89,27 @@ function handleNavbar () {
     }
   })
 
-  document.addEventListener('click', (event) => {
-    let target = event.target;
-    while (target != document.body && !target.classList.contains('each-sub-menu-link-content') && target.id != 'network-summary-stat-percentage_sold') {
-      if (target.id == 'network-summary-stat-close-button-percentage-sold') return;
-      target = target.parentNode;
-    };
-    if (!target.classList.contains('each-sub-menu-link-content') && target.id != 'network-summary-stat-percentage_sold') return;
+  // document.addEventListener('click', (event) => {
+  //   let target = event.target;
+  //   while (target != document.body && !target.classList.contains('each-sub-menu-link-content') && target.id != 'network-summary-stat-percentage_sold') {
+  //     if (target.id == 'network-summary-stat-close-button-percentage-sold') return;
+  //     target = target.parentNode;
+  //   };
+  //   if (!target.classList.contains('each-sub-menu-link-content') && target.id != 'network-summary-stat-percentage_sold') return;
 
-    document.getElementById('inner-main-wrapper').scrollTo({
-      top: 0,
-      left: 0,
-    });
+  //   document.getElementById('inner-main-wrapper').scrollTo({
+  //     top: 0,
+  //     left: 0,
+  //   });
 
-    if (target.id == 'network-summary-stat-percentage_sold') {
-      document.getElementById('network-summary-stat-percentage_sold').classList.add('network-summary-stat-percentage_sold-clicked');
-      return changeSummaryGraph(document.getElementById('percentage_sold_graph'))
-    };
-    if (target.id == 'percentage_sold_graph') document.getElementById('network-summary-stat-percentage_sold').classList.add('network-summary-stat-percentage_sold-clicked');
-    else document.getElementById('network-summary-stat-percentage_sold').classList.remove('network-summary-stat-percentage_sold-clicked');
-    return changeSummaryGraph(target);
-  })
+  //   if (target.id == 'network-summary-stat-percentage_sold') {
+  //     document.getElementById('network-summary-stat-percentage_sold').classList.add('network-summary-stat-percentage_sold-clicked');
+  //     return changeSummaryGraph(document.getElementById('percentage_sold_graph'))
+  //   };
+  //   if (target.id == 'percentage_sold_graph') document.getElementById('network-summary-stat-percentage_sold').classList.add('network-summary-stat-percentage_sold-clicked');
+  //   else document.getElementById('network-summary-stat-percentage_sold').classList.remove('network-summary-stat-percentage_sold-clicked');
+  //   return changeSummaryGraph(target);
+  // })
 
   window.addEventListener('popstate', function(event) {
     const target = document.getElementById(window.location.pathname.replace('/', '') || '');

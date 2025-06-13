@@ -22,56 +22,56 @@ function plotValidatorGraph(params) {
     if (!validatorGraphEventListenersMapping[operatorAddress]) validatorGraphEventListenersMapping[operatorAddress] = [];
     else validatorGraphEventListenersMapping[operatorAddress].forEach(eachEventHandler => eachEventHandler.element.removeEventListener(eachEventHandler.event, eachEventHandler.handler));  
 
-    dataFields.forEach(eachDataField => {
-      const key = operatorAddress == 'summary' ? 'summary' : 'validator';
-      const metric = document.getElementById(`${key}-metric-${eachDataField}`);
+    // dataFields.forEach(eachDataField => {
+    //   const key = operatorAddress == 'summary' ? 'summary' : 'validator';
+    //   const metric = document.getElementById(`${key}-metric-${eachDataField}`);
       
-      const dropdownOptionId = `${key}-graph-dropdown-option-${eachDataField}`;
-      const dropdownOption = document.getElementById(dropdownOptionId);
+    //   const dropdownOptionId = `${key}-graph-dropdown-option-${eachDataField}`;
+    //   const dropdownOption = document.getElementById(dropdownOptionId);
 
-      const visibilityHandler = (event) => {
-        let target = event.target;
-        while (target != document.body && ![metric.id, dropdownOption.id].includes(target.id)) target = target.parentNode;
-        if (![metric.id, dropdownOption.id].includes(target.id)) return;
-        console.log(metric.classList.contains('each-metric-content-wrapper-faded'))
+      // const visibilityHandler = (event) => {
+      //   let target = event.target;
+      //   while (target != document.body && ![metric.id, dropdownOption.id].includes(target.id)) target = target.parentNode;
+      //   if (![metric.id, dropdownOption.id].includes(target.id)) return;
+      //   console.log(metric.classList.contains('each-metric-content-wrapper-faded'))
 
-        if (metric.classList.contains('each-metric-content-wrapper-faded')) {
-          document.querySelectorAll(`.${eachDataField}-graph-data-line-${operatorAddress}`).forEach(eachElement => {
-            eachElement.style.opacity = '1';
-          })
+      //   if (metric.classList.contains('each-metric-content-wrapper-faded')) {
+      //     document.querySelectorAll(`.${eachDataField}-graph-data-line-${operatorAddress}`).forEach(eachElement => {
+      //       eachElement.style.opacity = '1';
+      //     })
 
-          document.querySelectorAll(`.${eachDataField}-graph-data-point-${operatorAddress}`).forEach(eachElement => {
-            eachElement.style.opacity = '0';
-          })
+      //     document.querySelectorAll(`.${eachDataField}-graph-data-point-${operatorAddress}`).forEach(eachElement => {
+      //       eachElement.style.opacity = '0';
+      //     })
 
-          document.querySelectorAll(`.${eachDataField}-graph-data-paint-bar-${operatorAddress}`).forEach(eachElement => {
-            eachElement.style.opacity = '0.1';
-          })
+      //     document.querySelectorAll(`.${eachDataField}-graph-data-paint-bar-${operatorAddress}`).forEach(eachElement => {
+      //       eachElement.style.opacity = '0.1';
+      //     })
 
-          dropdownOption.classList.add('dropdown-option-checked');
-          metric.classList.remove('each-metric-content-wrapper-faded');
-        }
-        else {
-          document.querySelectorAll(`.${eachDataField}-graph-data-line-${operatorAddress}`).forEach(eachElement => {
-            eachElement.style.opacity = '0.2';
-          })
+      //     dropdownOption.classList.add('dropdown-option-checked');
+      //     metric.classList.remove('each-metric-content-wrapper-faded');
+      //   }
+      //   else {
+      //     document.querySelectorAll(`.${eachDataField}-graph-data-line-${operatorAddress}`).forEach(eachElement => {
+      //       eachElement.style.opacity = '0.2';
+      //     })
 
-          document.querySelectorAll(`.${eachDataField}-graph-data-point-${operatorAddress}`).forEach(eachElement => {
-            eachElement.style.opacity = '0';
-          })
+      //     document.querySelectorAll(`.${eachDataField}-graph-data-point-${operatorAddress}`).forEach(eachElement => {
+      //       eachElement.style.opacity = '0';
+      //     })
 
-          document.querySelectorAll(`.${eachDataField}-graph-data-paint-bar-${operatorAddress}`).forEach(eachElement => {
-            eachElement.style.opacity = '0';
-          })
+      //     document.querySelectorAll(`.${eachDataField}-graph-data-paint-bar-${operatorAddress}`).forEach(eachElement => {
+      //       eachElement.style.opacity = '0';
+      //     })
 
-          dropdownOption.classList.remove('dropdown-option-checked');
-          metric.classList.add('each-metric-content-wrapper-faded');
-        }
-      }
+      //     dropdownOption.classList.remove('dropdown-option-checked');
+      //     metric.classList.add('each-metric-content-wrapper-faded');
+      //   }
+      // }
 
-      document.addEventListener('click', visibilityHandler);
-      validatorGraphEventListenersMapping[operatorAddress].push({ event: 'click', handler: visibilityHandler, element: document });  
-    })
+      // document.addEventListener('click', visibilityHandler);
+      // validatorGraphEventListenersMapping[operatorAddress].push({ event: 'click', handler: visibilityHandler, element: document });  
+    // })
   }
 
   const graphMouseDownHandler = (event) => {
@@ -126,14 +126,14 @@ function plotValidatorGraph(params) {
         metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + parseFloat(deltaMapping[eachDataField]).toFixed(2);
         if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
       
-        metric.querySelector('.percentage-change-value-content').innerHTML = '';
-        const arrow = document.createElement('img');
-        arrow.src = '/res/images/pretty_arrow.svg';
-        metric.querySelector('.percentage-change-value-content').appendChild(arrow);
-        const text = document.createElement('span');
-        text.innerHTML = (Math.round((deltaValue / (summaryData[`initial_${eachDataField}`] + Math.min(value_1, value_2))) * 100) + '%').toString().replace('Infinity', '-');
-        if (eachDataField == 'price') text.innerHTML = Math.round((deltaValue / (priceGraphData[priceGraphData.length - 1] + Math.min(value_1, value_2))) * 100) + '%';
-        metric.querySelector('.percentage-change-value-content').appendChild(text);
+        // metric.querySelector('.percentage-change-value-content').innerHTML = '';
+        // const arrow = document.createElement('img');
+        // arrow.src = '/res/images/pretty_arrow.svg';
+        // metric.querySelector('.percentage-change-value-content').appendChild(arrow);
+        // const text = document.createElement('span');
+        // text.innerHTML = (Math.round((deltaValue / (summaryData[`initial_${eachDataField}`] + Math.min(value_1, value_2))) * 100) + '%').toString().replace('Infinity', '-');
+        // if (eachDataField == 'price') text.innerHTML = Math.round((deltaValue / (priceGraphData[priceGraphData.length - 1] + Math.min(value_1, value_2))) * 100) + '%';
+        // metric.querySelector('.percentage-change-value-content').appendChild(text);
       })
 
       const initialTimestamp = !validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft ? validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp') : validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute('timestamp');

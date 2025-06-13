@@ -250,7 +250,7 @@ input {
   gap: 16px;
   transition: inherit;
   margin-bottom: 24px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .each-sub-menu-links-wrapper {
@@ -339,7 +339,12 @@ input {
 }
 
 .banner-logo-wrapper {
+  height: 56px;
   transition: all var(--navbar-toggle-transition-duration) ease-in-out 0s;
+}
+
+.banner-logo-wrapper img {
+  height: 100%;
 }
 
 .banner-title-content {
@@ -475,8 +480,9 @@ input {
 
 @media only screen and (max-width: 1000px) {
   :root {
-    --navbar-position: absolute;
-    --all-main-wrapper-width: 100% + var(--navbar-width) - 76px;
+    /* --navbar-position: absolute;
+    --all-main-wrapper-width: 100% + var(--navbar-width) - 76px; */
+    --header-main-wrapper-horizontal-padding: 20px;
     --inner-main-wrapper-horizontal-padding: 20px;
   }
 }

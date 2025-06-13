@@ -11,7 +11,7 @@
   --each-table-header-validator-info-header-min-width: 200px;
   --each-table-header-validator-info-header-max-width: 200px;
   
-  --each-table-header-title-font-size: 16px;
+  --each-table-header-title-font-size: 20px;
   --each-table-header-title-font-weight: 600;
   --each-table-header-title-gap: 0px;
   --each-table-header-title-color: rgba(124, 112, 195, 1);
@@ -75,8 +75,8 @@
   --validator-image-gap: 10px;
   --validator-image-border-radius: 100%;
 
-  --ranking-number-content-width: 20px;
-  --ranking-number-content-font-size: 12px;
+  --ranking-number-content-width: 24px;
+  --ranking-number-content-font-size: 14px;
   --ranking-number-content-color: rgba(232, 232, 255, 1);
   --ranking-number-content-background-color: rgba(77, 9, 180, 1);
   --ranking-number-content-span-margin-bottom: 4px;
@@ -84,7 +84,7 @@
   --validator-textual-info-wrapper-width: 80%;
   --validator-textual-info-margin-top: -2px;
 
-  --validator-operator-address-font-size: 16px;
+  --validator-operator-address-font-size: 20px;
   --validator-operator-address-gap: 5px;
   --validator-operator-address-width: fit-content;
   --validator-operator-address-height: 20px;
@@ -108,23 +108,23 @@
   --validator-operator-address-hover-middle-address-max-width: 500px;
   --validator-operator-address-hover-middle-address-opacity: 1;
 
-  --validator-moniker-font-size: 16px;
-  --validator-moniker-font-weight: 500;
+  --validator-moniker-font-size: 20px;
+  --validator-moniker-font-weight: semibold;
   --validator-moniker-color: rgba(73, 48, 111, 1);
   --validator-moniker-gap: 10px;
   --validator-moniker-text-content-width: 120px;
   --validator-moniker-overflow-animation-scroll-percentage: 105%;
 
-  --validator-each-numeric-info-font-size: 16px;
+  --validator-each-numeric-info-font-size: 20px;
   --validator-each-numeric-info-width: calc(100% / 6);
   --validator-each-numeric-info-max-width: 200px;
   --validator-each-numeric-info-width-adjustment: 0px;
 
-  --validator-each-numeric-info-native-font-size: 16px;
+  --validator-each-numeric-info-native-font-size: 20px;
   --validator-each-numeric-info-native-font-weight: semibold;
   --validator-each-numeric-info-native-color: rgba(37, 0, 84, 1);
  
-  --validator-each-numeric-info-usd-font-size: 14px;
+  --validator-each-numeric-info-usd-font-size: 16px;
   --validator-each-numeric-info-usd-font-weight: 500;
   --validator-each-numeric-info-usd-color: rgba(37, 0, 84, 1);
 
@@ -154,7 +154,7 @@
   --validator-dropdown-icon-opacity: 0.5;
   --validator-dropdown-icon-transition-duration: 0.25s;
 
-  --validator-filter-input-font-size: 16px;
+  --validator-filter-input-font-size: 20px;
   --validator-filter-input-color: rgba(124, 112, 195, 1);
   --validator-filter-input-border: 0;
   
@@ -167,7 +167,7 @@
   --validator-action-button-vertical-padding: 0px;
   --validator-action-button-horizontal-padding: 10px;
   --validator-action-button-border-radius: 2px;
-  --validator-action-button-font-size: 16px;
+  --validator-action-button-font-size: 20px;
   --validator-action-button-transition-duration: 0.25s;
   
   --calendar-start-day-wrapper-gap: 8px;
@@ -176,7 +176,7 @@
 
   --percentage-sold-main-circle-diameter: 80px;
   --percentage-sold-main-circle-background-color: rgba(232, 232, 255, 1);
-  --percentage-sold-main-circle-font-size: 14px;
+  --percentage-sold-main-circle-font-size: 16px;
   
   --percentage-sold-main-circle-span-z-index: 10;
   --percentage-sold-inner-circle-background-color: rgba(124, 112, 195, 1);

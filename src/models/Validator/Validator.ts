@@ -775,10 +775,10 @@ validatorSchema.statics.getSummaryGraphData = function (
       $group: {
         _id: groupId,
         timestamp: { $first: '$timestamp' },
-        self_stake_sum: { $sum: '$self_stake' },
+        self_stake_sum: { $avg: '$self_stake' },
         reward_sum: { $sum: '$reward' },
         commission_sum: { $sum: '$commission' },
-        total_stake_sum: { $sum: '$total_stake' },
+        total_stake_sum: { $avg: '$total_stake' },
         total_withdraw_sum: { $sum: '$total_withdraw' },
       }
     },

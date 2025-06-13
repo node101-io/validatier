@@ -42,15 +42,15 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
         metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + parseFloat(columnWrapper.getAttribute(eachDataField)).toFixed(2);
         if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
         
-        if(!showPercentageChange && eachDataField == 'total_withdraw_sum') return;
+        // if(!showPercentageChange && eachDataField == 'total_withdraw_sum') return;
 
-        metric.querySelector('.percentage-change-value-content').innerHTML = '';
-        const arrow = document.createElement('img');
-        arrow.src = '/res/images/pretty_arrow.svg';
-        metric.querySelector('.percentage-change-value-content').appendChild(arrow);
-        const text = document.createElement('span');
-        text.innerHTML = (Math.round((columnWrapper.getAttribute(eachDataField) / summaryData[`initial_${eachDataField}`]) * 100) + '%').toString().replace('Infinity', '-');
-        metric.querySelector('.percentage-change-value-content').appendChild(text);
+        // metric.querySelector('.percentage-change-value-content').innerHTML = '';
+        // const arrow = document.createElement('img');
+        // arrow.src = '/res/images/pretty_arrow.svg';
+        // metric.querySelector('.percentage-change-value-content').appendChild(arrow);
+        // const text = document.createElement('span');
+        // text.innerHTML = (Math.round((columnWrapper.getAttribute(eachDataField) / summaryData[`initial_${eachDataField}`]) * 100) + '%').toString().replace('Infinity', '-');
+        // metric.querySelector('.percentage-change-value-content').appendChild(text);
       });
     
     if (!validatorListenerVariablesMapping[operatorAddressM].isSelectingRange) return;

@@ -15,6 +15,10 @@ function addVerticalAxisLabels(graphWrapper, operatorAddress, min, max, details,
 
     const step = (maxValue - minValue) / numDivisions;
     let iter = minValue;
+
+    const verticalAxisSubWrapper = document.createElement('div');
+    verticalAxisSubWrapper.classList.add('vertical-axis-sub-wrapper');
+    verticalAxisSubWrapper.style.height = `${100 / numDivisions}%`;
     
     for (let j = 0; j <= numDivisions; j++) {
       const value = iter;
@@ -26,9 +30,11 @@ function addVerticalAxisLabels(graphWrapper, operatorAddress, min, max, details,
 
       eachVerticalLabel.innerHTML = !['%', '$'].includes(symbol) ? nativeValue.replace(symbol, '') : nativeValue.replace(symbol, symbolArray[id]);
 
-      verticalAxisLabels.appendChild(eachVerticalLabel);
+      verticalAxisSubWrapper.appendChild(eachVerticalLabel);
       iter += step;
     }
+
+    verticalAxisLabels.appendChild(verticalAxisSubWrapper);
     i++;
   }
 

@@ -1,10 +1,10 @@
 :root {
   --validator-graph-wrapper-min-width: 100%;
   --validator-graph-wrapper-max-width: 100%;
-  --validator-graph-wrapper-height: 240px;
+  --validator-graph-wrapper-height: 400px;
   --validator-graph-wrapper-transition-duration: 0.5s;
   --validator-graph-wrapper-vertical-padding: 10px;
-  --validator-graph-wrapper-horizontal-padding: 0;
+  --validator-graph-wrapper-horizontal-padding: 20px;
   --validator-graph-wrapper-bottom-padding: 10px;
 
   --validator-graph-wrapper-small-min-width: 100px;
@@ -20,22 +20,22 @@
   --each-data-line-z-index: 32;
   --each-data-line-transition-duration: 0.25s;
   
-  --horizontal-axis-label-font-size: 8px;
+  --horizontal-axis-label-font-size: 16px;
   --horizontal-axis-label-font-weight: 400;
   --horizontal-axis-label-transform-rotate-deg: 0deg;
   --horizontal-axis-label-transition-duration: 0s;
   --horizontal-axis-label-width: 20px;
-  --horizontal-axis-label-bottom: -10px;
-  --horizontal-axis-label-left: -10px;
+  --horizontal-axis-label-bottom: -30px;
+  --horizontal-axis-label-left: -18px;
   --horizontal-axis-label-z-index: 50;
   
   --each-data-point-horizontal-label-hovered-font-weight: 800;
   
-  --vertical-axis-labels-width: 40px;
-  --vertical-axis-labels-width-int: 40;
+  --vertical-axis-labels-width: 100px;
+  --vertical-axis-labels-width-int: 100;
   --vertical-axis-labels-border-right-size: 0px;
 
-  --each-vertical-label-font-size: 14px;
+  --each-vertical-label-font-size: 16px;
   --each-vertical-label-font-weight: 400;
   --each-vertical-label-margin-right: auto;
   --each-vertical-label-width: 40px;
@@ -52,14 +52,14 @@
 
 
 .validator-graph-wrapper {
-  width: 100%;
+  width: calc(100% - var(--validator-graph-wrapper-horizontal-padding));
   height: var(--validator-graph-wrapper-height);
   transition: all var(--validator-graph-wrapper-transition-duration) ease-in-out 0s;
   padding: var(--validator-graph-wrapper-vertical-padding) var(--validator-graph-wrapper-horizontal-padding);
   padding-bottom: var(--validator-graph-wrapper-bottom-padding); 
-  user-select: none;
   overflow: hidden;
   display: flex;
+  user-select: none;
   gap: 0;
   position: relative;
 }
@@ -75,7 +75,7 @@
 }
 
 .each-graph-column-wrapper {
-  height: 100%;
+  height: calc(100% - 30px);
   position: relative;
 }
 
@@ -84,14 +84,9 @@
   width: 100%;
   background-color: var(--body-main-wrapper-background);
   position: absolute;
-  bottom: -10px;
-  height: 10px;
+  bottom: -40px;
+  height: 30px;
   z-index: 35;
-}
-
-.column-wrapper-summary-subplot::after {
-  height: calc(50% + 15px);
-  z-index: 15;
 }
 
 .each-graph-column-wrapper-last {
@@ -139,6 +134,7 @@
   bottom: var(--horizontal-axis-label-bottom);
   left: var(--horizontal-axis-label-left);
   z-index: var(--horizontal-axis-label-z-index);
+  color: rgba(73, 48, 111, 1);
 }
 
 .each-data-point-horizontal-label-hovered {
@@ -148,14 +144,23 @@
 .vertical-axis-labels {
   min-width: var(--vertical-axis-labels-width);
   max-width: var(--vertical-axis-labels-width);
-  height: calc(100% + 20px);
+  height: calc(100% - 20px);
   display: flex;
   flex-direction: column-reverse;
   justify-content: space-between;
   text-wrap: nowrap;
-  align-items: center;
-  margin-top: -15px;
+  align-items: start;
+  margin-top: 0px;
   border-right: var(--vertical-axis-labels-border-right-size) solid var(--color-triangle-unselected);
+  padding: 0;
+}
+
+.vertical-axis-sub-wrapper {
+  display: flex;
+  flex-direction: column-reverse;
+  padding: 0;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .each-vertical-label {
@@ -166,6 +171,7 @@
   color: var(--each-vertical-label-color);
   text-align: start;
   text-wrap: nowrap;
+  line-height: 12px;
 }
 
 .graph-range-paint-bar {
@@ -189,7 +195,7 @@
 .each-data-indicator-vertical-line {
   width: 0;
   border-right: var(--each-data-indicator-vertical-line-border-right-size) dashed var(--each-data-indicator-vertical-line-border-color);
-  height: calc(var(--each-data-indicator-vertical-line-height) - var(--each-data-indicator-vertical-line-top));
+  height: calc(var(--each-data-indicator-vertical-line-height) - var(--each-data-indicator-vertical-line-top) + 30px);
   top: var(--each-data-indicator-vertical-line-top);
   left: var(--each-data-indicator-vertical-line-left);
   position: absolute;
@@ -205,18 +211,17 @@
 .each-data-vertical-reference-line {
   position: absolute;
   border-right: 1px dashed rgba(124, 112, 195, 1);
-  height: 100%;
+  height: calc(100% + 30px);
   right: 0;
   z-index: 0;
   z-index: 32;
 }
 
 .subplot-seperator {
-  width: calc(100% - var(--vertical-axis-labels-width));
-  height: 1px; 
-  background-color: var(--each-data-indicator-vertical-line-border-color);
-  border: 1px solid var(--body-main-wrapper-background);
+  width: calc(95% - var(--vertical-axis-labels-width));
+  border-top: 1px dashed var(--each-data-indicator-vertical-line-border-color);;
   position: absolute;
+  background-color: var(--body-main-wrapper-background);
   left: var(--vertical-axis-labels-width);
-  z-index: 101;
+  height: 100%;
 }

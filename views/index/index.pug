@@ -67,11 +67,11 @@ block content
     ]
     const timestampDifference = new Date(selectedDateTop).getTime() - new Date(selectedDateBottom).getTime()
   .all-main-wrapper#all-main-wrapper
-    .navbar-view-toggle#navbar-view-toggle(class='center')
-      span(class=`${isNavbarClose ? 'navbar-arrow-close' : ''}`)
-        include ../icons/chevron_left.pug
+    //- .navbar-view-toggle#navbar-view-toggle(class='center')
+    //-   span(class=`${isNavbarClose ? 'navbar-arrow-close' : ''}`)
+    //-     include ../icons/chevron_left.pug
     .header-main-wrapper
-      .header-network-switch-wrapper
+      .header-network-switch-wrapper(style='display:none;')
         .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_id=`${selectedChain.chain_id}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}` current_chain_first_available_time=`${selectedChain.first_available_block_time}`)
           .network-switch-header-chain-content-wrapper(class='center')
             .network-switch-network-image-wrapper
@@ -99,6 +99,10 @@ block content
         //-           img(src=`${chain.image}`)
         //-         .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
         //-           .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
+      a(href="/").header-banner-wrapper
+        .banner-logo-wrapper(class='center')
+          img(src='/res/images/logo.svg', alt='node101' class='center')
+        .banner-title-content(class='navbar-text') VALIDATIER
       .date-picker
         .selected-range#selected-range
           span.date-interval-description 
@@ -154,6 +158,8 @@ block content
             //- button.cancel#cancel Cancel
             //- button.apply#apply Apply
     .inner-main-wrapper#inner-main-wrapper
+      //- .info-parapgraph-main-wrapper 
+      //-   p Her yerde saç var, yerlerde saçlar / Kimin bu saçlar? bilemiyorum / Uyandığımda, yabancılarla / Kendi evimden de gidemiyorum / Sandım sen varsın / Yok öyle değil / Özür dilerim, diyemiyorum / Ben olsam, almam beni / Adamdan, saymam beni / Uzun uzun, soymam beni / Deli miyim? / Ben olsam bakmam bana / Bi çorba bile yapmam bana / Tüm bunları sen öğrettin bana / Sevgilim
       .network-summary-main-wrapper#network-summary-main-wrapper(class=`${(queryValidator || url == 'validators') ? 'section-hidden' : ''}`)
         .network-summary-main-wrapper-title(class='each-section-title-content') Network Summary
         -
@@ -199,10 +205,10 @@ block content
                   .each-network-summary-stat-footer-value(id=`${stat.id_usd}` class=`${stat.id_usd}`)= getValue(summaryData[stat.field], 'usd').usdValue
                 else 
                   .each-network-summary-stat-content(class='stat-value-font-large')
-                .each-network-summary-stat-footer-change
-                  span(class='percentage-change-value-content')
-                    img(src='/res/images/pretty_arrow.svg')
-                    span= (Math.round((summaryData[stat.field] / summaryData[`initial_${stat.field}`]) * 100) + '%').toString().replace('Infinity', '-')
+                //- .each-network-summary-stat-footer-change
+                //-   span(class='percentage-change-value-content')
+                //-     img(src='/res/images/pretty_arrow.svg')
+                //-     span= (Math.round((summaryData[stat.field] / summaryData[`initial_${stat.field}`]) * 100) + '%').toString().replace('Infinity', '-')
               .each-network-summary-stat-column
                 if `${stat.id_native}` == 'summary-percentage-sold-native'
                   .percentage-sold-main-circle
@@ -237,7 +243,7 @@ block content
             .network-summary-network-graph-content-header
               .network-summary-network-graph-content-header-main
                 .network-summary-network-graph-content-title#summary-graph-title= graph_title
-                .network-summary-network-graph-content-filters-wrapper
+                .network-summary-network-graph-content-filters-wrapper(style='display: none;')
                   each menu in summary_graph_menus
                     if menu.type == 'dropdown'
                       .each-network-summary-network-graph-content-dropdown-wrapper
@@ -278,21 +284,21 @@ block content
             unit: '%',
             triangle_direction: 'up',
           },
-          {
-            id: 'self_stake',
-            title: 'Self Stake Amount',
-            fields: ['self_stake', 'self_stake_ratio'],
-            summary_field: 'self_stake_sum',
-            id_native: 'summary-self-stake-amount-native',
-            id_usd: 'summary-self-stake-amount-usd',
-            unit: selectedChain.symbol || '$ATOM',
-            selected_option: 'self_stake',
-            dropdown: {
-              self_stake: { label: 'by amount', is_selected: true },
-              self_stake_ratio: { label: 'by percentage' }
-            },
-            triangle_direction: 'down',
-          },
+          //- {
+          //-   id: 'self_stake',
+          //-   title: 'Self Stake Amount',
+          //-   fields: ['self_stake', 'self_stake_ratio'],
+          //-   summary_field: 'self_stake_sum',
+          //-   id_native: 'summary-self-stake-amount-native',
+          //-   id_usd: 'summary-self-stake-amount-usd',
+          //-   unit: selectedChain.symbol || '$ATOM',
+          //-   selected_option: 'self_stake',
+          //-   dropdown: {
+          //-     self_stake: { label: 'by amount', is_selected: true },
+          //-     self_stake_ratio: { label: 'by percentage' }
+          //-   },
+          //-   triangle_direction: 'down',
+          //- },
           {
             id: 'sold',
             title: 'Total Sold Amount',
@@ -305,7 +311,7 @@ block content
             triangle_direction: 'down',
           },
         ]
-      .validators-leaderboards-all-wrapper#validators-leaderboards-all-wrapper(class=`${url == 'validators' ? '' : 'section-hidden'}`)
+      .validators-leaderboards-all-wrapper#validators-leaderboards-all-wrapper
         .each-section-title-content Leaderboards
         -
           const sortedValidatorsMapping = {};
@@ -336,14 +342,16 @@ block content
                   .each-network-summary-stat-content= getValue(summaryData[leaderboard.summary_field], leaderboard.unit).nativeValue
                   if leaderboard.id_usd
                     .each-network-summary-stat-footer(class='leaderboard-usd-value')= getValue(summaryData[leaderboard.summary_field], selectedChain.symbol).usdValue
-                .each-leaderboard-summary-percentage-change(class='percentage-change-value-content')= (Math.round((summaryData[leaderboard.summary_field] / summaryData[`initial_${leaderboard.summary_field}`]) * 100)).toString().replace('Infinity', '-') + '%'
+                //- .each-leaderboard-summary-percentage-change(class='percentage-change-value-content')= (Math.round((summaryData[leaderboard.summary_field] / summaryData[`initial_${leaderboard.summary_field}`]) * 100)).toString().replace('Infinity', '-') + '%'
               each field in leaderboard.fields
                 .each-leaderboard-table-wrapper(id=`leaderboard-content-${field}` class=`${leaderboard.selected_option != field ? 'section-hidden' : ''}`)
                   each validator, index in sortedValidatorsMapping[field]
                     .each-leaderboard-table-validator-wrapper
                       .each-leaderboard-table-validator-info-wrapper 
-                        span= index + 1
-                        img.each-leaderboard-table-validator-info-image(src=src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.png'}`)
+                        .validator-image
+                          .ranking-number-content(class='center')
+                            span= index + 1
+                          img.each-leaderboard-table-validator-info-image(src=src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.png'}`)
                         .each-leaderboard-table-validator-info-moniker= validator.moniker
                       .each-leaderboard-table-validator-data-wrapper 
                         if leaderboard.id == 'percentage_sold'
@@ -429,7 +437,7 @@ block content
             .network-summary-network-graph-content-header
               .network-summary-network-graph-content-header-main
                 .network-summary-network-graph-content-title Reward Flow Overview
-                .network-summary-network-graph-content-filters-wrapper
+                .network-summary-network-graph-content-filters-wrapper(style='display: none;')
                   each menu in summary_graph_menus
                     if menu.type == 'dropdown'
                       .each-network-summary-network-graph-content-dropdown-wrapper
