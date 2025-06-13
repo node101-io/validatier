@@ -25,7 +25,7 @@ export const convertEventsToMessageFormat = (finalizeBlockEvents: Event[], bech3
 
     const messageBody = {
       typeUrl: type,
-      time: time,
+      time: new Date(time),
       value: {
         validatorAddress: '',
         validatorAddressSender: '',
@@ -34,35 +34,41 @@ export const convertEventsToMessageFormat = (finalizeBlockEvents: Event[], bech3
       }
     }
     
-    let flagToPush = false;
+    let gotValidatorAddress = false;
+    let gotAmount = false;
 
     attributes.forEach(eachAttribute => {
       if (address_keys.includes(eachAttribute.key)) {
-        flagToPush = true;
         const operatorAddressValoperFormat = convertOperatorAddressToBech32(eachAttribute.value, `${bech32_prefix}valoper`);
         
         if (
           !operatorAddressValoperFormat ||
           !validValidatorAddress.includes(operatorAddressValoperFormat.replace('cosmosvaloper1', ''))
-        ) return flagToPush = false;
+        ) return;
 
+        
         if (eachAttribute.key == 'recipient')
           messageBody.value.validatorAddressRecipient = operatorAddressValoperFormat;
         else if (eachAttribute.key == 'sender')
           messageBody.value.validatorAddressSender = operatorAddressValoperFormat;
         else
           messageBody.value.validatorAddress = operatorAddressValoperFormat;
+        gotValidatorAddress = true;
       } else if (eachAttribute.key == amount_key) {
-        if (type == 'slash') messageBody.value.amount = eachAttribute.value;
+        if (type == 'slash') {
+          messageBody.value.amount = eachAttribute.value;
+          gotAmount = true;
+        }
         else {
           const nativeValue = getOnlyNativeTokenValueFromAmountString(eachAttribute.value, denom);
-          if (!nativeValue) return flagToPush = false;
+          if (!nativeValue) return gotAmount = false;
           messageBody.value.amount = nativeValue;
+          gotAmount = true;
         }
       }
     });
 
-    if (flagToPush)
+    if (gotValidatorAddress && gotAmount)
       messages.push(messageBody);
   })
 

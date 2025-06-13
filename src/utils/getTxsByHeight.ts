@@ -9,7 +9,7 @@ export interface DataInterface {
     block: {
       header: {
         height: number;
-        time: Date;
+        time: Date | string;
       };
       data: {
         txs: string[];
