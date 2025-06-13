@@ -24,7 +24,8 @@ export const LISTENING_EVENTS = [
   '/cosmos.staking.v1beta1.MsgBeginRedelegate',
   '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
   '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission',
-  'slash'
+  'slash',
+  'transfer'
 ];
 
 export const listenForEvents = (
@@ -70,7 +71,7 @@ export const listenForEvents = (
               if (!LISTENING_EVENTS.includes(eachMessage.typeUrl)) continue;
               const key = eachMessage.value.validatorAddress || '';
               
-              if (!key) {
+              if (!key && eachMessage.value.validatorSrcAddress && eachMessage.value.validatorDstAddress) {
                 if (!compositeEventBlockMap[eachMessage.value.validatorSrcAddress]) {
                   compositeEventBlockMap[eachMessage.value.validatorSrcAddress] = {
                     self_stake: 0,
@@ -93,7 +94,7 @@ export const listenForEvents = (
                     slash: 0
                   };
                 }
-              } else if (!compositeEventBlockMap[key]) 
+              } else if (key && !compositeEventBlockMap[key]) {
                 compositeEventBlockMap[key] = {
                   self_stake: 0,
                   reward: 0,
@@ -103,6 +104,7 @@ export const listenForEvents = (
                   balance_change: 0,
                   slash: 0
                 };
+              }
                 
               if (
                 [
@@ -182,15 +184,43 @@ export const listenForEvents = (
                 compositeEventBlockMap[eachMessage.value.validatorDstAddress].total_stake += value;
                 if (bech32DstOperatorAddress == eachMessage.value.delegatorAddress)
                   compositeEventBlockMap[eachMessage.value.validatorDstAddress].self_stake += value;
-              } else if (
-                ['coin_spent', 'coin_received'].includes(eachMessage.typeUrl)
-              ) {
-                const changeAmount = parseInt(eachMessage.value.amount.amount);
-                compositeEventBlockMap[key].balance_change += eachMessage.typeUrl == 'coin_received'
-                  ? changeAmount
-                  : -changeAmount;
               } else if (['slash'].includes(eachMessage.typeUrl)) {
                 compositeEventBlockMap[key].slash += eachMessage.value.amount;
+              } else if (
+                eachMessage.typeUrl == 'transfer'
+              ) {
+      
+                if (eachMessage.value.validatorAddressSender) {
+                  if (!compositeEventBlockMap[eachMessage.value.validatorAddressSender]) {
+                    compositeEventBlockMap[eachMessage.value.validatorAddressSender] = {
+                      self_stake: 0,
+                      reward: 0,
+                      commission: 0,
+                      total_stake: 0,
+                      total_withdraw: 0,
+                      balance_change: 0,
+                      slash: 0
+                    };
+                  }
+      
+                  compositeEventBlockMap[eachMessage.value.validatorAddressSender].balance_change -= parseInt(eachMessage.value.amount);
+                }
+      
+                if (eachMessage.value.validatorAddressRecipient) {
+                  if (!compositeEventBlockMap[eachMessage.value.validatorAddressRecipient]) {
+                    compositeEventBlockMap[eachMessage.value.validatorAddressRecipient] = {
+                      self_stake: 0,
+                      reward: 0,
+                      commission: 0,
+                      total_stake: 0,
+                      total_withdraw: 0,
+                      balance_change: 0,
+                      slash: 0
+                    };
+      
+                    compositeEventBlockMap[eachMessage.value.validatorAddressRecipient].balance_change += parseInt(eachMessage.value.amount);
+                  }
+                }
               }
             }
             resolve();
@@ -227,12 +257,15 @@ export const listenForEvents = (
             : [];
           result.inserted_validator_addresses = insertedValidatorAddresses;
           if (!timestamp) return final_callback('no_timestamp_available', { success: false });
-          const blockTimestamp = timestamp ? new Date(timestamp).getTime() : '';
+          const blockTimestamp = new Date(timestamp).getTime();
           
           Validator.updateLastVisitedBlock({ chain_identifier: chain.name, block_height: bottom_block_height, block_time: timestamp }, (err, updated_chain) => {
             if (err) return final_callback(`update_last_visited_block_failed: ${err}`, { success: false });
-            if (!blockTimestamp || blockTimestamp - chain.active_set_last_updated_block_time <= (86400 * 1000))
-              return final_callback(null, result);
+
+            if (
+              new Date(timestamp).toLocaleDateString('en-US') ==
+              new Date(chain.active_set_last_updated_block_time).toLocaleDateString('en-US')
+            ) return final_callback(null, result);
 
             getBatchData(chain.name, (err, data) => {
               if (err) return final_callback(`get_batch_data_failed: ${err}`, { success: false });

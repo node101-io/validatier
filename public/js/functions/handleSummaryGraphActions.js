@@ -152,6 +152,7 @@ function createNetworkSummaryGraph (dataFields, colors) {
         eachDataField != 'price' &&
         eachDataField != 'percentage_sold'
       ) data[eachDataField] += currentSumMapping[eachDataField];
+
       currentSumMapping[eachDataField] = data[eachDataField];
 
       const { nativeValue, usdValue } = getValueWithDecimals(currentSumMapping[eachDataField], eachDataField != 'percentage_sold' ? symbol : '%', usd_exchange_rate, decimals);

@@ -14,7 +14,9 @@ import { startFetchingData } from './utils/startFetchingData.js';
 import { initDB } from './utils/levelDb.js';
 import { Job_SaveChains } from './cron/jobs/Job_SaveChains.js';
 import getTxsByHeight from './utils/getTxsByHeight.js';
+import Chain from './models/Chain/Chain.js';
 import { convertOperatorAddressToBech32 } from './utils/convertOperatorAddressToBech32.js';
+import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -57,4 +59,4 @@ app.use('/', indexRouter);
 app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
-// startFetchingData();
+startFetchingData();

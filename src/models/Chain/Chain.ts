@@ -194,6 +194,12 @@ chainSchema.statics.saveChain = function (
 
       if (oldChain) return callback(null, oldChain);
 
+      const lastUpdatedBlockTime = new Date(
+        new Date(first_available_block_time).getFullYear(),
+        new Date(first_available_block_time).getMonth(),
+        new Date(first_available_block_time).getDate(),
+      ).getTime();
+
       Chain
         .create({ 
           name: name,
@@ -211,7 +217,7 @@ chainSchema.statics.saveChain = function (
           usd_exchange_rate: usd_exchange_rate,
           last_visited_block: first_available_block_height,
           last_visited_block_time: first_available_block_time,
-          active_set_last_updated_block_time: first_available_block_time,
+          active_set_last_updated_block_time: lastUpdatedBlockTime,
           active_set_last_updated_block_height: first_available_block_height
         })
         .then((newChain: ChainInterface) => {
@@ -260,11 +266,18 @@ chainSchema.statics.updateTimeOfLastActiveSetSave = function (
   callback: Parameters<ChainModel['updateTimeOfLastActiveSetSave']>[1],
 ) {
   const { chain_identifier, time, height } = body;
+
+  const lastUpdatedBlockTime = new Date(
+    new Date(time).getFullYear(),
+    new Date(time).getMonth(),
+    new Date(time).getDate(),
+  ).getTime();
+  
   Chain
     .findOneAndUpdate(
       { name: chain_identifier },
       {
-        active_set_last_updated_block_time: time,
+        active_set_last_updated_block_time: lastUpdatedBlockTime,
         active_set_last_updated_block_height: height
       }
     )

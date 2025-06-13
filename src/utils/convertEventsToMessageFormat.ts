@@ -1,3 +1,4 @@
+import { validValidatorAddress } from "../listeners/functions/constants.js";
 import { getOnlyNativeTokenValueFromAmountString } from "../listeners/functions/getOnlyNativeTokenValueFromAmountString.js";
 import { convertOperatorAddressToBech32 } from "./convertOperatorAddressToBech32.js";
 import { DecodedMessage, Event } from "./decodeTxs.js";
@@ -7,6 +8,10 @@ const EVENTS_TO_SEARCH = {
     address_keys: ['address'],
     amount_key: 'burned_coins',
   },
+  transfer: {
+    address_keys: ['recipient', 'sender'],
+    amount_key: 'amount',
+  }
 }
 
 export const convertEventsToMessageFormat = (finalizeBlockEvents: Event[], bech32_prefix: string, time: string, denom: string) => {
@@ -20,7 +25,7 @@ export const convertEventsToMessageFormat = (finalizeBlockEvents: Event[], bech3
 
     const messageBody = {
       typeUrl: type,
-      time: new Date(time),
+      time: time,
       value: {
         validatorAddress: '',
         validatorAddressSender: '',
@@ -35,11 +40,15 @@ export const convertEventsToMessageFormat = (finalizeBlockEvents: Event[], bech3
       if (address_keys.includes(eachAttribute.key)) {
         flagToPush = true;
         const operatorAddressValoperFormat = convertOperatorAddressToBech32(eachAttribute.value, `${bech32_prefix}valoper`);
-        if (!operatorAddressValoperFormat) return flagToPush = false;
+        
+        if (
+          !operatorAddressValoperFormat ||
+          !validValidatorAddress.includes(operatorAddressValoperFormat.replace('cosmosvaloper1', ''))
+        ) return flagToPush = false;
 
         if (eachAttribute.key == 'recipient')
           messageBody.value.validatorAddressRecipient = operatorAddressValoperFormat;
-        else if (eachAttribute.key == 'recipient')
+        else if (eachAttribute.key == 'sender')
           messageBody.value.validatorAddressSender = operatorAddressValoperFormat;
         else
           messageBody.value.validatorAddress = operatorAddressValoperFormat;

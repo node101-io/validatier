@@ -15,7 +15,7 @@ export interface Event {
 };
 
 export interface DecodedMessage {
-  time: Date;
+  time: Date | string;
   typeUrl: string;
   value: any;
 }
