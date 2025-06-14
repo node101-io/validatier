@@ -1,11 +1,11 @@
 :root {
   --validator-details-stats-wrapper-width: 100%;
-  --validator-details-stats-wrapper-height: 76px;
+  --validator-details-stats-wrapper-height: 120px;
   --validator-details-stats-wrapper-gap: 20px;
   --validator-details-stats-wrapper-flex-wrap: nowrap;
   
   --each-validator-stat-wrapper-width: 33%;
-  --each-validator-stat-wrapper-height: 76px;
+  --each-validator-stat-wrapper-height: 100%;
   --each-validator-stat-wrapper-padding-vertical: 14px;
   --each-validator-stat-wrapper-padding-horizontal: 16px;
   
@@ -19,8 +19,8 @@
   --each-validator-details-action-stake-padding-horizontal: 10px;
   --each-validator-details-action-stake-background-color: rgba(37, 0, 84, 1);
   --each-validator-details-action-stake-color: rgb(255, 255, 255);
-  --each-validator-details-action-stake-width: 47px;
-  --each-validator-details-action-stake-height: 19px;
+  --each-validator-details-action-stake-width: 56px;
+  --each-validator-details-action-stake-height: 24px;
 
   --each-validator-stat-content-wrapper-flex-direction: row;
   
@@ -253,7 +253,8 @@
   padding: var(--each-validator-stat-wrapper-padding-vertical) var(--each-validator-stat-wrapper-padding-horizontal);
   display: flex;
   flex-direction: column;
-  justify-content: baseline;
+  justify-content: center;
+  gap: 10px;
 }
 
 .validators-details-actions-wrapper {

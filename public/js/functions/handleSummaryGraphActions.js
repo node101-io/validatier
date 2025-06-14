@@ -62,16 +62,16 @@ function createNetworkSummaryGraph (dataFields, colors) {
   const targetCacheSummaryGraphData = JSON.parse(document.body.getAttribute('summaryGraphData'));
   
   let priceGraphData = null;
-  if (dataFields[0] == 'percentage_sold') {
+  
     priceGraphData = JSON.parse(document.body.getAttribute('priceGraphData'));
 
-    while (priceGraphData.length != targetCacheSummaryGraphData.length) {
-      if (priceGraphData.length > targetCacheSummaryGraphData.length)
-        priceGraphData.pop();
-      else 
-        targetCacheSummaryGraphData.pop();
-    }
+  while (priceGraphData.length != targetCacheSummaryGraphData.length) {
+    if (priceGraphData.length > targetCacheSummaryGraphData.length)
+      priceGraphData.pop();
+    else 
+      targetCacheSummaryGraphData.pop();
   }
+  
 
   document.querySelectorAll('.each-network-summary-network-graph-content-each-dropdown').forEach(each => {
     if (!each.classList.contains('leaderboard-dropdown-option')) each.classList.add('section-hidden')
@@ -110,8 +110,8 @@ function createNetworkSummaryGraph (dataFields, colors) {
   const subplotGroupMapping = dataFields[0] != 'percentage_sold' ? {
     number_of_groups: 3,
     total_stake_sum: 2,
-    total_withdraw_sum: 1,
-    total_sold: 0,
+    total_sold: 1,
+    price: 0,
   } : {
     number_of_groups: 1,
     percentage_sold: 0,
@@ -120,8 +120,8 @@ function createNetworkSummaryGraph (dataFields, colors) {
 
   const subplotGroupArray = dataFields[0] != 'percentage_sold' 
     ? [
+      ['price'],
       ['total_sold'],
-      ['total_withdraw_sum'],
       ['total_stake_sum']
     ]
     : [

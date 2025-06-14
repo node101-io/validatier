@@ -3,7 +3,7 @@ import CompositeEventBlock from '../../../models/CompositeEventBlock/CompositeEv
 import ActiveValidators from '../../../models/ActiveValidators/ActiveValidators.js';
 import { getInactivityIntervals } from '../../../models/ActiveValidators/function/getInactivityIntervalsFromAggregateResult.js';
 
-export const NUMBER_OF_COLUMNS = 50;
+export const NUMBER_OF_COLUMNS = 90;
 
 export default (req: Request, res: Response): any => {
   res.setHeader('Content-Type', 'text/event-stream');
@@ -86,12 +86,11 @@ export default (req: Request, res: Response): any => {
 
             const { self_stake = 0, reward = 0, commission = 0, total_stake = 0, total_withdraw = 0 } = result[operator_address] || {};
 
+            console.log(((reward + commission) - self_stake) || 1)
             const data = {
               success: true,
               data: {
                 total_stake_sum: total_stake || 1,
-                total_withdraw_sum: total_withdraw || 1,
-                self_stake_sum: self_stake || 1,
                 total_sold: ((reward + commission) - self_stake) || 1,
                 timestamp: bottomTimestamp + i * stepValue,
                 index: i

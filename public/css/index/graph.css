@@ -52,7 +52,7 @@
 
 
 .validator-graph-wrapper {
-  width: calc(100% - var(--validator-graph-wrapper-horizontal-padding));
+  width: calc(100% - (2 * var(--validator-graph-wrapper-horizontal-padding)));
   height: var(--validator-graph-wrapper-height);
   transition: all var(--validator-graph-wrapper-transition-duration) ease-in-out 0s;
   padding: var(--validator-graph-wrapper-vertical-padding) var(--validator-graph-wrapper-horizontal-padding);
@@ -77,6 +77,7 @@
 .each-graph-column-wrapper {
   height: calc(100% - 30px);
   position: relative;
+  padding-top: 5px;
 }
 
 .each-graph-column-wrapper::before, .column-wrapper-summary-subplot::after {
@@ -85,8 +86,26 @@
   background-color: var(--body-main-wrapper-background);
   position: absolute;
   bottom: -40px;
-  height: 30px;
+  height: 35px;
   z-index: 35;
+}
+
+.column-wrapper-summary-subplot::after {
+  height: calc(33% + 5px);
+  bottom: -5px;
+  background-color: var(--body-main-wrapper-background);
+  z-index: 15;
+}
+
+.column-wrapper-summary-subplot div:nth-child(1):after {
+  content: '';
+  width: 100%;
+  position: absolute;
+  left: 0;
+  height: calc(33% + 5px);
+  bottom: 33%;
+  background-color: var(--body-main-wrapper-background);
+  z-index: 5;
 }
 
 .each-graph-column-wrapper-last {
@@ -223,5 +242,4 @@
   position: absolute;
   background-color: var(--body-main-wrapper-background);
   left: var(--vertical-axis-labels-width);
-  height: 100%;
 }

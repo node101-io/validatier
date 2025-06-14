@@ -1,3 +1,6 @@
+
+const suffixArray = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th']
+
 function roundToFirstTwoDigits(number, method = 'floor') {
   if (number === 0) return 0;
 
@@ -50,9 +53,9 @@ const validator_stats = [
   { id: 'validator-details-moniker', field: 'moniker' },
   { id: 'validator-details-operator-address', field: 'operator_address' },
   { id: 'validator-details-image', field: 'temporary_image_uri' },
-  { id: 'validator-stat-percentage-sold', field: 'percentage_sold', title: 'Percentage sold', usdContent: false, additional_class: 'summary-percentage-text-native', type: 'percentage', helperType: 'percentage_change' },
-  { id: 'validator-stat-self-stake', field: 'self_stake', title: 'Self Stake Amount', usdContent: true, helperType: 'rank' },
-  { id: 'validator-stat-commission-rate', title: 'Commission', field: 'commission_rate', usdContent: false, additional_class: 'summary-percentage-text-native', helperType: 'text', helperText: 'fee from rewards' }
+  { id: 'validator-stat-percentage-sold', field: 'percentage_sold', title: 'Percentage sold', usdContent: false, additional_class: 'summary-percentage-text-native', helperType: 'rank' },
+  { id: 'validator-stat-self-stake', field: 'self_stake', title: 'Self Stake', usdContent: true, helperType: 'rank' },
+  { id: 'validator-stat-commission-rate', title: 'Commission', field: 'commission_rate', usdContent: false, additional_class: 'summary-percentage-text-native', helperText: 'fee from rewards', helperType: 'text' }
 ];
 
 function generateGraph (validator) {
@@ -64,7 +67,9 @@ function generateGraph (validator) {
   const pubkey = validator.pubkey;
   const chainIdentifier = validator.chain_identifier;
 
-  document.documentElement.style.setProperty(`--number-of-columns-${operatorAddress}`, 49);
+  const priceGraphData = JSON.parse(document.body.getAttribute('priceGraphData'));
+
+  document.documentElement.style.setProperty(`--number-of-columns-${operatorAddress}`, 89);
 
   const decimals = document.getElementById('network-switch-header').getAttribute('current_chain_decimals');
   const usd_exchange_rate = document.getElementById('network-switch-header').getAttribute('current_chain_usd_exhange_rate');
@@ -119,9 +124,14 @@ function generateGraph (validator) {
       if (stat.field == 'self_stake') {
         const ssRank = ([...validators].sort((a, b) => b['self_stake'] - a['self_stake']).findIndex(v => v.operator_address === validator.operator_address) + 1);
         const ssrRank = ([...validators].sort((a, b) => b['self_stake_ratio'] - a['self_stake_ratio']).findIndex(v => v.operator_address === validator.operator_address) + 1);
-        document.getElementById(`${stat.id}-helper`).innerHTML = (Math.floor((ssRank + ssrRank) / 2)) + '/' + validators.length;
+        const averageRank = Math.floor((ssRank + ssrRank) / 2);
+        const suffix = suffixArray[parseInt(averageRank.toString()[averageRank.toString().length - 1])];
+        
+        document.getElementById(`${stat.id}-helper`).innerHTML = averageRank + `${suffix} out of ` + validators.length;
       } else {
-        document.getElementById(`${stat.id}-helper`).innerHTML = ([...validators].sort((a, b) => b[stat.field] - a[stat.field]).findIndex(v => v.operator_address === validator.operator_address) + 1) + '/' + validators.length;
+        const rank = [...validators].sort((a, b) => a[stat.field] - b[stat.field]).findIndex(v => v.operator_address === validator.operator_address) + 1;
+        const suffix = suffixArray[parseInt(rank.toString()[rank.toString().length - 1])];
+        document.getElementById(`${stat.id}-helper`).innerHTML = (rank + `${suffix} out of ` + validators.length);
       }
     }
   });
@@ -140,8 +150,8 @@ function generateGraph (validator) {
   }
   
   const graphDataMapping = {};
-  const dataFields = ['total_stake_sum', 'total_withdraw_sum', 'total_sold'];
-  const colors = ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)'];
+  const dataFields = ['price', 'total_sold', 'total_stake_sum'];
+  const colors = ['rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)', 'rgba(255, 149, 0, 1)'];
     
   dataFields.forEach(eachDataField => {
     const metric = document.getElementById(`validator-metric-${eachDataField}`);
@@ -169,13 +179,13 @@ function generateGraph (validator) {
   const subplotGroupMapping = {
     number_of_groups: 3,
     total_stake_sum: 2,
-    total_withdraw_sum: 1,
-    total_sold: 0,
+    total_sold: 1,
+    price: 0,
   };
 
   const subplotGroupArray = [
+    ['price'],
     ['total_sold'],
-    ['total_withdraw_sum'],
     ['total_stake_sum']
   ];
   
@@ -193,7 +203,7 @@ function generateGraph (validator) {
     if (!response.success || response.err) {
       eventSource.close();
       return;
-    }    
+    }
     const data = response.data;
     
     if (response.isInactivityIntervals) {
@@ -215,6 +225,7 @@ function generateGraph (validator) {
       
       return;
     }
+    data.price = priceGraphData[data.index];
     graphDataMapping[data.index] = data;
 
     dataFields.forEach(eachDataField => {

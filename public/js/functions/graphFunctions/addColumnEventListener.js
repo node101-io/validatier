@@ -87,7 +87,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
 
           dataFields.forEach(eachDataField => {
             const groupId = subplotGroupMapping ? subplotGroupMapping[eachDataField] : 0;
-            const addOn = subplotGroupMapping ? `-${eachDataField != 'price' ? groupId : '1'}` : '';
+            const addOn = subplotGroupMapping ? `-${eachDataField != 'price' ? groupId : '0'}` : '';
             const numberOfGroups = subplotGroupMapping ? subplotGroupMapping['number_of_groups'] : 1;
             bottomMapping[eachDataField] = `calc(${(100 / numberOfGroups) * groupId}% + ((${current.nextSibling.getAttribute(eachDataField)} - var(--min-value-${operatorAddress}${addOn})) / (var(--max-value-${operatorAddress}${addOn}) - var(--min-value-${operatorAddress}${addOn}))) * ${100 / numberOfGroups}%)`;
           })
@@ -110,7 +110,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
 
           dataFields.forEach(eachDataField => {
             const groupId = subplotGroupMapping ? subplotGroupMapping[eachDataField] : 0;
-            const addOn = subplotGroupMapping ? `-${eachDataField != 'price' ? groupId : '1'}` : '';
+            const addOn = subplotGroupMapping ? `-${eachDataField != 'price' ? groupId : '0'}` : '';
             const numberOfGroups = subplotGroupMapping ? subplotGroupMapping['number_of_groups'] : 1;
             bottomMapping[eachDataField] = `calc(${(100 / numberOfGroups) * groupId}% + ((${current.getAttribute(eachDataField)} - var(--min-value-${operatorAddress}${addOn})) / (var(--max-value-${operatorAddress}${addOn}) - var(--min-value-${operatorAddress}${addOn}))) * ${100 / numberOfGroups}%)`;
           })
@@ -128,7 +128,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
 
         current.querySelectorAll('.each-data-line').forEach((eachLine, i) => {
           const dataField = dataFields[i];
-          eachLine.style.zIndex = (i + 1) * 10;
+          eachLine.style.zIndex = (dataFields.length - (i + 1)) * 10;
         })
 
         current.querySelectorAll('.graph-range-paint-bar').forEach((eachPaintBar, i) => {
@@ -141,7 +141,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
           eachPaintBar.style.backgroundColor = color;
           eachPaintBar.style.borderRight = `1px solid ${color}`;
           
-          eachPaintBar.style.zIndex = (i + 1) * 10;
+          eachPaintBar.style.zIndex = (dataFields.length - (i + 1)) * 10;
         })
 
         validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn = current;
@@ -159,7 +159,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
       const bottomMapping = {}
       dataFields.forEach(eachDataField => {
         const groupId = subplotGroupMapping ? subplotGroupMapping[eachDataField] : 0;
-        const addOn = subplotGroupMapping ? `-${eachDataField != 'price' ? groupId : '1'}` : '';
+        const addOn = subplotGroupMapping ? `-${eachDataField != 'price' ? groupId : '0'}` : '';
         const numberOfGroups = subplotGroupMapping ? subplotGroupMapping['number_of_groups'] : 1;
         bottomMapping[eachDataField] = `calc(${(100 / numberOfGroups) * groupId}% + ((${columnWrapper.nextSibling.getAttribute(eachDataField)} - var(--min-value-${operatorAddress}${addOn})) / (var(--max-value-${operatorAddress}${addOn}) - var(--min-value-${operatorAddress}${addOn}))) * ${100 / numberOfGroups}%)`;
       });
@@ -182,7 +182,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
       const bottomMapping = {}
       dataFields.forEach(eachDataField => {
         const groupId = subplotGroupMapping ? subplotGroupMapping[eachDataField] : 0;
-        const addOn = subplotGroupMapping ? `-${eachDataField != 'price' ? groupId : '1'}` : '';
+        const addOn = subplotGroupMapping ? `-${eachDataField != 'price' ? groupId : '0'}` : '';
         const numberOfGroups = subplotGroupMapping ? subplotGroupMapping['number_of_groups'] : 1;
         bottomMapping[eachDataField] = `calc(${(100 / numberOfGroups) * groupId}% + ((${columnWrapper.getAttribute(eachDataField)} - var(--min-value-${operatorAddress}${addOn})) / (var(--max-value-${operatorAddress}${addOn}) - var(--min-value-${operatorAddress}${addOn}))) * ${100 / numberOfGroups}%)`;
       });

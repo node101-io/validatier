@@ -8,7 +8,7 @@ function getAngleBetweenTwoPoints (column1, column2, operatorAddress, dataFields
   dataFields.forEach(eachDataField => {
 
     const subPlotGroup = subplotGroupMapping ? subplotGroupMapping[eachDataField] : '';
-    const minMaxAddOn = subplotGroupMapping ? `-${eachDataField != 'price' ? subPlotGroup : '1'}` : '';
+    const minMaxAddOn = subplotGroupMapping ? `-${eachDataField != 'price' ? subPlotGroup : '0'}` : '';
     const numOfGroups = subplotGroupMapping ? subplotGroupMapping['number_of_groups'] : 1;
 
     const data_1 = column1.getAttribute(eachDataField);

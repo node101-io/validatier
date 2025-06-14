@@ -87,8 +87,8 @@ const indexGetController = (req: Request, res: Response): void => {
         other: {
           graph_title: 'Reward Flow Overview',
           graph_description: 'Shows how validators respond to changes in total capitulation and delegation in the market',
-          dataFields: ['total_stake_sum', 'total_withdraw_sum', 'total_sold'],
-          colors: ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)']
+          dataFields: ['price', 'total_sold', 'total_stake_sum'],
+          colors: ['rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)', 'rgba(255, 149, 0, 1)']
         },
       };
       
@@ -178,8 +178,8 @@ const indexGetController = (req: Request, res: Response): void => {
         graph_title: graphMapping[url].graph_title,
         graph_description: graphMapping[url].graph_description,
         validatorGraph: {
-          dataFields: ['total_stake_sum', 'total_withdraw_sum', 'total_sold'],
-          colors: ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)']
+          dataFields: ['price', 'total_sold', 'total_stake_sum'],
+          colors: ['rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)', 'rgba(255, 149, 0, 1)']
         },
         priceGraphData
       });

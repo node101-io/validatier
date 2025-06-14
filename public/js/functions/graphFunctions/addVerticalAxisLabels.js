@@ -1,5 +1,5 @@
 
-function addVerticalAxisLabels(graphWrapper, operatorAddress, min, max, details, currency, decimals, usd_exchange_rate, symbol, id, symbolArray) {
+function addVerticalAxisLabels(graphWrapper, operatorAddress, min, max, details, currency, decimals, usd_exchange_rate, symbol, id, symbolArray, dataFields) {
   
   if (document.getElementById(`${operatorAddress.replace('@', '\\@')}-graph-vertical-axis-labels${id || ''}`)) document.getElementById(`${operatorAddress.replace('@', '\\@')}-graph-vertical-axis-labels${id || ''}`).remove();
   const verticalAxisLabels = document.createElement('div');
@@ -27,8 +27,11 @@ function addVerticalAxisLabels(graphWrapper, operatorAddress, min, max, details,
       eachVerticalLabel.classList.add('each-vertical-label');
 
       const { nativeValue, usdValue } = getValueWithDecimals(value, symbol, usd_exchange_rate, decimals);
-
-      eachVerticalLabel.innerHTML = !['%', '$'].includes(symbol) ? nativeValue.replace(symbol, '') : nativeValue.replace(symbol, symbolArray[id]);
+      if (dataFields[i] != 'price') {
+        eachVerticalLabel.innerHTML = !['%', '$'].includes(symbol) ? nativeValue.replace(symbol, '') : nativeValue.replace(symbol, symbolArray[id]);
+      } else {
+        eachVerticalLabel.innerHTML = `$${value}`;
+      }
 
       verticalAxisSubWrapper.appendChild(eachVerticalLabel);
       iter += step;

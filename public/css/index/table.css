@@ -22,12 +22,12 @@
   --each-table-popup-info-content-font-weight: 400;
   --each-table-popup-info-content-background-color: rgba(77, 9, 180, 1);
   --each-table-popup-info-content-color: rgba(250, 250, 250, 1);
-  --each-table-popup-info-content-font-size: 10px;
+  --each-table-popup-info-content-font-size: 20px;
   --each-table-popup-info-content-translate-y: -10px;
   --each-table-popup-info-content-opacity: 1;
-  --each-table-popup-info-content-bottom: 105%;
+  --each-table-popup-info-content-bottom: 85%;
   --each-table-popup-info-content-transition-duration: 0.25s;
-  --each-table-popup-info-content-height: 24px;
+  --each-table-popup-info-content-height: 32px;
   --each-table-popup-info-content-width: fit-content;
   --each-table-popup-info-content-left: -50%;
   --each-table-popup-info-content-horizontal-padding: 20px;

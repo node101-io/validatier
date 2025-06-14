@@ -8,15 +8,15 @@
   --each-network-summary-network-graph-content-dropdown-content-border-size: 0.5px;
   --each-network-summary-network-graph-content-dropdown-content-border-color: rgba(190, 190, 231, 1);;
   
-  --each-network-summary-select-wrapper-font-size: 16px;
+  --each-network-summary-select-wrapper-font-size: 20px;
   --each-network-summary-select-wrapper-gap: 14px;
   
   --each-network-summary-select-option-font-weight: 400;
   --each-network-summary-select-option-selected-font-weight: 600;
 
-  --summary-percentage-text-native-font-size: 32px !important;
+  --summary-percentage-text-native-font-size: 36px !important;
 
-  --network-summary-main-wrapper-title-network-summary-network-graph-metrics-wrapper-title-font-size: 16px;
+  --network-summary-main-wrapper-title-network-summary-network-graph-metrics-wrapper-title-font-size: 20px;
   --network-summary-main-wrapper-title-network-summary-network-graph-metrics-wrapper-title-font-weight: 500;
   --network-summary-network-graph-metrics-wrapper-title-width: fit-content;
 
@@ -39,10 +39,10 @@
   --each-network-summary-stat-column-max-width: 50%;
   
   --each-network-summary-stat-header-title-font-weight: 400;
-  --each-network-summary-stat-header-title-font-size: 16px;
+  --each-network-summary-stat-header-title-font-size: 20px;
   --each-network-summary-stat-header-title-color: rgba(124, 112, 195, 1);
   
-  --each-network-summary-stat-content-font-size: 24px;
+  --each-network-summary-stat-content-font-size: 28px;
   --each-network-summary-stat-content-font-weight: 700;
   --each-network-summary-stat-content-color: rgba(73, 48, 111, 1);
   
@@ -87,7 +87,7 @@
 
   --each-metric-content-wrapper-header-title-font-size: 20px;
   
-  --each-metric-content-wrapper-header-font-size: 16px;
+  --each-metric-content-wrapper-header-font-size: 20px;
   --each-metric-content-wrapper-header-color: rgba(124, 112, 195, 1);
   --each-metric-content-wrapper-header-gap: 10px;
   
@@ -96,14 +96,14 @@
   --each-metric-content-wrapper-content-flex-direction: row;
   
   --each-metric-content-wrapper-content-value-native-font-weight: 700;
-  --each-metric-content-wrapper-content-value-native-font-size: 24px;
+  --each-metric-content-wrapper-content-value-native-font-size: 28px;
   --each-metric-content-wrapper-content-value-native-color: rgba(73, 48, 111, 1);
   
   --each-metric-content-wrapper-content-value-usd-font-weight: 600;
-  --each-metric-content-wrapper-content-value-usd-font-size: 16px;
+  --each-metric-content-wrapper-content-value-usd-font-size: 20px;
   --each-metric-content-wrapper-content-value-usd-color: rgba(124, 112, 195, 1);
   
-  --each-metric-content-wrapper-footer-font-size: 16px;
+  --each-metric-content-wrapper-footer-font-size: 20px;
   --each-metric-content-wrapper-footer-font-weight: 400;
   --each-metric-content-wrapper-footer-color: rgba(124, 112, 195, 1);
    
@@ -121,12 +121,12 @@
   
   --percentage-change-value-content-color: rgba(19, 167, 25, 1) !important;
   
-  --network-summary-network-graph-content-filters-wrapper-font-size: 16px;
+  --network-summary-network-graph-content-filters-wrapper-font-size: 20px;
   --network-summary-network-graph-content-filters-wrapper-gap: 36px;
   --network-summary-network-graph-content-filters-wrapper-margin-top: -20px;
   
   --each-network-summary-network-graph-content-dropdown-header-gap: 5px;
-  --each-network-summary-network-graph-content-dropdown-header-font-size: 16px;
+  --each-network-summary-network-graph-content-dropdown-header-font-size: 20px;
   
   --each-network-summary-network-graph-content-dropdown-header-img-margin-top: 2px;
 }
@@ -495,7 +495,7 @@
 
 .each-network-summary-network-graph-content-each-dropdown span {
   margin-bottom: 2px;
-  font-size: 16px;
+  font-size: 20px;
 }
 
 .each-network-summary-network-graph-content-each-dropdown .general-choice-checkbox-inner-circle {
@@ -627,8 +627,8 @@
 
 @media only screen and (max-width: 600px) {
   :root {
-    --each-metric-content-wrapper-content-value-native-font-size: 16px;
-    --each-metric-content-wrapper-content-value-usd-font-size: 16px;
+    --each-metric-content-wrapper-content-value-native-font-size: 20px;
+    --each-metric-content-wrapper-content-value-usd-font-size: 20px;
     --each-metric-content-wrapper-content-flex-direction: column;
     --network-summary-network-graph-content-filters-wrapper-gap: 6px;
     --each-network-summary-select-wrapper-gap: 8px;
