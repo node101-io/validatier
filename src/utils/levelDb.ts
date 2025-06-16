@@ -12,6 +12,8 @@ interface CompositeEventDataInterface {
   commission: number;
   total_stake: number;
   total_withdraw: number;
+  balance_change: number;
+  slash: number;
   timestamp: number;
 }
 
@@ -85,13 +87,15 @@ export function bulkSave(
             processNext();
           });
         }
-
+        
         const currentRecordJSON = JSON.parse(currentRecord);
         currentRecordJSON.self_stake = parseInt(currentRecordJSON.self_stake) + (compositeEventData.self_stake || 0);
         currentRecordJSON.commission = parseInt(currentRecordJSON.commission) + (compositeEventData.commission || 0);
         currentRecordJSON.reward = parseInt(currentRecordJSON.reward) + (compositeEventData.reward || 0);
         currentRecordJSON.total_stake = parseInt(currentRecordJSON.total_stake) + (compositeEventData.total_stake || 0);
         currentRecordJSON.total_withdraw = parseInt(currentRecordJSON.total_withdraw) + (compositeEventData.total_withdraw || 0);
+        currentRecordJSON.balance_change = parseInt(currentRecordJSON.balance_change) + (compositeEventData.balance_change || 0);
+        currentRecordJSON.slash = parseInt(currentRecordJSON.slash) + (compositeEventData.slash || 0);
 
         batch.put(eachOperatorAddress, JSON.stringify(currentRecordJSON));
         counter++;
