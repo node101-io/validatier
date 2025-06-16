@@ -1,3 +1,6 @@
+
+const horizontalLabelDataMapping = {}
+
 function addColumnToExistingGraph (params) {
   const { type, operatorAddress, data, timestamp, index, currency, decimals, usd_exchange_rate, symbol, minValue, maxValue, graphWidth, dataFields, colors, columnsPer, subplotGroupMapping } = params;
   const graphWrapper = document.getElementById(`validator-graph-wrapper-${operatorAddress}`);
@@ -74,15 +77,36 @@ function addColumnToExistingGraph (params) {
   })
 
   if (type != 'small') {
-    const horizontalAxisLabel = generateSingleHorizontalAxisLabel(timestamp);
+
+    if (!horizontalLabelDataMapping[operatorAddress]) {
+      horizontalLabelDataMapping[operatorAddress] = {
+        currentIntervalLeft: timestamp,
+        currentIntervalRight: null,
+        columnToAppendHorizontalLabel: null
+      };
+    }
+
     const linePer = columnsPer / 2;
-    if (
-      index % columnsPer == 0
-    ) columnWrapper.appendChild(horizontalAxisLabel);
+    if (index % columnsPer == 0) {
+      horizontalLabelDataMapping[operatorAddress].columnToAppendHorizontalLabel = columnWrapper;
+    };
     if (index % linePer == 0 && index % columnsPer != 0) {
       const referenceLine = document.createElement('div');
       referenceLine.classList.add('each-data-vertical-reference-line');
       columnWrapper.appendChild(referenceLine);
+      
+      if (!horizontalLabelDataMapping[operatorAddress].currentIntervalLeft) {
+        horizontalLabelDataMapping[operatorAddress].currentIntervalLeft = timestamp;
+      } else if (!horizontalLabelDataMapping[operatorAddress].currentIntervalRight) {
+        horizontalLabelDataMapping[operatorAddress].currentIntervalRight = timestamp;
+        generateSingleHorizontalAxisLabel(horizontalLabelDataMapping[operatorAddress]);
+
+        horizontalLabelDataMapping[operatorAddress] = {
+          currentIntervalLeft: timestamp,
+          currentIntervalRight: null,
+          columnToAppendHorizontalLabel: null
+        };
+      }
     };
   }
 

@@ -26,7 +26,6 @@
   --horizontal-axis-label-transition-duration: 0s;
   --horizontal-axis-label-width: 20px;
   --horizontal-axis-label-bottom: -30px;
-  --horizontal-axis-label-left: -18px;
   --horizontal-axis-label-z-index: 50;
   
   --each-data-point-horizontal-label-hovered-font-weight: 800;
@@ -78,6 +77,8 @@
   height: calc(100% - 30px);
   position: relative;
   padding-top: 5px;
+  display: flex;
+  justify-content: center;
 }
 
 .each-graph-column-wrapper::before, .column-wrapper-summary-subplot::after {
@@ -88,6 +89,10 @@
   bottom: -40px;
   height: 35px;
   z-index: 35;
+}
+
+.each-graph-column-wrapper-inactivity-indicator, .each-graph-column-wrapper-inactivity-indicator::after, .each-graph-column-wrapper-inactivity-indicator div:nth-child(1):after {
+  background-color: rgb(255, 206, 199) !important;
 }
 
 .column-wrapper-summary-subplot::after {
@@ -143,17 +148,18 @@
 }
 
 .horizontal-axis-label {
+  width: fit-content;
+  text-wrap: nowrap;
   font-size: var(--horizontal-axis-label-font-size);
   font-weight: var(--horizontal-axis-label-font-weight);
   transform-origin: center;
   transform: rotateZ(var(--horizontal-axis-label-transform-rotate-deg));
   transition: font-weight var(--horizontal-axis-label-transition-duration) ease 0s;
-  width: var(--horizontal-axis-label-width);
   position: absolute;
   bottom: var(--horizontal-axis-label-bottom);
-  left: var(--horizontal-axis-label-left);
   z-index: var(--horizontal-axis-label-z-index);
   color: rgba(73, 48, 111, 1);
+  justify-content: center;
 }
 
 .each-data-point-horizontal-label-hovered {

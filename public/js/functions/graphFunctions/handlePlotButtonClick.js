@@ -201,6 +201,7 @@ function generateGraph (validator) {
   let sumTotalStake = 0;
   let sumTotalSold = 0;
   let dataLength = 0;
+  let inactivityIntervals = [];
   
   eventSource.onmessage = (event) => {
     const response = JSON.parse(event.data);
@@ -217,26 +218,24 @@ function generateGraph (validator) {
         price: sumPrice / dataLength,
         total_sold: sumTotalSold,
       }
-      return addColumnEventListener(operatorAddress.replace('@', '\\@'), dataFields, colors, symbol, usd_exchange_rate, decimals, summaryData, subplotGroupMapping, averageMapping);  
+      addColumnEventListener(operatorAddress.replace('@', '\\@'), dataFields, colors, symbol, usd_exchange_rate, decimals, summaryData, subplotGroupMapping, averageMapping);  
+    
+      document.querySelectorAll(`.column-wrapper-${operatorAddress}`).forEach(eachColumn => {
+        const timestamp = eachColumn.getAttribute('timestamp');
+        for (let i = 0; i < inactivityIntervals.length; i += 2) {
+          if (
+            inactivityIntervals[i] < timestamp &&
+            timestamp < inactivityIntervals[i + 1]
+          ) {
+            eachColumn.classList.add('each-graph-column-wrapper-inactivity-indicator');
+          }
+        }
+      });
+      return;
     }
 
     if (response.isInactivityIntervals) {
-      for (let j = 0; j < response.data.length; j += 2) {
-        
-        const inactivityDisplayBackgroundArea = document.createElement('div');
-        inactivityDisplayBackgroundArea.classList.add('inactivity-display-background-area');
-
-        const start = response.data[j];
-        const end = response.data[j + 1] ?? topTimestamp;
-
-        const left = ((start - bottomTimestamp) / (topTimestamp - bottomTimestamp)) * 100;
-        const width = ((end - start) / (topTimestamp - bottomTimestamp) * 100);
-
-        inactivityDisplayBackgroundArea.style.left = `calc(${left}% + var(--vertical-axis-labels-width))`;
-        inactivityDisplayBackgroundArea.style.width = `calc(${width}% - var(--vertical-axis-labels-width))`;
-        graphWrapper.insertBefore(inactivityDisplayBackgroundArea, graphWrapper.children[0]);
-      }
-      
+      inactivityIntervals = response.data;
       return;
     }
 
@@ -307,7 +306,7 @@ function generateGraph (validator) {
   };
   
 
-  eventSource.addEventListener('end', () => {  
+  eventSource.addEventListener('end', () => {
     eventSource.close();
   });
 
