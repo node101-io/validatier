@@ -285,8 +285,6 @@ function createSmallGraphs () {
       document.documentElement.style.setProperty(`--min-value-${operatorAddress}`, minValue);
       document.documentElement.style.setProperty(`--max-value-${operatorAddress}`, maxValue);
     
-      if (maxValue == minValue) minValue = maxValue / 2;
-    
       const insertedColumn = addColumnToExistingGraph({
         type: 'small',
         operatorAddress,

@@ -60,7 +60,7 @@
   --inactivity-display-background-area-background-color: red;
   --inactivity-display-background-area-opacity: 0.1;
 
-  --validators-leaderboards-main-wrapper-height: 520px;
+  --validators-leaderboards-main-wrapper-height: 550px;
   --validators-leaderboards-main-wrapper-gap: 20px;
   --validators-leaderboards-main-wrapper-margin-top: 10px;
   --validators-leaderboards-main-wrapper-margin-bottom: 10px;
@@ -88,7 +88,7 @@
   
   --each-leaderboard-summary-data-gap: 5px;
   
-  --each-leaderboard-summary-data-each-network-summary-stat-content-font-size: 32px;
+  --each-leaderboard-summary-data-each-network-summary-stat-content-font-size: 36px;
 
   --validator-details-main-wrapper-gap: 20px;
   --validator-details-main-wrapper-margin-top: 20px;
@@ -186,6 +186,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: 8px;
   margin-bottom: auto;
 }
 
@@ -198,7 +199,7 @@
 
 .each-leaderboard-summary-data .each-network-summary-stat-content {
   text-wrap: nowrap;
-  font-size: var(--each-leaderboard-summary-data-each-network-summary-stat-content-font-size);
+  font-size: var(--each-leaderboard-summary-data-each-network-summary-stat-content-font-size) !important; 
 }
 
 .validator-details-main-wrapper {
@@ -439,11 +440,6 @@
     --validators-leaderboards-main-wrapper-overflow: scroll;
     --leaderboard-usd-value-display: block;
     --leaderboard-value-responsive-conceal-display: flex;
-  }
-}
-
-@media only screen and (max-width: 750px) {
-  :root {
     --each-validator-stat-wrapper-width: calc(50% - 40px);
     --validator-details-stats-wrapper-gap: 0px;
   }

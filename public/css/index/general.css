@@ -16,6 +16,7 @@
   --color-pale-white: rgb(248, 248, 248);
   --color-dropdown-background: rgba(245, 245, 254, 1);
   --color-triangle-unselected: rgba(183, 166, 198, 1);
+  --color-triangle-big-unselected: rgba(73, 48, 111, 1);
   --color-middle-date-background: rgba(232, 232, 255, 1);
   --color-selected-date-background: rgba(202, 200, 255, 1);
   --color-network-switch: rgb(224, 228, 255);
@@ -41,6 +42,7 @@
   --spinner-animation-duration: 1s;
 
   --triangle-size: 5px;
+  --triangle-big-size: 8px;
 
   --navbar-toggle-transition-duration: 0.25s;
 
@@ -138,12 +140,28 @@ input {
   border-bottom: var(--triangle-size) solid var(--color-triangle-unselected);
 }
 
+.triangle-up-big {
+  width: 0;
+  height: 0;
+  border-left: var(--triangle-big-size) solid transparent;
+  border-right: var(--triangle-big-size) solid transparent;
+  border-bottom: var(--triangle-big-size) solid var(--color-triangle-big-unselected);
+}
+
 .triangle-down {
   width: 0;
   height: 0;
   border-left: var(--triangle-size) solid transparent;
   border-right: var(--triangle-size) solid transparent;
   border-top: var(--triangle-size) solid var(--color-triangle-unselected);
+}
+
+.triangle-down-big {
+  width: 0;
+  height: 0;
+  border-left: var(--triangle-big-size) solid transparent;
+  border-right: var(--triangle-big-size) solid transparent;
+  border-top: var(--triangle-big-size) solid var(--color-triangle-big-unselected);
 }
 
 .spinner {

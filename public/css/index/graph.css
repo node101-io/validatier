@@ -9,7 +9,7 @@
 
   --validator-graph-wrapper-small-min-width: 100px;
   --validator-graph-wrapper-small-max-width: 100px;
-  --validator-graph-wrapper-small-height: 50px;
+  --validator-graph-wrapper-small-height: 90px;
   
   --each-data-point-max-width: 10px;
   --each-data-point-min-width: 10px;
@@ -71,6 +71,7 @@
   display: flex;
   gap: 0;
   position: relative;
+  overflow: hidden;
 }
 
 .each-graph-column-wrapper {

@@ -330,7 +330,7 @@ block content
                 .each-leaderboard-table-type-content(type=`${leaderboard.id}`)
                   .each-leaderboard-header-title= leaderboard.title
                   .each-table-header-sort-indicators
-                    div(class=`triangle-${leaderboard.triangle_direction}` style=`margin-top: ${leaderboard.triangle_direction == 'asc' ? '-4px' : '-3px'};`)
+                    div(class=`triangle-${leaderboard.triangle_direction}-big`)
                 if leaderboard.dropdown
                   .each-network-summary-network-graph-content-dropdown-wrapper
                     .each-network-summary-network-graph-content-dropdown-header
