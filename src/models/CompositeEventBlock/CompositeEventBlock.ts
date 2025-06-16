@@ -491,19 +491,19 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
              
               if (each.chain_identifier != undefined) updateObj.chain_identifier = each.chain_identifier;
 
-              if (each.self_stake != 0) updateObj.self_stake = each.self_stake;
-              if (each.reward != 0) updateObj.reward = each.reward;
-              if (each.commission != 0) updateObj.commission = each.commission;
-              if (each.total_stake != 0) updateObj.total_stake = each.total_stake;
-              if (each.total_withdraw != 0) updateObj.total_withdraw = each.total_withdraw;
-              if (each.balance_change != 0) updateObj.balance_change = each.balance_change;
+              updateObj.self_stake = each.self_stake;
+              updateObj.reward = each.reward;
+              updateObj.commission = each.commission;
+              updateObj.total_stake = each.total_stake;
+              updateObj.total_withdraw = each.total_withdraw;
+              updateObj.balance_change = each.balance_change;
 
-              if (each.reward_prefix_sum != 0) updateObj.reward_prefix_sum = each.reward_prefix_sum;
-              if (each.self_stake_prefix_sum != 0) updateObj.self_stake_prefix_sum = each.self_stake_prefix_sum;
-              if (each.commission_prefix_sum != 0) updateObj.commission_prefix_sum = each.commission_prefix_sum;
-              if (each.total_stake_prefix_sum != 0) updateObj.total_stake_prefix_sum = each.total_stake_prefix_sum;
-              if (each.total_withdraw_prefix_sum != 0) updateObj.total_withdraw_prefix_sum = each.total_withdraw_prefix_sum;
-              if (each.balance_change_prefix_sum != 0) updateObj.balance_change_prefix_sum = each.balance_change_prefix_sum;
+              updateObj.reward_prefix_sum = each.reward_prefix_sum;
+              updateObj.self_stake_prefix_sum = each.self_stake_prefix_sum;
+              updateObj.commission_prefix_sum = each.commission_prefix_sum;
+              updateObj.total_stake_prefix_sum = each.total_stake_prefix_sum;
+              updateObj.total_withdraw_prefix_sum = each.total_withdraw_prefix_sum;
+              updateObj.balance_change_prefix_sum = each.balance_change_prefix_sum;
 
               return {
                 updateOne: {
