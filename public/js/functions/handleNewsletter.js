@@ -11,7 +11,6 @@ function handleNewsLetter() {
     }),
   })
     .then(res => res.json()).then(res => {
-      console.log(res)
       if ((!res || res.error) && res.error !== 'duplicated_unique_field') throw new Error(res.error);
       if (res.error) return contactTextContent.innerHTML = 'You have already joinned the waitlist!';
       return contactTextContent.innerHTML = 'Thank you for joining the community!';;

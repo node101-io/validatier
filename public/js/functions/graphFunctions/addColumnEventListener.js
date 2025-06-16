@@ -1,5 +1,28 @@
 
-function addColumnEventListener (operatorAddress, dataFields, colors, currency, exchange_rate, decimals, summaryData, subplotGroupMapping) {
+function addColumnEventListener (operatorAddress, dataFields, colors, currency, exchange_rate, decimals, summaryData, subplotGroupMapping, averageMapping) {
+  
+  
+  const resetMetrics = () => {
+    Object.keys(averageMapping).forEach(eachDataField => {
+      const key = operatorAddress == 'summary' ? 'summary' : 'validator';
+      const value = averageMapping[eachDataField]
+      const metric = document.getElementById(`${key}-metric-${eachDataField}`);
+      const { nativeValue, usdValue } = getValueWithDecimals(value, eachDataField != 'percentage_sold' ? currency : '%', exchange_rate, decimals);
+      
+      const currentTitleContent = metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML;
+      
+      if (eachDataField == 'total_stake_sum')
+        metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = currentTitleContent.replace('Total', 'Average');
+      else if (eachDataField == 'price' && !currentTitleContent.includes('Average '))
+        metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = 'Average ' + currentTitleContent
+
+      metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + parseFloat(value).toFixed(2);
+      if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
+    })
+  }
+
+  resetMetrics();
+  
   const columnMouseHandler = (event) => {
     const visibleClassName = `visible-${operatorAddress}`;
     document.querySelectorAll(`.${visibleClassName}`).forEach(each => {
@@ -9,7 +32,12 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
         each.classList.remove('each-data-point-horizontal-label-hovered')
         each.classList.remove('each-data-indicator-vertical-line-visible')
       }
-    })
+    });
+
+    const operatorAddressM = operatorAddress.replace('\\@', '@');
+    if(!validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn || !validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn) {
+      resetMetrics();
+    }
 
     let target = event.target;
     while (target != document.body && !target.classList.contains(`column-wrapper-${operatorAddress}`)) target = target.parentNode;
@@ -26,8 +54,6 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
       eachDataPoint.classList.add('each-data-point-hovered', visibleClassName.replace('\\@', '@'));
     })
     
-    const operatorAddressM = operatorAddress.replace('\\@', '@');
-    
     columnWrapper.querySelector('.each-data-delta-vertical-line').classList.add('each-data-delta-vertical-line-visible', visibleClassName.replace('\\@', '@'));
     columnWrapper.querySelector('.each-data-indicator-vertical-line').classList.add('each-data-indicator-vertical-line-visible', visibleClassName.replace('\\@', '@'));
 
@@ -39,6 +65,13 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
         const key = operatorAddress == 'summary' ? 'summary' : 'validator';
         const metric = document.getElementById(`${key}-metric-${eachDataField}`);
 
+        const currentTitleContent = metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML;
+
+        if (eachDataField == 'total_stake_sum')
+          metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = currentTitleContent.replace('Average', 'Total');
+        else if (eachDataField == 'price')
+          metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = currentTitleContent.replace('Average', '');
+  
         metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + parseFloat(columnWrapper.getAttribute(eachDataField)).toFixed(2);
         if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
         

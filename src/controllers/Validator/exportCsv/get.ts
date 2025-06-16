@@ -55,7 +55,6 @@ export default (req: Request, res: Response): any => {
     }),
   ])
     .then((result: Record<string, any>[]) => {
-      console.log(result)
       const [cacheExportResult, exportResult] = result;
       if (!cacheExportResult.value || !exportResult.value) return res.json({ success: false, err: 'bad_request' });;
       const csvExportData = (!specificRange && specificRange == 'custom')

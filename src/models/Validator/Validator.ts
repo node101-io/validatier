@@ -10,6 +10,7 @@ import { getCsvExportData } from './functions/getCsvExportData.js';
 import { formatTimestamp } from '../../utils/formatTimestamp.js';
 import { getPubkeysOfActiveValidatorsByHeight } from '../../utils/getPubkeysOfActiveValidatorsByHeight.js';
 import ActiveValidators, { ActiveValidatorsInterface } from '../ActiveValidators/ActiveValidators.js';
+import { getPercentageSold } from './functions/getPercentageSold.js';
 
 export interface GraphDataInterface {
   _id: {
@@ -481,6 +482,7 @@ validatorSchema.statics.rankValidators = function (
 
       let totalPercentageSold = 0;
       let initialTotalPercentageSold = 0;
+      let percentageSoldInvolvedValidatorCount = 0;
 
       const [validatorsResult, getPeriodicDataForValidatorSetResult] = results;
       if (
@@ -503,6 +505,7 @@ validatorSchema.statics.rankValidators = function (
           commission = 0,
           total_stake = 0,
           total_withdraw = 0,
+          balance_change = 0,
           initial_commission_prefix_sum = 0,
           initial_reward_prefix_sum = 0,
           initial_self_stake_prefix_sum = 0,
@@ -512,21 +515,16 @@ validatorSchema.statics.rankValidators = function (
         } = validatorRecordMapping[eachValidator.operator_address] || {};
 
         const ratio = (self_stake || 0) / ((reward + commission) || (10 ** CHAIN_TO_DECIMALS_MAPPING[`${chain_identifier}`]));
-        const sold = ((reward + commission) || 0) - (self_stake || 0);
+        const sold = balance_change * -1;
         const initial_sold = ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 0) - (initial_self_stake_prefix_sum || 0);
-        
-        let percentage_sold = 101;
-        if (self_stake != 0 && (reward + commission) != 0) {
-          percentage_sold = Math.min(
-            Math.max(
-              ((sold <= 0 ? 0 : sold) / ((reward + commission) || 1) * 100), 
-              0
-            ), 
-            100
-          );
 
+        let percentage_sold = 101;
+        if ((reward + commission) != 0) {
+          percentage_sold = getPercentageSold({ sold, self_stake, total_withdraw: reward + commission });
           totalPercentageSold += percentage_sold;
+          percentageSoldInvolvedValidatorCount++;
         }
+        
 
         const initial_percentage_sold = Math.min(
           Math.max(
@@ -611,7 +609,7 @@ validatorSchema.statics.rankValidators = function (
           total_sold: totalWithdrawnValidator - totalSelfStaked,
           initial_total_sold: initialTotalWithdrawnValidator - initialTotalSelfStaked,
           initial_percentage_sold: (((initialTotalWithdrawnValidator - initialTotalSelfStaked) / initialTotalWithdrawnValidator) * 100),
-          percentage_sold: (totalPercentageSold / valueArray.length),
+          percentage_sold: (totalPercentageSold / percentageSoldInvolvedValidatorCount),
           initial_self_stake_sum: (initialTotalPercentageSold / valueArray.length),
           self_stake_sum: totalSelfStaked,
           initial_average_self_stake_ratio: initialTotalSelfStakeRatio / valueArray.length,

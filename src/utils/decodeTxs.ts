@@ -45,9 +45,19 @@ const decodeTransactions = (txs: string[], events: Event[][], denom: string, tim
     let tx;
     try { tx = decodeTxRaw(Buffer.from(base64tx, 'base64')); }
     catch (err) { continue; }
-      
+
+    for (let i = 0; i < tx.body.messages.length; i++) {
+      const eachMessage = tx.body.messages[i];
+      if (eachMessage.typeUrl != '/cosmos.authz.v1beta1.MsgExec') continue;
+      const decodedMessage = registry.decode(eachMessage);
+      for (let j = 0; j < decodedMessage.msgs.length; j++) {
+        const eachMessage = decodedMessage.msgs[j];
+        tx.body.messages.push(eachMessage)
+      }
+    }
+
     const filteredMessages = tx.body.messages.filter((message) => LISTENING_EVENTS.includes(message.typeUrl));
-    
+
     for (let j = 0; j < filteredMessages.length; j++) {
       const message = filteredMessages[j];
       

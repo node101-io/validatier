@@ -60,6 +60,7 @@ export default (req: Request, res: Response): any => {
           isInactivityIntervals: true,
           data: inactivityIntervals,
         });
+        resolve();
       })
     })
   );
@@ -86,7 +87,6 @@ export default (req: Request, res: Response): any => {
 
             const { self_stake = 0, reward = 0, commission = 0, total_stake = 0, total_withdraw = 0 } = result[operator_address] || {};
 
-            console.log(((reward + commission) - self_stake) || 1)
             const data = {
               success: true,
               data: {
@@ -116,6 +116,7 @@ export default (req: Request, res: Response): any => {
   }
 
   Promise.all(promises).then(() => {
-    res.end();
+    sendData({ message: 'finished', success: true });
+    return res.end();
   });
 };

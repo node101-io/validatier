@@ -12,6 +12,9 @@ import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
 import { startFetchingData } from './utils/startFetchingData.js';
 import { initDB } from './utils/levelDb.js';
+import { Job_SaveCache } from './cron/jobs/Job_SaveCache.js';
+import Chain from './models/Chain/Chain.js';
+import getTxsByHeight from './utils/getTxsByHeight.js';
 
 const app: Express = express();
 const PORT: number = 3000;

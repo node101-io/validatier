@@ -1,7 +1,7 @@
 :root {
   --date-picker-height: 56px;
   --date-picker-z-index: 1000;
-  --date-picker-width: 400px;
+  --date-picker-width: 420px;
 
   --selected-range-height: 56px;
   --selected-range-font-size: 20px;
@@ -26,11 +26,11 @@
   --picker-content-wrapper-font-size: 20px;
   --picker-content-wrapper-margin-top: 5px;
 
-  --calendar-left-wrapper-width: 145px;
-  --calendar-left-wrapper-padding: 5px;
+  --calendar-left-wrapper-width: 165px;
+  --calendar-left-wrapper-padding: 10px;
   --calendar-left-wrapper-dropdown-ul-margin: 0;
   --calendar-left-wrapper-dropdown-ul-padding: 0;
-  --calendar-left-wrapper-dropdown-li-padding: 8px;
+  --calendar-left-wrapper-dropdown-li-padding: 10px;
   --calendar-left-wrapper-dropdown-li-transition-duration: 0.25s;
   --calendar-left-wrapper-dropdown-li-selected-font-weight: 600;
 
@@ -282,6 +282,8 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
+  overflow: hidden;
+  border-radius: calc(var(--picker-main-wrapper-border-radius) - var(--calendar-wrapper-padding));
 }
 
 .day {

@@ -42,13 +42,17 @@ function renderTableHeader (sort_by, order) {
   
       const contentWrapper = document.createElement('div');
       contentWrapper.classList.add('each-table-popup-info-content', 'center');
-      contentWrapper.innerHTML = header.popup_text
-      contentWrapper.style.marginBottom = '5px';
+      contentWrapper.style.marginTop = '-14px';
+      const contentWrapperSpan = document.createElement('span');
+      contentWrapperSpan.innerHTML = header.popup_text;
+      contentWrapper.appendChild(contentWrapperSpan);
   
       const tooltipWrapper = document.createElement('div');
       tooltipWrapper.classList.add('each-tooltip-info-hover', 'center');
   
       const infoIcon = document.createElement('img');
+      infoIcon.style.marginTop = '4px';
+      infoIcon.style.marginRight = '2px';
       infoIcon.src = '/res/images/info.svg';
       
       tooltipWrapper.appendChild(infoIcon);

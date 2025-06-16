@@ -322,6 +322,17 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
             { $ifNull: ["$leastRecentRecord.total_withdraw", 0] }
           ]
         },
+        balance_change: {
+          $add: [
+            { 
+              $subtract: [
+                { $ifNull: ["$mostRecentRecord.balance_change_prefix_sum", 0] },
+                { $ifNull: ["$leastRecentRecord.balance_change_prefix_sum", 0] }
+              ] 
+            },
+            { $ifNull: ["$leastRecentRecord.balance_change", 0] }
+          ]
+        },
       }
     }
   ])
@@ -341,7 +352,8 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
             reward: record.reward || 0,
             commission: record.commission || 0,
             total_stake: record.total_stake || 0,
-            total_withdraw: record.total_withdraw || 0
+            total_withdraw: record.total_withdraw || 0,
+            balance_change: record.balance_change || 0
           };
           
           mapping[operator_address].initial_self_stake_prefix_sum = record.initial_self_stake_prefix_sum;

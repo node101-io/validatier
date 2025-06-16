@@ -86,6 +86,7 @@
   --each-metric-content-wrapper-header-icon-width: 12px;
 
   --each-metric-content-wrapper-header-title-font-size: 20px;
+  --each-metric-content-wrapper-header-title-margin-bottom: 4px;
   
   --each-metric-content-wrapper-header-font-size: 20px;
   --each-metric-content-wrapper-header-color: rgba(124, 112, 195, 1);
@@ -171,7 +172,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 .each-network-summary-stat-header-title {
@@ -326,6 +327,7 @@
 
 .each-metric-content-wrapper-header-title {
   font-size: var(--each-metric-content-wrapper-header-title-font-size);
+  margin-bottom: var(--each-metric-content-wrapper-header-title-margin-bottom);
 }
 
 .each-metric-content-wrapper-content-value-native {
@@ -543,14 +545,13 @@
 }
 
 .percentage-sold-main-circle span {
-  position: absolute;
+  margin: 0 auto;
   margin-bottom: 4px;
-  left: 4px;
   z-index: var(--percentage-sold-main-circle-span-z-index);
 }
 
 .percentage-sold-inner-circle {
-  position: absolute;
+  position: relative;
   right: 0;
   aspect-ratio: 1/1;
   display: flex;
@@ -605,6 +606,9 @@
   display: flex !important;
 }
 
+.network-summary-small-graph-container {
+  margin: auto 0;
+}
 
 @media only screen and (max-width: 1200px) {
   :root {

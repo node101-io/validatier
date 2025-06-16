@@ -111,7 +111,7 @@
 }
 
 .inner-main-wrapper {
-  height: 100%;
+  height: calc(100% - var(--inner-main-wrapper-margin-top) - 106px);
   padding: var(--inner-main-wrapper-vertical-padding) var(--inner-main-wrapper-horizontal-padding);
   margin-top: var(--inner-main-wrapper-margin-top);
   overflow-y: scroll;

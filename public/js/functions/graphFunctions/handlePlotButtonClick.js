@@ -196,6 +196,11 @@ function generateGraph (validator) {
     subplotSeperator.style.top = `calc(${100 - ((i / subplotGroupArray.length) * 100)}% + ${(subplotGroupArray.length - i) * -10}px)`;
     graphWrapper.appendChild(subplotSeperator);
   }
+
+  let sumPrice = 0;
+  let sumTotalStake = 0;
+  let sumTotalSold = 0;
+  let dataLength = 0;
   
   eventSource.onmessage = (event) => {
     const response = JSON.parse(event.data);
@@ -205,7 +210,16 @@ function generateGraph (validator) {
       return;
     }
     const data = response.data;
-    
+
+    if (response.message == 'finished') {
+      const averageMapping = {
+        total_stake_sum: sumTotalStake / dataLength,
+        price: sumPrice / dataLength,
+        total_sold: sumTotalSold,
+      }
+      return addColumnEventListener(operatorAddress.replace('@', '\\@'), dataFields, colors, symbol, usd_exchange_rate, decimals, summaryData, subplotGroupMapping, averageMapping);  
+    }
+
     if (response.isInactivityIntervals) {
       for (let j = 0; j < response.data.length; j += 2) {
         
@@ -225,13 +239,19 @@ function generateGraph (validator) {
       
       return;
     }
+
     data.price = priceGraphData[data.index];
     graphDataMapping[data.index] = data;
+
+    sumPrice += data.price;
+    sumTotalStake += data.total_stake_sum;
+    sumTotalSold += data.total_sold;
+    dataLength++;
 
     dataFields.forEach(eachDataField => {
       const { nativeValue, usdValue } = getValueWithDecimals(data[eachDataField], eachDataField != 'percentage_sold' ? symbol : '%', usd_exchange_rate, decimals);
       const metric = document.getElementById(`validator-metric-${eachDataField}`);
-      
+
       metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + data[eachDataField].toFixed(2);
       if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
     });
@@ -283,16 +303,17 @@ function generateGraph (validator) {
       adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, operatorAddress.replace('@', '\\@'), dataFields, subplotGroupMapping);
     } else {
       document.documentElement.style.setProperty(`--column-height-${operatorAddress}`, insertedColumn.offsetHeight);
-      addColumnEventListener(operatorAddress.replace('@', '\\@'), dataFields, colors, symbol, usd_exchange_rate, decimals, summaryData, subplotGroupMapping);
     }
   };
   
 
-  eventSource.addEventListener('end', () => {
+  eventSource.addEventListener('end', () => {  
     eventSource.close();
   });
 
-  eventSource.onerror = (err) => eventSource.close();
+  eventSource.onerror = (err) => {
+    eventSource.close()
+  };
 }
 
 function handlePlotButtonClick () {

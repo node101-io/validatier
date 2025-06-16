@@ -138,8 +138,15 @@ function createNetworkSummaryGraph (dataFields, colors) {
       graphWrapper.appendChild(subplotSeperator);
     }
 
+  let sumPrice = 0;
+  let sumTotalStake = 0;
+  let sumTotalSold = 0;
+  const dataLength = targetCacheSummaryGraphData.length;
+  
   for (let i = 0; i < targetCacheSummaryGraphData.length; i++) {
     const data = targetCacheSummaryGraphData[i];
+    sumTotalSold += data.total_sold;
+
     if (priceGraphData) data['price'] = priceGraphData[i];
     
     dataFields.forEach(eachDataField => {
@@ -154,12 +161,6 @@ function createNetworkSummaryGraph (dataFields, colors) {
       ) data[eachDataField] += currentSumMapping[eachDataField];
 
       currentSumMapping[eachDataField] = data[eachDataField];
-
-      const { nativeValue, usdValue } = getValueWithDecimals(currentSumMapping[eachDataField], eachDataField != 'percentage_sold' ? symbol : '%', usd_exchange_rate, decimals);
-      const metric = document.getElementById(`summary-metric-${eachDataField}`);
-      
-      metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + data[eachDataField].toFixed(2);
-      if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
       
       // if(!showPercentageChange && eachDataField == 'total_withdraw_sum') return;
 
@@ -171,6 +172,9 @@ function createNetworkSummaryGraph (dataFields, colors) {
       // text.innerHTML = (Math.round((currentSumMapping[eachDataField] / summaryData[`initial_${eachDataField}`]) * 100) + '%').toString().replace('Infinity', '-');
       // metric.querySelector('.percentage-change-value-content').appendChild(text);
     });
+
+    sumPrice += data.price;
+    sumTotalStake += data.total_stake_sum;
     
     graphDataMapping[i] = data;
 
@@ -226,10 +230,16 @@ function createNetworkSummaryGraph (dataFields, colors) {
     ) {
       adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, 'summary', dataFields, subplotGroupMapping);
     } else {
-      document.documentElement.style.setProperty('--column-height-summary', insertedColumn.offsetHeight);
-      addColumnEventListener('summary', dataFields, colors, symbol, usd_exchange_rate, decimals, summaryData, subplotGroupMapping);
+      document.documentElement.style.setProperty('--column-height-summary', insertedColumn.offsetHeight);      
     }
   }
+
+  const averageMapping = {
+    total_stake_sum: sumTotalStake / dataLength,
+    price: sumPrice / dataLength,
+    total_sold: sumTotalSold,
+  }
+  addColumnEventListener('summary', dataFields, colors, symbol, usd_exchange_rate, decimals, summaryData, subplotGroupMapping, averageMapping);
 
   const rightVerticalAxisWrapper = document.getElementById('summary-graph-vertical-axis-labels1');
   if (rightVerticalAxisWrapper)

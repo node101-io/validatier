@@ -51,7 +51,7 @@ block content
           { id: 'total_withdraw_sum', title: 'Total Reward' },
           { id: 'total_sold', title: 'Total Sold' },
           { id: 'percentage_sold', title: 'Percentage Sold' },
-          { id: 'price', title: `1 ${selectedChain.symbol} Price In USD` },
+          { id: 'price', title: `${selectedChain.symbol} Price In USD` },
           { id: 'self_stake_sum', title: 'Self-Staked Amount' }
         ]
       },
@@ -62,7 +62,7 @@ block content
       { id: 'total_withdraw_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgb(50, 173, 230)', title: 'Total Reward' },
       { id: 'total_sold', unit: selectedChain.symbol || '$ATOM', color: 'rgb(88, 86, 214)', title: 'Total Sold Amount' },
       { id: 'percentage_sold', unit: selectedChain.symbol || '$ATOM', color: 'rgba(255, 149, 0, 1)', title: 'Percentage Sold' },
-      { id: 'price', unit: '$' || '$', color: 'rgb(50, 173, 230)', title: `1 ${selectedChain.symbol} Price In USD` },
+      { id: 'price', unit: '$' || '$', color: 'rgb(50, 173, 230)', title: `${selectedChain.symbol} Price In USD` },
       { id: 'self_stake_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgba(88, 86, 214, 1)', title: 'Self-Staked Amount' }
     ]
     const timestampDifference = new Date(selectedDateTop).getTime() - new Date(selectedDateBottom).getTime()
@@ -158,8 +158,8 @@ block content
             //- button.cancel#cancel Cancel
             //- button.apply#apply Apply
     .inner-main-wrapper#inner-main-wrapper
-      //- .info-parapgraph-main-wrapper 
-      //-   p Her yerde saç var, yerlerde saçlar / Kimin bu saçlar? bilemiyorum / Uyandığımda, yabancılarla / Kendi evimden de gidemiyorum / Sandım sen varsın / Yok öyle değil / Özür dilerim, diyemiyorum / Ben olsam, almam beni / Adamdan, saymam beni / Uzun uzun, soymam beni / Deli miyim? / Ben olsam bakmam bana / Bi çorba bile yapmam bana / Tüm bunları sen öğrettin bana / Sevgilim
+      .info-parapgraph-main-wrapper 
+        p node101 | CosmosHub Validator Timeline node101's journey as a CosmosHub validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.
       .network-summary-main-wrapper#network-summary-main-wrapper(class=`${(queryValidator || url == 'validators') ? 'section-hidden' : ''}`)
         .network-summary-main-wrapper-title(class='each-section-title-content') Network Summary
         -
@@ -230,8 +230,9 @@ block content
                     .each-metric-content-wrapper-header-title= metric.title
                     if metric.id == 'total_sold'
                       .each-table-popup-wrapper(class='each-table-popup-wrapper-metric')
-                        .each-table-popup-info-content(class='center') Negativity indicates more tokens added than transferred
-                        .each-tooltip-info-hover(style='height: 20px;')
+                        .each-table-popup-info-content(class='center')
+                          span Negativity indicates more tokens added than transferred
+                        .each-tooltip-info-hover
                           img(src='/res/images/info.svg')
                   .each-metric-content-wrapper-content
                     .each-metric-content-wrapper-content-value-native(class=`${metric.id == 'percentage_sold' ? 'graph-metric-percentage-change-content' : ''}`)
@@ -262,8 +263,9 @@ block content
                           .each-network-summary-select-option(class=`${option == menu.selected ? 'each-network-summary-select-option-selected' : ''}` option=option.toLowerCase())= option
               .network-summary-network-graph-content-description#summary-graph-description= graph_description
             .network-summary-network-graph-content#network-summary-graph-container(currentDataFields=dataFields currentColors=colors)
-              script.
-                createNetworkSummaryGraph(!{dataFields}, !{colors});
+              if !queryValidator
+                script.
+                  createNetworkSummaryGraph(!{dataFields}, !{colors});
       -
         const sortByArray = [
           { order: 'asc', sort_by: 'percentage_sold' },
@@ -405,8 +407,9 @@ block content
                 span= stat.title
                 if stat.field == 'self_stake'
                   .each-table-popup-wrapper(class='each-table-popup-wrapper-metric')
-                    .each-table-popup-info-content(class='center' style='margin-bottom: 5px;') Validator's own stake on itself
-                    .each-tooltip-info-hover(style='height: 20px;')
+                    .each-table-popup-info-content(class='center')
+                      span Validator's own stake on itself
+                    .each-tooltip-info-hover
                       img(src='/res/images/info.svg')
               .each-validator-stat-content-wrapper
                 .each-validator-stat-content
@@ -503,7 +506,8 @@ block content
                     .each-table-header-title
                       if header.popup_text
                         .each-table-popup-wrapper
-                          .each-table-popup-info-content(class='center')= header.popup_text
+                          .each-table-popup-info-content(class='center')
+                            span= header.popup_text
                           .each-tooltip-info-hover(style='margin-bottom: -1px')
                             img(src='/res/images/info.svg')
                       .each-table-header-title= header.name
@@ -540,18 +544,18 @@ block content
                       .validator-each-numeric-info-usd= getValue(validator[`${header.id}`], 'usd').usdValue
       .footer-main-wrapper
         .each-footer-column
-          .header-banner-wrapper
-            .banner-logo-wrapper(class='center')
-              img(src='/res/images/logo.svg', alt='node101' class='center')
-            .banner-title-content(class='navbar-text') VALIDATIER
-          .footer-description-text Validatier allows everyone to track the behavior of validators simultaneously.
+          //- .header-banner-wrapper
+          //-   .banner-logo-wrapper(class='center')
+          //-     img(src='/res/images/logo.svg', alt='node101' class='center')
+          //-   .banner-title-content(class='navbar-text') VALIDATIER
+          //- .footer-description-text Validatier allows everyone to track the behavior of validators simultaneously.
           .footer-email-wrapper
             a(href='mailto:hello@node101.io').footer-email-content hello@node101.io
             img(src='/res/images/top_right_arrow.svg').footer-email-icon
         .each-footer-column(class='each-footer-right-column')
-          .footer-mini-menu
-            a(href="") Dashboard
-            a(href="") Validators
+          //- .footer-mini-menu
+          //-   a(href="") Dashboard
+          //-   a(href="") Validators
           .footer-contact-wrapper 
             .footer-contact-label-text#contact-text Please contact us if you would like to contribute.
             .footer-contact-input-wrapper 

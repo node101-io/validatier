@@ -1,7 +1,7 @@
 
 function plotValidatorGraph(params) {
   const { type, operatorAddress, decimals, usd_exchange_rate, symbol, dataFields, graphContainer, summaryData } = params;
-
+  
   const priceGraphData = JSON.parse(document.body.getAttribute('priceGraphData'));
 
   if (document.getElementById(`validator-graph-wrapper-${operatorAddress}`)) document.getElementById(`validator-graph-wrapper-${operatorAddress}`).remove();
@@ -122,6 +122,12 @@ function plotValidatorGraph(params) {
         const { nativeValue, usdValue } = getValueWithDecimals(deltaValue, eachDataField != 'percentage_sold' ? symbol : '%', usd_exchange_rate, decimals);
         const key = operatorAddress == 'summary' ? 'summary' : 'validator';
         const metric = document.getElementById(`${key}-metric-${eachDataField}`);
+
+        const currentTitleContent = metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML;
+        if (eachDataField == 'total_stake_sum')
+          metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = currentTitleContent.replace('Average', 'Total');
+        else if (eachDataField == 'price')
+          metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = currentTitleContent.replace('Average', '');
 
         metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + parseFloat(deltaMapping[eachDataField]).toFixed(2);
         if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
