@@ -54,7 +54,7 @@
   width: calc(100% - (2 * var(--validator-graph-wrapper-horizontal-padding)));
   height: var(--validator-graph-wrapper-height);
   transition: all var(--validator-graph-wrapper-transition-duration) ease-in-out 0s;
-  padding: var(--validator-graph-wrapper-vertical-padding) var(--validator-graph-wrapper-horizontal-padding);
+  padding: 0 var(--validator-graph-wrapper-horizontal-padding);
   padding-bottom: var(--validator-graph-wrapper-bottom-padding); 
   overflow: hidden;
   display: flex;
@@ -75,7 +75,7 @@
 }
 
 .each-graph-column-wrapper {
-  height: calc(100% - 30px);
+  height: calc(100% - 25px);
   position: relative;
   padding-top: 5px;
   display: flex;
@@ -88,7 +88,7 @@
   background-color: var(--body-main-wrapper-background);
   position: absolute;
   bottom: -40px;
-  height: 35px;
+  height: 40px;
   z-index: 35;
 }
 
@@ -108,7 +108,7 @@
   width: 100%;
   position: absolute;
   left: 0;
-  height: calc(33% + 5px);
+  height: calc(33% + 2px);
   bottom: 33%;
   background-color: var(--body-main-wrapper-background);
   z-index: 5;
@@ -179,14 +179,16 @@
   margin-top: 0px;
   border-right: var(--vertical-axis-labels-border-right-size) solid var(--color-triangle-unselected);
   padding: 0;
+  padding-bottom: 20px;
 }
 
 .vertical-axis-sub-wrapper {
   display: flex;
   flex-direction: column-reverse;
-  padding: 0;
+  padding: 2px 0;
   justify-content: space-between;
   width: 100%;
+  border-bottom: 1px solid var(--each-data-indicator-vertical-line-border-color);
 }
 
 .each-vertical-label {
@@ -244,9 +246,9 @@
 }
 
 .subplot-seperator {
-  width: calc(95% - var(--vertical-axis-labels-width));
-  border-top: 1px dashed var(--each-data-indicator-vertical-line-border-color);;
+  width: calc(100% - var(--vertical-axis-labels-width) - (2 * var(--validator-graph-wrapper-horizontal-padding)));
+  border-bottom: 1px solid var(--each-data-indicator-vertical-line-border-color);;
   position: absolute;
   background-color: var(--body-main-wrapper-background);
-  left: var(--vertical-axis-labels-width);
+  left: calc(var(--vertical-axis-labels-width) + var(--validator-graph-wrapper-horizontal-padding));
 }

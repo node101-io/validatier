@@ -402,7 +402,7 @@ block content
               { id: 'validator-stat-commission-rate', title: 'Commission', field: 'commission_rate', usdContent: false, additional_class: 'summary-percentage-text-native', helperText: 'fee from rewards', helperType: 'text' }
             ]
           each stat in validator_stats 
-            .each-validator-stat-wrapper(class='body-wrapper-cell')
+            .each-validator-stat-wrapper(class=`body-wrapper-cell each-validator-stat-wrapper-${stat.field}`)
               .each-network-summary-stat-header-title
                 span= stat.title
                 if stat.field == 'self_stake'
@@ -557,7 +557,7 @@ block content
           //-   a(href="") Dashboard
           //-   a(href="") Validators
           .footer-contact-wrapper 
-            .footer-contact-label-text#contact-text Please contact us if you would like to contribute.
+            .footer-contact-label-text#contact-text Please subscribe to get notified about new things
             .footer-contact-input-wrapper 
               input.footer-contact-input-content(placeholder='name@gmail.com')#contact-message-input
               .footer-contact-input-submit#contact-submit(class='center')

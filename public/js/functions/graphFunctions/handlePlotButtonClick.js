@@ -38,7 +38,7 @@ function calculateMaxAndMinValue(graphDataMapping, dataFields) {
   });
 
   const rawMin = Math.min(...minArray);
-  const rawMax = Math.max(...maxArray);
+  const rawMax = Math.max(...maxArray) * 1.1;
 
   return {
     minValue: roundToFirstTwoDigits(rawMin, rawMin <= 0 ? 'ceil' : 'floor'),
@@ -193,7 +193,7 @@ function generateGraph (validator) {
     const subplotSeperator = document.createElement('div');
     subplotSeperator.classList.add('subplot-seperator');
     subplotSeperator.style.zIndex = `${((subplotGroupArray.length - i + 1) * 10)}`;
-    subplotSeperator.style.top = `calc(${100 - ((i / subplotGroupArray.length) * 100)}% + ${(subplotGroupArray.length - i) * -10}px)`;
+    subplotSeperator.style.bottom = `calc(${(i / subplotGroupArray.length) * 100}% + ${(subplotGroupArray.length - i) * 10}px`;
     graphWrapper.appendChild(subplotSeperator);
   }
 
@@ -265,7 +265,8 @@ function generateGraph (validator) {
 
       let { minValue: min, maxValue: max } = calculateMaxAndMinValue(graphDataMapping, eachSubplotGroup);
       
-      if (eachSubplotGroup[0] != 'total_stake_sum') minValue = min
+      // Değişmesi gerekirse buradan değiştir
+      if (!['total_stake_sum', 'price'].includes(eachSubplotGroup[0])) minValue = min
       else minValue = 0;
       maxValue = max;
 
@@ -291,7 +292,7 @@ function generateGraph (validator) {
       graphWidth,
       dataFields: dataFields,
       colors: colors,
-      columnsPer: 10,
+      columnsPer: 18,
       subplotGroupMapping
     });
   

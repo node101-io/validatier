@@ -15,6 +15,7 @@ import { initDB } from './utils/levelDb.js';
 import { Job_SaveCache } from './cron/jobs/Job_SaveCache.js';
 import Chain from './models/Chain/Chain.js';
 import getTxsByHeight from './utils/getTxsByHeight.js';
+import { convertOperatorAddressToBech32 } from './utils/convertOperatorAddressToBech32.js';
 
 const app: Express = express();
 const PORT: number = 3000;

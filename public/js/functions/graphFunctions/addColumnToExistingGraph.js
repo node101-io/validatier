@@ -51,6 +51,7 @@ function addColumnToExistingGraph (params) {
    
     const value = data[eachDataField];
     columnWrapper.setAttribute(eachDataField, value);
+
     let bottom;
     if (!subplotGroupMapping) {
       bottom = `calc(((${value} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
@@ -111,6 +112,18 @@ function addColumnToExistingGraph (params) {
   }
 
   graphWrapper.appendChild(columnWrapper);
+
+  dataFields.forEach(eachDataField => {
+    const value = data[eachDataField];
+    if (['price', 'total_stake_sum'].includes(eachDataField) && columnWrapper.previousSibling) {
+      if (!columnWrapper.previousSibling.classList.contains('each-graph-column-wrapper')) {
+        columnWrapper.setAttribute(`${eachDataField}_prefix_sum`, value);
+      } else {
+        const previousColumnPrefixSum = columnWrapper.previousSibling.getAttribute(`${eachDataField}_prefix_sum`);
+        columnWrapper.setAttribute(`${eachDataField}_prefix_sum`, parseFloat(previousColumnPrefixSum) + value);
+      }
+    }
+  });
 
   document.documentElement.style.setProperty(
     `--graph-column-width-${operatorAddress.replace('\\@', '@')}`, 

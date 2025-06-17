@@ -4,7 +4,7 @@
   --validator-details-stats-wrapper-gap: 20px;
   --validator-details-stats-wrapper-flex-wrap: nowrap;
   
-  --each-validator-stat-wrapper-width: 33%;
+  --each-validator-stat-wrapper-width: 35%;
   --each-validator-stat-wrapper-height: 100%;
   --each-validator-stat-wrapper-padding-vertical: 14px;
   --each-validator-stat-wrapper-padding-horizontal: 16px;
@@ -28,9 +28,9 @@
   --each-validator-stat-helper-font-weight: 500;
   --each-validator-stat-helper-color: rgba(124, 112, 195, 1);
   
-  --each-leaderboard-table-wrapper-gap: 12px;
+  --each-leaderboard-table-wrapper-gap: 18px;
   
-  --each-leaderboard-table-validator-info-wrapper-gap: 8px;
+  --each-leaderboard-table-validator-info-wrapper-gap: 16px;
 
   --each-leaderboard-table-validator-info-wrapper-span-font-size: 10px;
   --each-leaderboard-table-validator-info-wrapper-span-width: 10px;
@@ -60,17 +60,17 @@
   --inactivity-display-background-area-background-color: red;
   --inactivity-display-background-area-opacity: 0.1;
 
-  --validators-leaderboards-main-wrapper-height: 550px;
+  --validators-leaderboards-main-wrapper-height: 620px;
   --validators-leaderboards-main-wrapper-gap: 20px;
   --validators-leaderboards-main-wrapper-margin-top: 10px;
   --validators-leaderboards-main-wrapper-margin-bottom: 10px;
   --validators-leaderboards-main-wrapper-overflow: unset;
   --validators-leaderboards-main-wrapper-webkit-scrollbar-thumb-background: rgba(232, 232, 255, 1);
   
-  --each-leaderboard-main-wrapper-min-width: 150px;
+  --each-leaderboard-main-wrapper-min-width: 500px;
   --each-leaderboard-main-wrapper-width: 50%;
   --each-leaderboard-main-wrapper-height: 100%;
-  --each-leaderboard-main-wrapper-padding: 20px;
+  --each-leaderboard-main-wrapper-padding: 30px;
   --each-leaderboard-main-wrapper-background-color: var(--body-main-wrapper-background);
   --each-leaderboard-main-wrapper-border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
   --each-leaderboard-main-wrapper-border-radius: 20px;
@@ -249,7 +249,7 @@
 }
 
 .each-validator-stat-wrapper {
-  width: var(--each-validator-stat-wrapper-width);
+  width: calc(var(--each-validator-stat-wrapper-width) - (2 * var(--each-network-summary-stat-padding-horizontal)));
   height: calc(var(--each-validator-stat-wrapper-height) - (2 * var(--each-validator-stat-wrapper-padding-vertical)));
   padding: var(--each-validator-stat-wrapper-padding-vertical) var(--each-validator-stat-wrapper-padding-horizontal);
   display: flex;

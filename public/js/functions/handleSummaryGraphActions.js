@@ -134,7 +134,7 @@ function createNetworkSummaryGraph (dataFields, colors) {
       const subplotSeperator = document.createElement('div');
       subplotSeperator.classList.add('subplot-seperator');
       subplotSeperator.style.zIndex = `${((subplotGroupArray.length - i + 1) * 10)}`;
-      subplotSeperator.style.top = `calc(${100 - ((i / subplotGroupArray.length) * 100)}% + ${(subplotGroupArray.length - i) * -10}px)`;
+      subplotSeperator.style.bottom = `calc(${(i / subplotGroupArray.length) * 100}% + ${(subplotGroupArray.length - i) * 10}px`;
       graphWrapper.appendChild(subplotSeperator);
     }
 

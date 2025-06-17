@@ -1,4 +1,32 @@
 
+function deltaValueInRangeSelection (eachDataField, column1, column2, direction, type) {
+  if (type != 'average') {
+    const value_1 = column1.getAttribute(eachDataField);
+    const value_2 = column2.getAttribute(eachDataField);
+    const deltaValue = !direction 
+      ? value_1 - value_2
+      : value_2 - value_1;
+    
+    return deltaValue;
+  } else {
+    const value_1 = parseFloat(column1.getAttribute(eachDataField));
+    const value_1_prefix_sum = parseFloat(column1.getAttribute(`${eachDataField}_prefix_sum`));
+    const value_1_index = parseInt(column1.getAttribute('index'));
+
+    const value_2 = parseFloat(column2.getAttribute(eachDataField));
+    const value_2_prefix_sum = parseFloat(column2.getAttribute(`${eachDataField}_prefix_sum`));
+    const value_2_index = parseInt(column2.getAttribute('index'));
+
+    const numberOfColumns = Math.abs(value_2_index - value_1_index) + 1;
+
+    const deltaValue = !direction
+      ? ((value_1_prefix_sum - value_2_prefix_sum) + value_2) / numberOfColumns
+      : ((value_2_prefix_sum - value_1_prefix_sum) + value_1) / numberOfColumns;
+
+    return deltaValue;
+  }
+}
+
 function plotValidatorGraph(params) {
   const { type, operatorAddress, decimals, usd_exchange_rate, symbol, dataFields, graphContainer, summaryData } = params;
   
@@ -111,11 +139,15 @@ function plotValidatorGraph(params) {
     } else {
       const deltaMapping = {}
       dataFields.forEach(eachDataField => {
-        const value_1 = validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute(eachDataField);
-        const value_2 = validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute(eachDataField);
-        const deltaValue = !validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft 
-          ? value_1 - value_2
-          : value_2 - value_1;
+         
+        const type = !['total_stake_sum', 'price'].includes(eachDataField) ? 'difference' : 'average';
+        const deltaValue = deltaValueInRangeSelection(
+          eachDataField,
+          validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn,
+          validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn,
+          validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft,
+          type
+        );  
 
         deltaMapping[eachDataField] = deltaValue;
 
@@ -124,10 +156,11 @@ function plotValidatorGraph(params) {
         const metric = document.getElementById(`${key}-metric-${eachDataField}`);
 
         const currentTitleContent = metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML;
+    
         if (eachDataField == 'total_stake_sum')
-          metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = currentTitleContent.replace('Average', 'Total');
-        else if (eachDataField == 'price')
-          metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = currentTitleContent.replace('Average', '');
+          metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = currentTitleContent.replace('Total', 'Average');
+        else if (eachDataField == 'price' && !currentTitleContent.includes('Average '))
+          metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = 'Average ' + currentTitleContent
 
         metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + parseFloat(deltaMapping[eachDataField]).toFixed(2);
         if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;

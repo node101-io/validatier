@@ -23,7 +23,6 @@ export interface GraphDataInterface {
     reward_sum: number;
     commission_sum: number;
     total_stake_sum: number;
-    total_withdraw_sum: number;
     total_sold: number;
     percentage_sold: number;  
   }
@@ -777,15 +776,25 @@ validatorSchema.statics.getSummaryGraphData = function (
         reward_sum: { $sum: '$reward' },
         commission_sum: { $sum: '$commission' },
         total_stake_sum: { $sum: '$total_stake' },
-        total_withdraw_sum: { $sum: '$total_withdraw' },
+        balance_change_sum: { $sum: '$balance_change' },
       }
     },
     {
       $addFields: {
         total_sold: {
-          $subtract: [
-            { $add: ['$reward_sum', '$commission_sum'] },
-            '$self_stake_sum'
+          $max: [
+            {
+              $subtract: [
+                {
+                  $multiply: [
+                    -1,
+                    '$balance_change_sum'
+                  ]
+                },
+                '$self_stake_sum'
+              ]
+            },
+            0
           ]
         },
         percentage_sold: {
@@ -828,7 +837,7 @@ validatorSchema.statics.getSummaryGraphData = function (
       }
     },
   ])
-    .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, total_withdraw: 1 })
+    .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, balance_change: 1 })
     .then((buckets: any) => {
 
       const result: any = [];
@@ -850,7 +859,6 @@ validatorSchema.statics.getSummaryGraphData = function (
             reward_sum: 0,
             commission_sum: 0,
             total_stake_sum: 0,
-            total_withdraw_sum: 0,
             total_sold: 0,
             percentage_sold: lastValue ? lastValue.percentage_sold : 0,
           };
@@ -932,7 +940,7 @@ validatorSchema.statics.getSmallGraphData = function (
       }
     },
   ])
-    .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, total_withdraw: 1 })
+    .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, balance_change: 1 })
     .then(results => callback(null, results))
     .catch(err => callback(err, null))
 }

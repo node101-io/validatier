@@ -86,7 +86,7 @@ const indexGetController = (req: Request, res: Response): void => {
         },
         other: {
           graph_title: 'Reward Flow Overview',
-          graph_description: 'Shows how validators respond to changes in total capitulation and delegation in the market',
+          graph_description: 'Shows how validators respond to changes in price and delegation in the market',
           dataFields: ['price', 'total_sold', 'total_stake_sum'],
           colors: ['rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)', 'rgba(255, 149, 0, 1)']
         },

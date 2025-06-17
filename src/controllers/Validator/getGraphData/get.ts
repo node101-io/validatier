@@ -85,13 +85,13 @@ export default (req: Request, res: Response): any => {
               return resolve();
             }
 
-            const { self_stake = 0, reward = 0, commission = 0, total_stake = 0, total_withdraw = 0 } = result[operator_address] || {};
+            const { total_stake = 0, total_sold = 0 } = result[operator_address] || {};
 
             const data = {
               success: true,
               data: {
                 total_stake_sum: total_stake || 1,
-                total_sold: ((reward + commission) - self_stake) || 1,
+                total_sold: total_sold || 1,
                 timestamp: bottomTimestamp + i * stepValue,
                 index: i
               },

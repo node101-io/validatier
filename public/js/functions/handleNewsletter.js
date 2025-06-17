@@ -15,9 +15,9 @@ function handleNewsLetter() {
       if (res.error) return contactTextContent.innerHTML = 'You have already joinned the waitlist!';
       return contactTextContent.innerHTML = 'Thank you for joining the community!';;
     }).catch(err => {
-      contactTextContent.innerHTML = 'Please enter an valid input.'
+      contactTextContent.innerHTML = 'Please enter an valid input'
       setTimeout(() => {
-        contactTextContent.innerHTML = 'Please contact us if you would like to contribute.'
+        contactTextContent.innerHTML = 'Please subscribe to get notified about new things'
       }, 2000);
     });
   })

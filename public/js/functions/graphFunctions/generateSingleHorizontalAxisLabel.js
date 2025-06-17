@@ -5,7 +5,7 @@ function formatTimestampLarge(timestamp) {
   const date = new Date(timestamp);
 
   const shortYear = date.getFullYear().toString().slice(-2);
-  return `${months[date.getMonth()]} ${shortYear}`;
+  return `${months[date.getMonth()]} '${shortYear}`;
 }
 
 function formatTimestampSmall(timestamp) {
@@ -17,7 +17,6 @@ function formatTimestampSmall(timestamp) {
 const dayAsMilliseconds = 86400000;
 
 function generateSingleHorizontalAxisLabel (labelMapping) {
-  console.log(labelMapping)
   const { currentIntervalLeft, currentIntervalRight, columnToAppendHorizontalLabel } = labelMapping;
 
   const horizontalAxisLabel = document.createElement('span');

@@ -80,11 +80,8 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
     callback: (
       err: string | null,
       validatorRecordMapping: Record<string, {
-        self_stake: number,
-        reward: number,
-        commission: number,
         total_stake: number,
-        total_withdraw: number,
+        total_sold: number,
       }> | null
     ) => any
   ) => any;
@@ -224,18 +221,13 @@ compositeEventBlockSchema.statics.getPeriodicDataForGraphGeneration = function (
       
       records.forEach((record) => {
         
-        const totalReward = (record.mostRecentRecord.reward_prefix_sum - record.leastRecentRecord.reward_prefix_sum || 0) + (record.leastRecentRecord.reward || 0);
         const totalSelfStake = (record.mostRecentRecord.self_stake_prefix_sum - record.leastRecentRecord.self_stake_prefix_sum || 0) + (record.leastRecentRecord.self_stake || 0);
-        const totalCommission = (record.mostRecentRecord.commission_prefix_sum - record.leastRecentRecord.commission_prefix_sum || 0) + (record.leastRecentRecord.commission || 0);
         const totalStake = (record.mostRecentRecord.total_stake_prefix_sum - record.leastRecentRecord.total_stake_prefix_sum || 0) + (record.leastRecentRecord.total_stake || 0);
-        const totalWithdraw = (record.mostRecentRecord.total_withdraw_prefix_sum - record.leastRecentRecord.total_withdraw_prefix_sum || 0) + (record.leastRecentRecord.total_withdraw || 0);
-        
+        const balanceChange = (record.mostRecentRecord.balance_change_prefix_sum - record.leastRecentRecord.balance_change_prefix_sum || 0) + (record.leastRecentRecord.balance_change || 0);
+
         mapping[record._id] = {
-          self_stake: totalSelfStake || 0,
-          reward: totalReward || 0,
-          commission: totalCommission || 0,
           total_stake: (totalStake || 0),
-          total_withdraw: (totalWithdraw || 0)
+          total_sold: Math.max((balanceChange * -1), 0)
         };
       });
   
@@ -488,8 +480,6 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
             const updateCompositeEventBlocksBulk = updateCompositeEventBlocks.map(each => {
 
               const updateObj: { [key: string]: any } = {};
-             
-              if (each.chain_identifier != undefined) updateObj.chain_identifier = each.chain_identifier;
 
               updateObj.self_stake = each.self_stake;
               updateObj.reward = each.reward;
@@ -507,7 +497,10 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
 
               return {
                 updateOne: {
-                  filter: { timestamp: each.timestamp },
+                  filter: {
+                    operator_address: each.operator_address,
+                    timestamp: each.timestamp
+                  },
                   update: { $set: updateObj }
                 }
               };
