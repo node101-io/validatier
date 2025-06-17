@@ -28,6 +28,9 @@
   --horizontal-axis-label-bottom: -30px;
   --horizontal-axis-label-z-index: 50;
   
+  --horizontal-axis-label-display: block;
+  --horizontal-axis-label-compact-display: none;
+  
   --each-data-point-horizontal-label-hovered-font-weight: 800;
   
   --vertical-axis-labels-width: 100px;
@@ -150,6 +153,7 @@
 
 .horizontal-axis-label {
   width: fit-content;
+  text-align: center;
   text-wrap: nowrap;
   font-size: var(--horizontal-axis-label-font-size);
   font-weight: var(--horizontal-axis-label-font-weight);
@@ -161,6 +165,20 @@
   z-index: var(--horizontal-axis-label-z-index);
   color: rgba(73, 48, 111, 1);
   justify-content: center;
+  display: var(--horizontal-axis-label-display);
+}
+
+.horizontal-axis-label-compact {
+  text-wrap: wrap;
+  display: var(--horizontal-axis-label-compact-display);
+  flex-direction: column;
+  align-items: center;
+}
+
+.horizontal-axis-label-compact span {
+  text-wrap: nowrap;
+  line-height: 12px;
+  margin-bottom: 3px;
 }
 
 .each-data-point-horizontal-label-hovered {
@@ -251,4 +269,24 @@
   position: absolute;
   background-color: var(--body-main-wrapper-background);
   left: calc(var(--vertical-axis-labels-width) + var(--validator-graph-wrapper-horizontal-padding));
+}
+
+@media only screen and (max-width: 1000px) {
+  :root {
+    --horizontal-axis-label-display: none;
+    --horizontal-axis-label-compact-display: flex;
+  }
+}
+
+@media only screen and (max-width: 750px) {
+  :root {
+    --vertical-axis-labels-width: 50px;
+    --vertical-axis-labels-width-int: 50;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  :root {
+    --horizontal-axis-label-font-size: 12px;
+  }
 }

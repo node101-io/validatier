@@ -246,7 +246,7 @@ function renderValidators() {
       each.style.position = 'inline-block';
     })
 
-    const monikerWrapper = target.children[0].children[2].children[0];
+    const monikerWrapper = target.children[0].children[1].children[0];
     animateOverflowMonikers(monikerWrapper);
   })
 

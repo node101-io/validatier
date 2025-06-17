@@ -42,7 +42,8 @@ function renderTableHeader (sort_by, order) {
   
       const contentWrapper = document.createElement('div');
       contentWrapper.classList.add('each-table-popup-info-content', 'center');
-      contentWrapper.style.marginTop = '-14px';
+      contentWrapper.style.marginBottom = '3px';
+      contentWrapper.style.marginRight = '2px';
       const contentWrapperSpan = document.createElement('span');
       contentWrapperSpan.innerHTML = header.popup_text;
       contentWrapper.appendChild(contentWrapperSpan);

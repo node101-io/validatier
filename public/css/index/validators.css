@@ -7,13 +7,13 @@
   --each-validator-stat-wrapper-width: 35%;
   --each-validator-stat-wrapper-height: 100%;
   --each-validator-stat-wrapper-padding-vertical: 14px;
-  --each-validator-stat-wrapper-padding-horizontal: 16px;
+  --each-validator-stat-wrapper-padding-horizontal: 22px;
   
   --validators-details-actions-wrapper-gap: 20px;
   --validators-details-actions-wrapper-font-size: 16px;
   
   --each-validator-details-action-content-gap: 4px;
-  --each-validator-details-action-content-span-margin-bottom: 2px;
+  --each-validator-details-action-content-span-margin-bottom: 4px;
   --each-validator-details-action-stake-border-radius: 12px;
   --each-validator-details-action-stake-padding-vertical: 6px;
   --each-validator-details-action-stake-padding-horizontal: 10px;
@@ -249,7 +249,8 @@
 }
 
 .each-validator-stat-wrapper {
-  width: calc(var(--each-validator-stat-wrapper-width) - (2 * var(--each-network-summary-stat-padding-horizontal)));
+  min-width: calc(var(--each-validator-stat-wrapper-width) - (2 * var(--each-validator-stat-wrapper-padding-horizontal)) - var(--validator-details-stats-wrapper-gap) - (var(--general-main-wrapper-border-size)));
+  max-width: calc(var(--each-validator-stat-wrapper-width) - (2 * var(--each-validator-stat-wrapper-padding-horizontal)) - var(--validator-details-stats-wrapper-gap) - (var(--general-main-wrapper-border-size)));
   height: calc(var(--each-validator-stat-wrapper-height) - (2 * var(--each-validator-stat-wrapper-padding-vertical)));
   padding: var(--each-validator-stat-wrapper-padding-vertical) var(--each-validator-stat-wrapper-padding-horizontal);
   display: flex;

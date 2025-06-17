@@ -19,17 +19,33 @@ const dayAsMilliseconds = 86400000;
 function generateSingleHorizontalAxisLabel (labelMapping) {
   const { currentIntervalLeft, currentIntervalRight, columnToAppendHorizontalLabel } = labelMapping;
 
-  const horizontalAxisLabel = document.createElement('span');
+  const horizontalAxisLabel = document.createElement('div');
   horizontalAxisLabel.classList.add('horizontal-axis-label');
 
-  if ((currentIntervalRight - currentIntervalLeft) / dayAsMilliseconds > 60)
-    horizontalAxisLabel.innerHTML = `
-      ${formatTimestampLarge(currentIntervalLeft)} - ${formatTimestampLarge(currentIntervalRight)}
-    `;
-  else
-    horizontalAxisLabel.innerHTML = `
-      ${formatTimestampSmall(currentIntervalLeft)} - ${formatTimestampSmall(currentIntervalRight)}
-    `;
+  const horizontalAxisLabelCompact = document.createElement('div');
+  horizontalAxisLabelCompact.classList.add('horizontal-axis-label', 'horizontal-axis-label-compact');
+
+  let formattedDateLeft = '';
+  let formattedDateRight = '';
+
+  if ((currentIntervalRight - currentIntervalLeft) / dayAsMilliseconds > 60) {
+    formattedDateLeft = formatTimestampLarge(currentIntervalLeft);
+    formattedDateRight = formatTimestampLarge(currentIntervalRight);
+  }
+  else {
+    formattedDateLeft = formatTimestampLarge(currentIntervalLeft);
+    formattedDateRight = formatTimestampLarge(currentIntervalRight);
+  }
+
+  horizontalAxisLabel.innerHTML = `${formattedDateLeft} - ${formattedDateRight}`;
+
+  const compactLine1 = document.createElement('span');
+  compactLine1.innerHTML = formattedDateLeft;
+  const compactLine2 = document.createElement('span');
+  compactLine2.innerHTML = formattedDateRight;
+  horizontalAxisLabelCompact.appendChild(compactLine1);
+  horizontalAxisLabelCompact.appendChild(compactLine2);
 
   columnToAppendHorizontalLabel.appendChild(horizontalAxisLabel);
+  columnToAppendHorizontalLabel.appendChild(horizontalAxisLabelCompact);
 }
