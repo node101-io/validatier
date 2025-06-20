@@ -164,7 +164,7 @@ const indexGetController = (req: Request, res: Response): void => {
         selectedDateBottom: req.cookies.selectedDateBottom || (new Date(selectedChain.first_available_block_time)).toISOString().split('T')[0],
         selectedDateTop: req.cookies.selectedDateTop || (new Date()).toISOString().split('T')[0],
         specificRangeName,
-        specificRange,
+        specificRange: req.cookies.specificRange || 'all_time',
         startDay: req.cookies.startDay || 'monday',
         currency_type: req.cookies.currency_type || 'native',
         chains,
