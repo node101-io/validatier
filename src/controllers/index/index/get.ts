@@ -14,7 +14,7 @@ const indexGetController = (req: Request, res: Response): void => {
   const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()): Date.now();
 
   const specificRangeName = req.cookies.specificRangeName || 'All time';
-  const specificRange = req.cookies.specificRange || 'all_time';
+  const specificRange = 'custom';
 
   Promise.allSettled([
     new Promise((resolve) => { 

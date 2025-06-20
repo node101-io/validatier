@@ -150,7 +150,18 @@ export function clearChainData (
       if (!data) return callback(null, true);
       const operatorAddresses = JSON.parse(data);
       if (!operatorAddresses || operatorAddresses.length <= 0) return callback(null, true);
-      operatorAddresses.forEach((eachOperatorAddress: string) => batch.put(eachOperatorAddress, ''));
+      operatorAddresses.forEach((eachOperatorAddress: string) => batch.put(
+        eachOperatorAddress,
+        JSON.stringify({
+          self_stake: 0,
+          reward: 0,
+          commission: 0,
+          total_stake: 0,
+          total_withdraw: 0,
+          balance_change: 0,
+          slash: 0
+        })
+      ));
 
       batch.put(chain_identifier, JSON.stringify([]));
 

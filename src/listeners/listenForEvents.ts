@@ -62,7 +62,9 @@ export const listenForEvents = (
                 block_height: result.block_height
               });
             
-            timestamp = new Date(time);
+            if (!timestamp || timestamp < new Date(time))
+              timestamp = new Date(time);
+            
             if (!decodedTxs || decodedTxs.length <= 0) return resolve();
 
             const flattenedDecodedTxs: DecodedMessage[] = decodedTxs.flatMap((obj: { messages: DecodedMessage }) => obj.messages);
