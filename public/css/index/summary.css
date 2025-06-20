@@ -641,7 +641,6 @@
 @media only screen and (max-width: 900px) {
   :root {
     --network-summary-network-graph-main-wrapper-flex-direction: column;
-    --network-summary-network-graph-metrics-wrapper-flex-direction: row;
     --network-summary-network-graph-metrics-wrapper-width: 100%;
     --network-summary-network-graph-content-wrapper-width: calc(100% - (2 * var(--network-summary-network-graph-content-wrapper-padding-horizontal)));
     --each-network-summary-stat-width: calc(100% + (var(--network-summary-main-wrapper-gap)));
@@ -666,5 +665,8 @@
     --each-metric-content-wrapper-header-title-font-size: 24px;
     --each-metric-content-wrapper-content-value-native-font-size: 28px;
     --each-metric-content-wrapper-content-value-usd-font-size: 20px;
+
+    --network-summary-network-graph-content-title-font-size: 20px;
+    --network-summary-network-graph-content-description-font-size: 16px;
   }
 }

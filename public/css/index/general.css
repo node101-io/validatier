@@ -55,6 +55,7 @@
   --footer-main-wrapper-gap: 18px;
 
   --footer-main-wrapper-height: fit-content;
+  --footer-main-wrapper-margin-bottom: 25px;
   
   --each-social-icon-transition-duration: 0.25s;
   --each-social-icon-hover-scale: 1.2;
@@ -417,6 +418,7 @@ input {
   font-size: 20px;
   font-weight: 500;
   color: rgba(54, 22, 97, 1);
+  margin-bottom: var(--footer-main-wrapper-margin-bottom);
 }
 
 .footer-mini-menu {
