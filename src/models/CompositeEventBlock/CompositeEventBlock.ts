@@ -466,7 +466,15 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
         const existingCredentials = alreadyExistingCompositeEventBlocks.map(each => `${each.timestamp}.${each.operator_address}`);
 
         const newCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each => 
-          !existingCredentials.includes(`${each.timestamp}.${each.operator_address}`)
+          !existingCredentials.includes(`${each.timestamp}.${each.operator_address}`) &&
+          (
+            each.reward != 0 ||
+            each.commission != 0 ||
+            each.self_stake != 0 ||
+            each.total_stake != 0 ||
+            each.total_withdraw != 0 ||
+            each.balance_change != 0
+          )
         );
 
         const updateCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each => 

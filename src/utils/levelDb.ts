@@ -163,8 +163,6 @@ export function clearChainData (
         })
       ));
 
-      batch.put(chain_identifier, JSON.stringify([]));
-
       batch.write()
         .then(() => callback(null, true))
         .catch((err) => callback('bulk_delete_failed', false));
