@@ -20,8 +20,19 @@ function updateDateInputs () {
   document.getElementById('header-range-top-block').innerHTML = selectedDateTop ? new Date(selectedDateTop).toLocaleDateString('en-GB') : 'pending'
   document.getElementById('periodic-query-top-timestamp').value = selectedDateTop;
 
-  if (selectedDateBottom && selectedDateTop)
+  if (selectedDateBottom && selectedDateTop) {
+    const loadingWrapper = document.createElement('div');
+    loadingWrapper.classList.add('date-picker-open-loading-wrapper');
+
+    const loadingSpan = document.createElement('div');
+    loadingSpan.innerHTML = 'Lorem IPS';
+    
+    loadingWrapper.appendChild(loadingSpan);
+    loadingWrapper.appendChild(createSpinner(10));
+
+    document.getElementById('picker-main-wrapper').appendChild(loadingWrapper);
     window.location.reload();
+  }
 }
 
 function generateMonthContent (currentYearValue, currentMonthValue, startDay) {

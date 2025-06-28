@@ -55,9 +55,9 @@ export interface ValidatorInterface {
 interface ValidatorModel extends Model<ValidatorInterface> {
   saveValidator: (
     body: {
-      pubkey: string;
+      pubkey?: string;
       operator_address: string;
-      delegator_address: string;
+      delegator_address?: string;
       chain_identifier: string;
       moniker: string;
       website: string;
@@ -65,7 +65,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       security_contact: string;
       commission_rate: string;
       keybase_id: string;
-      created_at: Date;
+      created_at?: Date;
     }, 
     callback: (
       err: string | null,

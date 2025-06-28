@@ -99,7 +99,7 @@ function createNetworkSummaryGraph (dataFields, colors) {
   const graphDataMapping = {};
   const graphContainer = document.getElementById('network-summary-graph-container');
   const graphWrapper = plotValidatorGraph({ type: 'summary', operatorAddress: 'summary', decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping, dataFields, graphContainer, summaryData });
-  const graphWidth = window.getComputedStyle(graphContainer, null).getPropertyValue("width").replace('px', '');
+  const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue("width").replace('px', '');
 
   let columnsPer = Math.round(targetCacheSummaryGraphData.length / 5);
   columnsPer = columnsPer % 2 == 0 ? columnsPer : columnsPer + 1;

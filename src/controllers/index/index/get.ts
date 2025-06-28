@@ -9,6 +9,16 @@ const indexGetController = (req: Request, res: Response): void => {
 
   console.time('response_time');
 
+  const isStartClicked = req.cookies.isStartClicked;
+
+  const deviceType = !req.useragent
+    ? 'desktop'
+    : req.useragent.isMobile 
+      ? 'mobile'
+      : req.useragent.isTablet 
+        ? 'tablet'
+        : 'desktop';
+
   const activeNetworkIdentifier = req.cookies.network ? req.cookies.network : 'cosmoshub';
   const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime()): (new Date(1)).getTime();
   const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()): Date.now();
@@ -153,7 +163,7 @@ const indexGetController = (req: Request, res: Response): void => {
         title: 'Validatier',
         includes: {
           external: {
-            css: ['page', 'general', 'header', 'summary', 'validators', 'graph', 'export', 'table'],
+            css: ['page', 'general', 'header', 'summary', 'validators', 'graph', 'export', 'table', 'intro', 'mobile_start'],
             js: ['page', 'functions'],
           },
         },
@@ -181,7 +191,9 @@ const indexGetController = (req: Request, res: Response): void => {
           dataFields: ['price', 'total_sold', 'total_stake_sum'],
           colors: ['rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)', 'rgba(255, 149, 0, 1)']
         },
-        priceGraphData
+        priceGraphData,
+        deviceType,
+        isStartClicked
       });
     });
 };

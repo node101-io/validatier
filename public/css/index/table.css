@@ -150,6 +150,19 @@
   --minimal-popup-scrollbar-width: 5px;
   --minimal-popup-scrollbar-thumb-border-radius: 5px;
 
+  --validator-filter-input-wrapper-width: 250px;
+  --validator-filter-input-wrapper-height: 56px;
+  --validator-filter-input-wrapper-padding-horizontal: 16px;
+  --validator-filter-input-wrapper-padding-vertical: 8px;
+
+  --validator-filter-input-wrapper-background-color: rgba(245, 245, 255, 1);
+  --validator-filter-input-wrapper-border-size: 1px;
+  --validator-filter-input-wrapper-border-color: rgba(190, 190, 231, 1);
+  --validator-filter-input-wrapper-border-radius: 16px;
+  --validator-filter-input-wrapper-gap: 16px;
+  --validator-filter-input-wrapper-display-initial: none;
+  --validator-filter-input-wrapper-display: flex;
+
   --validator-filter-input-content-wrapper-width: 100%;
   --validator-filter-input-content-wrapper-input-width: 100%;
   
@@ -157,7 +170,9 @@
   --validator-dropdown-icon-transition-duration: 0.25s;
 
   --validator-filter-input-font-size: 20px;
+  --validator-filter-input-font-weight: 500;
   --validator-filter-input-color: rgba(124, 112, 195, 1);
+  --validator-filter-input-background-color: rgba(245, 245, 255, 1);
   --validator-filter-input-border: 0;
   
   --current-month-and-year-display-font-size: 20px;
@@ -183,6 +198,8 @@
   --percentage-sold-main-circle-span-z-index: 10;
   --percentage-sold-inner-circle-background-color: rgba(124, 112, 195, 1);
   --percentage-sold-inner-circle-color: rgba(229, 229, 255, 1);
+
+  --validators-info-column-width: 200px;
 }
 
 
@@ -278,8 +295,7 @@
 
 .validators-main-wrapper {
   padding: var(--validators-main-wrapper-vertical-padding) 0px;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: visible;
   padding-top: var(--validators-main-wrapper-padding-top);
 }
 
@@ -594,13 +610,23 @@
 
 .validator-filter-input-wrapper {
   position: relative;
-  flex-grow: 1;
+  width: calc(var(--validator-filter-input-wrapper-width) - (2 * var(--validator-filter-input-wrapper-padding-horizontal)));
+  height: calc(var(--validator-filter-input-wrapper-height) - (2 * var(--validator-filter-input-wrapper-padding-vertical)));
+  padding: var(--validator-filter-input-wrapper-padding-vertical) var(--validator-filter-input-wrapper-padding-horizontal);
+  background-color: var(--validator-filter-input-background-color);
+  border: var(--validator-filter-input-wrapper-border-size) solid var(--validator-filter-input-wrapper-border-color);
+  border-radius: var(--validator-filter-input-wrapper-border-radius);
+  display: var(--validator-filter-input-wrapper-display-initial);
+  overflow: hidden;
+  align-items: center;
+  margin-left: auto;
 }
 
 .validator-filter-input-content-wrapper {
   width: var(--validator-filter-input-content-wrapper-width);
   display: flex;
   align-items: center;
+  gap: var(--validator-filter-input-wrapper-gap);
 }
 
 .validator-filter-input-content-wrapper input {
@@ -615,6 +641,7 @@
 
 .validator-filter-input {
   font-size: var(--validator-filter-input-font-size);
+  font-weight: var(--validator-filter-input-font-weight);
   border: var(--validator-filter-input-border);
   color: var(--validator-filter-input-color);
   background: transparent;
@@ -687,4 +714,25 @@
 
 .graph-metric-percentage-change-content {
   font-size: 32px;
+}
+
+.validator-table-content {
+  width: 100%;
+  display: flex;
+}
+
+.validators-info-column {
+  width: var(--validators-info-column-width);
+  overflow: hidden;
+}
+
+.validators-data-column {
+  width: calc(100% - var(--validators-info-column-width));
+  overflow-x: scroll;
+}
+
+@media only screen and (max-width: 600px) {
+  :root {
+    --validators-info-column-width: 100px;
+  }
 }

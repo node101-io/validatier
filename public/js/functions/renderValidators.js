@@ -10,8 +10,8 @@ function shortNumberFormat(num) {
 }
 
 function formatCommission(value) {
-  if (value.includes('.')) return `${(parseInt(value) * 100)}%`;
-  return `${parseInt(value / 1e16)}%`;
+  if (value.includes('.')) return `${(parseFloat(value) * 100)}%`;
+  return `${parseFloat(value / 1e16)}%`;
 }
 
 function getScoreColor (value) {
@@ -60,7 +60,7 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     const img = document.createElement('img');
     img.src = validator.temporary_image_uri
       ? validator.temporary_image_uri
-      : '/res/images/default_validator_photo.png';
+      : '/res/images/default_validator_photo.svg';
   
     validatorImageDiv.appendChild(img);
   
@@ -250,22 +250,52 @@ function renderValidators() {
     animateOverflowMonikers(monikerWrapper);
   })
 
+  // document.addEventListener('click', (event) => {
+  //   let target = event.target;
+  //   while (target != document.body && !target.classList.contains('leaderboard-dropdown-option')) target = target.parentNode;
+  //   if (!target.classList.contains('leaderboard-dropdown-option') || target.classList.contains('dropdown-option-selected') || target.classList.contains('leaderboard-dropdown-title')) return;
+
+  //   target.parentNode.querySelectorAll('.leaderboard-dropdown-option').forEach(each => {
+  //     each.classList.remove('dropdown-option-selected');
+  //   });
+  //   target.classList.add('dropdown-option-selected');
+
+  //   const sortBy = target.getAttribute('leaderboard_sort_by');
+  //   const leaderboardContent = document.getElementById(`leaderboard-content-${sortBy}`);
+    
+  //   leaderboardContent.parentNode.querySelectorAll('.each-leaderboard-table-wrapper').forEach(each => {
+  //     each.classList.add('section-hidden');
+  //   });
+  //   leaderboardContent.classList.remove('section-hidden');
+  // })
+
+
+  const leaderboardSortOrderMapping = {
+    percentage_sold: 'asc',
+    sold: 'asc'
+  }
+
   document.addEventListener('click', (event) => {
     let target = event.target;
-    while (target != document.body && !target.classList.contains('leaderboard-dropdown-option')) target = target.parentNode;
-    if (!target.classList.contains('leaderboard-dropdown-option') || target.classList.contains('dropdown-option-selected') || target.classList.contains('leaderboard-dropdown-title')) return;
+    while (target != document.body && !target.classList.contains('each-leaderboard-table-type-content')) target = target.parentNode;
+    if (!target.classList.contains('each-leaderboard-table-type-content')) return;
 
-    target.parentNode.querySelectorAll('.leaderboard-dropdown-option').forEach(each => {
-      each.classList.remove('dropdown-option-selected');
-    });
-    target.classList.add('dropdown-option-selected');
+    const type = target.getAttribute('type');
+    const leaderboardTables = target.parentNode.parentNode.querySelectorAll('.each-leaderboard-table-wrapper');
 
-    const sortBy = target.getAttribute('leaderboard_sort_by');
-    const leaderboardContent = document.getElementById(`leaderboard-content-${sortBy}`);
-    
-    leaderboardContent.parentNode.querySelectorAll('.each-leaderboard-table-wrapper').forEach(each => {
-      each.classList.add('section-hidden');
-    });
-    leaderboardContent.classList.remove('section-hidden');
+    leaderboardTables.forEach(eachLeaderboardTable => {
+      if (eachLeaderboardTable.id.includes(leaderboardSortOrderMapping[type])) {
+        target.querySelector('.each-table-header-sort-indicators').children[0].className = 'triangle-up-big';
+        eachLeaderboardTable.classList.add('section-hidden');
+      }
+      else {
+        target.querySelector('.each-table-header-sort-indicators').children[0].className = 'triangle-down-big';
+        eachLeaderboardTable.classList.remove('section-hidden');
+      }
+    })
+
+    leaderboardSortOrderMapping[type] == 'asc'
+      ? leaderboardSortOrderMapping[type] = 'desc'
+      : leaderboardSortOrderMapping[type] = 'asc';
   })
 }

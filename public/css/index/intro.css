@@ -1,0 +1,229 @@
+:root {
+  --ellipse-minor-r: 265;
+  --ellipse-major-r: 395;
+
+  --star-x: calc(-1 * var(--ellipse-major-r));
+  --star-x-px: calc(-1px * (var(--ellipse-major-r)));
+
+  --orbit-direction: -1;
+}
+
+@property --orbit-direction {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: -1;
+}
+
+@property --star-x {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: -395;
+}
+
+@property --star-x-px {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: -395px;
+}
+
+.animate-star, .animate-star-3d {
+  width: 20px;
+  aspect-ratio: 1/1;
+  border-radius: 100%;
+  background-color: white;
+  position: absolute;
+  top: calc(50% - 15px);
+}
+
+.animate-star {
+  transform: translate(
+    var(--star-x-px),
+    calc(
+      var(--orbit-direction) *
+      1px *
+      (
+        pow(
+          1 - ((var(--star-x) * var(--star-x)) / (var(--ellipse-major-r) * var(--ellipse-major-r))),
+          0.5
+        ) * var(--ellipse-minor-r)
+      )
+    )
+  );
+}
+
+.orbit-1 {
+  animation: orbit 30s linear infinite, change-orbit-direction 30s steps(1, end) infinite;
+  left: calc(50% - 10px - 1px * (0 / 5 * (2 * var(--ellipse-major-r))) + var(--ellipse-major-r) * 1px);
+}
+.orbit-2 {
+  animation: orbit 15s linear infinite, change-orbit-direction-reverse 15s steps(1, end) infinite;
+  left: calc(50% + 10px - 1px * (1 / 5 * (2 * var(--ellipse-major-r))) + var(--ellipse-major-r) * 1px);
+}
+.orbit-3 {
+  animation: orbit 20s linear infinite, change-orbit-direction 20s steps(1, end) infinite;
+  left: calc(50% - 5px - 1px * (2 / 5 * (2 * var(--ellipse-major-r))) + var(--ellipse-major-r) * 1px);
+}
+.orbit-4 {
+  animation: orbit 60s linear infinite, change-orbit-direction-reverse 60s steps(1, end) infinite;
+  left: calc(50% - 20px - 1px * (3 / 5 * (2 * var(--ellipse-major-r))) + var(--ellipse-major-r) * 1px);
+}
+.orbit-5 {
+  animation: orbit 40s linear infinite, change-orbit-direction-reverse 40s steps(1, end) infinite;
+  left: calc(50% - 40px - 1px * (4 / 5 * (2 * var(--ellipse-major-r))) + var(--ellipse-major-r) * 1px);
+}
+.orbit-6 {
+  animation: orbit 50s linear infinite, change-orbit-direction 50s steps(1, end) infinite;
+  left: calc(50% - 10px - 1px * (5 / 5 * (2 * var(--ellipse-major-r))) + var(--ellipse-major-r) * 1px);
+}
+
+@keyframes orbit {
+  0% {
+    --star-x: calc(-1 * var(--ellipse-major-r));
+    --star-x-px: calc(-1px * (var(--ellipse-major-r)));
+  }
+  50% {
+    --star-x: calc(1 * var(--ellipse-major-r));
+    --star-x-px: calc(1px * (var(--ellipse-major-r)));
+  }
+  100% {
+    --star-x: calc(-1 * var(--ellipse-major-r));
+    --star-x-px: calc(-1px * (var(--ellipse-major-r)));
+  }
+}
+
+@keyframes change-orbit-direction {
+  0% {
+    --orbit-direction: -1;
+  }
+  50% {
+    --orbit-direction: 1;
+  }
+  100% {
+    --orbit-direction: -1;
+  }
+}
+
+@keyframes change-orbit-direction-reverse {
+  0% {
+    --orbit-direction: 1;
+  }
+  50% {
+    --orbit-direction: -1;
+  }
+  100% {
+    --orbit-direction: 1;
+  }
+}
+
+
+.animate-star-3d {
+  animation: orbit-3d 20s linear infinite;
+  transform: translateX(0);
+  scale: 1;
+  left: 0;
+}
+
+@keyframes orbit-3d {
+  0% {
+    left: 0;
+    scale: 1;
+  }
+  25% {
+    scale: 2;
+  }
+  50% {
+    left: 100%;
+    scale: 1;
+  }
+  75% {
+    scale: 0.5;
+  }
+  100% {
+    left: 0;
+    scale: 1;
+  }
+}
+
+:root {
+  --intro-main-wrapper-height: 543.34px;
+  --intro-main-wrapper-background: radial-gradient(148.09% 147.99% at 52.57% 116.34%, #FFFFFF 0%, #C0C0F2 18.92%, #609AFF 54.65%, #000000 100%);
+  --intro-main-wrapper-gap: 32px;
+
+  --intro-main-wrapper-title-description-color: rgba(245, 245, 255, 1);
+  --intro-main-wrapper-title-description-z-index: 30;
+
+  --intro-main-wrapper-title-font-size: 96px;
+  --intro-main-wrapper-title-font-weight: 800;
+  --intro-main-wrapper-title-line-height: 82px;
+
+  --intro-main-wrapper-description-font-size: 24px;
+  --intro-main-wrapper-description-font-weight: 500;
+  --intro-main-wrapper-description-line-height: 22px;
+
+  --intro-main-wrapper-background-content-top: 20px;
+}
+
+.intro-main-wrapper {
+  width: 100%;
+  min-height: var(--intro-main-wrapper-height);
+  max-height: var(--intro-main-wrapper-height);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--intro-main-wrapper-background); 
+  gap: var(--intro-main-wrapper-gap);
+  margin-bottom: calc(-100px - var(--header-main-wrapper-height));
+  position: relative;
+  overflow: hidden;
+}
+
+.intro-main-wrapper-title-wrapper, .intro-main-wrapper-description-wrapper {
+  color: var(--intro-main-wrapper-title-description-color);
+  text-align: center;
+  position: relative;
+  z-index: var(--intro-main-wrapper-title-description-z-index);
+}
+
+.intro-main-wrapper-title-wrapper {
+  font-size: var(--intro-main-wrapper-title-font-size);
+  font-weight: var(--intro-main-wrapper-title-font-weight);
+  line-height: var(--intro-main-wrapper-title-line-height);
+}
+
+.intro-main-wrapper-description-wrapper {
+  font-size: var(--intro-main-wrapper-description-font-size);
+  font-weight: var(--intro-main-wrapper-description-font-weight);
+  line-height: var(--intro-main-wrapper-description-line-height);
+}
+
+.intro-main-background-content {
+  height: 100%;
+  position: absolute;
+  top: var(--intro-main-wrapper-background-content-top);
+}
+
+@media only screen and (max-width: 700px) { 
+  :root {
+    --intro-main-wrapper-title-font-size: 72px;
+    --intro-main-wrapper-description-font-size: 20px;
+
+    --intro-main-wrapper-title-line-height: 60px;
+    --intro-main-wrapper-description-line-height: 22px;
+  }
+}
+
+@media only screen and (max-width: 500px) { 
+  :root {
+    --intro-main-wrapper-height: 310px;
+
+    --intro-main-wrapper-title-font-size: 44px;
+    --intro-main-wrapper-description-font-size: 14px;
+
+    --intro-main-wrapper-title-line-height: 36px;
+    --intro-main-wrapper-description-line-height: 16px;
+
+    --intro-main-wrapper-gap: 12px;
+  }
+}
+

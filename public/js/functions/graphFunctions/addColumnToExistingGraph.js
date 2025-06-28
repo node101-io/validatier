@@ -23,12 +23,12 @@ function addColumnToExistingGraph (params) {
 
   const addOnPx = type != 'small'
     ? dataFields[0] != 'percentage_sold'
-      ? ' - var(--vertical-axis-labels-width)'
+      ? ''
       : ' - (var(--vertical-axis-labels-width) * 2)'
     : '';
   const addOnInt = type != 'small'
     ? dataFields[0] != 'percentage_sold'
-      ? ' - var(--vertical-axis-labels-width-int)'
+      ? ''
       : ' - (var(--vertical-axis-labels-width-int) * 2)'
     : '';
   document.documentElement.style.setProperty(

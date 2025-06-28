@@ -15,4 +15,5 @@ window.onload = () => {
   handlePlotButtonClick();
   handleSummaryGraphActions();
   handleNewsLetter();
+  mainScrollHandler();
 }

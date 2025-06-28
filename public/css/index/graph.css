@@ -37,6 +37,8 @@
   --vertical-axis-labels-width-int: 100;
   --vertical-axis-labels-border-right-size: 0px;
 
+  --graph-horizontal-axis-color: rgba(124, 112, 195, 0.5);
+
   --each-vertical-label-font-size: 16px;
   --each-vertical-label-font-weight: 400;
   --each-vertical-label-margin-right: auto;
@@ -52,6 +54,9 @@
   --each-data-indicator-vertical-line-transition-duration: 0s;
 }
 
+.network-summary-network-graph-content {
+  width: 100%;
+}
 
 .validator-graph-wrapper {
   width: calc(100% - (2 * var(--validator-graph-wrapper-horizontal-padding)));
@@ -206,7 +211,7 @@
   padding: 2px 0;
   justify-content: space-between;
   width: 100%;
-  border-bottom: 1px solid var(--each-data-indicator-vertical-line-border-color);
+  border-bottom: 1px solid var(--graph-horizontal-axis-color);
 }
 
 .each-vertical-label {
@@ -265,7 +270,7 @@
 
 .subplot-seperator {
   width: calc(100% - var(--vertical-axis-labels-width) - (2 * var(--validator-graph-wrapper-horizontal-padding)));
-  border-bottom: 1px solid var(--each-data-indicator-vertical-line-border-color);;
+  border-bottom: 1px solid var(--graph-horizontal-axis-color);
   position: absolute;
   background-color: var(--body-main-wrapper-background);
   left: calc(var(--vertical-axis-labels-width) + var(--validator-graph-wrapper-horizontal-padding));

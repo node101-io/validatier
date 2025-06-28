@@ -1,6 +1,51 @@
 
 const suffixArray = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th']
 
+function changeSummaryGraph (target) {
+  document.querySelectorAll('.each-sub-menu-link-content').forEach(eachLink => {
+    eachLink.classList.remove('navbar-link-selected');
+  });
+
+  target.classList.add('navbar-link-selected');
+  history.replaceState(null, '', `/${target.id != 'dashboard' ? target.id : ''}`);
+
+  document.getElementById('all-validators-main-wrapper').classList.remove('section-hidden');
+  document.getElementById('validators-leaderboards-all-wrapper').classList.remove('section-hidden');
+  document.getElementById('network-summary-main-wrapper').classList.remove('section-hidden');
+  document.getElementById('intro-main-wrapper').classList.remove('section-hidden');
+  document.getElementById('validator-details-main-wrapper').classList.add('section-hidden');
+
+  const dataFields = JSON.parse(target.getAttribute('dataFields'));
+  const colors = JSON.parse(target.getAttribute('colors'));
+  const graphTitle = target.getAttribute('graph_title');
+  const graphDescription = target.getAttribute('graph_description');
+
+  if (!dataFields || !colors || !graphTitle || !graphDescription) return;
+
+  document.getElementById('summary-graph-title').innerHTML = graphTitle;
+  document.getElementById('summary-graph-description').innerHTML = graphDescription;
+  
+  createNetworkSummaryGraph(dataFields, colors);
+
+  const lastVisitedOperatorAddress = sessionStorage.getItem('last_visited_operator_address');
+  if (!lastVisitedOperatorAddress) return;
+  const headerHeight = getComputedStyle(document.documentElement)
+      .getPropertyValue('--header-main-wrapper-height')
+      .trim();
+
+
+  const validatorFilterInput = document.getElementById('validator-filter-input');
+  validatorFilterInput.value = '';
+  document.querySelectorAll('.each-validator-wrapper').forEach(each => {
+    each.style.display = 'flex';
+  });
+
+  document.getElementById('all-main-wrapper').scrollTo({
+    top: document.getElementById(lastVisitedOperatorAddress).offsetTop - headerHeight.replace('px', ''),
+    behavior: 'instant'
+  })
+}
+
 function roundToFirstTwoDigits(number, method = 'floor') {
   if (number === 0) return 0;
 
@@ -97,7 +142,7 @@ function generateGraph (validator) {
       return;
     } else if (stat.field == 'temporary_image_uri') {
       const validatorDetailsImage = document.getElementById(stat.id);
-      validatorDetailsImage.src = validator.temporary_image_uri || '/res/images/default_validator_photo.png';
+      validatorDetailsImage.src = validator.temporary_image_uri || '/res/images/default_validator_photo.svg';
       return;
     }
 
@@ -167,7 +212,8 @@ function generateGraph (validator) {
     pubkey: pubkey,
     bottom_timestamp: bottomTimestamp,
     top_timestamp: topTimestamp,
-    decimals: decimals
+    decimals: decimals,
+    number_of_columns: priceGraphData.length
   };
 
   const graphWrapper = plotValidatorGraph({ type: 'validator', operatorAddress: operatorAddress.replace('@', '\\@'), decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping, dataFields, graphContainer, summaryData });
@@ -251,7 +297,7 @@ function generateGraph (validator) {
       const { nativeValue, usdValue } = getValueWithDecimals(data[eachDataField], eachDataField != 'percentage_sold' ? symbol : '%', usd_exchange_rate, decimals);
       const metric = document.getElementById(`validator-metric-${eachDataField}`);
 
-      metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + data[eachDataField].toFixed(2);
+      metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + data[eachDataField];
       if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
     });
 
@@ -320,6 +366,14 @@ function handlePlotButtonClick () {
 
   document.body.addEventListener('click', async (event) => {
     let target = event.target;
+    while (target != document.body && !target.classList.contains('each-leaderboard-table-validator-wrapper')) target = target.parentNode;
+    if (!target.classList.contains('each-leaderboard-table-validator-wrapper')) return;
+
+    document.getElementById(target.getAttribute('operator_address')).click();
+  })
+
+  document.body.addEventListener('click', async (event) => {
+    let target = event.target;
     while (target != document.body && !target.classList.contains('each-validator-wrapper')) target = target.parentNode;
     if (!target.classList.contains('each-validator-wrapper')) return;
 
@@ -327,15 +381,25 @@ function handlePlotButtonClick () {
     document.getElementById('network-summary-main-wrapper').classList.add('section-hidden');
     document.getElementById('all-validators-main-wrapper').classList.add('section-hidden');
     document.getElementById('validators-leaderboards-all-wrapper').classList.add('section-hidden');
+    document.getElementById('intro-main-wrapper').classList.add('section-hidden');
     document.getElementById('validator-details-main-wrapper').classList.remove('section-hidden');
 
-    document.getElementById('inner-main-wrapper').scrollTo({
+    document.getElementById('all-main-wrapper').scrollTo({
       top: 0,
       left: 0,
-      behavior: 'smooth'
+      behavior: 'instant'
     });
     history.pushState(null, '', `/?validator=${validator.operator_address}`);
+    sessionStorage.setItem('last_visited_operator_address', validator.operator_address);
     generateGraph(validator)
+  });
+
+  window.addEventListener('popstate', function(event) {
+    const path = window.location.pathname.replace('/', '') || '';
+    let target = document.body;
+    if (path.includes('validator='))
+      return document.getElementById(path.split('=')[1])?.click();
+    return changeSummaryGraph(target);
   });
 
   let isResizing = false;

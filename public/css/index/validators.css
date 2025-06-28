@@ -4,7 +4,7 @@
   --validator-details-stats-wrapper-gap: 20px;
   --validator-details-stats-wrapper-flex-wrap: nowrap;
   
-  --each-validator-stat-wrapper-width: 35%;
+  --each-validator-stat-wrapper-width: 33%;
   --each-validator-stat-wrapper-height: 120px;
   --each-validator-stat-wrapper-padding-vertical: 14px;
   --each-validator-stat-wrapper-padding-horizontal: 22px;
@@ -170,6 +170,8 @@
   display: flex;
   align-items: center;
   gap: var(--each-leaderboard-table-type-content-gap);
+  cursor: var(--pointer-hand-dark);
+  user-select: none;
 }
 
 .each-leaderboard-dropdown {
@@ -317,6 +319,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  cursor: var(--pointer-hand-dark);
 }
 
 .each-leaderboard-table-validator-info-wrapper span {
@@ -345,6 +348,7 @@
   gap: var(--each-leaderboard-table-validator-data-wrapper-gap);
   color: var(--each-leaderboard-table-validator-data-wrapper-color);
   font-size: var(--each-leaderboard-table-validator-data-wrapper-font-size);
+  text-wrap: nowrap;
 }
 
 .each-leaderboard-table-validator-data {

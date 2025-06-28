@@ -2,8 +2,8 @@ extends ../partials/head
 block content 
   -
     function formatCommission(value) {
-      if (value.includes('.')) return `${(parseInt(value) * 100)}%`;
-      return `${parseInt(value / 1e16)}%`;
+      if (value.includes('.')) return `${(parseFloat(value) * 100)}%`;
+      return `${parseFloat(value / 1e16)}%`;
     }
   
     function shortNumberFormat(num) {
@@ -51,7 +51,7 @@ block content
           { id: 'total_withdraw_sum', title: 'Total Reward' },
           { id: 'total_sold', title: 'Total Sold' },
           { id: 'percentage_sold', title: 'Percentage Sold' },
-          { id: 'price', title: `${selectedChain.symbol} Price In USD` },
+          { id: 'price', title: `${selectedChain.symbol} Price` },
           { id: 'self_stake_sum', title: 'Self-Staked Amount' }
         ]
       },
@@ -62,7 +62,7 @@ block content
       { id: 'total_withdraw_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgb(50, 173, 230)', title: 'Total Reward' },
       { id: 'total_sold', unit: selectedChain.symbol || '$ATOM', color: 'rgb(88, 86, 214)', title: 'Total Sold Amount' },
       { id: 'percentage_sold', unit: selectedChain.symbol || '$ATOM', color: 'rgba(255, 149, 0, 1)', title: 'Percentage Sold' },
-      { id: 'price', unit: '$' || '$', color: 'rgb(50, 173, 230)', title: `${selectedChain.symbol} Price In USD` },
+      { id: 'price', unit: '$' || '$', color: 'rgb(50, 173, 230)', title: `${selectedChain.symbol} Price` },
       { id: 'self_stake_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgba(88, 86, 214, 1)', title: 'Self-Staked Amount' }
     ]
     const timestampDifference = new Date(selectedDateTop).getTime() - new Date(selectedDateBottom).getTime()
@@ -70,7 +70,7 @@ block content
     //- .navbar-view-toggle#navbar-view-toggle(class='center')
     //-   span(class=`${isNavbarClose ? 'navbar-arrow-close' : ''}`)
     //-     include ../icons/chevron_left.pug
-    .header-main-wrapper
+    .header-main-wrapper#header-main-wrapper
       .header-network-switch-wrapper(style='display:none;')
         .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_id=`${selectedChain.chain_id}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}` current_chain_first_available_time=`${selectedChain.first_available_block_time}`)
           .network-switch-header-chain-content-wrapper(class='center')
@@ -100,10 +100,15 @@ block content
         //-         .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
         //-           .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
       a(href="/").header-banner-wrapper
-        .banner-logo-wrapper(class='center')
-          img(src='/res/images/logo.svg', alt='node101' class='center')
-        .banner-title-content(class='navbar-text') VALIDATIER
-      .date-picker
+        .banner-logo-wrapper#banner-logo(class='center')
+          include ../icons/logo.pug
+        .banner-title-content#banner-title(class='navbar-text') VALIDATIER
+      .validator-filter-input-wrapper#search-wrapper
+        .validator-filter-input-content-wrapper 
+          .validator-search-icon(class='center')
+            include ../icons/search.pug
+          input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search Validator')
+      .date-picker#date-picker
         .selected-range#selected-range
           span.date-interval-description 
             include ../icons/calendar.pug
@@ -157,13 +162,61 @@ block content
             //-       span= day
             //- button.cancel#cancel Cancel
             //- button.apply#apply Apply
+    if deviceType == 'mobile' && !isStartClicked && !queryValidator
+      -
+        const fallingStarLocations = [
+          { left: '0%', top: '30%' },
+          { left: '30%', top: '50%' },
+          { left: '20%', top: '10%' }
+        ]
+      .mobile-start-menu-wrapper#mobile-menu-start-wrapper
+        each fallingStar in fallingStarLocations
+          .falling-star(style=`top: ${fallingStar.top}; left: ${fallingStar.left};`)
+            .falling-star-trail-wrapper
+              .falling-star-trail
+                img(src="/res/images/trail.svg")
+            .falling-star-star
+              img(src="/res/images/star.svg")
+        .mobile-menu-banner-wrapper 
+          .banner-logo-wrapper
+            include ../icons/logo.pug
+          .mobile-menu-banner-title VALIDATIER
+        .mobile-menu-background-content(class='intro-main-background-content')
+          include ../icons/mobile_intro_svg.pug
+        .mobile-menu-title-wrapper#mobile-menu-title-wrapper(class='intro-main-wrapper-title-wrapper')
+          div THE
+          div VALIDATOR'S
+          div GUIDE TO 
+          div THE GALAXY
+        .mobile-menu-description-wrapper#mobile-menu-description-wrapper(class='intro-main-wrapper-description-wrapper')
+          div node101 | CosmosHub Validatier showcases
+          div the validators' behaviors, contributions, and
+          div impact within the Cosmos ecosystem.
+        .mobile-start-menu-start-button(class='center')#mobile-intro-start-button
+          span Start
+    if !queryValidator
+      .intro-main-wrapper#intro-main-wrapper
+        .intro-main-background-content 
+          include ../icons/intro_svg.pug
+        .intro-main-wrapper-title-wrapper
+          div THE VALIDATOR'S
+          div GUIDE TO THE GALAXY
+        .intro-main-wrapper-description-wrapper 
+          div node101 | CosmosHub Validatier showcases the validators' behaviors,
+          div contributions, and impact within the Cosmos ecosystem
     .inner-main-wrapper#inner-main-wrapper
-      .info-parapgraph-main-wrapper 
-        p node101 | CosmosHub Validator Timeline node101's journey as a CosmosHub validator, detailing key milestones, challenges, and achievements. This timeline highlights their evolution, contributions, and impact within the Cosmos ecosystem.
       .network-summary-main-wrapper#network-summary-main-wrapper(class=`${(queryValidator || url == 'validators') ? 'section-hidden' : ''}`)
         .network-summary-main-wrapper-title(class='each-section-title-content') Network Summary
         -
           const stats = [
+            {
+              field: 'self_stake_sum',
+              title: 'Self Stake Amount',
+              id_native: 'summary-self-stake-amount-native',
+              id_usd: 'summary-self-stake-amount-usd',
+              unit: selectedChain.symbol || '$ATOM',
+              small_graph_id: 'self_stake_sum'
+            },
             {
               field: 'percentage_sold',
               title: 'Percentage sold',
@@ -172,14 +225,6 @@ block content
               additional_class: 'summary-percentage-text-native',
               value_usd: null,
               unit: '%'
-            },
-            {
-              field: 'self_stake_sum',
-              title: 'Self Stake Amount',
-              id_native: 'summary-self-stake-amount-native',
-              id_usd: 'summary-self-stake-amount-usd',
-              unit: selectedChain.symbol || '$ATOM',
-              small_graph_id: 'self_stake_sum'
             },
             {
               field: 'average_self_stake_ratio',
@@ -212,9 +257,9 @@ block content
               .each-network-summary-stat-column
                 if `${stat.id_native}` == 'summary-percentage-sold-native'
                   .percentage-sold-main-circle
-                    span(class=`${(100 - summaryData[stat.field]) < 20 ? 'section-hidden' : ''}`)= getValue(100 - summaryData[stat.field], stat.unit).nativeValue
+                    span(class=`${(100 - summaryData[stat.field]) < 40 ? 'section-invisible' : ''}`)= getValue(100 - summaryData[stat.field], stat.unit).nativeValue
                     .percentage-sold-inner-circle(class=`${stat.id_native}` style=`width: calc(var(--percentage-sold-main-circle-diameter) * ${Math.min(1, Math.sqrt(parseInt(summaryData[stat.field]) / 100))});`) 
-                      span #{getValue(summaryData[stat.field], stat.unit).nativeValue}
+                      span(class=`${(summaryData[stat.field]) < 20 ? 'section-invisible' : ''}`) #{getValue(summaryData[stat.field], stat.unit).nativeValue}
                 else
                   .network-summary-small-graph-container(id=`small-graph-${stat.small_graph_id}`)
           script.
@@ -269,15 +314,17 @@ block content
       -
         const sortByArray = [
           { order: 'asc', sort_by: 'percentage_sold' },
-          { order: 'desc', sort_by: 'self_stake' },
-          { order: 'desc', sort_by: 'self_stake_ratio' },
-          { order: 'desc', sort_by: 'sold' }
+          //- { order: 'desc', sort_by: 'self_stake' },
+          //- { order: 'desc', sort_by: 'self_stake_ratio' },
+          { order: 'asc', sort_by: 'sold' }
         ]
         const leaderboards = [
           {
             id: 'percentage_sold',
             title: 'Percentage Sold',
             fields: ['percentage_sold'],
+            orders: ['asc', 'desc'],
+            default_order: 'asc',
             selected_option: 'percentage_sold',
             summary_field: 'percentage_sold',
             id_native: 'summary-percentage-sold-native',
@@ -305,23 +352,29 @@ block content
             id: 'sold',
             title: 'Total Sold Amount',
             fields: ['sold'],
+            orders: ['asc', 'desc'],
+            default_order: 'asc',
             selected_option: 'sold',
             summary_field: 'total_sold',
             id_native: 'metric-total-sold-amount-native',
             id_usd: 'metric-total-sold-amount-usd',
             unit: selectedChain.symbol || '$ATOM',
-            triangle_direction: 'down',
+            triangle_direction: 'up',
           },
         ]
       .validators-leaderboards-all-wrapper#validators-leaderboards-all-wrapper(class=`${queryValidator ? 'section-hidden' : ''}`)
         .each-section-title-content Leaderboards
         -
           const sortedValidatorsMapping = {};
+          
           sortByArray.forEach(field => {
-            const sortedValidators = field.order == 'asc'
-              ? ([...validators].sort((a, b) => (a[field.sort_by] || 0) - (b[field.sort_by] || 0))).slice(0, 10)
-              : ([...validators].sort((a, b) => (b[field.sort_by] || 0) - (a[field.sort_by] || 0))).slice(0, 10);
-            sortedValidatorsMapping[field.sort_by] = sortedValidators;
+            sortedValidatorsMapping[field.sort_by] = { asc: [], desc: [] };
+
+            const sortedValidatorsAsc = ([...validators].sort((a, b) => (a[field.sort_by] || 0) - (b[field.sort_by] || 0))).slice(0, 10);
+            const sortedValidatorsDesc = ([...validators].sort((a, b) => (b[field.sort_by] || 0) - (a[field.sort_by] || 0))).slice(0, 10);
+            
+            sortedValidatorsMapping[field.sort_by].asc = sortedValidatorsAsc;
+            sortedValidatorsMapping[field.sort_by].desc = sortedValidatorsDesc;
           })
         .validators-leaderboards-main-wrapper
           each leaderboard in leaderboards
@@ -346,28 +399,29 @@ block content
                     .each-network-summary-stat-footer(class='leaderboard-usd-value')= getValue(summaryData[leaderboard.summary_field], selectedChain.symbol).usdValue
                 //- .each-leaderboard-summary-percentage-change(class='percentage-change-value-content')= (Math.round((summaryData[leaderboard.summary_field] / summaryData[`initial_${leaderboard.summary_field}`]) * 100)).toString().replace('Infinity', '-') + '%'
               each field in leaderboard.fields
-                .each-leaderboard-table-wrapper(id=`leaderboard-content-${field}` class=`${leaderboard.selected_option != field ? 'section-hidden' : ''}`)
-                  each validator, index in sortedValidatorsMapping[field]
-                    .each-leaderboard-table-validator-wrapper
-                      .each-leaderboard-table-validator-info-wrapper 
-                        .validator-image
-                          .ranking-number-content(class='center')
-                            span= index + 1
-                          img.each-leaderboard-table-validator-info-image(src=src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.png'}`)
-                        .each-leaderboard-table-validator-info-moniker= validator.moniker
-                      .each-leaderboard-table-validator-data-wrapper 
-                        if leaderboard.id == 'percentage_sold'
-                          - const scoreResult = getScoreColor(validator[`${leaderboard.id}`])
-                          .each-leaderboard-table-validator-data(class='validator-percentage-sold' style=`color: ${scoreResult.color}`) 
-                            span %#{shortNumberFormat(validator.percentage_sold)}
-                            if scoreResult.check
-                              img(src='/res/images/check_green.svg' class='center')
-                        else
-                          .each-leaderboard-table-validator-data(class=`${field == 'self_stake_ratio' ? 'leaderboard-value-responsive-conceal' : ''}`)= getValue(validator[`${leaderboard.id}`], leaderboard.unit).nativeValue
-                        if leaderboard.id_usd 
-                          .each-leaderboard-table-validator-data(class='leaderboard-usd-value')= getValue(validator[`${leaderboard.id}`], 'usd').usdValue
-                        if leaderboard.id == 'self_stake'
-                          .each-leaderboard-table-validator-data(class=`percentage-change-value-content ${field == 'self_stake' ? 'leaderboard-value-responsive-conceal' : ''}`)= getValue(validator['self_stake_ratio'], '%').nativeValue
+                each order in leaderboard.orders
+                  .each-leaderboard-table-wrapper(id=`leaderboard-content-${field}-${order}` class=`${(leaderboard.selected_option != field || leaderboard.default_order != order) ? 'section-hidden' : ''}`)
+                    each validator, index in sortedValidatorsMapping[field][order]
+                      .each-leaderboard-table-validator-wrapper(operator_address=`${validator.operator_address}`)
+                        .each-leaderboard-table-validator-info-wrapper 
+                          .validator-image
+                            .ranking-number-content(class='center')
+                              span= index + 1
+                            img.each-leaderboard-table-validator-info-image(src=src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.svg'}`)
+                          .each-leaderboard-table-validator-info-moniker= validator.moniker
+                        .each-leaderboard-table-validator-data-wrapper 
+                          if leaderboard.id == 'percentage_sold'
+                            - const scoreResult = getScoreColor(validator[`${leaderboard.id}`])
+                            .each-leaderboard-table-validator-data(class='validator-percentage-sold' style=`color: ${scoreResult.color}`) 
+                              span %#{shortNumberFormat(validator.percentage_sold)}
+                              if scoreResult.check
+                                img(src='/res/images/check_green.svg' class='center')
+                          else
+                            .each-leaderboard-table-validator-data(class=`${field == 'self_stake_ratio' ? 'leaderboard-value-responsive-conceal' : ''}`)= getValue(validator[`${leaderboard.id}`], leaderboard.unit).nativeValue
+                          if leaderboard.id_usd 
+                            .each-leaderboard-table-validator-data(class='leaderboard-usd-value')= getValue(validator[`${leaderboard.id}`], 'usd').usdValue
+                          if leaderboard.id == 'self_stake'
+                            .each-leaderboard-table-validator-data(class=`percentage-change-value-content ${field == 'self_stake' ? 'leaderboard-value-responsive-conceal' : ''}`)= getValue(validator['self_stake_ratio'], '%').nativeValue
         - const validator = queryValidator ? JSON.parse(queryValidator) : {}
       .validator-details-main-wrapper#validator-details-main-wrapper(class=`${queryValidator ? '' : 'section-hidden'}`)
         .validator-details-header-wrapper(class='body-wrapper-cell')
@@ -397,8 +451,8 @@ block content
         .validator-details-stats-wrapper
           -
             const validator_stats = [
-              { id: 'validator-stat-percentage-sold', field: 'percentage_sold', title: 'Percentage sold', usdContent: false, additional_class: 'summary-percentage-text-native', helperType: 'rank' },
               { id: 'validator-stat-self-stake', field: 'self_stake', title: 'Self Stake', usdContent: true, helperType: 'rank' },
+              { id: 'validator-stat-percentage-sold', field: 'percentage_sold', title: 'Percentage sold', usdContent: false, additional_class: 'summary-percentage-text-native', helperType: 'rank' },
               { id: 'validator-stat-commission-rate', title: 'Commission', field: 'commission_rate', usdContent: false, additional_class: 'summary-percentage-text-native', helperText: 'fee from rewards', helperType: 'text' }
             ]
           each stat in validator_stats 
@@ -450,7 +504,7 @@ block content
                         .each-network-summary-network-graph-content-dropdown-content
                           each option in menu.options 
                             .each-network-summary-network-graph-content-each-dropdown(id=`validator-graph-dropdown-option-${option.id}` class=`dropdown-option-checked ${dataFields.includes(option.id) ? '' : 'section-hidden'}`)= option.title
-              .network-summary-network-graph-content-description Shows how validators respond to changes in total capitalization and delegation in the market
+              .network-summary-network-graph-content-description Shows how validators respond to changes in total KAPİTÜLASYON and delegation in the market
             .network-summary-network-graph-content#validator-graph-container
               if queryValidator
                 script.
@@ -459,11 +513,6 @@ block content
         .each-section-title-content Validators
         .table-main-wrapper
           .table-filters
-            .validator-filter-input-wrapper
-              .validator-filter-input-content-wrapper 
-                .validator-search-icon(class='center')
-                  include ../icons/search.svg
-                input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search Validator')
             .table-filters-subgroup 
               .export-main-wrapper 
                 .export-wrapper-header(class='center' isOpen='false')#export-wrapper-toggle
@@ -496,52 +545,59 @@ block content
                 {name: 'Total Sold Amount', id: 'sold', popup_text: 'Total withdraw - Self stake'},
                 {name: 'Self Stake', id: 'self_stake', popup_text: 'Validator\'s own stake on itself'},
               ]
-            .validator-table-header
-              .each-table-header-wrapper(class='each-table-header-validator-info-header')
-                .each-table-header-title Validators
-              each header in headers_array
-                .each-table-header-wrapper
-                  .each-table-header-wrapper-popup-content
-                  .each-table-header-wrapper(id=`${header.id}` class=`${header.popup_text ? 'each-table-header-hover' : ''}`)
-                    .each-table-header-title
-                      if header.popup_text
-                        .each-table-popup-wrapper
-                          .each-table-popup-info-content(class='center')
-                            span= header.popup_text
-                          .each-tooltip-info-hover(style='margin-bottom: -1px')
-                            img(src='/res/images/info.svg')
-                      .each-table-header-title= header.name
-                    .each-table-header-sort-indicators 
-                      .triangle-up
-                      .triangle-down
-            each validator, index in validators
-              .each-validator-wrapper(validator=validator id=`${validator.operator_address}` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}` class='operator-address')
-                .each-validator-info-wrapper
-                  .validator-image
-                    .ranking-number-content(class='center') 
-                      span= index + 1
-                    img.validator-image-content(src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.png'}`)
-                  .validator-textual-info-wrapper 
-                    .validator-moniker 
-                      .validator-moniker-text-content 
-                        span.validator-moniker-text #{validator.moniker}
-                      if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
-                        .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
-                          img(src='/res/images/warning.svg')
-                each header in headers_array
-                  if `${header.id}` == 'percentage_sold'
-                    - const scoreResult = getScoreColor(validator.percentage_sold)
-                    .validator-each-numeric-info(class='validator-percentage-sold' style=`color: ${scoreResult.color}`)
-                      if validator.percentage_sold <= 100
-                        span %#{shortNumberFormat(validator.percentage_sold)}
+            
+            .validator-table-content
+              .validators-info-column 
+                .validator-table-header
+                  .each-table-header-wrapper(class='each-table-header-validator-info-header')
+                    .each-table-header-title Validators
+                each validator, index in validators
+                  .each-validator-wrapper(validator=validator id=`${validator.operator_address}-info` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}` class='operator-address')
+                    .each-validator-info-wrapper
+                      .validator-image
+                        .ranking-number-content(class='center') 
+                          span= index + 1
+                        img.validator-image-content(src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.svg'}`)
+                      .validator-textual-info-wrapper 
+                        .validator-moniker 
+                          .validator-moniker-text-content 
+                            span.validator-moniker-text #{validator.moniker}
+                          if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
+                            .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
+                              img(src='/res/images/warning.svg')
+              .validators-data-column
+                .validator-table-header
+                  each header in headers_array
+                    .each-table-header-wrapper
+                      .each-table-header-wrapper-popup-content
+                      .each-table-header-wrapper(id=`${header.id}` class=`${header.popup_text ? 'each-table-header-hover' : ''}`)
+                        .each-table-header-title
+                          if header.popup_text
+                            .each-table-popup-wrapper
+                              .each-table-popup-info-content(class='center')
+                                span= header.popup_text
+                              .each-tooltip-info-hover(style='margin-bottom: -1px')
+                                img(src='/res/images/info.svg')
+                          .each-table-header-title= header.name
+                        .each-table-header-sort-indicators 
+                          .triangle-up
+                          .triangle-down
+                each validator, index in validators
+                  .each-validator-wrapper(validator=validator id=`${validator.operator_address}` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}` class='operator-address operator-address-search')
+                    each header in headers_array
+                      if `${header.id}` == 'percentage_sold'
+                        - const scoreResult = getScoreColor(validator.percentage_sold)
+                        .validator-each-numeric-info(class='validator-percentage-sold' style=`color: ${scoreResult.color}`)
+                          if validator.percentage_sold <= 100
+                            span %#{shortNumberFormat(validator.percentage_sold)}
+                          else
+                            span % N/A
+                          if scoreResult.check
+                            img(src='/res/images/check_green.svg' class='center')
                       else
-                        span % N/A
-                      if scoreResult.check
-                        img(src='/res/images/check_green.svg' class='center')
-                  else
-                    .validator-each-numeric-info
-                      .validator-each-numeric-info-native= getValue(validator[`${header.id}`], symbol).nativeValue
-                      .validator-each-numeric-info-usd= getValue(validator[`${header.id}`], 'usd').usdValue
+                        .validator-each-numeric-info
+                          .validator-each-numeric-info-native= getValue(validator[`${header.id}`], symbol).nativeValue
+                          .validator-each-numeric-info-usd= getValue(validator[`${header.id}`], 'usd').usdValue
       .footer-main-wrapper
         .each-footer-column
           //- .header-banner-wrapper

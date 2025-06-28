@@ -83,21 +83,37 @@
 }
 
 html {
+  width: 100vw;
+  height: 100vh;
   margin: 0;
   padding: 0;
   font-size: var(--website-main-font-size);
-  background-color: rgb(245, 245, 245); 
+  overflow: hidden;
 }
 
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
+  width: 100%;
   font-family: var(--website-main-font-family);
   background-color: rgb(232, 232, 254) !important;
   font-weight: var(--website-main-font-weight);
   background-color: var(--color-pale-white);
   color: var(--color-pale-dark);
   cursor: var(--pointer-default-dark);
+  overflow: hidden;
+}
+
+.all-wrapper {
+  width: var(--all-wrapper-width);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  overflow-y: overlay;
+  position: relative;
+  flex-direction: column;
+  align-items: center;
 }
 
 a {
@@ -124,13 +140,6 @@ button {
 input {
   outline: none;
   background-color: var(--color-pale-white);
-}
-
-.all-wrapper {
-  width: var(--all-wrapper-width);
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
 }
 
 .triangle-up {
@@ -355,19 +364,6 @@ input {
 
 .navbar-close {
   width: 30px;
-}
-
-.banner-logo-wrapper {
-  height: 56px;
-  transition: all var(--navbar-toggle-transition-duration) ease-in-out 0s;
-}
-
-.banner-logo-wrapper img {
-  height: 100%;
-}
-
-.banner-title-content {
-  transition: all var(--navbar-toggle-transition-duration) ease-in-out 0s;
 }
 
 .navbar-close .banner-logo-wrapper {

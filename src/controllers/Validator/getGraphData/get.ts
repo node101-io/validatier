@@ -17,14 +17,15 @@ export default (req: Request, res: Response): any => {
     res.write(`data: ${JSON.stringify(data)}\n\n`);
   };
 
-  const { chain_identifier, operator_address, bottom_timestamp, top_timestamp, pubkey } = req.query;
+  const { chain_identifier, operator_address, bottom_timestamp, top_timestamp, pubkey, number_of_columns } = req.query;
 
   if (
     typeof chain_identifier !== 'string' ||
     typeof bottom_timestamp !== 'string' ||
     typeof top_timestamp !== 'string' ||
     typeof operator_address !== 'string' ||
-    typeof pubkey !== 'string'
+    typeof pubkey !== 'string' ||
+    typeof number_of_columns !== 'string'
   ) {
     sendData({ err: 'format_error', success: false });
     return res.end();
@@ -33,7 +34,7 @@ export default (req: Request, res: Response): any => {
   const bottomTimestamp = parseInt(bottom_timestamp, 10);
   const topTimestamp = parseInt(top_timestamp, 10);
   
-  const stepValue = Math.ceil((topTimestamp - bottomTimestamp) / NUMBER_OF_COLUMNS);
+  const stepValue = Math.ceil((topTimestamp - bottomTimestamp) / parseInt(number_of_columns));
 
   let pushedIndex = -1;
   const pendingData: Record<number, any> = {};

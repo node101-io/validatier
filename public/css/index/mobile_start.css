@@ -1,0 +1,244 @@
+.mobile-start-menu-wrapper {
+  min-width: 100vw;
+  min-height: 100vh;
+  background: radial-gradient(148.09% 147.99% at 52.57% 116.34%, #FFFFFF 0%, #C0C0F2 18.92%, #609AFF 54.65%, #000000 100%);
+  position: fixed;
+  z-index: 100000;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: scale 1.5s ease 0.5s, opacity 0.5s ease 1.5s;
+  transform-origin: center center;
+}
+
+.mobile-menu-banner-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 20px;
+}
+
+.mobile-menu-banner-title {
+  color: rgba(245, 245, 255, 1);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.mobile-menu-background-content {
+  position: relative;
+  width: 100%;
+}
+
+.mobile-menu-title-wrapper, .mobile-menu-description-wrapper {
+  text-align: start;
+  transition: all 1s ease 0.5s;
+}
+
+.mobile-menu-title-wrapper {
+  font-size: 60px;
+  line-height: 55px;
+  margin: 15px;
+}
+
+.mobile-menu-description-wrapper {
+  font-size: 16px;
+  line-height: 18px;
+  margin: 15px;
+}
+
+.mobile-start-menu-start-button {
+  width: calc(86px - 2 * 28px);
+  height: calc(37px - 2 * 14px);
+  background-color: rgba(37, 0, 84, 1);
+  color: rgba(239, 239, 255, 1);
+  padding: 14px 28px;
+  margin: 0 auto;
+  margin-top: auto;
+  margin-bottom: 24px;
+  border-radius: 8px;
+}
+
+.mobile-start-menu-start-button span {
+  margin-bottom: 4px;
+}
+
+
+.mobile-ellipse-1 {
+  transition: all 1s ease 0.25s;
+}
+
+.mobile-ellipse-2 {
+  transition: all 1.25s ease 0s;
+}
+
+
+:root {
+  --mobile-ellipse-minor-r: 170;
+  --mobile-ellipse-major-r: 215.13;
+
+  --mobile-star-x: calc(-1 * var(--ellipse-major-r));
+  --mobile-star-x-px: calc(-1px * (var(--ellipse-major-r)));
+
+  --mobile-orbit-direction: -1;
+}
+
+@property --mobile-orbit-direction {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: -1;
+}
+
+@property --mobile-star-x {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: -395;
+}
+
+@property --mobile-star-x-px {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: -395px;
+}
+
+.mobile-animate-star, .mobile-animate-star-3d {
+  width: 20px;
+  aspect-ratio: 1/1;
+  border-radius: 100%;
+  background-color: white;
+  position: absolute;
+  top: calc(50% - 15px);
+  transition: all 0.25s ease 0s;
+}
+
+.mobile-animate-star {
+  transform: translate(
+    var(--mobile-star-x-px),
+    calc(
+      var(--mobile-orbit-direction) *
+      1px *
+      (
+        pow(
+          1 - ((var(--mobile-star-x) * var(--mobile-star-x)) / (var(--mobile-ellipse-major-r) * var(--mobile-ellipse-major-r))),
+          0.5
+        ) * var(--mobile-ellipse-minor-r)
+      )
+    )
+  );
+}
+
+.mobile-orbit-1 {
+  animation: mobile-orbit 30s linear infinite, mobile-change-orbit-direction 30s steps(1, end) infinite;
+  left: calc(50% - 10px - 1px * (0 / 5 * (2 * var(--mobile-ellipse-major-r))) + var(--mobile-ellipse-major-r) * 1px);
+}
+.mobile-orbit-2 {
+  animation: mobile-orbit 15s linear infinite, mobile-change-orbit-direction-reverse 15s steps(1, end) infinite;
+  left: calc(50% + 0px - 1px * (1 / 5 * (2 * var(--mobile-ellipse-major-r))) + var(--mobile-ellipse-major-r) * 1px);
+}
+.mobile-orbit-3 {
+  animation: mobile-orbit 20s linear infinite, mobile-change-orbit-direction 20s steps(1, end) infinite;
+  left: calc(50% - 10px - 1px * (2 / 5 * (2 * var(--mobile-ellipse-major-r))) + var(--mobile-ellipse-major-r) * 1px);
+}
+.mobile-orbit-4 {
+  animation: mobile-orbit 60s linear infinite, mobile-change-orbit-direction-reverse 60s steps(1, end) infinite;
+  left: calc(50% - 20px - 1px * (3 / 5 * (2 * var(--mobile-ellipse-major-r))) + var(--mobile-ellipse-major-r) * 1px);
+}
+.mobile-orbit-5 {
+  animation: mobile-orbit 40s linear infinite, mobile-change-orbit-direction-reverse 40s steps(1, end) infinite;
+  left: calc(50% - 50px - 1px * (4 / 5 * (2 * var(--mobile-ellipse-major-r))) + var(--mobile-ellipse-major-r) * 1px);
+}
+.mobile-orbit-6 {
+  animation: mobile-orbit 50s linear infinite, mobile-change-orbit-direction 50s steps(1, end) infinite;
+  left: calc(50% + 50px - 1px * (5 / 5 * (2 * var(--mobile-ellipse-major-r))) + var(--mobile-ellipse-major-r) * 1px);
+}
+
+@keyframes mobile-orbit {
+  0% {
+    --mobile-star-x: calc(-1 * var(--mobile-ellipse-major-r));
+    --mobile-star-x-px: calc(-1px * (var(--mobile-ellipse-major-r)));
+  }
+  50% {
+    --mobile-star-x: calc(1 * var(--mobile-ellipse-major-r));
+    --mobile-star-x-px: calc(1px * (var(--mobile-ellipse-major-r)));
+  }
+  100% {
+    --mobile-star-x: calc(-1 * var(--mobile-ellipse-major-r));
+    --mobile-star-x-px: calc(-1px * (var(--mobile-ellipse-major-r)));
+  }
+}
+
+@keyframes mobile-change-orbit-direction {
+  0% {
+    --mobile-orbit-direction: -1;
+  }
+  50% {
+    --mobile-orbit-direction: 1;
+  }
+  100% {
+    --mobile-orbit-direction: -1;
+  }
+}
+
+@keyframes mobile-change-orbit-direction-reverse {
+  0% {
+    --mobile-orbit-direction: 1;
+  }
+  50% {
+    --mobile-orbit-direction: -1;
+  }
+  100% {
+    --mobile-orbit-direction: 1;
+  }
+}
+
+.falling-star {
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  z-index: 1000000000000;
+  transition: transform 2s ease 0s, opacity 0.25s ease 0s;
+  opacity: 0;
+}
+
+.falling-star-trail-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.falling-star-trail {
+  width: 200px;
+  aspect-ratio: 1 / 1;
+  transition: all 2s ease 0s;
+}
+
+.falling-star-trail img {
+  width: 100%;
+  height: 100%;
+}
+
+.falling-star-star {
+  width: 50px;
+  height: 50px;
+  position: absolute;
+  right: -20px;
+  bottom: -20px;
+  z-index: 100;
+}
+
+.falling-star-star img {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -26,5 +26,8 @@ export function getInactivityIntervals(results: Result[]) {
       );
     }
   }
+
+  if (inactivityIntervals.length % 2 != 0)
+    inactivityIntervals.push(new Date().getTime());
   return inactivityIntervals;
 }
