@@ -11,14 +11,6 @@ const indexGetController = (req: Request, res: Response): void => {
 
   const isStartClicked = req.cookies.isStartClicked;
 
-  const deviceType = !req.useragent
-    ? 'desktop'
-    : req.useragent.isMobile 
-      ? 'mobile'
-      : req.useragent.isTablet 
-        ? 'tablet'
-        : 'desktop';
-
   const activeNetworkIdentifier = req.cookies.network ? req.cookies.network : 'cosmoshub';
   const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime()): (new Date(1)).getTime();
   const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()): Date.now();
@@ -192,7 +184,6 @@ const indexGetController = (req: Request, res: Response): void => {
           colors: ['rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)', 'rgba(255, 149, 0, 1)']
         },
         priceGraphData,
-        deviceType,
         isStartClicked
       });
     });

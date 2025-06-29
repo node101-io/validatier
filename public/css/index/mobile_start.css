@@ -1,3 +1,7 @@
+:root {
+  --mobile-start-menu-display: none;
+}
+
 .mobile-start-menu-wrapper {
   min-width: 100vw;
   min-height: 100vh;
@@ -6,7 +10,7 @@
   z-index: 100000;
   left: 0;
   top: 0;
-  display: flex;
+  display: var(--mobile-start-menu-display);
   flex-direction: column;
   align-items: flex-start;
   transition: scale 1.5s ease 0.5s, opacity 0.5s ease 1.5s;
@@ -240,5 +244,12 @@
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+
+@media only screen and (max-width: 800px) {
+  :root {
+    --mobile-start-menu-display: flex;
   }
 }

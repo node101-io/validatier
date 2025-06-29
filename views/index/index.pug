@@ -162,7 +162,7 @@ block content
             //-       span= day
             //- button.cancel#cancel Cancel
             //- button.apply#apply Apply
-    if deviceType == 'mobile' && !isStartClicked && !queryValidator
+    if !isStartClicked && !queryValidator
       -
         const fallingStarLocations = [
           { left: '0%', top: '30%' },
