@@ -67,9 +67,7 @@ function mainScrollHandler() {
       eachStar.style.opacity = '0';
     })
 
-    mobileMenuStartWrapper.style.scale = '10';
     mobileMenuStartWrapper.style.opacity = '0';
-    mobileMenuTitleWrapper.style.transform = 'translate(-13.5%, -70%)';
     mobileMenuDescriptionWrapper.style.opacity = '0';
 
     document.querySelectorAll('.falling-star').forEach(eachFallingStar => {
@@ -83,6 +81,6 @@ function mainScrollHandler() {
       mobileMenuStartWrapper.style.display = 'none';
     }, 2 * 1000);
 
-    setCookie('isStartClicked', 'true', (1 / 24 / 60 / 2))
+    setCookie('isStartClicked', 'true', (1 / 24))
   })
 }
