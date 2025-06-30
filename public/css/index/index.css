@@ -1,11 +1,11 @@
 
 :root {
   --all-main-wrapper-width: 100%;
-  --all-main-wrapper-background-color: rgb(247, 248, 255);
+  --all-main-wrapper-background-color: rgb(255, 255, 255);
   --all-main-wrapper-border-radius: 0;
   --all-main-wrapper-margin-left: 0px;
 
-  --all-main-wrapper-webkit-scrollbar-width: 8px;
+  --all-main-wrapper-webkit-scrollbar-width: 0px;
   
   --all-main-wrapper-webkit-scrollbar-thumb-background: rgba(100, 100, 100, var(--scrollbar-opacity, 1));
   --all-main-wrapper-webkit-scrollbar-thumb-border-radius: 10px;
@@ -32,7 +32,7 @@
   --header-main-wrapper-border-bottom-gradient-to: rgba(246, 247, 255, 1);
   
   --header-main-background-initial: transparent;
-  --header-main-background: rgba(245, 245, 255, 1);
+  --header-main-background: rgba(255, 255, 255, 1);
   
   --body-main-wrapper-background: rgba(245, 245, 255, 1);
   --general-main-wrapper-border-color: rgba(190, 190, 231, 1);
@@ -71,8 +71,8 @@
 }
 
 .all-main-wrapper::-webkit-scrollbar {
-  position: absolute;
   width: var(--all-main-wrapper-webkit-scrollbar-width);
+  position: absolute;
   background-color: transparent;
   top: 0;
   left: 0;
@@ -165,14 +165,14 @@
 
 @media only screen and (max-width: 750px) {
   :root {
-    --all-main-wrapper-webkit-scrollbar-width: 2px;
+    --all-main-wrapper-webkit-scrollbar-width: 0px;
     --all-main-wrapper-border-radius: 0;
   }
 }
 
 @media only screen and (max-width: 500px) {
   :root {
-    --all-main-wrapper-webkit-scrollbar-width: 2px;
+    --all-main-wrapper-webkit-scrollbar-width: 0px;
     --all-main-wrapper-border-radius: 0;
 
     --header-main-wrapper-height: 75px;

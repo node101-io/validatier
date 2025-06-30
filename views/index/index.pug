@@ -264,9 +264,9 @@ block content
                   .network-summary-small-graph-container(id=`small-graph-${stat.small_graph_id}`)
           script.
             createSmallGraphs();
+        .network-summary-network-graph-metrics-wrapper-title(class='each-section-title-content') Graph Metrics
         .network-summary-network-graph-main-wrapper
           .network-summary-network-graph-metrics-wrapper
-            .network-summary-network-graph-metrics-wrapper-title(class='each-section-title-content') Graph Metrics
             .network-summary-network-graph-metrics-content-wrapper
               each metric in metrics 
                 .each-metric-content-wrapper(id=`summary-metric-${metric.id}` class=`${dataFields.includes(metric.id) ? '' : 'section-hidden'}`)
@@ -407,7 +407,7 @@ block content
                           .validator-image
                             .ranking-number-content(class='center')
                               span= index + 1
-                            img.each-leaderboard-table-validator-info-image(src=src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.svg'}`)
+                            img.each-leaderboard-table-validator-info-image(src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.svg'}` style=`${!validator.temporary_image_uri ? 'border-radius: 0;' : ''}`)
                           .each-leaderboard-table-validator-info-moniker= validator.moniker
                         .each-leaderboard-table-validator-data-wrapper 
                           if leaderboard.id == 'percentage_sold'
@@ -504,7 +504,7 @@ block content
                         .each-network-summary-network-graph-content-dropdown-content
                           each option in menu.options 
                             .each-network-summary-network-graph-content-each-dropdown(id=`validator-graph-dropdown-option-${option.id}` class=`dropdown-option-checked ${dataFields.includes(option.id) ? '' : 'section-hidden'}`)= option.title
-              .network-summary-network-graph-content-description Shows how validators respond to changes in total KAPİTÜLASYON and delegation in the market
+              //- .network-summary-network-graph-content-description Shows how validators respond to changes in total KAPİTÜLASYON and delegation in the market
             .network-summary-network-graph-content#validator-graph-container
               if queryValidator
                 script.
@@ -552,19 +552,21 @@ block content
                   .each-table-header-wrapper(class='each-table-header-validator-info-header')
                     .each-table-header-title Validators
                 each validator, index in validators
-                  .each-validator-wrapper(validator=validator id=`${validator.operator_address}-info` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}` class='operator-address')
-                    .each-validator-info-wrapper
-                      .validator-image
-                        .ranking-number-content(class='center') 
-                          span= index + 1
-                        img.validator-image-content(src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.svg'}`)
-                      .validator-textual-info-wrapper 
-                        .validator-moniker 
-                          .validator-moniker-text-content 
-                            span.validator-moniker-text #{validator.moniker}
-                          if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
-                            .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
-                              img(src='/res/images/warning.svg')
+                  if cummulativeActiveListData.includes(validator.pubkey)
+                    .each-validator-wrapper(validator=validator id=`${validator.operator_address}-info` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}` class='operator-address')
+                      .each-validator-info-wrapper
+                        .validator-image
+                          - const rankingFontMultipliers = [1, 0.9, 0.7] 
+                          .ranking-number-content(class='center' style=`font-size: calc(var(--ranking-number-content-font-size) * (${rankingFontMultipliers[((index + 1).toString().length - 1)]}))`)
+                            span= index + 1
+                          img.validator-image-content(src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.svg'}` style=`${!validator.temporary_image_uri ? 'border-radius: 0;' : ''}`)
+                        .validator-textual-info-wrapper 
+                          .validator-moniker 
+                            .validator-moniker-text-content 
+                              span.validator-moniker-text #{validator.moniker}
+                            if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
+                              .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
+                                img(src='/res/images/warning.svg')
               .validators-data-column
                 .validator-table-header
                   each header in headers_array
@@ -583,21 +585,22 @@ block content
                           .triangle-up
                           .triangle-down
                 each validator, index in validators
-                  .each-validator-wrapper(validator=validator id=`${validator.operator_address}` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}` class='operator-address operator-address-search')
-                    each header in headers_array
-                      if `${header.id}` == 'percentage_sold'
-                        - const scoreResult = getScoreColor(validator.percentage_sold)
-                        .validator-each-numeric-info(class='validator-percentage-sold' style=`color: ${scoreResult.color}`)
-                          if validator.percentage_sold <= 100
-                            span %#{shortNumberFormat(validator.percentage_sold)}
-                          else
-                            span % N/A
-                          if scoreResult.check
-                            img(src='/res/images/check_green.svg' class='center')
-                      else
-                        .validator-each-numeric-info
-                          .validator-each-numeric-info-native= getValue(validator[`${header.id}`], symbol).nativeValue
-                          .validator-each-numeric-info-usd= getValue(validator[`${header.id}`], 'usd').usdValue
+                  if cummulativeActiveListData.includes(validator.pubkey)
+                    .each-validator-wrapper(validator=validator id=`${validator.operator_address}` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}` class='operator-address operator-address-search')
+                      each header in headers_array
+                        if `${header.id}` == 'percentage_sold'
+                          - const scoreResult = getScoreColor(validator.percentage_sold)
+                          .validator-each-numeric-info(class='validator-percentage-sold' style=`color: ${scoreResult.color}`)
+                            if validator.percentage_sold <= 100
+                              span %#{shortNumberFormat(Math.max(0, validator.percentage_sold))}
+                            else
+                              span % N/A
+                            if scoreResult.check
+                              img(src='/res/images/check_green.svg' class='center')
+                        else
+                          .validator-each-numeric-info
+                            .validator-each-numeric-info-native= getValue(validator[`${header.id}`], symbol).nativeValue
+                            .validator-each-numeric-info-usd= getValue(validator[`${header.id}`], 'usd').usdValue
       .footer-main-wrapper
         .each-footer-column
           //- .header-banner-wrapper

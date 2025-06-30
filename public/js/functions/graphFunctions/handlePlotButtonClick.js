@@ -7,7 +7,7 @@ function changeSummaryGraph (target) {
   });
 
   target.classList.add('navbar-link-selected');
-  history.replaceState(null, '', `/${target.id != 'dashboard' ? target.id : ''}`);
+  history.pushState({ page: 'dashboard' }, 'dashboard', `/${target.id != 'dashboard' ? target.id : ''}`);
 
   document.getElementById('all-validators-main-wrapper').classList.remove('section-hidden');
   document.getElementById('validators-leaderboards-all-wrapper').classList.remove('section-hidden');
@@ -15,17 +15,17 @@ function changeSummaryGraph (target) {
   document.getElementById('intro-main-wrapper').classList.remove('section-hidden');
   document.getElementById('validator-details-main-wrapper').classList.add('section-hidden');
 
-  const dataFields = JSON.parse(target.getAttribute('dataFields'));
-  const colors = JSON.parse(target.getAttribute('colors'));
-  const graphTitle = target.getAttribute('graph_title');
-  const graphDescription = target.getAttribute('graph_description');
+  // const dataFields = JSON.parse(target.getAttribute('dataFields'));
+  // const colors = JSON.parse(target.getAttribute('colors'));
+  // const graphTitle = target.getAttribute('graph_title');
+  // const graphDescription = target.getAttribute('graph_description');
 
-  if (!dataFields || !colors || !graphTitle || !graphDescription) return;
+  // if (!dataFields || !colors || !graphTitle || !graphDescription) return;
 
-  document.getElementById('summary-graph-title').innerHTML = graphTitle;
-  document.getElementById('summary-graph-description').innerHTML = graphDescription;
+  // document.getElementById('summary-graph-title').innerHTML = graphTitle;
+  // document.getElementById('summary-graph-description').innerHTML = graphDescription;
   
-  createNetworkSummaryGraph(dataFields, colors);
+  // createNetworkSummaryGraph(dataFields, colors);
 
   const lastVisitedOperatorAddress = sessionStorage.getItem('last_visited_operator_address');
   if (!lastVisitedOperatorAddress) return;
@@ -39,9 +39,9 @@ function changeSummaryGraph (target) {
   document.querySelectorAll('.each-validator-wrapper').forEach(each => {
     each.style.display = 'flex';
   });
-
+  
   document.getElementById('all-main-wrapper').scrollTo({
-    top: document.getElementById(lastVisitedOperatorAddress).offsetTop - headerHeight.replace('px', ''),
+    top: document.getElementById(lastVisitedOperatorAddress).offsetTop + document.getElementById('all-validators-main-wrapper').offsetTop - parseInt(headerHeight),
     behavior: 'instant'
   })
 }
@@ -389,7 +389,7 @@ function handlePlotButtonClick () {
       left: 0,
       behavior: 'instant'
     });
-    history.pushState(null, '', `/?validator=${validator.operator_address}`);
+    history.pushState({ page: 'validator' }, 'validator', `/?validator=${validator.operator_address}`);
     sessionStorage.setItem('last_visited_operator_address', validator.operator_address);
     generateGraph(validator)
   });

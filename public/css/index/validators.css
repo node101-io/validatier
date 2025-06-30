@@ -28,7 +28,11 @@
   --each-validator-stat-helper-font-weight: 500;
   --each-validator-stat-helper-color: rgba(124, 112, 195, 1);
   
-  --each-leaderboard-table-wrapper-gap: 18px;
+  --each-leaderboard-table-wrapper-gap: 0px;
+  --each-leaderboard-table-info-wrapper-gap: 8px;
+
+  --each-leaderboard-table-validator-wrapper-vertical: 12px;
+  --each-leaderboard-table-validator-wrapper-horizontal: 16px;
   
   --each-leaderboard-table-validator-info-wrapper-gap: 16px;
 
@@ -39,7 +43,7 @@
   --each-leaderboard-table-validator-info-image-aspect-ratio: 1/1;
   --each-leaderboard-table-validator-info-image-border-radius: 100%;
   
-  --each-leaderboard-table-validator-info-moniker-width: 250px;
+  --each-leaderboard-table-validator-info-moniker-width: 150px;
   --each-leaderboard-table-validator-info-moniker-font-size: 20px;
   --each-leaderboard-table-validator-info-moniker-color: rgba(73, 48, 111, 1);
   
@@ -60,28 +64,30 @@
   --inactivity-display-background-area-background-color: red;
   --inactivity-display-background-area-opacity: 0.1;
 
-  --validators-leaderboards-main-wrapper-height: 620px;
+  --validators-leaderboards-main-wrapper-height: 650px;
   --validators-leaderboards-main-wrapper-gap: 20px;
   --validators-leaderboards-main-wrapper-margin-top: 10px;
   --validators-leaderboards-main-wrapper-margin-bottom: 10px;
   --validators-leaderboards-main-wrapper-overflow: unset;
   --validators-leaderboards-main-wrapper-webkit-scrollbar-thumb-background: rgba(232, 232, 255, 1);
   
-  --each-leaderboard-main-wrapper-min-width: 500px;
+  --each-leaderboard-main-wrapper-min-width: 200px;
   --each-leaderboard-main-wrapper-width: 50%;
   --each-leaderboard-main-wrapper-height: 100%;
-  --each-leaderboard-main-wrapper-padding: 30px;
+  --each-leaderboard-main-wrapper-padding: 0px;
   --each-leaderboard-main-wrapper-background-color: var(--body-main-wrapper-background);
   --each-leaderboard-main-wrapper-border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
   --each-leaderboard-main-wrapper-border-radius: 20px;
   --each-leaderboard-main-wrapper-display: flex;
   --each-leaderboard-main-wrapper-flex-direction: column;
   
+  --each-leaderboard-header-padding: 16px;
   --each-leaderboard-header-title-color: rgba(124, 112, 195, 1);
   --each-leaderboard-header-title-font-weight: 400;
   --each-leaderboard-header-title-font-size: 20px;
   
   --each-leaderboard-table-type-content-gap: 5px;
+  --each-leaderboard-summary-padding: 0px 16px;
   
   --each-leaderboard-dropdown-height: 20px;
   --each-leaderboard-dropdown-title-height: 20px;
@@ -151,6 +157,7 @@
   gap: 5px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .each-leaderboard-header {
@@ -158,6 +165,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: var(--each-leaderboard-header-padding);
 }
 
 .each-leaderboard-header-title {
@@ -188,8 +196,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 8px;
   margin-bottom: auto;
+  padding: var(--each-leaderboard-summary-padding);
 }
 
 .each-leaderboard-summary-data {
@@ -312,7 +320,7 @@
 .each-leaderboard-table-validator-info-wrapper {
   display: flex;
   align-items: center;
-  gap: var(--each-leaderboard-table-validator-info-wrapper-gap);
+  gap: var(--each-leaderboard-table-info-wrapper-gap);
 }
 
 .each-leaderboard-table-validator-wrapper {
@@ -320,6 +328,11 @@
   align-items: center;
   justify-content: space-between;
   cursor: var(--pointer-hand-dark);
+  padding: var(--each-leaderboard-table-validator-wrapper-vertical) var(--each-leaderboard-table-validator-wrapper-horizontal);
+}
+
+.each-leaderboard-table-validator-wrapper:hover {
+  background-color: var(--network-switch-header-background-color);
 }
 
 .each-leaderboard-table-validator-info-wrapper span {

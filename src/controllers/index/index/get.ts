@@ -4,6 +4,7 @@ import Chain, { ChainInterface } from '../../../models/Chain/Chain.js';
 import { NUMBER_OF_COLUMNS } from '../../Validator/getGraphData/get.js';
 import Cache, { CacheInterface } from '../../../models/Cache/Cache.js';
 import Price from '../../../models/Price/Price.js';
+import ActiveValidators from '../../../models/ActiveValidators/ActiveValidators.js';
 
 const indexGetController = (req: Request, res: Response): void => {
 
@@ -67,7 +68,16 @@ const indexGetController = (req: Request, res: Response): void => {
         bottom_timestamp: bottomTimestamp,
         top_timestamp: topTimestamp
       }, (err, priceGraphData) => {
-        resolve({ err: err, priceGraphData: priceGraphData })
+        resolve({ err: err, priceGraphData: priceGraphData });
+      })
+    }),
+    new Promise((resolve) => {
+      ActiveValidators.getCummulativeActiveListByRange({
+        chain_identifier: activeNetworkIdentifier,
+        bottom_timestamp: bottomTimestamp,
+        top_timestamp: topTimestamp
+      }, (err, cummulativeActiveList) => {
+        resolve({ err: err, cummulativeActiveList: cummulativeActiveList })
       })
     })
   ])
@@ -104,7 +114,7 @@ const indexGetController = (req: Request, res: Response): void => {
         }
       });
 
-      const [getAllChainsResult, rankValidatorsResult, cacheResults, summaryGraphResults, smallGraphResults, priceGraphResults] = results;
+      const [getAllChainsResult, rankValidatorsResult, cacheResults, summaryGraphResults, smallGraphResults, priceGraphResults, cummulativeActiveListResult] = results;
 
       if (
         !getAllChainsResult.value.chains ||
@@ -112,7 +122,8 @@ const indexGetController = (req: Request, res: Response): void => {
         !cacheResults.value.cache ||
         !summaryGraphResults.value.summaryGraphData ||
         !smallGraphResults.value.smallGraphData ||
-        !priceGraphResults.value.priceGraphData
+        !priceGraphResults.value.priceGraphData ||
+        !cummulativeActiveListResult.value.cummulativeActiveList
       ) return res.json({ success: false, err: 'bad_request' })
     
       const chains = getAllChainsResult.value.chains;
@@ -122,6 +133,11 @@ const indexGetController = (req: Request, res: Response): void => {
       let summaryGraphData;
       let smallGraphData;
       const priceGraphData = priceGraphResults.value.priceGraphData;
+      const cummulativeActiveListData = cummulativeActiveListResult.value.cummulativeActiveList
+        .filter((each: { _id: string, count: number }) => {
+          return ((Math.abs(topTimestamp - bottomTimestamp) / 86400000) / 90) <= each.count
+        })
+        .map((each: { _id: string, count: number }) => each._id);
 
       if (specificRange && specificRange != 'custom') {
         const cache: Record<string, any> = {};
@@ -184,7 +200,8 @@ const indexGetController = (req: Request, res: Response): void => {
           colors: ['rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)', 'rgba(255, 149, 0, 1)']
         },
         priceGraphData,
-        isStartClicked
+        isStartClicked,
+        cummulativeActiveListData
       });
     });
 };

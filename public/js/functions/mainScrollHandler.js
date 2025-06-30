@@ -18,12 +18,15 @@ function mainScrollHandler() {
       document.documentElement.style.setProperty('--banner-logo-color', 'rgba(245, 245, 255, 1)');
       document.documentElement.style.setProperty('--selected-range-logo-color', 'rgba(255, 255, 255, 1)');
 
-      selectedRange.style.background = 'var(--selected-range-initial-background-initial)';
+      selectedRange.style.background = 'var(--selected-range-background-initial)';
       selectedRange.style.backdropFilter = 'var(--selected-range-backdrop-filter-initial)';
       selectedRange.style.border = 'var(--selected-range-border-size-initial) solid var(--selected-range-border-color-initial)';
       selectedRange.style.color = 'var(--selected-range-color-initial)';
 
-      searchWrapper.style.display = 'var(--validator-filter-input-wrapper-display-initial)';
+      searchWrapper.style.opacity = '0';
+      setTimeout(() => {
+        searchWrapper.style.visibility = 'hidden';
+      }, 0.25 * 1000);
     } else {
       bannerTitle.style.color = 'var(--banner-title-content-color-main)';
       document.documentElement.style.setProperty('--banner-logo-color', 'rgba(37, 0, 84, 1)');
@@ -33,8 +36,6 @@ function mainScrollHandler() {
       selectedRange.style.backdropFilter = 'var(--selected-range-backdrop-filter)';
       selectedRange.style.border = 'var(--selected-range-border-size) solid var(--selected-range-border-color)';
       selectedRange.style.color = 'var(--selected-range-color)';
-
-      searchWrapper.style.display = 'var(--validator-filter-input-wrapper-display)';
     }
 
     if (scrollTop < 273) {
@@ -45,6 +46,8 @@ function mainScrollHandler() {
       headerMainWrapper.classList.add('header-main-wrapper-main');
       headerMainWrapper.style.background = 'var(--header-main-background)';
       datePicker.style.background = 'var(--date-picker-display)';
+      searchWrapper.style.visibility = 'visible';
+      searchWrapper.style.opacity = '1';
     }
   });
 

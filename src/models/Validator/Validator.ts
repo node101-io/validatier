@@ -10,7 +10,7 @@ import { getCsvExportData } from './functions/getCsvExportData.js';
 import { formatTimestamp } from '../../utils/formatTimestamp.js';
 import { getPubkeysOfActiveValidatorsByHeight } from '../../utils/getPubkeysOfActiveValidatorsByHeight.js';
 import ActiveValidators, { ActiveValidatorsInterface } from '../ActiveValidators/ActiveValidators.js';
-import { getPercentageSold } from './functions/getPercentageSold.js';
+import { getPercentageSold, getPercentageSoldWithoutRounding } from './functions/getPercentageSold.js';
 
 export interface GraphDataInterface {
   _id: {
@@ -518,9 +518,10 @@ validatorSchema.statics.rankValidators = function (
         const initial_sold = ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 0) - (initial_self_stake_prefix_sum || 0);
 
         let percentage_sold = 101;
+
         if ((reward + commission) != 0) {
-          percentage_sold = getPercentageSold({ sold, self_stake, total_withdraw: reward + commission });
-          totalPercentageSold += percentage_sold;
+          percentage_sold = getPercentageSoldWithoutRounding({ sold, self_stake, total_withdraw: reward + commission });
+          totalPercentageSold += getPercentageSold({ sold, self_stake, total_withdraw: reward + commission });;
           percentageSoldInvolvedValidatorCount++;
         }
         

@@ -1,26 +1,26 @@
 :root {
-  --date-picker-height: 56px;
+  --date-picker-height: 46px;
   --date-picker-z-index: 1000;
-  --date-picker-width: 420px;
+  --date-picker-width: 300px;
   
   --date-picker-display-initial: flex;
   --date-picker-display: flex;
 
-  --selected-range-height: 56px;
+  --selected-range-height: 46px;
   --selected-range-font-size: 20px;
   --selected-range-border-radius: 16px;
   --selected-range-gap: 8px;
-  --selected-range-padding: 10px;
+  --selected-range-padding: 5px;
 
   --selected-range-logo-color: rgba(255, 255, 255, 1);
   
-  --selected-range-background: var(--header-main-background);
+  --selected-range-background: rgba(245, 245, 255, 1);
   --selected-range-backdrop-filter: none;
   --selected-range-border-size: 1px;
   --selected-range-border-color: var(--general-main-wrapper-border-color);
   --selected-range-color: rgba(124, 112, 195, 1);
 
-  --selected-range-initial-background-initial: rgba(255, 255, 255, 0.17);
+  --selected-range-background-initial: rgba(255, 255, 255, 0.17);
   --selected-range-backdrop-filter-initial: blur(19.3px);
   --selected-range-border-size-initial: var(--general-main-wrapper-border-size);
   --selected-range-border-color-initial: rgba(239, 239, 255, 1);
@@ -197,13 +197,12 @@
 }
 
 .date-picker-open {
-  width: calc(1.2 * var(--date-picker-width));
+  width: calc(1.7 * var(--date-picker-width));
 }
 
 .date-picker-open-loading-wrapper {
-  width: calc(100% - 20px);
-  height: calc(100% - 20px + var(--selected-range-height));
-  margin: 10px;
+  width: 100%;
+  height: calc(100% + var(--selected-range-height));
   border-radius: calc(var(--picker-main-wrapper-border-radius) - 10px);
   background-color: rgba(234, 234, 255, 0.8);
   display: flex;
@@ -213,6 +212,7 @@
   left: 0;
   gap: 12px;
   top: calc(-1 * var(--selected-range-height));
+  z-index: 500;
 }
 
 .date-picker-open-loading-wrapper span {
@@ -256,7 +256,6 @@
 }
 
 .selected-range-open {
-  background-color: var(--color-dropdown-background);
   border-bottom: 0px solid var(--general-main-wrapper-border-color);
   border-radius: var(--selected-range-border-radius) var(--selected-range-border-radius) 0 0;
 }
@@ -496,6 +495,7 @@
   font-weight: var(--each-network-switch-main-numerical-value-font-weight);
   font-size: var(--each-network-switch-main-numerical-value-font-size);
   display: var(--network-switch-text-display);
+  position: relative;
 }
 
 .each-network-switch-main-numerical-value span, .each-network-switch-main-numerical-value img {

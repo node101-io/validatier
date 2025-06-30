@@ -20,6 +20,7 @@ import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBloc
 import { Job_SyncValidatorInfo } from './cron/jobs/Job_SyncValidatorInfo.js';
 import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsImageUri.js';
 import useragent from 'express-useragent';
+import ActiveValidators from './models/ActiveValidators/ActiveValidators.js';
 
 const app: Express = express();
 const PORT: number = 3000;

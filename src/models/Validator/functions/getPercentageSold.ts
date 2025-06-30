@@ -13,3 +13,14 @@ export const getPercentageSold = (
     100
   )
 }
+
+export const getPercentageSoldWithoutRounding = (
+  body: {
+    sold: number,
+    self_stake: number,
+    total_withdraw: number
+  }
+) => {
+  const { sold, self_stake, total_withdraw } = body;
+  return ((sold - self_stake) / total_withdraw) * 100;
+}

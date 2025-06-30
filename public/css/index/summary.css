@@ -19,6 +19,7 @@
   --network-summary-main-wrapper-title-network-summary-network-graph-metrics-wrapper-title-font-size: 20px;
   --network-summary-main-wrapper-title-network-summary-network-graph-metrics-wrapper-title-font-weight: 500;
   --network-summary-network-graph-metrics-wrapper-title-width: fit-content;
+  --network-summary-network-graph-metrics-wrapper-title-margin-top: 8px;
 
   --network-summary-main-wrapper-gap: 20px;
   --network-summary-main-wrapper-margin-bottom: 10px;
@@ -143,7 +144,7 @@
 
 .network-summary-network-graph-metrics-wrapper-title {
   width: var(--network-summary-network-graph-metrics-wrapper-title-width);
-  margin-top: -8px;
+  margin-top: var(--network-summary-network-graph-metrics-wrapper-title-margin-top);
 }
 
 .network-summary-main-wrapper {

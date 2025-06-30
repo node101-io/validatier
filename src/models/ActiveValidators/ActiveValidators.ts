@@ -43,6 +43,17 @@ interface ActiveValidatorsModel extends Model<ActiveValidatorsInterface> {
         year: number;
       }[] | null,
     ) => any
+  ) => any;
+  getCummulativeActiveListByRange: (
+    body: {
+      chain_identifier: string;
+      bottom_timestamp: number;
+      top_timestamp: number;
+    },
+    callback: (
+      err: string | null,
+      cummulativeActiveList: string[] | null
+    ) => any
   ) => any
 }
 
@@ -168,6 +179,42 @@ activeValidatorsSchema.statics.getActiveValidatorHistoryOfValidator = function (
         month: 1,
       },
     },
+  ])
+    .hint({ chain_identifier: 1, year: 1, month: 1 })
+    .then(activeValidatorHistory => callback(null, activeValidatorHistory))
+    .catch(err => callback(err, null))
+}
+
+
+activeValidatorsSchema.statics.getCummulativeActiveListByRange = function (
+  body: Parameters<ActiveValidatorsModel['getCummulativeActiveListByRange']>[0],
+  callback: Parameters<ActiveValidatorsModel['getCummulativeActiveListByRange']>[1]
+) {
+  const { chain_identifier, bottom_timestamp, top_timestamp } = body;
+  ActiveValidators.aggregate([
+    {
+      $match: {
+        chain_identifier: chain_identifier,
+        year: {
+          $gte: (new Date(bottom_timestamp).getFullYear()),
+          $lte: (new Date(top_timestamp).getFullYear()),
+        },
+      },
+    },
+    { $unwind: "$active_validators" },
+    { $unwind: "$active_validators.pubkeys" },
+    {
+      $project: {
+        _id: 0,
+        pubkey: "$active_validators.pubkeys"
+      }
+    },
+    {
+      $group: {
+        _id: '$pubkey',
+        count: { $sum: 1 }
+      }
+    }
   ])
     .hint({ chain_identifier: 1, year: 1, month: 1 })
     .then(activeValidatorHistory => callback(null, activeValidatorHistory))
