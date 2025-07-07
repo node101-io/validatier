@@ -1,7 +1,7 @@
 import { validValidatorAddress } from "../listeners/functions/constants.js";
 import { getOnlyNativeTokenValueFromAmountString } from "../listeners/functions/getOnlyNativeTokenValueFromAmountString.js";
 import { convertOperatorAddressToBech32 } from "./convertOperatorAddressToBech32.js";
-import { DecodedMessage, Event } from "./decodeTxs.js";
+import { DecodedMessage, Event } from "./decodeTxsV2.js";
 
 const EVENTS_TO_SEARCH = {
   slash: {
@@ -11,10 +11,18 @@ const EVENTS_TO_SEARCH = {
   transfer: {
     address_keys: ['recipient', 'sender'],
     amount_key: 'amount',
-  }
+  },
+  complete_redelegation: {
+    address_keys: ['delegator', 'source_validator', 'destination_validator'],
+    amount_key: 'amount',
+  },
+  complete_unbonding: {
+    address_keys: ['delegator', 'validator'],
+    amount_key: 'amount',
+  },
 }
 
-export const convertEventsToMessageFormat = (finalizeBlockEvents: Event[], bech32_prefix: string, time: string, denom: string) => {
+export const convertEventsToMessageFormat = (finalizeBlockEvents: Event[], bech32_prefix: string, time: Date | null, denom: string) => {
   const messages: DecodedMessage[] = [];
 
   finalizeBlockEvents.forEach(eachEvent => {
@@ -25,11 +33,14 @@ export const convertEventsToMessageFormat = (finalizeBlockEvents: Event[], bech3
 
     const messageBody = {
       typeUrl: type,
-      time: new Date(time),
+      time: time ? new Date(time) : null,
       value: {
         validatorAddress: '',
         validatorAddressSender: '',
         validatorAddressRecipient: '',
+        delegatorAddress: '',
+        validatorSrcArress: '',
+        validatorDstArress: '',
         amount: ''
       }
     }
@@ -51,6 +62,12 @@ export const convertEventsToMessageFormat = (finalizeBlockEvents: Event[], bech3
           messageBody.value.validatorAddressRecipient = operatorAddressValoperFormat;
         else if (eachAttribute.key == 'sender')
           messageBody.value.validatorAddressSender = operatorAddressValoperFormat;
+        else if (eachAttribute.key == 'delegator')
+          messageBody.value.delegatorAddress = operatorAddressValoperFormat;
+        else if (eachAttribute.key == 'source_validator')
+          messageBody.value.validatorSrcArress = operatorAddressValoperFormat;
+        else if (eachAttribute.key == 'destination_validator')
+          messageBody.value.validatorDstArress = operatorAddressValoperFormat;
         else
           messageBody.value.validatorAddress = operatorAddressValoperFormat;
         gotValidatorAddress = true;
