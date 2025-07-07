@@ -45,6 +45,11 @@ export const listenForEvents = (
   let timestamp: Date;
 
   for (let height = bottom_block_height; height < top_block_height; height++) {
+
+    let fetch_time = false;
+    if (height == top_block_height - 1)
+      fetch_time = true;
+
     promises.push(
       new Promise ((resolve, reject) => {
         getTxsByHeight(
@@ -53,6 +58,7 @@ export const listenForEvents = (
           chain.denom,
           chain.bech32_prefix,
           0,
+          fetch_time,
           (err, result) => {
             const { time, decodedTxs } = result;
             
