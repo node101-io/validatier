@@ -22,5 +22,6 @@ export const getPercentageSoldWithoutRounding = (
   }
 ) => {
   const { sold, self_stake, total_withdraw } = body;
+  if (total_withdraw <= 0) return 100;
   return ((sold - self_stake) / total_withdraw) * 100;
 }

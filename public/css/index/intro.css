@@ -1,4 +1,4 @@
-:root {
+/* :root {
   --ellipse-minor-r: 265;
   --ellipse-major-r: 395;
 
@@ -6,9 +6,9 @@
   --star-x-px: calc(-1px * (var(--ellipse-major-r)));
 
   --orbit-direction: -1;
-}
+} */
 
-@property --orbit-direction {
+/* @property --orbit-direction {
   syntax: '<number>';
   inherits: false;
   initial-value: -1;
@@ -24,7 +24,7 @@
   syntax: '<length>';
   inherits: false;
   initial-value: -395px;
-}
+} */
 
 .animate-star, .animate-star-3d {
   width: 20px;
@@ -36,6 +36,56 @@
 }
 
 .animate-star {
+  offset-distance: 0%;
+  left: 0;
+  top: 0;
+}
+
+.orbit-1 {
+  width: 30px;
+  offset-path: path('M1114.55 531.875C1332.45 531.875 1509.1 412.972 1509.1 266.298C1509.1 119.624 1332.45 0.720703 1114.55 0.720703C896.638 0.720703 719.989 119.624 719.989 266.298C719.989 412.972 896.638 531.875 1114.55 531.875Z');
+  animation: move-cw 110s linear infinite;
+}
+.orbit-2 {
+  offset-path: path('M984.874 532.621C1202.78 532.621 1379.43 413.718 1379.43 267.044C1379.43 120.37 1202.78 1.4668 984.874 1.4668C766.966 1.4668 590.318 120.37 590.318 267.044C590.318 413.718 766.966 532.621 984.874 532.621Z');
+  animation: move-ccw 60s linear infinite;
+}
+.orbit-3 {
+  offset-path: path('M807.545 532.621C1025.45 532.621 1202.1 413.718 1202.1 267.044C1202.1 120.37 1025.45 1.4668 807.545 1.4668C589.638 1.4668 412.989 120.37 412.989 267.044C412.989 413.718 589.638 532.621 807.545 532.621Z');
+  animation: move-cw 120s linear infinite;
+}
+.orbit-4 {
+  offset-path: path('M630.216 532.621C848.124 532.621 1024.77 413.718 1024.77 267.044C1024.77 120.37 848.124 1.4668 630.216 1.4668C412.309 1.4668 235.66 120.37 235.66 267.044C235.66 413.718 412.309 532.621 630.216 532.621Z');
+  animation: move-ccw 90s linear infinite;
+}
+.orbit-5 {
+  offset-path: path('M452.888 532.621C670.795 532.621 847.444 413.718 847.444 267.044C847.444 120.37 670.795 1.4668 452.888 1.4668C234.98 1.4668 58.3313 120.37 58.3313 267.044C58.3313 413.718 234.98 532.621 452.888 532.621Z');
+  animation: move-cw 80s linear infinite;
+}
+.orbit-6 {
+  offset-path: path('M324.324 532.621C542.232 532.621 718.881 413.718 718.881 267.044C718.881 120.37 542.232 1.4668 324.324 1.4668C106.417 1.4668 -70.2319 120.37 -70.2319 267.044C-70.2319 413.718 106.417 532.621 324.324 532.621Z');
+  animation: move-ccw 150s linear infinite;
+}
+
+@keyframes move-cw {
+  0% {
+    offset-distance: 25%;
+  }
+  100% {
+    offset-distance: 125%;
+  }
+}
+
+@keyframes move-ccw {
+  0% {
+    offset-distance: 150%;
+  }
+  100% {
+    offset-distance: 50%;
+  }
+}
+
+/* .animate-star {
   transform: translate(
     var(--star-x-px),
     calc(
@@ -49,34 +99,34 @@
       )
     )
   );
-}
+} */
 
-.orbit-1 {
-  animation: orbit 30s linear infinite, change-orbit-direction 30s steps(1, end) infinite;
+/* .orbit-1 {
+  animation: orbit 120s ease-in-out infinite, change-orbit-direction 120s steps(1, end) infinite;
   left: calc(50% - 10px - 1px * (0 / 5 * (2 * var(--ellipse-major-r))) + var(--ellipse-major-r) * 1px);
 }
 .orbit-2 {
-  animation: orbit 15s linear infinite, change-orbit-direction-reverse 15s steps(1, end) infinite;
+  animation: orbit 120s ease-in-out infinite, change-orbit-direction-reverse 120s steps(1, end) infinite;
   left: calc(50% + 10px - 1px * (1 / 5 * (2 * var(--ellipse-major-r))) + var(--ellipse-major-r) * 1px);
 }
 .orbit-3 {
-  animation: orbit 20s linear infinite, change-orbit-direction 20s steps(1, end) infinite;
+  animation: orbit 120s ease-in-out infinite, change-orbit-direction 120s steps(1, end) infinite;
   left: calc(50% - 5px - 1px * (2 / 5 * (2 * var(--ellipse-major-r))) + var(--ellipse-major-r) * 1px);
 }
 .orbit-4 {
-  animation: orbit 60s linear infinite, change-orbit-direction-reverse 60s steps(1, end) infinite;
+  animation: orbit 180s ease-in-out infinite, change-orbit-direction-reverse 180s steps(1, end) infinite;
   left: calc(50% - 20px - 1px * (3 / 5 * (2 * var(--ellipse-major-r))) + var(--ellipse-major-r) * 1px);
 }
 .orbit-5 {
-  animation: orbit 40s linear infinite, change-orbit-direction-reverse 40s steps(1, end) infinite;
+  animation: orbit 250s ease-in-out infinite, change-orbit-direction-reverse 250s steps(1, end) infinite;
   left: calc(50% - 40px - 1px * (4 / 5 * (2 * var(--ellipse-major-r))) + var(--ellipse-major-r) * 1px);
 }
 .orbit-6 {
-  animation: orbit 50s linear infinite, change-orbit-direction 50s steps(1, end) infinite;
+  animation: orbit 300s ease-in-out infinite, change-orbit-direction 300s steps(1, end) infinite;
   left: calc(50% - 10px - 1px * (5 / 5 * (2 * var(--ellipse-major-r))) + var(--ellipse-major-r) * 1px);
-}
+} */
 
-@keyframes orbit {
+/* @keyframes orbit {
   0% {
     --star-x: calc(-1 * var(--ellipse-major-r));
     --star-x-px: calc(-1px * (var(--ellipse-major-r)));
@@ -113,11 +163,11 @@
   100% {
     --orbit-direction: 1;
   }
-}
+} */
 
 
 .animate-star-3d {
-  animation: orbit-3d 20s linear infinite;
+  animation: orbit-3d 120s linear infinite;
   transform: translateX(0);
   scale: 1;
   left: 0;

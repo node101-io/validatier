@@ -24,7 +24,7 @@
   --header-main-wrapper-height: 150px;
   --header-main-wrapper-vertical-padding: 30px;
   --header-main-wrapper-horizontal-padding: 40px;
-  --header-main-wrapper-gap: 16px;
+  --header-main-wrapper-gap: 20px;
   --header-main-wrapper-z-index: 500;
   --header-main-wrapper-padding-bottom: 20px;
   --header-main-wrapper-border-bottom-size: 10px;
@@ -117,9 +117,15 @@
   z-index: 10;
 }
 
+.header-inputs-main-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .inner-main-wrapper { 
   max-width: var(--inner-main-wrapper-width);
-  height: calc(100% - var(--inner-main-wrapper-margin-top) - 106px);
+  height: fit-content;
   padding: var(--inner-main-wrapper-vertical-padding) var(--inner-main-wrapper-horizontal-padding);
   margin-top: var(--inner-main-wrapper-margin-top);
   margin-bottom: var(--inner-main-wrapper-header-margin-bottom);

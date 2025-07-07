@@ -81,7 +81,8 @@
   --ranking-number-content-background-color: rgba(37, 0, 85, 1);
   --ranking-number-content-border-color: rgba(245, 245, 255, 1);
   --ranking-number-content-border-size: 1px;
-  --ranking-number-content-span-margin-bottom: 4px;
+  --ranking-number-content-span-margin-bottom: 3px;
+  --ranking-number-content-span-margin-left: 0px;
 
   --leaderboard-ranking-number-content-width: 16px;
 
@@ -168,6 +169,7 @@
 
   --validator-filter-input-content-wrapper-width: 100%;
   --validator-filter-input-content-wrapper-input-width: 100%;
+  --validator-filter-input-content-wrapper-display: flex;
   
   --validator-dropdown-icon-opacity: 0.5;
   --validator-dropdown-icon-transition-duration: 0.25s;
@@ -228,8 +230,7 @@
 
 .each-table-popup-wrapper {
   margin-right: var(--each-table-popup-wrapper-margin-right);
-  position: absolute;
-  margin-left: -16px;
+  position: relative;
   z-index: 100;
   width: 16px;
   display: flex;
@@ -331,10 +332,11 @@
   gap: var(--each-validator-info-wrapper-gap);
   min-width: var(--each-validator-info-wrapper-min-width);
   max-width: var(--each-validator-info-wrapper-max-width);
-  height: calc(var(--each-validator-info-wrapper-height) - (var(--each-validator-info-wrapper-vertical-padding) * 2));
+  height: var(--each-validator-info-wrapper-height);
   left: var(--each-validator-info-wrapper-left);
-  padding: var(--each-validator-info-wrapper-vertical-padding) 0;
-  background-color: var(--color-powder-blue);
+  padding: 10px;
+  background-color: var(--body-main-wrapper-background);
+  z-index: 100;
   display: flex; 
   align-items: center; 
   overflow: visible;
@@ -382,6 +384,7 @@
 
 .ranking-number-content span {
   margin-bottom: var(--ranking-number-content-span-margin-bottom);
+  margin-left: var(--ranking-number-content-span-margin-left);
 }
 
 .validator-textual-info-wrapper {
@@ -624,7 +627,6 @@
   display: var(--validator-filter-input-wrapper-display);
   overflow: hidden;
   align-items: center;
-  margin-left: auto;
   visibility: hidden;
   opacity: 0;
   transition: all 0.25s ease 0s;
@@ -632,9 +634,10 @@
 
 .validator-filter-input-content-wrapper {
   width: var(--validator-filter-input-content-wrapper-width);
-  display: flex;
+  display: var(--validator-filter-input-content-wrapper-display);
   align-items: center;
   gap: var(--validator-filter-input-wrapper-gap);
+  overflow: hidden;
 }
 
 .validator-filter-input-content-wrapper input {
@@ -732,11 +735,25 @@
 .validators-info-column {
   width: var(--validators-info-column-width);
   overflow: hidden;
+  padding-top: 50px;
+  margin-top: -50px;
 }
 
 .validators-data-column {
   width: calc(100% - var(--validators-info-column-width));
   overflow-x: scroll;
+  padding-top: 50px;
+  margin-top: -50px;
+  padding-left: 200px;
+  margin-left: -200px;
+}
+
+@media only screen and (max-width: 900px) {
+  :root {
+    --validator-filter-input-content-wrapper-input-width: 0%;
+    --validator-filter-input-content-wrapper-width: fit-content;
+    --validator-filter-input-wrapper-width: fit-content;
+  }
 }
 
 @media only screen and (max-width: 600px) {

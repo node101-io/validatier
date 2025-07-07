@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Validator from '../../../models/Validator/Validator.js';
+import Validator, { ValidatorInterface } from '../../../models/Validator/Validator.js';
 import Chain, { ChainInterface } from '../../../models/Chain/Chain.js';
 import { NUMBER_OF_COLUMNS } from '../../Validator/getGraphData/get.js';
 import Cache, { CacheInterface } from '../../../models/Cache/Cache.js';
@@ -155,6 +155,8 @@ const indexGetController = (req: Request, res: Response): void => {
         summaryGraphData = summaryGraphResults.value.summaryGraphData;
         smallGraphData = smallGraphResults.value.smallGraphData;
       }
+      
+      const activeValidators = validators.filter((eachValidator: ValidatorInterface) => cummulativeActiveListData.includes(eachValidator.pubkey))
 
       const selectedChain = chains.find((element: ChainInterface) => element.name == activeNetworkIdentifier);  
 
@@ -176,7 +178,7 @@ const indexGetController = (req: Request, res: Response): void => {
           },
         },
         summaryData,
-        validators,
+        validators: activeValidators,
         summaryGraphData,
         smallGraphData,
         selectedDateBottom: req.cookies.selectedDateBottom || (new Date(selectedChain.first_available_block_time)).toISOString().split('T')[0],
@@ -201,7 +203,6 @@ const indexGetController = (req: Request, res: Response): void => {
         },
         priceGraphData,
         isStartClicked,
-        cummulativeActiveListData
       });
     });
 };

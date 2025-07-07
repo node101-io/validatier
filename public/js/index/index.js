@@ -14,6 +14,6 @@ window.onload = () => {
   handleExportEvents();
   handlePlotButtonClick();
   handleSummaryGraphActions();
-  handleNewsLetter();
+  // handleNewsLetter();
   mainScrollHandler();
 }

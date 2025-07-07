@@ -29,23 +29,161 @@ function getValueWithDecimals(value, currency, exhange_rate, decimals) {
   };
 }
 
-function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
+function generateValidatorRankingContent(response, sort_by, sortOrderMapping) {
   if (response.err || !response.success) return;
-  const data = response.data.validators;
 
-  document.getElementById('validators-main-wrapper').innerHTML = '';
-  renderTableHeader(sort_by, sortOrderMapping[sort_by]);
+  const data = response.data.validators;
+  const mainWrapper = document.getElementById('validators-main-wrapper');
+  mainWrapper.innerHTML = '';
+
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('validator-table-content')
+
+  // renderTableHeader(sort_by, sortOrderMapping[sort_by]);
+
+  const infoColumn = document.createElement('div');
+  infoColumn.classList.add('validators-info-column');
+
+  const infoTableHeader = document.createElement('div');
+  infoTableHeader.classList.add('validator-table-header');
+  
+  const infoTableHeaderWrapper = document.createElement('div');
+  infoTableHeaderWrapper.classList.add('each-table-header-wrapper', 'each-table-header-validator-info-header');
+  
+  const infoHeaderTitle = document.createElement('div');
+  infoHeaderTitle.classList.add('each-table-header-title');
+  infoHeaderTitle.innerHTML = 'Validators';
+
+  infoTableHeaderWrapper.appendChild(infoHeaderTitle);
+  infoTableHeader.appendChild(infoTableHeaderWrapper);
+  infoColumn.appendChild(infoTableHeader)
+
+  const dataColumn = document.createElement('div');
+  dataColumn.classList.add('validators-data-column');
+
+  const headers_array = [
+    { name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Withdraw - Self Stake) / Withdraw' },
+    { name: 'Avg Delegation', id: 'average_total_stake' },
+    { name: 'Total Rewards', id: 'total_withdraw' },
+    { name: 'Total Sold Amount', id: 'sold', popup_text: 'Total withdraw - Self stake' },
+    { name: 'Self Stake', id: 'self_stake', popup_text: 'Validator\'s own stake on itself' },
+  ];
+
+  const exchangeRate = document.getElementById('network-switch-header').getAttribute('current_chain_usd_exhange_rate');
+  const currentChainSymbol = document.getElementById('network-switch-header').getAttribute('current_chain_symbol');
+  const currentChainDecimals = document.getElementById('network-switch-header').getAttribute('current_chain_decimals');
+
+  const createPercentageSoldTd = (value) => {
+    const td = document.createElement('div');
+    const { color, check } = getScoreColor(value)
+    td.classList.add('validator-each-numeric-info', 'validator-percentage-sold');
+    td.style.color = color;
+
+    const span = document.createElement('span');
+    span.innerHTML = value <= 100 ? `%${shortNumberFormat(Math.max(value, 0))}` : `%100.0`;
+    td.appendChild(span);
+
+    if (check) {
+      const checkImgContent = document.createElement('img');
+      checkImgContent.classList.add('center');
+      checkImgContent.src = '/res/images/check_green.svg';
+      td.appendChild(checkImgContent);
+    }
+    return td;
+  };
+
+  const createCurrencyTd = (value) => {
+    const td = document.createElement('div');
+    td.classList.add('validator-each-numeric-info');
+    const { nativeValue, usdValue } = getValueWithDecimals(value, currentChainSymbol, exchangeRate, currentChainDecimals);
+
+    const nativeContentDiv = document.createElement('div');
+    nativeContentDiv.classList.add('validator-each-numeric-info-native');
+    nativeContentDiv.innerHTML = nativeValue;
+
+    const usdContentDiv = document.createElement('div');
+    usdContentDiv.classList.add('validator-each-numeric-info-usd');
+    usdContentDiv.innerHTML = usdValue;
+
+    td.appendChild(nativeContentDiv);
+    td.appendChild(usdContentDiv);
+    return td;
+  };
+
+  const tableHeader = document.createElement('div');
+  tableHeader.classList.add('validator-table-header');
+
+  for (const header of headers_array) {
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('each-table-header-wrapper', 'each-table-header-hover');
+    wrapper.id = header.id;
+
+    const titleContainer = document.createElement('div');
+    titleContainer.classList.add('each-table-header-title');
+
+    if (header.popup_text) {
+      const popupWrapper = document.createElement('div');
+      popupWrapper.classList.add('each-table-popup-wrapper');
+
+      const popupContent = document.createElement('div');
+      popupContent.classList.add('each-table-popup-info-content', 'center');
+      const popupText = document.createElement('span');
+      popupText.innerHTML = header.popup_text;
+      popupContent.appendChild(popupText);
+
+      const infoHover = document.createElement('div');
+      infoHover.classList.add('each-tooltip-info-hover');
+      infoHover.style.marginBottom = '-1px';
+
+      const infoImg = document.createElement('img');
+      infoImg.src = '/res/images/info.svg';
+      infoHover.appendChild(infoImg);
+
+      popupWrapper.appendChild(popupContent);
+      popupWrapper.appendChild(infoHover);
+      titleContainer.appendChild(popupWrapper);
+    }
+
+    const headerTitle = document.createElement('div');
+    headerTitle.classList.add('each-table-header-title');
+    headerTitle.innerHTML = header.name;
+    titleContainer.appendChild(headerTitle);
+
+    const sortIndicators = document.createElement('div');
+    sortIndicators.classList.add('each-table-header-sort-indicators');
+
+    const triangleUp = document.createElement('div');
+    triangleUp.classList.add('triangle-up');
+    const triangleDown = document.createElement('div');
+    triangleDown.classList.add('triangle-down');
+
+    header.id == sort_by 
+      ? sortOrderMapping[sort_by] == 'desc' 
+        ? triangleDown.style.borderTopColor = 'rgb(22, 22, 22)' 
+        : triangleUp.style.borderBottomColor = 'rgb(22, 22, 22)'
+      : '';
+
+    sortIndicators.appendChild(triangleUp);
+    sortIndicators.appendChild(triangleDown);
+
+    wrapper.appendChild(titleContainer);
+    wrapper.appendChild(sortIndicators);
+    tableHeader.appendChild(wrapper);
+  }
+
+  dataColumn.appendChild(tableHeader);
 
   for (let i = 0; i < data.length; i++) {
-
     const validator = data[i];
 
-    const tr = document.createElement('div');
-    tr.classList.add('each-validator-wrapper');
-    tr.id = validator.operator_address;
+    // === Info Column Cell ===
+    const infoWrapper = document.createElement('div');
+    infoWrapper.classList.add('each-validator-wrapper');
+    infoWrapper.id = `${validator.operator_address}-info`;
+
     const tdInfo = document.createElement('div');
     tdInfo.classList.add('each-validator-info-wrapper');
-  
+
     const validatorImageDiv = document.createElement('div');
     validatorImageDiv.classList.add('validator-image');
 
@@ -54,112 +192,83 @@ function generateValidatorRankingContent (response, sort_by, sortOrderMapping) {
     const rankingDivSpan = document.createElement('span');
     rankingDivSpan.textContent = i + 1;
     rankingDiv.appendChild(rankingDivSpan);
-
     validatorImageDiv.appendChild(rankingDiv);
-  
+
     const img = document.createElement('img');
-    img.src = validator.temporary_image_uri
-      ? validator.temporary_image_uri
-      : '/res/images/default_validator_photo.svg';
-  
+    img.classList.add('validator-image-content');
+    img.src = validator.temporary_image_uri || '/res/images/default_validator_photo.svg';
+    if (!validator.temporary_image_uri)
+      img.style.borderRadius = '0';
     validatorImageDiv.appendChild(img);
-  
+
     const textualInfoWrapper = document.createElement('div');
     textualInfoWrapper.classList.add('validator-textual-info-wrapper');
-  
+
     const monikerDiv = document.createElement('div');
     monikerDiv.classList.add('validator-moniker');
 
-    const validatorMonikerTextContentWrapper = document.createElement('div');
-    validatorMonikerTextContentWrapper.classList.add('validator-moniker-text-content');
-    const validatorMonikerInnerTextContent = document.createElement('span');
-    validatorMonikerInnerTextContent.classList.add('validator-moniker-text');
-    validatorMonikerInnerTextContent.innerHTML = validator.moniker;
+    const monikerTextContent = document.createElement('div');
+    monikerTextContent.classList.add('validator-moniker-text-content');
 
-    validatorMonikerTextContentWrapper.appendChild(validatorMonikerInnerTextContent);
-    monikerDiv.appendChild(validatorMonikerTextContentWrapper);
+    const monikerTextSpan = document.createElement('span');
+    monikerTextSpan.classList.add('validator-moniker-text');
+    monikerTextSpan.innerHTML = validator.moniker;
+    monikerTextContent.appendChild(monikerTextSpan);
+    monikerDiv.appendChild(monikerTextContent);
 
-    if (validator.inactivityIntervals && validator.inactivityIntervals.length > 0) {
+    if (validator.inactivityIntervals?.length > 0) {
       const inactivityDiv = document.createElement('div');
       inactivityDiv.classList.add('validator-inactivity-display', 'center');
       inactivityDiv.setAttribute('value', `${validator.inactivityIntervals}`);
-  
       const warningImg = document.createElement('img');
       warningImg.src = '/res/images/warning.svg';
-  
       inactivityDiv.appendChild(warningImg);
       monikerDiv.appendChild(inactivityDiv);
     }
 
     textualInfoWrapper.appendChild(monikerDiv);
-  
     tdInfo.appendChild(validatorImageDiv);
     tdInfo.appendChild(textualInfoWrapper);
-  
-    const createPercentageSoldTd = (value) => {
-      const td = document.createElement('div');
-      const { color, check } = getScoreColor(value)
-      td.classList.add('validator-each-numeric-info');
-      td.classList.add('validator-percentage-sold');
-      td.style.color = color;
+    infoWrapper.appendChild(tdInfo);
 
-      const span = document.createElement('span');
-      if (value <= 100)
-        span.innerHTML = `%${shortNumberFormat(value)}`;
-      else
-        span.innerHTML = `% N/A`;
-      td.appendChild(span);
-      if (check) {
-        const checkImgContent = document.createElement('img');
-        checkImgContent.classList.add('center');
-        checkImgContent.src = '/res/images/check_green.svg';
-        td.appendChild(checkImgContent);
+    // Metadata
+    infoWrapper.setAttribute('validator', JSON.stringify(validator));
+    infoWrapper.setAttribute('pubkey', validator.pubkey);
+    infoWrapper.setAttribute('chain_identifier', validator.chain_identifier);
+    infoWrapper.classList.add('operator-address');
+
+    infoColumn.appendChild(infoWrapper);
+
+    // === Data Column Cell ===
+    const dataWrapper = document.createElement('div');
+    dataWrapper.classList.add('each-validator-wrapper');
+    dataWrapper.id = validator.operator_address;
+
+    dataWrapper.setAttribute('validator', JSON.stringify(validator));
+    dataWrapper.setAttribute('pubkey', validator.pubkey);
+    dataWrapper.setAttribute('chain_identifier', validator.chain_identifier);
+    dataWrapper.classList.add('operator-address');
+
+    for (const header of headers_array) {
+      let td;
+      if (header.id === 'percentage_sold') {
+        td = createPercentageSoldTd(validator.percentage_sold);
+      } else {
+        const value = header.id === 'sold' ? Math.max(0, validator[header.id]) : validator[header.id];
+        td = createCurrencyTd(value);
       }
-      return td;
-    };
+      dataWrapper.appendChild(td);
+    }
 
-    const exchangeRate = document.getElementById('network-switch-header').getAttribute('current_chain_usd_exhange_rate');
-    const currentChainSymbol = document.getElementById('network-switch-header').getAttribute('current_chain_symbol');
-    const currentChainDecimals = document.getElementById('network-switch-header').getAttribute('current_chain_decimals');
-
-    const createCurrencyTd = (value) => {
-      const td = document.createElement('div');
-      td.classList.add('validator-each-numeric-info');
-      const { nativeValue, usdValue } = getValueWithDecimals(value, currentChainSymbol, exchangeRate, currentChainDecimals);
-      
-      const nativeContentDiv = document.createElement('div');
-      nativeContentDiv.classList.add('validator-each-numeric-info-native')
-      const usdContentDiv = document.createElement('div');
-      usdContentDiv.classList.add('validator-each-numeric-info-usd')
-
-      nativeContentDiv.innerHTML = nativeValue;
-      usdContentDiv.innerHTML = usdValue;
-
-      td.appendChild(nativeContentDiv);
-      td.appendChild(usdContentDiv);
-      return td;
-    };
-
-    const percentageSoldTd = createPercentageSoldTd(validator.percentage_sold);
-    const delegationTd = createCurrencyTd(validator.average_total_stake);
-    const totalRewardsTd = createCurrencyTd(validator.total_withdraw);
-    const totalSoldAmountTd = createCurrencyTd(validator.sold);
-    const selfStakeTd = createCurrencyTd(validator.self_stake);
-
-    tr.appendChild(tdInfo);
-    tr.appendChild(percentageSoldTd);
-    tr.appendChild(delegationTd);
-    tr.appendChild(totalRewardsTd);
-    tr.appendChild(totalSoldAmountTd);
-    tr.appendChild(selfStakeTd);
-
-    tr.setAttribute('validator', JSON.stringify(validator));
-    tr.setAttribute('pubkey', validator.pubkey);
-    tr.setAttribute('chain_identifier', validator.chain_identifier);
-    tr.classList.add('operator-address');
-    document.getElementById('validators-main-wrapper').appendChild(tr);
+    dataColumn.appendChild(dataWrapper);
   }
+
+  wrapper.appendChild(infoColumn);
+  wrapper.appendChild(dataColumn);
+
+  mainWrapper.appendChild(wrapper)
 }
+
 
 
 function renderValidators() {

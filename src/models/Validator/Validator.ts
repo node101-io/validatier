@@ -517,10 +517,9 @@ validatorSchema.statics.rankValidators = function (
         const sold = balance_change * -1;
         const initial_sold = ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 0) - (initial_self_stake_prefix_sum || 0);
 
-        let percentage_sold = 101;
+        const percentage_sold = getPercentageSoldWithoutRounding({ sold, self_stake, total_withdraw: reward + commission });
 
         if ((reward + commission) != 0) {
-          percentage_sold = getPercentageSoldWithoutRounding({ sold, self_stake, total_withdraw: reward + commission });
           totalPercentageSold += getPercentageSold({ sold, self_stake, total_withdraw: reward + commission });;
           percentageSoldInvolvedValidatorCount++;
         }

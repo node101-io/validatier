@@ -36,14 +36,15 @@ function changeSummaryGraph (target) {
 
   const validatorFilterInput = document.getElementById('validator-filter-input');
   validatorFilterInput.value = '';
-  document.querySelectorAll('.each-validator-wrapper').forEach(each => {
-    each.style.display = 'flex';
-  });
   
   document.getElementById('all-main-wrapper').scrollTo({
     top: document.getElementById(lastVisitedOperatorAddress).offsetTop + document.getElementById('all-validators-main-wrapper').offsetTop - parseInt(headerHeight),
     behavior: 'instant'
   })
+
+  document.querySelectorAll('.each-validator-wrapper').forEach(each => {
+    each.style.display = 'flex';
+  });
 }
 
 function roundToFirstTwoDigits(number, method = 'floor') {
