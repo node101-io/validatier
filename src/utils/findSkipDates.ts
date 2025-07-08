@@ -7,7 +7,7 @@ function parseDate(dateStr: string): Date {
 }
 
 export const findSkipDates = () => {
-  const rawJson = fs.readFileSync('atom_price.json', 'utf-8');
+  const rawJson = fs.readFileSync('atom_price_2.json', 'utf-8');
   const data = JSON.parse(rawJson);
   const dateStrings = Object.keys(data);
 

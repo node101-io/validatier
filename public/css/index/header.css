@@ -240,6 +240,13 @@
   color: var(--selected-range-color-initial);
 }
 
+.selected-range-validator {
+  backdrop-filter: var(--selected-range-backdrop-filter) !important;
+  color: var(--selected-range-color) !important;
+  border: var(--selected-range-border-size) solid var(--selected-range-border-color) !important;
+  background-color: var(--selected-range-background) !important;
+}
+
 .date-interval-description {
   display: flex;
   align-items: center;
@@ -441,6 +448,10 @@
   font-size: var(--banner-title-content-font-size);
   font-weight: var(--banner-title-content-font-weight);
   color: var(--banner-title-content-color-initial);
+}
+
+.banner-title-content-validator {
+  color: var(--banner-title-content-color) !important;
 }
 
 .banner-logo-wrapper {

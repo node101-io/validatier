@@ -73,12 +73,14 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
       
       const messages: DecodedMessage[] | null = convertEventsToMessageFormat(finalizeBlockEvents, bech32_prefix, time, denom);
       const events: Event[][] = [];
-
+      
       let poppedIndices = [];
       for (let i = 0; i < data_block_results.result.txs_results.length; i++) {
         const tx = data_block_results.result.txs_results[i];
-        if (tx.code != 0) continue;
-        poppedIndices.push(i);
+        if (tx.code != 0) {
+          poppedIndices.push(i);
+          continue
+        };
         events.push(tx.events);
       }
         
@@ -90,8 +92,10 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
         events,
         denom,
         time,
+        poppedIndices,
         (err, decodedTxs) => {
           if (err)
+            return callback(err, null);
           if (messages && messages.length > 0) decodedTxs.push({ messages: messages });
       
           return callback(null, {

@@ -232,6 +232,13 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       updated_chain: ChainInterface | null
     ) => any
   ) => any;
+  findValidatorsByChainIdentifier: (
+    body: { chain_identifier: string },
+    callback: (
+      err: string | null,
+      validators: ValidatorInterface[] | null
+    ) => any
+  ) => any;
 }
 
 const validatorSchema = new Schema<ValidatorInterface>({
@@ -962,6 +969,18 @@ validatorSchema.statics.updateLastVisitedBlock = function (
       return callback(null, updatedChain);
     })
     .catch(err => callback(err, null))
+}
+
+
+validatorSchema.statics.findValidatorsByChainIdentifier = function (
+  body: Parameters<ValidatorModel['findValidatorsByChainIdentifier']>[0],
+  callback: Parameters<ValidatorModel['findValidatorsByChainIdentifier']>[1]
+) {
+  const { chain_identifier } = body;
+  Validator
+    .find({ chain_identifier: chain_identifier })
+    .then(validators => callback(null, validators))
+    .catch(err => callback(err, null));
 }
 
 

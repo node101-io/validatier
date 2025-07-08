@@ -52,7 +52,7 @@
 
 
   --validators-main-wrapper-vertical-padding: 10px;
-  --validators-main-wrapper-padding-top: 70px;
+  --validators-main-wrapper-padding-top: 30px;
   
   --each-validator-wrapper-height: 40px;
   --each-validator-wrapper-vertical-padding: 10px;
@@ -137,6 +137,7 @@
   --each-month-wrapper-flex-grow: 100%;
 
   --validator-table-header-right-padding: 20px;
+  --validator-table-header-background-color: rgba(245, 245, 255, 1);
   --validator-table-header-left-padding: 4%;
   --validator-table-header-horizontal-padding: 10px;
   --validator-table-header-margin-bottom: 5px;
@@ -165,10 +166,9 @@
   --validator-filter-input-wrapper-gap: 16px;
   --validator-filter-input-wrapper-display-initial: none;
   --validator-filter-input-wrapper-display: flex;
-  --validator-filter-input-wrapper-transition-duration: 0.25s;
 
   --validator-filter-input-content-wrapper-width: 100%;
-  --validator-filter-input-content-wrapper-input-width: 100%;
+  --validator-filter-input-content-wrapper-input-width: 200px;
   --validator-filter-input-content-wrapper-display: flex;
   
   --validator-dropdown-icon-opacity: 0.5;
@@ -307,7 +307,7 @@
 .each-validator-wrapper {
   height: var(--each-validator-wrapper-height);
   gap: var(--each-validator-wrapper-gap);
-  padding: var(--each-validator-wrapper-vertical-padding) var(--each-validator-wrapper-horizontal-padding);
+  padding: var(--each-validator-wrapper-vertical-padding) 0px;
   border-bottom: var(--each-validator-wrapper-border-bottom-size) solid var(--color-triangle-unselected);
   min-width: calc(var(--each-validator-wrapper-min-width) - (var(--each-validator-wrapper-horizontal-padding) * 2));
   cursor: var(--pointer-hand-dark);
@@ -333,8 +333,8 @@
   min-width: var(--each-validator-info-wrapper-min-width);
   max-width: var(--each-validator-info-wrapper-max-width);
   height: var(--each-validator-info-wrapper-height);
-  left: var(--each-validator-info-wrapper-left);
   padding: 10px;
+  padding-left: var(--each-validator-info-wrapper-left);
   background-color: var(--body-main-wrapper-background);
   z-index: 100;
   display: flex; 
@@ -553,10 +553,11 @@
 
 .validator-table-header {
   display: flex;
-  padding: 0 var(--validator-table-header-horizontal-padding);
+  padding: 0;
   align-items: center;
   margin-bottom: var(--validator-table-header-margin-bottom);
   gap: var(--validator-table-header-gap);
+  background-color: var(--validator-table-header-background-color);
 }
 
 .each-table-header-wrapper {
@@ -570,7 +571,6 @@
   display: flex;
   justify-content: center;
   text-align: center;
-  min-width: var(--each-table-header-wrapper-flex-basis-min-width);
 }
 
 .each-table-header-validator-info-header {
@@ -579,6 +579,9 @@
   justify-content: flex-start;
   margin-right: auto;
   cursor: var(--pointer-hand-default);
+  background-color: var(--validator-filter-input-background-color);
+  z-index: 200;
+  padding-left: 10px;
 }
 
 .each-table-header-sort-indicators {
@@ -618,7 +621,7 @@
 
 .validator-filter-input-wrapper {
   position: relative;
-  width: calc(var(--validator-filter-input-wrapper-width) - (2 * var(--validator-filter-input-wrapper-padding-horizontal)));
+  width: fit-content;
   height: calc(var(--validator-filter-input-wrapper-height) - (2 * var(--validator-filter-input-wrapper-padding-vertical)));
   padding: var(--validator-filter-input-wrapper-padding-vertical) var(--validator-filter-input-wrapper-padding-horizontal);
   background-color: var(--validator-filter-input-background-color);
@@ -629,11 +632,10 @@
   align-items: center;
   visibility: hidden;
   opacity: 0;
-  transition: all 0.25s ease 0s;
 }
 
 .validator-filter-input-content-wrapper {
-  width: var(--validator-filter-input-content-wrapper-width);
+  width: fit-content;
   display: var(--validator-filter-input-content-wrapper-display);
   align-items: center;
   gap: var(--validator-filter-input-wrapper-gap);
@@ -641,7 +643,11 @@
 }
 
 .validator-filter-input-content-wrapper input {
-  width: var(--validator-filter-input-content-wrapper-input-width);
+  min-width: var(--validator-filter-input-content-wrapper-input-width);
+  max-width: var(--validator-filter-input-content-wrapper-input-width);
+  transition: all 0.5s ease 0s;
+  padding: 0 !important;
+  margin-bottom: 4px;
 }
 
 .validator-dropdown-icon {
@@ -748,16 +754,17 @@
   margin-left: -200px;
 }
 
-@media only screen and (max-width: 900px) {
-  :root {
-    --validator-filter-input-content-wrapper-input-width: 0%;
-    --validator-filter-input-content-wrapper-width: fit-content;
-    --validator-filter-input-wrapper-width: fit-content;
-  }
+.validator-table-header-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 900px) {
   :root {
-    --validators-info-column-width: 100px;
+    --validator-filter-input-content-wrapper-input-width: 0px;
+    --validator-filter-input-wrapper-gap: 0px;
+    --validator-filter-input-wrapper-padding-horizontal: 12px;
   }
 }

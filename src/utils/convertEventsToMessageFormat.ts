@@ -1,6 +1,4 @@
-import { validValidatorAddress } from "../listeners/functions/constants.js";
 import { getOnlyNativeTokenValueFromAmountString } from "../listeners/functions/getOnlyNativeTokenValueFromAmountString.js";
-import { convertOperatorAddressToBech32 } from "./convertOperatorAddressToBech32.js";
 import { DecodedMessage, Event } from "./decodeTxsV2.js";
 
 const EVENTS_TO_SEARCH = {
@@ -50,26 +48,18 @@ export const convertEventsToMessageFormat = (finalizeBlockEvents: Event[], bech3
 
     attributes.forEach(eachAttribute => {
       if (address_keys.includes(eachAttribute.key)) {
-        const operatorAddressValoperFormat = convertOperatorAddressToBech32(eachAttribute.value, `${bech32_prefix}valoper`);
-        
-        if (
-          !operatorAddressValoperFormat ||
-          !validValidatorAddress.includes(operatorAddressValoperFormat.replace('cosmosvaloper1', ''))
-        ) return;
-
-        
         if (eachAttribute.key == 'recipient')
-          messageBody.value.validatorAddressRecipient = operatorAddressValoperFormat;
+          messageBody.value.validatorAddressRecipient = eachAttribute.value;
         else if (eachAttribute.key == 'sender')
-          messageBody.value.validatorAddressSender = operatorAddressValoperFormat;
+          messageBody.value.validatorAddressSender = eachAttribute.value;
         else if (eachAttribute.key == 'delegator')
-          messageBody.value.delegatorAddress = operatorAddressValoperFormat;
+          messageBody.value.delegatorAddress = eachAttribute.value;
         else if (eachAttribute.key == 'source_validator')
-          messageBody.value.validatorSrcArress = operatorAddressValoperFormat;
+          messageBody.value.validatorSrcArress = eachAttribute.value;
         else if (eachAttribute.key == 'destination_validator')
-          messageBody.value.validatorDstArress = operatorAddressValoperFormat;
+          messageBody.value.validatorDstArress = eachAttribute.value;
         else
-          messageBody.value.validatorAddress = operatorAddressValoperFormat;
+          messageBody.value.validatorAddress = eachAttribute.value;
         gotValidatorAddress = true;
       } else if (eachAttribute.key == amount_key) {
         if (type == 'slash') {

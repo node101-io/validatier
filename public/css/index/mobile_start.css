@@ -94,6 +94,10 @@
   transition: all 1.25s ease 0s;
 }
 
+.mobile-animate-star {
+  margin-left: 8px;
+}
+
 .orbit-7 {
   offset-path: path('M608.507 338.891C727.347 338.891 823.686 265.913 823.686 175.889C823.686 85.8653 727.347 12.8867 608.507 12.8867C489.667 12.8867 393.328 85.8653 393.328 175.889C393.328 265.913 489.667 338.891 608.507 338.891Z');
   animation: move-ccw 30s linear infinite;

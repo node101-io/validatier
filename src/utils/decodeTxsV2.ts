@@ -33,7 +33,8 @@ const LISTENING_EVENTS = [
   'create_validator',
   'delegate',
   'withdraw_rewards',
-  'withdraw_commission'
+  'withdraw_commission',
+  'set_withdraw_address'
 ];
 
 const registry = new Registry(defaultRegistryTypes);
@@ -60,19 +61,37 @@ const getAttributesAsMappingFromEventType = (
 ) => {
   for (let i = 0; i < events.length; i++) {
     const eachEvent = events[i];
-    if (eachEvent.type != searchType) continue;
+    
+    if (!searchType.split('|').includes(eachEvent.type)) continue;
     const attributes = getAttributesAsMapping(eachEvent.attributes);
-
-    let flag = 1;
+    
+    let flag = 0;
+    let foundIn = '';
     attributeEqualityPattern.split(',').forEach(eachEquationGeneralPattern => {
-      const [key, value] = eachEquationGeneralPattern.split(':');
-      if (value != 'true')
-        if (attributes[key] != value) return flag = 0;
-      else
-        if (!attributes[key]) return flag = 0;
+      let orFlag = 0;
+      eachEquationGeneralPattern.split('|').forEach(generalPatternEachOr => {
+        
+        const [key, value] = generalPatternEachOr.split(':');
+        if (value != 'true') 
+          if (attributes[key] == value) {
+            foundIn = value;
+            return orFlag = 1;
+          }
+        else
+          if (attributes[key]) {
+            foundIn = value;
+            return orFlag = 1;
+          }
+      })
+      if (flag != 1)
+        flag = orFlag;
     })
     if (!flag) continue;
-    return { attributes, index: i };
+    
+    if (attributeEqualityPattern.includes('module:distribution') && foundIn == 'staking')
+    return { attributes, index: -1 };
+    else
+      return { attributes, index: i };
   }
   return { attributes: null, index: -1 };
 }
@@ -82,6 +101,7 @@ const decodeTxsV2 = (
   events: Event[][],
   denom: string,
   time: Date | null,
+  poppedIndices: number[],
   callback: (
     err: string | null,
     decodedTxs: DecodedTx[]
@@ -89,7 +109,7 @@ const decodeTxsV2 = (
 ) => {
 
   let createValidatorPromises = [];
-  const decodedTxs = [];
+  const decodedTxs: { messages: { time: Date | null; typeUrl: string; value: Record<string, any>; }[] | DecodedMessage[]; }[] = [];
   
   for (let i = 0; i < events.length; i++) {
     const eachTransactionEvents = events[i];
@@ -104,7 +124,7 @@ const decodeTxsV2 = (
 
       const attributesMapping = getAttributesAsMapping(eachEvent.attributes);
       
-      if (!['create_validator', 'complete_redelegation'].includes(eachEvent.type)) {
+      if (!['create_validator', 'set_withdraw_address'].includes(eachEvent.type)) {
         value = {
           validatorAddress: attributesMapping.validator || null,
           delegatorAddress: attributesMapping.delegator || null,
@@ -130,7 +150,9 @@ const decodeTxsV2 = (
 
         const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message', 'module:staking,sender:true');
         if (!attributes) throw new Error('delegate:delegator_not_found');
-        eachTransactionEvents[index].type = 'message_used';
+        if (index >= 0)
+          eachTransactionEvents[index].type = 'message_used_staking';
+        
         value.delegatorAddress = attributes.sender;
       } else if (eachEvent.type == 'create_validator') {
         const { rpc_url, block_height } = ctx;
@@ -143,16 +165,21 @@ const decodeTxsV2 = (
               fetch(`http://${rpc_url}/block?height=${block_height}`, { signal: AbortSignal.timeout(15 * 1000) })
                 .then((response: any) => response.json())
                 .then(response => {
-                  const transactions = response.result.block.data.txs;
-                  const createValidatorTransactionBase64 = transactions[i];
+                  const successfulTxs: string[] = [];
 
+                  response.result.block.data.txs.filter((eachTx: any, i: number) => {
+                    if (!poppedIndices.includes(i))
+                      successfulTxs.push(eachTx);
+                  });
+                  const createValidatorTransactionBase64 = successfulTxs[i];
+                  
                   let createValidatorTx;
                   try { createValidatorTx = decodeTxRaw(Buffer.from(createValidatorTransactionBase64, 'base64')); }
                   catch (err) { reject('create_validator:tx_decode_error'); }
-
+                  
                   createValidatorTx?.body.messages.forEach(eachMessage => {
                     if (eachMessage.typeUrl == '/cosmos.staking.v1beta1.MsgCreateValidator')
-                      return resolve({ time: time, typeUrl: eachMessage.typeUrl, value: registry.decode(eachMessage) });
+                      return resolve({ time: time, typeUrl: 'create_validator', value: registry.decode(eachMessage) });
                   })
                 })
             }
@@ -161,25 +188,42 @@ const decodeTxsV2 = (
 
       } else if (eachEvent.type == 'withdraw_rewards') {
 
-        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message', 'module:staking,sender:true');
+        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used_staking', 'sender:true,module:distribution|module:staking');
         if (!attributes) throw new Error('withdraw_rewards:delegator_not_found');
-        eachTransactionEvents[index].type = 'message_used';
+        if (index >= 0)
+          eachTransactionEvents[index].type = 'message_used';
+
         value.delegatorAddress = attributes.sender;
 
       } else if (eachEvent.type == 'withdraw_commission') {
 
-        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message', 'module:staking,sender:true');
+        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message', 'sender:true,module:distribution');
         if (!attributes) throw new Error('withdraw_commission:validator_not_found');
-        eachTransactionEvents[index].type = 'message_used';
+        if (index >= 0)
+          eachTransactionEvents[index].type = 'message_used';
+
         value.validatorAddress = attributes.sender;
 
+      } else if (eachEvent.type == 'set_withdraw_address') {
+        value = {
+          withdrawAddress: attributesMapping.withdraw_address || null,
+          delegatorAddress: attributesMapping.delegator_address || null,
+        }
+
+        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message', 'sender:true,module:distribution');
+        if (!attributes) throw new Error('set_withdraw_address:delegator_not_found');
+        if (index >= 0)
+          eachTransactionEvents[index].type = 'message_used';
+
+        value.delegatorAddress = attributes.sender;
       } else {
         continue;
       }
 
-      messages.push({ time: time, typeUrl: 'each', value: value });
+      if (eachEvent.type != 'create_validator')
+        messages.push({ time: time, typeUrl: eachEvent.type, value: value });
     }
-    
+ 
     decodedTxs.push({ messages });
   }
   
@@ -196,12 +240,11 @@ const decodeTxsV2 = (
             return callback(`bad_request:create_validator:promise:${i}`, []);
           messagesFromCreateValidator.push(eachResult.value);
         });
+        decodedTxs.push({ messages: messagesFromCreateValidator });
 
-        decodedTxs.push({ messagesFromCreateValidator });
+        const filteredTxs = decodedTxs.filter((tx) => tx.messages.length > 0);
+        return callback(null, filteredTxs);
       })
-    
-    const filteredTxs = decodedTxs.filter((tx) => tx.messages.length > 0);
-    return callback(null, filteredTxs);
   }
 };
 

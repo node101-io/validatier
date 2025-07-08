@@ -52,7 +52,7 @@ function generateValidatorRankingContent(response, sort_by, sortOrderMapping) {
   
   const infoHeaderTitle = document.createElement('div');
   infoHeaderTitle.classList.add('each-table-header-title');
-  infoHeaderTitle.innerHTML = 'Validators';
+  infoHeaderTitle.innerHTML = 'Name';
 
   infoTableHeaderWrapper.appendChild(infoHeaderTitle);
   infoTableHeader.appendChild(infoTableHeaderWrapper);

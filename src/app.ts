@@ -21,6 +21,8 @@ import { Job_SyncValidatorInfo } from './cron/jobs/Job_SyncValidatorInfo.js';
 import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsImageUri.js';
 import useragent from 'express-useragent';
 import ActiveValidators from './models/ActiveValidators/ActiveValidators.js';
+import { findSkipDates } from './utils/findSkipDates.js';
+import Price from './models/Price/Price.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -66,3 +68,12 @@ app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
 // startFetchingData();
+
+// getTxsByHeight('5.9.86.153:26657', 18152061, 'uatom', 'cosmos', 0, false, (err, result) => {
+//   console.log(err)
+//   result.decodedTxs.forEach(each => {
+//     each.messages.forEach(each => {
+//       console.log(each)
+//     })
+//   })
+// })

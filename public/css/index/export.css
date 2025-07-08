@@ -40,8 +40,7 @@
 
 .export-main-wrapper {
   position: relative;
-  color: var(--export-main-wrapper-color);
-  margin-right: 20px;
+  color: var(--export-main-wrapper-color);  
 }
 
 .export-wrapper-header {
@@ -49,6 +48,9 @@
   font-size: var(--export-wrapper-header-font-size);
   gap: var(--export-wrapper-header-gap);
   cursor: var(--pointer-hand-dark);
+  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
+  background-color: var(--body-main-wrapper-background);
+  border-radius: 100%;
 }
 
 .export-wrapper-content {

@@ -96,6 +96,7 @@
   
   --each-leaderboard-summary-data-each-network-summary-stat-content-font-size: 36px;
 
+  --validator-details-main-width: var(--inner-main-wrapper-width);
   --validator-details-main-wrapper-gap: 20px;
   --validator-details-main-wrapper-margin-top: 20px;
   
@@ -213,7 +214,7 @@
 }
 
 .validator-details-main-wrapper {
-  width: 100%;
+  width: var(--validator-details-main-width);
   display: flex;
   flex-direction: column;
   gap: var(--validator-details-main-wrapper-gap);
@@ -300,6 +301,10 @@
   flex-direction: var(--each-validator-stat-content-wrapper-flex-direction);
   align-items: baseline;
   justify-content: space-between;
+}
+
+.each-validator-stat-content {
+  overflow: visible;
 }
 
 .each-validator-stat-helper {

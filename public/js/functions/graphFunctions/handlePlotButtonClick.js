@@ -105,6 +105,29 @@ const validator_stats = [
 ];
 
 function generateGraph (validator) {
+  const selectedRange = document.getElementById('selected-range');
+
+  const bannerTitle = document.getElementById('banner-title');
+
+  const headerMainWrapper = document.getElementById('header-main-wrapper');
+  const datePicker = document.getElementById('date-picker');
+  const searchWrapper = document.getElementById('search-wrapper');
+  
+  searchWrapper.style.visibility = 'hidden';
+  bannerTitle.style.color = 'var(--banner-title-content-color-main)';
+  document.documentElement.style.setProperty('--banner-logo-color', 'rgba(37, 0, 84, 1)');
+  document.documentElement.style.setProperty('--selected-range-logo-color', 'rgba(124, 112, 195, 1)');
+
+  selectedRange.style.background = 'var(--selected-range-background)';
+  selectedRange.style.backdropFilter = 'var(--selected-range-backdrop-filter)';
+  selectedRange.style.border = 'var(--selected-range-border-size) solid var(--selected-range-border-color)';
+  selectedRange.style.color = 'var(--selected-range-color)';
+
+  headerMainWrapper.style.height = `calc(var(--header-main-wrapper-height) - 50px)`
+  headerMainWrapper.classList.add('header-main-wrapper-main');
+  headerMainWrapper.style.background = 'var(--header-main-background)';
+  datePicker.style.background = 'var(--date-picker-display)';
+
   if (typeof validator == 'string') validator = JSON.parse(validator);
   const summaryData = JSON.parse(document.body.getAttribute('summaryData'));
   const validators = JSON.parse(document.body.getAttribute('validators'));
@@ -156,7 +179,7 @@ function generateGraph (validator) {
       wrapper.children[0].innerHTML = nativeValue;
       wrapper.children[1].innerHTML = '%' + (shortNumberFormat(validator['self_stake_ratio']));
     } else {
-      document.getElementById(`${stat.id}-native`).innerHTML = '%' + (shortNumberFormat(validator[stat.field]));
+      document.getElementById(`${stat.id}-native`).innerHTML = '%' + (shortNumberFormat(Math.max(0.00, validator[stat.field])));
     }
 
     if (stat.usdContent) 
@@ -385,13 +408,14 @@ function handlePlotButtonClick () {
     document.getElementById('intro-main-wrapper').classList.add('section-hidden');
     document.getElementById('validator-details-main-wrapper').classList.remove('section-hidden');
 
+    history.pushState({ page: 'validator' }, 'validator', `/?validator=${validator.operator_address}`);
+    sessionStorage.setItem('last_visited_operator_address', validator.operator_address);
+
     document.getElementById('all-main-wrapper').scrollTo({
       top: 0,
       left: 0,
       behavior: 'instant'
     });
-    history.pushState({ page: 'validator' }, 'validator', `/?validator=${validator.operator_address}`);
-    sessionStorage.setItem('last_visited_operator_address', validator.operator_address);
     generateGraph(validator)
   });
 

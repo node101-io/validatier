@@ -105,7 +105,7 @@
   
   --each-metric-content-wrapper-header-div-margin-top: -2px;
 
-  --each-metric-content-wrapper-content-flex-direction: row;
+  --each-metric-content-wrapper-content-flex-direction: column;
   
   --each-metric-content-wrapper-content-value-native-font-weight: 700;
   --each-metric-content-wrapper-content-value-native-font-size: 28px;
@@ -288,7 +288,6 @@
 .network-summary-network-graph-metrics-wrapper {
   min-width: var(--network-summary-network-graph-metrics-wrapper-width);
   max-width: var(--network-summary-network-graph-metrics-wrapper-width);
-  height: var(--network-summary-network-graph-metrics-wrapper-height);
   overflow: var(--network-summary-network-graph-metrics-wrapper-overflow-x);
   display: flex;
   flex-direction: column;
@@ -304,8 +303,8 @@
 }
 
 .each-metric-content-wrapper {
-  min-width: calc(var(--each-metric-content-wrapper-width) - (2 * var(--each-metric-content-wrapper-padding-horizontal)));
-  max-width: calc(var(--each-metric-content-wrapper-width) - (2 * var(--each-metric-content-wrapper-padding-horizontal)));
+  min-width: calc(var(--each-metric-content-wrapper-width) - (2 * var(--each-metric-content-wrapper-padding-horizontal)) - 1px);
+  max-width: calc(var(--each-metric-content-wrapper-width) - (2 * var(--each-metric-content-wrapper-padding-horizontal)) - 1px);
   border-radius: var(--each-metric-content-wrapper-border-radius);
   height: calc(var(--each-metric-content-wrapper-height) - (2 * var(--each-metric-content-wrapper-padding-vertical)));
   display: flex;

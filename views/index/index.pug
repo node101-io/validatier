@@ -70,7 +70,7 @@ block content
     //- .navbar-view-toggle#navbar-view-toggle(class='center')
     //-   span(class=`${isNavbarClose ? 'navbar-arrow-close' : ''}`)
     //-     include ../icons/chevron_left.pug
-    .header-main-wrapper#header-main-wrapper
+    .header-main-wrapper#header-main-wrapper(class=`${queryValidator ? 'header-main-wrapper-validator' : ''}`)
       .header-network-switch-wrapper(style='display:none;')
         .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_id=`${selectedChain.chain_id}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}` current_chain_first_available_time=`${selectedChain.first_available_block_time}`)
           .network-switch-header-chain-content-wrapper(class='center')
@@ -99,10 +99,6 @@ block content
         //-           img(src=`${chain.image}`)
         //-         .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
         //-           .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
-      a(href="/").header-banner-wrapper
-        .banner-logo-wrapper#banner-logo(class='center')
-          include ../icons/logo.pug
-        .banner-title-content#banner-title(class='navbar-text') VALIDATIER
       .header-inputs-main-wrapper
         .validator-filter-input-wrapper#search-wrapper
           .validator-filter-input-content-wrapper 
@@ -110,7 +106,7 @@ block content
               include ../icons/search.pug
             input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search Validator')
         .date-picker#date-picker
-          .selected-range#selected-range
+          .selected-range#selected-range(class=`${queryValidator ? 'selected-range-validator' : ''}`)
             span.date-interval-description 
               include ../icons/calendar.pug
               span.date-interval-description-text#header-selected-range-description= specificRangeName ? specificRangeName : 'All time'
@@ -163,6 +159,10 @@ block content
               //-       span= day
               //- button.cancel#cancel Cancel
               //- button.apply#apply Apply
+      a(href="/").header-banner-wrapper
+        .banner-logo-wrapper#banner-logo(class='center')
+          include ../icons/logo.pug
+        .banner-title-content#banner-title(class=`navbar-text ${queryValidator ? 'banner-title-content-validator' : ''}`) VALIDATIER
     if !isStartClicked && !queryValidator
       -
         const fallingStarLocations = [
@@ -448,7 +448,7 @@ block content
           -
             const validator_stats = [
               { id: 'validator-stat-self-stake', field: 'self_stake', title: 'Self Stake', usdContent: true, helperType: 'rank' },
-              { id: 'validator-stat-percentage-sold', field: 'percentage_sold', title: 'Percentage sold', usdContent: false, additional_class: 'summary-percentage-text-native', helperType: 'rank' },
+              { id: 'validator-stat-percentage-sold', field: 'percentage_sold', title: 'Percentage sold', usdContent: false, additional_class: 'summary-percentage-text-native', helperType: 'rank', type: 'percentage' },
               { id: 'validator-stat-commission-rate', title: 'Commission', field: 'commission_rate', usdContent: false, additional_class: 'summary-percentage-text-native', helperText: 'fee from rewards', helperType: 'text' }
             ]
           each stat in validator_stats 
@@ -467,10 +467,10 @@ block content
                     .each-network-summary-stat-content(id=`${stat.id}-native` class=`${stat.id}-native ${stat.additional_class}`)= queryValidator ? formatCommission(validator[`${stat.field}`]) : ''
                   else
                     .each-network-summary-stat-content(id=`${stat.id}-native` class=`${stat.id}-native ${stat.additional_class}`) 
-                      span= queryValidator ? stat.type == 'percentage' ? '%' + shortNumberFormat(validator[`${stat.field}`]) : getValue(validator[`${stat.field}`], symbol) : ''
+                      span= queryValidator ? stat.type == 'percentage' ? '%' + shortNumberFormat(Math.max(0.00, validator[`${stat.field}`])) : getValue(Math.max(0, validator[`${stat.field}`]), symbol) : ''
                       span(class='validator-details-percentage-near-value')= queryValidator ? '%' + shortNumberFormat(validator['self_stake_ratio']) : ''
                   if stat.usdContent
-                    .each-network-summary-stat-footer(id=`${stat.id}-usd` class=`${stat.id}-usd`)= queryValidator ? getValue(validator[`${stat.field}`], 'usd') : ''
+                    .each-network-summary-stat-footer(id=`${stat.id}-usd` class=`${stat.id}-usd`)= queryValidator ? getValue(Math.max(0.00, validator[`${stat.field}`]), 'usd') : ''
                 .each-validator-stat-helper(class=`${stat.helperType == 'percentage_change' ? 'percentage-change-value-content' : ''}` id=`${stat.id}-helper`)
         .network-summary-network-graph-main-wrapper
           .network-summary-network-graph-metrics-wrapper
@@ -505,33 +505,32 @@ block content
               if queryValidator
                 script.
                   generateGraph(!{JSON.stringify(validator)})
-      .all-validators-main-wrapper#all-validators-main-wrapper(class=`${queryValidator ? 'section-hidden' : ''}`)
-        .each-section-title-content Validators
+      .all-validators-main-wrapper#all-validators-main-wrapper(class=`${queryValidator ? 'section-hidden' : ''} section-hidden`)
+        .validator-table-header-wrapper 
+          .each-section-title-content Validators
+          .export-main-wrapper 
+            .export-wrapper-header(class='center' isOpen='false')#export-wrapper-toggle
+              include ../icons/export.svg
+            .export-wrapper-content
+              .export-wrapper-content-title Data Frequency
+              -
+                const export_choices = [
+                  { id: 'all_time', label: 'All time', range: 0, is_selected: true },
+                  { id: 'weekly', label: 'Weekly', range: 7 * 86400 * 1000 },
+                  { id: 'monthly', label: 'Monthly', range: 30 * 86400 * 1000 },
+                  { id: 'yearly', label: 'Yearly', range: 365 * 86400 * 1000 },
+                ]
+              each export_choice in export_choices
+                .each-export-choice(id=export_choice.id range=export_choice.range class=`${export_choice.is_selected ? 'export-choice-selected' : ''} ${(timestampDifference / export_choice.range > 50 && export_choice.range != 0) ? 'section-hidden' : ''}`)
+                  .general-choice-radio-button(class='center')
+                    .general-choice-radio-button-inner-circle(style=`${export_choice.is_selected ? 'display: unset' : ''}`)
+                  span= export_choice.label
+              .export-action-buttons-wrapper
+                button.export-choice-action-button(class='center export-choice-download-button')#export-choice-download-button
+                  span Download
+                button.export-choice-action-button(class='center')#export-choice-cancel-button
+                  span Cancel
         .table-main-wrapper
-          .table-filters
-            .table-filters-subgroup 
-              .export-main-wrapper 
-                .export-wrapper-header(class='center' isOpen='false')#export-wrapper-toggle
-                  include ../icons/export.svg
-                .export-wrapper-content
-                  .export-wrapper-content-title Data Frequency
-                  -
-                    const export_choices = [
-                      { id: 'all_time', label: 'All time', range: 0, is_selected: true },
-                      { id: 'weekly', label: 'Weekly', range: 7 * 86400 * 1000 },
-                      { id: 'monthly', label: 'Monthly', range: 30 * 86400 * 1000 },
-                      { id: 'yearly', label: 'Yearly', range: 365 * 86400 * 1000 },
-                    ]
-                  each export_choice in export_choices
-                    .each-export-choice(id=export_choice.id range=export_choice.range class=`${export_choice.is_selected ? 'export-choice-selected' : ''} ${(timestampDifference / export_choice.range > 50 && export_choice.range != 0) ? 'section-hidden' : ''}`)
-                      .general-choice-radio-button(class='center')
-                        .general-choice-radio-button-inner-circle(style=`${export_choice.is_selected ? 'display: unset' : ''}`)
-                      span= export_choice.label
-                  .export-action-buttons-wrapper
-                    button.export-choice-action-button(class='center export-choice-download-button')#export-choice-download-button
-                      span Download
-                    button.export-choice-action-button(class='center')#export-choice-cancel-button
-                      span Cancel
           .validators-main-wrapper#validators-main-wrapper(sort_by='percentage_sold' order='asc')
             -
               const headers_array = [
@@ -545,7 +544,7 @@ block content
               .validators-info-column 
                 .validator-table-header
                   .each-table-header-wrapper(class='each-table-header-validator-info-header')
-                    .each-table-header-title Validators
+                    .each-table-header-title Name
                 each validator, index in validators
                   .each-validator-wrapper(validator=validator id=`${validator.operator_address}-info` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}` class='operator-address')
                     .each-validator-info-wrapper

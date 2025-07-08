@@ -1,3 +1,4 @@
+import async from 'async';
 import CompositeEventBlock from '../models/CompositeEventBlock/CompositeEventBlock.js';
 import Validator from '../models/Validator/Validator.js';
 import Chain, { ChainInterface } from '../models/Chain/Chain.js';
@@ -7,6 +8,18 @@ import { convertOperatorAddressToBech32 } from '../utils/convertOperatorAddressT
 import { ActiveValidatorsInterface } from '../models/ActiveValidators/ActiveValidators.js';
 import { bulkSave, clearChainData, getBatchData } from '../utils/levelDb.js';
 
+export const LISTENING_EVENTS = [
+  'create_validator',
+  'delegate',
+  'complete_unbonding',
+  'complete_redelegation',
+  'withdraw_rewards',
+  'withdraw_commission',
+  'slash',
+  'transfer',
+  'set_withdraw_address'
+];
+
 interface ListenForEventsResult {
   success: boolean,
   inserted_validator_addresses?: string[] | null,
@@ -15,18 +28,17 @@ interface ListenForEventsResult {
   saved_active_validators?: ActiveValidatorsInterface | null
 }
 
-export const LISTENING_EVENTS = [
-  '/cosmos.staking.v1beta1.MsgCreateValidator',
-  '/cosmos.staking.v1beta1.MsgDelegate',
-  '/cosmos.staking.v1beta1.MsgEditValidator',
-  '/cosmos.staking.v1beta1.MsgUndelegate',
-  '/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation',
-  '/cosmos.staking.v1beta1.MsgBeginRedelegate',
-  '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
-  '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission',
-  'slash',
-  'transfer'
-];
+function initializeCompositeBlock () {
+  return {
+    self_stake: 0,
+    reward: 0,
+    commission: 0,
+    total_stake: 0,
+    total_withdraw: 0,
+    balance_change: 0,
+    slash: 0
+  }
+}
 
 export const listenForEvents = (
   body: {
@@ -42,6 +54,7 @@ export const listenForEvents = (
   const promises: Promise<void>[] = [];
   const validatorMap: Record<string, any> = {};
   const compositeEventBlockMap: Record<string, any> = {};
+  const setWithdrawAddressMap: Record<string, any>[] = [];
   let timestamp: Date;
 
   for (let height = bottom_block_height; height < top_block_height; height++) {
@@ -63,175 +76,142 @@ export const listenForEvents = (
             const { time, decodedTxs } = result;
             
             if (err)
-              return reject({
-                err: err,
-                block_height: result.block_height
-              });
+              return reject({ err: err, block_height: result.block_height });
             
-            if (!timestamp || timestamp < new Date(time))
+            if (time)
               timestamp = new Date(time);
             
-            if (!decodedTxs || decodedTxs.length <= 0) return resolve();
+            if (!decodedTxs || decodedTxs.length <= 0)
+              return resolve();
 
             const flattenedDecodedTxs: DecodedMessage[] = decodedTxs.flatMap((obj: { messages: DecodedMessage }) => obj.messages);
-            for (const eachMessage of flattenedDecodedTxs) {
 
-              if (!LISTENING_EVENTS.includes(eachMessage.typeUrl)) continue;
-              const key = eachMessage.value.validatorAddress || '';
-              
-              if (!key && eachMessage.value.validatorSrcAddress && eachMessage.value.validatorDstAddress) {
-                if (!compositeEventBlockMap[eachMessage.value.validatorSrcAddress]) {
-                  compositeEventBlockMap[eachMessage.value.validatorSrcAddress] = {
-                    self_stake: 0,
-                    reward: 0,
-                    commission: 0,
-                    total_stake: 0,
-                    total_withdraw: 0,
-                    balance_change: 0,
-                    slash: 0
-                  };
-                }
-                if (!compositeEventBlockMap[eachMessage.value.validatorDstAddress]) {
-                  compositeEventBlockMap[eachMessage.value.validatorDstAddress] = {
-                    self_stake: 0,
-                    reward: 0,
-                    commission: 0,
-                    total_stake: 0,
-                    total_withdraw: 0,
-                    balance_change: 0,
-                    slash: 0
-                  };
-                }
-              } else if (key && !compositeEventBlockMap[key]) {
-                compositeEventBlockMap[key] = {
-                  self_stake: 0,
-                  reward: 0,
-                  commission: 0,
-                  total_stake: 0,
-                  total_withdraw: 0,
-                  balance_change: 0,
-                  slash: 0
-                };
-              }
-                
-              if (
-                [
-                  '/cosmos.staking.v1beta1.MsgCreateValidator',
-                  '/cosmos.staking.v1beta1.MsgEditValidator'
-                ].includes(eachMessage.typeUrl)
-              ) {
-                if (
-                  !eachMessage.value.pubkey || !eachMessage.value.description.moniker
-                ) continue;
-                const pubkey: ArrayBuffer = eachMessage.value.pubkey.value;
-                const byteArray = new Uint8Array(Object.values(pubkey).slice(2));
-                const pubkeyBase64 = btoa(String.fromCharCode(...byteArray));
-                
-                const delegatorAddress = eachMessage.value.delegatorAddress 
-                  ? eachMessage.value.delegatorAddress 
-                  : convertOperatorAddressToBech32(eachMessage.value.validatorAddress, chain.bech32_prefix);
+            async.times(
+              flattenedDecodedTxs.length,
+              (i, next) => {
+                const eachMessage = flattenedDecodedTxs[i];
 
-                validatorMap[key] = {
-                  pubkey: pubkeyBase64,
-                  operator_address: eachMessage.value.validatorAddress,
-                  delegator_address: delegatorAddress,
-                  keybase_id: eachMessage.value.description.identity,
-                  moniker: eachMessage.value.description.moniker,
-                  website: eachMessage.value.description.website,
-                  details: eachMessage.value.description.details,
-                  security_contant: eachMessage.value.description.securityContact,
-                  commission_rate: eachMessage.value.commission.rate,
-                  chain_identifier: chain.name,
-                  created_at: eachMessage.time,
-                };
-                if (eachMessage.value.value.denom && eachMessage.value.value.amount) {
-                  compositeEventBlockMap[key].self_stake += parseInt(eachMessage.value.value.amount);
-                  compositeEventBlockMap[key].total_stake += parseInt(eachMessage.value.value.amount);
-                }
-              }
-              const bech32OperatorAddress = eachMessage.value.validatorAddress ? convertOperatorAddressToBech32(eachMessage.value.validatorAddress, chain.bech32_prefix) : '';
-              if (
-                [
-                  '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
-                  '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission'
-                ].includes(eachMessage.typeUrl)
-              ) {
-                if (!eachMessage.value || !eachMessage.value.amount || !eachMessage.value.amount.amount) continue;
-                compositeEventBlockMap[key].total_withdraw += parseInt(eachMessage.value.amount.amount);
-                if (eachMessage.typeUrl == '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission') 
-                  compositeEventBlockMap[key].commission += parseInt(eachMessage.value.amount.amount);
-                else if (bech32OperatorAddress == eachMessage.value.delegatorAddress)
-                   compositeEventBlockMap[key].reward += parseInt(eachMessage.value.amount.amount);
-              
-              } else if (
-                [
-                  '/cosmos.staking.v1beta1.MsgDelegate',
-                  '/cosmos.staking.v1beta1.MsgUndelegate',
-                  '/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation',
-                ].includes(eachMessage.typeUrl)
-              ) {
-                if (!eachMessage.value || !eachMessage.value.amount || !eachMessage.value.amount.amount) continue;
-                const stakeAmount = parseInt(eachMessage.value.amount.amount);
-                const additiveTxs = ['/cosmos.staking.v1beta1.MsgDelegate', '/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation'];
-                compositeEventBlockMap[key].total_stake += additiveTxs.includes(eachMessage.typeUrl) ? stakeAmount : (stakeAmount * -1);
+                const key = eachMessage.value.validatorAddress || '';
                 
-                if (bech32OperatorAddress == eachMessage.value.delegatorAddress) 
-                  compositeEventBlockMap[key].self_stake += additiveTxs.includes(eachMessage.typeUrl) ? stakeAmount : (stakeAmount * -1);
-              } else if (
-                ['/cosmos.staking.v1beta1.MsgBeginRedelegate'].includes(eachMessage.typeUrl)
-              ) {
-                const bech32SrcOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorSrcAddress, chain.bech32_prefix);
-                const bech32DstOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorDstAddress, chain.bech32_prefix);
-                
-                const value = parseInt(eachMessage.value.amount.amount);
-                
-                compositeEventBlockMap[eachMessage.value.validatorSrcAddress].total_stake += (value * -1);
-                if (bech32SrcOperatorAddress == eachMessage.value.delegatorAddress)
-                  compositeEventBlockMap[eachMessage.value.validatorSrcAddress].self_stake += (value * -1);
-                
-                compositeEventBlockMap[eachMessage.value.validatorDstAddress].total_stake += value;
-                if (bech32DstOperatorAddress == eachMessage.value.delegatorAddress)
-                  compositeEventBlockMap[eachMessage.value.validatorDstAddress].self_stake += value;
-              } else if (['slash'].includes(eachMessage.typeUrl)) {
-                compositeEventBlockMap[key].slash += eachMessage.value.amount;
-              } else if (
-                eachMessage.typeUrl == 'transfer'
-              ) {
-      
-                if (eachMessage.value.validatorAddressSender) {
-                  if (!compositeEventBlockMap[eachMessage.value.validatorAddressSender]) {
-                    compositeEventBlockMap[eachMessage.value.validatorAddressSender] = {
-                      self_stake: 0,
-                      reward: 0,
-                      commission: 0,
-                      total_stake: 0,
-                      total_withdraw: 0,
-                      balance_change: 0,
-                      slash: 0
-                    };
+                if (!key && eachMessage.value.validatorSrcAddress && eachMessage.value.validatorDstAddress) {
+                  if (!compositeEventBlockMap[eachMessage.value.validatorSrcAddress]) {
+                    compositeEventBlockMap[eachMessage.value.validatorSrcAddress] = initializeCompositeBlock();
                   }
-      
-                  compositeEventBlockMap[eachMessage.value.validatorAddressSender].balance_change -= parseInt(eachMessage.value.amount);
+                  if (!compositeEventBlockMap[eachMessage.value.validatorDstAddress]) {
+                    compositeEventBlockMap[eachMessage.value.validatorDstAddress] = initializeCompositeBlock();
+                  }
+                } else if (key && !compositeEventBlockMap[key]) {
+                  compositeEventBlockMap[key] = initializeCompositeBlock();
                 }
-      
-                if (eachMessage.value.validatorAddressRecipient) {
-                  if (!compositeEventBlockMap[eachMessage.value.validatorAddressRecipient]) {
-                    compositeEventBlockMap[eachMessage.value.validatorAddressRecipient] = {
-                      self_stake: 0,
-                      reward: 0,
-                      commission: 0,
-                      total_stake: 0,
-                      total_withdraw: 0,
-                      balance_change: 0,
-                      slash: 0
-                    };
-      
+                  
+                if (
+                  [
+                    'create_validator',
+                  ].includes(eachMessage.typeUrl)
+                ) {
+                  if (!eachMessage.value.pubkey || !eachMessage.value.description.moniker)
+                    return reject({ err: `no_pubkey_or_moniker:${eachMessage.typeUrl}`, block_height: result.block_height });
+
+                  const pubkey: ArrayBuffer = eachMessage.value.pubkey.value;
+                  const byteArray = new Uint8Array(Object.values(pubkey).slice(2));
+                  const pubkeyBase64 = btoa(String.fromCharCode(...byteArray));
+                  
+                  const delegatorAddress = eachMessage.value.delegatorAddress 
+                    ? eachMessage.value.delegatorAddress 
+                    : convertOperatorAddressToBech32(eachMessage.value.validatorAddress, chain.bech32_prefix);
+
+                  validatorMap[key] = {
+                    pubkey: pubkeyBase64,
+                    operator_address: eachMessage.value.validatorAddress,
+                    delegator_address: delegatorAddress,
+                    keybase_id: eachMessage.value.description.identity,
+                    moniker: eachMessage.value.description.moniker,
+                    website: eachMessage.value.description.website,
+                    details: eachMessage.value.description.details,
+                    security_contant: eachMessage.value.description.securityContact,
+                    commission_rate: eachMessage.value.commission.rate,
+                    chain_identifier: chain.name,
+                    created_at: eachMessage.time,
+                  };
+                  if (eachMessage.value.value.denom && eachMessage.value.value.amount) {
+                    compositeEventBlockMap[key].self_stake += parseInt(eachMessage.value.value.amount);
+                    compositeEventBlockMap[key].total_stake += parseInt(eachMessage.value.value.amount);
+                  }
+                }
+                const bech32OperatorAddress = eachMessage.value.validatorAddress ? convertOperatorAddressToBech32(eachMessage.value.validatorAddress, chain.bech32_prefix) : '';
+                if (
+                  [
+                    'withdraw_rewards',
+                    'withdraw_commission'
+                  ].includes(eachMessage.typeUrl)
+                ) {
+                  if (!eachMessage.value || !eachMessage.value.amount || !eachMessage.value.amount.amount)
+                    return reject({ err: `no_amount_value:${eachMessage.typeUrl}`, block_height: result.block_height });
+                
+                  compositeEventBlockMap[key].total_withdraw += parseInt(eachMessage.value.amount.amount);
+                  if (eachMessage.typeUrl == '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission') 
+                    compositeEventBlockMap[key].commission += parseInt(eachMessage.value.amount.amount);
+                  else if (bech32OperatorAddress == eachMessage.value.delegatorAddress)
+                    compositeEventBlockMap[key].reward += parseInt(eachMessage.value.amount.amount);
+                
+                } else if (
+                  [
+                    'delegate',
+                    'complete_unbonding',
+                  ].includes(eachMessage.typeUrl)
+                ) {
+                  if (!eachMessage.value || !eachMessage.value.amount || !eachMessage.value.amount.amount)
+                    return reject({ err: `no_amount_value:${eachMessage.typeUrl}`, block_height: result.block_height });
+
+                  const stakeAmount = parseInt(eachMessage.value.amount.amount);
+                  const additiveTxs = ['/cosmos.staking.v1beta1.MsgDelegate', '/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation'];
+                  compositeEventBlockMap[key].total_stake += additiveTxs.includes(eachMessage.typeUrl) ? stakeAmount : (stakeAmount * -1);
+                  
+                  if (bech32OperatorAddress == eachMessage.value.delegatorAddress) 
+                    compositeEventBlockMap[key].self_stake += additiveTxs.includes(eachMessage.typeUrl) ? stakeAmount : (stakeAmount * -1);
+                } else if (
+                  ['complete_redelegation'].includes(eachMessage.typeUrl)
+                ) {
+                  const bech32SrcOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorSrcAddress, chain.bech32_prefix);
+                  const bech32DstOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorDstAddress, chain.bech32_prefix);
+                  
+                  const value = parseInt(eachMessage.value.amount.amount);
+                  
+                  compositeEventBlockMap[eachMessage.value.validatorSrcAddress].total_stake += (value * -1);
+                  if (bech32SrcOperatorAddress == eachMessage.value.delegatorAddress)
+                    compositeEventBlockMap[eachMessage.value.validatorSrcAddress].self_stake += (value * -1);
+                  
+                  compositeEventBlockMap[eachMessage.value.validatorDstAddress].total_stake += value;
+                  if (bech32DstOperatorAddress == eachMessage.value.delegatorAddress)
+                    compositeEventBlockMap[eachMessage.value.validatorDstAddress].self_stake += value;
+                } else if (['slash'].includes(eachMessage.typeUrl)) {
+                  compositeEventBlockMap[key].slash += eachMessage.value.amount;
+                } else if (
+                  eachMessage.typeUrl == 'transfer'
+                ) {
+        
+                  if (eachMessage.value.validatorAddressSender) {
+                    if (!compositeEventBlockMap[eachMessage.value.validatorAddressSender])
+                      compositeEventBlockMap[eachMessage.value.validatorAddressSender] = initializeCompositeBlock();
+                    compositeEventBlockMap[eachMessage.value.validatorAddressSender].balance_change -= parseInt(eachMessage.value.amount);
+                  }
+        
+                  if (eachMessage.value.validatorAddressRecipient) {
+                    if (!compositeEventBlockMap[eachMessage.value.validatorAddressRecipient])
+                      compositeEventBlockMap[eachMessage.value.validatorAddressRecipient] = initializeCompositeBlock();
                     compositeEventBlockMap[eachMessage.value.validatorAddressRecipient].balance_change += parseInt(eachMessage.value.amount);
                   }
+                } else if (eachMessage.typeUrl == 'set_withdraw_address') {
+                  setWithdrawAddressMap.push(eachMessage.value);
                 }
+                return next();
+              },
+              (err) => {
+                if (err)
+                  return reject({ err: err, block_height: result.block_height });
+                return resolve();
               }
-            }
-            resolve();
+            )
           })
         }
       )

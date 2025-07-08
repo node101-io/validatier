@@ -15,7 +15,7 @@ function renderTableHeader (sort_by, order) {
   tdValidators.classList.add('each-table-header-validator-info-header')
 
   const tdValidatorsTitle = document.createElement('div')
-  tdValidatorsTitle.textContent = 'Validators';
+  tdValidatorsTitle.textContent = 'Name';
   tdValidatorsTitle.classList.add('each-table-header-title');
 
   tdValidators.appendChild(tdValidatorsTitle);

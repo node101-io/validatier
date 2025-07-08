@@ -9,7 +9,8 @@ function mainScrollHandler() {
   const datePicker = document.getElementById('date-picker');
   const searchWrapper = document.getElementById('search-wrapper');
 
-  allMainWrapper.addEventListener('scroll', (event) => {
+  allMainWrapper.addEventListener('scroll', (event) => {    
+    if (window.location.href.includes('validator=')) return;
     const scrollTop = event.target.scrollTop;
     introMainWrapper.style.transform = `translateY(-${Math.min(scrollTop, 273)}px)`;
 
@@ -23,11 +24,11 @@ function mainScrollHandler() {
       selectedRange.style.border = 'var(--selected-range-border-size-initial) solid var(--selected-range-border-color-initial)';
       selectedRange.style.color = 'var(--selected-range-color-initial)';
 
+      searchWrapper.style.visibility = 'hidden';
       searchWrapper.style.opacity = '0';
-      setTimeout(() => {
-        searchWrapper.style.visibility = 'hidden';
-      }, 0.25 * 1000);
+      headerMainWrapper.style.height = `var(--header-main-wrapper-height)`
     } else {
+      searchWrapper.style.visibility = 'visible';
       bannerTitle.style.color = 'var(--banner-title-content-color-main)';
       document.documentElement.style.setProperty('--banner-logo-color', 'rgba(37, 0, 84, 1)');
       document.documentElement.style.setProperty('--selected-range-logo-color', 'rgba(124, 112, 195, 1)');
@@ -36,6 +37,9 @@ function mainScrollHandler() {
       selectedRange.style.backdropFilter = 'var(--selected-range-backdrop-filter)';
       selectedRange.style.border = 'var(--selected-range-border-size) solid var(--selected-range-border-color)';
       selectedRange.style.color = 'var(--selected-range-color)';
+
+      searchWrapper.style.opacity = `${Math.min(1 - ((273 - scrollTop) / (273 - 234)), 1)}`;
+      headerMainWrapper.style.height = `calc(var(--header-main-wrapper-height) - ${Math.min(scrollTop - 234, 50)}px)`
     }
 
     if (scrollTop < 273) {
@@ -46,8 +50,6 @@ function mainScrollHandler() {
       headerMainWrapper.classList.add('header-main-wrapper-main');
       headerMainWrapper.style.background = 'var(--header-main-background)';
       datePicker.style.background = 'var(--date-picker-display)';
-      searchWrapper.style.visibility = 'visible';
-      searchWrapper.style.opacity = '1';
     }
   });
 
