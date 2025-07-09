@@ -138,7 +138,7 @@ export const listenForEvents = (
                   }
 
                   setWithdrawAddress(chain.name, eachMessage.value.validatorAddress, delegatorAddress, (err, success) => {
-                    if (err || !success) return final_callback('withdraw_address_set_failed:set_withdraw_address', { success: false });
+                    if (err || !success) return final_callback(`withdraw_address_set_failed:create_validator:${height}`, { success: false });
                     return next();
                   })
                 }
@@ -262,7 +262,7 @@ export const listenForEvents = (
                   if (!operatorAddressFormat)
                     return final_callback('address_conversion_failed:set_withdraw_address', { success: false });
                   setWithdrawAddress(chain.name, operatorAddressFormat, eachMessage.value.withdrawAddress, (err, success) => {
-                    if (err || !success) return final_callback('withdraw_address_set_failed:set_withdraw_address', { success: false });
+                    if (err || !success) return final_callback(`withdraw_address_set_failed:set_withdraw_address:${height}`, { success: false });
                     return next();
                   })
                 } else {
