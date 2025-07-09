@@ -11,7 +11,7 @@ import path from 'path';
 import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
 import { startFetchingData } from './utils/startFetchingData.js';
-import { initDB } from './utils/levelDb.js';
+import { getWithdrawAddressMappingForChain, initDB, resetWithdrawAddressMappingForChain, setWithdrawAddress } from './utils/levelDb.js';
 import { Job_SaveCache } from './cron/jobs/Job_SaveCache.js';
 import Chain from './models/Chain/Chain.js';
 import getTxsByHeight from './utils/getTxsByHeight.js';
@@ -23,6 +23,7 @@ import useragent from 'express-useragent';
 import ActiveValidators from './models/ActiveValidators/ActiveValidators.js';
 import { findSkipDates } from './utils/findSkipDates.js';
 import Price from './models/Price/Price.js';
+import { testDataFetch } from './test/testDataFetch.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -67,13 +68,4 @@ app.use('/', indexRouter);
 app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
-// startFetchingData();
-
-// getTxsByHeight('5.9.86.153:26657', 18152061, 'uatom', 'cosmos', 0, false, (err, result) => {
-//   console.log(err)
-//   result.decodedTxs.forEach(each => {
-//     each.messages.forEach(each => {
-//       console.log(each)
-//     })
-//   })
-// })
+startFetchingData();

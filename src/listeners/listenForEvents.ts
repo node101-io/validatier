@@ -6,7 +6,7 @@ import getTxsByHeight, { RETRY_TOTAL } from '../utils/getTxsByHeight.js';
 import { DecodedMessage } from '../utils/decodeTxs.js';
 import { convertOperatorAddressToBech32 } from '../utils/convertOperatorAddressToBech32.js';
 import { ActiveValidatorsInterface } from '../models/ActiveValidators/ActiveValidators.js';
-import { bulkSave, clearChainData, getBatchData } from '../utils/levelDb.js';
+import { bulkSave, clearChainData, getBatchData, getValidatorsOfWithdrawAddress, setWithdrawAddress } from '../utils/levelDb.js';
 
 export const LISTENING_EVENTS = [
   'create_validator',
@@ -54,7 +54,6 @@ export const listenForEvents = (
   const promises: Promise<void>[] = [];
   const validatorMap: Record<string, any> = {};
   const compositeEventBlockMap: Record<string, any> = {};
-  const setWithdrawAddressMap: Record<string, any>[] = [];
   let timestamp: Date;
 
   for (let height = bottom_block_height; height < top_block_height; height++) {
@@ -137,6 +136,11 @@ export const listenForEvents = (
                     compositeEventBlockMap[key].self_stake += parseInt(eachMessage.value.value.amount);
                     compositeEventBlockMap[key].total_stake += parseInt(eachMessage.value.value.amount);
                   }
+
+                  setWithdrawAddress(chain.name, eachMessage.value.validatorAddress, delegatorAddress, (err, success) => {
+                    if (err || !success) return final_callback('withdraw_address_set_failed:set_withdraw_address', { success: false });
+                    return next();
+                  })
                 }
                 const bech32OperatorAddress = eachMessage.value.validatorAddress ? convertOperatorAddressToBech32(eachMessage.value.validatorAddress, chain.bech32_prefix) : '';
                 if (
@@ -153,6 +157,8 @@ export const listenForEvents = (
                     compositeEventBlockMap[key].commission += parseInt(eachMessage.value.amount.amount);
                   else if (bech32OperatorAddress == eachMessage.value.delegatorAddress)
                     compositeEventBlockMap[key].reward += parseInt(eachMessage.value.amount.amount);
+
+                  return next();
                 
                 } else if (
                   [
@@ -169,6 +175,8 @@ export const listenForEvents = (
                   
                   if (bech32OperatorAddress == eachMessage.value.delegatorAddress) 
                     compositeEventBlockMap[key].self_stake += additiveTxs.includes(eachMessage.typeUrl) ? stakeAmount : (stakeAmount * -1);
+
+                  return next();
                 } else if (
                   ['complete_redelegation'].includes(eachMessage.typeUrl)
                 ) {
@@ -184,27 +192,61 @@ export const listenForEvents = (
                   compositeEventBlockMap[eachMessage.value.validatorDstAddress].total_stake += value;
                   if (bech32DstOperatorAddress == eachMessage.value.delegatorAddress)
                     compositeEventBlockMap[eachMessage.value.validatorDstAddress].self_stake += value;
+
+                  return next();
                 } else if (['slash'].includes(eachMessage.typeUrl)) {
                   compositeEventBlockMap[key].slash += eachMessage.value.amount;
+                  return next();
                 } else if (
                   eachMessage.typeUrl == 'transfer'
                 ) {
+
+                  const amount = parseInt(eachMessage.value.amount);
         
-                  if (eachMessage.value.validatorAddressSender) {
-                    if (!compositeEventBlockMap[eachMessage.value.validatorAddressSender])
-                      compositeEventBlockMap[eachMessage.value.validatorAddressSender] = initializeCompositeBlock();
-                    compositeEventBlockMap[eachMessage.value.validatorAddressSender].balance_change -= parseInt(eachMessage.value.amount);
-                  }
-        
-                  if (eachMessage.value.validatorAddressRecipient) {
-                    if (!compositeEventBlockMap[eachMessage.value.validatorAddressRecipient])
-                      compositeEventBlockMap[eachMessage.value.validatorAddressRecipient] = initializeCompositeBlock();
-                    compositeEventBlockMap[eachMessage.value.validatorAddressRecipient].balance_change += parseInt(eachMessage.value.amount);
-                  }
+                  getValidatorsOfWithdrawAddress(chain.name, eachMessage.value.validatorAddressSender, (err, senderValidatorAddresses) => {
+                    if (err) return next(new Error(err));
+                    getValidatorsOfWithdrawAddress(chain.name, eachMessage.value.validatorAddressRecipient, (err, recipientValidatorAddresses) => {
+                      if (err) return next(new Error(err));
+
+                      if (senderValidatorAddresses && senderValidatorAddresses.length) {
+
+                        const remainder = amount % senderValidatorAddresses.length;
+
+                        senderValidatorAddresses.forEach((eachValidatorAddress, i) => {
+                          if (!compositeEventBlockMap[eachValidatorAddress])
+                            compositeEventBlockMap[eachValidatorAddress] = initializeCompositeBlock();
+                          compositeEventBlockMap[eachValidatorAddress].balance_change -= Math.floor(amount / senderValidatorAddresses.length);
+                          if (i == 0 && remainder)
+                            compositeEventBlockMap[eachValidatorAddress].balance_change -= remainder;
+                        })
+                      }
+            
+                      if (recipientValidatorAddresses && recipientValidatorAddresses.length) {
+
+                        const remainder = amount % recipientValidatorAddresses.length;
+
+                        recipientValidatorAddresses.forEach((eachValidatorAddress, i) => {
+                          if (!compositeEventBlockMap[eachValidatorAddress])
+                            compositeEventBlockMap[eachValidatorAddress] = initializeCompositeBlock();
+                          compositeEventBlockMap[eachValidatorAddress].balance_change += Math.floor(amount / recipientValidatorAddresses.length);
+                          if (i == 0 && remainder)
+                            compositeEventBlockMap[eachValidatorAddress].balance_change += remainder;
+                        })
+                      }
+                      return next();
+                    })
+                  });
                 } else if (eachMessage.typeUrl == 'set_withdraw_address') {
-                  setWithdrawAddressMap.push(eachMessage.value);
+                  const operatorAddressFormat = convertOperatorAddressToBech32(eachMessage.value.delegatorAddress, `${bech32OperatorAddress}valoper`);
+                  if (!operatorAddressFormat)
+                    return final_callback('address_conversion_failed:set_withdraw_address', { success: false });
+                  setWithdrawAddress(chain.name, operatorAddressFormat, eachMessage.value.withdrawAddress, (err, success) => {
+                    if (err || !success) return final_callback('withdraw_address_set_failed:set_withdraw_address', { success: false });
+                    return next();
+                  })
+                } else {
+                  return next();
                 }
-                return next();
               },
               (err) => {
                 if (err)

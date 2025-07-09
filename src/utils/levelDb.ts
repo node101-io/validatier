@@ -176,12 +176,12 @@ export function initializeOperatorAddressToWithdrawAddressMapping (
 ) {
   db.get(`withdraw_address_to_validators_mapping_${chain_identifier}`)
     .then((data) => {
-      if (!data) {
+      if (!data || data == '{}') {
         Validator.findValidatorsByChainIdentifier({ chain_identifier: chain_identifier }, (err, validators) => {
           if (err) callback(err, false);
-          const withdrawAddressToValidatorsMapping: Record<string, string> = {};
+          const withdrawAddressToValidatorsMapping: Record<string, string[]> = {};
           validators?.forEach(eachValidator => {
-            withdrawAddressToValidatorsMapping[eachValidator.operator_address] = eachValidator.delegator_address;
+            withdrawAddressToValidatorsMapping[eachValidator.delegator_address] = [eachValidator.operator_address];
           });
 
           db.put(`withdraw_address_to_validators_mapping_${chain_identifier}`, JSON.stringify(withdrawAddressToValidatorsMapping))
@@ -197,7 +197,7 @@ export function initializeOperatorAddressToWithdrawAddressMapping (
 export function getValidatorsOfWithdrawAddress (
   chain_identifier: string,
   withdraw_address: string,
-  callback: (err: string | null, withdrawAddress: string[] | null) => any
+  callback: (err: string | null, validatorAddresses: string[] | null) => any
 ) {
   db.get(`withdraw_address_to_validators_mapping_${chain_identifier}`)
     .then((withdrawAddressToValidatorsMapping) => {
@@ -230,4 +230,25 @@ export function setWithdrawAddress (
         .then(() => callback(null, true))
         .catch(err => callback(err, false))
     })
+}
+
+export function getWithdrawAddressMappingForChain (
+  chain_identifier: string,
+  callback: (err: string | null, withdrawAddressMappingForChain: Record<string, string[]> | null) => any
+) {
+  db.get(`withdraw_address_to_validators_mapping_${chain_identifier}`)
+    .then((withdrawAddressToValidatorsMapping) => {
+      if (!withdrawAddressToValidatorsMapping)
+        return callback('bad_request', null);
+      return callback(null, JSON.parse(withdrawAddressToValidatorsMapping));
+    })
+}
+
+export function resetWithdrawAddressMappingForChain (
+  chain_identifier: string,
+  callback: (err: string | null, success: Boolean) => any
+) {
+  db.put(`withdraw_address_to_validators_mapping_${chain_identifier}`, '')
+    .then(() => callback(null, true))
+    .catch((err) => callback(err, false))
 }
