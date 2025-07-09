@@ -100,11 +100,6 @@ block content
         //-         .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
         //-           .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
       .header-inputs-main-wrapper
-        .validator-filter-input-wrapper#search-wrapper
-          .validator-filter-input-content-wrapper 
-            .validator-search-icon(class='center')
-              include ../icons/search.pug
-            input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search Validator')
         .date-picker#date-picker
           .selected-range#selected-range(class=`${queryValidator ? 'selected-range-validator' : ''}`)
             span.date-interval-description 
@@ -159,6 +154,11 @@ block content
               //-       span= day
               //- button.cancel#cancel Cancel
               //- button.apply#apply Apply
+        .validator-filter-input-wrapper#search-wrapper
+          .validator-filter-input-content-wrapper 
+            .validator-search-icon(class='center')
+              include ../icons/search.pug
+            input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search Validator')
       a(href="/").header-banner-wrapper
         .banner-logo-wrapper#banner-logo(class='center')
           include ../icons/logo.pug
@@ -505,7 +505,7 @@ block content
               if queryValidator
                 script.
                   generateGraph(!{JSON.stringify(validator)})
-      .all-validators-main-wrapper#all-validators-main-wrapper(class=`${queryValidator ? 'section-hidden' : ''} section-hidden`)
+      .all-validators-main-wrapper#all-validators-main-wrapper(class=`${queryValidator ? 'section-hidden' : ''}`)
         .validator-table-header-wrapper 
           .each-section-title-content Validators
           .export-main-wrapper 

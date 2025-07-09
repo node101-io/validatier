@@ -34,11 +34,11 @@
 // function resizeNavbar (navbarWrapper) {
 
 //   if (window.innerWidth < 1000) {
-//     document.documentElement.style.setProperty("--navbar-width", "36px");
+//     document.documentElement.style.setProperty('--navbar-width', '36px');
 //     document.getElementById('all-main-wrapper').style.marginLeft = '76px';
 //     return navbarWrapper.classList.add('navbar-close');
 //   }
-//   document.documentElement.style.setProperty("--navbar-width", "237px");
+//   document.documentElement.style.setProperty('--navbar-width', '237px');
 //   document.getElementById('all-main-wrapper').style.marginLeft = '0px';
 //   return navbarWrapper.classList.remove('navbar-close');
 // }
@@ -48,7 +48,7 @@
 //   const navbarWrapper = document.getElementById('navbar-wrapper');
 
 //   if (window.innerWidth < 1000 && navbarWrapper.classList.contains('navbar-close')) {
-//     document.documentElement.style.setProperty("--navbar-width", "30px");
+//     document.documentElement.style.setProperty('--navbar-width', '30px');
 //     navbarViewToggle.querySelector('span').classList.add('navbar-arrow-close');
 //   }
 
@@ -72,7 +72,7 @@
 //       }
 //     }, 0.25 * 1000);
 //     if (navbarWrapper.classList.contains('navbar-close')) {
-//       document.documentElement.style.setProperty("--navbar-width", "237px");
+//       document.documentElement.style.setProperty('--navbar-width', '237px');
 //       navbarWrapper.classList.remove('navbar-close');
 //       navbarViewToggle.querySelector('span').classList.remove('navbar-arrow-close');
       
@@ -81,7 +81,7 @@
 
 //       setCookie('isNavbarClose', '');
 //     } else {
-//       document.documentElement.style.setProperty("--navbar-width", "30px");
+//       document.documentElement.style.setProperty('--navbar-width', '30px');
 //       navbarWrapper.classList.add('navbar-close');
 //       navbarViewToggle.querySelector('span').classList.add('navbar-arrow-close');
 //       navbarViewToggle.style.left = 'var(--navbar-view-toggle-left)';

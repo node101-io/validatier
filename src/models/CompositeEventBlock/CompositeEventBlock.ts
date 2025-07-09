@@ -200,19 +200,19 @@ compositeEventBlockSchema.statics.getPeriodicDataForGraphGeneration = function (
     { $match: { operator_address: operator_address, timestamp: { $gte: bottom_timestamp, $lte: top_timestamp } }},
     {
       $setWindowFields: {
-        partitionBy: "$operator_address",
+        partitionBy: '$operator_address',
         sortBy: { operator_address: 1, timestamp: 1 },
         output: {
-          mostRecent: { $last: "$$ROOT" },
-          leastRecent: { $first: "$$ROOT" }
+          mostRecent: { $last: '$$ROOT' },
+          leastRecent: { $first: '$$ROOT' }
         }
       }
     },
     {
       $group: {
-        _id: "$operator_address",
-        mostRecentRecord: { $first: "$mostRecent" },
-        leastRecentRecord: { $first: "$leastRecent" }
+        _id: '$operator_address',
+        mostRecentRecord: { $first: '$mostRecent' },
+        leastRecentRecord: { $first: '$leastRecent' }
       }
     }
   ])
@@ -269,10 +269,10 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
               1
             ]
           },
-          operator_address: "$operator_address"
+          operator_address: '$operator_address'
         },
-        leastRecentRecord: { $first: "$$ROOT" },
-        mostRecentRecord: { $last: "$$ROOT" },
+        leastRecentRecord: { $first: '$$ROOT' },
+        mostRecentRecord: { $last: '$$ROOT' },
         average_total_stake: { $avg: '$total_stake_prefix_sum' }
       }
     },
@@ -286,43 +286,43 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
         initial_commission_prefix_sum: '$leastRecentRecord.commission_prefix_sum',
         reward: {
           $add: [
-            { $subtract: ["$mostRecentRecord.reward_prefix_sum", "$leastRecentRecord.reward_prefix_sum"] },
-            { $ifNull: ["$leastRecentRecord.reward", 0] }
+            { $subtract: ['$mostRecentRecord.reward_prefix_sum', '$leastRecentRecord.reward_prefix_sum'] },
+            { $ifNull: ['$leastRecentRecord.reward', 0] }
           ]
         },
         self_stake: {
           $add: [
-            { $subtract: ["$mostRecentRecord.self_stake_prefix_sum", "$leastRecentRecord.self_stake_prefix_sum"] },
-            { $ifNull: ["$leastRecentRecord.self_stake", 0] }
+            { $subtract: ['$mostRecentRecord.self_stake_prefix_sum', '$leastRecentRecord.self_stake_prefix_sum'] },
+            { $ifNull: ['$leastRecentRecord.self_stake', 0] }
           ]
         },
         commission: {
           $add: [
-            { $subtract: ["$mostRecentRecord.commission_prefix_sum", "$leastRecentRecord.commission_prefix_sum"] },
-            { $ifNull: ["$leastRecentRecord.commission", 0] }
+            { $subtract: ['$mostRecentRecord.commission_prefix_sum', '$leastRecentRecord.commission_prefix_sum'] },
+            { $ifNull: ['$leastRecentRecord.commission', 0] }
           ]
         },
         total_stake: {
           $add: [
-            { $subtract: ["$mostRecentRecord.total_stake_prefix_sum", "$leastRecentRecord.total_stake_prefix_sum"] },
-            { $ifNull: ["$leastRecentRecord.total_stake", 0] }
+            { $subtract: ['$mostRecentRecord.total_stake_prefix_sum', '$leastRecentRecord.total_stake_prefix_sum'] },
+            { $ifNull: ['$leastRecentRecord.total_stake', 0] }
           ]
         },
         total_withdraw: {
           $add: [
-            { $subtract: ["$mostRecentRecord.total_withdraw_prefix_sum", "$leastRecentRecord.total_withdraw_prefix_sum"] },
-            { $ifNull: ["$leastRecentRecord.total_withdraw", 0] }
+            { $subtract: ['$mostRecentRecord.total_withdraw_prefix_sum', '$leastRecentRecord.total_withdraw_prefix_sum'] },
+            { $ifNull: ['$leastRecentRecord.total_withdraw', 0] }
           ]
         },
         balance_change: {
           $add: [
             { 
               $subtract: [
-                { $ifNull: ["$mostRecentRecord.balance_change_prefix_sum", 0] },
-                { $ifNull: ["$leastRecentRecord.balance_change_prefix_sum", 0] }
+                { $ifNull: ['$mostRecentRecord.balance_change_prefix_sum', 0] },
+                { $ifNull: ['$leastRecentRecord.balance_change_prefix_sum', 0] }
               ] 
             },
-            { $ifNull: ["$leastRecentRecord.balance_change", 0] }
+            { $ifNull: ['$leastRecentRecord.balance_change', 0] }
           ]
         },
       }
@@ -385,11 +385,11 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
     { $sort: { operator_address: 1, timestamp: 1 } },
     {
       $group: {
-        _id: "$operator_address",
-        mostRecentRecord: { $last: "$$ROOT" }, 
+        _id: '$operator_address',
+        mostRecentRecord: { $last: '$$ROOT' }, 
       },
     },
-    { $replaceRoot: { newRoot: "$mostRecentRecord" } } 
+    { $replaceRoot: { newRoot: '$mostRecentRecord' } } 
   ])
   .then((mostRecendRecordsArray) => {
     const mostRecendRecordsMapping: Record<string, any> = {};
@@ -537,8 +537,8 @@ compositeEventBlockSchema.statics.removeDuplicates = function (
     { $sort: { operator_address: 1, timestamp: 1 } },
     {
       $group: {
-        _id: { operator_address: "$operator_address", timestamp: "$timestamp" },
-        ids: { $push: "$_id" },
+        _id: { operator_address: '$operator_address', timestamp: '$timestamp' },
+        ids: { $push: '$_id' },
         count: { $sum: 1 }
       }
     },

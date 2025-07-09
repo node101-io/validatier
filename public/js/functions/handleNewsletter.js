@@ -4,9 +4,9 @@
 //   const contactInput = document.getElementById('contact-message-input');
 
 //   contactSubmit.addEventListener('click', (event) => {
-//     fetch("https://node101.io/subscribe", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" }, body: JSON.stringify({
+//     fetch('https://node101.io/subscribe', {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
 //       email: contactInput.value, type: 'validatier'
 //     }),
 //   })

@@ -13,10 +13,13 @@ const indexGetController = (req: Request, res: Response): void => {
   const isStartClicked = req.cookies.isStartClicked;
 
   const activeNetworkIdentifier = req.cookies.network ? req.cookies.network : 'cosmoshub';
-  const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime()): (new Date(1)).getTime();
-  const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()): Date.now();
 
-  const specificRangeName = req.cookies.specificRangeName || 'All time';
+  const dayAsMilliseconds = 86400000;
+
+  const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime()) : new Date().getTime() - dayAsMilliseconds * 365;
+  const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()) : new Date().getTime();
+
+  const specificRangeName = req.cookies.specificRangeName || 'Last year';
   const specificRange = 'custom';
 
   Promise.allSettled([
@@ -181,10 +184,10 @@ const indexGetController = (req: Request, res: Response): void => {
         validators: activeValidators,
         summaryGraphData,
         smallGraphData,
-        selectedDateBottom: req.cookies.selectedDateBottom || (new Date(selectedChain.first_available_block_time)).toISOString().split('T')[0],
-        selectedDateTop: req.cookies.selectedDateTop || (new Date()).toISOString().split('T')[0],
+        selectedDateBottom: req.cookies.selectedDateBottom || (new Date(bottomTimestamp)).toISOString().split('T')[0],
+        selectedDateTop: req.cookies.selectedDateTop || (new Date(topTimestamp)).toISOString().split('T')[0],
         specificRangeName,
-        specificRange: req.cookies.specificRange || 'all_time',
+        specificRange: req.cookies.specificRange || 'last_365_days',
         startDay: req.cookies.startDay || 'monday',
         currency_type: req.cookies.currency_type || 'native',
         chains,

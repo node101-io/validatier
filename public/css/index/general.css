@@ -560,7 +560,8 @@ input {
 
 .each-new-footer-line {
   width: 100%;
-  display: var(--each-new-footer-line-section-flex-direction);
+  display: flex;
+  flex-direction: var(--each-new-footer-line-section-flex-direction);
   justify-content: space-between;
   align-items: center;
   position: relative;

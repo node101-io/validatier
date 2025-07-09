@@ -241,7 +241,7 @@ function generateGraph (validator) {
   };
 
   const graphWrapper = plotValidatorGraph({ type: 'validator', operatorAddress: operatorAddress.replace('@', '\\@'), decimals, usd_exchange_rate, symbol, validatorGraphEventListenersMapping, dataFields, graphContainer, summaryData });
-  const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue("width").replace('px', '');
+  const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue('width').replace('px', '');
 
   const queryString = new URLSearchParams(requestData).toString();
   const eventSource = new EventSource(`/validator/get_graph_data?${queryString}`)

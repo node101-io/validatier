@@ -154,7 +154,7 @@
   --minimal-popup-scrollbar-width: 5px;
   --minimal-popup-scrollbar-thumb-border-radius: 5px;
 
-  --validator-filter-input-wrapper-width: 250px;
+  --validator-filter-input-wrapper-width: 200px;
   --validator-filter-input-wrapper-height: 46px;
   --validator-filter-input-wrapper-padding-horizontal: 16px;
   --validator-filter-input-wrapper-padding-vertical: 3px;
@@ -166,9 +166,10 @@
   --validator-filter-input-wrapper-gap: 16px;
   --validator-filter-input-wrapper-display-initial: none;
   --validator-filter-input-wrapper-display: flex;
+  --validator-filter-input-wrapper-transition-duration: 0.5s;
 
   --validator-filter-input-content-wrapper-width: 100%;
-  --validator-filter-input-content-wrapper-input-width: 200px;
+  --validator-filter-input-content-wrapper-input-width: calc(100% - 46px);
   --validator-filter-input-content-wrapper-display: flex;
   
   --validator-dropdown-icon-opacity: 0.5;
@@ -621,13 +622,15 @@
 
 .validator-filter-input-wrapper {
   position: relative;
-  width: fit-content;
+  min-width: 20px;
+  width: calc(var(--validator-filter-input-wrapper-width) - 2 * var(--validator-filter-input-wrapper-padding-horizontal));
   height: calc(var(--validator-filter-input-wrapper-height) - (2 * var(--validator-filter-input-wrapper-padding-vertical)));
   padding: var(--validator-filter-input-wrapper-padding-vertical) var(--validator-filter-input-wrapper-padding-horizontal);
   background-color: var(--validator-filter-input-background-color);
   border: var(--validator-filter-input-wrapper-border-size) solid var(--validator-filter-input-wrapper-border-color);
   border-radius: var(--validator-filter-input-wrapper-border-radius);
   display: var(--validator-filter-input-wrapper-display);
+  transition: all var(--validator-filter-input-wrapper-transition-duration) ease 0s;
   overflow: hidden;
   align-items: center;
   visibility: hidden;
@@ -635,7 +638,6 @@
 }
 
 .validator-filter-input-content-wrapper {
-  width: fit-content;
   display: var(--validator-filter-input-content-wrapper-display);
   align-items: center;
   gap: var(--validator-filter-input-wrapper-gap);
@@ -645,9 +647,13 @@
 .validator-filter-input-content-wrapper input {
   min-width: var(--validator-filter-input-content-wrapper-input-width);
   max-width: var(--validator-filter-input-content-wrapper-input-width);
-  transition: all 0.5s ease 0s;
   padding: 0 !important;
   margin-bottom: 4px;
+}
+
+.validator-search-icon {
+  min-width: 20px;
+  min-height: 20px;
 }
 
 .validator-dropdown-icon {
@@ -763,7 +769,7 @@
 
 @media only screen and (max-width: 900px) {
   :root {
-    --validator-filter-input-content-wrapper-input-width: 0px;
+    --validator-filter-input-wrapper-width: 46px;
     --validator-filter-input-wrapper-gap: 0px;
     --validator-filter-input-wrapper-padding-horizontal: 12px;
   }

@@ -24,7 +24,7 @@ function handleValidatorSearch () {
     const monikers = Array.from(document.querySelectorAll('.validator-moniker')).map(each => each.children[0].children[0].innerHTML);
     const operatorAddresses = Array.from(document.querySelectorAll('.operator-address-search')).map(each => each.id);  
 
-    document.documentElement.style.setProperty("--scrollbar-opacity", "1");
+    document.documentElement.style.setProperty('--scrollbar-opacity', '1');
     if (!validatorFilterInput.value || validatorFilterInput.value.length <= 0) return document.querySelectorAll('.each-validator-wrapper').forEach(each => {
       each.style.display = 'flex';
     });
@@ -45,7 +45,7 @@ function handleValidatorSearch () {
     }
 
     if (document.documentElement.scrollHeight <= document.documentElement.clientHeight) {
-      document.documentElement.style.setProperty("--scrollbar-opacity", "0");
+      document.documentElement.style.setProperty('--scrollbar-opacity', '0');
     }
   })
 
@@ -55,16 +55,20 @@ function handleValidatorSearch () {
     while (target != document.body && target.id != 'search-wrapper') target = target.parentNode;
     if (target.id != 'search-wrapper') {
       if (window.innerWidth <= 900) {
-        document.documentElement.style.setProperty("--validator-filter-input-content-wrapper-input-width", "0px");
-        document.documentElement.style.setProperty("--validator-filter-input-wrapper-gap", '0px');
+        document.documentElement.style.setProperty('--validator-filter-input-wrapper-width', '46px');
+        document.documentElement.style.setProperty('--header-inputs-main-wrapper-width', '0%');
+        document.documentElement.style.setProperty('--validator-filter-input-wrapper-gap', '0px');
+        document.documentElement.style.setProperty('--header-banner-wrapper-margin-right', '0px');
       }
       return;
     }
 
     if (window.innerWidth > 900) return;
-    const searchWidth = `calc(${window.innerWidth}px - 60px - var(--date-picker-width) - 2 * var(--header-inputs-main-wrapper-gap) - 2 * var(--inner-main-wrapper-horizontal-padding))`
-    document.documentElement.style.setProperty("--validator-filter-input-content-wrapper-input-width", searchWidth);
-    document.documentElement.style.setProperty("--validator-filter-input-wrapper-gap", '10px');
+    const searchWidth = `calc(100% - var(--date-picker-width))`
+    document.documentElement.style.setProperty('--validator-filter-input-wrapper-width', searchWidth);
+    document.documentElement.style.setProperty('--header-inputs-main-wrapper-width', '100%');
+    document.documentElement.style.setProperty('--validator-filter-input-wrapper-gap', '10px');
+    document.documentElement.style.setProperty('--header-banner-wrapper-margin-right', '30px');
 
     return;
   })
