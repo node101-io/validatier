@@ -24,6 +24,7 @@ import ActiveValidators from './models/ActiveValidators/ActiveValidators.js';
 import { findSkipDates } from './utils/findSkipDates.js';
 import Price from './models/Price/Price.js';
 import { testDataFetch } from './test/testDataFetch.js';
+import { getOnlyNativeTokenValueFromAmountString } from './listeners/functions/getOnlyNativeTokenValueFromAmountString.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -69,3 +70,4 @@ app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
 startFetchingData();
+// testDataFetch();

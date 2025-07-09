@@ -128,10 +128,7 @@ const decodeTxsV2 = (
         value = {
           validatorAddress: attributesMapping.validator || null,
           delegatorAddress: attributesMapping.delegator || null,
-          value: {
-            amount: getOnlyNativeTokenValueFromAmountString(attributesMapping.amount, denom),
-            denom: denom
-          },
+          amount: getOnlyNativeTokenValueFromAmountString(attributesMapping.amount, denom) || '0',
         }
         
         if (

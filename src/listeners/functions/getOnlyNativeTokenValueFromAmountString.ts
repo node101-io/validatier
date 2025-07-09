@@ -1,6 +1,9 @@
 
 export const getOnlyNativeTokenValueFromAmountString = function (value: string, denom: string) {
 
+  if (parseInt(value).toString() == value)
+    return value;
+
   const splitString: string[] = value.split(',');
 
   for (let i = 0; i < splitString.length; i++) {

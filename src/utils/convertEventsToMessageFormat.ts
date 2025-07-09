@@ -37,8 +37,8 @@ export const convertEventsToMessageFormat = (finalizeBlockEvents: Event[], bech3
         validatorAddressSender: '',
         validatorAddressRecipient: '',
         delegatorAddress: '',
-        validatorSrcArress: '',
-        validatorDstArress: '',
+        validatorSrcAddress: '',
+        validatorDstAddress: '',
         amount: ''
       }
     }
@@ -55,9 +55,9 @@ export const convertEventsToMessageFormat = (finalizeBlockEvents: Event[], bech3
         else if (eachAttribute.key == 'delegator')
           messageBody.value.delegatorAddress = eachAttribute.value;
         else if (eachAttribute.key == 'source_validator')
-          messageBody.value.validatorSrcArress = eachAttribute.value;
+          messageBody.value.validatorSrcAddress = eachAttribute.value;
         else if (eachAttribute.key == 'destination_validator')
-          messageBody.value.validatorDstArress = eachAttribute.value;
+          messageBody.value.validatorDstAddress = eachAttribute.value;
         else
           messageBody.value.validatorAddress = eachAttribute.value;
         gotValidatorAddress = true;

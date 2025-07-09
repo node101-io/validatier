@@ -149,14 +149,23 @@ export const listenForEvents = (
                     'withdraw_commission'
                   ].includes(eachMessage.typeUrl)
                 ) {
-                  if (!eachMessage.value || !eachMessage.value.amount || !eachMessage.value.amount.amount)
-                    return reject({ err: `no_amount_value:${eachMessage.typeUrl}`, block_height: result.block_height });
-                
-                  compositeEventBlockMap[key].total_withdraw += parseInt(eachMessage.value.amount.amount);
+                  if (
+                    (
+                      eachMessage.typeUrl == 'withdraw_rewards' &&
+                      !eachMessage.value.delegatorAddress
+                    ) ||
+                    !eachMessage.value.validatorAddress ||
+                    !eachMessage.value.amount
+                  ) {
+                    console.log(eachMessage)
+                    return reject({ err: `neccessary_values_missing:${eachMessage.typeUrl}:${height}`, block_height: result.block_height });
+                  }
+
+                  compositeEventBlockMap[key].total_withdraw += parseInt(eachMessage.value.amount);
                   if (eachMessage.typeUrl == '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission') 
-                    compositeEventBlockMap[key].commission += parseInt(eachMessage.value.amount.amount);
+                    compositeEventBlockMap[key].commission += parseInt(eachMessage.value.amount);
                   else if (bech32OperatorAddress == eachMessage.value.delegatorAddress)
-                    compositeEventBlockMap[key].reward += parseInt(eachMessage.value.amount.amount);
+                    compositeEventBlockMap[key].reward += parseInt(eachMessage.value.amount);
 
                   return next();
                 
@@ -166,10 +175,12 @@ export const listenForEvents = (
                     'complete_unbonding',
                   ].includes(eachMessage.typeUrl)
                 ) {
-                  if (!eachMessage.value || !eachMessage.value.amount || !eachMessage.value.amount.amount)
-                    return reject({ err: `no_amount_value:${eachMessage.typeUrl}`, block_height: result.block_height });
+                  if (!eachMessage.value.delegatorAddress || !eachMessage.value.validatorAddress || !eachMessage.value.amount) {
+                    console.log(eachMessage)
+                    return reject({ err: `neccessary_values_missing:${eachMessage.typeUrl}:${height}`, block_height: result.block_height });
+                  }
 
-                  const stakeAmount = parseInt(eachMessage.value.amount.amount);
+                  const stakeAmount = parseInt(eachMessage.value.amount);
                   const additiveTxs = ['/cosmos.staking.v1beta1.MsgDelegate', '/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation'];
                   compositeEventBlockMap[key].total_stake += additiveTxs.includes(eachMessage.typeUrl) ? stakeAmount : (stakeAmount * -1);
                   
@@ -180,10 +191,16 @@ export const listenForEvents = (
                 } else if (
                   ['complete_redelegation'].includes(eachMessage.typeUrl)
                 ) {
+
+                  if (!eachMessage.value.validatorSrcAddress || !eachMessage.value.validatorDstAddress || !eachMessage.value.delegatorAddress || !eachMessage.value.amount) {
+                    console.log(eachMessage)
+                    return reject({ err: `neccessary_values_missing:${eachMessage.typeUrl}:${height}`, block_height: result.block_height });
+                  }
+
                   const bech32SrcOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorSrcAddress, chain.bech32_prefix);
                   const bech32DstOperatorAddress = convertOperatorAddressToBech32(eachMessage.value.validatorDstAddress, chain.bech32_prefix);
                   
-                  const value = parseInt(eachMessage.value.amount.amount);
+                  const value = parseInt(eachMessage.value.amount);
                   
                   compositeEventBlockMap[eachMessage.value.validatorSrcAddress].total_stake += (value * -1);
                   if (bech32SrcOperatorAddress == eachMessage.value.delegatorAddress)
@@ -195,6 +212,10 @@ export const listenForEvents = (
 
                   return next();
                 } else if (['slash'].includes(eachMessage.typeUrl)) {
+                  if (!eachMessage.value.amount) {
+                    console.log(eachMessage)
+                    return reject({ err: `neccessary_values_missing:${eachMessage.typeUrl}:${height}`, block_height: result.block_height });
+                  }
                   compositeEventBlockMap[key].slash += eachMessage.value.amount;
                   return next();
                 } else if (
