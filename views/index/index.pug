@@ -154,11 +154,8 @@ block content
               //-       span= day
               //- button.cancel#cancel Cancel
               //- button.apply#apply Apply
-        .validator-filter-input-wrapper#search-wrapper
-          .validator-filter-input-content-wrapper 
-            .validator-search-icon(class='center')
-              include ../icons/search.pug
-            input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search Validator')
+        .validator-filter-container
+          input.validator-filter-input(autocomplete="off" class='search-wrapper' type='text' id='validator-filter-input' placeholder='Search Validator')
       a(href="/").header-banner-wrapper
         .banner-logo-wrapper#banner-logo(class='center')
           include ../icons/logo.pug

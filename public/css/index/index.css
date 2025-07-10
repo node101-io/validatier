@@ -34,7 +34,7 @@
   --header-main-background-initial: transparent;
   --header-main-background: rgba(255, 255, 255, 1);
 
-  --header-inputs-main-wrapper-width: 0%;
+  --header-inputs-main-wrapper-width: fit-content;
   --header-inputs-main-wrapper-gap: 20px;
   
   --body-main-wrapper-background: rgba(245, 245, 255, 1);
@@ -127,8 +127,7 @@
 }
 
 .header-inputs-main-wrapper {
-  min-width: var(--header-inputs-main-wrapper-width);
-  max-width: var(--header-inputs-main-wrapper-width);
+  width: var(--header-inputs-main-wrapper-width);
   display: flex;
   flex-direction: row-reverse;
   align-items: center;

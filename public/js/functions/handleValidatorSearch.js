@@ -48,28 +48,4 @@ function handleValidatorSearch () {
       document.documentElement.style.setProperty('--scrollbar-opacity', '0');
     }
   })
-
-  document.addEventListener('click', (event) => {
-    
-    let target = event.target;
-    while (target != document.body && target.id != 'search-wrapper') target = target.parentNode;
-    if (target.id != 'search-wrapper') {
-      if (window.innerWidth <= 900) {
-        document.documentElement.style.setProperty('--validator-filter-input-wrapper-width', '46px');
-        document.documentElement.style.setProperty('--header-inputs-main-wrapper-width', '0%');
-        document.documentElement.style.setProperty('--validator-filter-input-wrapper-gap', '0px');
-        document.documentElement.style.setProperty('--header-banner-wrapper-margin-right', '0px');
-      }
-      return;
-    }
-
-    if (window.innerWidth > 900) return;
-    const searchWidth = `calc(100% - var(--date-picker-width))`
-    document.documentElement.style.setProperty('--validator-filter-input-wrapper-width', searchWidth);
-    document.documentElement.style.setProperty('--header-inputs-main-wrapper-width', '100%');
-    document.documentElement.style.setProperty('--validator-filter-input-wrapper-gap', '10px');
-    document.documentElement.style.setProperty('--header-banner-wrapper-margin-right', '30px');
-
-    return;
-  })
 }

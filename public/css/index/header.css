@@ -174,7 +174,7 @@
   --header-banner-wrapper-gap: 10px;
   --header-banner-wrapper-margin-bottom: 10px;
   --header-banner-wrapper-margin-left: 0px;
-  --header-banner-wrapper-margin-right: 0px;
+  --header-banner-wrapper-margin-right: 50px;
 
   --banner-title-content-color-initial: rgba(245, 245, 255, 1);
   --banner-title-content-color-main: rgba(37, 0, 84, 1);

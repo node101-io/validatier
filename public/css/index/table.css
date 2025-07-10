@@ -153,24 +153,6 @@
 
   --minimal-popup-scrollbar-width: 5px;
   --minimal-popup-scrollbar-thumb-border-radius: 5px;
-
-  --validator-filter-input-wrapper-width: 200px;
-  --validator-filter-input-wrapper-height: 46px;
-  --validator-filter-input-wrapper-padding-horizontal: 16px;
-  --validator-filter-input-wrapper-padding-vertical: 3px;
-
-  --validator-filter-input-wrapper-background-color: rgba(245, 245, 255, 1);
-  --validator-filter-input-wrapper-border-size: 1px;
-  --validator-filter-input-wrapper-border-color: rgba(190, 190, 231, 1);
-  --validator-filter-input-wrapper-border-radius: 16px;
-  --validator-filter-input-wrapper-gap: 16px;
-  --validator-filter-input-wrapper-display-initial: none;
-  --validator-filter-input-wrapper-display: flex;
-  --validator-filter-input-wrapper-transition-duration: 0.5s;
-
-  --validator-filter-input-content-wrapper-width: 100%;
-  --validator-filter-input-content-wrapper-input-width: calc(100% - 46px);
-  --validator-filter-input-content-wrapper-display: flex;
   
   --validator-dropdown-icon-opacity: 0.5;
   --validator-dropdown-icon-transition-duration: 0.25s;
@@ -179,7 +161,8 @@
   --validator-filter-input-font-weight: 500;
   --validator-filter-input-color: rgba(124, 112, 195, 1);
   --validator-filter-input-background-color: rgba(245, 245, 255, 1);
-  --validator-filter-input-border: 0;
+  --validator-filter-border-size: 1px;
+  --validator-filter-border-color: var(--general-main-wrapper-border-color);
   
   --current-month-and-year-display-font-size: 20px;
   --current-month-and-year-display-font-weight: 600;
@@ -620,37 +603,6 @@
   transform-origin: center;
 }
 
-.validator-filter-input-wrapper {
-  position: relative;
-  min-width: 20px;
-  width: calc(var(--validator-filter-input-wrapper-width) - 2 * var(--validator-filter-input-wrapper-padding-horizontal));
-  height: calc(var(--validator-filter-input-wrapper-height) - (2 * var(--validator-filter-input-wrapper-padding-vertical)));
-  padding: var(--validator-filter-input-wrapper-padding-vertical) var(--validator-filter-input-wrapper-padding-horizontal);
-  background-color: var(--validator-filter-input-background-color);
-  border: var(--validator-filter-input-wrapper-border-size) solid var(--validator-filter-input-wrapper-border-color);
-  border-radius: var(--validator-filter-input-wrapper-border-radius);
-  display: var(--validator-filter-input-wrapper-display);
-  transition: all var(--validator-filter-input-wrapper-transition-duration) ease 0s;
-  overflow: hidden;
-  align-items: center;
-  visibility: hidden;
-  opacity: 0;
-}
-
-.validator-filter-input-content-wrapper {
-  display: var(--validator-filter-input-content-wrapper-display);
-  align-items: center;
-  gap: var(--validator-filter-input-wrapper-gap);
-  overflow: hidden;
-}
-
-.validator-filter-input-content-wrapper input {
-  min-width: var(--validator-filter-input-content-wrapper-input-width);
-  max-width: var(--validator-filter-input-content-wrapper-input-width);
-  padding: 0 !important;
-  margin-bottom: 4px;
-}
-
 .validator-search-icon {
   min-width: 20px;
   min-height: 20px;
@@ -663,11 +615,31 @@
 }
 
 .validator-filter-input {
+  width: 200px;
+  height: var(--selected-range-height);
   font-size: var(--validator-filter-input-font-size);
   font-weight: var(--validator-filter-input-font-weight);
-  border: var(--validator-filter-input-border);
+  border: var(--validator-filter-border-size) solid var(--validator-filter-border-color);
   color: var(--validator-filter-input-color);
-  background: transparent;
+  background-color: var(--validator-filter-input-background-color);
+  border-radius: var(--selected-range-border-radius);
+  transition: all 0.5s ease-in-out 0s;
+  padding: 0;
+  padding-left: 40px;
+  position: relative;
+  background-image: url('/res/images/search.svg');
+  background-position: calc(var(--selected-range-height) / 2 - 10px) calc(var(--selected-range-height) / 2 - 10px);
+  background-repeat: no-repeat;
+}
+
+.validator-filter-input:focus {
+  width: calc(100vw - var(--date-picker-width) - 3 * var(--header-inputs-main-wrapper-gap) - 2 * var(--inner-main-wrapper-horizontal-padding));
+}
+
+.validator-filter-container {
+  width: fit-content;
+  height: fit-content;
+  position: relative;
 }
 
 .validator-filter-input::placeholder {

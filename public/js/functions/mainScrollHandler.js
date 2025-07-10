@@ -7,7 +7,7 @@ function mainScrollHandler() {
 
   const headerMainWrapper = document.getElementById('header-main-wrapper');
   const datePicker = document.getElementById('date-picker');
-  const searchWrapper = document.getElementById('search-wrapper');
+  const searchWrapper = document.querySelector('.search-wrapper');
 
   allMainWrapper.addEventListener('scroll', (event) => {    
     if (window.location.href.includes('validator=')) return;
