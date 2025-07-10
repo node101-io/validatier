@@ -137,8 +137,8 @@ export const listenForEvents = (
                     compositeEventBlockMap[key].total_stake += parseInt(eachMessage.value.value.amount);
                   }
 
-                  setWithdrawAddress(chain.name, eachMessage.value.validatorAddress, delegatorAddress, (err, success) => {
-                    if (err || !success) return final_callback(`withdraw_address_set_failed:create_validator:${height}`, { success: false });
+                  return setWithdrawAddress(chain.name, eachMessage.value.validatorAddress, delegatorAddress, (err, success) => {
+                    if (err || !success) return reject(`${err}:withdraw_address_set_failed:create_validator:${height}`);
                     return next();
                   })
                 }
@@ -225,9 +225,9 @@ export const listenForEvents = (
                   const amount = parseInt(eachMessage.value.amount);
         
                   getValidatorsOfWithdrawAddress(chain.name, eachMessage.value.validatorAddressSender, (err, senderValidatorAddresses) => {
-                    if (err) return next(new Error(err));
+                    if (err) return reject(err);
                     getValidatorsOfWithdrawAddress(chain.name, eachMessage.value.validatorAddressRecipient, (err, recipientValidatorAddresses) => {
-                      if (err) return next(new Error(err));
+                      if (err) return reject(err);
 
                       if (senderValidatorAddresses && senderValidatorAddresses.length) {
 
@@ -258,11 +258,11 @@ export const listenForEvents = (
                     })
                   });
                 } else if (eachMessage.typeUrl == 'set_withdraw_address') {
-                  const operatorAddressFormat = convertOperatorAddressToBech32(eachMessage.value.delegatorAddress, `${bech32OperatorAddress}valoper`);
+                  const operatorAddressFormat = convertOperatorAddressToBech32(eachMessage.value.delegatorAddress, `${chain.bech32_prefix}valoper`);
                   if (!operatorAddressFormat)
-                    return final_callback('address_conversion_failed:set_withdraw_address', { success: false });
+                    return reject('address_conversion_failed:set_withdraw_address');
                   setWithdrawAddress(chain.name, operatorAddressFormat, eachMessage.value.withdrawAddress, (err, success) => {
-                    if (err || !success) return final_callback(`withdraw_address_set_failed:set_withdraw_address:${height}`, { success: false });
+                    if (err || !success) return reject(`withdraw_address_set_failed:set_withdraw_address:${height}`);
                     return next();
                   })
                 } else {

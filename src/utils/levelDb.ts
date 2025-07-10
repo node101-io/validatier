@@ -208,17 +208,23 @@ export function getValidatorsOfWithdrawAddress (
     })
 }
 
-export function setWithdrawAddress (
+export function setWithdrawAddress(
   chain_identifier: string,
   operator_address: string,
   new_withdraw_address: string,
-  callback: (err: string | null, success: Boolean) => any
+  callback: (err: string | null, success: boolean) => any
 ) {
   db.get(`withdraw_address_to_validators_mapping_${chain_identifier}`)
     .then((withdrawAddressToValidatorsMapping) => {
       if (!withdrawAddressToValidatorsMapping)
         return callback('bad_request', false);
-      const withdrawAddressToValidatorsMappingJSON = JSON.parse(withdrawAddressToValidatorsMapping);
+
+      let withdrawAddressToValidatorsMappingJSON;
+      try {
+        withdrawAddressToValidatorsMappingJSON = JSON.parse(withdrawAddressToValidatorsMapping);
+      } catch (err) {
+        return callback(`json_parse_failed:${err}`, false);
+      }
 
       if (!withdrawAddressToValidatorsMappingJSON[new_withdraw_address])
         withdrawAddressToValidatorsMappingJSON[new_withdraw_address] = [];
@@ -226,11 +232,16 @@ export function setWithdrawAddress (
       if (!withdrawAddressToValidatorsMappingJSON[new_withdraw_address].includes(operator_address))
         withdrawAddressToValidatorsMappingJSON[new_withdraw_address].push(operator_address);
 
-      db.put(`withdraw_address_to_validators_mapping_${chain_identifier}`, JSON.stringify(withdrawAddressToValidatorsMappingJSON))
+      db.put(
+        `withdraw_address_to_validators_mapping_${chain_identifier}`,
+        JSON.stringify(withdrawAddressToValidatorsMappingJSON)
+      )
         .then(() => callback(null, true))
-        .catch(err => callback(err, false))
+        .catch(err => callback(`level_db_write_failed:${err}`, false));
     })
+    .catch(err => callback(`level_db_read_failed:${err}`, false));
 }
+
 
 export function getWithdrawAddressMappingForChain (
   chain_identifier: string,
