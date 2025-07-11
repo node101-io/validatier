@@ -65,31 +65,33 @@ const getAttributesAsMappingFromEventType = (
     if (!searchType.split('|').includes(eachEvent.type)) continue;
     const attributes = getAttributesAsMapping(eachEvent.attributes);
     
-    let flag = 0;
+    let flag = 1;
     let foundIn = '';
     attributeEqualityPattern.split(',').forEach(eachEquationGeneralPattern => {
       let orFlag = 0;
       eachEquationGeneralPattern.split('|').forEach(generalPatternEachOr => {
-        
+        if (orFlag) return;
         const [key, value] = generalPatternEachOr.split(':');
-        if (value != 'true') 
+        
+        if (value != 'true') {
           if (attributes[key] == value) {
             foundIn = value;
-            return orFlag = 1;
+            orFlag = orFlag || 1;
           }
-        else
+        }
+        else {
           if (attributes[key]) {
             foundIn = value;
-            return orFlag = 1;
+            orFlag = orFlag || 1;
           }
+        }
       })
-      if (flag != 1)
-        flag = orFlag;
+      flag = flag && orFlag;
     })
     if (!flag) continue;
     
     if (attributeEqualityPattern.includes('module:distribution') && foundIn == 'staking')
-    return { attributes, index: -1 };
+      return { attributes, index: -1 };
     else
       return { attributes, index: i };
   }
@@ -208,6 +210,7 @@ const decodeTxsV2 = (
         }
 
         const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message', 'sender:true,module:distribution');
+        
         if (!attributes) throw new Error('set_withdraw_address:delegator_not_found');
         if (index >= 0)
           eachTransactionEvents[index].type = 'message_used';

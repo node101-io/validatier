@@ -111,7 +111,7 @@ function generateGraph (validator) {
 
   const headerMainWrapper = document.getElementById('header-main-wrapper');
   const datePicker = document.getElementById('date-picker');
-  const searchWrapper = document.getElementById('search-wrapper');
+  const searchWrapper = document.querySelector('.search-wrapper');
   
   searchWrapper.style.visibility = 'hidden';
   bannerTitle.style.color = 'var(--banner-title-content-color-main)';
@@ -167,6 +167,8 @@ function generateGraph (validator) {
     } else if (stat.field == 'temporary_image_uri') {
       const validatorDetailsImage = document.getElementById(stat.id);
       validatorDetailsImage.src = validator.temporary_image_uri || '/res/images/default_validator_photo.svg';
+      if (!validator.temporary_image_uri)
+        validatorDetailsImage.style.borderRadius = '0';
       return;
     }
 

@@ -601,7 +601,6 @@ input {
   :root {
     /* --navbar-position: absolute;
     --all-main-wrapper-width: 100% + var(--navbar-width) - 76px; */
-    --header-main-wrapper-horizontal-padding: 20px;
     --inner-main-wrapper-horizontal-padding: 20px;
   }
 }

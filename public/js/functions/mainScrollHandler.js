@@ -2,6 +2,7 @@ function mainScrollHandler() {
   const allMainWrapper = document.getElementById('all-main-wrapper');
   const introMainWrapper = document.getElementById('intro-main-wrapper');
   const selectedRange = document.getElementById('selected-range');
+  const pickerMainWrapper = document.getElementById('picker-main-wrapper');
 
   const bannerTitle = document.getElementById('banner-title');
 
@@ -18,6 +19,8 @@ function mainScrollHandler() {
       bannerTitle.style.color = 'var(--banner-title-content-color-initial)';
       document.documentElement.style.setProperty('--banner-logo-color', 'rgba(245, 245, 255, 1)');
       document.documentElement.style.setProperty('--selected-range-logo-color', 'rgba(255, 255, 255, 1)');
+      if (window.innerWidth <= 500)
+        document.documentElement.style.setProperty('--header-banner-wrapper-margin-left', 'calc(50% - (130px / 2))');
 
       selectedRange.style.background = 'var(--selected-range-background-initial)';
       selectedRange.style.backdropFilter = 'var(--selected-range-backdrop-filter-initial)';
@@ -27,29 +30,34 @@ function mainScrollHandler() {
       searchWrapper.style.visibility = 'hidden';
       searchWrapper.style.opacity = '0';
       headerMainWrapper.style.height = `var(--header-main-wrapper-height)`
+
+      headerMainWrapper.classList.remove('header-main-wrapper-main');
+      headerMainWrapper.style.background = 'var(--header-main-background-initial)';
+      datePicker.style.display = 'var(--date-picker-display-initial)';
+
+      pickerMainWrapper.style.border = 'var(--picker-main-wrapper-border-size-initial) solid var(--general-main-wrapper-border-color)'
+      pickerMainWrapper.style.borderTop = 'none';
     } else {
       searchWrapper.style.visibility = 'visible';
       bannerTitle.style.color = 'var(--banner-title-content-color-main)';
       document.documentElement.style.setProperty('--banner-logo-color', 'rgba(37, 0, 84, 1)');
       document.documentElement.style.setProperty('--selected-range-logo-color', 'rgba(124, 112, 195, 1)');
-    
+      document.documentElement.style.setProperty('--header-banner-wrapper-margin-left', '0');
+
       selectedRange.style.background = 'var(--selected-range-background)';
       selectedRange.style.backdropFilter = 'var(--selected-range-backdrop-filter)';
       selectedRange.style.border = 'var(--selected-range-border-size) solid var(--selected-range-border-color)';
       selectedRange.style.color = 'var(--selected-range-color)';
 
       searchWrapper.style.opacity = `${Math.min(1 - ((273 - scrollTop) / (273 - 234)), 1)}`;
-      headerMainWrapper.style.height = `calc(var(--header-main-wrapper-height) - ${Math.min(scrollTop - 234, 50)}px)`
-    }
-
-    if (scrollTop < 273) {
-      headerMainWrapper.classList.remove('header-main-wrapper-main');
-      headerMainWrapper.style.background = 'var(--header-main-background-initial)';
-      datePicker.style.background = 'var(--date-picker-display-initial)';
-    } else {
+      headerMainWrapper.style.height = `calc(var(--header-main-wrapper-height) * ${1 - 0.34 * Math.max(0, Math.min((scrollTop - 234) / 100, 1))})`;
+    
       headerMainWrapper.classList.add('header-main-wrapper-main');
       headerMainWrapper.style.background = 'var(--header-main-background)';
-      datePicker.style.background = 'var(--date-picker-display)';
+      datePicker.style.display = 'var(--date-picker-display)';
+
+      pickerMainWrapper.style.border = 'var(--picker-main-wrapper-border-size) solid var(--general-main-wrapper-border-color)'
+      pickerMainWrapper.style.borderTop = 'none';
     }
   });
 

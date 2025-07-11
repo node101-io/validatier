@@ -5,14 +5,15 @@ import getTxsByHeight from "../utils/getTxsByHeight.js";
 const testSeperation = '-------------------------------------------------------------------------------------------------';
 
 const TEST_CASES = [
-  // { height: 9636026, description: 'complete_redelegation' },
-  // { height: 6489032, description: 'complete_unbonding' },
-  // { height: 17224685, description: 'create_validator + auto_withdraw + delegation + manual_withdraw' },
-  // { height: 9421602, description: 'delegate + withdraw' },
-  // { height: 8772784, description: 'withdraw_reward + withdraw_commission + delegate' },
-  // { height: 8772711, description: 'withdraw_reward + withdraw_commission + delegate (failed)' },
-  // { height: 18152061, description: 'modify_withdraw_address' },
+  { height: 9636026, description: 'complete_redelegation' },
+  { height: 6489032, description: 'complete_unbonding' },
+  { height: 17224685, description: 'create_validator + auto_withdraw + delegation + manual_withdraw' },
+  { height: 9421602, description: 'delegate + withdraw' },
+  { height: 8772784, description: 'withdraw_reward + withdraw_commission + delegate' },
+  { height: 8772711, description: 'withdraw_reward + withdraw_commission + delegate (failed)' },
+  { height: 18152061, description: 'modify_withdraw_address' },
   { height: 9866551, description: 'modify_withdraw_address' },
+  { height: 11767753, description: 'modify_withdraw_address' },
 ];
 
 export function testDataFetch() {
@@ -21,7 +22,7 @@ export function testDataFetch() {
 
     async.timesSeries(TEST_CASES.length, (index, next) => {
       const { height, description } = TEST_CASES[index];
-      getTxsByHeight(chain.rpc_url, height, chain.denom, chain.bech32_prefix, 0, false, (err, results) => {
+      getTxsByHeight(chain.rpc_url, height, chain.denom, chain.bech32_prefix, 0, true, (err, results) => {
         console.log(`############### Block: ${height} - ${description} ###############`);
         if (err) console.log(err);
         else {

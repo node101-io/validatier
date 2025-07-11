@@ -12,6 +12,8 @@
   --selected-range-gap: 8px;
   --selected-range-padding: 5px;
 
+  --selected-range-open-date-interval-description-span-display: flex;
+
   --selected-range-logo-color: rgba(255, 255, 255, 1);
   
   --selected-range-background: rgba(245, 245, 255, 1);
@@ -26,7 +28,7 @@
   --selected-range-border-color-initial: rgba(239, 239, 255, 1);
   --selected-range-color-initial: rgba(255, 255, 255, 1);
 
-  --date-interval-description-padding: 10px;
+  --date-interval-description-padding: 8px;
   --date-interval-description-gap: 5px;
   --date-interval-descriptio-text-margin-top: -2px;
 
@@ -39,6 +41,8 @@
   --picker-main-wrapper-top: 100%;
   --picker-main-wrapper-z-index: 10000;
   --picker-main-wrapper-border-radius: 24px;
+  --picker-main-wrapper-border-size-initial: var(--general-main-wrapper-border-size);
+  --picker-main-wrapper-border-size: 1px;
   
   --picker-content-wrapper-font-size: 20px;
   --picker-content-wrapper-margin-top: 5px;
@@ -174,7 +178,7 @@
   --header-banner-wrapper-gap: 10px;
   --header-banner-wrapper-margin-bottom: 10px;
   --header-banner-wrapper-margin-left: 0px;
-  --header-banner-wrapper-margin-right: 50px;
+  --header-banner-wrapper-margin-right: 0px;
 
   --banner-title-content-color-initial: rgba(245, 245, 255, 1);
   --banner-title-content-color-main: rgba(37, 0, 84, 1);
@@ -236,7 +240,7 @@
   background-color: var(--selected-range-background-initial);
   border: var(--selected-range-border-size-initial) solid var(--selected-range-border-color-initial);
   border-radius: var(--selected-range-border-radius);
-  transition: all var(--picker-main-wrapper-transition-duration) ease-in-out 0s;
+  transition: all var(--picker-main-wrapper-transition-duration) ease-in-out 0s, border 0s ease 0s;
   backdrop-filter: var(--selected-range-backdrop-filter-initial);
   color: var(--selected-range-color-initial);
 }
@@ -270,19 +274,19 @@
 }
 
 .selected-range-open .date-interval-description span {
-  display: flex !important;
+  display: var(--selected-range-open-date-interval-description-span-display) !important;
 }
 
 .picker-main-wrapper {
   width: 100%;
-  transition: all var(--picker-main-wrapper-transition-duration) ease 0s;
+  transition: all var(--picker-main-wrapper-transition-duration) ease 0s, border 0s ease 0s;
   transform: perspective(var(--picker-main-wrapper-transform-perspective)) rotateX(var(--picker-main-wrapper-transform-rotate-x));
   opacity: var(--picker-main-wrapper-opacity);
   top: var(--picker-main-wrapper-top);
   border-radius: var(--picker-main-wrapper-border-radius);
   background-color: var(--color-dropdown-background);
   z-index: var(--picker-main-wrapper-z-index);
-  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
+  border: var(--picker-main-wrapper-border-size-initial) solid var(--general-main-wrapper-border-color);
   border-top: 0px solid var(--general-main-wrapper-border-color);
   transform-origin: top;
   position: absolute;
@@ -292,6 +296,16 @@
   border-radius: 0 0 var(--picker-main-wrapper-border-radius) var(--picker-main-wrapper-border-radius);
   transform: perspective(1000px) rotateX(0deg);
   opacity: 1;
+}
+
+.selected-range-open:after {
+  content: '';
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  background-color: rgba(221, 221, 255, 0.6);
 }
 
 .picker-content-wrapper {
@@ -746,7 +760,7 @@
 
 @media only screen and (max-width: 700px) {
   :root {
-    --date-picker-width: 49px;
+    --date-picker-width: var(--selected-range-height);
   }
 }
 
@@ -757,7 +771,7 @@
     --network-switch-header-height: 32px;
 
     --table-filters-subgroup-gap: 0px;
-    --date-picker-height: 48px;
+    --date-picker-height: 36px;
     --date-picker-display-initial: none;
   
     --selected-range-font-size: 16px;
@@ -788,17 +802,20 @@
     --banner-title-content-margin-top: -3px;
 
     --header-banner-wrapper-margin-left: calc(50% - (130px / 2));
+    --selected-range-height: 36px;
+    --date-interval-description-padding: 3px;
   }
 }
 
 
-@media only screen and (max-width: 450px) {
+@media only screen and (max-width: 700px) {
   .picker-main-wrapper-open {
     border-radius: var(--picker-main-wrapper-border-radius);
-    transform: perspective(1000px) rotateX(0deg);
-    opacity: 1;
     right: 0;
-    width: 100% !important;
+    width: calc(100vw - (2 * var(--inner-main-wrapper-horizontal-padding) + 2px)) !important;
+    max-width: calc(300px * 1.7);
+    background-color: var(--header-main-background);
+    border-top: 1px solid var(--general-main-wrapper-border-color) !important;
   }
 
   .selected-range-open {
@@ -807,7 +824,23 @@
     border-radius: var(--selected-range-border-radius);
   }
 
+  .date-picker-open {
+    width: calc(4.5 * var(--date-picker-width));
+  }
+
+  .selected-range {
+    justify-content: start;
+  }
+
   :root {
-    --date-picker-width: 300px;
+    --date-range-width: fit-content;
+    --selected-range-open-date-interval-description-span-display: none;
+    --header-inputs-main-wrapper-gap: 8px;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  .date-picker-open {
+    width: calc(5.5 * var(--date-picker-width));
   }
 }

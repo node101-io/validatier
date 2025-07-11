@@ -97,6 +97,7 @@
   --each-metric-content-wrapper-header-icon-width: 12px;
 
   --each-metric-content-wrapper-header-title-font-size: 20px;
+  --each-metric-content-wrapper-header-title-font-weight: 500;
   --each-metric-content-wrapper-header-title-margin-bottom: 4px;
   
   --each-metric-content-wrapper-header-font-size: 20px;
@@ -350,6 +351,7 @@
 
 .each-metric-content-wrapper-header-title {
   font-size: var(--each-metric-content-wrapper-header-title-font-size);
+  font-weight: var(--each-metric-content-wrapper-header-title-font-weight);
   margin-bottom: var(--each-metric-content-wrapper-header-title-margin-bottom);
   text-wrap: nowrap;
 }
@@ -647,8 +649,9 @@
     --network-summary-network-graph-metrics-wrapper-width: 100%;
     --network-summary-network-graph-metrics-wrapper-height: 120px;
     --network-summary-network-graph-content-wrapper-width: calc(100% - (2 * var(--network-summary-network-graph-content-wrapper-padding-horizontal)));
-    --each-network-summary-stat-width: 350px;
+    --each-network-summary-stat-width: 320px;
     --inner-main-wrapper-horizontal-padding: 10px;
+    --inner-main-wrapper-padding-right: 0px;
     --network-summary-network-graph-metrics-content-wrapper-gap: 10px;
     --each-metric-content-wrapper-header-title-font-size: 20px;
     --each-metric-content-wrapper-content-value-native-font-size: 24px;
@@ -660,9 +663,11 @@
 
 @media only screen and (max-width: 800px) {
   :root {
-    --each-metric-content-wrapper-width: 350px;
+    --each-metric-content-wrapper-width: 308px;
     --network-summary-network-graph-metrics-wrapper-overflow-x: scroll;
     --network-summary-network-graph-content-wrapper: none;
+    --network-summary-network-graph-metrics-content-wrapper-gap: 20px;
+    --each-metric-content-wrapper-content-flex-direction: row;
   }
 }
 
@@ -672,8 +677,7 @@
     --each-network-summary-select-wrapper-gap: 8px;
     --network-summary-network-graph-content-header-padding-vertical: 4px;
     --network-summary-network-graph-content-header-padding-horizontal: 6px;
-    --each-metric-content-wrapper-content-flex-direction: row;
-    --each-metric-content-wrapper-header-title-font-size: 24px;
+    --each-metric-content-wrapper-header-title-font-size: 20px;
 
     --network-summary-network-graph-content-title-font-size: 20px;
     --network-summary-network-graph-content-description-font-size: 16px;

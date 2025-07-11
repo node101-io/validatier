@@ -260,7 +260,7 @@ export const listenForEvents = (
                 } else if (eachMessage.typeUrl == 'set_withdraw_address') {
                   const operatorAddressFormat = convertOperatorAddressToBech32(eachMessage.value.delegatorAddress, `${chain.bech32_prefix}valoper`);
                   if (!operatorAddressFormat)
-                    return reject('address_conversion_failed:set_withdraw_address');
+                    return reject(`address_conversion_failed:set_withdraw_address:${height}`);
                   setWithdrawAddress(chain.name, operatorAddressFormat, eachMessage.value.withdrawAddress, (err, success) => {
                     if (err || !success) return reject(`withdraw_address_set_failed:set_withdraw_address:${height}`);
                     return next();

@@ -15,5 +15,6 @@ window.onload = () => {
   handlePlotButtonClick();
   handleSummaryGraphActions();
   // handleNewsLetter();
+  handlePopupConceal();
   mainScrollHandler();
 }

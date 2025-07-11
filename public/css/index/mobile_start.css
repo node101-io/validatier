@@ -40,15 +40,15 @@
 
 .mobile-menu-background-content {
   position: relative;
-  width: 100%;
-  aspect-ratio: 800/353;
+  height: 250px;
+  aspect-ratio: 661/252;
   display: flex;
   justify-content: center;
 }
 
 .mobile-menu-background-content svg {
-  width: 800px;
-  height: 352px;
+  width: 661px;
+  height: 250px;
   display: block;
 }
 
@@ -94,32 +94,28 @@
   transition: all 1.25s ease 0s;
 }
 
-.mobile-animate-star {
-  margin-left: 8px;
-}
-
 .orbit-7 {
-  offset-path: path('M608.507 338.891C727.347 338.891 823.686 265.913 823.686 175.889C823.686 85.8653 727.347 12.8867 608.507 12.8867C489.667 12.8867 393.328 85.8653 393.328 175.889C393.328 265.913 489.667 338.891 608.507 338.891Z');
+  offset-path: path('M495.127 250.536C586.125 250.536 659.893 194.65 659.893 125.711C659.893 56.7726 586.125 0.886719 495.127 0.886719C404.129 0.886719 330.361 56.7726 330.361 125.711C330.361 194.65 404.129 250.536 495.127 250.536Z');
   animation: move-ccw 30s linear infinite;
 }
 .orbit-8 {
-  offset-path: path('M537.788 339.349C656.628 339.349 752.967 266.371 752.967 176.347C752.967 86.3233 656.628 13.3447 537.788 13.3447C418.948 13.3447 322.609 86.3233 322.609 176.347C322.609 266.371 418.948 339.349 537.788 339.349Z');
+  offset-path: path('M440.976 250.887C531.974 250.887 605.743 195.001 605.743 126.062C605.743 57.1234 531.974 1.23749 440.976 1.23749C349.979 1.23749 276.21 57.1234 276.21 126.062C276.21 195.001 349.979 250.887 440.976 250.887Z');
   animation: move-cw 15s linear infinite;
 }
 .orbit-9 {
-  offset-path: path('M441.078 339.349C559.918 339.349 656.257 266.371 656.257 176.347C656.257 86.3233 559.918 13.3447 441.078 13.3447C322.238 13.3447 225.899 86.3233 225.899 176.347C225.899 266.371 322.238 339.349 441.078 339.349Z');
+  offset-path: path('M366.924 250.887C457.922 250.887 531.69 195.001 531.69 126.062C531.69 57.1234 457.922 1.23749 366.924 1.23749C275.926 1.23749 202.158 57.1234 202.158 126.062C202.158 195.001 275.926 250.887 366.924 250.887Z');
   animation: move-ccw 20s linear infinite;
 }
 .orbit-10 {
-  offset-path: path('M344.368 339.349C463.208 339.349 559.547 266.371 559.547 176.347C559.547 86.3233 463.208 13.3447 344.368 13.3447C225.528 13.3447 129.189 86.3233 129.189 176.347C129.189 266.371 225.528 339.349 344.368 339.349Z');
+  offset-path: path('M292.871 250.887C383.869 250.887 457.638 195.001 457.638 126.062C457.638 57.1234 383.869 1.23749 292.871 1.23749C201.874 1.23749 128.105 57.1234 128.105 126.062C128.105 195.001 201.874 250.887 292.871 250.887Z');
   animation: move-cw 60s linear infinite;
 }
 .orbit-11 {
-  offset-path: path('M247.659 339.349C366.499 339.349 462.838 266.371 462.838 176.347C462.838 86.3233 366.499 13.3447 247.659 13.3447C128.819 13.3447 32.48 86.3233 32.48 176.347C32.48 266.371 128.819 339.349 247.659 339.349Z');
+  offset-path: path('M218.82 250.887C309.817 250.887 383.586 195.001 383.586 126.062C383.586 57.1234 309.817 1.23749 218.82 1.23749C127.822 1.23749 54.0534 57.1234 54.0534 126.062C54.0534 195.001 127.822 250.887 218.82 250.887Z');
   animation: move-ccw 40s linear infinite;
 }
 .orbit-12 {
-  offset-path: path('M177.545 339.349C296.385 339.349 392.724 266.371 392.724 176.347C392.724 86.3233 296.385 13.3447 177.545 13.3447C58.7046 13.3447 -37.6343 86.3233 -37.6343 176.347C-37.6343 266.371 58.7046 339.349 177.545 339.349Z');
+  offset-path: path('M165.132 250.887C256.13 250.887 329.898 195.001 329.898 126.062C329.898 57.1234 256.13 1.23749 165.132 1.23749C74.134 1.23749 0.365692 57.1234 0.365692 126.062C0.365692 195.001 74.134 250.887 165.132 250.887Z');
   animation: move-cw 50s linear infinite;
 }
 
@@ -180,24 +176,28 @@
   }
 }
 
+@media only screen and (max-width: 750px) {
+  :root {
+    --mobile-start-text-content-width: 80%;
+    --mobile-start-title-font-size: 64px;
+    --mobile-start-title-line-height: 52px;
+  }
+}
+
 @media only screen and (max-width: 700px) {
   :root {
     --mobile-start-text-content-width: 60%;
-    --mobile-start-title-font-size: 64px;
-    --mobile-start-title-line-height: 52px;
     --mobile-start-description-font-size: 20px;
     --mobile-start-description-line-height: 16px;
   }
 }
 
-@media only screen and (max-width: 500px) {
-  :root {
-    --mobile-start-text-content-width: 50%;
-  }
-}
-
 @media only screen and (max-width: 410px) {
   :root {
-    --mobile-start-text-content-width: 45%;
+    --mobile-start-text-content-width: 55%;
+    --mobile-start-title-font-size: 52px;
+    --mobile-start-title-line-height: 42px;
+    --mobile-start-description-font-size: 18px;
+    --mobile-start-description-line-height: 16px;
   }
 }

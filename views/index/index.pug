@@ -557,7 +557,7 @@ block content
                           if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
                             .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
                               img(src='/res/images/warning.svg')
-              .validators-data-column
+              .validators-data-column#validators-data-column
                 .validator-table-header
                   each header in headers_array
                     .each-table-header-wrapper
@@ -568,7 +568,7 @@ block content
                             .each-table-popup-wrapper
                               .each-table-popup-info-content(class='center')
                                 span= header.popup_text
-                              .each-tooltip-info-hover(style='margin-bottom: -1px')
+                              .each-tooltip-info-hover(class='each-tooltip-info-hover-table' style='margin-bottom: -1px')
                                 img(src='/res/images/info.svg')
                           .each-table-header-title= header.name
                         .each-table-header-sort-indicators 
