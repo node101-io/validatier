@@ -70,4 +70,4 @@ app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
 // startFetchingData();
-// testDataFetch();
+testDataFetch();

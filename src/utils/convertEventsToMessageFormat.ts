@@ -1,5 +1,5 @@
 import { getOnlyNativeTokenValueFromAmountString } from "../listeners/functions/getOnlyNativeTokenValueFromAmountString.js";
-import { DecodedMessage, Event } from "./decodeTxsV2.js";
+import { DecodedMessage, Event } from "./decodeTxs.js";
 
 const EVENTS_TO_SEARCH = {
   slash: {

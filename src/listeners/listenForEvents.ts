@@ -162,7 +162,7 @@ export const listenForEvents = (
                   }
 
                   compositeEventBlockMap[key].total_withdraw += parseInt(eachMessage.value.amount);
-                  if (eachMessage.typeUrl == '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission') 
+                  if (eachMessage.typeUrl == 'withdraw_commission') 
                     compositeEventBlockMap[key].commission += parseInt(eachMessage.value.amount);
                   else if (bech32OperatorAddress == eachMessage.value.delegatorAddress)
                     compositeEventBlockMap[key].reward += parseInt(eachMessage.value.amount);
@@ -181,11 +181,15 @@ export const listenForEvents = (
                   }
 
                   const stakeAmount = parseInt(eachMessage.value.amount);
-                  const additiveTxs = ['/cosmos.staking.v1beta1.MsgDelegate', '/cosmos.staking.v1beta1.MsgCancelUnbondingDelegation'];
-                  compositeEventBlockMap[key].total_stake += additiveTxs.includes(eachMessage.typeUrl) ? stakeAmount : (stakeAmount * -1);
+
+                  compositeEventBlockMap[key].total_stake += eachMessage.typeUrl == 'delegate'
+                    ? stakeAmount 
+                    : (stakeAmount * -1);
                   
                   if (bech32OperatorAddress == eachMessage.value.delegatorAddress) 
-                    compositeEventBlockMap[key].self_stake += additiveTxs.includes(eachMessage.typeUrl) ? stakeAmount : (stakeAmount * -1);
+                    compositeEventBlockMap[key].self_stake += eachMessage.typeUrl == 'delegate'
+                      ? stakeAmount 
+                      : (stakeAmount * -1);
 
                   return next();
                 } else if (

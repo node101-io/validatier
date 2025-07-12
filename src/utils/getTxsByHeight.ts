@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import decodeTxsV2, { DecodedMessage, Event } from './decodeTxsV2.js';
+import decodeTxsV2, { DecodedMessage, Event } from './decodeTxs.js';
 import { convertEventsToMessageFormat } from './convertEventsToMessageFormat.js';
 
 export const RETRY_TOTAL = 10;
