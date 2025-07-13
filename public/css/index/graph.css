@@ -1,7 +1,7 @@
 :root {
   --validator-graph-wrapper-min-width: 100%;
   --validator-graph-wrapper-max-width: 100%;
-  --validator-graph-wrapper-height: 400px;
+  --validator-graph-wrapper-height: 330px;
   --validator-graph-wrapper-transition-duration: 0.5s;
   --validator-graph-wrapper-vertical-padding: 10px;
   --validator-graph-wrapper-horizontal-padding: 20px;

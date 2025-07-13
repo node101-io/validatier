@@ -25,8 +25,12 @@
   --network-summary-main-wrapper-margin-bottom: 10px;
   
   --network-summary-network-stats-main-wrapper-width: 100%;
+  --network-summary-network-stats-main-wrapper-margin-left: 0px;
+  --network-summary-network-stats-main-wrapper-padding-horizontal: 0px;
+
   --network-summary-network-stats-main-wrapper-gap: 20px;
   --network-summary-network-stats-main-wrapper-flex-wrap: nowrap;
+  --network-summary-network-stats-main-wrapper-overflow-x: visible;
 
   --network-summary-network-graph-content-header-height: 30px;
   --network-summary-network-graph-content-header-padding-vertical: 8px;
@@ -35,7 +39,7 @@
   --network-summary-network-graph-content-header-margin-bottom: 20px;
   
   --each-network-summary-stat-height: 108px;
-  --each-network-summary-stat-width: 33%;
+  --each-network-summary-stat-width: 33.3%;
   --each-network-summary-stat-padding-horizontal: 22px;
   --each-network-summary-stat-padding-vertical: 16px;
   --each-network-summary-stat-border-radius: 20px;
@@ -78,11 +82,15 @@
   --network-summary-network-graph-content-description-margin-top: -2px;
   --network-summary-network-graph-content-description-line-height: 16px;
   
-  --network-summary-network-graph-metrics-wrapper-overflow-x: hidden;
+  --network-summary-network-graph-metrics-wrapper-overflow-x: visible;
   --network-summary-network-graph-metrics-wrapper-width: 230px;
+  --network-summary-network-graph-metrics-wrapper-margin-left: 0px;
+  --network-summary-network-graph-metrics-wrapper-padding-horizontal: 0px;
   --network-summary-network-graph-metrics-wrapper-height: 100%;
   --network-summary-network-graph-metrics-wrapper-gap: 12px;
   --network-summary-network-graph-metrics-wrapper-flex-direction: column;
+  
+  --network-summary-network-graph-metrics-content-wrapper-width: 100%;
 
   --network-summary-network-graph-metrics-content-wrapper-gap: 20px;
   
@@ -100,6 +108,8 @@
   --each-metric-content-wrapper-header-title-font-weight: 500;
   --each-metric-content-wrapper-header-title-margin-bottom: 4px;
   
+  --each-metric-content-wrapper-header-height: fit-content;
+  --each-metric-content-wrapper-header-margin-top: 0px;
   --each-metric-content-wrapper-header-font-size: 20px;
   --each-metric-content-wrapper-header-color: rgba(124, 112, 195, 1);
   --each-metric-content-wrapper-header-gap: 10px;
@@ -115,6 +125,7 @@
   --each-metric-content-wrapper-content-value-usd-font-weight: 600;
   --each-metric-content-wrapper-content-value-usd-font-size: 20px;
   --each-metric-content-wrapper-content-value-usd-color: rgba(124, 112, 195, 1);
+  --each-metric-content-wrapper-content-value-usd-margin-top: 0px;
   
   --each-metric-content-wrapper-footer-font-size: 20px;
   --each-metric-content-wrapper-footer-font-weight: 400;
@@ -167,7 +178,9 @@
   flex-wrap: var(--network-summary-network-stats-main-wrapper-flex-wrap);
   justify-content: space-between;
   gap: var(--network-summary-network-stats-main-wrapper-gap);
-  overflow-x: auto;
+  overflow-x: var(--network-summary-network-stats-main-wrapper-overflow-x);
+  margin-left: var(--network-summary-network-stats-main-wrapper-margin-left);
+  padding: 0px var(--network-summary-network-stats-main-wrapper-padding-horizontal);
 }
 
 .each-network-summary-stat {
@@ -293,10 +306,12 @@
   display: flex;
   flex-direction: column;
   gap: var(--network-summary-network-graph-metrics-wrapper-gap);
+  margin-left: var(--network-summary-network-graph-metrics-wrapper-margin-left);
+  padding: 0px var(--network-summary-network-graph-metrics-wrapper-padding-horizontal);
 }
 
 .network-summary-network-graph-metrics-content-wrapper {
-  width: 100%;
+  width: var(--network-summary-network-graph-metrics-content-wrapper-width);
   display: flex;
   height: 100%;
   flex-direction: var(--network-summary-network-graph-metrics-wrapper-flex-direction);
@@ -338,11 +353,13 @@
 
 .each-metric-content-wrapper-header {
   width: 100%;
+  height: var(--each-metric-content-wrapper-header-height);
   display: flex;
   align-items: center;
   font-size: var(--each-metric-content-wrapper-header-font-size);
   color: var(--each-metric-content-wrapper-header-color);
   gap: var(--each-metric-content-wrapper-header-gap);
+  margin-top: var(--each-metric-content-wrapper-header-margin-top);
 }
 
 .each-metric-content-wrapper-header div {
@@ -367,6 +384,7 @@
   font-weight: var(--each-metric-content-wrapper-content-value-usd-font-weight);
   font-size: var(--each-metric-content-wrapper-content-value-usd-font-size);
   color: var(--each-metric-content-wrapper-content-value-usd-color);
+  margin-top: var(--each-metric-content-wrapper-content-value-usd-margin-top);
   text-wrap: nowrap;
 }
 
@@ -634,6 +652,10 @@
   margin: auto 0;
 }
 
+.network-summary-network-stats-main-wrapper::-webkit-scrollbar, .network-summary-network-graph-metrics-wrapper::-webkit-scrollbar {
+  height: 0px;
+}
+
 @media only screen and (max-width: 1200px) {
   :root {
     --network-summary-network-graph-content-header-flex-direction: row;
@@ -642,32 +664,48 @@
 
 @media only screen and (max-width: 900px) {
   :root {
-    --each-metric-content-wrapper-height: 100px;
-    --each-metric-content-wrapper-width: calc(33% - 5px);
+    --each-metric-content-wrapper-height: 108px;
+    --each-metric-content-wrapper-width: calc(33.3% - (2/3) * var(--network-summary-network-graph-metrics-content-wrapper-gap));
     --network-summary-network-graph-metrics-wrapper-flex-direction: row;
     --network-summary-network-graph-main-wrapper-flex-direction: column;
     --network-summary-network-graph-metrics-wrapper-width: 100%;
     --network-summary-network-graph-metrics-wrapper-height: 120px;
-    --network-summary-network-graph-content-wrapper-width: calc(100% - (2 * var(--network-summary-network-graph-content-wrapper-padding-horizontal)));
+    --network-summary-network-graph-content-wrapper-width: calc(100% - 18px);
     --each-network-summary-stat-width: 320px;
-    --inner-main-wrapper-horizontal-padding: 10px;
-    --inner-main-wrapper-padding-right: 0px;
-    --network-summary-network-graph-metrics-content-wrapper-gap: 10px;
+    --inner-main-wrapper-horizontal-padding: 20px;
+
+    --network-summary-network-graph-metrics-content-wrapper-gap: 20px;
     --each-metric-content-wrapper-header-title-font-size: 20px;
     --each-metric-content-wrapper-content-value-native-font-size: 24px;
     --each-metric-content-wrapper-content-value-usd-font-size: 20px;
     --each-metric-content-wrapper-content-value-native-font-size: 28px;
     --each-metric-content-wrapper-content-value-usd-font-size: 20px;
+
+    --network-summary-network-stats-main-wrapper-overflow-x: scroll;
+    --each-metric-content-wrapper-content-value-usd-margin-top: -6px;
+    --each-metric-content-wrapper-header-height: 10px;
+    --each-metric-content-wrapper-header-margin-top: 12px;
   }
 }
 
 @media only screen and (max-width: 800px) {
   :root {
+
+    --network-summary-network-stats-main-wrapper-width: calc(100% + (2 * var(--inner-main-wrapper-horizontal-padding)) - 40px);
+    --network-summary-network-stats-main-wrapper-margin-left: calc(-1 * var(--network-summary-network-graph-content-wrapper-padding-horizontal) - 16px);
+    --network-summary-network-stats-main-wrapper-padding-horizontal: calc(var(--network-summary-network-graph-content-wrapper-padding-horizontal) + 16px);
+    
+    --network-summary-network-graph-metrics-content-wrapper-width: fit-content;
+    --network-summary-network-graph-metrics-wrapper-width: calc(100% + (2 * var(--inner-main-wrapper-horizontal-padding)) - 24px);
+    --network-summary-network-graph-metrics-wrapper-margin-left: calc(-1 * var(--network-summary-network-graph-content-wrapper-padding-horizontal) - 16px);
+    --network-summary-network-graph-metrics-wrapper-padding-horizontal: calc(var(--network-summary-network-graph-content-wrapper-padding-horizontal) + 16px);
+
     --each-metric-content-wrapper-width: 308px;
     --network-summary-network-graph-metrics-wrapper-overflow-x: scroll;
     --network-summary-network-graph-content-wrapper: none;
     --network-summary-network-graph-metrics-content-wrapper-gap: 20px;
     --each-metric-content-wrapper-content-flex-direction: row;
+    --network-summary-network-graph-content-wrapper-width: calc(100% - (2 * var(--network-summary-network-graph-content-wrapper-padding-horizontal)) - 1px);
   }
 }
 

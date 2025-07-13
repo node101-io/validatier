@@ -264,12 +264,6 @@ block content
                   .each-metric-content-wrapper-header
                     .each-metric-content-wrapper-header-icon(style=`background-color: ${metric.color}`)
                     .each-metric-content-wrapper-header-title= metric.title
-                    if metric.id == 'total_sold'
-                      .each-table-popup-wrapper(class='each-table-popup-wrapper-metric')
-                        .each-table-popup-info-content(class='center')
-                          span Negativity indicates more tokens added than transferred
-                        .each-tooltip-info-hover
-                          img(src='/res/images/info.svg')
                   .each-metric-content-wrapper-content
                     .each-metric-content-wrapper-content-value-native(class=`${metric.id == 'percentage_sold' ? 'graph-metric-percentage-change-content' : ''}`)
                     .each-metric-content-wrapper-content-value-usd(class=`${metric.id == 'percentage_sold' ? 'percentage-change-value-content' : ''}`)
@@ -497,7 +491,7 @@ block content
                         .each-network-summary-network-graph-content-dropdown-content
                           each option in menu.options 
                             .each-network-summary-network-graph-content-each-dropdown(id=`validator-graph-dropdown-option-${option.id}` class=`dropdown-option-checked ${dataFields.includes(option.id) ? '' : 'section-hidden'}`)= option.title
-              //- .network-summary-network-graph-content-description Shows how validators respond to changes in total price and delegation in the market
+              .network-summary-network-graph-content-description Shows how validators respond to changes in total price and delegation in the market
             .network-summary-network-graph-content#validator-graph-container
               if queryValidator
                 script.

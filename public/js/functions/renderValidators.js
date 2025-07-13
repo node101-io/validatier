@@ -39,10 +39,10 @@ function generateValidatorRankingContent(response, sort_by, sortOrderMapping) {
   const wrapper = document.createElement('div');
   wrapper.classList.add('validator-table-content')
 
-  // renderTableHeader(sort_by, sortOrderMapping[sort_by]);
 
   const infoColumn = document.createElement('div');
   infoColumn.classList.add('validators-info-column');
+  infoColumn.id = 'validators-info-column';
 
   const infoTableHeader = document.createElement('div');
   infoTableHeader.classList.add('validator-table-header');
@@ -60,6 +60,7 @@ function generateValidatorRankingContent(response, sort_by, sortOrderMapping) {
 
   const dataColumn = document.createElement('div');
   dataColumn.classList.add('validators-data-column');
+  dataColumn.id = 'validators-data-column';
 
   const headers_array = [
     { name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Withdraw - Self Stake) / Withdraw' },
@@ -132,7 +133,7 @@ function generateValidatorRankingContent(response, sort_by, sortOrderMapping) {
       popupContent.appendChild(popupText);
 
       const infoHover = document.createElement('div');
-      infoHover.classList.add('each-tooltip-info-hover');
+      infoHover.classList.add('each-tooltip-info-hover', 'each-tooltip-info-hover-table');
       infoHover.style.marginBottom = '-1px';
 
       const infoImg = document.createElement('img');
@@ -266,7 +267,8 @@ function generateValidatorRankingContent(response, sort_by, sortOrderMapping) {
   wrapper.appendChild(infoColumn);
   wrapper.appendChild(dataColumn);
 
-  mainWrapper.appendChild(wrapper)
+  mainWrapper.appendChild(wrapper);
+  handlePopupConceal();
 }
 
 

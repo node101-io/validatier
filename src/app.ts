@@ -19,7 +19,6 @@ import { convertOperatorAddressToBech32 } from './utils/convertOperatorAddressTo
 import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
 import { Job_SyncValidatorInfo } from './cron/jobs/Job_SyncValidatorInfo.js';
 import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsImageUri.js';
-import useragent from 'express-useragent';
 import ActiveValidators from './models/ActiveValidators/ActiveValidators.js';
 import { findSkipDates } from './utils/findSkipDates.js';
 import Price from './models/Price/Price.js';
@@ -35,8 +34,6 @@ const __dirname = path.dirname(__filename);
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, '../views'));
 app.use(cors());
-
-app.use(useragent.express());
 
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
@@ -70,4 +67,4 @@ app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
 // startFetchingData();
-testDataFetch();
+// testDataFetch();

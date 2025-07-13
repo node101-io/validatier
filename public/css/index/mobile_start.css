@@ -77,8 +77,7 @@
   color: rgba(239, 239, 255, 1);
   padding: 14px 28px;
   margin: 0 auto;
-  margin-top: auto;
-  margin-bottom: 24px;
+  margin-bottom: auto; 
   border-radius: 8px;
 }
 

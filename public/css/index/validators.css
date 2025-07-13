@@ -4,7 +4,7 @@
   --validator-details-stats-wrapper-gap: 20px;
   --validator-details-stats-wrapper-flex-wrap: nowrap;
   
-  --each-validator-stat-wrapper-width: 33%;
+  --each-validator-stat-wrapper-width: 33.3%;
   --each-validator-stat-wrapper-height: 120px;
   --each-validator-stat-wrapper-padding-vertical: 14px;
   --each-validator-stat-wrapper-padding-horizontal: 22px;
@@ -56,11 +56,6 @@
   --each-leaderboard-table-validator-data-width: 100px;
   --each-leaderboard-table-validator-data-font-size: 20px;
   
-  --each-leaderboard-more-wrapper-width: 100%;
-  --each-leaderboard-more-wrapper-gap: 4px;
-  --each-leaderboard-more-wrapper-div-width: 4px;
-  --each-leaderboard-more-wrapper-div-background-color: rgba(144, 144, 245, 1);
-  
   --inactivity-display-background-area-background-color: red;
   --inactivity-display-background-area-opacity: 0.1;
 
@@ -71,7 +66,7 @@
   --validators-leaderboards-main-wrapper-overflow: unset;
   --validators-leaderboards-main-wrapper-webkit-scrollbar-thumb-background: rgba(232, 232, 255, 1);
   
-  --each-leaderboard-main-wrapper-min-width: 200px;
+  --each-leaderboard-main-wrapper-min-width: 307px;
   --each-leaderboard-main-wrapper-width: 50%;
   --each-leaderboard-main-wrapper-height: 100%;
   --each-leaderboard-main-wrapper-padding: 0px;
@@ -121,6 +116,7 @@
 }
 
 .validators-leaderboards-main-wrapper {
+  width: 100%;
   height: var(--validators-leaderboards-main-wrapper-height);
   display: flex;
   justify-content: space-around;
@@ -130,27 +126,18 @@
   overflow-y: hidden;
   padding-bottom: 10px;
   overflow-x: var(--validators-leaderboards-main-wrapper-overflow);
+  margin-left: calc(-1 * var(--inner-main-wrapper-horizontal-padding));
+  padding: 0px var(--inner-main-wrapper-horizontal-padding);
 }
 
 .validators-leaderboards-main-wrapper::-webkit-scrollbar {
-  height: calc(var(--all-main-wrapper-webkit-scrollbar-width) * 2);
-}
-
-.validators-leaderboards-main-wrapper::-webkit-scrollbar-thumb {
-  background: var(--validators-leaderboards-main-wrapper-webkit-scrollbar-thumb-background);
-  border-radius: var(--all-main-wrapper-webkit-scrollbar-thumb-border-radius);
-  transition: background var(--all-main-wrapper-webkit-scrollbar-thumb-transition-duration) ease-in-out;
-  letter-spacing: var(--all-main-wrapper-webkit-scrollbar-thumb-letter-spacing);
-}
-
-.validators-leaderboards-main-wrapper::-webkit-scrollbar-track {
-  background: transparent;
+  height: 0px;
 }
 
 .each-leaderboard-main-wrapper {
   width: var(--each-leaderboard-main-wrapper-width);
   min-width: var(--each-leaderboard-main-wrapper-min-width);
-  height: calc(100% - (2 * var(--each-leaderboard-main-wrapper-padding)));
+  height: calc(100% - (2 * var(--each-leaderboard-main-wrapper-padding)) - 1px);
   padding: var(--each-leaderboard-main-wrapper-padding);
   background-color: var(--body-main-wrapper-background);
   border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
@@ -445,15 +432,15 @@
 
 @media only screen and (max-width: 950px) {
   :root {
-    --each-leaderboard-main-wrapper-min-width: 450px !important;
-    --each-leaderboard-main-wrapper-width: 450px !important;
-  }  
+    --each-leaderboard-table-validator-data-width: 70px;
+  }
 }
 
 @media only screen and (max-width: 900px) {
   :root {
     --validator-details-stats-wrapper-flex-wrap: wrap;
-    --each-validator-stat-wrapper-width: calc(100% + var(--each-network-summary-stat-padding-horizontal));
+    --each-validator-stat-wrapper-width: 100%;
+    --each-leaderboard-table-validator-info-moniker-width: 100px;
   }
 }
 
@@ -462,6 +449,11 @@
     --validators-leaderboards-main-wrapper-overflow: scroll;
     --leaderboard-usd-value-display: block;
     --leaderboard-value-responsive-conceal-display: flex;
+
+    --each-leaderboard-table-validator-info-moniker-width: 80px;
+    --each-leaderboard-table-validator-data-font-size: 16px;
+    --validator-details-moniker-font-size: 16px;
+    --each-leaderboard-table-validator-data-width: 50px;
   }
 }
 

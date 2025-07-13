@@ -2,11 +2,10 @@
   --each-validator-wrapper-gap: 30px;
   --validator-table-header-gap: 30px;
 
-  --each-table-header-wrapper-min-width: 150px;
-  --validator-each-numeric-info-min-width: 150px;
+  --each-table-header-wrapper-min-width: 138px;
+  --validator-each-numeric-info-min-width: 138px;
 
   --each-table-header-wrapper-gap: 0px;
-  --each-table-header-wrapper-width: calc(100% / 6);
   --each-table-header-wrapper-max-width: 200px;
   --each-table-header-validator-info-header-min-width: 200px;
   --each-table-header-validator-info-header-max-width: 200px;
@@ -52,7 +51,6 @@
 
 
   --validators-main-wrapper-vertical-padding: 10px;
-  --validators-main-wrapper-padding-top: 30px;
   
   --each-validator-wrapper-height: 40px;
   --each-validator-wrapper-vertical-padding: 10px;
@@ -121,7 +119,7 @@
   --validator-moniker-overflow-animation-scroll-percentage: 105%;
 
   --validator-each-numeric-info-font-size: 20px;
-  --validator-each-numeric-info-width: calc(100% / 6);
+  --validator-each-numeric-info-width: calc(100% / 7);
   --validator-each-numeric-info-max-width: 200px;
   --validator-each-numeric-info-width-adjustment: 0px;
 
@@ -192,7 +190,8 @@
   --percentage-sold-inner-circle-background-color: rgba(124, 112, 195, 1);
   --percentage-sold-inner-circle-color: rgba(229, 229, 255, 1);
 
-  --validators-info-column-width: 200px;
+  --validators-info-column-width: 190px;
+  --validators-data-column-overflow-x: hidden;
 }
 
 
@@ -201,7 +200,6 @@
   position: relative;
   flex-direction: column;
   border-radius: 30px;
-  overflow: hidden;
   background-color: var(--body-main-wrapper-background);
   border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
 }
@@ -233,7 +231,6 @@
   border-radius: var(--each-table-popup-info-content-border-radius);
   font-weight: var(--each-table-popup-info-content-font-weight);
   font-size: var(--each-table-popup-info-content-font-size);
-  opacity: 0;
   bottom: var(--each-table-popup-info-content-bottom);
   transition: transform, opacity var(--each-table-popup-info-content-transition-duration) ease 0s;
   height: var(--each-table-popup-info-content-height);
@@ -244,6 +241,8 @@
   text-wrap: nowrap;
   cursor: var(--pointer-default-dark);
   position: absolute;
+  opacity: 0;
+  visibility: hidden;
 }
 
 .each-table-popup-info-content span {
@@ -263,10 +262,12 @@
 }
 
 .each-table-header-hover:hover .each-table-popup-info-content {
+  visibility: visible;
   opacity: 1;
 }
 
 .each-table-popup-wrapper-metric:hover .each-table-popup-info-content {
+  visibility: visible;
   opacity: 1;
 }
 
@@ -289,7 +290,6 @@
 .validators-main-wrapper {
   padding: var(--validators-main-wrapper-vertical-padding) 0px;
   overflow: visible;
-  padding-top: var(--validators-main-wrapper-padding-top);
 }
 
 .each-validator-wrapper {
@@ -545,12 +545,10 @@
   align-items: center;
   margin-bottom: var(--validator-table-header-margin-bottom);
   gap: var(--validator-table-header-gap);
-  background-color: var(--validator-table-header-background-color);
 }
 
 .each-table-header-wrapper {
   min-width: var(--each-table-header-wrapper-min-width) !important;
-  width: var(--each-table-header-wrapper-width);
   max-width: var(--each-table-header-wrapper-max-width); 
   gap: var(--each-table-header-wrapper-gap);
   text-wrap: nowrap;
@@ -576,8 +574,9 @@
 .each-table-header-validator-info-header::before {
   content: '';
   position: absolute;
-  width: 100%;
+  width: calc(100% - 30px);
   left: 0;
+  border-radius: 10px 0 0 0;
   height: 18px;
   top: 8px;
   background-color: var(--validator-filter-input-background-color);
@@ -647,6 +646,7 @@
   position: relative;
   opacity: 0;
   visibility: hidden;
+  margin-top: 2px;
   background-image: url('/res/images/search.svg');
   background-position: calc(var(--selected-range-height) / 2 - 10px) calc(var(--selected-range-height) / 2 - 10px);
   background-repeat: no-repeat;
@@ -734,6 +734,7 @@
 .validator-table-content {
   width: 100%;
   display: flex;
+  overflow: visible;
 }
 
 .validators-info-column {
@@ -741,12 +742,11 @@
   overflow: hidden;
   padding-top: 50px;
   margin-top: -50px;
-  margin-right: 5px;
 }
 
 .validators-data-column {
   width: calc(100% - var(--validators-info-column-width));
-  overflow-x: scroll;
+  overflow-x: var(--validators-data-column-overflow-x);
   padding-top: 50px;
   margin-top: -50px;
   padding-left: 200px;
@@ -758,6 +758,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+@media only screen and (max-width: 1050px) {
+  :root {
+    --validators-data-column-overflow-x: scroll;
+  }
 }
 
 @media only screen and (max-width: 900px) {

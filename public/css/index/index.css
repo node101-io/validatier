@@ -46,7 +46,6 @@
   --inner-main-wrapper-horizontal-padding: 40px;
   --inner-main-wrapper-margin-bottom: 10px;
   --inner-main-wrapper-margin-top: var(--header-main-wrapper-height);
-  --inner-main-wrapper-padding-right: var(--inner-main-wrapper-horizontal-padding);
 
   --inner-main-wrapper-title-font-size: 24px;
   --inner-main-wrapper-title-color: rgba(37, 0, 84, 1);
@@ -141,7 +140,6 @@
   width: var(--inner-main-wrapper-width);
   height: fit-content;
   padding: var(--inner-main-wrapper-vertical-padding) var(--inner-main-wrapper-horizontal-padding);
-  padding-right: var(--inner-main-wrapper-padding-right);
   margin-top: var(--inner-main-wrapper-margin-top);
   margin-bottom: var(--inner-main-wrapper-header-margin-bottom);
 }
@@ -179,7 +177,7 @@
 
 @media only screen and (max-width: 1050px) {
   :root {
-    --inner-main-wrapper-width: calc(100% - (var(--inner-main-wrapper-horizontal-padding)));
+    --inner-main-wrapper-width: calc(100% - (2 * var(--inner-main-wrapper-horizontal-padding)));
     /* --all-main-wrapper-margin-left: 74px; */
   }
 }
