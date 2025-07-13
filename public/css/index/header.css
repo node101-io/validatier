@@ -27,6 +27,8 @@
   --selected-range-border-size-initial: var(--general-main-wrapper-border-size);
   --selected-range-border-color-initial: rgba(239, 239, 255, 1);
   --selected-range-color-initial: rgba(255, 255, 255, 1);
+  
+  --selected-range-open-after-display: none;
 
   --date-interval-description-padding: 8px;
   --date-interval-description-gap: 5px;
@@ -178,7 +180,7 @@
   --header-banner-wrapper-gap: 10px;
   --header-banner-wrapper-margin-bottom: 10px;
   --header-banner-wrapper-margin-left: 0px;
-  --header-banner-wrapper-margin-right: 0px;
+  --header-banner-wrapper-margin-right: 50px;
 
   --banner-title-content-color-initial: rgba(245, 245, 255, 1);
   --banner-title-content-color-main: rgba(37, 0, 84, 1);
@@ -305,6 +307,7 @@
   width: 100vw;
   height: 100vh;
   position: fixed;
+  display: var(--selected-range-open-after-display);
   background-color: rgba(221, 221, 255, 0.6);
 }
 
@@ -825,7 +828,7 @@
   }
 
   .date-picker-open {
-    width: calc(4.5 * var(--date-picker-width));
+    width: calc(5.5 * var(--date-picker-width));
   }
 
   .selected-range {
@@ -842,5 +845,9 @@
 @media only screen and (max-width: 500px) {
   .date-picker-open {
     width: calc(5.5 * var(--date-picker-width));
+  }
+
+  :root {
+    --selected-range-open-after-display: flex;
   }
 }

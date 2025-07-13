@@ -1,6 +1,6 @@
 :root {
   --export-main-wrapper-color: rgba(41, 48, 80, 1);;
-  --export-wrapper-header-padding: 15px;
+  --export-wrapper-header-padding: 8px;
   --export-wrapper-header-font-size: 20px;
   --export-wrapper-header-gap: 20px;
 
@@ -14,7 +14,7 @@
   --export-wrapper-content-transform-rotate-x: -90deg;
   --export-wrapper-content-transform-perspective: 1000px;
   --export-wrapper-content-top: 48px;
-  --export-wrapper-content-z-index: 120;
+  --export-wrapper-content-z-index: 1000;
   --export-wrapper-content-opacity: 0;
   --export-wrapper-content-right: 0;
   --export-wrapper-content-border-radius: 24px;
@@ -44,13 +44,15 @@
 }
 
 .export-wrapper-header {
+  width: calc(var(--selected-range-height) - (2 * var(--export-wrapper-header-padding)));
+  height: calc(var(--selected-range-height) - (2 * var(--export-wrapper-header-padding)));
   padding: var(--export-wrapper-header-padding);
   font-size: var(--export-wrapper-header-font-size);
   gap: var(--export-wrapper-header-gap);
   cursor: var(--pointer-hand-dark);
   border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
   background-color: var(--body-main-wrapper-background);
-  border-radius: 100%;
+  border-radius: 16px;
 }
 
 .export-wrapper-content {

@@ -653,7 +653,7 @@
 }
 
 .validator-filter-input:focus {
-  width: calc(100vw - var(--date-picker-width) - var(--selected-range-height) - 1 * var(--header-inputs-main-wrapper-gap) - 2 * var(--inner-main-wrapper-horizontal-padding) + 1px);
+  width: calc(100vw - var(--date-picker-width) - var(--selected-range-height) - 1 * var(--header-inputs-main-wrapper-gap) - 2 * var(--inner-main-wrapper-horizontal-padding) - 2px);
 }
 
 .validator-filter-container {
