@@ -14,8 +14,15 @@ const TEST_CASES = [
   // { height: 18152061, description: 'modify_withdraw_address' },
   // { height: 9866551, description: 'modify_withdraw_address' },
   // { height: 11767753, description: 'modify_withdraw_address' },
-  { height: 5434269, description: 'delegate_sign_test' },
+  // { height: 5434269, description: 'delegate_sign_test' },
+  // { height: 5401833, description: 'missing_delegate_test' } 
+  // { height: 5159118, description: 'complete_undelegate + auto claim reward' }
+  { height: 10355620, description: 'complete_redelegate that we may not consider' }
 ];
+
+// for (let i = 5401834; i < 5411792; i++) {
+//   TEST_CASES.push({ height: i, description: '' })
+// }
 
 export function testDataFetch() {
   Chain.findChainByIdentifier({ chain_identifier: 'cosmoshub' }, (err, chain) => {
@@ -36,6 +43,8 @@ export function testDataFetch() {
         console.log(testSeperation);
         next();
       });
+    }, (err) => {
+      console.log('DONE');
     });
   });
 }

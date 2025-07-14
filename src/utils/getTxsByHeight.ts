@@ -62,7 +62,8 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
         )
       ) return callback(null, { time: time, decodedTxs: []});
 
-      if (!data_block_results.result.txs_results) return callback(null, { time: time, decodedTxs: []});
+      if (!data_block_results.result.txs_results)
+        data_block_results.result.txs_results = [];
       const defaultEvents = data_block_results.result.txs_results.flatMap((eachTx: any) => eachTx.events);
       
       const finalizeBlockEvents = [
