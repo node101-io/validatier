@@ -57,45 +57,53 @@ const getAttributesAsMapping = (
 const getAttributesAsMappingFromEventType = (
   events: Event[],
   searchType: string,
-  attributeEqualityPattern: string
+  attributeEqualityPatterns: string[]
 ) => {
-  for (let i = 0; i < events.length; i++) {
-    const eachEvent = events[i];
-    
-    if (!searchType.split('|').includes(eachEvent.type)) continue;
-    const attributes = getAttributesAsMapping(eachEvent.attributes);
-    
-    let flag = 1;
-    let foundIn = '';
-    attributeEqualityPattern.split(',').forEach(eachEquationGeneralPattern => {
-      let orFlag = 0;
-      eachEquationGeneralPattern.split('|').forEach(generalPatternEachOr => {
-        if (orFlag) return;
-        const [key, value] = generalPatternEachOr.split(':');
-        
-        if (value != 'true') {
-          if (attributes[key] == value) {
-            foundIn = value;
-            orFlag = orFlag || 1;
+
+  let foundAttributes: Record<string, string> = { sender: '' }, foundIndex = -1, foundStatus = false;
+  searchType.split('|').forEach((searchingFor, k) => {
+    if (foundStatus) return;
+
+    for (let i = 0; i < events.length; i++) {
+      const eachEvent = events[i];
+      if (eachEvent.type != searchingFor) continue;
+
+      const attributeEqualityPattern = attributeEqualityPatterns[k];
+      const attributes = getAttributesAsMapping(eachEvent.attributes);
+      
+      let flag = 1;
+      let foundIn = '';
+      attributeEqualityPattern.split(',').forEach(eachEquationGeneralPattern => {
+        let orFlag = 0;
+        eachEquationGeneralPattern.split('|').forEach(generalPatternEachOr => {
+          if (orFlag) return;
+          const [key, value] = generalPatternEachOr.split(':');
+
+          if (value != 'true') {
+            if (attributes[key] == value) {
+              foundIn = value;
+              orFlag = orFlag || 1;
+            }
           }
-        }
-        else {
-          if (attributes[key]) {
-            foundIn = value;
-            orFlag = orFlag || 1;
+          else {
+            if (attributes[key]) {
+              orFlag = orFlag || 1;
+            }
           }
-        }
+        })
+        flag = flag && orFlag;
       })
-      flag = flag && orFlag;
-    })
-    if (!flag) continue;
-    
-    if (attributeEqualityPattern.includes('module:distribution') && foundIn == 'staking')
-      return { attributes, index: -1 };
-    else
-      return { attributes, index: i };
-  }
-  return { attributes: null, index: -1 };
+
+      if (!flag) continue;
+      foundStatus = true;
+      foundAttributes = attributes;
+      if (attributeEqualityPattern.includes('module:distribution') && foundIn == 'staking')
+        foundIndex = -1
+      else
+        foundIndex = i
+    }
+  })
+  return { attributes: foundAttributes, index: foundIndex };
 }
 
 const decodeTxsV2 = (
@@ -132,6 +140,8 @@ const decodeTxsV2 = (
           delegatorAddress: attributesMapping.delegator || null,
           amount: getOnlyNativeTokenValueFromAmountString(attributesMapping.amount, denom) || '0',
         }
+
+        if (value.amount == '0') continue;
         
         if (
           value.delegatorAddress || 
@@ -146,8 +156,7 @@ const decodeTxsV2 = (
       }
 
       if (eachEvent.type == 'delegate') {
-
-        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message', 'module:staking,sender:true');
+        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used_staking|message_used', ['module:staking,sender:true', 'module:staking,sender:true', 'module:staking,sender:true']);
         if (!attributes) throw new Error('delegate:delegator_not_found');
         if (index >= 0)
           eachTransactionEvents[index].type = 'message_used_staking';
@@ -187,7 +196,13 @@ const decodeTxsV2 = (
 
       } else if (eachEvent.type == 'withdraw_rewards') {
 
-        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used_staking', 'sender:true,module:distribution|module:staking');
+        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used|message_used_staking|message', [
+          'sender:true,module:distribution',
+          'sender:true,module:distribution',
+          'sender:true,module:staking',
+          'sender:true|module:staking'
+        ]);
+        
         if (!attributes) throw new Error('withdraw_rewards:delegator_not_found');
         if (index >= 0)
           eachTransactionEvents[index].type = 'message_used';
@@ -196,7 +211,7 @@ const decodeTxsV2 = (
 
       } else if (eachEvent.type == 'withdraw_commission') {
 
-        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message', 'sender:true,module:distribution');
+        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message', ['sender:true,module:distribution']);
         if (!attributes) throw new Error('withdraw_commission:validator_not_found');
         if (index >= 0)
           eachTransactionEvents[index].type = 'message_used';
@@ -209,7 +224,7 @@ const decodeTxsV2 = (
           delegatorAddress: attributesMapping.delegator_address || null,
         }
 
-        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message', 'sender:true,module:distribution');
+        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message', ['sender:true,module:distribution']);
         
         if (!attributes) throw new Error('set_withdraw_address:delegator_not_found');
         if (index >= 0)

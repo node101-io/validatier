@@ -20,12 +20,28 @@ const EVENTS_TO_SEARCH = {
   },
 }
 
-export const convertEventsToMessageFormat = (finalizeBlockEvents: Event[], bech32_prefix: string, time: Date | null, denom: string) => {
+const SENSITIVE_EVENTS = ['complete_redelegation', 'complete_unbonding'];
+const ignoreSensitiveEventsBlockThresholdMapping = {
+  cosmoshub: 5448069
+}
+
+export const convertEventsToMessageFormat = (
+  ctx: {
+    chain_identifier: string,
+    height: number
+  },
+  finalizeBlockEvents: Event[],
+  time: Date | null,
+  denom: string
+) => {
+  const { chain_identifier, height } = ctx;
   const messages: DecodedMessage[] = [];
 
   finalizeBlockEvents.forEach(eachEvent => {
     const { type, attributes } = eachEvent;
     if (!Object.keys(EVENTS_TO_SEARCH).includes(type)) return;
+    const ignoreSensitiveBlockThreshold = ignoreSensitiveEventsBlockThresholdMapping[chain_identifier as keyof typeof ignoreSensitiveEventsBlockThresholdMapping];
+    if (SENSITIVE_EVENTS.includes(type) && height <= ignoreSensitiveBlockThreshold) return;
 
     const { address_keys, amount_key } = EVENTS_TO_SEARCH[type as keyof typeof EVENTS_TO_SEARCH];
 

@@ -73,7 +73,7 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
         ...defaultEvents
       ];
       
-      const messages: DecodedMessage[] | null = convertEventsToMessageFormat(finalizeBlockEvents, bech32_prefix, time, denom);
+      const messages: DecodedMessage[] | null = convertEventsToMessageFormat({ height: block_height, chain_identifier: 'cosmoshub' }, finalizeBlockEvents, time, denom);
       const events: Event[][] = [];
       
       let poppedIndices = [];
