@@ -179,17 +179,22 @@
 
   --header-banner-wrapper-gap: 10px;
   --header-banner-wrapper-margin-bottom: 10px;
-  --header-banner-wrapper-margin-left: 0px;
   --header-banner-wrapper-margin-right: 50px;
+  --header-banner-wrapper-margin-left-initial: 0px;
+  --header-banner-wrapper-margin-left: 0px;
 
   --banner-title-content-color-initial: rgba(245, 245, 255, 1);
   --banner-title-content-color-main: rgba(37, 0, 84, 1);
 
+  --banner-logo-wrapper-height: 100%;
+  --banner-title-content-font-weight: 700;
+  --header-banner-wrapper-height-initial: 26px;
+  --banner-title-content-font-size-initial: 42px;
+  --banner-title-content-margin-top-initial: -8px;
+
   --header-banner-wrapper-height: 26px;
   --banner-title-content-font-size: 42px;
-  --banner-title-content-font-weight: 700;
   --banner-title-content-margin-top: -8px;
-  --banner-logo-wrapper-height: 100%;
 }
 
 .date-picker {
@@ -211,7 +216,7 @@
 .date-picker-open-loading-wrapper {
   width: 100%;
   height: calc(100% + var(--selected-range-height));
-  border-radius: calc(var(--picker-main-wrapper-border-radius) - 10px);
+  border-radius: calc(var(--picker-main-wrapper-border-radius) - 8px);
   background-color: rgba(234, 234, 255, 0.8);
   display: flex;
   justify-content: center;
@@ -450,10 +455,10 @@
 
 
 .header-banner-wrapper{
-  height: var(--header-banner-wrapper-height);
+  height: var(--header-banner-wrapper-height-initial);
   gap: var(--header-banner-wrapper-gap);
   margin: var(--header-banner-wrapper-margin-bottom) 0;
-  margin-left: var(--header-banner-wrapper-margin-left);
+  margin-left: var(--header-banner-wrapper-margin-left-initial);
   margin-right: var(--header-banner-wrapper-margin-right);
   transition: all 0.5s ease 0s;
   display: flex;
@@ -463,9 +468,9 @@
 }
 
 .banner-title-content {
-  margin-top: var(--banner-title-content-margin-top);
+  margin-top: var(--banner-title-content-margin-top-initial);
   letter-spacing: var(--banner-title-content-letter-spacing);
-  font-size: var(--banner-title-content-font-size);
+  font-size: var(--banner-title-content-font-size-initial);
   font-weight: var(--banner-title-content-font-weight);
   color: var(--banner-title-content-color-initial);
 }
@@ -767,50 +772,6 @@
   }
 }
 
-@media only screen and (max-width: 500px) {
-  :root {
-
-    --default-inner-image-content-height: 32px;
-    --network-switch-header-height: 32px;
-
-    --table-filters-subgroup-gap: 0px;
-    --date-picker-height: 36px;
-    --date-picker-display-initial: none;
-  
-    --selected-range-font-size: 16px;
-
-    --calendar-left-wrapper-dropdown-li-padding: 4px;
-  
-    --calendar-left-wrapper-each-choice-font-size: 16px;
-    --calendar-left-wrapper-each-choice-font-weight: 400;
-  
-    --calendar-wrapper-padding: 10px;
-    --picker-main-wrapper-right: -50px;
-  
-    --date-input-month-year-info-content-font-size: 16px;
-    --calendar-left-wrapper-width: 120px;
-  
-    --days-header-wrapper-horizontal-margin: -5px;
-    --days-header-wrapper-horizontal-padding: 5px;
-    --days-header-wrapper-gap: 5px;
-  
-    --date-font-size: 16px;
-    --date-border-size: 4px;
-    --date-padding: 0px;
-    
-    --date-range-width: 100px;
-
-    --header-banner-wrapper-height: 13px;
-    --banner-title-content-font-size: 20px;
-    --banner-title-content-margin-top: -3px;
-
-    --header-banner-wrapper-margin-left: calc(50% - (130px / 2));
-    --selected-range-height: 36px;
-    --date-interval-description-padding: 3px;
-  }
-}
-
-
 @media only screen and (max-width: 700px) {
   .picker-main-wrapper-open {
     border-radius: var(--picker-main-wrapper-border-radius);
@@ -849,5 +810,53 @@
 
   :root {
     --selected-range-open-after-display: flex;
+  }
+}
+
+
+@media only screen and (max-width: 500px) {
+  :root {
+
+    --default-inner-image-content-height: 32px;
+    --network-switch-header-height: 32px;
+
+    --table-filters-subgroup-gap: 0px;
+    --date-picker-height: 36px;
+    --date-picker-display-initial: none;
+  
+    --selected-range-font-size: 16px;
+
+    --calendar-left-wrapper-dropdown-li-padding: 4px;
+  
+    --calendar-left-wrapper-each-choice-font-size: 16px;
+    --calendar-left-wrapper-each-choice-font-weight: 400;
+  
+    --calendar-wrapper-padding: 10px;
+    --picker-main-wrapper-right: -50px;
+  
+    --date-input-month-year-info-content-font-size: 16px;
+    --calendar-left-wrapper-width: 120px;
+  
+    --days-header-wrapper-horizontal-margin: -5px;
+    --days-header-wrapper-horizontal-padding: 5px;
+    --days-header-wrapper-gap: 5px;
+  
+    --date-font-size: 16px;
+    --date-border-size: 4px;
+    --date-padding: 0px;
+    
+    --date-range-width: 100px;
+
+    --header-banner-wrapper-height-initial: 13px;
+    --header-banner-wrapper-margin-left-initial: calc(50% - (130px / 2));
+    --banner-title-content-font-size-initial: 20px;
+    --banner-title-content-margin-top-initial: -3px;
+
+    --header-banner-wrapper-height: 16px;
+    --banner-title-content-font-size: 26px;
+    --banner-title-content-margin-top: -5px;
+
+    --selected-range-height: 36px;
+    --date-interval-description-padding: 3px;
   }
 }

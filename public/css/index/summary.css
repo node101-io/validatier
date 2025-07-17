@@ -685,16 +685,16 @@
     --each-metric-content-wrapper-content-value-usd-margin-top: -6px;
     --each-metric-content-wrapper-header-height: 10px;
     --each-metric-content-wrapper-header-margin-top: 12px;
-  }
-}
 
-@media only screen and (max-width: 800px) {
-  :root {
 
     --network-summary-network-stats-main-wrapper-width: calc(100% + (2 * var(--inner-main-wrapper-horizontal-padding)) - 40px);
     --network-summary-network-stats-main-wrapper-margin-left: calc(-1 * var(--network-summary-network-graph-content-wrapper-padding-horizontal) - 16px);
     --network-summary-network-stats-main-wrapper-padding-horizontal: calc(var(--network-summary-network-graph-content-wrapper-padding-horizontal) + 16px);
-    
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  :root {    
     --network-summary-network-graph-metrics-content-wrapper-width: fit-content;
     --network-summary-network-graph-metrics-wrapper-width: calc(100% + (2 * var(--inner-main-wrapper-horizontal-padding)) - 24px);
     --network-summary-network-graph-metrics-wrapper-margin-left: calc(-1 * var(--network-summary-network-graph-content-wrapper-padding-horizontal) - 16px);

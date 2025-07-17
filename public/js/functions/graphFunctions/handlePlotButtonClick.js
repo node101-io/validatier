@@ -112,6 +112,7 @@ function generateGraph (validator) {
   const headerMainWrapper = document.getElementById('header-main-wrapper');
   const datePicker = document.getElementById('date-picker');
   const searchWrapper = document.querySelector('.search-wrapper');
+  const innerMainWrapper = document.getElementById('inner-main-wrapper');
   
   searchWrapper.style.visibility = 'hidden';
   bannerTitle.style.color = 'var(--banner-title-content-color-main)';
@@ -123,10 +124,17 @@ function generateGraph (validator) {
   selectedRange.style.border = 'var(--selected-range-border-size) solid var(--selected-range-border-color)';
   selectedRange.style.color = 'var(--selected-range-color)';
 
-  headerMainWrapper.style.height = `calc(var(--header-main-wrapper-height) - 50px)`
+  headerMainWrapper.style.height = `75px`;
   headerMainWrapper.classList.add('header-main-wrapper-main');
   headerMainWrapper.style.background = 'var(--header-main-background)';
-  datePicker.style.background = 'var(--date-picker-display)';
+
+  const headerBannerWrapper = document.getElementById('header-banner-wrapper');
+  headerBannerWrapper.style.height = 'var(--header-banner-wrapper-height)';
+  headerBannerWrapper.style.marginLeft = 'var(--header-banner-wrapper-margin-left)';
+  bannerTitle.style.marginTop = 'var(--banner-title-content-margin-top)';
+  bannerTitle.style.fontSize = 'var(--banner-title-content-font-size)';
+  datePicker.style.display = 'flex';
+  innerMainWrapper.style.marginTop = '75px';
 
   if (typeof validator == 'string') validator = JSON.parse(validator);
   const summaryData = JSON.parse(document.body.getAttribute('summaryData'));

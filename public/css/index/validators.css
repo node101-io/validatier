@@ -91,7 +91,7 @@
   
   --each-leaderboard-summary-data-each-network-summary-stat-content-font-size: 36px;
 
-  --validator-details-main-width: var(--inner-main-wrapper-width);
+  --validator-details-main-width: 100%;
   --validator-details-main-wrapper-gap: 20px;
   --validator-details-main-wrapper-margin-top: 20px;
   
@@ -439,7 +439,7 @@
 @media only screen and (max-width: 900px) {
   :root {
     --validator-details-stats-wrapper-flex-wrap: wrap;
-    --each-validator-stat-wrapper-width: 100%;
+    --each-validator-stat-wrapper-width: calc(100% + var(--each-validator-stat-wrapper-padding-horizontal));
     --each-leaderboard-table-validator-info-moniker-width: 100px;
   }
 }

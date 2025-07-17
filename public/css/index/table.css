@@ -2,15 +2,15 @@
   --each-validator-wrapper-gap: 30px;
   --validator-table-header-gap: 30px;
 
-  --each-table-header-wrapper-min-width: 138px;
-  --validator-each-numeric-info-min-width: 138px;
+  --each-table-header-wrapper-min-width: 135px;
+  --validator-each-numeric-info-min-width: 135px;
 
   --each-table-header-wrapper-gap: 0px;
   --each-table-header-wrapper-max-width: 200px;
   --each-table-header-validator-info-header-min-width: 200px;
   --each-table-header-validator-info-header-max-width: 200px;
   
-  --each-table-header-title-font-size: 20px;
+  --each-table-header-title-font-size: 18px;
   --each-table-header-title-font-weight: 600;
   --each-table-header-title-gap: 0px;
   --each-table-header-title-color: rgba(124, 112, 195, 1);
@@ -21,15 +21,15 @@
   --each-table-popup-info-content-font-weight: 400;
   --each-table-popup-info-content-background-color: rgba(77, 9, 180, 1);
   --each-table-popup-info-content-color: rgba(250, 250, 250, 1);
-  --each-table-popup-info-content-font-size: 20px;
+  --each-table-popup-info-content-font-size: 16px;
   --each-table-popup-info-content-translate-y: -10px;
   --each-table-popup-info-content-opacity: 1;
   --each-table-popup-info-content-bottom: 85%;
   --each-table-popup-info-content-transition-duration: 0.25s;
-  --each-table-popup-info-content-height: 32px;
+  --each-table-popup-info-content-height: 24px;
   --each-table-popup-info-content-width: fit-content;
   --each-table-popup-info-content-left: -50%;
-  --each-table-popup-info-content-horizontal-padding: 20px;
+  --each-table-popup-info-content-horizontal-padding: 10px;
   --each-table-popup-info-content-margin-top: -22px;
   
   --each-table-popup-info-content-before-width: 10px;
@@ -157,6 +157,7 @@
   --validator-dropdown-icon-transition-duration: 0.25s;
 
   --validator-filter-input-width: 200px;
+  --validator-filter-input-width-focus: 200px;
   --validator-filter-input-padding-left: var(--selected-range-height);
   --validator-filter-input-padding-bottom: 4px;
   --validator-filter-input-font-size: 20px;
@@ -295,7 +296,7 @@
 .each-validator-wrapper {
   height: var(--each-validator-wrapper-height);
   gap: var(--each-validator-wrapper-gap);
-  padding: var(--each-validator-wrapper-vertical-padding) 0px;
+  padding: var(--each-validator-wrapper-vertical-padding) var(--each-validator-wrapper-horizontal-padding);
   border-bottom: var(--each-validator-wrapper-border-bottom-size) solid var(--color-triangle-unselected);
   min-width: calc(var(--each-validator-wrapper-min-width) - (var(--each-validator-wrapper-horizontal-padding) * 2));
   cursor: var(--pointer-hand-dark);
@@ -541,7 +542,7 @@
 
 .validator-table-header {
   display: flex;
-  padding: 0;
+  padding: 0 var(--validator-table-header-horizontal-padding);
   align-items: center;
   margin-bottom: var(--validator-table-header-margin-bottom);
   gap: var(--validator-table-header-gap);
@@ -653,7 +654,7 @@
 }
 
 .validator-filter-input:focus {
-  width: calc(100vw - var(--date-picker-width) - var(--selected-range-height) - 1 * var(--header-inputs-main-wrapper-gap) - 2 * var(--inner-main-wrapper-horizontal-padding) - 2px);
+  width: var(--validator-filter-input-width-focus);
 }
 
 .validator-filter-container {
@@ -747,8 +748,8 @@
 .validators-data-column {
   width: calc(100% - var(--validators-info-column-width));
   overflow-x: var(--validators-data-column-overflow-x);
-  padding-top: 50px;
-  margin-top: -50px;
+  padding-top: 20px;
+  margin-top: -20px;
   padding-left: 200px;
   margin-left: -200px;
 }
@@ -771,11 +772,18 @@
     --validator-filter-input-width: 0px;
     --validator-filter-input-wrapper-gap: 0px;
     --validator-filter-input-wrapper-padding-horizontal: 12px;
+    --validator-filter-input-width-focus: calc(100vw - var(--date-picker-width) - var(--selected-range-height) - 1 * var(--header-inputs-main-wrapper-gap) - 2 * var(--inner-main-wrapper-horizontal-padding) - 2px);
   }
 }
 
 @media only screen and (max-width: 700px) {
   :root {
     --dropdown-icon-display: none;
+  }
+}
+
+@media only screen and (max-width: 700px) {
+  :root {
+    --each-leaderboard-table-validator-wrapper-vertical: 11px;
   }
 }

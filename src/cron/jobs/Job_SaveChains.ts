@@ -1,7 +1,6 @@
 import async from 'async';
 import Chain from '../../models/Chain/Chain.js'
 import { findNodeWithMinBlockHeight } from '../../utils/findNodeWithMinBlockHeight.js';
-import Price from '../../models/Price/Price.js';
 
 export const Job_SaveChains = (callback: (err: string | null, success: Boolean) => any) => {
   
@@ -37,18 +36,7 @@ export const Job_SaveChains = (callback: (err: string | null, success: Boolean) 
                 usd_exchange_rate: response.chain.prices.coingecko[response.chain.display].usd
               }, (err, chain) => {
                 if (err || !chain) return next(new Error(err || 'no_chain'));
-
-                const datetime = new Date();
-
-                Price.savePriceFunction({
-                  day: datetime.getDate(),
-                  month: datetime.getMonth() + 1,
-                  year: datetime.getFullYear(),
-                  price: chain?.usd_exchange_rate
-                }, (err, result) => {
-                  if (err) return next(new Error(err));
-                  return next();
-                })
+                return next();
               })
             })
         })

@@ -4,11 +4,13 @@ function mainScrollHandler() {
   const selectedRange = document.getElementById('selected-range');
   const pickerMainWrapper = document.getElementById('picker-main-wrapper');
 
+  const headerBannerWrapper = document.getElementById('header-banner-wrapper');
   const bannerTitle = document.getElementById('banner-title');
 
   const headerMainWrapper = document.getElementById('header-main-wrapper');
   const datePicker = document.getElementById('date-picker');
   const searchWrapper = document.querySelector('.search-wrapper');
+  const innerMainWrapper = document.getElementById('inner-main-wrapper');
 
   allMainWrapper.addEventListener('scroll', (event) => {    
     if (window.location.href.includes('validator=')) return;
@@ -22,12 +24,13 @@ function mainScrollHandler() {
     const scrollTop = event.target.scrollTop;
     introMainWrapper.style.transform = `translateY(-${Math.min(scrollTop, scrollNormalizer)}px)`;
 
+    headerMainWrapper.style.height = `var(--header-main-wrapper-height)`;
+    innerMainWrapper.style.marginTop = '150px';
+
     if (scrollTop < scrollThreshold) {
       bannerTitle.style.color = 'var(--banner-title-content-color-initial)';
       document.documentElement.style.setProperty('--banner-logo-color', 'rgba(245, 245, 255, 1)');
       document.documentElement.style.setProperty('--selected-range-logo-color', 'rgba(255, 255, 255, 1)');
-      if (window.innerWidth <= 500)
-        document.documentElement.style.setProperty('--header-banner-wrapper-margin-left', 'calc(50% - (130px / 2))');
 
       selectedRange.style.background = 'var(--selected-range-background-initial)';
       selectedRange.style.backdropFilter = 'var(--selected-range-backdrop-filter-initial)';
@@ -45,17 +48,15 @@ function mainScrollHandler() {
       pickerMainWrapper.style.border = 'var(--picker-main-wrapper-border-size-initial) solid var(--general-main-wrapper-border-color)'
       pickerMainWrapper.style.borderTop = 'none';
 
-      if (window.innerWidth <= 500) {
-        document.documentElement.style.setProperty('--header-banner-wrapper-height', '13px');
-        document.documentElement.style.setProperty('--banner-title-content-font-size', '20px');
-        document.documentElement.style.setProperty('--banner-title-content-margin-top', '-3px');
-      }
+      headerBannerWrapper.style.height = 'var(--header-banner-wrapper-height-initial)';
+      headerBannerWrapper.style.marginLeft = 'var(--header-banner-wrapper-margin-left-initial)';
+      bannerTitle.style.marginTop = 'var(--banner-title-content-margin-top-initial)';
+      bannerTitle.style.fontSize = 'var(--banner-title-content-font-size-initial)';
     } else {
       searchWrapper.style.visibility = 'visible';
       bannerTitle.style.color = 'var(--banner-title-content-color-main)';
       document.documentElement.style.setProperty('--banner-logo-color', 'rgba(37, 0, 84, 1)');
       document.documentElement.style.setProperty('--selected-range-logo-color', 'rgba(124, 112, 195, 1)');
-      document.documentElement.style.setProperty('--header-banner-wrapper-margin-left', '0');
 
       selectedRange.style.background = 'var(--selected-range-background)';
       selectedRange.style.backdropFilter = 'var(--selected-range-backdrop-filter)';
@@ -72,12 +73,10 @@ function mainScrollHandler() {
       pickerMainWrapper.style.border = 'var(--picker-main-wrapper-border-size) solid var(--general-main-wrapper-border-color)'
       pickerMainWrapper.style.borderTop = 'none';
 
-      
-      if (window.innerWidth <= 500) {
-        document.documentElement.style.setProperty('--header-banner-wrapper-height', '20px');
-        document.documentElement.style.setProperty('--banner-title-content-font-size', '32px');
-        document.documentElement.style.setProperty('--banner-title-content-margin-top', '-5px');
-      }
+      headerBannerWrapper.style.height = 'var(--header-banner-wrapper-height)';
+      headerBannerWrapper.style.marginLeft = 'var(--header-banner-wrapper-margin-left)';
+      bannerTitle.style.marginTop = 'var(--banner-title-content-margin-top)';
+      bannerTitle.style.fontSize = 'var(--banner-title-content-font-size)';
     }
   });
 

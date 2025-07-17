@@ -156,7 +156,7 @@ block content
               //- button.apply#apply Apply
         .validator-filter-container
           input.validator-filter-input(autocomplete="off" class='search-wrapper' type='text' id='validator-filter-input' placeholder='Search Validator')
-      a(href="/").header-banner-wrapper
+      a(href="/").header-banner-wrapper#header-banner-wrapper
         .banner-logo-wrapper#banner-logo(class='center')
           include ../icons/logo.pug
         .banner-title-content#banner-title(class=`navbar-text ${queryValidator ? 'banner-title-content-validator' : ''}`) VALIDATIER
@@ -176,7 +176,7 @@ block content
             .falling-star-star
               img(src="/res/images/star.svg")
         .mobile-menu-banner-wrapper 
-          .banner-logo-wrapper
+          .mobile-banner-logo-wrapper
             include ../icons/logo.pug
           .mobile-menu-banner-title VALIDATIER
         .mobile-menu-background-content(class='intro-main-background-content')
@@ -248,7 +248,7 @@ block content
               .each-network-summary-stat-column
                 if `${stat.id_native}` == 'summary-percentage-sold-native'
                   .percentage-sold-main-circle
-                    span(class=`${(100 - summaryData[stat.field]) < 40 ? 'section-invisible' : ''}`)= getValue(100 - summaryData[stat.field], stat.unit).nativeValue
+                    span(class=`${(100 - summaryData[stat.field]) < 50 ? 'section-invisible' : ''}`)= getValue(100 - summaryData[stat.field], stat.unit).nativeValue
                     .percentage-sold-inner-circle(class=`${stat.id_native}` style=`width: calc(var(--percentage-sold-main-circle-diameter) * ${Math.min(1, Math.sqrt(parseInt(summaryData[stat.field]) / 100))});`) 
                       span(class=`${(summaryData[stat.field]) < 20 ? 'section-invisible' : ''}`) #{getValue(summaryData[stat.field], stat.unit).nativeValue}
                 else
@@ -468,7 +468,7 @@ block content
             .network-summary-network-graph-metrics-wrapper-title(class='each-section-title-content') Graph Metrics
             .network-summary-network-graph-metrics-content-wrapper
               each metric in metrics 
-                .each-metric-content-wrapper(id=`validator-metric-${metric.id}` class=`${validatorGraph.dataFields.includes(metric.id) ? '' : 'section-hidden'}`)
+                .each-metric-content-wrapper(id=`validator-metric-${metric.id}` class=`each-metric-content-wrapper-validator-details ${validatorGraph.dataFields.includes(metric.id) ? '' : 'section-hidden'}`)
                   .each-metric-content-wrapper-header
                     .each-metric-content-wrapper-header-icon(style=`background-color: ${metric.color}`)
                     .each-metric-content-wrapper-header-title= metric.title

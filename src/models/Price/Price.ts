@@ -26,6 +26,19 @@ interface PriceModel extends Model<PriceInterface> {
       } | null
     ) => any
   ) => any;
+  getMostRecentPriceDocument: (
+    body: {},
+    callback: (
+      err: string | null,
+      result: {
+        day: number,
+        month: number,
+        year: number,
+        timestamp: number,
+        price: number
+      } | null
+    ) => any
+  ) => any;
   getPriceGraphData: (
     body: {
       bottom_timestamp: number,
@@ -81,6 +94,15 @@ PriceSchema.statics.savePriceFunction = function (
     .then(result => callback(null, body))
     .catch(error => callback(error, null));
 };
+
+PriceSchema.statics.getMostRecentPriceDocument = function (
+  body: Parameters<PriceModel['getMostRecentPriceDocument']>[0],
+  callback: Parameters<PriceModel['getMostRecentPriceDocument']>[1]
+) {
+  Price.findOne().sort({ timestamp: -1 })
+    .then(mostRecent => callback(null, mostRecent))
+    .catch(err => callback(err, null));
+}
 
 PriceSchema.statics.getPriceGraphData = function (
   body: Parameters<PriceModel['getPriceGraphData']>[0],

@@ -24,6 +24,7 @@ import { findSkipDates } from './utils/findSkipDates.js';
 import Price from './models/Price/Price.js';
 import { testDataFetch } from './test/testDataFetch.js';
 import { getOnlyNativeTokenValueFromAmountString } from './listeners/functions/getOnlyNativeTokenValueFromAmountString.js';
+import { Job_SyncPrices } from './cron/jobs/Job_SyncPrices.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -66,5 +67,3 @@ app.use('/', indexRouter);
 app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
-startFetchingData();
-// testDataFetch();

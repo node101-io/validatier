@@ -26,8 +26,12 @@
   initial-value: -395px;
 } */
 
+:root {
+  --animate-star-width: 20px;
+}
+
 .animate-star, .animate-star-3d {
-  width: 20px;
+  width: var(--animate-star-width);
   aspect-ratio: 1/1;
   border-radius: 100%;
   background-color: white;
@@ -42,7 +46,7 @@
 }
 
 .orbit-1 {
-  width: 30px;
+  width: calc(var(--animate-star-width) * 1.5);
   offset-path: path('M1114.55 531.875C1332.45 531.875 1509.1 412.972 1509.1 266.298C1509.1 119.624 1332.45 0.720703 1114.55 0.720703C896.638 0.720703 719.989 119.624 719.989 266.298C719.989 412.972 896.638 531.875 1114.55 531.875Z');
   animation: move-cw 110s linear infinite;
 }
@@ -251,6 +255,22 @@
   height: 100%;
   position: absolute;
   top: var(--intro-main-wrapper-background-content-top);
+}
+
+@media only screen and (max-width: 950px) {
+  :root {
+    --intro-main-wrapper-title-font-size: 80px;
+    --intro-main-wrapper-description-font-size: 20px;
+
+    --intro-main-wrapper-title-line-height: 64px;
+    --intro-main-wrapper-description-line-height: 22px;
+  }
+}
+
+@media only screen and (max-width: 950px) {
+  :root {
+    --animate-star-width: 10px;
+  }
 }
 
 @media only screen and (max-width: 700px) { 

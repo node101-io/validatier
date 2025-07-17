@@ -222,7 +222,7 @@ compositeEventBlockSchema.statics.getPeriodicDataForGraphGeneration = function (
       records.forEach((record) => {
         
         const totalSelfStake = (record.mostRecentRecord.self_stake_prefix_sum - record.leastRecentRecord.self_stake_prefix_sum || 0) + (record.leastRecentRecord.self_stake || 0);
-        const totalStake = (record.mostRecentRecord.total_stake_prefix_sum || 0) + (record.leastRecentRecord.total_stake || 0);
+        const totalStake = (record.mostRecentRecord.total_stake_prefix_sum || 0);
         const balanceChange = (record.mostRecentRecord.balance_change_prefix_sum - (record.leastRecentRecord.balance_change_prefix_sum || 0)) + (record.leastRecentRecord.balance_change || 0);
 
         mapping[record._id] = {
