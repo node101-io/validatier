@@ -224,7 +224,7 @@ const decodeTxsV2 = (
           delegatorAddress: attributesMapping.delegator_address || null,
         }
 
-        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message', ['sender:true,module:distribution']);
+        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used', ['sender:true,module:distribution', 'sender:true,module:distribution']);
         
         if (!attributes) throw new Error('set_withdraw_address:delegator_not_found');
         if (index >= 0)
