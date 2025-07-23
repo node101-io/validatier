@@ -33,11 +33,11 @@ const TEST_CASES = [
 
 export function testDataFetch() {
   Chain.findChainByIdentifier({ chain_identifier: 'cosmoshub' }, (err, chain) => {
-    if (!chain?.rpc_url) return console.log('no_rpc_url');
+    if (!chain?.rpc_urls[0]) return console.log('no_rpc_url');
 
     async.timesSeries(TEST_CASES.length, (index, next) => {
       const { height, description } = TEST_CASES[index];
-      getTxsByHeight(chain.rpc_url, height, chain.denom, chain.bech32_prefix, 0, true, (err, results) => {
+      getTxsByHeight(chain.rpc_urls[0], height, chain.denom, chain.bech32_prefix, 0, true, (err, results) => {
         console.log(`############### Block: ${height} - ${description} ###############`);
         if (err) console.log(err);
         else {

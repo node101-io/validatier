@@ -64,14 +64,17 @@ export const listenForEvents = (
 
     promises.push(
       new Promise ((resolve, reject) => {
+        const I = height;
+        console.time(`${chain.name} | Processed block: ${I}`);
         getTxsByHeight(
-          chain.rpc_url,
+          chain.rpc_urls[I % 2],
           height,
           chain.denom,
           chain.bech32_prefix,
           0,
           fetch_time,
           (err, result) => {
+            console.timeEnd(`${chain.name} | Processed block: ${I}`);
             const { time, decodedTxs } = result;
             
             if (err)
@@ -291,19 +294,24 @@ export const listenForEvents = (
     new_active_set_last_updated_block_time: null,
     success: true
   }
+
+  console.time(`${chain.name} | Processed through ${bottom_block_height} to ${top_block_height}`);
   
   Promise.allSettled(promises)
     .then(values => {
+      console.timeEnd(`${chain.name} | Processed through ${bottom_block_height} to ${top_block_height}`);
       const rejectedValues = values.filter(each => each.status == 'rejected')
       if (rejectedValues.length)
         return final_callback(`${rejectedValues.map((each: any) => each.reason.block_height)} | rejected for ${RETRY_TOTAL} times\nJSON: ${JSON.stringify(rejectedValues)}`, { success: false })
 
       Validator.saveManyValidators(validatorMap, (err, validators) => {
         if (err) return final_callback(`save_many_validators_failed: ${err}`, { success: false });
+        console.time(`${chain.name} | BULK SAVE to leveldb`);
         bulkSave({
           chain_identifier: chain.name,
           saveMapping: compositeEventBlockMap
         }, (err, success) => {
+          console.timeEnd(`${chain.name} | BULK SAVE to leveldb`);
           if (err || !success) return final_callback(err, { success: false });
           const insertedValidatorAddresses = validators?.insertedValidators 
             ? validators?.insertedValidators.map(validator => 
@@ -341,7 +349,7 @@ export const listenForEvents = (
                 Validator
                   .updateActiveValidatorList({
                     chain_identifier: chain.name,
-                    chain_rpc_url: chain.rpc_url,
+                    chain_rpc_url: chain.rpc_urls[0],
                     height: bottom_block_height,
                     day: day,
                     month: month,

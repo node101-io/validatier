@@ -9,7 +9,7 @@ export interface ChainInterface {
   symbol: string;
   decimals: number;
   denom: string;
-  rpc_url: string;
+  rpc_urls: string[];
   first_available_block_height: number;
   last_available_block_height: number;
   first_available_block_time: Date;
@@ -33,7 +33,7 @@ interface ChainModel extends Model<ChainInterface> {
       decimals: number;
       denom: string;
       bech32_prefix: string;
-      rpc_url: string;
+      rpc_urls: string[];
       first_available_block_height: number;
       last_available_block_height: number;
       first_available_block_time: Date;
@@ -117,8 +117,8 @@ const chainSchema = new Schema<ChainInterface>({
     min: 0,
     max: 20
   },
-  rpc_url: {
-    type: String,
+  rpc_urls: {
+    type: [String],
     required: true,
     trim: true
   },
@@ -180,7 +180,7 @@ chainSchema.statics.saveChain = function (
   callback: Parameters<ChainModel['saveChain']>[1]
 ) {
 
-  const { name, pretty_name, chain_id, image, symbol, decimals, denom, bech32_prefix, rpc_url, first_available_block_height, last_available_block_height, first_available_block_time, usd_exchange_rate } = body;
+  const { name, pretty_name, chain_id, image, symbol, decimals, denom, bech32_prefix, rpc_urls, first_available_block_height, last_available_block_height, first_available_block_time, usd_exchange_rate } = body;
 
   Chain
     .findOneAndUpdate(
@@ -210,7 +210,7 @@ chainSchema.statics.saveChain = function (
           decimals: decimals,
           denom: denom,
           bech32_prefix: bech32_prefix,
-          rpc_url: rpc_url,
+          rpc_urls: rpc_urls,
           first_available_block_height: first_available_block_height,
           last_available_block_height: last_available_block_height,
           first_available_block_time: first_available_block_time,

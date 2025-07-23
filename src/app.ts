@@ -11,7 +11,7 @@ import path from 'path';
 import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
 import { startFetchingData } from './utils/startFetchingData.js';
-import { getWithdrawAddressMappingForChain, initDB, resetWithdrawAddressMappingForChain, setWithdrawAddress } from './utils/levelDb.js';
+import { getValidatorsOfWithdrawAddress, getWithdrawAddressMappingForChain, initDB, resetWithdrawAddressMappingForChain, setWithdrawAddress } from './utils/levelDb.js';
 import { Job_SaveCache } from './cron/jobs/Job_SaveCache.js';
 import Chain from './models/Chain/Chain.js';
 import getTxsByHeight from './utils/getTxsByHeight.js';
@@ -25,6 +25,7 @@ import Price from './models/Price/Price.js';
 import { testDataFetch } from './test/testDataFetch.js';
 import { getOnlyNativeTokenValueFromAmountString } from './listeners/functions/getOnlyNativeTokenValueFromAmountString.js';
 import { Job_SyncPrices } from './cron/jobs/Job_SyncPrices.js';
+import { Job_SaveChains } from './cron/jobs/Job_SaveChains.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -67,3 +68,4 @@ app.use('/', indexRouter);
 app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
+startFetchingData();

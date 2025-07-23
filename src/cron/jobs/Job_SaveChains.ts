@@ -1,6 +1,6 @@
 import async from 'async';
 import Chain from '../../models/Chain/Chain.js'
-import { findNodeWithMinBlockHeight } from '../../utils/findNodeWithMinBlockHeight.js';
+import { findGenesisNodes } from '../../utils/findNodeWithMinBlockHeight.js';
 
 export const Job_SaveChains = (callback: (err: string | null, success: Boolean) => any) => {
   
@@ -17,8 +17,8 @@ export const Job_SaveChains = (callback: (err: string | null, success: Boolean) 
             .then(node_response => node_response.json())
             .then(node_response => {
 
-              const earliestNode = findNodeWithMinBlockHeight(node_response);
-              if (!earliestNode) return next(new Error('fetch_error'));
+              const genesisNodes = findGenesisNodes(node_response);
+              if (!genesisNodes) return next(new Error('fetch_error'));
 
               Chain.saveChain({
                 name: response.chain.chain_name,
@@ -29,10 +29,10 @@ export const Job_SaveChains = (callback: (err: string | null, success: Boolean) 
                 decimals: response.chain.decimals,
                 denom: response.chain.denom,
                 bech32_prefix: response.chain.bech32_prefix,
-                rpc_url:  earliestNode.ip_address,
-                first_available_block_height: earliestNode.earliest_block_height,
-                last_available_block_height: earliestNode.latest_block_height,
-                first_available_block_time: new Date(earliestNode.data_since),
+                rpc_urls:  genesisNodes.ip_addresses,
+                first_available_block_height: genesisNodes.earliest_block_height,
+                last_available_block_height: genesisNodes.latest_block_height,
+                first_available_block_time: new Date(genesisNodes.data_since),
                 usd_exchange_rate: response.chain.prices.coingecko[response.chain.display].usd
               }, (err, chain) => {
                 if (err || !chain) return next(new Error(err || 'no_chain'));
