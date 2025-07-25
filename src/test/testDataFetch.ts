@@ -25,7 +25,8 @@ const TEST_CASES = [
   // { height: 18152061, description: 'modify_withdraw_address' },
   // { height: 9866551, description: 'modify_withdraw_address' },
   // { height: 11767753, description: 'modify_withdraw_address' },
-  { height: 19639608, description: 'set_withdraw_address' },
+  // { height: 19639608, description: 'withdraw_commission' },
+  { height: 19642834, description: 'set_withdraw_address' },
 ];
 
 // for (let i = 5401834; i < 5411792; i++) {
