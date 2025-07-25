@@ -156,10 +156,11 @@ const decodeTxsV2 = (
       }
 
       if (eachEvent.type == 'delegate') {
-        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used_staking|message_used|message', [
+        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used_staking|message_used|message|message_used', [
           'module:staking,sender:true',
           'module:staking,sender:true',
           'module:staking,sender:true',
+          'authz_msg_index:true,sender:true',
           'authz_msg_index:true,sender:true',
         ]);
         if (!attributes) throw new Error('delegate:delegator_not_found');
@@ -201,11 +202,13 @@ const decodeTxsV2 = (
 
       } else if (eachEvent.type == 'withdraw_rewards') {
 
-        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used|message_used_staking|message', [
+        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used|message_used_staking|message|message|message_used', [
           'sender:true,module:distribution',
           'sender:true,module:distribution',
           'sender:true,module:staking',
-          'sender:true,authz_msg_index:true'
+          'sender:true,module:staking',
+          'sender:true,authz_msg_index:true',
+          'sender:true,authz_msg_index:true',
         ]);
         
         if (!attributes) throw new Error('withdraw_rewards:delegator_not_found');
@@ -216,11 +219,13 @@ const decodeTxsV2 = (
 
       } else if (eachEvent.type == 'withdraw_commission') {
 
-        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used|message|message_used', [
+        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used|message_used_staking|message|message|message_used', [
           'sender:true,module:distribution',
           'sender:true,module:distribution',
+          'sender:true,module:staking',
+          'sender:true,module:staking',
           'sender:true,authz_msg_index:true',
-          'sender:true,authz_msg_index:true'
+          'sender:true,authz_msg_index:true',
         ]);
         if (!attributes) throw new Error('withdraw_commission:validator_not_found');
         if (index >= 0)
