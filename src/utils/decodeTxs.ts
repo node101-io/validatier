@@ -211,7 +211,12 @@ const decodeTxsV2 = (
 
       } else if (eachEvent.type == 'withdraw_commission') {
 
-        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message', ['sender:true,module:distribution']);
+        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used|message_used_staking|message', [
+          'sender:true,module:distribution',
+          'sender:true,module:distribution',
+          'sender:true,module:staking',
+          'sender:true|module:staking'
+        ]);
         if (!attributes) throw new Error('withdraw_commission:validator_not_found');
         if (index >= 0)
           eachTransactionEvents[index].type = 'message_used';

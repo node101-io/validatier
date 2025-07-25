@@ -11,9 +11,6 @@ const TEST_CASES = [
   // { height: 9421602, description: 'delegate + withdraw' },
   // { height: 8772784, description: 'withdraw_reward + withdraw_commission + delegate' },
   // { height: 8772711, description: 'withdraw_reward + withdraw_commission + delegate (failed)' },
-  // { height: 18152061, description: 'modify_withdraw_address' },
-  // { height: 9866551, description: 'modify_withdraw_address' },
-  // { height: 11767753, description: 'modify_withdraw_address' },
   // { height: 5434269, description: 'delegate_sign_test' },
   // { height: 10355620, description: 'complete_redelegate that we may not consider' },
   // { height: 16985512, description: 'rate_limit_test' },
@@ -24,7 +21,11 @@ const TEST_CASES = [
   // { height: 16985586, description: 'rate_limit_test' },
   // { height: 16985587, description: 'rate_limit_test' },
   // { height: 5200792, description: 'ignore_sensitive_events' },
-  { height: 12487454, description: 'set_withdraw_address' },
+  // { height: 12487454, description: 'set_withdraw_address' },
+  // { height: 18152061, description: 'modify_withdraw_address' },
+  // { height: 9866551, description: 'modify_withdraw_address' },
+  // { height: 11767753, description: 'modify_withdraw_address' },
+  { height: 19639608, description: 'set_withdraw_address' },
 ];
 
 // for (let i = 5401834; i < 5411792; i++) {
