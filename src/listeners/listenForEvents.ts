@@ -282,96 +282,95 @@ export const listenForEvents = (
         )
       );
     }
-  });
+    const result: ListenForEventsResult = {
+      inserted_validator_addresses: null,
+      saved_composite_events_operator_addresses: null,
+      saved_active_validators: null,
+      new_active_set_last_updated_block_time: null,
+      success: true
+    }
 
-  const result: ListenForEventsResult = {
-    inserted_validator_addresses: null,
-    saved_composite_events_operator_addresses: null,
-    saved_active_validators: null,
-    new_active_set_last_updated_block_time: null,
-    success: true
-  }
+    console.time(`${chain.name} | Processed through ${bottom_block_height} to ${top_block_height}`);
+    
+    Promise.allSettled(promises)
+      .then(values => {
+        console.timeEnd(`${chain.name} | Processed through ${bottom_block_height} to ${top_block_height}`);
+        const rejectedValues = values.filter(each => each.status == 'rejected')
+        if (rejectedValues.length)
+          return final_callback(`${rejectedValues.map((each: any) => each.reason.block_height)} | rejected for ${RETRY_TOTAL} times\nJSON: ${JSON.stringify(rejectedValues)}`, { success: false })
 
-  console.time(`${chain.name} | Processed through ${bottom_block_height} to ${top_block_height}`);
-  
-  Promise.allSettled(promises)
-    .then(values => {
-      console.timeEnd(`${chain.name} | Processed through ${bottom_block_height} to ${top_block_height}`);
-      const rejectedValues = values.filter(each => each.status == 'rejected')
-      if (rejectedValues.length)
-        return final_callback(`${rejectedValues.map((each: any) => each.reason.block_height)} | rejected for ${RETRY_TOTAL} times\nJSON: ${JSON.stringify(rejectedValues)}`, { success: false })
+        Validator.saveManyValidators(validatorMap, (err, validators) => {
+          if (err) return final_callback(`save_many_validators_failed: ${err}`, { success: false });
+          console.time(`${chain.name} | BULK SAVE to leveldb`);
+          bulkSave({
+            chain_identifier: chain.name,
+            saveMapping: compositeEventBlockMap
+          }, (err, success) => {
+            console.timeEnd(`${chain.name} | BULK SAVE to leveldb`);
+            if (err || !success) return final_callback(err, { success: false });
+            const insertedValidatorAddresses = validators?.insertedValidators 
+              ? validators?.insertedValidators.map(validator => 
+                `${validator.operator_address.slice(0,4)}...${validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)}`
+              )
+              : [];
+            result.inserted_validator_addresses = insertedValidatorAddresses;
+            if (!timestamp) return final_callback('no_timestamp_available', { success: false });
+            const blockTimestamp = new Date(timestamp).getTime();
+            
+            Validator.updateLastVisitedBlock({ chain_identifier: chain.name, block_height: bottom_block_height, block_time: timestamp }, (err, updated_chain) => {
+              if (err) return final_callback(`update_last_visited_block_failed: ${err}`, { success: false });
 
-      Validator.saveManyValidators(validatorMap, (err, validators) => {
-        if (err) return final_callback(`save_many_validators_failed: ${err}`, { success: false });
-        console.time(`${chain.name} | BULK SAVE to leveldb`);
-        bulkSave({
-          chain_identifier: chain.name,
-          saveMapping: compositeEventBlockMap
-        }, (err, success) => {
-          console.timeEnd(`${chain.name} | BULK SAVE to leveldb`);
-          if (err || !success) return final_callback(err, { success: false });
-          const insertedValidatorAddresses = validators?.insertedValidators 
-            ? validators?.insertedValidators.map(validator => 
-              `${validator.operator_address.slice(0,4)}...${validator.operator_address.slice(validator.operator_address.length - 4, validator.operator_address.length)}`
-            )
-            : [];
-          result.inserted_validator_addresses = insertedValidatorAddresses;
-          if (!timestamp) return final_callback('no_timestamp_available', { success: false });
-          const blockTimestamp = new Date(timestamp).getTime();
-          
-          Validator.updateLastVisitedBlock({ chain_identifier: chain.name, block_height: bottom_block_height, block_time: timestamp }, (err, updated_chain) => {
-            if (err) return final_callback(`update_last_visited_block_failed: ${err}`, { success: false });
+              if (
+                new Date(timestamp).toLocaleDateString('en-US') ==
+                new Date(chain.active_set_last_updated_block_time).toLocaleDateString('en-US')
+              ) return final_callback(null, result);
 
-            if (
-              new Date(timestamp).toLocaleDateString('en-US') ==
-              new Date(chain.active_set_last_updated_block_time).toLocaleDateString('en-US')
-            ) return final_callback(null, result);
-
-            getBatchData(chain.name, (err, data) => {
-              if (err) return final_callback(`get_batch_data_failed: ${err}`, { success: false });
-              const day = new Date(blockTimestamp).getDate();
-              const month = new Date(blockTimestamp).getMonth();
-              const year = new Date(blockTimestamp).getFullYear();
-              
-              const saveManyCompositeEventBlocksBody = {
-                chain_identifier: chain.name,
-                day: day,
-                month: month,
-                year: year,
-                block_height: top_block_height,
-                saveMapping: data
-              };
-              CompositeEventBlock.saveManyCompositeEventBlocks(saveManyCompositeEventBlocksBody, (err, savedCompositeEventBlocks) => {
-                if (err) return final_callback(`save_many_blocks_failed: ${err}`, { success: false });
-                Validator
-                  .updateActiveValidatorList({
-                    chain_identifier: chain.name,
-                    chain_rpc_url: chain.rpc_urls[0],
-                    height: bottom_block_height,
-                    day: day,
-                    month: month,
-                    year: year,
-                    active_validators_pubkeys_array: null
-                  }, (err, savedActiveValidators) => {
-                    if (err) return final_callback(`update_active_validators_failed: ${err}`, { success: false });
-                    const savedCompositeEventsOperatorAddresses = savedCompositeEventBlocks?.map(each => 
-                      `${each.operator_address.slice(0,4)}...${each.operator_address.slice(each.operator_address.length - 4, each.operator_address.length)}`
-                    );
-                    result.saved_composite_events_operator_addresses = savedCompositeEventsOperatorAddresses;
-                    Chain.updateTimeOfLastActiveSetSave({ chain_identifier: chain.name, time: blockTimestamp, height: top_block_height }, (err, activeSetUpdatedChain) => {
-                      if (err) return final_callback(`update_last_active_set_data_save_failed: ${err}`, { success: false });
-                      result.new_active_set_last_updated_block_time = blockTimestamp;
-                      result.saved_active_validators = savedActiveValidators;
-                      clearChainData(chain.name, (err, success) => {
-                        if (err || !success) return final_callback(`clear_chain_data_failed: ${err}`, { success: false });
-                        return final_callback(null, result);
+              getBatchData(chain.name, (err, data) => {
+                if (err) return final_callback(`get_batch_data_failed: ${err}`, { success: false });
+                const day = new Date(blockTimestamp).getDate();
+                const month = new Date(blockTimestamp).getMonth();
+                const year = new Date(blockTimestamp).getFullYear();
+                
+                const saveManyCompositeEventBlocksBody = {
+                  chain_identifier: chain.name,
+                  day: day,
+                  month: month,
+                  year: year,
+                  block_height: top_block_height,
+                  saveMapping: data
+                };
+                CompositeEventBlock.saveManyCompositeEventBlocks(saveManyCompositeEventBlocksBody, (err, savedCompositeEventBlocks) => {
+                  if (err) return final_callback(`save_many_blocks_failed: ${err}`, { success: false });
+                  Validator
+                    .updateActiveValidatorList({
+                      chain_identifier: chain.name,
+                      chain_rpc_url: chain.rpc_urls[0],
+                      height: bottom_block_height,
+                      day: day,
+                      month: month,
+                      year: year,
+                      active_validators_pubkeys_array: null
+                    }, (err, savedActiveValidators) => {
+                      if (err) return final_callback(`update_active_validators_failed: ${err}`, { success: false });
+                      const savedCompositeEventsOperatorAddresses = savedCompositeEventBlocks?.map(each => 
+                        `${each.operator_address.slice(0,4)}...${each.operator_address.slice(each.operator_address.length - 4, each.operator_address.length)}`
+                      );
+                      result.saved_composite_events_operator_addresses = savedCompositeEventsOperatorAddresses;
+                      Chain.updateTimeOfLastActiveSetSave({ chain_identifier: chain.name, time: blockTimestamp, height: top_block_height }, (err, activeSetUpdatedChain) => {
+                        if (err) return final_callback(`update_last_active_set_data_save_failed: ${err}`, { success: false });
+                        result.new_active_set_last_updated_block_time = blockTimestamp;
+                        result.saved_active_validators = savedActiveValidators;
+                        clearChainData(chain.name, (err, success) => {
+                          if (err || !success) return final_callback(`clear_chain_data_failed: ${err}`, { success: false });
+                          return final_callback(null, result);
+                        })
                       })
                     })
-                  })
+                })
               })
             })
-          })
+        })
       })
     })
-  })
+  });
 };
