@@ -6,7 +6,7 @@ function handlePopupConceal () {
     items.forEach((item, i) => {
       const { left: itemLeft } = item.getBoundingClientRect();
       const { left: wrapperLeft } = validatorsDataColumn.getBoundingClientRect();
-      let addOn = 200;
+      let addOn = 150;
 
       if ((itemLeft + 10) < (wrapperLeft + addOn)) {
         item.previousSibling.style.display = 'none';

@@ -306,11 +306,11 @@
 }
 
 .each-validator-wrapper:hover {
-  background-color: var(--network-switch-header-background-color) !important;
+  background-color: rgba(232, 232, 255, 1) !important;
 }
 
 .each-validator-wrapper:hover .each-validator-info-wrapper  {
-  background-color: var(--network-switch-header-background-color) !important;
+  background-color: rgba(232, 232, 255, 1) !important;
 }
 
 .each-validator-wrapper:hover .validator-moniker-text-content::after {
@@ -750,8 +750,12 @@
   overflow-x: var(--validators-data-column-overflow-x);
   padding-top: 20px;
   margin-top: -20px;
-  padding-left: 200px;
-  margin-left: -200px;
+  padding-left: 150px;
+  margin-left: -150px;
+}
+
+.validators-data-column::-webkit-scrollbar {
+  display: none !important;
 }
 
 .validator-table-header-wrapper {

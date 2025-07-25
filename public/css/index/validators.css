@@ -292,6 +292,7 @@
 
 .each-validator-stat-content {
   overflow: visible;
+  width: 50px;
 }
 
 .each-validator-stat-helper {

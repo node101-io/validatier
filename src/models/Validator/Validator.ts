@@ -529,10 +529,9 @@ validatorSchema.statics.rankValidators = function (
         const percentage_sold = getPercentageSoldWithoutRounding({ sold, self_stake, total_withdraw: reward + commission });
 
         if ((reward + commission) != 0) {
-          totalPercentageSold += getPercentageSold({ sold, self_stake, total_withdraw: reward + commission });;
-          percentageSoldInvolvedValidatorCount++;
+          totalPercentageSold += getPercentageSold({ sold, self_stake, total_withdraw: reward + commission });
         }
-        
+        percentageSoldInvolvedValidatorCount++;
 
         const initial_percentage_sold = Math.min(
           Math.max(

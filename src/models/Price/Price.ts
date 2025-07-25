@@ -146,7 +146,7 @@ PriceSchema.statics.getPriceGraphData = function (
     }
   ])
     .hint({ timestamp: 1, price: 1 })
-    .then(result => callback(null, result.map(each => each.price)))
+    .then(result => callback(null, result.map(each => (Math.round(each.price * 100) / 100))))
     .catch(err => callback(err, null))
 }
 

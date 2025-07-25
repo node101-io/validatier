@@ -6,11 +6,14 @@ export const getPercentageSold = (
   }
 ) => {
   const { sold, self_stake, total_withdraw } = body;
-  return Math.min(
-    (
-      Math.max((sold - self_stake), 0) / total_withdraw
-    ) * 100,
-    100
+  return Math.max(
+    Math.min(
+      (
+        Math.max((sold - self_stake), 0) / total_withdraw
+      ) * 100,
+      100
+    ),
+    0
   )
 }
 

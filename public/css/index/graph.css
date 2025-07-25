@@ -7,8 +7,8 @@
   --validator-graph-wrapper-horizontal-padding: 20px;
   --validator-graph-wrapper-bottom-padding: 10px;
 
-  --validator-graph-wrapper-small-min-width: 100px;
-  --validator-graph-wrapper-small-max-width: 100px;
+  --validator-graph-wrapper-small-min-width: 80px;
+  --validator-graph-wrapper-small-max-width: 80px;
   --validator-graph-wrapper-small-height: 90px;
   
   --each-data-point-max-width: 10px;
@@ -75,6 +75,8 @@
   min-width: var(--validator-graph-wrapper-small-min-width);
   max-width: var(--validator-graph-wrapper-small-max-width);
   height: var(--validator-graph-wrapper-small-height);
+  padding-top: 5px;
+  margin-top: -5px;
   user-select: none;
   display: flex;
   gap: 0;

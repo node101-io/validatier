@@ -262,6 +262,10 @@
   border-radius: var(--network-summary-network-graph-content-wrapper-border-radius);
 }
 
+.network-validator-graph-content {
+  display: flex !important;
+}
+
 .network-summary-network-graph-content {
   width: 100%;
 }

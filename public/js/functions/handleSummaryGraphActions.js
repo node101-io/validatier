@@ -281,7 +281,9 @@ function createSmallGraphs () {
 
       graphDataMapping[i] = data;    
       let { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping, dataFields);
-    
+      if (dataFields[0] == 'average_self_stake_ratio')
+        maxValue = 100;
+
       document.documentElement.style.setProperty(`--min-value-${operatorAddress}`, minValue);
       document.documentElement.style.setProperty(`--max-value-${operatorAddress}`, maxValue);
     

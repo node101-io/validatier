@@ -304,8 +304,8 @@ function generateGraph (validator) {
         const timestamp = eachColumn.getAttribute('timestamp');
         for (let i = 0; i < inactivityIntervals.length; i += 2) {
           if (
-            inactivityIntervals[i] < timestamp &&
-            timestamp < inactivityIntervals[i + 1]
+            inactivityIntervals[i] <= timestamp &&
+            timestamp <= inactivityIntervals[i + 1]
           ) {
             eachColumn.classList.add('each-graph-column-wrapper-inactivity-indicator');
           }
@@ -324,7 +324,7 @@ function generateGraph (validator) {
 
     sumPrice += data.price;
     sumTotalStake += data.total_stake_sum;
-    sumTotalSold += data.total_sold;
+    sumTotalSold = data.total_sold;
     dataLength++;
 
     dataFields.forEach(eachDataField => {
