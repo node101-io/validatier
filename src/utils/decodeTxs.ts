@@ -156,7 +156,12 @@ const decodeTxsV2 = (
       }
 
       if (eachEvent.type == 'delegate') {
-        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used_staking|message_used', ['module:staking,sender:true', 'module:staking,sender:true', 'module:staking,sender:true']);
+        const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used_staking|message_used|message', [
+          'module:staking,sender:true',
+          'module:staking,sender:true',
+          'module:staking,sender:true',
+          'authz_msg_index:true,sender:true',
+        ]);
         if (!attributes) throw new Error('delegate:delegator_not_found');
         if (index >= 0)
           eachTransactionEvents[index].type = 'message_used_staking';
