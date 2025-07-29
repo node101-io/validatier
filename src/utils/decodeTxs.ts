@@ -1,8 +1,8 @@
 
 import { decodeTxRaw, Registry } from '@cosmjs/proto-signing';
 import { defaultRegistryTypes } from '@cosmjs/stargate';
-import { getSpecificAttributeOfAnEventFromTxEventsArray } from './getSpecificAttributeOfAnEventFromTxEventsArray.js';
 import { getOnlyNativeTokenValueFromAmountString } from '../listeners/functions/getOnlyNativeTokenValueFromAmountString.js';
+import { convertOperatorAddressToBech32 } from './convertOperatorAddressToBech32.js';
 
 export interface EventAttribute { 
   key: string; 
@@ -23,6 +23,7 @@ export interface DecodedMessage {
 interface RpcContext {
   rpc_url: string,
   block_height: number,
+  bech32_prefix: string
 }
 
 interface DecodedTx {
@@ -170,7 +171,10 @@ const decodeTxsV2 = (
         if (index >= 0)
           eachTransactionEvents[index].type = 'message_used_staking';
         
-        value.delegatorAddress = attributes.sender;
+        if (attributes.sender.includes('valoper'))
+          value.delegatorAddress = convertOperatorAddressToBech32(attributes.sender, ctx.bech32_prefix);
+        else
+          value.delegatorAddress = attributes.sender;
       } else if (eachEvent.type == 'create_validator') {
         const { rpc_url, block_height } = ctx;
         createValidatorPromises.push(
@@ -221,7 +225,10 @@ const decodeTxsV2 = (
         if (index >= 0)
           eachTransactionEvents[index].type = 'message_used';
 
-        value.delegatorAddress = attributes.sender;
+        if (attributes.sender.includes('valoper'))
+          value.delegatorAddress = convertOperatorAddressToBech32(attributes.sender, ctx.bech32_prefix);
+        else
+          value.delegatorAddress = attributes.sender;
 
       } else if (eachEvent.type == 'withdraw_commission') {
 
@@ -240,7 +247,10 @@ const decodeTxsV2 = (
         if (index >= 0)
           eachTransactionEvents[index].type = 'message_used';
 
-        value.validatorAddress = attributes.sender;
+        if (attributes.sender.includes('valoper'))
+          value.validatorAddress = attributes.sender;
+        else
+          value.validatorAddress = convertOperatorAddressToBech32(attributes.sender, `${ctx.bech32_prefix}valoper`);
 
       } else if (eachEvent.type == 'set_withdraw_address') {
         value = {

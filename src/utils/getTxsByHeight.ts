@@ -89,7 +89,8 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
       decodeTxsV2(
         {
           rpc_url: base_url,
-          block_height: block_height
+          block_height: block_height,
+          bech32_prefix: bech32_prefix
         },
         events,
         denom,

@@ -76,6 +76,7 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
       operator_address: string;
       bottom_timestamp: number;
       top_timestamp: number;
+      index: number;
     },
     callback: (
       err: string | null,
@@ -194,10 +195,10 @@ compositeEventBlockSchema.statics.getPeriodicDataForGraphGeneration = function (
   callback: Parameters<CompositeEventBlockModel['getPeriodicDataForGraphGeneration']>[1]
 ) {
 
-  const { operator_address, bottom_timestamp, top_timestamp } = body;
+  const { operator_address, bottom_timestamp, top_timestamp, index } = body;
 
   CompositeEventBlock.aggregate([
-    { $match: { operator_address: operator_address, timestamp: { $gte: bottom_timestamp, $lte: top_timestamp } }},
+    { $match: { operator_address: operator_address, timestamp: { $gte: bottom_timestamp - 86_400_000, $lte: top_timestamp } }},
     {
       $setWindowFields: {
         partitionBy: '$operator_address',

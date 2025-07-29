@@ -461,7 +461,7 @@ validatorSchema.statics.rankValidators = function (
     new Promise((resolve, reject) => {
       CompositeEventBlock.getPeriodicDataForValidatorSet({
         chain_identifier: chain_identifier,
-        bottom_timestamp: bottom_timestamp,
+        bottom_timestamp: bottom_timestamp - 86_400_000,
         top_timestamp: top_timestamp
       }, (err, validatorRecordMapping) => {
         if (err) return reject(err);
@@ -523,7 +523,7 @@ validatorSchema.statics.rankValidators = function (
         } = validatorRecordMapping[eachValidator.operator_address] || {};
 
         const ratio = (self_stake || 0) / ((reward + commission) || (10 ** CHAIN_TO_DECIMALS_MAPPING[`${chain_identifier}`]));
-        const sold = balance_change * -1;
+        const sold = Math.max((balance_change - (commission + reward) + self_stake) * -1, 0);
         const initial_sold = ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 0) - (initial_self_stake_prefix_sum || 0);
 
         const percentage_sold = getPercentageSoldWithoutRounding({ sold, self_stake, total_withdraw: reward + commission });
@@ -541,7 +541,7 @@ validatorSchema.statics.rankValidators = function (
           100
         );
 
-        totalSold += Math.max(balance_change * -1, 0);
+        totalSold += Math.max((balance_change - (commission + reward) + self_stake) * -1, 0);
 
         const self_stake_ratio = Math.min(Math.abs(self_stake / (total_stake || 1)), 1) * 100;
         const initial_self_stake_ratio = Math.min(Math.abs(initial_self_stake_prefix_sum / (initial_total_stake_prefix_sum || 1)), 1) * 100;

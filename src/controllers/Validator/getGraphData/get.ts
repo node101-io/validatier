@@ -76,8 +76,9 @@ export default (req: Request, res: Response): any => {
         CompositeEventBlock.getPeriodicDataForGraphGeneration(
           {
             operator_address: operator_address,
-            bottom_timestamp: bottomTimestamp,
-            top_timestamp: end
+            bottom_timestamp: bottomTimestamp - 86_400_000,
+            top_timestamp: end,
+            index: i
           },
           (err, result) => {
 

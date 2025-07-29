@@ -41,6 +41,7 @@ export const convertEventsToMessageFormat = (
     const { type, attributes } = eachEvent;
     if (!Object.keys(EVENTS_TO_SEARCH).includes(type)) return;
     const ignoreSensitiveBlockThreshold = ignoreSensitiveEventsBlockThresholdMapping[chain_identifier as keyof typeof ignoreSensitiveEventsBlockThresholdMapping];
+    
     if (SENSITIVE_EVENTS.includes(type) && height <= ignoreSensitiveBlockThreshold) return;
 
     const { address_keys, amount_key } = EVENTS_TO_SEARCH[type as keyof typeof EVENTS_TO_SEARCH];

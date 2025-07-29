@@ -146,28 +146,30 @@ export function clearChainData (
 ) {
   const batch = db.batch();
 
-  db.get(chain_identifier)
-    .then((data) => {
-      if (!data) return callback(null, true);
-      const operatorAddresses = JSON.parse(data);
-      if (!operatorAddresses || operatorAddresses.length <= 0) return callback(null, true);
-      operatorAddresses.forEach((eachOperatorAddress: string) => batch.put(
-        eachOperatorAddress,
-        JSON.stringify({
-          self_stake: 0,
-          reward: 0,
-          commission: 0,
-          total_stake: 0,
-          total_withdraw: 0,
-          balance_change: 0,
-          slash: 0
-        })
-      ));
+  Validator.findValidatorsByChainIdentifier({ chain_identifier: chain_identifier }, (err, validators) => {
+    if (err) return callback('get_validators_failed:clearChainData', false);
 
-      batch.write()
-        .then(() => callback(null, true))
-        .catch((err) => callback('bulk_delete_failed', false));
-    })
+    const operatorAddresses = validators?.map(each => each.operator_address);
+    batch.put(chain_identifier, JSON.stringify(operatorAddresses));
+
+    if (!operatorAddresses || operatorAddresses.length <= 0) return callback(null, true);
+    operatorAddresses.forEach((eachOperatorAddress: string) => batch.put(
+      eachOperatorAddress,
+      JSON.stringify({
+        self_stake: 0,
+        reward: 0,
+        commission: 0,
+        total_stake: 0,
+        total_withdraw: 0,
+        balance_change: 0,
+        slash: 0
+      })
+    ));
+
+    batch.write()
+      .then(() => callback(null, true))
+      .catch((err) => callback('bulk_delete_failed:clearChainData', false));
+  })
 }
 
 export function initializeOperatorAddressToWithdrawAddressMapping (

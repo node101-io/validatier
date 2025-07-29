@@ -67,8 +67,7 @@ export const listenForEvents = (
 
       promises.push(
         new Promise ((resolve, reject) => {
-          const I = height;
-          console.time(`${chain.name} | Processed block: ${I}`);
+          
           getTxsByHeight(
             chain.rpc_urls[1],
             height,
@@ -77,7 +76,7 @@ export const listenForEvents = (
             0,
             fetch_time,
             (err, result) => {
-              console.timeEnd(`${chain.name} | Processed block: ${I}`);
+              
               const { time, decodedTxs } = result;
 
               if (err)
@@ -265,8 +264,13 @@ export const listenForEvents = (
                       return reject(`address_conversion_failed:set_withdraw_address:${height}`);
                     setWithdrawAddress(chain.name, operatorAddressFormat, eachMessage.value.withdrawAddress, (err, success) => {
                       if (err || !success) return reject(`withdraw_address_set_failed:set_withdraw_address:${height}`);
+                      
+                      if (!withdrawAddressMapping[eachMessage.value.withdrawAddress])
+                        withdrawAddressMapping[eachMessage.value.withdrawAddress] = [];
+                      withdrawAddressMapping[eachMessage.value.withdrawAddress].push(operatorAddressFormat);
+
                       return next();
-                    })
+                    });
                   } else {
                     return next();
                   }
@@ -301,12 +305,12 @@ export const listenForEvents = (
 
         Validator.saveManyValidators(validatorMap, (err, validators) => {
           if (err) return final_callback(`save_many_validators_failed: ${err}`, { success: false });
-          console.time(`${chain.name} | BULK SAVE to leveldb`);
+          
           bulkSave({
             chain_identifier: chain.name,
             saveMapping: compositeEventBlockMap
           }, (err, success) => {
-            console.timeEnd(`${chain.name} | BULK SAVE to leveldb`);
+            
             if (err || !success) return final_callback(err, { success: false });
             const insertedValidatorAddresses = validators?.insertedValidators 
               ? validators?.insertedValidators.map(validator => 
@@ -317,7 +321,7 @@ export const listenForEvents = (
             if (!timestamp) return final_callback('no_timestamp_available', { success: false });
             const blockTimestamp = new Date(timestamp).getTime();
             
-            Validator.updateLastVisitedBlock({ chain_identifier: chain.name, block_height: bottom_block_height, block_time: timestamp }, (err, updated_chain) => {
+            Validator.updateLastVisitedBlock({ chain_identifier: chain.name, block_height: top_block_height, block_time: timestamp }, (err, updated_chain) => {
               if (err) return final_callback(`update_last_visited_block_failed: ${err}`, { success: false });
 
               if (
@@ -345,7 +349,7 @@ export const listenForEvents = (
                     .updateActiveValidatorList({
                       chain_identifier: chain.name,
                       chain_rpc_url: chain.rpc_urls[0],
-                      height: bottom_block_height,
+                      height: top_block_height,
                       day: day,
                       month: month,
                       year: year,
