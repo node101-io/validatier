@@ -62,7 +62,7 @@ export const listenForEvents = (
           const h = height;
 
           getTxsByHeight(
-            chain.rpc_urls[1],
+            chain.rpc_urls[h % chain.rpc_urls.length],
             height,
             chain.denom,
             chain.bech32_prefix,
@@ -83,7 +83,8 @@ export const listenForEvents = (
               flattenedDecodedTxsByBlock.push({
                 block_height: h,
                 flattenedDecodedTxs: flattenedDecodedTxs
-              })
+              });
+              return resolve();
             })
           }
         )

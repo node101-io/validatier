@@ -18,7 +18,7 @@ import { clearChainData, getBatchData, initDB } from './utils/levelDb.js';
 import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
 
 const app: Express = express();
-const PORT: number = 3000;
+const PORT: number = 3001;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
