@@ -55,12 +55,14 @@
   display: flex;
   justify-content: center;
   margin-bottom: 20px;
+  overflow: visible;
 }
 
 .mobile-menu-background-content svg {
   width: 661px;
   height: 250px;
   display: block;
+  overflow: visible;
 }
 
 .mobile-menu-title-wrapper, .mobile-menu-description-wrapper {
@@ -101,11 +103,11 @@
 }
 
 .mobile-ellipse-1 {
-  transition: all 1s ease 0.25s;
+  transition: all 4s ease 0s;
 }
 
 .mobile-ellipse-2 {
-  transition: all 1.25s ease 0s;
+  transition: all 2.5s ease 0.5s;
 }
 
 .orbit-7 {

@@ -157,7 +157,7 @@ function createNetworkSummaryGraph (dataFields, colors) {
           
       if (
         eachDataField != 'price' &&
-        eachDataField != 'percentage_sold'
+        eachDataField != 'percentage_sold'        
       ) data[eachDataField] += currentSumMapping[eachDataField];
 
       currentSumMapping[eachDataField] = data[eachDataField];

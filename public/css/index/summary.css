@@ -181,6 +181,7 @@
   overflow-x: var(--network-summary-network-stats-main-wrapper-overflow-x);
   margin-left: var(--network-summary-network-stats-main-wrapper-margin-left);
   padding: 0px var(--network-summary-network-stats-main-wrapper-padding-horizontal);
+  scrollbar-width: 0;
 }
 
 .each-network-summary-stat {
@@ -312,6 +313,7 @@
   gap: var(--network-summary-network-graph-metrics-wrapper-gap);
   margin-left: var(--network-summary-network-graph-metrics-wrapper-margin-left);
   padding: 0px var(--network-summary-network-graph-metrics-wrapper-padding-horizontal);
+  scrollbar-width: 0;
 }
 
 .network-summary-network-graph-metrics-content-wrapper {

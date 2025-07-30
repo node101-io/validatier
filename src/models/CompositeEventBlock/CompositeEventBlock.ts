@@ -226,9 +226,14 @@ compositeEventBlockSchema.statics.getPeriodicDataForGraphGeneration = function (
         const totalStake = (record.mostRecentRecord.total_stake_prefix_sum || 0);
         const balanceChange = (record.mostRecentRecord.balance_change_prefix_sum - (record.leastRecentRecord.balance_change_prefix_sum || 0)) + (record.leastRecentRecord.balance_change || 0);
 
+        const commission = (record.mostRecentRecord.commission_prefix_sum - (record.leastRecentRecord.commission_prefix_sum || 0)) + (record.leastRecentRecord.commission || 0);
+        const reward = (record.mostRecentRecord.reward_prefix_sum - (record.leastRecentRecord.reward_prefix_sum || 0)) + (record.leastRecentRecord.reward || 0);
+
+        const total_rewards = (commission || 0) + (reward || 0);
+
         mapping[record._id] = {
           total_stake: (totalStake || 0),
-          total_sold: Math.max(((balanceChange * -1) - totalSelfStake), 0)
+          total_sold: Math.max(((balanceChange * -1) + total_rewards - totalSelfStake), 0)
         };
       });
   
@@ -361,6 +366,13 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
       return callback(null, mapping);
   })
 }
+
+
+/* 
+  TODO: Validatör'lerin tüm withdraw adreslerinin ayrı ayrı sold amount'larının cüzdanlara çekilen ödül ağırlığınca hesaplanması.
+  Validatör modelinin yanına withdraw adres modeli eklenebilir ve validatör modeli withdraw adres modelini wrapler.
+*/
+
 
 compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
   body: Parameters<CompositeEventBlockModel['saveManyCompositeEventBlocks']>[0],

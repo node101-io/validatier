@@ -541,7 +541,7 @@ validatorSchema.statics.rankValidators = function (
           100
         );
 
-        totalSold += Math.max((balance_change - (commission + reward) + self_stake) * -1, 0);
+        totalSold += sold;
 
         const self_stake_ratio = Math.min(Math.abs(self_stake / (total_stake || 1)), 1) * 100;
         const initial_self_stake_ratio = Math.min(Math.abs(initial_self_stake_prefix_sum / (initial_total_stake_prefix_sum || 1)), 1) * 100;
@@ -790,58 +790,6 @@ validatorSchema.statics.getSummaryGraphData = function (
       }
     },
     {
-      $addFields: {
-        total_sold: {
-          $max: [
-            {
-              $subtract: [
-                {
-                  $multiply: [
-                    -1,
-                    '$balance_change_sum'
-                  ]
-                },
-                '$self_stake_sum'
-              ]
-            },
-            0
-          ]
-        },
-        percentage_sold: {
-          $multiply: [
-            100,
-            {
-              $max: [
-                {
-                  $min: [
-                    {
-                      $divide: [
-                        {
-                          $subtract: [
-                            { $add: ['$reward_sum', '$commission_sum'] },
-                            '$self_stake_sum'
-                          ]
-                        },
-                        {
-                          $cond: [
-                            { $eq: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
-                            1,
-                            { $add: ['$reward_sum', '$commission_sum'] }
-                          ]
-                        }
-                      ]
-                    },
-                    1
-                  ]
-                },
-                0
-              ]
-            }
-          ]
-        }
-      }
-    },
-    {
       $sort: {
         timestamp: 1
       }
@@ -858,8 +806,20 @@ validatorSchema.statics.getSummaryGraphData = function (
         const found = buckets.find((b: any) => b._id.bucket === bucketIndex);
 
         if (found) {
-          lastValue = found;
-          result.push(found);
+          const { timestamp, self_stake_sum, reward_sum, commission_sum, total_stake_sum, balance_change_sum } = found;
+
+          const sold = Math.max((balance_change_sum - (commission_sum + reward_sum) + self_stake_sum) * -1, 0);
+
+          result.push({
+            _id: { bucket: bucketIndex },
+            timestamp: timestamp,
+            self_stake_sum: self_stake_sum,
+            reward_sum: reward_sum,
+            commission_sum: commission_sum,
+            total_stake_sum: total_stake_sum,
+            total_sold: sold,
+            percentage_sold: getPercentageSoldWithoutRounding({ sold, self_stake: self_stake_sum, total_withdraw: reward_sum + commission_sum }),
+          });
         } else {
           
           const fake = {

@@ -399,7 +399,7 @@ block content
                           if leaderboard.id == 'percentage_sold'
                             - const scoreResult = getScoreColor(validator[`${leaderboard.id}`])
                             .each-leaderboard-table-validator-data(class='validator-percentage-sold' style=`color: ${scoreResult.color}`) 
-                              span %#{shortNumberFormat(Math.max(0, validator.percentage_sold))}
+                              span %#{shortNumberFormat(Math.min(Math.max(0, validator.percentage_sold), 100))}
                               if scoreResult.check
                                 img(src='/res/images/check_green.svg' class='center')
                           else

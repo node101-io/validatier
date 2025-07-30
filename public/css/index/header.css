@@ -216,7 +216,7 @@
 .date-picker-open-loading-wrapper {
   width: 100%;
   height: calc(100% + var(--selected-range-height));
-  border-radius: calc(var(--picker-main-wrapper-border-radius) - 8px);
+  border-radius: calc(var(--picker-main-wrapper-border-radius) - 8px) calc(var(--picker-main-wrapper-border-radius) - 8px) calc(var(--picker-main-wrapper-border-radius) - 2px) calc(var(--picker-main-wrapper-border-radius) - 2px);
   background-color: rgba(234, 234, 255, 0.8);
   display: flex;
   justify-content: center;

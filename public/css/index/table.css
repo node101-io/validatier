@@ -289,7 +289,7 @@
 }
 
 .validators-main-wrapper {
-  padding: var(--validators-main-wrapper-vertical-padding) 0px;
+  padding: var(--validators-main-wrapper-vertical-padding) 0px calc(var(--validators-main-wrapper-vertical-padding) * 2.5) 0px;
   overflow: visible;
 }
 
@@ -752,6 +752,7 @@
   margin-top: -20px;
   padding-left: 150px;
   margin-left: -150px;
+  scrollbar-width: 0;
 }
 
 .validators-data-column::-webkit-scrollbar {

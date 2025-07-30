@@ -189,7 +189,7 @@ function generateGraph (validator) {
       wrapper.children[0].innerHTML = nativeValue;
       wrapper.children[1].innerHTML = '%' + (shortNumberFormat(validator['self_stake_ratio']));
     } else {
-      document.getElementById(`${stat.id}-native`).innerHTML = '%' + (shortNumberFormat(Math.max(0.00, validator[stat.field])));
+      document.getElementById(`${stat.id}-native`).innerHTML = '%' + (Math.round(shortNumberFormat(Math.min(Math.max(0.00, validator[stat.field]), 100)) * 100) / 100);
     }
 
     if (stat.usdContent) 

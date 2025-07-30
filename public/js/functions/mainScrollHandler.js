@@ -88,10 +88,12 @@ function mainScrollHandler() {
   startButton.addEventListener('click', (event) => {
     document.querySelectorAll('.ellipse-left').forEach(eachEllipse => {
       eachEllipse.style.transform = 'translateX(-1000px)';
+      eachEllipse.style.opacity = '0';
       eachEllipse.style.scale = '1.5';
     })
     document.querySelectorAll('.ellipse-right').forEach(eachEllipse => {
       eachEllipse.style.transform = 'translateX(1000px)';
+      eachEllipse.style.opacity = '0';
       eachEllipse.style.scale = '1.5';
     })
 
