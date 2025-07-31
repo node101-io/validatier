@@ -111,7 +111,6 @@ export const listenForEvents = (
           sortedBlocks,
           (err, mapResults) => {
 
-            console.log('1')
             if (err || !mapResults) return final_callback(`get_composite_blocks_from_interval: ${err}`, { success: false });
 
             const { validatorMap, compositeEventBlockMap } = mapResults;
@@ -120,7 +119,6 @@ export const listenForEvents = (
             if (rejectedValues.length)
               return final_callback(`${rejectedValues.map((each: any) => each.reason.block_height)} | rejected for ${RETRY_TOTAL} times\nJSON: ${JSON.stringify(rejectedValues)}`, { success: false })
 
-            console.log('2')
             Validator.saveManyValidators(validatorMap, (err, validators) => {
               if (err) return final_callback(`save_many_validators_failed: ${err}`, { success: false });
               
@@ -129,7 +127,6 @@ export const listenForEvents = (
                 saveMapping: compositeEventBlockMap
               }, (err, success) => {
 
-                console.log('3')
                 if (err || !success) return final_callback(err, { success: false });
                 const insertedValidatorAddresses = validators?.insertedValidators 
                   ? validators?.insertedValidators.map(validator => 
@@ -139,14 +136,10 @@ export const listenForEvents = (
                 result.inserted_validator_addresses = insertedValidatorAddresses;
                 if (!timestamp) return final_callback('no_timestamp_available', { success: false });
                 const blockTimestamp = new Date(timestamp).getTime();
-
-                console.log('4')
                 
-                console.log({ chain_identifier: chain.name, block_height: top_block_height, block_time: timestamp })
                 Validator.updateLastVisitedBlock({ chain_identifier: chain.name, block_height: top_block_height, block_time: timestamp }, (err, updated_chain) => {
                   if (err) return final_callback(`update_last_visited_block_failed: ${err}`, { success: false });
 
-                  console.log('5')
                   if (
                     new Date(timestamp).toLocaleDateString('en-US') ==
                     new Date(chain.active_set_last_updated_block_time).toLocaleDateString('en-US')
