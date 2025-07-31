@@ -16,9 +16,6 @@ function initializeCompositeBlock () {
   }
 }
 
-const validatorMap: Record<string, any> = {};
-const compositeEventBlockMap: Record<string, any> = {};
-
 export const getCompositeBlocksFromInterval = (
   ctx: {
     chain: ChainInterface,
@@ -37,6 +34,9 @@ export const getCompositeBlocksFromInterval = (
   ) => any
 ) => {
 
+  const validatorMap: Record<string, any> = {};
+  const compositeEventBlockMap: Record<string, any> = {};
+
   const { chain, withdrawAddressMapping } = ctx;
 
   async.timesSeries(
@@ -45,10 +45,10 @@ export const getCompositeBlocksFromInterval = (
 
       const { block_height, flattenedDecodedTxs } = flattenedDecodedTxsByBlock[i];
 
-      async.times(
+      async.timesSeries(
         flattenedDecodedTxs.length,
-        (i, next2) => {
-          const eachMessage = flattenedDecodedTxs[i];
+        (j, next2) => {
+          const eachMessage = flattenedDecodedTxs[j];
 
           const key = eachMessage.value.validatorAddress || '';
 

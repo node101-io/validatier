@@ -152,7 +152,7 @@ export function clearChainData (
     const operatorAddresses = validators?.map(each => each.operator_address);
     batch.put(chain_identifier, JSON.stringify(operatorAddresses));
 
-    if (!operatorAddresses || operatorAddresses.length <= 0) return callback(null, true);
+    if (!operatorAddresses || operatorAddresses.length <= 0) return callback('operator_addresses_null:clearChainData', false);
     operatorAddresses.forEach((eachOperatorAddress: string) => batch.put(
       eachOperatorAddress,
       JSON.stringify({

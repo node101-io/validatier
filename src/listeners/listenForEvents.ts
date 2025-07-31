@@ -5,7 +5,7 @@ import Chain, { ChainInterface } from '../models/Chain/Chain.js';
 import getTxsByHeight, { RETRY_TOTAL } from '../utils/getTxsByHeight.js';
 import { DecodedMessage } from '../utils/decodeTxs.js';
 import { ActiveValidatorsInterface } from '../models/ActiveValidators/ActiveValidators.js';
-import { bulkSave, clearChainData, getBatchData, getValidatorsOfWithdrawAddress, getWithdrawAddressMappingForChain, setWithdrawAddress } from '../utils/levelDb.js';
+import { bulkSave, getBatchData, getWithdrawAddressMappingForChain } from '../utils/levelDb.js';
 import { getCompositeBlocksFromInterval } from './functions/getCompositeBlocksFromInterval.js';
 
 export const LISTENING_EVENTS = [
@@ -105,6 +105,10 @@ export const listenForEvents = (
       .then(values => {
         console.timeEnd(`${chain.name} | Processed through ${bottom_block_height} to ${top_block_height}`);
 
+        const rejectedValues = values.filter(each => each.status == 'rejected')
+        if (rejectedValues.length)
+          return final_callback(`${rejectedValues.map((each: any) => each.reason.block_height)} | rejected for ${RETRY_TOTAL} times\nJSON: ${JSON.stringify(rejectedValues)}`, { success: false })
+
         const sortedBlocks = flattenedDecodedTxsByBlock.sort((a, b) => a.block_height - b.block_height);
         getCompositeBlocksFromInterval(
           { chain, withdrawAddressMapping },
@@ -114,10 +118,6 @@ export const listenForEvents = (
             if (err || !mapResults) return final_callback(`get_composite_blocks_from_interval: ${err}`, { success: false });
 
             const { validatorMap, compositeEventBlockMap } = mapResults;
-
-            const rejectedValues = values.filter(each => each.status == 'rejected')
-            if (rejectedValues.length)
-              return final_callback(`${rejectedValues.map((each: any) => each.reason.block_height)} | rejected for ${RETRY_TOTAL} times\nJSON: ${JSON.stringify(rejectedValues)}`, { success: false })
 
             Validator.saveManyValidators(validatorMap, (err, validators) => {
               if (err) return final_callback(`save_many_validators_failed: ${err}`, { success: false });
@@ -159,6 +159,7 @@ export const listenForEvents = (
                       block_height: top_block_height,
                       saveMapping: data
                     };
+
                     CompositeEventBlock.saveManyCompositeEventBlocks(saveManyCompositeEventBlocksBody, (err, savedCompositeEventBlocks) => {
                       if (err) return final_callback(`save_many_blocks_failed: ${err}`, { success: false });
                       Validator
@@ -180,10 +181,7 @@ export const listenForEvents = (
                             if (err) return final_callback(`update_last_active_set_data_save_failed: ${err}`, { success: false });
                             result.new_active_set_last_updated_block_time = blockTimestamp;
                             result.saved_active_validators = savedActiveValidators;
-                            clearChainData(chain.name, (err, success) => {
-                              if (err || !success) return final_callback(`clear_chain_data_failed: ${err}`, { success: false });
-                              return final_callback(null, result);
-                            })
+                            return final_callback(null, result);
                           })
                         })
                     })

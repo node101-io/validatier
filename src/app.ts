@@ -14,11 +14,11 @@ import validatorRouter from './routes/validatorRouter.js';
 
 import { startFetchingData } from './utils/startFetchingData.js';
 import { testDataFetch } from './test/testDataFetch.js';
-import { clearChainData, getBatchData, initDB } from './utils/levelDb.js';
+import { clearChainData, initDB } from './utils/levelDb.js';
 import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
 
 const app: Express = express();
-const PORT: number = 3001;
+const PORT: number = 3000;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -59,5 +59,12 @@ app.use('/chain', chainRouter);
 app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
-startFetchingData();
+// startFetchingData();
 // testDataFetch();
+
+import { getBatchData } from './utils/levelDb.js';
+setTimeout(() => {
+  getBatchData('cosmoshub', (err, data) => {
+    console.log(data)
+  })
+}, 5000);

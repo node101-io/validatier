@@ -2,6 +2,7 @@ import winston from "winston";
 import { listenForEvents } from "../listeners/listenForEvents.js";
 import Chain, { ChainInterface } from "../models/Chain/Chain.js";
 import { sendTelegramMessage } from "./sendTelegramMessage.js";
+import { clearChainData } from "./levelDb.js";
 
 const logger = winston.createLogger({
   levels: winston.config.syslog.levels,
@@ -47,16 +48,20 @@ export const processBlocks = (start: number, end: number, chain: ChainInterface)
         logger.info(`${chain.name.toUpperCase()} | CREATED | Validators with addresses: ${result.inserted_validator_addresses.join('    ')}`);
 
       if (result.new_active_set_last_updated_block_time) {
-        return Chain.findChainByIdentifier({ chain_identifier: chain.name }, (err, updatedChain) => {
-          if (err || !updatedChain) throw new Error(`bad_request`);
-          
-          if (result.saved_active_validators && result.saved_active_validators.active_validators.length) {
-            logger.info(`${chain.name.toUpperCase()} | SAVED | Active Validator set for ${result.saved_active_validators.month}/${result.saved_active_validators.year}: ${result.saved_active_validators.active_validators.length} currently in active list`);
-            logger.info(`${chain.name.toUpperCase()} | SAVED | CompositeEventBlocks | for ${result.saved_composite_events_operator_addresses?.join('    ')}`);
-            logger.info(`${chain.name.toUpperCase()} | Continuing from: ${bottom_block_height + INTERVAL}`);
-          }
-          
-          return listenInterval(bottom_block_height + INTERVAL, top_block_height + INTERVAL, updatedChain); 
+        return clearChainData(chain.name, (err, success) => {
+          if (err || !success) return sendTelegramMessage(`clear_chain_data_failed: ${err}`, (err, success) => logger.error(`clear_chain_data_failed: ${err}`));
+
+          return Chain.findChainByIdentifier({ chain_identifier: chain.name }, (err, updatedChain) => {
+            if (err || !updatedChain) throw new Error(`bad_request`);
+            
+            if (result.saved_active_validators && result.saved_active_validators.active_validators.length) {
+              logger.info(`${chain.name.toUpperCase()} | SAVED | Active Validator set for ${result.saved_active_validators.month}/${result.saved_active_validators.year}: ${result.saved_active_validators.active_validators.length} currently in active list`);
+              logger.info(`${chain.name.toUpperCase()} | SAVED | CompositeEventBlocks | for ${result.saved_composite_events_operator_addresses?.join('    ')}`);
+              logger.info(`${chain.name.toUpperCase()} | Continuing from: ${bottom_block_height + INTERVAL}`);
+            }
+            
+            return listenInterval(bottom_block_height + INTERVAL, top_block_height + INTERVAL, updatedChain); 
+          })
         })
       }
 
