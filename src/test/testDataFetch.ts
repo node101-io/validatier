@@ -9,7 +9,7 @@ const TEST_CASES = [
   // { height: 6489032, description: 'complete_unbonding' },
   // { height: 17224685, description: 'create_validator + auto_withdraw + delegation + manual_withdraw' },
   // { height: 9421602, description: 'delegate + withdraw' },
-  { height: 8772784, description: 'withdraw_reward + withdraw_commission + delegate' },
+  // { height: 8772784, description: 'withdraw_reward + withdraw_commission + delegate' },
   // { height: 8772711, description: 'withdraw_reward + withdraw_commission + delegate (failed)' },
   // { height: 5434269, description: 'delegate_sign_test' },
   // { height: 10355620, description: 'complete_redelegate that we may not consider' },
@@ -30,7 +30,9 @@ const TEST_CASES = [
   // { height: 19633553, description: 'withdraw' },
   // { height: 18495704, description: 'commission' },
   // { height: 5358694, description: 'sensitivity test' },
-  { height: 18408101, description: 'auth_exec test' },
+  // { height: 18408101, description: 'auth_exec test' },
+  // { height: 16585415, description: 'auth_exec test' },
+  { height: 12067092, description: 'exec delegate test' },
 ];
 
 // for (let i = 5401834; i < 5411792; i++) {
