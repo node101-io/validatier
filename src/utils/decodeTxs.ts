@@ -35,7 +35,9 @@ const LISTENING_EVENTS = [
   'delegate',
   'withdraw_rewards',
   'withdraw_commission',
-  'set_withdraw_address'
+  'set_withdraw_address',
+  'redelegate',
+  'unbond'
 ];
 
 const registry = new Registry(defaultRegistryTypes);
@@ -135,7 +137,12 @@ const decodeTxsV2 = (
 
       const attributesMapping = getAttributesAsMapping(eachEvent.attributes);
       
-      if (!['create_validator', 'set_withdraw_address'].includes(eachEvent.type)) {
+      if (
+        ['redelegate', 'unbond'].includes(eachEvent.type) &&
+        (new Date(attributesMapping.completion_time)).getTime() > 0
+      ) continue;
+
+      if (!['create_validator', 'set_withdraw_address', 'redelegate'].includes(eachEvent.type)) {
         value = {
           validatorAddress: attributesMapping.validator || null,
           delegatorAddress: attributesMapping.delegator || null,
@@ -156,7 +163,22 @@ const decodeTxsV2 = (
         }
       }
 
-      if (eachEvent.type == 'delegate') {
+      if (eachEvent.type == 'delegate' || eachEvent.type == 'unbond' || eachEvent.type == 'redelegate') {
+
+        if (eachEvent.type == 'redelegate') {
+          value = {
+            validatorSrcAddress: attributesMapping.source_validator || null,
+            validatorDscAddress: attributesMapping.destination_validator || null,
+            delegatorAddress: attributesMapping.delegator || null,
+            amount: getOnlyNativeTokenValueFromAmountString(attributesMapping.amount, denom) || '0',
+          }
+
+          if (value.delegatorAddress) {
+            messages.push({ time: time, typeUrl: eachEvent.type, value: value });
+            continue;
+          }
+        }
+
         const { attributes, index } = getAttributesAsMappingFromEventType(eachTransactionEvents, 'message|message_used|message|message_used|message|message_used', [
           `sender:true,authz_msg_index:${attributesMapping.authz_msg_index || 'true'}`,
           `sender:true,authz_msg_index:${attributesMapping.authz_msg_index || 'true'}`,
@@ -165,7 +187,7 @@ const decodeTxsV2 = (
           'sender:true',
           'sender:true',
         ]);
-        if (!attributes) throw new Error('delegate:delegator_not_found');
+        if (!attributes) throw new Error(`${eachEvent.type}:delegator_not_found`);
         if (index >= 0)
           eachTransactionEvents[index].type = 'message_used';
         

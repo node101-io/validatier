@@ -16,6 +16,7 @@ import { startFetchingData } from './utils/startFetchingData.js';
 import { testDataFetch } from './test/testDataFetch.js';
 import { clearChainData, initDB, resetWithdrawAddressMappingForChain } from './utils/levelDb.js';
 import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
+import { convertOperatorAddressToBech32 } from './utils/convertOperatorAddressToBech32.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -59,5 +60,5 @@ app.use('/chain', chainRouter);
 app.use('/validator', validatorRouter);
 
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
-// startFetchingData();
+startFetchingData();
 // testDataFetch();
