@@ -32,9 +32,9 @@ const TEST_CASES = [
   // { height: 5358694, description: 'sensitivity test' },
   // { height: 18408101, description: 'auth_exec test' },
   // { height: 16585415, description: 'auth_exec test' },
-  // { height: 7928263, description: 'exec redelegate test' },
+  { height: 7928263, description: 'exec redelegate test' },
   // { height: 26921091, description: 'exec redelegate test not taking this' },
-  { height: 26922275, description: 'exec unbond test not taking this' },
+  // { height: 26922275, description: 'exec unbond test not taking this' },
 ];
 
 // for (let i = 5401834; i < 5411792; i++) {

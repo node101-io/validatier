@@ -15,6 +15,8 @@ export const LISTENING_EVENTS = [
   'complete_redelegation',
   'withdraw_rewards',
   'withdraw_commission',
+  'redelegate',
+  'unbond',
   'slash',
   'transfer',
   'set_withdraw_address'

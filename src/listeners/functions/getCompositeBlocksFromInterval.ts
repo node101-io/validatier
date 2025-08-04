@@ -133,6 +133,7 @@ export const getCompositeBlocksFromInterval = (
             [
               'delegate',
               'complete_unbonding',
+              'unbond'
             ].includes(eachMessage.typeUrl)
           ) {
             if (!eachMessage.value.delegatorAddress || !eachMessage.value.validatorAddress || !eachMessage.value.amount) {
@@ -153,7 +154,7 @@ export const getCompositeBlocksFromInterval = (
 
             return next2();
           } else if (
-            ['complete_redelegation'].includes(eachMessage.typeUrl)
+            ['complete_redelegation', 'redelegate'].includes(eachMessage.typeUrl)
           ) {
 
             if (!eachMessage.value.validatorSrcAddress || !eachMessage.value.validatorDstAddress || !eachMessage.value.delegatorAddress || !eachMessage.value.amount) {
