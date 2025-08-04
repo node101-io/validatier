@@ -168,7 +168,7 @@ const decodeTxsV2 = (
         if (eachEvent.type == 'redelegate') {
           value = {
             validatorSrcAddress: attributesMapping.source_validator || null,
-            validatorDscAddress: attributesMapping.destination_validator || null,
+            validatorDstAddress: attributesMapping.destination_validator || null,
             delegatorAddress: attributesMapping.delegator || null,
             amount: getOnlyNativeTokenValueFromAmountString(attributesMapping.amount, denom) || '0',
           }
