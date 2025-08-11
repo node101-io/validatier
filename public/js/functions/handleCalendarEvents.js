@@ -25,7 +25,7 @@ function updateDateInputs () {
     loadingWrapper.classList.add('date-picker-open-loading-wrapper');
 
     const loadingSpan = document.createElement('div');
-    loadingSpan.innerHTML = 'Lorem IPS';
+    loadingSpan.innerHTML = 'Loading';
     
     loadingWrapper.appendChild(loadingSpan);
     loadingWrapper.appendChild(createSpinner(10));

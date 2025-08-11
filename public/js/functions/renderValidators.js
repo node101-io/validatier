@@ -10,8 +10,8 @@ function shortNumberFormat(num) {
 }
 
 function formatCommission(value) {
-  if (value.includes('.')) return `${(parseFloat(value) * 100)}%`;
-  return `${parseFloat(value / 1e16)}%`;
+  if (value.includes('.')) return `${(Math.round(parseFloat(value) * 100) / 100)}%`;
+  return `${Math.round(parseFloat(value / 1e16) * 100) / 100}%`;
 }
 
 function getScoreColor (value) {
@@ -63,10 +63,10 @@ function generateValidatorRankingContent(response, sort_by, sortOrderMapping) {
   dataColumn.id = 'validators-data-column';
 
   const headers_array = [
-    { name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Withdraw - Self Stake) / Withdraw' },
+    { name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Total sold / Total rewards) * 100' },
     { name: 'Avg Delegation', id: 'average_total_stake' },
     { name: 'Total Rewards', id: 'total_withdraw' },
-    { name: 'Total Sold Amount', id: 'sold', popup_text: 'Total withdraw - Self stake' },
+    { name: 'Total Sold Amount', id: 'sold', popup_text: 'Total transferred out from wallet (cummulative)' },
     { name: 'Self Stake', id: 'self_stake', popup_text: 'Validator\'s own stake on itself' },
   ];
 
