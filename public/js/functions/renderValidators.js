@@ -10,8 +10,8 @@ function shortNumberFormat(num) {
 }
 
 function formatCommission(value) {
-  if (value.includes('.')) return `${(Math.round(parseFloat(value) * 100) / 100)}%`;
-  return `${Math.round(parseFloat(value / 1e16) * 100) / 100}%`;
+  if (value.includes('.')) return `${(Math.round(parseFloat(value) * 100))}%`;
+  return `${(Math.round(parseFloat(value / 1e16) * 100) / 100)}%`;
 }
 
 function getScoreColor (value) {

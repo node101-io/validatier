@@ -19,6 +19,7 @@ import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBloc
 import { convertOperatorAddressToBech32 } from './utils/convertOperatorAddressToBech32.js';
 import { Job_SyncValidatorInfo } from './cron/jobs/Job_SyncValidatorInfo.js';
 import { Job_SyncPrices } from './cron/jobs/Job_SyncPrices.js';
+import { startCronJobs } from './cron/startCronJobs.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -64,3 +65,4 @@ app.use('/validator', validatorRouter);
 app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
 // startFetchingData();
 // testDataFetch();
+startCronJobs();
