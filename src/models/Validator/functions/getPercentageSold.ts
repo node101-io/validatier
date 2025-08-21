@@ -9,7 +9,7 @@ export const getPercentageSold = (
   return Math.max(
     Math.min(
       (
-        Math.max((sold + total_withdraw - self_stake), 0) / total_withdraw
+        Math.max(sold, 0) / total_withdraw
       ) * 100,
       100
     ),
@@ -26,5 +26,5 @@ export const getPercentageSoldWithoutRounding = (
 ) => {
   const { sold, self_stake, total_withdraw } = body;
   if (total_withdraw <= 0) return 100;
-  return ((sold + total_withdraw - self_stake) / total_withdraw) * 100;
+  return (sold / total_withdraw) * 100;
 }
