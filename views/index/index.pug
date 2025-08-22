@@ -548,6 +548,7 @@ block content
                         .validator-moniker
                           .validator-moniker-text-content
                             span.validator-moniker-text #{validator.moniker}
+                          //- TODO: fix dead code, never enters inside if
                           if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
                             .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
                               img(src='/res/images/warning.svg')
@@ -586,7 +587,7 @@ block content
                           .validator-each-numeric-info-native= getValue(validator[`${header.id}`], symbol).nativeValue
                             if header.id == 'sold' && validator.total_withdraw < validator.sold
                               .each-table-popup-wrapper(class='each-table-popup-wrapper-warning')
-                                img.validator-each-numeric-info-native-warning(src='/res/images/warning-2.svg' class='center')
+                                img.validator-each-numeric-info-native-warning(src='/res/images/warning.svg' class='center')
                                 .each-table-popup-info-content(class='center')
                                   span The amount sold exceeds the total rewards<br>because the validator also sold tokens received<br>before the queried time interval.
                                 .each-tooltip-info-hover
