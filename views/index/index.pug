@@ -522,16 +522,16 @@ block content
                   span Download
                 button.export-choice-action-button(class='center')#export-choice-cancel-button
                   span Cancel
-        .table-main-wrapper
+        -
+          const headers_array = [
+            {name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Total sold / Total rewards) * 100' },
+            {name: 'Avg Delegation', id: 'average_total_stake', popup_text: 'Average total stake of the validator' },
+            {name: 'Total Rewards', id: 'total_withdraw', popup_text: 'Commission + self stake rewards' },
+            {name: 'Total Sold Amount', id: 'sold', popup_text: 'Total transferred out from wallet (cummulative)' },
+            {name: 'Self Stake', id: 'self_stake', popup_text: 'Validator\'s own stake on itself'},
+          ]
+        .table-main-wrapper(data-headers-array=`${JSON.stringify(headers_array)}`)
           .validators-main-wrapper#validators-main-wrapper(sort_by='percentage_sold' order='asc')
-            -
-              const headers_array = [
-                {name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Total sold / Total rewards) * 100' },
-                {name: 'Avg Delegation', id: 'average_total_stake'},
-                {name: 'Total Rewards', id: 'total_withdraw'},
-                {name: 'Total Sold Amount', id: 'sold', popup_text: 'Total transferred out from wallet (cummulative)' },
-                {name: 'Self Stake', id: 'self_stake', popup_text: 'Validator\'s own stake on itself'},
-              ]
             .validator-table-content
               .validators-info-column
                 .validator-table-header
@@ -568,20 +568,24 @@ block content
                                 img(src='/res/images/info.svg')
                           .each-table-header-title= header.name
                         .each-table-header-sort-indicators
-                          .triangle-up
+                          .triangle-up(style=`${header.id == 'percentage_sold' ? 'border-bottom-color: rgb(22, 22, 22);' : ''}`)
                           .triangle-down
                 each validator, index in validators
                   .each-validator-wrapper(validator=validator id=`${validator.operator_address}` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}` class='operator-address operator-address-search')
                     each header in headers_array
                       if `${header.id}` == 'percentage_sold'
-                        - const scoreResult = getScoreColor(validator.percentage_sold)
-                        .validator-each-numeric-info(class='validator-percentage-sold' style=`color: ${scoreResult.color}`)
-                          if validator.percentage_sold <= 100
-                            span %#{shortNumberFormat(Math.max(0, validator.percentage_sold))}
-                          else
-                            span %100.0
-                          if scoreResult.check
-                            img(src='/res/images/check_green.svg' class='center')
+                        if (validator.total_withdraw == 0 && validator.sold == 0)
+                          .validator-each-numeric-info(class='validator-percentage-sold')
+                            span -
+                        else
+                          - const scoreResult = getScoreColor(validator.percentage_sold)
+                          .validator-each-numeric-info(class='validator-percentage-sold' style=`color: ${scoreResult.color}`)
+                            if validator.percentage_sold <= 100
+                              span %#{shortNumberFormat(Math.max(0, validator.percentage_sold))}
+                            else
+                              span %100.0
+                            if scoreResult.check
+                              img(src='/res/images/check_green.svg' class='center')
                       else
                         - if (`${header.id}` == 'sold') validator[`${header.id}`] = Math.max(0, validator[`${header.id}`])
                         .validator-each-numeric-info

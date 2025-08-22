@@ -62,13 +62,7 @@ function generateValidatorRankingContent(response, sort_by, sortOrderMapping) {
   dataColumn.classList.add('validators-data-column');
   dataColumn.id = 'validators-data-column';
 
-  const headers_array = [
-    { name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Total sold / Total rewards) * 100' },
-    { name: 'Avg Delegation', id: 'average_total_stake' },
-    { name: 'Total Rewards', id: 'total_withdraw' },
-    { name: 'Total Sold Amount', id: 'sold', popup_text: 'Total transferred out from wallet (cummulative)' },
-    { name: 'Self Stake', id: 'self_stake', popup_text: 'Validator\'s own stake on itself' },
-  ];
+  const headers_array = JSON.parse(document.querySelector('.table-main-wrapper').getAttribute('data-headers-array'));
 
   const exchangeRate = document.getElementById('network-switch-header').getAttribute('current_chain_usd_exhange_rate');
   const currentChainSymbol = document.getElementById('network-switch-header').getAttribute('current_chain_symbol');
@@ -253,7 +247,15 @@ function generateValidatorRankingContent(response, sort_by, sortOrderMapping) {
     for (const header of headers_array) {
       let td;
       if (header.id === 'percentage_sold') {
-        td = createPercentageSoldTd(validator.percentage_sold);
+        if (((validator.total_withdraw || 0) === 0) && ((validator.sold || 0) === 0)) {
+          td = document.createElement('div');
+          td.classList.add('validator-each-numeric-info', 'validator-percentage-sold');
+          const dash = document.createElement('span');
+          dash.innerHTML = '-';
+          td.appendChild(dash);
+        } else {
+          td = createPercentageSoldTd(validator.percentage_sold);
+        }
       } else {
         const value = header.id === 'sold' ? Math.max(0, validator[header.id]) : validator[header.id];
         td = createCurrencyTd(value);
@@ -275,7 +277,7 @@ function generateValidatorRankingContent(response, sort_by, sortOrderMapping) {
 
 function renderValidators() {
   const sortOrderMapping = {
-    percentage_sold: 'desc',
+    percentage_sold: 'asc',
     average_total_stake: 'asc',
     total_withdraw: 'asc',
     sold: 'asc',
@@ -323,9 +325,23 @@ function renderValidators() {
     document.getElementById('validators-main-wrapper').setAttribute('order', sortOrderMapping[sort_by]);
 
     if (cacheResponse) {
-      sortOrderMapping[sort_by] == 'desc'
-        ? cacheResponse.data.validators.sort((a, b) => (b[sort_by] || 0) - (a[sort_by] || 0))
-        : cacheResponse.data.validators.sort((a, b) => (a[sort_by] || 0) - (b[sort_by] || 0))
+      const order = sortOrderMapping[sort_by];
+      const getSortable = (v) => {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : (order === 'desc' ? -Infinity : Infinity);
+      };
+      cacheResponse.data.validators.sort((a, b) => {
+        const aVal = getSortable(a[sort_by]);
+        const bVal = getSortable(b[sort_by]);
+
+        if (aVal === bVal && sort_by === 'percentage_sold') {
+          const secA = Number(a['average_total_stake']) || 0;
+          const secB = Number(b['average_total_stake']) || 0;
+          return order === 'asc' ? (secB - secA) : (secA - secB);
+        }
+
+        return order === 'desc' ? (bVal - aVal) : (aVal - bVal);
+      });
 
       return generateValidatorRankingContent(cacheResponse, sort_by, sortOrderMapping)
     };
