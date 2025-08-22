@@ -19,7 +19,7 @@ function renderTableHeader (sort_by, order) {
   tdValidatorsTitle.classList.add('each-table-header-title');
 
   tdValidators.appendChild(tdValidatorsTitle);
-  
+
   headersRow.appendChild(tdValidators);
   headersArray.forEach(header => {
     const td = document.createElement('div');
@@ -39,7 +39,7 @@ function renderTableHeader (sort_by, order) {
 
       popupWrapper = document.createElement('div');
       popupWrapper.classList.add('each-table-popup-wrapper')
-  
+
       const contentWrapper = document.createElement('div');
       contentWrapper.classList.add('each-table-popup-info-content', 'center');
       contentWrapper.style.marginBottom = '3px';
@@ -47,15 +47,15 @@ function renderTableHeader (sort_by, order) {
       const contentWrapperSpan = document.createElement('span');
       contentWrapperSpan.innerHTML = header.popup_text;
       contentWrapper.appendChild(contentWrapperSpan);
-  
+
       const tooltipWrapper = document.createElement('div');
       tooltipWrapper.classList.add('each-tooltip-info-hover', 'center');
-  
+
       const infoIcon = document.createElement('img');
       infoIcon.style.marginTop = '4px';
       infoIcon.style.marginRight = '2px';
       infoIcon.src = '/res/images/info.svg';
-      
+
       tooltipWrapper.appendChild(infoIcon);
       popupWrapper.appendChild(contentWrapper);
       popupWrapper.appendChild(tooltipWrapper);
@@ -70,9 +70,9 @@ function renderTableHeader (sort_by, order) {
     const triangleDown = document.createElement('div');
     triangleDown.classList.add('triangle-down');
 
-    header.id == sort_by 
-      ? order == 'desc' 
-        ? triangleDown.style.borderTopColor = 'rgb(22, 22, 22)' 
+    header.id == sort_by
+      ? order == 'desc'
+        ? triangleDown.style.borderTopColor = 'rgb(22, 22, 22)'
         : triangleUp.style.borderBottomColor = 'rgb(22, 22, 22)'
       : '';
 

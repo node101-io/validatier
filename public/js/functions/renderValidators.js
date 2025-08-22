@@ -46,10 +46,10 @@ function generateValidatorRankingContent(response, sort_by, sortOrderMapping) {
 
   const infoTableHeader = document.createElement('div');
   infoTableHeader.classList.add('validator-table-header');
-  
+
   const infoTableHeaderWrapper = document.createElement('div');
   infoTableHeaderWrapper.classList.add('each-table-header-wrapper', 'each-table-header-validator-info-header');
-  
+
   const infoHeaderTitle = document.createElement('div');
   infoHeaderTitle.classList.add('each-table-header-title');
   infoHeaderTitle.innerHTML = 'Name';
@@ -158,9 +158,9 @@ function generateValidatorRankingContent(response, sort_by, sortOrderMapping) {
     const triangleDown = document.createElement('div');
     triangleDown.classList.add('triangle-down');
 
-    header.id == sort_by 
-      ? sortOrderMapping[sort_by] == 'desc' 
-        ? triangleDown.style.borderTopColor = 'rgb(22, 22, 22)' 
+    header.id == sort_by
+      ? sortOrderMapping[sort_by] == 'desc'
+        ? triangleDown.style.borderTopColor = 'rgb(22, 22, 22)'
         : triangleUp.style.borderBottomColor = 'rgb(22, 22, 22)'
       : '';
 
@@ -274,7 +274,6 @@ function generateValidatorRankingContent(response, sort_by, sortOrderMapping) {
 
 
 function renderValidators() {
-
   const sortOrderMapping = {
     percentage_sold: 'desc',
     average_total_stake: 'asc',
@@ -289,18 +288,18 @@ function renderValidators() {
 
     document.getElementById('selected-range').classList.remove('selected-range-open');
     document.getElementById('picker-main-wrapper').classList.remove('picker-main-wrapper-open');
-    
+
     let target = event.target;
     while (isHeaderClickedChecker && !target.classList.contains('each-table-header-wrapper')) target = target.parentNode;
 
     const sort_by = target.id;
 
     sortOrderMapping[sort_by] == 'desc'
-      ? target.id 
-        ? sortOrderMapping[sort_by] = 'asc' 
+      ? target.id
+        ? sortOrderMapping[sort_by] = 'asc'
         : 'desc'
       : sortOrderMapping[sort_by] = 'desc';
-    
+
     const validatorsMainWrapper = document.getElementById('validators-main-wrapper');
     validatorsMainWrapper.setAttribute('sort_by', sort_by);
     validatorsMainWrapper.setAttribute('order', sortOrderMapping[sort_by]);
@@ -350,14 +349,16 @@ function renderValidators() {
     let target = event.target;
     while (target != document.body && !target.classList.contains('each-validator-wrapper')) target = target.parentNode;
     if (!target.classList.contains('each-validator-wrapper')) return;
-    
+
     document.querySelectorAll('.validator-moniker-text').forEach(each => {
-      if (each.innerHTML == target.querySelector('.validator-moniker-text').innerHTML) return;
+      if (each.innerHTML == target.querySelector('.validator-moniker-text')?.innerHTML) return;
       each.style.animation = 'none';
       each.style.position = 'inline-block';
     })
 
-    const monikerWrapper = target.children[0].children[1].children[0];
+    const monikerWrapper = target.children[0]?.children[1]?.children[0];
+    if (!monikerWrapper) return;
+
     animateOverflowMonikers(monikerWrapper);
   })
 
@@ -373,7 +374,7 @@ function renderValidators() {
 
   //   const sortBy = target.getAttribute('leaderboard_sort_by');
   //   const leaderboardContent = document.getElementById(`leaderboard-content-${sortBy}`);
-    
+
   //   leaderboardContent.parentNode.querySelectorAll('.each-leaderboard-table-wrapper').forEach(each => {
   //     each.classList.add('section-hidden');
   //   });

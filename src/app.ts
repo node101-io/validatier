@@ -47,9 +47,9 @@ mongoose
   .catch(err => console.error('MongoDB connection error:', err));
 
 initDB((err) => {
-    if (err) return console.log(err);
-    console.log('Connected to LevelDB');
-  })
+  if (err) return console.log(err);
+  console.log('Connected to LevelDB');
+})
 
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -62,7 +62,11 @@ app.use('/', indexRouter);
 app.use('/chain', chainRouter);
 app.use('/validator', validatorRouter);
 
-app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
+app.listen(PORT, () => console.log(`Server running at http://127.0.0.1:${PORT}`));
+
 // testDataFetch();
-startFetchingData();
-startCronJobs();
+
+if (process.env.NODE_ENV !== 'development') {
+  startFetchingData();
+  startCronJobs();
+}

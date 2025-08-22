@@ -9,7 +9,7 @@
   --each-table-header-wrapper-max-width: 200px;
   --each-table-header-validator-info-header-min-width: 200px;
   --each-table-header-validator-info-header-max-width: 200px;
-  
+
   --each-table-header-title-font-size: 18px;
   --each-table-header-title-font-weight: 600;
   --each-table-header-title-gap: 0px;
@@ -31,7 +31,7 @@
   --each-table-popup-info-content-left: -50%;
   --each-table-popup-info-content-horizontal-padding: 10px;
   --each-table-popup-info-content-margin-top: -22px;
-  
+
   --each-table-popup-info-content-before-width: 10px;
   --each-table-popup-info-content-before-height: 10px;
   --each-table-popup-info-content-before-rotate-deg: 45deg;
@@ -51,7 +51,7 @@
 
 
   --validators-main-wrapper-vertical-padding: 10px;
-  
+
   --each-validator-wrapper-height: 40px;
   --each-validator-wrapper-vertical-padding: 10px;
   --each-validator-wrapper-horizontal-padding: 10px;
@@ -99,15 +99,15 @@
   --validator-operator-address-content-min-width: fit-content;
   --validator-operator-address-copy-button-margin-top: 3px;
   --validator-operator-address-copy-button-margin-left: 4px;
-  
+
   --validator-opeartor-address-dots-max-width: 20px;
   --validator-operator-address-animaton-transition-duration: 1s;
   --validator-operator-address-animaton-transition-delay: 1s;
-  
+
   --validator-operator-address-hover-dots-max-width: 0;
   --validator-operator-address-hover-dots-opacity: 0;
   --animated-middle-date-display: unset;
-  
+
   --validator-operator-address-hover-middle-address-max-width: 500px;
   --validator-operator-address-hover-middle-address-opacity: 1;
 
@@ -125,11 +125,13 @@
 
   --validator-each-numeric-info-native-font-size: 20px;
   --validator-each-numeric-info-native-font-weight: semibold;
-  --validator-each-numeric-info-native-color: rgba(37, 0, 84, 1);
- 
+  --validator-each-numeric-info-native-color: rgba(99, 63, 154, 1);
+
+  --validator-each-numeric-info-native-warning-size: 12px;
+
   --validator-each-numeric-info-usd-font-size: 16px;
   --validator-each-numeric-info-usd-font-weight: 500;
-  --validator-each-numeric-info-usd-color: rgba(37, 0, 84, 1);
+  --validator-each-numeric-info-usd-color: rgba(99, 63, 154, 1);
 
   --each-month-wrapper-width: 100%;
   --each-month-wrapper-flex-grow: 100%;
@@ -152,7 +154,7 @@
 
   --minimal-popup-scrollbar-width: 5px;
   --minimal-popup-scrollbar-thumb-border-radius: 5px;
-  
+
   --validator-dropdown-icon-opacity: 0.5;
   --validator-dropdown-icon-transition-duration: 0.25s;
 
@@ -166,7 +168,7 @@
   --validator-filter-input-background-color: rgba(245, 245, 255, 1);
   --validator-filter-border-size: 1px;
   --validator-filter-border-color: var(--general-main-wrapper-border-color);
-  
+
   --current-month-and-year-display-font-size: 20px;
   --current-month-and-year-display-font-weight: 600;
 
@@ -178,7 +180,7 @@
   --validator-action-button-border-radius: 2px;
   --validator-action-button-font-size: 20px;
   --validator-action-button-transition-duration: 0.25s;
-  
+
   --calendar-start-day-wrapper-gap: 8px;
   --each-start-day-choice-gap: 8px;
   --each-start-day-choice-span-margin-top: -4px;
@@ -186,7 +188,7 @@
   --percentage-sold-main-circle-diameter: 80px;
   --percentage-sold-main-circle-background-color: rgba(232, 232, 255, 1);
   --percentage-sold-main-circle-font-size: 16px;
-  
+
   --percentage-sold-main-circle-span-z-index: 10;
   --percentage-sold-inner-circle-background-color: rgba(124, 112, 195, 1);
   --percentage-sold-inner-circle-color: rgba(229, 229, 255, 1);
@@ -252,7 +254,7 @@
 
 .each-table-popup-info-content::before {
   content: '';
-  position: absolute;  
+  position: absolute;
   left: calc(50% - (var(--each-table-popup-info-content-before-width) / 2));
   height: 0;
   top: 100%;
@@ -270,6 +272,20 @@
 .each-table-popup-wrapper-metric:hover .each-table-popup-info-content {
   visibility: visible;
   opacity: 1;
+}
+
+.each-table-popup-wrapper-warning {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  z-index: 100;
+}
+
+.each-table-popup-wrapper-warning:hover .each-table-popup-info-content {
+  visibility: visible;
+  opacity: 1;
+  height: fit-content !important;
+  background-color: #2C2749;
 }
 
 .each-table-popup-info-content-hover {
@@ -326,8 +342,8 @@
   padding-left: var(--each-validator-info-wrapper-left);
   background-color: var(--body-main-wrapper-background);
   z-index: 100;
-  display: flex; 
-  align-items: center; 
+  display: flex;
+  align-items: center;
   overflow: visible;
   position: relative;
   margin-right: auto;
@@ -360,7 +376,7 @@
   border-radius: 100%;
 }
 
-.each-leaderboard-table-validator-info-wrapper .ranking-number-content {  
+.each-leaderboard-table-validator-info-wrapper .ranking-number-content {
   min-width: var(--leaderboard-ranking-number-content-width);
   max-width: var(--leaderboard-ranking-number-content-width);
   min-height: var(--leaderboard-ranking-number-content-width);
@@ -398,7 +414,7 @@
   height: var(--validator-operator-address-height);
   opacity: var(--validator-operator-address-opacity);
   transition: all var(--validator-operator-address-transition-duration) ease 0s;
-  cursor: var(--pointer-hand-dark); 
+  cursor: var(--pointer-hand-dark);
 }
 
 .validator-operator-address-content {
@@ -417,7 +433,7 @@
 }
 
 .validator-operator-address-copy-button {
-  margin-top: var(--validator-operator-address-copy-button-margin-top); 
+  margin-top: var(--validator-operator-address-copy-button-margin-top);
   margin-left: var(--validator-operator-address-copy-button-margin-left);
 }
 
@@ -440,7 +456,7 @@
   display: inline-block;
   overflow: hidden;
   max-width: var(--validator-opeartor-address-dots-max-width);
-  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out 
+  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out
               calc(var(--validator-operator-address-animaton-transition-delay) + 0.5s);
 }
 
@@ -449,7 +465,7 @@
   display: inline-block;
   max-width: 0;
   overflow: hidden;
-  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out 
+  transition: max-width var(--validator-operator-address-animaton-transition-duration) ease-in-out
               var(--validator-operator-address-animaton-transition-delay);
 }
 
@@ -502,18 +518,29 @@
 }
 
 .validator-each-numeric-info {
+  position: relative;
   font-size: var(--validator-each-numeric-info-font-size);
   min-width: var(--validator-each-numeric-info-min-width);
   width: var(--validator-each-numeric-info-width);
-  max-width: var(--validator-each-numeric-info-max-width);  
+  max-width: var(--validator-each-numeric-info-max-width);
   text-align: center;
   text-wrap: nowrap;
 }
 
 .validator-each-numeric-info-native {
+  display: inline-flex;
+  gap: calc(var(--validator-each-numeric-info-native-font-size) / 4);
   font-size: var(--validator-each-numeric-info-native-font-size);
   font-weight: var(--validator-each-numeric-info-native-font-weight);
   color: var(--validator-each-numeric-info-native-color);
+}
+
+.validator-each-numeric-info-native-warning {
+  width: var(--validator-each-numeric-info-native-warning-size);
+  height: var(--validator-each-numeric-info-native-warning-size);
+  margin-top: auto;
+  margin-bottom: auto;
+  padding-top: calc(var(--validator-each-numeric-info-native-warning-size) / 4);
 }
 
 .validator-each-numeric-info-usd {
@@ -550,7 +577,7 @@
 
 .each-table-header-wrapper {
   min-width: var(--each-table-header-wrapper-min-width) !important;
-  max-width: var(--each-table-header-wrapper-max-width); 
+  max-width: var(--each-table-header-wrapper-max-width);
   gap: var(--each-table-header-wrapper-gap);
   text-wrap: nowrap;
   align-items: center;
