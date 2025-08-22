@@ -90,8 +90,13 @@
   color: rgba(239, 239, 255, 1);
   padding: 14px 28px;
   margin: 0 auto;
-  margin-bottom: auto; 
+  margin-bottom: auto;
   border-radius: 8px;
+}
+
+.mobile-start-menu-start-button[disabled] {
+  opacity: 0.8;
+  cursor: not-allowed;
 }
 
 .mobile-start-menu-start-button span {
@@ -199,12 +204,12 @@
 }
 
 @media only screen and (max-width: 700px) {
-  :root { 
+  :root {
     --mobile-start-text-content-width: 80%;
     --mobile-start-title-font-size: 54px;
     --mobile-start-title-line-height: 42px;
     --mobile-start-description-font-size: 16px;
-    --mobile-start-description-line-height: 14px; 
+    --mobile-start-description-line-height: 14px;
   }
 }
 
@@ -223,11 +228,11 @@
 
 @media only screen and (max-width: 550px) {
   :root {
-    --mobile-start-text-content-width: 65%;   
+    --mobile-start-text-content-width: 65%;
     --mobile-start-title-font-size: 50px;
     --mobile-start-title-line-height: 42px;
     --mobile-start-description-font-size: 16px;
-    --mobile-start-description-line-height: 14px; 
+    --mobile-start-description-line-height: 14px;
   }
 }
 

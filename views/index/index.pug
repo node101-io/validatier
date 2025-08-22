@@ -183,8 +183,9 @@ block content
           include ../icons/mobile_intro_svg.pug
         .mobile-menu-title-wrapper#mobile-menu-title-wrapper(class='intro-main-wrapper-title-wrapper') THE VALIDATOR'S GUIDE TO THE GALAXY
         .mobile-menu-description-wrapper#mobile-menu-description-wrapper(class='intro-main-wrapper-description-wrapper') Validatier showcases the validators' behaviors, contributions, and impact within the Cosmos Hub ecosystem.
-        .mobile-start-menu-start-button(class='center')#mobile-intro-start-button
-          span Start
+        .mobile-start-menu-start-button(class='center' disabled)#mobile-intro-start-button
+          span#mobile-intro-start-button-text(style='display: none') Start
+          div#mobile-intro-start-button-spinner(class='spinner' style='width: 16px; height: 16px')
     if !queryValidator
       .intro-main-wrapper#intro-main-wrapper
         .intro-main-background-content

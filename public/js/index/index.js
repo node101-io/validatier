@@ -17,4 +17,5 @@ window.onload = () => {
   // handleNewsLetter();
   handlePopupConceal();
   mainScrollHandler();
+  endMobileSpinner();
 }

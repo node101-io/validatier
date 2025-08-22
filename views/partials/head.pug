@@ -13,7 +13,7 @@ html(lang='tr')
             link(rel='stylesheet' href=`/css/${page}.css`)
           else
             link(rel='stylesheet' href=`/css/index/${css}.css`)
-      if includes.external.js 
+      if includes.external.js
         if includes.external.js.includes('page')
           script(src=`/js/${page}.js`)
         if includes.external.js.includes('functions')
@@ -46,6 +46,7 @@ html(lang='tr')
           script(src=`/js/functions/handleNewsLetter.js`)
           script(src=`/js/functions/mainScrollHandler.js`)
           script(src=`/js/functions/handlePopupConceal.js`)
+          script(src=`/js/functions/endMobileSpinner.js`)
     //- - const navbarWidth = isNavbarClose ? '50px' : '237px';
     style.
       :root {
@@ -88,15 +89,15 @@ html(lang='tr')
               type: 'insights',
               title: 'Insights',
               links: [
-                //- { 
-                //-   id: ['reward_flow'], 
-                //-   icon: 'reward_flow.svg', 
+                //- {
+                //-   id: ['reward_flow'],
+                //-   icon: 'reward_flow.svg',
                 //-   title: 'Reward Flow',
                 //-   graph: reward_flow_graph_data
                 //- },
-                //- { 
-                //-   id: ['self_staked_and_delegation'], 
-                //-   icon: 'self_staked_delegation.svg', 
+                //- {
+                //-   id: ['self_staked_and_delegation'],
+                //-   icon: 'self_staked_delegation.svg',
                 //-   title: 'Self-Staked & Delegation',
                 //-   graph: {
                 //-     title: 'Self-Staked & Delegation',
@@ -105,9 +106,9 @@ html(lang='tr')
                 //-     colors: ['rgba(255, 149, 0, 1)', 'rgba(88, 86, 214, 1)']
                 //-   }
                 //- },
-                { 
-                  id: ['percentage_sold_graph'], 
-                  icon: 'percentage_sold_graph.svg', 
+                {
+                  id: ['percentage_sold_graph'],
+                  icon: 'percentage_sold_graph.svg',
                   title: 'Percentage Sold Graph',
                   graph: {
                     title: 'Percentage Sold Graph',
@@ -122,9 +123,9 @@ html(lang='tr')
         .navbar-menu-wrapper
           each subMenu in menu
             .each-sub-menu-wrapper
-              //- .each-sub-menu-title= subMenu.title 
-              .each-sub-menu-links-wrapper 
-                each link in subMenu.links 
+              //- .each-sub-menu-title= subMenu.title
+              .each-sub-menu-links-wrapper
+                each link in subMenu.links
                   .each-sub-menu-link-content(graph_title=`${link.graph.title}`, graph_description=`${link.graph.description}` type=`${subMenu.type}` dataFields=JSON.stringify(link.graph.dataFields) colors=JSON.stringify(link.graph.colors) id=`${link.id[0]}` class=`${link.id.includes(url) ? 'navbar-link-selected' : ''}`)
                     img.each-sub-menu-link-icon(class='navbar-icon' src=`/res/images/navbar/${link.icon}` alt='node101')
                     .each-sub-menu-link-title(class='navbar-text')= link.title
