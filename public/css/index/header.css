@@ -344,7 +344,7 @@
 .dropdown li {
   padding: var(--calendar-left-wrapper-dropdown-li-padding);
   transition: all var(--calendar-left-wrapper-dropdown-li-transition-duration) ease-in-out 0s;
-  /* cursor: var(--pointer-hand-dark); */
+  cursor: var(--pointer-hand-dark);
   display: flex;
   justify-content: space-between;
   align-items: center;
