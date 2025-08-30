@@ -7,7 +7,8 @@
     "build": "tsc",
     "start": "node build/app.js",
     "dev": "NODE_ENV=development nodemon --exec tsx src/app.ts",
-    "test": "vitest"
+    "test": "vitest",
+    "save-cache": "tsx src/utils/saveCacheForTesting.ts"
   },
   "author": "Dogu Boran Senturk",
   "license": "ISC",

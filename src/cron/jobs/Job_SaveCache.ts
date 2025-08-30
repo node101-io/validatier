@@ -9,20 +9,22 @@ export const Job_SaveCache = (
   ) => any
 ) => {
   Chain.getAllChains((err, chains) => {
-    if (err || !chains) return callback(err, false);
-    async.timesSeries(
-      chains?.length,
-      (i, next) => {
-        const eachChain = chains[i];
-        CacheSummaryGraph.saveCacheForChain({ chain: eachChain }, (err, cacheSummaryGraph) => {
-          if (err) return next(new Error(err));
-          return next();
-        })
-      },
-      (err) => {
-        if (err) return callback(JSON.stringify(err), false);
-        return callback(null, true)
-      }
-    )
+    if (err || !chains) return console.log(err);
+
+    async.timesSeries(chains.length, (i, next) => {
+      const eachChain = chains[i];
+
+      CacheSummaryGraph.saveCacheForChain({ chain: eachChain }, (err, caches) => {
+        if (err) return next(new Error(err));
+
+        console.log(caches);
+        return next();
+      })
+    }, (err) => {
+      if (err) return console.log(JSON.stringify(err));
+
+      console.log('Cache saved for all chains');
+      return callback(null, true);
+    });
   })
 }

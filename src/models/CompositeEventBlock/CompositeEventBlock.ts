@@ -23,6 +23,22 @@ export interface CompositeEventBlockInterface {
   balance_change_prefix_sum: number,
 }
 
+export interface ValidatorRecordInterface {
+  self_stake: number,
+  reward: number,
+  commission: number,
+  total_stake: number,
+  total_withdraw: number,
+  balance_change: number,
+  average_total_stake: number;
+  initial_self_stake_prefix_sum: number,
+  initial_reward_prefix_sum: number,
+  initial_total_stake_prefix_sum: number,
+  initial_total_withdraw_prefix_sum: number,
+  initial_commission_prefix_sum: number,
+  initial_balance_change_prefix_sum: number,
+}
+
 interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
   saveManyCompositeEventBlocks: (
     body: {
@@ -40,7 +56,7 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
         balance_change?: number;
         slash?: number;
       }> | null
-    }, 
+    },
     callback: (
       err: string | null,
       savedCompositeEventBlocks: CompositeEventBlockInterface[] | null
@@ -54,21 +70,7 @@ interface CompositeEventBlockModel extends Model<CompositeEventBlockInterface> {
     },
     callback: (
       err: string | null,
-      validatorRecordMapping: Record<string, {
-        self_stake: number,
-        reward: number,
-        commission: number,
-        total_stake: number,
-        total_withdraw: number,
-        balance_change: number,
-        average_total_stake: number;
-        initial_self_stake_prefix_sum: number,
-        initial_reward_prefix_sum: number,
-        initial_total_stake_prefix_sum: number,
-        initial_total_withdraw_prefix_sum: number,
-        initial_commission_prefix_sum: number,
-        initial_balance_change_prefix_sum: number,
-      }> | null
+      validatorRecordMapping: Record<string, ValidatorRecordInterface> | null
     ) => any
   ) => any;
   getPeriodicDataForGraphGeneration: (
@@ -130,13 +132,13 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
     type: Number,
     required: false,
   },
-  self_stake: { 
-    type: Number, 
+  self_stake: {
+    type: Number,
     required: false,
     default: 0
   },
-  reward: { 
-    type: Number, 
+  reward: {
+    type: Number,
     required: false,
     default: 0
   },
@@ -161,11 +163,11 @@ const compositeEventBlockSchema = new Schema<CompositeEventBlockInterface>({
     default: 0
   },
   self_stake_prefix_sum: {
-    type: Number, 
+    type: Number,
     required: true
   },
   reward_prefix_sum: {
-    type: Number, 
+    type: Number,
     required: true,
   },
   commission_prefix_sum: {
@@ -219,9 +221,9 @@ compositeEventBlockSchema.statics.getPeriodicDataForGraphGeneration = function (
   ])
     .then((records) => {
       const mapping: Record<string, any> = {};
-      
+
       records.forEach((record) => {
-        
+
         const totalSelfStake = (record.mostRecentRecord.self_stake_prefix_sum - record.leastRecentRecord.self_stake_prefix_sum || 0) + (record.leastRecentRecord.self_stake || 0);
         const totalStake = (record.mostRecentRecord.total_stake_prefix_sum || 0);
         const balanceChange = (record.mostRecentRecord.balance_change_prefix_sum - (record.leastRecentRecord.balance_change_prefix_sum || 0)) + (record.leastRecentRecord.balance_change || 0);
@@ -236,7 +238,7 @@ compositeEventBlockSchema.statics.getPeriodicDataForGraphGeneration = function (
           total_sold: Math.max(((balanceChange * -1) + total_rewards - totalSelfStake), 0)
         };
       });
-  
+
       return callback(null, mapping);
     })
     .catch((err) => callback(err, null));
@@ -249,14 +251,14 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
 ) {
   const { chain_identifier, bottom_timestamp, top_timestamp } = body;
   CompositeEventBlock.aggregate([
-    { 
-      $match: { 
-        chain_identifier: chain_identifier, 
+    {
+      $match: {
+        chain_identifier: chain_identifier,
         timestamp: {
           $gte: bottom_timestamp - (top_timestamp - bottom_timestamp),
           $lte: top_timestamp
         }
-      } 
+      }
     },
     {
       $sort: {
@@ -322,11 +324,11 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
         },
         balance_change: {
           $add: [
-            { 
+            {
               $subtract: [
                 { $ifNull: ['$mostRecentRecord.balance_change_prefix_sum', 0] },
                 { $ifNull: ['$leastRecentRecord.balance_change_prefix_sum', 0] }
-              ] 
+              ]
             },
             { $ifNull: ['$leastRecentRecord.balance_change', 0] }
           ]
@@ -336,10 +338,10 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
   ])
     .hint({ chain_identifier: 1, timestamp: 1, operator_address: 1 })
     .then((records: any) => {
-      
+
       const mapping: Record<string, any> = {};
       records.forEach((record: any) => {
-        
+
         const { range_id, operator_address } = record._id;
         if (!mapping[operator_address]) mapping[operator_address] = {};
 
@@ -353,7 +355,7 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
             total_withdraw: record.total_withdraw || 0,
             balance_change: record.balance_change || 0
           };
-          
+
           mapping[operator_address].initial_self_stake_prefix_sum = record.initial_self_stake_prefix_sum;
           mapping[operator_address].initial_total_stake_prefix_sum = record.initial_total_stake_prefix_sum;
         } else {
@@ -361,14 +363,14 @@ compositeEventBlockSchema.statics.getPeriodicDataForValidatorSet = function (
           mapping[operator_address].initial_total_withdraw_prefix_sum = record.total_withdraw;
           mapping[operator_address].initial_commission_prefix_sum = record.commission;
         }
-      });  
+      });
 
       return callback(null, mapping);
   })
 }
 
 
-/* 
+/*
   TODO: Validatör'lerin tüm withdraw adreslerinin ayrı ayrı sold amount'larının cüzdanlara çekilen ödül ağırlığınca hesaplanması.
   Validatör modelinin yanına withdraw adres modeli eklenebilir ve validatör modeli withdraw adres modelini wrapler.
 */
@@ -378,7 +380,7 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
   body: Parameters<CompositeEventBlockModel['saveManyCompositeEventBlocks']>[0],
   callback: Parameters<CompositeEventBlockModel['saveManyCompositeEventBlocks']>[1],
 ) {
-  
+
   const { chain_identifier, day, month, year, block_height, saveMapping } = body;
 
   if (!saveMapping) return callback(null, []);
@@ -389,8 +391,8 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
   const compositeEventBlocksArray = Object.values(saveMapping);
 
   CompositeEventBlock.aggregate([
-    { 
-      $match: { 
+    {
+      $match: {
         operator_address: { $in: operatorAddresses },
         timestamp: { $lt: timestamp }
       }
@@ -399,25 +401,25 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
     {
       $group: {
         _id: '$operator_address',
-        mostRecentRecord: { $last: '$$ROOT' }, 
+        mostRecentRecord: { $last: '$$ROOT' },
       },
     },
-    { $replaceRoot: { newRoot: '$mostRecentRecord' } } 
+    { $replaceRoot: { newRoot: '$mostRecentRecord' } }
   ])
   .then((mostRecendRecordsArray) => {
     const mostRecendRecordsMapping: Record<string, any> = {};
     for (const record of mostRecendRecordsArray) {
       mostRecendRecordsMapping[record.operator_address] = record;
     }
-    
+
     const compositeEventBlocksArrayToInsertMany: CompositeEventBlockInterface[] = [];
-    
+
     for (let i = 0; i < compositeEventBlocksArray.length; i++) {
       const operatorAddress = operatorAddresses[i];
       const newCompositeEventBlock = compositeEventBlocksArray[i];
-      
+
       if (
-        !mostRecendRecordsMapping[operatorAddress] && 
+        !mostRecendRecordsMapping[operatorAddress] &&
         newCompositeEventBlock.self_stake == 0 &&
         newCompositeEventBlock.total_stake == 0
       ) continue;
@@ -425,7 +427,7 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
       const mostRecentCompositeEventBlock = mostRecendRecordsMapping[operatorAddress]
         ? mostRecendRecordsMapping[operatorAddress]
         : newCompositeEventBlock;
-      
+
       const selfStake = newCompositeEventBlock.self_stake || 0;
       const reward = newCompositeEventBlock.reward || 0;
       const commission = newCompositeEventBlock.commission || 0;
@@ -478,7 +480,7 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
 
         const existingCredentials = alreadyExistingCompositeEventBlocks.map(each => `${each.timestamp}.${each.operator_address}`);
 
-        const newCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each => 
+        const newCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each =>
           !existingCredentials.includes(`${each.timestamp}.${each.operator_address}`) &&
           (
             each.reward != 0 ||
@@ -490,8 +492,8 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
           )
         );
 
-        const updateCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each => 
-          existingCredentials.includes(`${each.timestamp}.${each.operator_address}`)  
+        const updateCompositeEventBlocks = compositeEventBlocksArrayToInsertMany.filter(each =>
+          existingCredentials.includes(`${each.timestamp}.${each.operator_address}`)
         );
 
         CompositeEventBlock
@@ -526,7 +528,7 @@ compositeEventBlockSchema.statics.saveManyCompositeEventBlocks = function (
                 }
               };
             });
-        
+
             CompositeEventBlock
               .bulkWrite(updateCompositeEventBlocksBulk)
               .then(updateCompositeEventBlocks => callback(null, insertedCompositeEventBlocks))
@@ -558,7 +560,7 @@ compositeEventBlockSchema.statics.removeDuplicates = function (
     { $match: { count: { $gt: 1 } } }
   ])
     .then(duplicates => {
-      
+
       const idsToDelete = duplicates.flatMap(doc => doc.ids.slice(1));
 
       if (idsToDelete.length == 0) {

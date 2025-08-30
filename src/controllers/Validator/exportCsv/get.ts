@@ -13,13 +13,13 @@ export default (req: Request, res: Response): any => {
   type SortBy = 'total_stake' | 'total_withdraw' | 'sold' | 'self_stake' | 'percentage_sold';
 
   const { order, sort_by, bottom_timestamp, top_timestamp, range, chain_identifier, specific_range, range_id } = req.query;
-  
+
   if (!isValidSortBy(sort_by)) return res.send({ err: 'bad_request1', success: false});
   if (!isValidSortOrder(order)) return res.send({ err: 'bad_request2', success: false});
   if (typeof chain_identifier != 'string' || typeof range_id != 'string' || typeof specific_range != 'string' || typeof bottom_timestamp != 'string' || typeof top_timestamp != 'string' || typeof range != 'string') return res.send({ err: 'bad_request3', success: false });
 
   if (!['all_time', 'yearly', 'monthly', 'weekly'].includes(range_id)) return res.send({ err: 'bad_request', success: false});
-  
+
   const chainIdentifier: string = chain_identifier;
   const sortBy: SortBy = sort_by;
   const sortOrder: SortOrder = order;
@@ -40,7 +40,7 @@ export default (req: Request, res: Response): any => {
         },
         (err, cacheResult) => {
           if (err || !cacheResult) return resolve({ success: false, err: 'bad_request' });
-          const data = cacheResult[0].data;
+          const data = cacheResult[0];
           return resolve({ err: null, result: data[rangeId as keyof typeof data] });
         })
     }),
@@ -60,15 +60,15 @@ export default (req: Request, res: Response): any => {
       const csvExportData = (!specificRange && specificRange == 'custom')
         ? exportResult.value.result
         : cacheExportResult.value.result;
-        
+
       getCsvZipBuffer(csvExportData, (err, zipBuffer) => {
         if (err) return res.json({ success: false, err: err });
-        
+
         if (!parseInt(rangeValue)) {
           const fileName = `validator-timeline-${formatTimestamp(parseInt(bottomTimestamp))}-${formatTimestamp(parseInt(topTimestamp))}.csv`;
           res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
           res.setHeader('Content-Type', 'text/csv');
-          return res.send(csvExportData[Object.keys(csvExportData)[0]]); 
+          return res.send(csvExportData[Object.keys(csvExportData)[0]]);
         } else {
           res.setHeader('Content-Disposition', `attachment; filename=validator-timeline-${formatTimestamp(parseInt(bottomTimestamp))}-${formatTimestamp(parseInt(topTimestamp))}.zip`);
           res.setHeader('Content-Type', 'application/zip');

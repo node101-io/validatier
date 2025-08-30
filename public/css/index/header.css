@@ -344,7 +344,7 @@
 .dropdown li {
   padding: var(--calendar-left-wrapper-dropdown-li-padding);
   transition: all var(--calendar-left-wrapper-dropdown-li-transition-duration) ease-in-out 0s;
-  cursor: var(--pointer-hand-dark);
+  /* cursor: var(--pointer-hand-dark); */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -391,7 +391,7 @@
   font-size: var(--date-font-size);
   border: var(--date-border-size) solid transparent;
   padding: var(--date-padding);
-  cursor: var(--pointer-hand-dark);
+  /* cursor: var(--pointer-hand-dark); */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -504,7 +504,7 @@
 .header-network-switch-wrapper {
   font-size: var(--header-network-switch-wrapper-font-size);
   font-weight: var(--header-network-switch-wrapper-font-weight);
-  cursor: var(--pointer-hand-dark);
+  /* cursor: var(--pointer-hand-dark); */
   display: flex;
   flex-direction: column;
   position: relative;

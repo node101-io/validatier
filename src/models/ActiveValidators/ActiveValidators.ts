@@ -11,7 +11,12 @@ export interface ActiveValidatorsInterface {
   }[];
 }
 
-interface ActiveValidatorsModel extends Model<ActiveValidatorsInterface> {
+export interface CummulativeActiveListItemInterface {
+  _id: string;
+  count: number;
+}
+
+export interface ActiveValidatorsModel extends Model<ActiveValidatorsInterface> {
   saveActiveValidators: (
     body: {
       chain_identifier: string;
@@ -52,7 +57,7 @@ interface ActiveValidatorsModel extends Model<ActiveValidatorsInterface> {
     },
     callback: (
       err: string | null,
-      cummulativeActiveList: string[] | null
+      cummulativeActiveList: CummulativeActiveListItemInterface[] | null
     ) => any
   ) => any
 }
@@ -87,51 +92,51 @@ activeValidatorsSchema.statics.saveActiveValidators = function (
   const { chain_identifier, day, month, year, active_validators_pubkeys_array } = body;
   ActiveValidators
     .findOneAndUpdate(
-      { 
-        chain_identifier: chain_identifier, 
-        month: month, 
+      {
+        chain_identifier: chain_identifier,
+        month: month,
         year: year,
         "active_validators.day": { $ne: day }
       },
-      { 
-        $push: { 
+      {
+        $push: {
           active_validators: {
             day: day,
             pubkeys: active_validators_pubkeys_array
-          } 
-        } 
+          }
+        }
       }
     )
     .then(activeValidatorsRecordUpdate => {
-      
+
       if (activeValidatorsRecordUpdate) return callback(null, activeValidatorsRecordUpdate);
 
       ActiveValidators
-      .findOne(
-        { 
-          chain_identifier: chain_identifier, 
-          month: month, 
-          year: year,
-        }
-      ).then(recordDuplicate => {
-
-        if (recordDuplicate) return callback(null, recordDuplicate);
-
-        const newRecordActiveValidators = {
-          day: day,
-          pubkeys: active_validators_pubkeys_array
-        }
-
-        ActiveValidators
-          .create({
+        .findOne(
+          {
             chain_identifier: chain_identifier,
             month: month,
             year: year,
-            active_validators: [newRecordActiveValidators]
-          })
-          .then(newActiveValidatorsRecord => callback(null, newActiveValidatorsRecord))
-          .catch(err => callback(err, null));
-      })
+          }
+        ).then(recordDuplicate => {
+
+          if (recordDuplicate) return callback(null, recordDuplicate);
+
+          const newRecordActiveValidators = {
+            day: day,
+            pubkeys: active_validators_pubkeys_array
+          }
+
+          ActiveValidators
+            .create({
+              chain_identifier: chain_identifier,
+              month: month,
+              year: year,
+              active_validators: [newRecordActiveValidators]
+            })
+            .then(newActiveValidatorsRecord => callback(null, newActiveValidatorsRecord))
+            .catch(err => callback(err, null));
+        })
     })
     .catch(err => callback(err, null));
 }
@@ -191,7 +196,7 @@ activeValidatorsSchema.statics.getCummulativeActiveListByRange = function (
   callback: Parameters<ActiveValidatorsModel['getCummulativeActiveListByRange']>[1]
 ) {
   const { chain_identifier, bottom_timestamp, top_timestamp } = body;
-  ActiveValidators.aggregate([
+  ActiveValidators.aggregate<CummulativeActiveListItemInterface>([
     {
       $match: {
         chain_identifier: chain_identifier,

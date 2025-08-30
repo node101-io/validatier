@@ -13,12 +13,7 @@ import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
 
 import { startFetchingData } from './utils/startFetchingData.js';
-import { testDataFetch } from './test/testDataFetch.js';
-import { clearChainData, initDB, resetWithdrawAddressMappingForChain } from './utils/levelDb.js';
-import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
-import { convertOperatorAddressToBech32 } from './utils/convertOperatorAddressToBech32.js';
-import { Job_SyncValidatorInfo } from './cron/jobs/Job_SyncValidatorInfo.js';
-import { Job_SyncPrices } from './cron/jobs/Job_SyncPrices.js';
+import { initDB } from './utils/levelDb.js';
 import { startCronJobs } from './cron/startCronJobs.js';
 
 const app: Express = express();

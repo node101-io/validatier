@@ -1,9 +1,9 @@
 import async from 'async';
 import Chain from '../../models/Chain/Chain.js'
-import { findGenesisNodes } from '../../utils/findNodeWithMinBlockHeight.js';
+import { getLatestBlockHeight } from '../../utils/getLatestBlockHeight.js';
 
 export const Job_SaveChains = (callback: (err: string | null, success: Boolean) => any) => {
-  
+
   const chainIdentifiers = ['cosmoshub'];
 
   async.timesSeries(
@@ -15,33 +15,27 @@ export const Job_SaveChains = (callback: (err: string | null, success: Boolean) 
 
           fetch(`https://snapshots.kjnodes.com/_rpc/${chainIdentifiers[i]}.json`)
             .then(node_response => node_response.json())
-            .then(node_response => {
+            .then((node_response: Record<string, { latest_block_height: number }>) => {
 
-              const genesisNodes = findGenesisNodes(node_response);
-              if (!genesisNodes) return next(new Error('fetch_error'));
+              const { latest_block_height } = getLatestBlockHeight(node_response);
+              if (!latest_block_height)
+                return next(new Error('fetch_error'));
 
-              Chain.saveChain({
-                name: response.chain.chain_name,
-                pretty_name: response.chain.pretty_name,
-                chain_id: response.chain.chain_id,
-                image: response.chain.logo_URIs.png,
-                symbol: response.chain.symbol,
-                decimals: response.chain.decimals,
-                denom: response.chain.denom,
-                bech32_prefix: response.chain.bech32_prefix,
-                rpc_urls:  genesisNodes.ip_addresses,
-                first_available_block_height: genesisNodes.earliest_block_height,
-                last_available_block_height: genesisNodes.latest_block_height,
-                first_available_block_time: new Date(genesisNodes.data_since),
+              Chain.updateOne({
+                name: chainIdentifiers[i]
+              }, {
+                last_available_block_height: latest_block_height,
                 usd_exchange_rate: response.chain.prices.coingecko[response.chain.display].usd
-              }, (err, chain) => {
-                if (err || !chain) return next(new Error(err || 'no_chain'));
-                return next();
-              })
+              }, { upsert: true })
+                .then(chain => {
+                  if (!chain) return next(new Error('no_chain'));
+                  return next();
+                })
+                .catch(err => next(new Error(err.toString())));
             })
         })
     },
-    (err) => { 
+    (err) => {
       if (err) return callback(err.toString(), false);
       return callback(null, true);
     }

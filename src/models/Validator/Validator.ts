@@ -2,7 +2,7 @@
 import async from 'async';
 
 import mongoose, { Schema, Model, Validator, SortOrder } from 'mongoose';
-import CompositeEventBlock from '../CompositeEventBlock/CompositeEventBlock.js';
+import CompositeEventBlock, { ValidatorRecordInterface } from '../CompositeEventBlock/CompositeEventBlock.js';
 import Chain, { ChainInterface } from '../Chain/Chain.js';
 
 import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
@@ -48,11 +48,24 @@ export interface ValidatorInterface {
   security_contact: string;
   commission_rate: string;
   keybase_id: string;
-  temporary_image_uri: string;
   created_at: Date;
+  temporary_image_uri?: string;
 }
 
-interface ValidatorModel extends Model<ValidatorInterface> {
+export interface ValidatorsSummaryDataInterface {
+  initial_total_stake_sum: number;
+  initial_total_withdraw_sum: number;
+  initial_total_sold: number;
+  total_sold: number;
+  initial_percentage_sold: number;
+  percentage_sold: number;
+  initial_self_stake_sum: number;
+  self_stake_sum: number;
+  initial_average_self_stake_ratio: number;
+  average_self_stake_ratio: number;
+}
+
+export interface ValidatorModel extends Model<ValidatorInterface> {
   saveValidator: (
     body: {
       pubkey?: string;
@@ -130,31 +143,8 @@ interface ValidatorModel extends Model<ValidatorInterface> {
     callback: (
       err: string | null,
       results: {
-        summary_data: {
-          initial_total_stake_sum: number;
-          initial_total_withdraw_sum: number;
-          initial_total_sold: number;
-          total_sold: number;
-          initial_percentage_sold: number;
-          percentage_sold: number;
-          initial_self_stake_sum: number;
-          self_stake_sum: number;
-          initial_average_self_stake_ratio: number;
-          average_self_stake_ratio: number;
-        } | null,
-        validators: {
-          operator_address: string,
-          moniker: string,
-          temporary_image_uri: string,
-          self_stake: number,
-          reward: number,
-          commission: number,
-          ratio: number,
-          sold: number,
-          percentage_sold: number,
-          self_stake_ratio: number,
-          average_total_stake: number
-        }[] | null
+        summary_data: ValidatorsSummaryDataInterface | null,
+        validators: ValidatorInterface[] | null
       } | null
     ) => any
   ) => any;
@@ -382,11 +372,13 @@ validatorSchema.statics.saveManyValidators = function (
           const updateValidatorsBulk = updateValidators.map(validator => ({
             updateOne: {
               filter: { operator_address: validator.operator_address },
-              update: { $set: {
-                moniker: validator.moniker,
-                commission_rate: validator.commission_rate,
-                keybase_id: validator.keybase_id
-              } }
+              update: {
+                $set: {
+                  moniker: validator.moniker,
+                  commission_rate: validator.commission_rate,
+                  keybase_id: validator.keybase_id
+                }
+              }
             }
           }));
 
@@ -449,20 +441,21 @@ validatorSchema.statics.rankValidators = function (
   body: Parameters<ValidatorModel['rankValidators']>[0],
   callback: Parameters<ValidatorModel['rankValidators']>[1],
 ) {
-  const { sort_by, order, bottom_timestamp, top_timestamp, with_photos, chain_identifier } = body;
+  const { sort_by, order, bottom_timestamp, top_timestamp, chain_identifier } = body;
 
   if (!chain_identifier) return callback('bad_request', null);
 
   Promise.allSettled([
-    new Promise((resolve, reject) => {
+    new Promise<ValidatorInterface[]>((resolve, reject) => {
       Validator.find({
         chain_identifier: chain_identifier ? chain_identifier : 'cosmoshub',
-        created_at: { $lte: new Date(top_timestamp) }
+        created_at: { $lte: new Date(top_timestamp) },
       })
-      .then((validators) => resolve(validators))
-      .catch(err => reject(err));
+        .lean()
+        .then((result) => resolve(result))
+        .catch(err => reject(err));
     }),
-    new Promise((resolve, reject) => {
+    new Promise<Record<string, ValidatorRecordInterface> | null>((resolve, reject) => {
       CompositeEventBlock.getPeriodicDataForValidatorSet({
         chain_identifier: chain_identifier,
         bottom_timestamp: bottom_timestamp - 86_400_000,
@@ -510,7 +503,7 @@ validatorSchema.statics.rankValidators = function (
       let index = 0;
       while (index < validators.length) {
         const i = index;
-        const eachValidator: any = validators[i];
+        const eachValidator = validators[i];
         const {
           self_stake = 0,
           reward = 0,
@@ -568,32 +561,26 @@ validatorSchema.statics.rankValidators = function (
         initialTotalPercentageSold += initial_percentage_sold;
 
         const pushObjectData = {
-          pubkey: eachValidator.pubkey || '',
-          operator_address: eachValidator.operator_address || '',
-          moniker: eachValidator.moniker || '',
-          website: eachValidator.website || '',
-          commission_rate: eachValidator.commission_rate || '',
-          description: eachValidator.description || '',
-          temporary_image_uri: eachValidator.temporary_image_uri,
-          self_stake, initial_self_stake_prefix_sum,
-          reward, initial_reward_prefix_sum,
-          commission, initial_commission_prefix_sum,
-          total_stake, initial_total_stake_prefix_sum,
+          ...eachValidator,
+          self_stake,
+          reward,
+          commission,
+          total_stake,
           total_withdraw: (reward + commission),
+          initial_self_stake_prefix_sum,
+          initial_reward_prefix_sum,
+          initial_commission_prefix_sum,
+          initial_total_stake_prefix_sum,
           initial_total_withdraw_prefix_sum: (initial_reward_prefix_sum + initial_commission_prefix_sum),
-          percentage_sold, initial_percentage_sold,
-          self_stake_ratio, initial_self_stake_ratio,
+          percentage_sold,
+          initial_percentage_sold,
+          self_stake_ratio,
+          initial_self_stake_ratio,
           average_total_stake: average_total_stake,
-          chain_identifier: chain_identifier,
           ratio: ratio,
           sold: sold
         };
 
-        if (!with_photos) {
-          delete eachValidator.website;
-          delete eachValidator.description;
-          delete pushObjectData.temporary_image_uri;
-        }
         valueArray.push(pushObjectData);
         index++;
       }
@@ -603,16 +590,16 @@ validatorSchema.statics.rankValidators = function (
         const valB = b[sort_by] || 0;
 
         if (valA == valB && sort_by == 'percentage_sold') {
-            const secA = a['average_total_stake'] || 0;
-            const secB = b['average_total_stake'] || 0;
-            return (order == 'asc' || order == 1)
-                ? secB - secA
-                : secA - secB;
+          const secA = a['average_total_stake'] || 0;
+          const secB = b['average_total_stake'] || 0;
+          return (order == 'asc' || order == 1)
+            ? secB - secA
+            : secA - secB;
         }
 
         return (order == 'desc' || order == -1)
-            ? valB - valA
-            : valA - valB;
+          ? valB - valA
+          : valA - valB;
       });
 
       callback(null, {
@@ -683,7 +670,7 @@ validatorSchema.statics.exportCsv = function (
   if ((timestampDifference / range) > 50 && range != 0) return callback('bad_request', null);
 
   const timestampRange = Math.min((topTimestamp - bottomTimestamp), (range ? range : (topTimestamp - bottomTimestamp)));
-  const csvDataMapping: any = {};
+  const csvDataMapping: Record<string, ValidatorInterface[]> = {};
 
   async.whilst(
     function test(cb) { cb(null, bottomTimestamp < topTimestamp); },
@@ -698,9 +685,8 @@ validatorSchema.statics.exportCsv = function (
       }, (err, results) => {
         if (err || !results) return next();
 
-        const { validators } = results;
+        csvDataMapping[`validator-ranking-${formatTimestamp(bottomTimestamp)}_${formatTimestamp(bottomTimestamp + timestampRange)}.csv`] = results.validators || [];
 
-        csvDataMapping[`validator-ranking-${formatTimestamp(bottomTimestamp)}_${formatTimestamp(bottomTimestamp + timestampRange)}.csv`] = validators;
         bottomTimestamp += timestampRange;
         return next();
       })
@@ -715,7 +701,7 @@ validatorSchema.statics.exportCsv = function (
   )
 }
 
-validatorSchema.statics.exportCsvForAllRanges = function(
+validatorSchema.statics.exportCsvForAllRanges = function (
   body: Parameters<ValidatorModel['exportCsvForAllRanges']>[0],
   callback: Parameters<ValidatorModel['exportCsvForAllRanges']>[1]
 ) {

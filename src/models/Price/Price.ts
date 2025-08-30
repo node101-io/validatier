@@ -8,7 +8,7 @@ export interface PriceInterface extends Document {
   price: number;
 }
 
-interface PriceModel extends Model<PriceInterface> {
+export interface PriceModel extends Model<PriceInterface> {
   savePriceFunction: (
     body: {
       day: number,
@@ -46,7 +46,7 @@ interface PriceModel extends Model<PriceInterface> {
     },
     callback: (
       err: string | null,
-      priceGraphData: number[] | any
+      priceGraphData: number[] | null
     ) => any
   ) => any
 }
@@ -108,12 +108,12 @@ PriceSchema.statics.getPriceGraphData = function (
   body: Parameters<PriceModel['getPriceGraphData']>[0],
   callback: Parameters<PriceModel['getPriceGraphData']>[1],
 ) {
-  
+
   const { bottom_timestamp, top_timestamp } = body;
 
   const numberOfDataPoints = 90;
   const intervalMs = Math.ceil((top_timestamp - bottom_timestamp) / numberOfDataPoints);
-  
+
   const groupId: Record<string, any> = {
     bucket: {
       $floor: {
@@ -146,7 +146,7 @@ PriceSchema.statics.getPriceGraphData = function (
     }
   ])
     .hint({ timestamp: 1, price: 1 })
-    .then(result => callback(null, result.map(each => (Math.round(each.price * 100) / 100))))
+    .then(result => callback(null, result.map(each => (Math.round(each.price * 100) / 100)) || null))
     .catch(err => callback(err, null))
 }
 

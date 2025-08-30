@@ -11,7 +11,7 @@ window.onload = () => {
   handleCalendarEvents(currentYearValue, currentMonthValue, 'monday' /* document.getElementById('calendar-format-toggle').value */)
   renderValidators();
   // handleNavbar();
-  handleExportEvents();
+  // handleExportEvents();
   handlePlotButtonClick();
   handleSummaryGraphActions();
   // handleNewsLetter();

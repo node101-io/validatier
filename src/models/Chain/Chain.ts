@@ -22,9 +22,9 @@ export interface ChainInterface {
   is_genesis_saved: boolean;
 }
 
-interface ChainModel extends Model<ChainInterface> {
+export interface ChainModel extends Model<ChainInterface> {
   saveChain: (
-    body: {  
+    body: {
       name: string;
       pretty_name: string;
       chain_id: string;
@@ -38,7 +38,7 @@ interface ChainModel extends Model<ChainInterface> {
       last_available_block_height: number;
       first_available_block_time: Date;
       usd_exchange_rate: number
-    }, 
+    },
     callback: (
       err: string | null,
       newChain: ChainInterface | null
@@ -124,11 +124,11 @@ const chainSchema = new Schema<ChainInterface>({
   },
   first_available_block_height: {
     type: Number,
-    required: true 
+    required: true
   },
   last_available_block_height: {
     type: Number,
-    required: true 
+    required: true
   },
   first_available_block_time: {
     type: Date,
@@ -176,7 +176,7 @@ chainSchema.statics.getAllChains = function (callback: Parameters<ChainModel['ge
 }
 
 chainSchema.statics.saveChain = function (
-  body: Parameters<ChainModel['saveChain']>[0], 
+  body: Parameters<ChainModel['saveChain']>[0],
   callback: Parameters<ChainModel['saveChain']>[1]
 ) {
 
@@ -185,7 +185,7 @@ chainSchema.statics.saveChain = function (
   Chain
     .findOneAndUpdate(
       { chain_id: chain_id },
-      { 
+      {
         last_available_block_height: last_available_block_height,
         usd_exchange_rate: usd_exchange_rate
       }
@@ -201,7 +201,7 @@ chainSchema.statics.saveChain = function (
       ).getTime();
 
       Chain
-        .create({ 
+        .create({
           name: name,
           pretty_name: pretty_name,
           chain_id: chain_id,
@@ -272,7 +272,7 @@ chainSchema.statics.updateTimeOfLastActiveSetSave = function (
     new Date(time).getMonth(),
     new Date(time).getDate(),
   ).getTime();
-  
+
   Chain
     .findOneAndUpdate(
       { name: chain_identifier },
