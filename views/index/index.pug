@@ -1,11 +1,11 @@
 extends ../partials/head
-block content 
+block content
   -
     function formatCommission(value) {
-      if (value.includes('.')) return `${(parseInt(value) * 100)}%`;
-      return `${parseInt(value / 1e16)}%`;
+      if (value.includes('.')) return `${(Math.round(parseFloat(value) * 100))}%`;
+      return `${(Math.round(parseFloat(value / 1e16) * 100) / 100)}%`;
     }
-  
+
     function shortNumberFormat(num) {
       const sign = num < 0 ? '-' : '';
       num = Math.abs(num);
@@ -18,7 +18,7 @@ block content
 
       return sign + num.toString();
     }
-  
+
     function getValue(value, unit) {
       const decimals = selectedChain.decimals || 6;
       const exchangeRate = selectedChain.usd_exchange_rate || 0;
@@ -27,7 +27,7 @@ block content
         usdValue: unit != '%' ? '$' + shortNumberFormat((value / Math.pow(10, decimals)) * exchangeRate) : null
       }
     }
-  
+
     function getScoreColor (value) {
       if (value < 25) return { color: 'rgba(19, 167, 25, 1)', check: true };
       else if (value < 50) return { color: 'rgba(255, 111, 67, 1)', check: false };
@@ -36,12 +36,12 @@ block content
     const symbol = selectedChain.symbol ? selectedChain.symbol : 'ATOM'
 
     const summary_graph_menus = [
-      {
-        type: 'select',
-        id: 'network-summary-interval',
-        options: ['D', 'W', 'M', 'Y'],
-        selected: 'M'
-      },
+      //- {
+      //-   type: 'select',
+      //-   id: 'network-summary-interval',
+      //-   options: ['D', 'W', 'M', 'Y'],
+      //-   selected: 'M'
+      //- },
       {
         type: 'dropdown',
         id: 'network-summary-filter',
@@ -51,24 +51,27 @@ block content
           { id: 'total_withdraw_sum', title: 'Total Reward' },
           { id: 'total_sold', title: 'Total Sold' },
           { id: 'percentage_sold', title: 'Percentage Sold' },
+          { id: 'price', title: `${selectedChain.symbol} Price` },
           { id: 'self_stake_sum', title: 'Self-Staked Amount' }
         ]
       },
     ]
-    
+
     const metrics = [
       { id: 'total_stake_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgb(254, 148, 4)', title: 'Total Delegation' },
       { id: 'total_withdraw_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgb(50, 173, 230)', title: 'Total Reward' },
       { id: 'total_sold', unit: selectedChain.symbol || '$ATOM', color: 'rgb(88, 86, 214)', title: 'Total Sold Amount' },
       { id: 'percentage_sold', unit: selectedChain.symbol || '$ATOM', color: 'rgba(255, 149, 0, 1)', title: 'Percentage Sold' },
+      { id: 'price', unit: '$' || '$', color: 'rgb(50, 173, 230)', title: `${selectedChain.symbol} Price` },
       { id: 'self_stake_sum', unit: selectedChain.symbol || '$ATOM', color: 'rgba(88, 86, 214, 1)', title: 'Self-Staked Amount' }
     ]
+    const timestampDifference = new Date(selectedDateTop).getTime() - new Date(selectedDateBottom).getTime()
   .all-main-wrapper#all-main-wrapper
-    .navbar-view-toggle#navbar-view-toggle(class='center')
-      span(class=`${isNavbarClose ? 'navbar-arrow-close' : ''}`)
-        include ../icons/chevron_left.pug
-    .header-main-wrapper
-      .header-network-switch-wrapper
+    //- .navbar-view-toggle#navbar-view-toggle(class='center')
+    //-   span(class=`${isNavbarClose ? 'navbar-arrow-close' : ''}`)
+    //-     include ../icons/chevron_left.pug
+    .header-main-wrapper#header-main-wrapper(class=`${queryValidator ? 'header-main-wrapper-validator' : ''}`)
+      .header-network-switch-wrapper(style='display:none;')
         .network-switch-header#network-switch-header(current_chain_identifier=`${selectedChain.name}` current_chain_id=`${selectedChain.chain_id}` current_chain_symbol=`${selectedChain.symbol}` current_chain_decimals=`${selectedChain.decimals}` current_chain_usd_exhange_rate=`${selectedChain.usd_exchange_rate}` current_chain_first_available_time=`${selectedChain.first_available_block_time}`)
           .network-switch-header-chain-content-wrapper(class='center')
             .network-switch-network-image-wrapper
@@ -76,84 +79,135 @@ block content
             .network-switch-network-info-wrapper
               .network-switch-network-title-wrapper
                 .network-switch-network-title(class='current-network-name')= selectedChain.pretty_name || 'Cosmos Hub'
-                .network-switch-drowdown-toggle(class='network-switch-dropdown-arrow center')
-                  include ../icons/chevron.pug
+                //- .network-switch-drowdown-toggle(class='network-switch-dropdown-arrow center')
+                //-   include ../icons/chevron.pug
               .network-switch-network-currency= selectedChain.symbol || 'ATOM'
           .network-switch-main-numerical-values-wrapper
-            //- .each-network-switch-main-numerical-value(class='percentage-change-value-content') → %17.3 
+            .each-network-switch-main-numerical-value(class='percentage-change-value-content')
+              img(src='/res/images/pretty_arrow.svg')
+              span= Math.round(((priceGraphData[priceGraphData.length - 1] - priceGraphData[0]) / priceGraphData[0]) * 100) + '%'
             .each-network-switch-main-numerical-value $#{selectedChain.usd_exchange_rate}
-        .network-switch-dropdown
-          .network-switch-search-bar
-            .network-switch-search-icon(class='center')
-              include ../icons/search.svg
-            input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search')
-          .network-switch-chains-wrapper
-            each chain in chains 
-              .each-chain-wrapper(id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}` symbol=`${chain.symbol}` decimals=`${chain.decimals}` usd_exchange_rate=`${chain.usd_exchange_rate}` first_available_time=`${chain.first_available_block_time}`)
-                .network-switch-network-image-wrapper(class='center network-unselected-image-wrapper')
-                  img(src=`${chain.image}`)
-                .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
-                  .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
-      .date-picker
-        .selected-range 
-          span.date-interval-description 
-            include ../icons/calendar.pug
-            span.date-interval-description-text#header-selected-range-description= specificRangeName ? specificRangeName : 'All time'
-          span.date-range
-            span#header-range-bottom-block= selectedDateBottom ? new Date(selectedDateBottom).toLocaleDateString('en-GB') : 'Genesis'
-            span  - 
-            span#header-range-top-block= new Date(selectedDateTop ? selectedDateTop : '').toLocaleDateString('en-GB')
-          .dropdown-icon(style='margin-bottom: -6px;')
-            include ../icons/chevron.pug
-        .picker-main-wrapper#picker-main-wrapper
-          .picker-content-wrapper
-            .left-wrapper
-              .dropdown
-                -
-                  const options = [
-                    { id: 'last_90_days', label: 'Last 3 months', selected: true },
-                    { id: 'last_180_days', label: 'Last 6 months' },
-                    { id: 'this_year', label: 'This year (Jan - Today)' },
-                    { id: 'last_calendar_year', label: 'Last Calendar Year' },
-                    { id: 'all_time', label: 'All time' },
-                    { id: 'custom', label: 'Custom' }
-                  ]
-                ul
-                  each option in options
-                    li.left-wrapper-each-choice(class=`${(specificRange == option.id || (!specificRange && option.selected)) ? 'selected' : ''}` id=option.id) #{option.label}
-            .calendar-wrapper
-              .calendar 
-                .date-input(style='display: none')
-                  input.each-date-input(type='date' id='periodic-query-bottom-timestamp' value=`${selectedDateBottom ? selectedDateBottom : ''}`)
-                  span —
-                  input.each-date-input(type='date' id='periodic-query-top-timestamp' value=`${selectedDateTop ? selectedDateTop : ''}`)
-                .date-input-month-year-info-content
-                  div.current-month-and-year-display#current-month-and-year-display
-                  .each-month-switch-arrow(style='transform: rotateZ(90deg); margin-right: 20px;')#previous-month
-                    include ../icons/chevron_dark.pug
-                  .each-month-switch-arrow(style='transform: rotateZ(-90deg)')#next-month
-                    include ../icons/chevron_dark.pug
-                .days#days-main-wrapper(class='days-header-wrapper')
-                  each day in (`${startDay}` == 'sunday' ? ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] : ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'])
-                    span.day= day
-                .month-wrapper
-                  .days#month-wrapper
-          .buttons
-            .calendar-start-day-wrapper(id='calendar-format-toggle' value=`${startDay ? startDay : 'monday'}`)
-              .calendar-start-day-toggle-title Week Starts on
-              - const weekStartsOnArray = ['monday', 'sunday']
-              each day in weekStartsOnArray
-                .each-start-day-choice(value=`${day}`)
-                  .general-choice-radio-button(class='center')
-                    .general-choice-radio-button-inner-circle(style=`${`${startDay}` == `${day}` ? 'display: flex' : ''}` value=`${day}`)
-                  span= day
-            button.cancel#cancel Cancel
-            button.apply#apply Apply
+        //- .network-switch-dropdown
+        //-   .network-switch-search-bar
+        //-     .network-switch-search-icon(class='center')
+        //-       include ../icons/search.svg
+        //-     input.network-switch-input-content(type='text' id='network-switch-input' placeholder='Search')
+        //-   .network-switch-chains-wrapper
+        //-     each chain in chains
+        //-       .each-chain-wrapper(id=`${chain.chain_id}` chain_id=`${chain.chain_id}` pretty_name=`${chain.pretty_name}` image=`${chain.image}` name=`${chain.name}` symbol=`${chain.symbol}` decimals=`${chain.decimals}` usd_exchange_rate=`${chain.usd_exchange_rate}` first_available_time=`${chain.first_available_block_time}`)
+        //-         .network-switch-network-image-wrapper(class='center network-unselected-image-wrapper')
+        //-           img(src=`${chain.image}`)
+        //-         .network-switch-network-info-wrapper(style='display: flex; align-items: center; flex-direction: row; gap: 10px')
+        //-           .network-switch-network-title(class='unselected-network-title' style='text-wrap: nowrap')= chain.pretty_name
+      .header-inputs-main-wrapper
+        .date-picker#date-picker
+          .selected-range#selected-range(class=`${queryValidator ? 'selected-range-validator' : ''}`)
+            span.date-interval-description
+              include ../icons/calendar.pug
+              span.date-interval-description-text#header-selected-range-description= specificRangeName ? specificRangeName : 'All time'
+            span.date-range
+              span#header-range-bottom-block= selectedDateBottom ? new Date(selectedDateBottom).toLocaleDateString('en-GB') : 'Genesis'
+              span  -
+              span#header-range-top-block= new Date(selectedDateTop ? selectedDateTop : '').toLocaleDateString('en-GB')
+            .dropdown-icon(style='margin-bottom: -6px; margin-right: 4px;')
+              include ../icons/chevron.pug
+          .picker-main-wrapper#picker-main-wrapper
+            .picker-content-wrapper
+              .left-wrapper
+                .dropdown
+                  -
+                    const options = [
+                      { id: 'last_90_days', label: 'Last 3 months', selected: true },
+                      { id: 'last_180_days', label: 'Last 6 months' },
+                      { id: 'last_365_days', label: 'Last year' },
+                      { id: 'all_time', label: 'All time' },
+                      //- { id: 'custom', label: 'Custom' },
+                    ]
+                  ul
+                    each option in options
+                      li.left-wrapper-each-choice(class=`${(specificRange == option.id || (!specificRange && option.selected)) ? 'selected' : ''}` id=option.id) #{option.label}
+              .calendar-wrapper
+                .calendar
+                  .date-input(style='display: none')
+                    input.each-date-input(type='date' id='periodic-query-bottom-timestamp' value=`${selectedDateBottom ? selectedDateBottom : ''}`)
+                    span —
+                    input.each-date-input(type='date' id='periodic-query-top-timestamp' value=`${selectedDateTop ? selectedDateTop : ''}`)
+                  .date-input-month-year-info-content
+                    div.current-month-and-year-display#current-month-and-year-display
+                    .each-month-switch-arrow(style='transform: rotateZ(90deg); margin-right: 20px;')#previous-month
+                      include ../icons/chevron_dark.pug
+                    .each-month-switch-arrow(style='transform: rotateZ(-90deg)')#next-month
+                      include ../icons/chevron_dark.pug
+                  .days#days-main-wrapper(class='days-header-wrapper')
+                    each day in (`${startDay}` == 'sunday' ? ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'] : ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'])
+                      span.day= day
+                  .month-wrapper
+                    .days#month-wrapper
+            //- .buttons
+              //- .calendar-start-day-wrapper(id='calendar-format-toggle' value=`${startDay ? startDay : 'monday'}`)
+              //-   .calendar-start-day-toggle-title Week Starts on
+              //-   - const weekStartsOnArray = ['monday', 'sunday']
+              //-   each day in weekStartsOnArray
+              //-     .each-start-day-choice(value=`${day}`)
+              //-       .general-choice-radio-button(class='center')
+              //-         .general-choice-radio-button-inner-circle(style=`${`${startDay}` == `${day}` ? 'display: flex' : ''}` value=`${day}`)
+              //-       span= day
+              //- button.cancel#cancel Cancel
+              //- button.apply#apply Apply
+        .validator-filter-container
+          input.validator-filter-input(autocomplete="off" class='search-wrapper' type='text' id='validator-filter-input' placeholder='Search Validator')
+      a(href="/").header-banner-wrapper#header-banner-wrapper
+        .banner-logo-wrapper#banner-logo(class='center')
+          include ../icons/logo.pug
+        .banner-title-content#banner-title(class=`navbar-text ${queryValidator ? 'banner-title-content-validator' : ''}`) VALIDATIER
+    if !isStartClicked && !queryValidator
+      -
+        const fallingStarLocations = [
+          { left: '0%', top: '30%' },
+          { left: '30%', top: '50%' },
+          { left: '20%', top: '10%' }
+        ]
+      .mobile-start-menu-wrapper#mobile-menu-start-wrapper
+        each fallingStar in fallingStarLocations
+          .falling-star(style=`top: ${fallingStar.top}; left: ${fallingStar.left};`)
+            .falling-star-trail-wrapper
+              .falling-star-trail
+                img(src="/res/images/trail.svg")
+            .falling-star-star
+              img(src="/res/images/star.svg")
+        .mobile-menu-banner-wrapper
+          .mobile-banner-logo-wrapper
+            include ../icons/logo.pug
+          .mobile-menu-banner-title VALIDATIER
+        .mobile-menu-background-content(class='intro-main-background-content')
+          include ../icons/mobile_intro_svg.pug
+        .mobile-menu-title-wrapper#mobile-menu-title-wrapper(class='intro-main-wrapper-title-wrapper') THE VALIDATOR'S GUIDE TO THE GALAXY
+        .mobile-menu-description-wrapper#mobile-menu-description-wrapper(class='intro-main-wrapper-description-wrapper') Validatier showcases the validators' behaviors, contributions, and impact within the Cosmos Hub ecosystem.
+        .mobile-start-menu-start-button.center.display-none#mobile-intro-start-button Start
+        div#mobile-intro-start-button-spinner(class='spinner' style='width: 16px; height: 16px')
+    if !queryValidator
+      .intro-main-wrapper#intro-main-wrapper
+        .intro-main-background-content
+          include ../icons/intro_svg.pug
+        .intro-main-wrapper-title-wrapper
+          div THE VALIDATOR'S
+          div GUIDE TO THE GALAXY
+        .intro-main-wrapper-description-wrapper
+          div node101 | CosmosHub Validatier showcases the validators' behaviors,
+          div contributions, and impact within the Cosmos ecosystem
     .inner-main-wrapper#inner-main-wrapper
       .network-summary-main-wrapper#network-summary-main-wrapper(class=`${(queryValidator || url == 'validators') ? 'section-hidden' : ''}`)
         .network-summary-main-wrapper-title(class='each-section-title-content') Network Summary
         -
           const stats = [
+            {
+              field: 'self_stake_sum',
+              title: 'Self Stake Amount',
+              id_native: 'summary-self-stake-amount-native',
+              id_usd: 'summary-self-stake-amount-usd',
+              unit: selectedChain.symbol || '$ATOM',
+              small_graph_id: 'self_stake_sum'
+            },
             {
               field: 'percentage_sold',
               title: 'Percentage sold',
@@ -164,16 +218,8 @@ block content
               unit: '%'
             },
             {
-              field: 'self_stake_amount',
-              title: 'Self Stake Amount',
-              id_native: 'summary-self-stake-amount-native',
-              id_usd: 'summary-self-stake-amount-usd',
-              unit: selectedChain.symbol || '$ATOM',
-              small_graph_id: 'self_stake_sum'
-            },
-            {
               field: 'average_self_stake_ratio',
-              title: 'Average Self Staked Ratio',
+              title: 'Avg. Self/Total Stake',
               id_native: 'summary-average-self-stake-ratio-native',
               id_usd: null,
               additional_class: 'summary-percentage-text-native',
@@ -183,47 +229,52 @@ block content
           ]
         .network-summary-network-stats-main-wrapper
           each stat in stats
-            .each-network-summary-stat(class=`network-summary-stat-${stat.field}` id=`network-summary-stat-${stat.field}`)
+            .each-network-summary-stat(class=`network-summary-stat-${stat.field} ${(url == 'percentage_sold_graph' && stat.field == 'percentage_sold' ) ? 'network-summary-stat-percentage_sold-clicked' : ''}` id=`network-summary-stat-${stat.field}`)
+              if stat.field == 'percentage_sold'
+                .network-summary-stat-close-button#network-summary-stat-close-button-percentage-sold(class='center')
+                  include ../icons/cross.pug
               .each-network-summary-stat-column
                 .each-network-summary-stat-header-title= stat.title
                 if stat.id_native
                   .each-network-summary-stat-content(id=`${stat.id_native}` class=`${stat.id_native} ${stat.additional_class}`)= getValue(summaryData[stat.field], stat.unit).nativeValue
                 if stat.id_usd
                   .each-network-summary-stat-footer-value(id=`${stat.id_usd}` class=`${stat.id_usd}`)= getValue(summaryData[stat.field], 'usd').usdValue
-                else 
+                else
                   .each-network-summary-stat-content(class='stat-value-font-large')
-                .each-network-summary-stat-footer-change 
-                  span(class='percentage-change-value-content')
-                    img(src='/res/images/pretty_arrow.svg')
-                    span= Math.round((summaryData[stat.field] / summaryData[`initial_${stat.field}`]) * 100) + '%'
+                //- .each-network-summary-stat-footer-change
+                //-   span(class='percentage-change-value-content')
+                //-     img(src='/res/images/pretty_arrow.svg')
+                //-     span= (Math.round((summaryData[stat.field] / summaryData[`initial_${stat.field}`]) * 100) + '%').toString().replace('Infinity', '-')
               .each-network-summary-stat-column
                 if `${stat.id_native}` == 'summary-percentage-sold-native'
                   .percentage-sold-main-circle
-                    span= getValue(100 - summaryData[stat.field], stat.unit).nativeValue
-                    .percentage-sold-inner-circle(class=`${stat.id_native}` style=`width: calc(var(--percentage-sold-main-circle-diameter) * ${Math.sqrt(parseInt(summaryData[stat.field]) / 100)});`) #{getValue(summaryData[stat.field], stat.unit).nativeValue}
+                    span(class=`${(100 - summaryData[stat.field]) < 50 ? 'section-invisible' : ''}`)= getValue(100 - summaryData[stat.field], stat.unit).nativeValue
+                    .percentage-sold-inner-circle(class=`${stat.id_native}` style=`width: calc(var(--percentage-sold-main-circle-diameter) * ${Math.min(1, Math.sqrt(parseInt(summaryData[stat.field]) / 100))});`)
+                      span(class=`${(summaryData[stat.field]) < 20 ? 'section-invisible' : ''}`) #{getValue(summaryData[stat.field], stat.unit).nativeValue}
                 else
                   .network-summary-small-graph-container(id=`small-graph-${stat.small_graph_id}`)
           script.
             createSmallGraphs();
+        .network-summary-network-graph-metrics-wrapper-title(class='each-section-title-content') Graph Metrics
         .network-summary-network-graph-main-wrapper
           .network-summary-network-graph-metrics-wrapper
-            .network-summary-network-graph-metrics-wrapper-title(class='each-section-title-content') Graph Metrics
             .network-summary-network-graph-metrics-content-wrapper
-              each metric in metrics 
+              each metric in metrics
                 .each-metric-content-wrapper(id=`summary-metric-${metric.id}` class=`${dataFields.includes(metric.id) ? '' : 'section-hidden'}`)
                   .each-metric-content-wrapper-header
                     .each-metric-content-wrapper-header-icon(style=`background-color: ${metric.color}`)
                     .each-metric-content-wrapper-header-title= metric.title
                   .each-metric-content-wrapper-content
-                    .each-metric-content-wrapper-content-value-native
-                    .each-metric-content-wrapper-content-value-usd
-                  .each-metric-content-wrapper-footer
-                    span(class='percentage-change-value-content')
+                    .each-metric-content-wrapper-content-value-native(class=`${metric.id == 'percentage_sold' ? 'graph-metric-percentage-change-content' : ''}`)
+                    .each-metric-content-wrapper-content-value-usd(class=`${metric.id == 'percentage_sold' ? 'percentage-change-value-content' : ''}`)
+                  if metric.id != 'percentage_sold'
+                    .each-metric-content-wrapper-footer
+                      span(class='percentage-change-value-content')
           .network-summary-network-graph-content-wrapper
             .network-summary-network-graph-content-header
               .network-summary-network-graph-content-header-main
                 .network-summary-network-graph-content-title#summary-graph-title= graph_title
-                .network-summary-network-graph-content-filters-wrapper
+                .network-summary-network-graph-content-filters-wrapper(style='display: none;')
                   each menu in summary_graph_menus
                     if menu.type == 'dropdown'
                       .each-network-summary-network-graph-content-dropdown-wrapper
@@ -231,31 +282,34 @@ block content
                           span= menu.title
                           img.each-network-summary-network-graph-content-dropdown-arrow(src='/res/images/chevron_aestethic.svg' class='center')
                         .each-network-summary-network-graph-content-dropdown-content
-                          each option in menu.options 
+                          each option in menu.options
                             .each-network-summary-network-graph-content-each-dropdown(id=`summary-graph-dropdown-option-${option.id}` class=`dropdown-option-checked ${dataFields.includes(option.id) ? '' : 'section-hidden'}`)
                               .general-choice-checkbox(class='center')
                                 .general-choice-checkbox-inner-circle(style=`${dataFields.includes(option.id) ? 'display: unset' : ''}`) ✓
                               span= option.title
-                    else 
+                    else
                       .each-network-summary-select-wrapper
-                        each option in menu.options 
+                        each option in menu.options
                           .each-network-summary-select-option(class=`${option == menu.selected ? 'each-network-summary-select-option-selected' : ''}` option=option.toLowerCase())= option
               .network-summary-network-graph-content-description#summary-graph-description= graph_description
             .network-summary-network-graph-content#network-summary-graph-container(currentDataFields=dataFields currentColors=colors)
-              script.
-                createNetworkSummaryGraph(!{dataFields}, !{colors}, 'm');
+              if !queryValidator
+                script.
+                  createNetworkSummaryGraph(!{dataFields}, !{colors});
       -
         const sortByArray = [
           { order: 'asc', sort_by: 'percentage_sold' },
-          { order: 'desc', sort_by: 'self_stake' },
-          { order: 'desc', sort_by: 'self_stake_ratio' },
-          { order: 'desc', sort_by: 'sold' }
+          //- { order: 'desc', sort_by: 'self_stake' },
+          //- { order: 'desc', sort_by: 'self_stake_ratio' },
+          { order: 'asc', sort_by: 'sold' }
         ]
         const leaderboards = [
           {
             id: 'percentage_sold',
             title: 'Percentage Sold',
             fields: ['percentage_sold'],
+            orders: ['asc', 'desc'],
+            default_order: 'asc',
             selected_option: 'percentage_sold',
             summary_field: 'percentage_sold',
             id_native: 'summary-percentage-sold-native',
@@ -264,42 +318,48 @@ block content
             unit: '%',
             triangle_direction: 'up',
           },
-          {
-            id: 'self_stake',
-            title: 'Self Stake Amount',
-            fields: ['self_stake', 'self_stake_ratio'],
-            summary_field: 'self_stake_amount',
-            id_native: 'summary-self-stake-amount-native',
-            id_usd: 'summary-self-stake-amount-usd',
-            unit: selectedChain.symbol || '$ATOM',
-            selected_option: 'self_stake',
-            dropdown: {
-              self_stake: { label: 'by amount', is_selected: true },
-              self_stake_ratio: { label: 'by percentage' }
-            },
-            triangle_direction: 'down',
-          },
+          //- {
+          //-   id: 'self_stake',
+          //-   title: 'Self Stake Amount',
+          //-   fields: ['self_stake', 'self_stake_ratio'],
+          //-   summary_field: 'self_stake_sum',
+          //-   id_native: 'summary-self-stake-amount-native',
+          //-   id_usd: 'summary-self-stake-amount-usd',
+          //-   unit: selectedChain.symbol || '$ATOM',
+          //-   selected_option: 'self_stake',
+          //-   dropdown: {
+          //-     self_stake: { label: 'by amount', is_selected: true },
+          //-     self_stake_ratio: { label: 'by percentage' }
+          //-   },
+          //-   triangle_direction: 'down',
+          //- },
           {
             id: 'sold',
             title: 'Total Sold Amount',
             fields: ['sold'],
+            orders: ['asc', 'desc'],
+            default_order: 'asc',
             selected_option: 'sold',
             summary_field: 'total_sold',
             id_native: 'metric-total-sold-amount-native',
             id_usd: 'metric-total-sold-amount-usd',
             unit: selectedChain.symbol || '$ATOM',
-            triangle_direction: 'down',
+            triangle_direction: 'up',
           },
         ]
-      .validators-leaderboards-all-wrapper#validators-leaderboards-all-wrapper(class=`${url == 'validators' ? '' : 'section-hidden'}`)
+      .validators-leaderboards-all-wrapper#validators-leaderboards-all-wrapper(class=`${queryValidator ? 'section-hidden' : ''}`)
         .each-section-title-content Leaderboards
         -
           const sortedValidatorsMapping = {};
+
           sortByArray.forEach(field => {
-            const sortedValidators = field.order == 'asc'
-              ? ([...validators].sort((a, b) => (a[field.sort_by] || 0) - (b[field.sort_by] || 0))).slice(0, 10)
-              : ([...validators].sort((a, b) => (b[field.sort_by] || 0) - (a[field.sort_by] || 0))).slice(0, 10);
-            sortedValidatorsMapping[field.sort_by] = sortedValidators;
+            sortedValidatorsMapping[field.sort_by] = { asc: [], desc: [] };
+
+            const sortedValidatorsAsc = ([...validators].sort((a, b) => (a[field.sort_by] || 0) - (b[field.sort_by] || 0))).slice(0, 10);
+            const sortedValidatorsDesc = ([...validators].sort((a, b) => (b[field.sort_by] || 0) - (a[field.sort_by] || 0))).slice(0, 10);
+
+            sortedValidatorsMapping[field.sort_by].asc = sortedValidatorsAsc;
+            sortedValidatorsMapping[field.sort_by].desc = sortedValidatorsDesc;
           })
         .validators-leaderboards-main-wrapper
           each leaderboard in leaderboards
@@ -308,46 +368,47 @@ block content
                 .each-leaderboard-table-type-content(type=`${leaderboard.id}`)
                   .each-leaderboard-header-title= leaderboard.title
                   .each-table-header-sort-indicators
-                    div(class=`triangle-${leaderboard.triangle_direction}`)
+                    div(class=`triangle-${leaderboard.triangle_direction}-big`)
                 if leaderboard.dropdown
                   .each-network-summary-network-graph-content-dropdown-wrapper
                     .each-network-summary-network-graph-content-dropdown-header
                       span(class='leaderboard-dropdown-option leaderboard-dropdown-title')= leaderboard.dropdown[leaderboard.selected_option].label
                       img.each-network-summary-network-graph-content-dropdown-arrow(src='/res/images/chevron_aestethic.svg' class='center')
                     .each-network-summary-network-graph-content-dropdown-content
-                      each option, key in leaderboard.dropdown 
+                      each option, key in leaderboard.dropdown
                         .each-network-summary-network-graph-content-each-dropdown(leaderboard_sort_by=key class=`leaderboard-dropdown-option ${option.is_selected ? 'dropdown-option-selected' : ''}`)= option.label
               .each-leaderboard-summary
                 .each-leaderboard-summary-data
                   .each-network-summary-stat-content= getValue(summaryData[leaderboard.summary_field], leaderboard.unit).nativeValue
                   if leaderboard.id_usd
-                    .each-network-summary-stat-footer= getValue(summaryData[leaderboard.summary_field], selectedChain.symbol).usdValue
-                .each-leaderboard-summary-percentage-change(class='percentage-change-value-content')= '' + Math.round((summaryData[leaderboard.summary_field] / summaryData[`initial_${leaderboard.summary_field}`]) * 100) + '%'
+                    .each-network-summary-stat-footer(class='leaderboard-usd-value')= getValue(summaryData[leaderboard.summary_field], selectedChain.symbol).usdValue
+                //- .each-leaderboard-summary-percentage-change(class='percentage-change-value-content')= (Math.round((summaryData[leaderboard.summary_field] / summaryData[`initial_${leaderboard.summary_field}`]) * 100)).toString().replace('Infinity', '-') + '%'
               each field in leaderboard.fields
-                .each-leaderboard-table-wrapper(id=`leaderboard-content-${field}` class=`${leaderboard.selected_option != field ? 'section-hidden' : ''}`)
-                  each validator, index in sortedValidatorsMapping[field]
-                    .each-leaderboard-table-validator-wrapper
-                      .each-leaderboard-table-validator-info-wrapper 
-                        span= index + 1
-                        img.each-leaderboard-table-validator-info-image(src=src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.png'}`)
-                        .each-leaderboard-table-validator-info-moniker= validator.moniker
-                      .each-leaderboard-table-validator-data-wrapper 
-                        if leaderboard.id == 'percentage_sold'
-                          - const scoreResult = getScoreColor(validator[`${leaderboard.id}`])
-                          .each-leaderboard-table-validator-data(class='validator-percentage-sold' style=`color: ${scoreResult.color}`) 
-                            span %#{shortNumberFormat(validator.percentage_sold)}
-                            if scoreResult.check
-                              img(src='/res/images/check_green.svg' class='center')
-                        else 
-                          .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], leaderboard.unit).nativeValue
-                        if leaderboard.id_usd 
-                          .each-leaderboard-table-validator-data= getValue(validator[`${leaderboard.id}`], 'usd').usdValue
-                        if leaderboard.id == 'self_stake'
-                          .each-leaderboard-table-validator-data(class='percentage-change-value-content')= getValue(validator['self_stake_ratio'], '%').nativeValue
-                  .each-leaderboard-more-wrapper
-                    div
-                    div
-                    div
+                each order in leaderboard.orders
+                  .each-leaderboard-table-wrapper(id=`leaderboard-content-${field}-${order}` class=`${(leaderboard.selected_option != field || leaderboard.default_order != order) ? 'section-hidden' : ''}`)
+                    each validator, index in sortedValidatorsMapping[field][order]
+                      .each-leaderboard-table-validator-wrapper(operator_address=`${validator.operator_address}`)
+                        .each-leaderboard-table-validator-info-wrapper
+                          .validator-image
+                            - const rankingFontMultipliers = [1, 0.8, 0.7]
+                            .ranking-number-content(class='center' style=`font-size: calc(var(--ranking-number-content-font-size) * (${rankingFontMultipliers[((index + 1).toString().length - 1)]}));`)
+                              span(style=`${((index + 1).toString().length) == 2 ? 'margin-left: -2px' : ''}`)= index + 1
+                            img.each-leaderboard-table-validator-info-image(src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.svg'}` style=`${!validator.temporary_image_uri ? 'border-radius: 0;' : ''}`)
+                          .each-leaderboard-table-validator-info-moniker= validator.moniker
+                        .each-leaderboard-table-validator-data-wrapper
+                          if leaderboard.id == 'percentage_sold'
+                            - const scoreResult = getScoreColor(validator[`${leaderboard.id}`])
+                            .each-leaderboard-table-validator-data(class='validator-percentage-sold' style=`color: ${scoreResult.color}`)
+                              span %#{shortNumberFormat(Math.min(Math.max(0, validator.percentage_sold), 100))}
+                              if scoreResult.check
+                                img(src='/res/images/check_green.svg' class='center')
+                          else
+                            - if (`${leaderboard.id}` == 'sold') validator[`${leaderboard.id}`] = Math.max(0, validator[`${leaderboard.id}`])
+                            .each-leaderboard-table-validator-data(class=`${field == 'self_stake_ratio' ? 'leaderboard-value-responsive-conceal' : ''}`)= getValue(validator[`${leaderboard.id}`], leaderboard.unit).nativeValue
+                          if leaderboard.id_usd
+                            .each-leaderboard-table-validator-data(class='leaderboard-usd-value')= getValue(validator[`${leaderboard.id}`], 'usd').usdValue
+                          if leaderboard.id == 'self_stake'
+                            .each-leaderboard-table-validator-data(class=`percentage-change-value-content ${field == 'self_stake' ? 'leaderboard-value-responsive-conceal' : ''}`)= getValue(validator['self_stake_ratio'], '%').nativeValue
         - const validator = queryValidator ? JSON.parse(queryValidator) : {}
       .validator-details-main-wrapper#validator-details-main-wrapper(class=`${queryValidator ? '' : 'section-hidden'}`)
         .validator-details-header-wrapper(class='body-wrapper-cell')
@@ -377,29 +438,37 @@ block content
         .validator-details-stats-wrapper
           -
             const validator_stats = [
-              { id: 'validator-stat-percentage-sold', field: 'percentage_sold', title: 'Percentage sold', usdContent: false, additional_class: 'summary-percentage-text-native', type: 'percentage', helperType: 'percentage_change' },
-              { id: 'validator-stat-self-stake', field: 'self_stake', title: 'Self Stake Amount', usdContent: true, helperType: 'rank' },
-              { id: 'validator-stat-self-stake-ratio', field: 'self_stake_ratio', title: 'Average Self Stake Ratio', usdContent: false, additional_class: 'summary-percentage-text-native', type: 'percentage', helperType: 'rank' },
-              { id: 'validator-stat-commission-rate', title: 'Commission', field: 'commission_rate', usdContent: false, helperText: 'fee from rewards', additional_class: 'summary-percentage-text-native', helperText: 'fee from rewards' }
+              { id: 'validator-stat-self-stake', field: 'self_stake', title: 'Self Stake', usdContent: true, helperType: 'rank' },
+              { id: 'validator-stat-percentage-sold', field: 'percentage_sold', title: 'Percentage sold', usdContent: false, additional_class: 'summary-percentage-text-native', helperType: 'rank', type: 'percentage' },
+              { id: 'validator-stat-commission-rate', title: 'Commission', field: 'commission_rate', usdContent: false, additional_class: 'summary-percentage-text-native', helperText: 'fee from rewards', helperType: 'text' }
             ]
-          each stat in validator_stats 
-            .each-validator-stat-wrapper(class='body-wrapper-cell')
-              .each-network-summary-stat-header-title= stat.title
+          each stat in validator_stats
+            .each-validator-stat-wrapper(class=`body-wrapper-cell each-validator-stat-wrapper-${stat.field}`)
+              .each-network-summary-stat-header-title
+                span= stat.title
+                if stat.field == 'self_stake'
+                  .each-table-popup-wrapper(class='each-table-popup-wrapper-metric')
+                    .each-table-popup-info-content(class='center')
+                      span Validator's own stake on itself
+                    .each-tooltip-info-hover
+                      img(src='/res/images/info.svg')
               .each-validator-stat-content-wrapper
                 .each-validator-stat-content
                   if stat.field == 'commission_rate'
                     .each-network-summary-stat-content(id=`${stat.id}-native` class=`${stat.id}-native ${stat.additional_class}`)= queryValidator ? formatCommission(validator[`${stat.field}`]) : ''
                   else
-                    .each-network-summary-stat-content(id=`${stat.id}-native` class=`${stat.id}-native ${stat.additional_class}`)= queryValidator ? stat.type == 'percentage' ? '%' + shortNumberFormat(validator[`${stat.field}`]) : getValue(validator[`${stat.field}`], symbol) : ''
+                    .each-network-summary-stat-content(id=`${stat.id}-native` class=`${stat.id}-native ${stat.additional_class}`)
+                      span= queryValidator ? stat.type == 'percentage' ? '%' + shortNumberFormat(Math.max(0.00, validator[`${stat.field}`])) : getValue(Math.max(0, validator[`${stat.field}`]), symbol) : ''
+                      span(class='validator-details-percentage-near-value')= queryValidator ? '%' + shortNumberFormat(validator['self_stake_ratio']) : ''
                   if stat.usdContent
-                    .each-network-summary-stat-footer(id=`${stat.id}-usd` class=`${stat.id}-usd`)= queryValidator ? getValue(validator[`${stat.field}`], 'usd') : ''
+                    .each-network-summary-stat-footer(id=`${stat.id}-usd` class=`${stat.id}-usd`)= queryValidator ? getValue(Math.max(0.00, validator[`${stat.field}`]), 'usd') : ''
                 .each-validator-stat-helper(class=`${stat.helperType == 'percentage_change' ? 'percentage-change-value-content' : ''}` id=`${stat.id}-helper`)
         .network-summary-network-graph-main-wrapper
           .network-summary-network-graph-metrics-wrapper
             .network-summary-network-graph-metrics-wrapper-title(class='each-section-title-content') Graph Metrics
             .network-summary-network-graph-metrics-content-wrapper
-              each metric in metrics 
-                .each-metric-content-wrapper(id=`validator-metric-${metric.id}` class=`${validatorGraph.dataFields.includes(metric.id) ? '' : 'section-hidden'}`)
+              each metric in metrics
+                .each-metric-content-wrapper(id=`validator-metric-${metric.id}` class=`each-metric-content-wrapper-validator-details ${validatorGraph.dataFields.includes(metric.id) ? '' : 'section-hidden'}`)
                   .each-metric-content-wrapper-header
                     .each-metric-content-wrapper-header-icon(style=`background-color: ${metric.color}`)
                     .each-metric-content-wrapper-header-title= metric.title
@@ -408,11 +477,11 @@ block content
                     .each-metric-content-wrapper-content-value-usd
                   .each-metric-content-wrapper-footer
                     span(class='percentage-change-value-content')
-          .network-summary-network-graph-content-wrapper
+          .network-summary-network-graph-content-wrapper(class='network-validator-graph-content')
             .network-summary-network-graph-content-header
               .network-summary-network-graph-content-header-main
                 .network-summary-network-graph-content-title Reward Flow Overview
-                .network-summary-network-graph-content-filters-wrapper
+                .network-summary-network-graph-content-filters-wrapper(style='display: none;')
                   each menu in summary_graph_menus
                     if menu.type == 'dropdown'
                       .each-network-summary-network-graph-content-dropdown-wrapper
@@ -420,110 +489,132 @@ block content
                           span= menu.title
                           img.each-network-summary-network-graph-content-dropdown-arrow(src='/res/images/chevron_aestethic.svg' class='center')
                         .each-network-summary-network-graph-content-dropdown-content
-                          each option in menu.options 
+                          each option in menu.options
                             .each-network-summary-network-graph-content-each-dropdown(id=`validator-graph-dropdown-option-${option.id}` class=`dropdown-option-checked ${dataFields.includes(option.id) ? '' : 'section-hidden'}`)= option.title
-              .network-summary-network-graph-content-description Shows how validators respond to changes in total capitulation and delegation in the market
+              .network-summary-network-graph-content-description Shows how validators respond to changes in total price and delegation in the market
             .network-summary-network-graph-content#validator-graph-container
               if queryValidator
                 script.
                   generateGraph(!{JSON.stringify(validator)})
-      .all-validators-main-wrapper
-        .each-section-title-content Validators
-        .table-main-wrapper
-          .table-filters
-            .validator-filter-input-wrapper
-              .validator-filter-input-content-wrapper 
-                .validator-search-icon(class='center')
-                  include ../icons/search.svg
-                input.validator-filter-input(type='text' id='validator-filter-input' placeholder='Search Validator')
-            .table-filters-subgroup 
-              .export-main-wrapper 
-                .export-wrapper-header(class='center' isOpen='false')#export-wrapper-toggle
-                  include ../icons/export.svg
-                .export-wrapper-content
-                  .export-wrapper-content-title Data Frequency
-                  -
-                    const export_choices = [
-                      { id: 'all_time', label: 'All time', range: 0, is_selected: true },
-                      { id: 'weekly', label: 'Weekly', range: 7 * 86400 * 1000 },
-                      { id: 'monthly', label: 'Monthly', range: 30 * 86400 * 1000 },
-                      { id: 'yearly', label: 'Yearly', range: 365 * 86400 * 1000 },
-                    ]
-                  - const timestampDifference = new Date(selectedDateTop).getTime() - new Date(selectedDateBottom).getTime()
-                  each export_choice in export_choices
-                    .each-export-choice(id=export_choice.id range=export_choice.range class=`${export_choice.is_selected ? 'export-choice-selected' : ''} ${(timestampDifference / export_choice.range > 50 && export_choice.range != 0) ? 'section-hidden' : ''}`)
-                      .general-choice-radio-button(class='center')
-                        .general-choice-radio-button-inner-circle(style=`${export_choice.is_selected ? 'display: unset' : ''}`)
-                      span= export_choice.label
-                  .export-action-buttons-wrapper
-                    button.export-choice-action-button(class='center export-choice-download-button')#export-choice-download-button Download
-                    button.export-choice-action-button(class='center')#export-choice-cancel-button Cancel
+      .all-validators-main-wrapper#all-validators-main-wrapper(class=`${queryValidator ? 'section-hidden' : ''}`)
+        .validator-table-header-wrapper
+          .each-section-title-content Validators
+          //- .export-main-wrapper
+            .export-wrapper-header(class='center' isOpen='false')#export-wrapper-toggle
+              include ../icons/export.pug
+            .export-wrapper-content
+              .export-wrapper-content-title Data Frequency
+              -
+                const export_choices = [
+                  { id: 'all_time', label: 'All time', range: 0, is_selected: true },
+                  { id: 'weekly', label: 'Weekly', range: 7 * 86400 * 1000 },
+                  { id: 'monthly', label: 'Monthly', range: 30 * 86400 * 1000 },
+                  { id: 'yearly', label: 'Yearly', range: 365 * 86400 * 1000 },
+                ]
+              each export_choice in export_choices
+                .each-export-choice(id=export_choice.id range=export_choice.range class=`${export_choice.is_selected ? 'export-choice-selected' : ''} ${(timestampDifference / export_choice.range > 50 && export_choice.range != 0) ? 'section-hidden' : ''}`)
+                  .general-choice-radio-button(class='center')
+                    .general-choice-radio-button-inner-circle(style=`${export_choice.is_selected ? 'display: unset' : ''}`)
+                  span= export_choice.label
+              .export-action-buttons-wrapper
+                button.export-choice-action-button(class='center export-choice-download-button')#export-choice-download-button
+                  span Download
+                button.export-choice-action-button(class='center')#export-choice-cancel-button
+                  span Cancel
+        -
+          const headers_array = [
+            {name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Total sold / Total rewards) * 100' },
+            {name: 'Avg Delegation', id: 'average_total_stake', popup_text: 'Average total stake of the validator' },
+            {name: 'Total Rewards', id: 'total_withdraw', popup_text: 'Commission + self stake rewards' },
+            {name: 'Total Sold Amount', id: 'sold', popup_text: 'Total transferred out from wallet (cummulative)' },
+            {name: 'Self Stake', id: 'self_stake', popup_text: 'Validator\'s own stake on itself'},
+          ]
+        .table-main-wrapper(data-headers-array=`${JSON.stringify(headers_array)}`)
           .validators-main-wrapper#validators-main-wrapper(sort_by='percentage_sold' order='asc')
-            -
-              const headers_array = [
-                {name: 'Delegation', id: 'total_stake'},
-                {name: 'Total Rewards', id: 'total_withdraw'},
-                {name: 'Total Sold Amount', id: 'sold', popup_text: 'Total withdraw - Self stake'},
-                {name: 'Self Stake', id: 'self_stake'},
-                {name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Withdraw - Self Stake) / Withdraw'},
-              ]
-            .validator-table-header
-              .each-table-header-wrapper(class='each-table-header-validator-info-header')
-                .each-table-header-title Validators
-              each header in headers_array
-                .each-table-header-wrapper
-                  .each-table-header-wrapper-popup-content
-                  .each-table-header-wrapper(id=`${header.id}` class=`${header.popup_text ? 'each-table-header-hover' : ''}`)
-                    .each-table-header-title
-                      if header.popup_text
-                        .each-table-popup-wrapper
-                          .each-table-popup-info-content(class='center')= header.popup_text
-                          .each-tooltip-info-hover(style='margin-bottom: -1px')
-                            img(src='/res/images/info.svg')
-                      .each-table-header-title= header.name
-                    .each-table-header-sort-indicators 
-                      .triangle-up
-                      .triangle-down
-            each validator, index in validators
-              .each-validator-wrapper(validator=validator id=`${validator.operator_address}` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}` class='operator-address')
-                .each-validator-info-wrapper
-                  .ranking-number-content= index + 1
-                  .validator-image
-                    img.validator-image-content(src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.png'}`)
-                  .validator-textual-info-wrapper 
-                    .validator-moniker 
-                      .validator-moniker-text-content 
-                        span.validator-moniker-text #{validator.moniker}
-                      if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
-                        .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
-                          img(src='/res/images/warning.svg')
-                each header in headers_array
-                  if `${header.id}` == 'percentage_sold'
-                    - const scoreResult = getScoreColor(validator.percentage_sold)
-                    .validator-each-numeric-info(class='validator-percentage-sold' style=`color: ${scoreResult.color}`)
-                      span %#{shortNumberFormat(validator.percentage_sold)}
-                      if scoreResult.check
-                        img(src='/res/images/check_green.svg' class='center')
-                  else
-                    .validator-each-numeric-info
-                      .validator-each-numeric-info-native= getValue(validator[`${header.id}`], symbol).nativeValue
-                      .validator-each-numeric-info-usd= getValue(validator[`${header.id}`], 'usd').usdValue
-      .footer-main-wrapper
-        .each-footer-column
-          .header-banner-wrapper
-            .banner-logo-wrapper(class='center')
-              img(src='/res/images/logo.svg', alt='node101' class='center')
-            .banner-title-content(class='navbar-text') VALIDATIER
-          .footer-description-text Validatier allows everyone to track the behavior of validators simultaneously.
-          .footer-email-wrapper
-            .footer-email-content hello@node101.io
-            img(src='/res/images/top_right_arrow.svg').footer-email-icon
-        .each-footer-column
-          .footer-mini-menu
-            a(href="") Dashboard
-            a(href="") Validators
-          .footer-contact-wrapper 
-            .footer-contact-label-text Please contact us if you would like to contribute.
-            .footer-contact-input-wrapper 
-              input.footer-contact-input-content(placeholder='name@gmail.com')#contact-message-input
-              .footer-contact-input-submit#contact-submit(class='center') Send
+            .validator-table-content
+              .validators-info-column
+                .validator-table-header
+                  .each-table-header-wrapper(class='each-table-header-validator-info-header')
+                    .each-table-header-title Name
+                each validator, index in validators
+                  .each-validator-wrapper(validator=validator id=`${validator.operator_address}-info` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}` class='operator-address')
+                    .each-validator-info-wrapper
+                      .validator-image
+                        - const rankingFontMultipliers = [1, 0.9, 0.7]
+                        .ranking-number-content(class='center' style=`font-size: calc(var(--ranking-number-content-font-size) * (${rankingFontMultipliers[((index + 1).toString().length - 1)]}))`)
+                          span= index + 1
+                        img.validator-image-content(src=`${validator.temporary_image_uri || '/res/images/default_validator_photo.svg'}` style=`${!validator.temporary_image_uri ? 'border-radius: 0;' : ''}`)
+                      .validator-textual-info-wrapper
+                        .validator-moniker
+                          .validator-moniker-text-content
+                            span.validator-moniker-text #{validator.moniker}
+                          //- TODO: fix dead code, never enters inside if
+                          if validator.inactivityIntervals && validator.inactivityIntervals.length > 0
+                            .validator-inactivity-display(class='center' value=`${validator.inactivityIntervals}`)
+                              img(src='/res/images/warning.svg')
+              .validators-data-column#validators-data-column
+                .validator-table-header
+                  each header in headers_array
+                    .each-table-header-wrapper
+                      .each-table-header-wrapper-popup-content
+                      .each-table-header-wrapper(id=`${header.id}` class=`${header.popup_text ? 'each-table-header-hover' : ''}`)
+                        .each-table-header-title
+                          if header.popup_text
+                            .each-table-popup-wrapper
+                              .each-table-popup-info-content(class='center')
+                                span= header.popup_text
+                              .each-tooltip-info-hover(class='each-tooltip-info-hover-table' style='margin-bottom: -1px')
+                                img(src='/res/images/info.svg')
+                          .each-table-header-title= header.name
+                        .each-table-header-sort-indicators
+                          .triangle-up(style=`${header.id == 'percentage_sold' ? 'border-bottom-color: rgb(22, 22, 22);' : ''}`)
+                          .triangle-down
+                each validator, index in validators
+                  .each-validator-wrapper(validator=validator id=`${validator.operator_address}` pubkey=`${validator.pubkey}` chain_identifier=`${validator.chain_identifier}` class='operator-address operator-address-search')
+                    each header in headers_array
+                      if `${header.id}` == 'percentage_sold'
+                        if (validator.total_withdraw == 0 && validator.sold == 0)
+                          .validator-each-numeric-info(class='validator-percentage-sold')
+                            span -
+                        else
+                          - const scoreResult = getScoreColor(validator.percentage_sold)
+                          .validator-each-numeric-info(class='validator-percentage-sold' style=`color: ${scoreResult.color}`)
+                            if validator.percentage_sold <= 100
+                              span %#{shortNumberFormat(Math.max(0, validator.percentage_sold))}
+                            else
+                              span %100.0
+                            if scoreResult.check
+                              img(src='/res/images/check_green.svg' class='center')
+                      else
+                        - if (`${header.id}` == 'sold') validator[`${header.id}`] = Math.max(0, validator[`${header.id}`])
+                        .validator-each-numeric-info
+                          .validator-each-numeric-info-native= getValue(validator[`${header.id}`], symbol).nativeValue
+                            if header.id == 'sold' && validator.total_withdraw < validator.sold
+                              .each-table-popup-wrapper(class='each-table-popup-wrapper-warning')
+                                img.validator-each-numeric-info-native-warning(src='/res/images/warning.svg' class='center')
+                                .each-table-popup-info-content(class='center')
+                                  span The amount sold exceeds the total rewards<br>because the validator also sold tokens received<br>before the queried time interval.
+                                .each-tooltip-info-hover
+                          .validator-each-numeric-info-usd= getValue(validator[`${header.id}`], 'usd').usdValue
+    .stake-cta-main-wrapper
+      .stake-cta-title STAKE WITH US TO SUPPORT OUR PUBLIC<br>CONTRIBUTIONS TO INTERCHAIN
+      a.stake-cta-button(href='https://wallet.keplr.app/chains/cosmos-hub?modal=staking&chain=cosmoshub-4&validator_address=cosmosvaloper1lrzxwu4dmy8030waevcpft7rpxjjz26cpzvumd&step_id=2' target='_blank') Stake With Us
+    .footer-main-wrapper
+      .footer-background
+        include ../icons/footer_svg.pug
+      .each-new-footer-line
+        .new-footer-line-section
+          a(href='mailto:hello@node101.io' target='_blank') hello@node101.io
+          a(href='https://node101.io' target='_blank') node101.io
+        .new-footer-line-section
+          a(href='https://x.com/node_101' target='_blank') X
+          a(href='https://github.com/node101-io' target='_blank') Github
+      .each-new-footer-banner
+        .footer-banner-logo
+          include ../icons/footer_logo_svg.pug
+        .footer-banner-title VALIDATIER
+      .each-new-footer-line
+        .new-footer-line-section
+          span Designed and developed by node101
+        .new-footer-line-section
+          span © 2025. All rights reserved

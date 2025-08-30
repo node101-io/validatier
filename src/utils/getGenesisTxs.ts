@@ -105,7 +105,7 @@ export const getGenesisTxs = async (chain_identifier: string, callback: (err: st
                   day: day,
                   height: chain.first_available_block_height,
                   chain_identifier: chain_identifier,
-                  chain_rpc_url: chain.rpc_url,
+                  chain_rpc_url: chain.rpc_urls[0],
                   active_validators_pubkeys_array: pubkeysOfActiveValidators
                 }, (err, savedActiveValidators) => {
                   if (err) return callback(err, false);

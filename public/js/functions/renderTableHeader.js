@@ -2,11 +2,11 @@
 function renderTableHeader (sort_by, order) {
   const validatorsWrapper = document.getElementById('validators-main-wrapper');
   const headersArray = [
-    { name: 'Delegation', id: 'total_stake' },
+    { name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Total sold / Total rewards) * 100'},
+    { name: 'Avg Delegation', id: 'average_total_stake' },
     { name: 'Total Rewards', id: 'total_withdraw' },
-    { name: 'Total Sold Amount', id: 'sold', popup_text: 'Total withdraw - Self stake' },
-    { name: 'Self Stake', id: 'self_stake' },
-    { name: 'Percentage Sold', id: 'percentage_sold', popup_text: '(Withdraw - Self Stake) / Withdraw '}
+    { name: 'Total Sold Amount', id: 'sold', popup_text: 'Total transferred out from wallet (cummulative)' },
+    { name: 'Self Stake', id: 'self_stake', popup_text: 'Validator\'s own stake on itself' },
   ]
   const headersRow = document.createElement('div');
   headersRow.classList.add('validator-table-header')
@@ -15,11 +15,11 @@ function renderTableHeader (sort_by, order) {
   tdValidators.classList.add('each-table-header-validator-info-header')
 
   const tdValidatorsTitle = document.createElement('div')
-  tdValidatorsTitle.textContent = 'Validators';
+  tdValidatorsTitle.textContent = 'Name';
   tdValidatorsTitle.classList.add('each-table-header-title');
 
   tdValidators.appendChild(tdValidatorsTitle);
-  
+
   headersRow.appendChild(tdValidators);
   headersArray.forEach(header => {
     const td = document.createElement('div');
@@ -34,20 +34,28 @@ function renderTableHeader (sort_by, order) {
     let popupWrapper;
 
     if (header.popup_text) {
+
+      td.classList.add('each-table-header-hover')
+
       popupWrapper = document.createElement('div');
       popupWrapper.classList.add('each-table-popup-wrapper')
-  
+
       const contentWrapper = document.createElement('div');
       contentWrapper.classList.add('each-table-popup-info-content', 'center');
-      contentWrapper.innerHTML = header.popup_text
-  
+      contentWrapper.style.marginBottom = '3px';
+      contentWrapper.style.marginRight = '2px';
+      const contentWrapperSpan = document.createElement('span');
+      contentWrapperSpan.innerHTML = header.popup_text;
+      contentWrapper.appendChild(contentWrapperSpan);
+
       const tooltipWrapper = document.createElement('div');
       tooltipWrapper.classList.add('each-tooltip-info-hover', 'center');
-  
+
       const infoIcon = document.createElement('img');
+      infoIcon.style.marginTop = '4px';
+      infoIcon.style.marginRight = '2px';
       infoIcon.src = '/res/images/info.svg';
-      infoIcon.style.marginBottom = '-5px';
-      
+
       tooltipWrapper.appendChild(infoIcon);
       popupWrapper.appendChild(contentWrapper);
       popupWrapper.appendChild(tooltipWrapper);
@@ -62,9 +70,9 @@ function renderTableHeader (sort_by, order) {
     const triangleDown = document.createElement('div');
     triangleDown.classList.add('triangle-down');
 
-    header.id == sort_by 
-      ? order == 'desc' 
-        ? triangleDown.style.borderTopColor = 'rgb(22, 22, 22)' 
+    header.id == sort_by
+      ? order == 'desc'
+        ? triangleDown.style.borderTopColor = 'rgb(22, 22, 22)'
         : triangleUp.style.borderBottomColor = 'rgb(22, 22, 22)'
       : '';
 

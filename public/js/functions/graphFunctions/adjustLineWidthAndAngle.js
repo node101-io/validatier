@@ -1,6 +1,6 @@
-function adjustLineWidthAndAngle (prevColumn, column, operatorAddress, dataFields) {
+function adjustLineWidthAndAngle (prevColumn, column, operatorAddress, dataFields, subplotGroupMapping) {
   
-  const angleHypotenuseMapping = getAngleBetweenTwoPoints(prevColumn, column, operatorAddress, dataFields);
+  const angleHypotenuseMapping = getAngleBetweenTwoPoints(prevColumn, column, operatorAddress, dataFields, subplotGroupMapping);
   
   dataFields.forEach(eachDataField => {
     const line = prevColumn.querySelector(`.${eachDataField}-graph-data-line-${operatorAddress}`);

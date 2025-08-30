@@ -1,5 +1,28 @@
 
-function addColumnEventListener (operatorAddress, dataFields, colors, currency, exchange_rate, decimals, summaryData) {
+function addColumnEventListener (operatorAddress, dataFields, colors, currency, exchange_rate, decimals, summaryData, subplotGroupMapping, averageMapping) {
+  
+  
+  const resetMetrics = () => {
+    Object.keys(averageMapping).forEach(eachDataField => {
+      const key = operatorAddress == 'summary' ? 'summary' : 'validator';
+      const value = averageMapping[eachDataField]
+      const metric = document.getElementById(`${key}-metric-${eachDataField}`);
+      const { nativeValue, usdValue } = getValueWithDecimals(value, eachDataField != 'percentage_sold' ? currency : '%', exchange_rate, decimals);
+      
+      const currentTitleContent = metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML;
+      
+      if (eachDataField == 'total_stake_sum')
+        metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = currentTitleContent.replace('Total', 'Average');
+      else if (eachDataField == 'price' && !currentTitleContent.includes('Average '))
+        metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = 'Average ' + currentTitleContent
+
+      metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + parseFloat(value).toFixed(2);
+      if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
+    })
+  }
+
+  resetMetrics();
+  
   const columnMouseHandler = (event) => {
     const visibleClassName = `visible-${operatorAddress}`;
     document.querySelectorAll(`.${visibleClassName}`).forEach(each => {
@@ -9,7 +32,12 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
         each.classList.remove('each-data-point-horizontal-label-hovered')
         each.classList.remove('each-data-indicator-vertical-line-visible')
       }
-    })
+    });
+
+    const operatorAddressM = operatorAddress.replace('\\@', '@');
+    if(!validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn || !validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn) {
+      resetMetrics();
+    }
 
     let target = event.target;
     while (target != document.body && !target.classList.contains(`column-wrapper-${operatorAddress}`)) target = target.parentNode;
@@ -26,10 +54,10 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
       eachDataPoint.classList.add('each-data-point-hovered', visibleClassName.replace('\\@', '@'));
     })
     
-    const operatorAddressM = operatorAddress.replace('\\@', '@');
-    
     columnWrapper.querySelector('.each-data-delta-vertical-line').classList.add('each-data-delta-vertical-line-visible', visibleClassName.replace('\\@', '@'));
     columnWrapper.querySelector('.each-data-indicator-vertical-line').classList.add('each-data-indicator-vertical-line-visible', visibleClassName.replace('\\@', '@'));
+
+    const showPercentageChange = document.body.getAttribute('showPercentageChange');
 
     if (!validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn || !validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn)
       dataFields.forEach(eachDataField => {
@@ -37,16 +65,25 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
         const key = operatorAddress == 'summary' ? 'summary' : 'validator';
         const metric = document.getElementById(`${key}-metric-${eachDataField}`);
 
-        metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
-        metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
+        const currentTitleContent = metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML;
+
+        if (eachDataField == 'total_stake_sum')
+          metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = currentTitleContent.replace('Average', 'Total');
+        else if (eachDataField == 'price')
+          metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = currentTitleContent.replace('Average', '');
+  
+        metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + parseFloat(columnWrapper.getAttribute(eachDataField)).toFixed(2);
+        if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
         
-        metric.querySelector('.percentage-change-value-content').innerHTML = '';
-        const arrow = document.createElement('img');
-        arrow.src = '/res/images/pretty_arrow.svg';
-        metric.querySelector('.percentage-change-value-content').appendChild(arrow);
-        const text = document.createElement('span');
-        text.innerHTML = Math.round((columnWrapper.getAttribute(eachDataField) / summaryData[`initial_${eachDataField}`]) * 100) + '%';
-        metric.querySelector('.percentage-change-value-content').appendChild(text);
+        // if(!showPercentageChange && eachDataField == 'total_withdraw_sum') return;
+
+        // metric.querySelector('.percentage-change-value-content').innerHTML = '';
+        // const arrow = document.createElement('img');
+        // arrow.src = '/res/images/pretty_arrow.svg';
+        // metric.querySelector('.percentage-change-value-content').appendChild(arrow);
+        // const text = document.createElement('span');
+        // text.innerHTML = (Math.round((columnWrapper.getAttribute(eachDataField) / summaryData[`initial_${eachDataField}`]) * 100) + '%').toString().replace('Infinity', '-');
+        // metric.querySelector('.percentage-change-value-content').appendChild(text);
       });
     
     if (!validatorListenerVariablesMapping[operatorAddressM].isSelectingRange) return;
@@ -82,7 +119,10 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
           })
 
           dataFields.forEach(eachDataField => {
-            bottomMapping[eachDataField] = `calc(((${current.nextSibling.getAttribute(eachDataField)} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+            const groupId = subplotGroupMapping ? subplotGroupMapping[eachDataField] : 0;
+            const addOn = subplotGroupMapping ? `-${eachDataField != 'price' ? groupId : '0'}` : '';
+            const numberOfGroups = subplotGroupMapping ? subplotGroupMapping['number_of_groups'] : 1;
+            bottomMapping[eachDataField] = `calc(${(100 / numberOfGroups) * groupId}% + ((${current.nextSibling.getAttribute(eachDataField)} - var(--min-value-${operatorAddress}${addOn})) / (var(--max-value-${operatorAddress}${addOn}) - var(--min-value-${operatorAddress}${addOn}))) * ${100 / numberOfGroups}%)`;
           })
         } else {
           validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft = false;
@@ -102,11 +142,14 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
           })
 
           dataFields.forEach(eachDataField => {
-            bottomMapping[eachDataField] = `calc(((${current.getAttribute(eachDataField)} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+            const groupId = subplotGroupMapping ? subplotGroupMapping[eachDataField] : 0;
+            const addOn = subplotGroupMapping ? `-${eachDataField != 'price' ? groupId : '0'}` : '';
+            const numberOfGroups = subplotGroupMapping ? subplotGroupMapping['number_of_groups'] : 1;
+            bottomMapping[eachDataField] = `calc(${(100 / numberOfGroups) * groupId}% + ((${current.getAttribute(eachDataField)} - var(--min-value-${operatorAddress}${addOn})) / (var(--max-value-${operatorAddress}${addOn}) - var(--min-value-${operatorAddress}${addOn}))) * ${100 / numberOfGroups}%)`;
           })
         }
         
-        const angleHypotenuseMapping = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields);
+        const angleHypotenuseMapping = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields, subplotGroupMapping);
 
         const dataMapping = {};
         dataFields.forEach(eachDataField => {
@@ -118,7 +161,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
 
         current.querySelectorAll('.each-data-line').forEach((eachLine, i) => {
           const dataField = dataFields[i];
-          eachLine.style.zIndex = `${(sortedKeys.indexOf(dataField) + 1) * 10}`;
+          eachLine.style.zIndex = (dataFields.length - (i + 1)) * 10;
         })
 
         current.querySelectorAll('.graph-range-paint-bar').forEach((eachPaintBar, i) => {
@@ -131,7 +174,7 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
           eachPaintBar.style.backgroundColor = color;
           eachPaintBar.style.borderRight = `1px solid ${color}`;
           
-          eachPaintBar.style.zIndex = `${(sortedKeys.indexOf(dataField) + 1) * 10}`;
+          eachPaintBar.style.zIndex = (dataFields.length - (i + 1)) * 10;
         })
 
         validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn = current;
@@ -140,15 +183,18 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
       }
     }
 
-    const angleHypotenuseMappingAnglesOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields);
+    const angleHypotenuseMappingAnglesOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields, subplotGroupMapping);
     
     if (target.getAttribute('timestamp') < validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp')) {
       validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft = true;
-      const angleHypotenuseMappingHypotenuseOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields);
+      const angleHypotenuseMappingHypotenuseOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields, subplotGroupMapping);
       
       const bottomMapping = {}
       dataFields.forEach(eachDataField => {
-        bottomMapping[eachDataField] = `calc(((${columnWrapper.nextSibling.getAttribute(eachDataField)} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+        const groupId = subplotGroupMapping ? subplotGroupMapping[eachDataField] : 0;
+        const addOn = subplotGroupMapping ? `-${eachDataField != 'price' ? groupId : '0'}` : '';
+        const numberOfGroups = subplotGroupMapping ? subplotGroupMapping['number_of_groups'] : 1;
+        bottomMapping[eachDataField] = `calc(${(100 / numberOfGroups) * groupId}% + ((${columnWrapper.nextSibling.getAttribute(eachDataField)} - var(--min-value-${operatorAddress}${addOn})) / (var(--max-value-${operatorAddress}${addOn}) - var(--min-value-${operatorAddress}${addOn}))) * ${100 / numberOfGroups}%)`;
       });
 
       columnWrapper.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
@@ -164,11 +210,14 @@ function addColumnEventListener (operatorAddress, dataFields, colors, currency, 
     } else {
       validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft = false;
       
-      const angleHypotenuseMappingHypotenuseOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields);
+      const angleHypotenuseMappingHypotenuseOnly = getAngleBetweenTwoPoints(current, current.nextSibling, operatorAddress, dataFields, subplotGroupMapping);
       
       const bottomMapping = {}
       dataFields.forEach(eachDataField => {
-        bottomMapping[eachDataField] = `calc(((${columnWrapper.getAttribute(eachDataField)} - var(--min-value-${operatorAddress})) / (var(--max-value-${operatorAddress}) - var(--min-value-${operatorAddress}))) * 100%)`;
+        const groupId = subplotGroupMapping ? subplotGroupMapping[eachDataField] : 0;
+        const addOn = subplotGroupMapping ? `-${eachDataField != 'price' ? groupId : '0'}` : '';
+        const numberOfGroups = subplotGroupMapping ? subplotGroupMapping['number_of_groups'] : 1;
+        bottomMapping[eachDataField] = `calc(${(100 / numberOfGroups) * groupId}% + ((${columnWrapper.getAttribute(eachDataField)} - var(--min-value-${operatorAddress}${addOn})) / (var(--max-value-${operatorAddress}${addOn}) - var(--min-value-${operatorAddress}${addOn}))) * ${100 / numberOfGroups}%)`;
       });
       
       columnWrapper.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {

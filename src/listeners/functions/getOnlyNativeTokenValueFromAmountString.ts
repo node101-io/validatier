@@ -1,5 +1,8 @@
 
-export const getOnlyNativeTokenValueFromCommissionOrRewardEvent = function (value: string, denom: string) {
+export const getOnlyNativeTokenValueFromAmountString = function (value: string, denom: string) {
+
+  if (parseInt(value).toString() == value)
+    return value;
 
   const splitString: string[] = value.split(',');
 

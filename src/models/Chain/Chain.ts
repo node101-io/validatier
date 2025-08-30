@@ -9,7 +9,7 @@ export interface ChainInterface {
   symbol: string;
   decimals: number;
   denom: string;
-  rpc_url: string;
+  rpc_urls: string[];
   first_available_block_height: number;
   last_available_block_height: number;
   first_available_block_time: Date;
@@ -22,9 +22,9 @@ export interface ChainInterface {
   is_genesis_saved: boolean;
 }
 
-interface ChainModel extends Model<ChainInterface> {
+export interface ChainModel extends Model<ChainInterface> {
   saveChain: (
-    body: {  
+    body: {
       name: string;
       pretty_name: string;
       chain_id: string;
@@ -33,12 +33,12 @@ interface ChainModel extends Model<ChainInterface> {
       decimals: number;
       denom: string;
       bech32_prefix: string;
-      rpc_url: string;
+      rpc_urls: string[];
       first_available_block_height: number;
       last_available_block_height: number;
       first_available_block_time: Date;
       usd_exchange_rate: number
-    }, 
+    },
     callback: (
       err: string | null,
       newChain: ChainInterface | null
@@ -117,18 +117,18 @@ const chainSchema = new Schema<ChainInterface>({
     min: 0,
     max: 20
   },
-  rpc_url: {
-    type: String,
+  rpc_urls: {
+    type: [String],
     required: true,
     trim: true
   },
   first_available_block_height: {
     type: Number,
-    required: true 
+    required: true
   },
   last_available_block_height: {
     type: Number,
-    required: true 
+    required: true
   },
   first_available_block_time: {
     type: Date,
@@ -166,8 +166,9 @@ const chainSchema = new Schema<ChainInterface>({
 });
 
 chainSchema.statics.getAllChains = function (callback: Parameters<ChainModel['getAllChains']>[0]) {
+  const skipChainIdentifiers = ['osmosis', 'celestia', 'lava'];
   Chain
-    .find({})
+    .find({ name: { $nin: skipChainIdentifiers } })
     .then(chains => {
       return callback(null, chains);
     })
@@ -175,16 +176,16 @@ chainSchema.statics.getAllChains = function (callback: Parameters<ChainModel['ge
 }
 
 chainSchema.statics.saveChain = function (
-  body: Parameters<ChainModel['saveChain']>[0], 
+  body: Parameters<ChainModel['saveChain']>[0],
   callback: Parameters<ChainModel['saveChain']>[1]
 ) {
 
-  const { name, pretty_name, chain_id, image, symbol, decimals, denom, bech32_prefix, rpc_url, first_available_block_height, last_available_block_height, first_available_block_time, usd_exchange_rate } = body;
+  const { name, pretty_name, chain_id, image, symbol, decimals, denom, bech32_prefix, rpc_urls, first_available_block_height, last_available_block_height, first_available_block_time, usd_exchange_rate } = body;
 
   Chain
     .findOneAndUpdate(
       { chain_id: chain_id },
-      { 
+      {
         last_available_block_height: last_available_block_height,
         usd_exchange_rate: usd_exchange_rate
       }
@@ -193,8 +194,14 @@ chainSchema.statics.saveChain = function (
 
       if (oldChain) return callback(null, oldChain);
 
+      const lastUpdatedBlockTime = new Date(
+        new Date(first_available_block_time).getFullYear(),
+        new Date(first_available_block_time).getMonth(),
+        new Date(first_available_block_time).getDate(),
+      ).getTime();
+
       Chain
-        .create({ 
+        .create({
           name: name,
           pretty_name: pretty_name,
           chain_id: chain_id,
@@ -203,14 +210,14 @@ chainSchema.statics.saveChain = function (
           decimals: decimals,
           denom: denom,
           bech32_prefix: bech32_prefix,
-          rpc_url: rpc_url,
+          rpc_urls: rpc_urls,
           first_available_block_height: first_available_block_height,
           last_available_block_height: last_available_block_height,
           first_available_block_time: first_available_block_time,
           usd_exchange_rate: usd_exchange_rate,
           last_visited_block: first_available_block_height,
           last_visited_block_time: first_available_block_time,
-          active_set_last_updated_block_time: first_available_block_time,
+          active_set_last_updated_block_time: lastUpdatedBlockTime,
           active_set_last_updated_block_height: first_available_block_height
         })
         .then((newChain: ChainInterface) => {
@@ -259,11 +266,18 @@ chainSchema.statics.updateTimeOfLastActiveSetSave = function (
   callback: Parameters<ChainModel['updateTimeOfLastActiveSetSave']>[1],
 ) {
   const { chain_identifier, time, height } = body;
+
+  const lastUpdatedBlockTime = new Date(
+    new Date(time).getFullYear(),
+    new Date(time).getMonth(),
+    new Date(time).getDate(),
+  ).getTime();
+
   Chain
     .findOneAndUpdate(
       { name: chain_identifier },
       {
-        active_set_last_updated_block_time: time,
+        active_set_last_updated_block_time: lastUpdatedBlockTime,
         active_set_last_updated_block_height: height
       }
     )

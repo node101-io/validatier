@@ -8,16 +8,13 @@ import mongoose from 'mongoose';
 import path from 'path';
 // import { rateLimit } from 'express-rate-limit';
 
+import chainRouter from './routes/chainRouter.js';
 import indexRouter from './routes/indexRouter.js';
 import validatorRouter from './routes/validatorRouter.js';
+
 import { startFetchingData } from './utils/startFetchingData.js';
-import { Job_UpdateValidatorsImageUri } from './cron/jobs/Job_UpdateValidatorsImageUri.js';
 import { initDB } from './utils/levelDb.js';
-import { Job_SaveChains } from './cron/jobs/Job_SaveChains.js';
-import { getGenesisTxs } from './utils/getGenesisTxs.js';
 import { startCronJobs } from './cron/startCronJobs.js';
-import { Job_SaveCacheSummaryGraphs } from './cron/jobs/Job_SaveCacheSummaryGraphs.js';
-import CompositeEventBlock from './models/CompositeEventBlock/CompositeEventBlock.js';
 
 const app: Express = express();
 const PORT: number = 3000;
@@ -45,9 +42,9 @@ mongoose
   .catch(err => console.error('MongoDB connection error:', err));
 
 initDB((err) => {
-    if (err) return console.log(err);
-    console.log('Connected to LevelDB');
-  })
+  if (err) return console.log(err);
+  console.log('Connected to LevelDB');
+})
 
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -57,6 +54,14 @@ app.use(cookieParser());
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
 
 app.use('/', indexRouter);
+app.use('/chain', chainRouter);
 app.use('/validator', validatorRouter);
 
-app.listen(PORT, () => console.log(`Server running at PORT ${PORT}`));
+app.listen(PORT, () => console.log(`Server running at http://127.0.0.1:${PORT}`));
+
+// testDataFetch();
+
+if (process.env.NODE_ENV !== 'development') {
+  startFetchingData();
+  startCronJobs();
+}

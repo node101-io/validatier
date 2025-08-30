@@ -4,7 +4,6 @@ function getDateRange(currentDate) {
   const currentYear = currentDateObj.getFullYear();
   const currentMonth = currentDateObj.getMonth();
   const currentDay = currentDateObj.getDate();
-  const currentDayOfWeek = currentDateObj.getDay();
 
   const formatDate = (date) => date.toISOString().split('T')[0];
 
@@ -23,13 +22,9 @@ function getDateRange(currentDate) {
       bottom: formatDate(new Date(currentYear, currentMonth, currentDay - 180)),
       top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
     },
-    this_year: {
-      bottom: formatDate(new Date(currentYear, 0, 1)),
-      top: formatDate(new Date(currentYear, 11, 31))
+    last_365_days: {
+      bottom: formatDate(new Date(currentYear, currentMonth, currentDay - 365)),
+      top: formatDate(new Date(currentYear, currentMonth, currentDay - 1))
     },
-    last_calendar_year: {
-      bottom: formatDate(new Date(currentYear - 1, 0, 1)),
-      top: formatDate(new Date(currentYear - 1, 11, 31))
-    }
   };
 }

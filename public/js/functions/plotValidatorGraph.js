@@ -1,6 +1,36 @@
 
+function deltaValueInRangeSelection (eachDataField, column1, column2, direction, type) {
+  if (type != 'average') {
+    const value_1 = column1.getAttribute(eachDataField);
+    const value_2 = column2.getAttribute(eachDataField);
+    const deltaValue = !direction 
+      ? value_1 - value_2
+      : value_2 - value_1;
+    
+    return deltaValue;
+  } else {
+    const value_1 = parseFloat(column1.getAttribute(eachDataField));
+    const value_1_prefix_sum = parseFloat(column1.getAttribute(`${eachDataField}_prefix_sum`));
+    const value_1_index = parseInt(column1.getAttribute('index'));
+
+    const value_2 = parseFloat(column2.getAttribute(eachDataField));
+    const value_2_prefix_sum = parseFloat(column2.getAttribute(`${eachDataField}_prefix_sum`));
+    const value_2_index = parseInt(column2.getAttribute('index'));
+
+    const numberOfColumns = Math.abs(value_2_index - value_1_index) + 1;
+
+    const deltaValue = !direction
+      ? ((value_1_prefix_sum - value_2_prefix_sum) + value_2) / numberOfColumns
+      : ((value_2_prefix_sum - value_1_prefix_sum) + value_1) / numberOfColumns;
+
+    return deltaValue;
+  }
+}
+
 function plotValidatorGraph(params) {
   const { type, operatorAddress, decimals, usd_exchange_rate, symbol, dataFields, graphContainer, summaryData } = params;
+  
+  const priceGraphData = JSON.parse(document.body.getAttribute('priceGraphData'));
 
   if (document.getElementById(`validator-graph-wrapper-${operatorAddress}`)) document.getElementById(`validator-graph-wrapper-${operatorAddress}`).remove();
   
@@ -19,35 +49,57 @@ function plotValidatorGraph(params) {
 
     if (!validatorGraphEventListenersMapping[operatorAddress]) validatorGraphEventListenersMapping[operatorAddress] = [];
     else validatorGraphEventListenersMapping[operatorAddress].forEach(eachEventHandler => eachEventHandler.element.removeEventListener(eachEventHandler.event, eachEventHandler.handler));  
-  
-    dataFields.forEach(eachDataField => {
-      const key = operatorAddress == 'summary' ? 'summary' : 'validator';
-      const metric = document.getElementById(`${key}-metric-${eachDataField}`);
+
+    // dataFields.forEach(eachDataField => {
+    //   const key = operatorAddress == 'summary' ? 'summary' : 'validator';
+    //   const metric = document.getElementById(`${key}-metric-${eachDataField}`);
       
-      const dropdownOptionId = `${key}-graph-dropdown-option-${eachDataField}`;
-      const dropdownOption = document.getElementById(dropdownOptionId);
+    //   const dropdownOptionId = `${key}-graph-dropdown-option-${eachDataField}`;
+    //   const dropdownOption = document.getElementById(dropdownOptionId);
 
-      document.addEventListener('click', (event) => {
-        let target = event.target;
-        while (target != document.body && ![metric.id, dropdownOption.id].includes(target.id)) target = target.parentNode;
-        if (![metric.id, dropdownOption.id].includes(target.id)) return;
+      // const visibilityHandler = (event) => {
+      //   let target = event.target;
+      //   while (target != document.body && ![metric.id, dropdownOption.id].includes(target.id)) target = target.parentNode;
+      //   if (![metric.id, dropdownOption.id].includes(target.id)) return;
+      //   console.log(metric.classList.contains('each-metric-content-wrapper-faded'))
 
-        if (metric.classList.contains('each-metric-content-wrapper-faded')) {
-          document.querySelectorAll(`.${eachDataField}-graph-data-line-${operatorAddress}`).forEach(eachElement => {
-            eachElement.style.opacity = '1';
-          })
-          dropdownOption.classList.add('dropdown-option-checked');
-          metric.classList.remove('each-metric-content-wrapper-faded');
-        }
-        else {
-          document.querySelectorAll(`.${eachDataField}-graph-data-line-${operatorAddress}`).forEach(eachElement => {
-            eachElement.style.opacity = '0.2';
-          })
-          dropdownOption.classList.remove('dropdown-option-checked');
-          metric.classList.add('each-metric-content-wrapper-faded');
-        }
-      })
-    })
+      //   if (metric.classList.contains('each-metric-content-wrapper-faded')) {
+      //     document.querySelectorAll(`.${eachDataField}-graph-data-line-${operatorAddress}`).forEach(eachElement => {
+      //       eachElement.style.opacity = '1';
+      //     })
+
+      //     document.querySelectorAll(`.${eachDataField}-graph-data-point-${operatorAddress}`).forEach(eachElement => {
+      //       eachElement.style.opacity = '0';
+      //     })
+
+      //     document.querySelectorAll(`.${eachDataField}-graph-data-paint-bar-${operatorAddress}`).forEach(eachElement => {
+      //       eachElement.style.opacity = '0.1';
+      //     })
+
+      //     dropdownOption.classList.add('dropdown-option-checked');
+      //     metric.classList.remove('each-metric-content-wrapper-faded');
+      //   }
+      //   else {
+      //     document.querySelectorAll(`.${eachDataField}-graph-data-line-${operatorAddress}`).forEach(eachElement => {
+      //       eachElement.style.opacity = '0.2';
+      //     })
+
+      //     document.querySelectorAll(`.${eachDataField}-graph-data-point-${operatorAddress}`).forEach(eachElement => {
+      //       eachElement.style.opacity = '0';
+      //     })
+
+      //     document.querySelectorAll(`.${eachDataField}-graph-data-paint-bar-${operatorAddress}`).forEach(eachElement => {
+      //       eachElement.style.opacity = '0';
+      //     })
+
+      //     dropdownOption.classList.remove('dropdown-option-checked');
+      //     metric.classList.add('each-metric-content-wrapper-faded');
+      //   }
+      // }
+
+      // document.addEventListener('click', visibilityHandler);
+      // validatorGraphEventListenersMapping[operatorAddress].push({ event: 'click', handler: visibilityHandler, element: document });  
+    // })
   }
 
   const graphMouseDownHandler = (event) => {
@@ -87,11 +139,15 @@ function plotValidatorGraph(params) {
     } else {
       const deltaMapping = {}
       dataFields.forEach(eachDataField => {
-        const value_1 = validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute(eachDataField);
-        const value_2 = validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute(eachDataField);
-        const deltaValue = !validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft 
-          ? value_1 - value_2
-          : value_2 - value_1;
+         
+        const type = !['total_stake_sum', 'price'].includes(eachDataField) ? 'difference' : 'average';
+        const deltaValue = deltaValueInRangeSelection(
+          eachDataField,
+          validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn,
+          validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn,
+          validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft,
+          type
+        );  
 
         deltaMapping[eachDataField] = deltaValue;
 
@@ -99,16 +155,24 @@ function plotValidatorGraph(params) {
         const key = operatorAddress == 'summary' ? 'summary' : 'validator';
         const metric = document.getElementById(`${key}-metric-${eachDataField}`);
 
-        metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = nativeValue;
-        metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
+        const currentTitleContent = metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML;
+    
+        if (eachDataField == 'total_stake_sum')
+          metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = currentTitleContent.replace('Total', 'Average');
+        else if (eachDataField == 'price' && !currentTitleContent.includes('Average '))
+          metric.querySelector('.each-metric-content-wrapper-header-title').innerHTML = 'Average ' + currentTitleContent
+
+        metric.querySelector('.each-metric-content-wrapper-content-value-native').innerHTML = eachDataField != 'price' ? nativeValue : '$' + parseFloat(deltaMapping[eachDataField]).toFixed(2);
+        if (eachDataField != 'price') metric.querySelector('.each-metric-content-wrapper-content-value-usd').innerHTML = usdValue;
       
-        metric.querySelector('.percentage-change-value-content').innerHTML = '';
-        const arrow = document.createElement('img');
-        arrow.src = '/res/images/pretty_arrow.svg';
-        metric.querySelector('.percentage-change-value-content').appendChild(arrow);
-        const text = document.createElement('span');
-        text.innerHTML = Math.round((deltaValue / (summaryData[`initial_${eachDataField}`] + Math.min(value_1, value_2))) * 100) + '%';
-        metric.querySelector('.percentage-change-value-content').appendChild(text);
+        // metric.querySelector('.percentage-change-value-content').innerHTML = '';
+        // const arrow = document.createElement('img');
+        // arrow.src = '/res/images/pretty_arrow.svg';
+        // metric.querySelector('.percentage-change-value-content').appendChild(arrow);
+        // const text = document.createElement('span');
+        // text.innerHTML = (Math.round((deltaValue / (summaryData[`initial_${eachDataField}`] + Math.min(value_1, value_2))) * 100) + '%').toString().replace('Infinity', '-');
+        // if (eachDataField == 'price') text.innerHTML = Math.round((deltaValue / (priceGraphData[priceGraphData.length - 1] + Math.min(value_1, value_2))) * 100) + '%';
+        // metric.querySelector('.percentage-change-value-content').appendChild(text);
       })
 
       const initialTimestamp = !validatorListenerVariablesMapping[operatorAddressM].isSelectionDirectionToLeft ? validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.getAttribute('timestamp') : validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.getAttribute('timestamp');
@@ -120,7 +184,7 @@ function plotValidatorGraph(params) {
           eachPaintBar.style.borderRight = `none`;
         });
 
-        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.nextSibling.querySelector('.each-data-indicator-vertical-line').classList.add('each-data-indicator-vertical-line-visible', 'range-edges-indicator', `range-edge-${operatorAddressM}`);
+        // validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.nextSibling.querySelector('.each-data-indicator-vertical-line').classList.add('each-data-indicator-vertical-line-visible', 'range-edges-indicator', `range-edge-${operatorAddressM}`);
       } else {
         validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.querySelectorAll('.graph-range-paint-bar').forEach(eachPaintBar => {
           eachPaintBar.style.width = '0px';
@@ -132,10 +196,10 @@ function plotValidatorGraph(params) {
           eachPaintBar.style.borderRight = `none`;
         });
 
-        validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.querySelector('.each-data-indicator-vertical-line').classList.add('each-data-indicator-vertical-line-visible', 'range-edges-indicator', `range-edge-${operatorAddressM}`);
+        // validatorListenerVariablesMapping[operatorAddressM].rangeFinalColumn.querySelector('.each-data-indicator-vertical-line').classList.add('each-data-indicator-vertical-line-visible', 'range-edges-indicator', `range-edge-${operatorAddressM}`);
       }
 
-      validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.querySelector('each-data-indicator-vertical-line-visible', 'range-edges-indicator', `range-edge-${operatorAddressM}`);      
+      // validatorListenerVariablesMapping[operatorAddressM].rangeInitialColumn.querySelector('each-data-indicator-vertical-line-visible', 'range-edges-indicator', `range-edge-${operatorAddressM}`);      
     }
   }
 

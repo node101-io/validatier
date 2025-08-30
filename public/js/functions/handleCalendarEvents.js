@@ -15,17 +15,29 @@ function removeAllEventListeners(eventListeners) {
 }
 
 function updateDateInputs () {
-
-  if (selectedDateBottom && selectedDateTop) document.getElementById('apply').disabled = false;
-  else document.getElementById('apply').disabled = true;
-
   document.getElementById('header-range-bottom-block').innerHTML = new Date(selectedDateBottom).toLocaleDateString('en-US')
   document.getElementById('periodic-query-bottom-timestamp').value = selectedDateBottom;
   document.getElementById('header-range-top-block').innerHTML = selectedDateTop ? new Date(selectedDateTop).toLocaleDateString('en-GB') : 'pending'
   document.getElementById('periodic-query-top-timestamp').value = selectedDateTop;
+
+  if (selectedDateBottom && selectedDateTop) {
+    const loadingWrapper = document.createElement('div');
+    loadingWrapper.classList.add('date-picker-open-loading-wrapper');
+
+    const loadingSpan = document.createElement('div');
+    loadingSpan.innerHTML = 'Loading';
+
+    loadingWrapper.appendChild(loadingSpan);
+    loadingWrapper.appendChild(createSpinner(10));
+
+    document.getElementById('picker-main-wrapper').appendChild(loadingWrapper);
+
+    window.location.reload();
+  }
 }
 
 function generateMonthContent (currentYearValue, currentMonthValue, startDay) {
+  const currentChainFirstAvailableTime = document.getElementById('network-switch-header').getAttribute('current_chain_first_available_time');
   document.getElementById('month-wrapper').innerHTML = '';
   document.getElementById('current-month-and-year-display').innerHTML = new Date(currentYearValue, currentMonthValue - 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
 
@@ -37,17 +49,25 @@ function generateMonthContent (currentYearValue, currentMonthValue, startDay) {
       const previousMonth = getMonthInfo(currentYearValue, currentMonthValue - 1);
       while (weekCount < eachDay.dayIndex) {
         const prevDateToBePushed = previousMonth.days[previousMonth.days.length - (eachDay.dayIndex - weekCount)];
-  
+
         const date = document.createElement('div');
         date.classList.add('date');
         date.style.color = '#888';
         date.innerHTML = prevDateToBePushed.date;
 
+        if (
+          new Date(currentYearValue, currentMonthValue - 1, eachDay.date).getTime() > new Date().getTime() ||
+          new Date(currentChainFirstAvailableTime).getTime() > new Date(currentYearValue, currentMonthValue - 1, eachDay.date).getTime()
+        ) {
+          date.style.pointerEvents = 'none';
+          date.style.cursor = 'var(--pointer-default-dark)';
+        }
+
         const dayToBeUsedAsDayInTheId = prevDateToBePushed.date.toString().length == 1 ? '0' + (prevDateToBePushed.date).toString() : prevDateToBePushed.date;
         const monthToBeUsedInTheId = (currentMonthValue - 1).toString().length == 1 ? '0' + (currentMonthValue - 1).toString() : currentMonthValue - 1;
-        
+
         date.setAttribute('date', `${currentYearValue}-${monthToBeUsedInTheId}-${dayToBeUsedAsDayInTheId}`);
-  
+
         document.getElementById('month-wrapper').appendChild(date);
         weekCount++;
       }
@@ -56,12 +76,20 @@ function generateMonthContent (currentYearValue, currentMonthValue, startDay) {
     const date = document.createElement('div');
     date.classList.add('date');
     date.innerHTML = eachDay.date;
+    if (
+      new Date(currentYearValue, currentMonthValue - 1, eachDay.date).getTime() > new Date().getTime() ||
+      new Date(currentChainFirstAvailableTime).getTime() > new Date(currentYearValue, currentMonthValue - 1, eachDay.date).getTime()
+    ) {
+      date.style.color = '#888';
+      date.style.pointerEvents = 'none';
+      date.style.cursor = 'var(--pointer-default-dark)';
+    }
 
     const dayToBeUsedAsDayInTheId = eachDay.date.toString().length == 1 ? '0' + (eachDay.date).toString() : eachDay.date;
     const monthToBeUsedInTheId = (currentMonthValue).toString().length == 1 ? '0' + (currentMonthValue).toString() : currentMonthValue;
-    
+
     date.setAttribute('date', `${currentYearValue}-${monthToBeUsedInTheId}-${dayToBeUsedAsDayInTheId}`);
-    
+
     document.getElementById('month-wrapper').appendChild(date);
 
     if (i == currentMonth.days.length - 1) {
@@ -69,17 +97,25 @@ function generateMonthContent (currentYearValue, currentMonthValue, startDay) {
       const nextMonth = getMonthInfo(currentYearValue, currentMonthValue + 1);
       while (weekCount < (6 - eachDay.dayIndex)) {
         const nextDateToBePushed = nextMonth.days[weekCount];
-  
+
         const date = document.createElement('div');
         date.classList.add('date');
         date.style.color = '#888';
         date.innerHTML = nextDateToBePushed.date;
-        
+
+        if (
+          new Date(currentYearValue, currentMonthValue - 1, eachDay.date).getTime() > new Date().getTime() ||
+          new Date(currentChainFirstAvailableTime).getTime() > new Date(currentYearValue, currentMonthValue - 1, eachDay.date).getTime()
+        ) {
+          date.style.pointerEvents = 'none';
+          date.style.cursor = 'var(--pointer-default-dark)';
+        }
+
         const dayToBeUsedAsDayInTheId = nextDateToBePushed.date.toString().length == 1 ? '0' + (nextDateToBePushed.date).toString() : nextDateToBePushed.date;
         const monthToBeUsedInTheId = (currentMonthValue + 1).toString().length == 1 ? '0' + (currentMonthValue + 1).toString() : currentMonthValue + 1;
-        
+
         date.setAttribute('date', `${currentYearValue}-${monthToBeUsedInTheId}-${dayToBeUsedAsDayInTheId}`);
-  
+
         document.getElementById('month-wrapper').appendChild(date);
         weekCount++;
       }
@@ -117,9 +153,9 @@ function getMonthInfo(year, month, startDay = 'monday') {
 
   const adjustDayIndex = (dayIndex) => {
     if (startDay === 'monday') {
-      return (dayIndex === 0) ? 6 : dayIndex - 1; 
+      return (dayIndex === 0) ? 6 : dayIndex - 1;
     }
-    return dayIndex; 
+    return dayIndex;
   };
 
   for (let day = 1; day <= lastDay.getDate(); day++) {
@@ -145,24 +181,27 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
   monthWrapper.innerHTML = '';
 
   const clickEventListener = (event) => {
+
     if (event.target.classList.contains('selected-range') || event.target.parentNode.classList.contains('selected-range') || event.target.parentNode.parentNode.classList.contains('selected-range')) {
-      
+
       let target = event.target;
       while (!target.classList.contains('selected-range')) target = target.parentNode;
 
-      if (target.nextSibling.style.opacity == 0) {
-        target.nextSibling.style.transform = 'perspective(1000px) rotateX(0deg)';
-        target.nextSibling.style.opacity = 1;
-  
+      if (!target.classList.contains('selected-range-open')) {
+        target.classList.add('selected-range-open');
+        target.parentNode.classList.add('date-picker-open');
+        target.nextSibling.classList.add('picker-main-wrapper-open');
+
         target.children[target.children.length - 1].style.transform = 'rotateX(180deg) translateY(5px)';
       } else {
-        target.nextSibling.style.transform = 'perspective(1000px) rotateX(-90deg)';
-        target.nextSibling.style.opacity = 0;
-  
+        target.classList.remove('selected-range-open')
+        target.parentNode.classList.remove('date-picker-open');
+        target.nextSibling.classList.remove('picker-main-wrapper-open');
+
         target.children[target.children.length - 1].style.transform = 'rotateX(0deg)';
       }
 
-    } else if (event.target.classList.contains('left-wrapper-each-choice') && !event.target.classList.contains('selected')) { 
+    } else if (event.target.classList.contains('left-wrapper-each-choice') && !event.target.classList.contains('selected')) {
       event.target.parentNode.childNodes.forEach(eachLeftWrapperChoice => {
         eachLeftWrapperChoice.classList.remove('selected');
       })
@@ -171,7 +210,7 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
 
       selectedDateBottom = getDateRange(new Date().toISOString().split('T')[0])[event.target.id].bottom;
       selectedDateTop = getDateRange(new Date().toISOString().split('T')[0])[event.target.id].top;
-      
+
       setCookie('specificRange', event.target.id, 7);
       setCookie('specificRangeName', event.target.innerHTML, 7);
       setCookie('selectedDateBottom', selectedDateBottom, 7);
@@ -181,47 +220,48 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
       paintBlocksInBetween();
       updateDateInputs();
     } else if (event.target.classList.contains('date')) {
+      // if ((new Date(event.target.getAttribute('date')).getTime()) > (new Date().getTime())) return;
 
-      document.querySelectorAll('.left-wrapper-each-choice').forEach(eachLeftWrapperChoice => {
-        eachLeftWrapperChoice.classList.remove('selected');
-      })
-      document.getElementById('custom').classList.add('selected');
-      document.getElementById('header-selected-range-description').innerHTML = 'Custom';
+      // document.querySelectorAll('.left-wrapper-each-choice').forEach(eachLeftWrapperChoice => {
+      //   eachLeftWrapperChoice.classList.remove('selected');
+      // })
+      // document.getElementById('custom').classList.add('selected');
+      // document.getElementById('header-selected-range-description').innerHTML = 'Custom';
 
-      setCookie('specificRange', 'custom', 7);
-      setCookie('specificRangeName', 'Custom', 7);
+      // setCookie('specificRange', 'custom', 7);
+      // setCookie('specificRangeName', 'Custom', 7);
 
-      if (!selectedDateBottom) {
-        selectedDateBottom = event.target.getAttribute('date');
-        selectedDateTop = '';
-      }
-      else if (selectedDateBottom && !selectedDateTop) {
-        if (event.target.getAttribute('date') < selectedDateBottom) {
-          selectedDateBottom = event.target.getAttribute('date');
-          selectedDateTop = '';
-        }
-        else {
-          selectedDateTop = event.target.getAttribute('date');
-        }
-      } else if (selectedDateBottom && selectedDateTop) {
-        selectedDateBottom = event.target.getAttribute('date');
-        selectedDateTop = '';
-      }
+      // if (!selectedDateBottom) {
+      //   selectedDateBottom = event.target.getAttribute('date');
+      //   selectedDateTop = '';
+      // }
+      // else if (selectedDateBottom && !selectedDateTop) {
+      //   if (event.target.getAttribute('date') < selectedDateBottom) {
+      //     selectedDateBottom = event.target.getAttribute('date');
+      //     selectedDateTop = '';
+      //   }
+      //   else {
+      //     selectedDateTop = event.target.getAttribute('date');
+      //   }
+      // } else if (selectedDateBottom && selectedDateTop) {
+      //   selectedDateBottom = event.target.getAttribute('date');
+      //   selectedDateTop = '';
+      // }
 
-      paintBlocksInBetween();
-      updateDateInputs();
+      // paintBlocksInBetween();
+      // updateDateInputs();
     } else {
       let target = event.target;
       while (target != document.documentElement && !target.classList.contains('date-picker')) target = target.parentNode;
       if (target.classList.contains('date-picker')) return;
-      document.getElementById('picker-main-wrapper').style.transform = 'perspective(1000px) rotateX(-90deg)';
-      document.getElementById('picker-main-wrapper').style.opacity = 0;
-      document.getElementById('picker-main-wrapper').previousSibling.children[document.getElementById('picker-main-wrapper').previousSibling.children.length - 1].style.transform = 'rotateX(0deg)';
+      document.getElementById('selected-range').classList.remove('selected-range-open');
+      document.getElementById('selected-range').parentNode.classList.remove('date-picker-open');
+      document.getElementById('picker-main-wrapper').classList.remove('picker-main-wrapper-open');
     }
   }
 
   const changeEventListener = (event) => {
-    
+
     if (!event.target.classList.contains('each-date-input')) return;
 
     if (event.target.id == 'periodic-query-bottom-timestamp') {
@@ -242,15 +282,13 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
     updateDateInputs();
   }
 
-  const calendarFormatToggle = document.getElementById('calendar-format-toggle');
-
   const previousMonthListener = (event) => {
     currentMonthValue--;
     if (currentMonthValue == 0) {
       currentMonthValue = 12;
       currentYearValue--;
     }
-    handleCalendarEvents(currentYearValue, currentMonthValue, calendarFormatToggle.value);
+    handleCalendarEvents(currentYearValue, currentMonthValue, 'monday');
   }
 
   const nextMonthListener = (event) => {
@@ -259,36 +297,7 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
       currentMonthValue = 1;
       currentYearValue++;
     }
-    handleCalendarEvents(currentYearValue, currentMonthValue, calendarFormatToggle.value);
-  }
-
-  const changeCalendarFormat = (event) => {
-    let target = event.target;
-    while (target != document.body && !target.classList.contains('each-start-day-choice')) target = target.parentNode;
-    if (!target.classList.contains('each-start-day-choice')) return;
-
-    calendarFormatToggle.value = target.getAttribute('value');
-    target.parentNode.querySelectorAll('.general-choice-radio-button-inner-circle')
-      .forEach(each => {
-        if (each.getAttribute('value') == target.getAttribute('value')) return each.style.display = 'unset';
-        return each.style.display = 'none';
-      })
-
-    const startDayMonday = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-    const startDaySunday = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-
-    const arrayToBeUsedToGenerateTopDaysContent = calendarFormatToggle.value == 'sunday' ? startDaySunday : startDayMonday;
-    const daysMainWrapper = document.getElementById('days-main-wrapper');
-    daysMainWrapper.innerHTML = '';
-    arrayToBeUsedToGenerateTopDaysContent.forEach(eachDayLabel => {
-      const eachDayLabelSpan = document.createElement('span');
-      eachDayLabelSpan.classList.add('day');
-      eachDayLabelSpan.innerHTML = eachDayLabel;
-      daysMainWrapper.appendChild(eachDayLabelSpan);
-    })
-
-    setCookie('startDay', calendarFormatToggle.value);
-    handleCalendarEvents(currentYearValue, currentMonthValue, calendarFormatToggle.value);
+    handleCalendarEvents(currentYearValue, currentMonthValue, 'monday');
   }
 
   generateMonthContent(currentYearValue, currentMonthValue, startDay);
@@ -299,13 +308,10 @@ function handleCalendarEvents (currentYearValue, currentMonthValue, startDay) {
 
   document.getElementById('previous-month').addEventListener('click', previousMonthListener);
   eventListeners.push({ element: document.getElementById('previous-month'), event: 'click', listener: previousMonthListener });
-  
+
   document.getElementById('next-month').addEventListener('click', nextMonthListener);
   eventListeners.push({ element: document.getElementById('next-month'), event: 'click', listener: nextMonthListener });
-  
+
   document.addEventListener('click', clickEventListener);
   eventListeners.push({ element: document, event: 'click', listener: clickEventListener });
-
-  document.body.addEventListener('click', changeCalendarFormat);
-  eventListeners.push({ element: document.body, event: 'click', listener: changeCalendarFormat });
 }

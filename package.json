@@ -6,8 +6,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node build/app.js",
-    "dev": "nodemon --exec tsx src/app.ts",
-    "test": "vitest"
+    "dev": "NODE_ENV=development nodemon --exec tsx src/app.ts",
+    "test": "vitest",
+    "save-cache": "tsx src/utils/saveCacheForTesting.ts"
   },
   "author": "Dogu Boran Senturk",
   "license": "ISC",
@@ -26,6 +27,7 @@
     "express-rate-limit": "^7.5.0",
     "express-session": "^1.18.1",
     "express-sse": "^0.5.3",
+    "express-useragent": "^1.0.15",
     "level": "^9.0.0",
     "mongodb": "^6.13.0",
     "node-cron": "^3.0.3",
@@ -46,6 +48,7 @@
     "@types/express": "^5.0.0",
     "@types/express-session": "^1.18.1",
     "@types/express-sse": "^0.5.1",
+    "@types/express-useragent": "^1.0.5",
     "@types/level": "^8.0.0",
     "@types/lodash": "^4.17.15",
     "@types/mongoose": "^5.11.97",
@@ -53,6 +56,7 @@
     "@types/node-cron": "^3.0.11",
     "@types/ws": "^8.5.14",
     "mongoose": "^8.12.0",
+    "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
     "vitest": "^3.0.7"

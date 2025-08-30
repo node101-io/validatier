@@ -7,7 +7,7 @@ function setSelectedChain (pretty_name, symbol, src, name) {
   document.querySelectorAll('.network-switch-header').forEach(each => each.setAttribute('chain_identifier', name));
 }
 
-function handleNetworkSwitch () {
+function initializeCache () {
 
   const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
   const topDate = document.getElementById('periodic-query-top-timestamp').value;
@@ -24,6 +24,9 @@ function handleNetworkSwitch () {
   };
 
   rankingResponsesCache[bottomTimestamp + '.' + topTimestamp + '.' + chainIdentifier] = response;
+}
+
+function handleNetworkSwitch () {
 
   const networkSwitchInput = document.getElementById('network-switch-input');
   networkSwitchInput.addEventListener('keyup', (event) => {
@@ -50,6 +53,7 @@ function handleNetworkSwitch () {
       });
       target.parentNode.querySelectorAll('.network-switch-dropdown').forEach(each => 
         each.classList.remove('network-switch-dropdown-open'));
+      target.parentNode.querySelector('.network-switch-header').classList.remove('network-switch-header-open');
       return;
     };
 
@@ -60,10 +64,11 @@ function handleNetworkSwitch () {
     if (!networkSwitchDropdown.classList.contains('network-switch-dropdown-open')) {
       target.parentNode.querySelectorAll('.network-switch-dropdown-arrow').forEach(each => {
         each.style.transform = 'rotateX(180deg)';
-        each.style.marginTop = '-8px';
+        each.style.marginTop = '-2px';
       });
       target.parentNode.querySelectorAll('.network-switch-dropdown').forEach(each => 
         each.classList.add('network-switch-dropdown-open'));
+      target.classList.add('network-switch-header-open');
     }
     else {
       target.parentNode.querySelectorAll('.network-switch-dropdown-arrow').forEach(each => {
@@ -72,6 +77,7 @@ function handleNetworkSwitch () {
       });
       target.parentNode.querySelectorAll('.network-switch-dropdown').forEach(each => 
         each.classList.remove('network-switch-dropdown-open'));
+      target.classList.remove('network-switch-header-open');
     };
   })
 
@@ -94,9 +100,6 @@ function handleNetworkSwitch () {
 
     const bottomTimestamp = Math.floor(new Date(bottomDate).getTime());
     const topTimestamp = Math.floor(new Date(topDate).getTime());
-
-    const GET_VALIDATORS_API_ENDPOINT = 'validator/rank_validators';
-    const BASE_URL = !window.location.href.includes('#') ? window.location.href : window.location.href.split('#')[0];
   
     const chainIdentifier = target.getAttribute('name');
     const chainSymbol = target.getAttribute('symbol');
@@ -114,16 +117,6 @@ function handleNetworkSwitch () {
 
     if (cacheResponse) return generateValidatorRankingContent(cacheResponse, 'percentage_sold', 'asc');
 
-    displaySkeleton();
-
-    serverRequest(
-      BASE_URL + GET_VALIDATORS_API_ENDPOINT + `?sort_by=percentage_sold&order=asc&bottom_timestamp=${bottomTimestamp}&top_timestamp=${topTimestamp}&chain_identifier=${chainIdentifier}&with_photos`,
-      'GET',
-      {},
-      (response) => {
-        generateValidatorRankingContent(response, 'percentage_sold', 'asc');
-        rankingResponsesCache[bottomTimestamp + '.' + topTimestamp + '.' + chainIdentifier] = response;
-      }
-    )
+    window.location.reload();
   })
 }

@@ -3,7 +3,7 @@ import CompositeEventBlock from '../../../models/CompositeEventBlock/CompositeEv
 import ActiveValidators from '../../../models/ActiveValidators/ActiveValidators.js';
 import { getInactivityIntervals } from '../../../models/ActiveValidators/function/getInactivityIntervalsFromAggregateResult.js';
 
-export const NUMBER_OF_COLUMNS = 50;
+export const NUMBER_OF_COLUMNS = 90;
 
 export default (req: Request, res: Response): any => {
   res.setHeader('Content-Type', 'text/event-stream');
@@ -17,14 +17,15 @@ export default (req: Request, res: Response): any => {
     res.write(`data: ${JSON.stringify(data)}\n\n`);
   };
 
-  const { chain_identifier, operator_address, bottom_timestamp, top_timestamp, pubkey } = req.query;
+  const { chain_identifier, operator_address, bottom_timestamp, top_timestamp, pubkey, number_of_columns } = req.query;
 
   if (
     typeof chain_identifier !== 'string' ||
     typeof bottom_timestamp !== 'string' ||
     typeof top_timestamp !== 'string' ||
     typeof operator_address !== 'string' ||
-    typeof pubkey !== 'string'
+    typeof pubkey !== 'string' ||
+    typeof number_of_columns !== 'string'
   ) {
     sendData({ err: 'format_error', success: false });
     return res.end();
@@ -33,7 +34,7 @@ export default (req: Request, res: Response): any => {
   const bottomTimestamp = parseInt(bottom_timestamp, 10);
   const topTimestamp = parseInt(top_timestamp, 10);
   
-  const stepValue = Math.ceil((topTimestamp - bottomTimestamp) / NUMBER_OF_COLUMNS);
+  const stepValue = Math.ceil((topTimestamp - bottomTimestamp) / parseInt(number_of_columns));
 
   let pushedIndex = -1;
   const pendingData: Record<number, any> = {};
@@ -60,6 +61,7 @@ export default (req: Request, res: Response): any => {
           isInactivityIntervals: true,
           data: inactivityIntervals,
         });
+        resolve();
       })
     })
   );
@@ -74,8 +76,9 @@ export default (req: Request, res: Response): any => {
         CompositeEventBlock.getPeriodicDataForGraphGeneration(
           {
             operator_address: operator_address,
-            bottom_timestamp: bottomTimestamp,
-            top_timestamp: end
+            bottom_timestamp: bottomTimestamp - 86_400_000,
+            top_timestamp: end,
+            index: i
           },
           (err, result) => {
 
@@ -84,14 +87,13 @@ export default (req: Request, res: Response): any => {
               return resolve();
             }
 
-            const { self_stake = 0, reward = 0, commission = 0, total_stake = 0, total_withdraw = 0 } = result[operator_address] || {};
+            const { total_stake = 0, total_sold = 0 } = result[operator_address] || {};
 
             const data = {
               success: true,
               data: {
                 total_stake_sum: total_stake || 1,
-                total_withdraw_sum: total_withdraw || 1,
-                total_sold: ((reward + commission) - self_stake) || 1,
+                total_sold: total_sold || 1,
                 timestamp: bottomTimestamp + i * stepValue,
                 index: i
               },
@@ -116,6 +118,7 @@ export default (req: Request, res: Response): any => {
   }
 
   Promise.all(promises).then(() => {
-    res.end();
+    sendData({ message: 'finished', success: true });
+    return res.end();
   });
 };

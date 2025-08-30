@@ -130,3 +130,12 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+/genesis.json
+/self_stakes.json
+/total_stakes.json
+/atom_price.json
+/scrape.js
+/atom_price_2.json
+
+.DS_Store

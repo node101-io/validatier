@@ -13,7 +13,7 @@ html(lang='tr')
             link(rel='stylesheet' href=`/css/${page}.css`)
           else
             link(rel='stylesheet' href=`/css/index/${css}.css`)
-      if includes.external.js 
+      if includes.external.js
         if includes.external.js.includes('page')
           script(src=`/js/${page}.js`)
         if includes.external.js.includes('functions')
@@ -24,14 +24,14 @@ html(lang='tr')
           script(src=`/js/functions/getDateRange.js`)
           script(src=`/js/functions/handleCalendarEvents.js`)
           script(src=`/js/functions/handleExportEvents.js`)
-          script(src=`/js/functions/handleNavbar.js`)
+          //- script(src=`/js/functions/handleNavbar.js`)
           script(src=`/js/functions/handleNetworkSwitch.js`)
           script(src=`/js/functions/handleValidatorSearch.js`)
           script(src=`/js/functions/httpRequest.js`)
           script(src=`/js/functions/nativeCurrencyConversions.js`)
           script(src=`/js/functions/graphFunctions/addColumnEventListener.js`)
           script(src=`/js/functions/graphFunctions/addColumnToExistingGraph.js`)
-          script(src=`/js/functions/graphFunctions/addInactivityDetails.js`)
+          //- script(src=`/js/functions/graphFunctions/addInactivityDetails.js`)
           script(src=`/js/functions/graphFunctions/addVerticalAxisLabels.js`)
           script(src=`/js/functions/graphFunctions/generatePointAndLine.js`)
           script(src=`/js/functions/graphFunctions/generateSingleHorizontalAxisLabel.js`)
@@ -43,14 +43,29 @@ html(lang='tr')
           script(src=`/js/functions/renderTableHeader.js`)
           script(src=`/js/functions/renderValidators.js`)
           script(src=`/js/functions/handleSummaryGraphActions.js`)
-    - const navbarWidth = isNavbarClose ? '50px' : '237px';
+          script(src=`/js/functions/handleNewsLetter.js`)
+          script(src=`/js/functions/mainScrollHandler.js`)
+          script(src=`/js/functions/handlePopupConceal.js`)
+          script(src=`/js/functions/endMobileSpinner.js`)
+    //- - const navbarWidth = isNavbarClose ? '50px' : '237px';
     style.
       :root {
-        --navbar-width: #{navbarWidth};
+        --navbar-width: 0px
       }
-  body(summaryGraphData=summaryGraphData smallGraphData=smallGraphData, summaryData=summaryData, validators=validators)
+  - const showPercentageChange = ((new Date(selectedDateTop).getTime() + new Date(selectedChain.first_available_block_time).getTime()) / 2) <= (new Date(selectedDateBottom)) ? true : false;
+  body(summaryGraphData=summaryGraphData smallGraphData=smallGraphData, summaryData=summaryData, validators=validators, showPercentageChange=showPercentageChange, priceGraphData=priceGraphData)
     .all-wrapper
-      .navbar-wrapper#navbar-wrapper(class=`${isNavbarClose ? 'navbar-close' : ''}`)        
+      //- .navbar-wrapper#navbar-wrapper
+        script.
+          (function () {
+            const navbar = document.getElementById('navbar-wrapper');
+            const isNavbarClose = '#{isNavbarClose}';
+            if (window.innerWidth < 1000 || isNavbarClose == 'false') {
+              navbar.classList.add('navbar-close');
+            } else {
+              navbar.classList.remove('navbar-close');
+            }
+          })();
         .header-banner-wrapper
           .banner-logo-wrapper(class='center')
             img(src='/res/images/logo.svg', alt='node101' class='center')
@@ -58,7 +73,7 @@ html(lang='tr')
         -
           const reward_flow_graph_data = {
             title: 'Reward Flow Overview',
-            description: 'Shows how validators respond to changes in total capitulation and delegation in the market',
+            description: 'Shows how validators respond to changes in price and delegation in the market',
             dataFields: ['total_stake_sum', 'total_withdraw_sum', 'total_sold'],
             colors: ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)']
           }
@@ -74,32 +89,32 @@ html(lang='tr')
               type: 'insights',
               title: 'Insights',
               links: [
-                { 
-                  id: ['reward_flow'], 
-                  icon: 'reward_flow.svg', 
-                  title: 'Reward Flow',
-                  graph: reward_flow_graph_data
-                },
-                { 
-                  id: ['self_staked_and_delegation'], 
-                  icon: 'self_staked_delegation.svg', 
-                  title: 'Self-Staked & Delegation',
-                  graph: {
-                    title: 'Self-Staked & Delegation',
-                    description: 'Total Self-Staked & Total Delegation',
-                    dataFields: ['total_stake_sum', 'self_stake_sum'],
-                    colors: ['rgba(255, 149, 0, 1)', 'rgba(88, 86, 214, 1)']
-                  }
-                },
-                { 
-                  id: ['percentage_sold_graph'], 
-                  icon: 'percentage_sold_graph.svg', 
+                //- {
+                //-   id: ['reward_flow'],
+                //-   icon: 'reward_flow.svg',
+                //-   title: 'Reward Flow',
+                //-   graph: reward_flow_graph_data
+                //- },
+                //- {
+                //-   id: ['self_staked_and_delegation'],
+                //-   icon: 'self_staked_delegation.svg',
+                //-   title: 'Self-Staked & Delegation',
+                //-   graph: {
+                //-     title: 'Self-Staked & Delegation',
+                //-     description: 'Total Self-Staked & Total Delegation',
+                //-     dataFields: ['total_stake_sum', 'self_stake_sum'],
+                //-     colors: ['rgba(255, 149, 0, 1)', 'rgba(88, 86, 214, 1)']
+                //-   }
+                //- },
+                {
+                  id: ['percentage_sold_graph'],
+                  icon: 'percentage_sold_graph.svg',
                   title: 'Percentage Sold Graph',
                   graph: {
                     title: 'Percentage Sold Graph',
                     description: 'Total Sold / Total Reward Withdrawn',
-                    dataFields: ['percentage_sold'],
-                    colors: ['rgba(255, 149, 0, 1)']
+                    dataFields: ['percentage_sold', 'price'],
+                    colors: ['rgba(255, 149, 0, 1)', 'rgba(88, 86, 214, 1)']
                   }
                 },
               ]
@@ -108,9 +123,9 @@ html(lang='tr')
         .navbar-menu-wrapper
           each subMenu in menu
             .each-sub-menu-wrapper
-              .each-sub-menu-title= subMenu.title 
-              .each-sub-menu-links-wrapper 
-                each link in subMenu.links 
+              //- .each-sub-menu-title= subMenu.title
+              .each-sub-menu-links-wrapper
+                each link in subMenu.links
                   .each-sub-menu-link-content(graph_title=`${link.graph.title}`, graph_description=`${link.graph.description}` type=`${subMenu.type}` dataFields=JSON.stringify(link.graph.dataFields) colors=JSON.stringify(link.graph.colors) id=`${link.id[0]}` class=`${link.id.includes(url) ? 'navbar-link-selected' : ''}`)
                     img.each-sub-menu-link-icon(class='navbar-icon' src=`/res/images/navbar/${link.icon}` alt='node101')
                     .each-sub-menu-link-title(class='navbar-text')= link.title

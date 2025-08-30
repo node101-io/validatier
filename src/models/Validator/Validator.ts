@@ -2,7 +2,7 @@
 import async from 'async';
 
 import mongoose, { Schema, Model, Validator, SortOrder } from 'mongoose';
-import CompositeEventBlock from '../CompositeEventBlock/CompositeEventBlock.js';
+import CompositeEventBlock, { ValidatorRecordInterface } from '../CompositeEventBlock/CompositeEventBlock.js';
 import Chain, { ChainInterface } from '../Chain/Chain.js';
 
 import { isOperatorAddressValid } from '../../utils/validationFunctions.js';
@@ -10,6 +10,7 @@ import { getCsvExportData } from './functions/getCsvExportData.js';
 import { formatTimestamp } from '../../utils/formatTimestamp.js';
 import { getPubkeysOfActiveValidatorsByHeight } from '../../utils/getPubkeysOfActiveValidatorsByHeight.js';
 import ActiveValidators, { ActiveValidatorsInterface } from '../ActiveValidators/ActiveValidators.js';
+import { getPercentageSold, getPercentageSoldWithoutRounding } from './functions/getPercentageSold.js';
 
 export interface GraphDataInterface {
   _id: {
@@ -22,9 +23,8 @@ export interface GraphDataInterface {
     reward_sum: number;
     commission_sum: number;
     total_stake_sum: number;
-    total_withdraw_sum: number;
     total_sold: number;
-    percentage_sold: number;  
+    percentage_sold: number;
   }
 }[]
 
@@ -48,16 +48,29 @@ export interface ValidatorInterface {
   security_contact: string;
   commission_rate: string;
   keybase_id: string;
-  temporary_image_uri: string;
   created_at: Date;
+  temporary_image_uri?: string;
 }
 
-interface ValidatorModel extends Model<ValidatorInterface> {
+export interface ValidatorsSummaryDataInterface {
+  initial_total_stake_sum: number;
+  initial_total_withdraw_sum: number;
+  initial_total_sold: number;
+  total_sold: number;
+  initial_percentage_sold: number;
+  percentage_sold: number;
+  initial_self_stake_sum: number;
+  self_stake_sum: number;
+  initial_average_self_stake_ratio: number;
+  average_self_stake_ratio: number;
+}
+
+export interface ValidatorModel extends Model<ValidatorInterface> {
   saveValidator: (
     body: {
-      pubkey: string;
+      pubkey?: string;
       operator_address: string;
-      delegator_address: string;
+      delegator_address?: string;
       chain_identifier: string;
       moniker: string;
       website: string;
@@ -65,8 +78,8 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       security_contact: string;
       commission_rate: string;
       keybase_id: string;
-      created_at: Date;
-    }, 
+      created_at?: Date;
+    },
     callback: (
       err: string | null,
       newValidator: ValidatorInterface | null
@@ -103,7 +116,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       security_contact: string;
       commission_rate: string;
       keybase_id: string;
-    }, 
+    },
     callback: (
       err: string | null,
       updatedValidator: ValidatorInterface | null
@@ -112,7 +125,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
   getValidatorByOperatorAddress: (
     body: {
       operator_address: string
-    }, 
+    },
     callback: (
       err: string | null,
       validator: ValidatorInterface | null
@@ -130,30 +143,8 @@ interface ValidatorModel extends Model<ValidatorInterface> {
     callback: (
       err: string | null,
       results: {
-        summary_data: {
-          initial_total_stake_sum: number;
-          initial_total_withdraw_sum: number;
-          initial_total_sold: number;
-          total_sold: number;
-          initial_percentage_sold: number;
-          percentage_sold: number;
-          initial_self_stake_amount: number;
-          self_stake_amount: number;
-          initial_average_self_stake_ratio: number;
-          average_self_stake_ratio: number;
-        } | null,
-        validators: {
-          operator_address: string,
-          moniker: string,
-          temporary_image_uri: string,
-          self_stake: number,
-          reward: number,
-          commission: number,
-          ratio: number,
-          sold: number,
-          percentage_sold: number,
-          self_stake_ratio: number
-        }[] | null
+        summary_data: ValidatorsSummaryDataInterface | null,
+        validators: ValidatorInterface[] | null
       } | null
     ) => any
   ) => any;
@@ -204,11 +195,10 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       chain_identifier: string;
       bottom_timestamp: number;
       top_timestamp: number;
-      by_array: string[];
     },
     callback: (
       err: string | null,
-      summaryGraphData: Record<string, GraphDataInterface> | null
+      summaryGraphData: GraphDataInterface | null
     ) => any
   ) => any;
   getSmallGraphData: (
@@ -232,6 +222,13 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       updated_chain: ChainInterface | null
     ) => any
   ) => any;
+  findValidatorsByChainIdentifier: (
+    body: { chain_identifier: string },
+    callback: (
+      err: string | null,
+      validators: ValidatorInterface[] | null
+    ) => any
+  ) => any;
 }
 
 const validatorSchema = new Schema<ValidatorInterface>({
@@ -242,16 +239,16 @@ const validatorSchema = new Schema<ValidatorInterface>({
     trim: true,
     index: 1
   },
-  operator_address: { 
-    type: String, 
-    required: true, 
+  operator_address: {
+    type: String,
+    required: true,
     unique: true,
     trim: true,
     index: 1
   },
-  delegator_address: { 
-    type: String, 
-    required: false, 
+  delegator_address: {
+    type: String,
+    required: false,
     unique: true,
     trim: true,
     index: 1
@@ -261,31 +258,31 @@ const validatorSchema = new Schema<ValidatorInterface>({
     required: true,
     trim: true
   },
-  moniker: { 
-    type: String, 
+  moniker: {
+    type: String,
     required: true,
     trim: true,
     index: 1,
     minlength: 1,
     maxlength: MAX_DATABASE_TEXT_FIELD_LENGTH
   },
-  website: { 
-    type: String, 
+  website: {
+    type: String,
     trim: true,
     required: false
   },
-  description: { 
-    type: String, 
+  description: {
+    type: String,
     trim: true,
     required: false
   },
-  security_contact: { 
-    type: String, 
+  security_contact: {
+    type: String,
     trim: true,
     required: false
   },
-  commission_rate: { 
-    type: String, 
+  commission_rate: {
+    type: String,
     required: true,
     trim: true
   },
@@ -299,15 +296,19 @@ const validatorSchema = new Schema<ValidatorInterface>({
     type: String,
     required: false
   },
-  created_at: { 
-    type: Date, 
+  created_at: {
+    type: Date,
     required: true
   }
 });
 
+/*
+  TODO: Aynı pubkeye sahip bir validatör oluşturulduğunda farklı validatör olmasına rağmen aynı gibi davranıyoruz.
+  Validatörü pubkeyi ile identify etmemeliyiz. Farklı validatör saymalıyız.
+*/
 
 validatorSchema.statics.saveValidator = function (
-  body: Parameters<ValidatorModel['saveValidator']>[0], 
+  body: Parameters<ValidatorModel['saveValidator']>[0],
   callback: Parameters<ValidatorModel['saveValidator']>[1],
 ) {
   const { operator_address, moniker, commission_rate, keybase_id, chain_identifier, description, security_contact, website } = body;
@@ -318,7 +319,7 @@ validatorSchema.statics.saveValidator = function (
       chain_identifier: chain_identifier,
       operator_address: operator_address
     })
-    .then(oldValidator => { 
+    .then(oldValidator => {
       if (!oldValidator) {
         return Validator
           .create(body)
@@ -363,7 +364,7 @@ validatorSchema.statics.saveManyValidators = function (
       const existingOperatorAddresses = existingValidators.map(validator => validator.operator_address);
       const newValidators = validatorsArray.filter(validator => !existingOperatorAddresses.includes(validator.operator_address));
       const updateValidators = validatorsArray.filter(validator => existingOperatorAddresses.includes(validator.operator_address));
-  
+
       Validator
         .insertMany(newValidators, { ordered: false })
         .then(insertedValidators => {
@@ -371,14 +372,16 @@ validatorSchema.statics.saveManyValidators = function (
           const updateValidatorsBulk = updateValidators.map(validator => ({
             updateOne: {
               filter: { operator_address: validator.operator_address },
-              update: { $set: {
-                moniker: validator.moniker,
-                commission_rate: validator.commission_rate,
-                keybase_id: validator.keybase_id
-              } }
+              update: {
+                $set: {
+                  moniker: validator.moniker,
+                  commission_rate: validator.commission_rate,
+                  keybase_id: validator.keybase_id
+                }
+              }
             }
           }));
-      
+
           Validator
             .bulkWrite(updateValidatorsBulk)
             .then(updatedValidators => {
@@ -394,12 +397,12 @@ validatorSchema.statics.saveManyValidators = function (
 
 
 validatorSchema.statics.updateValidator = function (
-  body: Parameters<ValidatorModel['updateValidator']>[0], 
+  body: Parameters<ValidatorModel['updateValidator']>[0],
   callback: Parameters<ValidatorModel['updateValidator']>[1],
 ) {
-  
+
   const { operator_address, moniker, commission_rate, keybase_id, website, security_contact, description } = body;
-  
+
   Validator
     .findOneAndUpdate(
       { operator_address: operator_address },
@@ -410,7 +413,7 @@ validatorSchema.statics.updateValidator = function (
         website: website,
         security_contact: security_contact,
         description: description
-      }  
+      }
     )
     .then(validator => {
       if (!validator) return callback('bad_request', null);
@@ -420,14 +423,14 @@ validatorSchema.statics.updateValidator = function (
 }
 
 validatorSchema.statics.getValidatorByOperatorAddress = function (
-  body: Parameters<ValidatorModel['getValidatorByOperatorAddress']>[0], 
+  body: Parameters<ValidatorModel['getValidatorByOperatorAddress']>[0],
   callback: Parameters<ValidatorModel['getValidatorByOperatorAddress']>[1],
 ) {
 
   const { operator_address } = body;
 
   Validator
-    .findOne({ operator_address }) 
+    .findOne({ operator_address })
     .then((validator) => {
       return callback(null, validator);
     })
@@ -435,26 +438,27 @@ validatorSchema.statics.getValidatorByOperatorAddress = function (
 }
 
 validatorSchema.statics.rankValidators = function (
-  body: Parameters<ValidatorModel['rankValidators']>[0], 
+  body: Parameters<ValidatorModel['rankValidators']>[0],
   callback: Parameters<ValidatorModel['rankValidators']>[1],
 ) {
-  const { sort_by, order, bottom_timestamp, top_timestamp, with_photos, chain_identifier } = body;
+  const { sort_by, order, bottom_timestamp, top_timestamp, chain_identifier } = body;
 
   if (!chain_identifier) return callback('bad_request', null);
 
   Promise.allSettled([
-    new Promise((resolve, reject) => {
+    new Promise<ValidatorInterface[]>((resolve, reject) => {
       Validator.find({
         chain_identifier: chain_identifier ? chain_identifier : 'cosmoshub',
-        created_at: { $lte: new Date(top_timestamp) }
+        created_at: { $lte: new Date(top_timestamp) },
       })
-      .then((validators) => resolve(validators))
-      .catch(err => reject(err));
+        .lean()
+        .then((result) => resolve(result))
+        .catch(err => reject(err));
     }),
-    new Promise((resolve, reject) => {
+    new Promise<Record<string, ValidatorRecordInterface> | null>((resolve, reject) => {
       CompositeEventBlock.getPeriodicDataForValidatorSet({
         chain_identifier: chain_identifier,
-        bottom_timestamp: bottom_timestamp,
+        bottom_timestamp: bottom_timestamp - 86_400_000,
         top_timestamp: top_timestamp
       }, (err, validatorRecordMapping) => {
         if (err) return reject(err);
@@ -475,16 +479,22 @@ validatorSchema.statics.rankValidators = function (
 
       let totalWithdrawn = 0;
       let initialTotalWithdrawn = 0;
-      
+
+      let totalSold = 0;
+
       let totalSelfStakeRatio = 0;
       let initialTotalSelfStakeRatio = 0;
 
+      let totalPercentageSold = 0;
+      let initialTotalPercentageSold = 0;
+      let percentageSoldInvolvedValidatorCount = 0;
+
       const [validatorsResult, getPeriodicDataForValidatorSetResult] = results;
       if (
-        validatorsResult.status == 'rejected' || 
+        validatorsResult.status == 'rejected' ||
         getPeriodicDataForValidatorSetResult.status == 'rejected'
       ) return callback('bad_request', null);
-      
+
       const validators = validatorsResult.value;
       const validatorRecordMapping = getPeriodicDataForValidatorSetResult.value;
 
@@ -493,36 +503,52 @@ validatorSchema.statics.rankValidators = function (
       let index = 0;
       while (index < validators.length) {
         const i = index;
-        const eachValidator: any = validators[i];
+        const eachValidator = validators[i];
         const {
           self_stake = 0,
           reward = 0,
           commission = 0,
           total_stake = 0,
           total_withdraw = 0,
+          balance_change = 0,
           initial_commission_prefix_sum = 0,
           initial_reward_prefix_sum = 0,
           initial_self_stake_prefix_sum = 0,
           initial_total_stake_prefix_sum = 0,
           initial_total_withdraw_prefix_sum = 0,
+          average_total_stake = 0
         } = validatorRecordMapping[eachValidator.operator_address] || {};
 
         const ratio = (self_stake || 0) / ((reward + commission) || (10 ** CHAIN_TO_DECIMALS_MAPPING[`${chain_identifier}`]));
-        const sold = ((reward + commission) || 0) - (self_stake || 0);
+        const sold = Math.max((balance_change - (commission + reward) + self_stake) * -1, 0);
         const initial_sold = ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 0) - (initial_self_stake_prefix_sum || 0);
-        
-        const percentage_sold = Math.min(Math.abs((sold || 1) / ((reward + commission) || 1)), 1) * 100;
-        const initial_percentage_sold = Math.min(Math.abs((initial_sold || 1) / ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 1)), 1) * 100;
+
+        const percentage_sold = getPercentageSoldWithoutRounding({ sold, self_stake, total_withdraw: reward + commission });
+
+        if ((reward + commission) != 0) {
+          totalPercentageSold += getPercentageSold({ sold, self_stake, total_withdraw: reward + commission });
+        }
+        percentageSoldInvolvedValidatorCount++;
+
+        const initial_percentage_sold = Math.min(
+          Math.max(
+            ((initial_sold <= 0 ? 0 : initial_sold) / ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 1) * 100),
+            0
+          ),
+          100
+        );
+
+        totalSold += sold;
 
         const self_stake_ratio = Math.min(Math.abs(self_stake / (total_stake || 1)), 1) * 100;
         const initial_self_stake_ratio = Math.min(Math.abs(initial_self_stake_prefix_sum / (initial_total_stake_prefix_sum || 1)), 1) * 100;
 
         totalDelegation += total_stake;
         initialTotalDelegation += initial_total_stake_prefix_sum;
-        
-        totalWithdrawn += total_withdraw;
-        initialTotalWithdrawn += initial_total_withdraw_prefix_sum;
-        
+
+        totalWithdrawn += (reward + commission);
+        initialTotalWithdrawn += (initial_reward_prefix_sum + initial_commission_prefix_sum);
+
         totalSelfStaked += self_stake;
         initialTotalSelfStaked += initial_self_stake_prefix_sum;
 
@@ -532,49 +558,60 @@ validatorSchema.statics.rankValidators = function (
         totalSelfStakeRatio += self_stake_ratio;
         initialTotalSelfStakeRatio += initial_self_stake_ratio;
 
+        initialTotalPercentageSold += initial_percentage_sold;
+
         const pushObjectData = {
-          pubkey: eachValidator.pubkey || '',
-          operator_address: eachValidator.operator_address || '',
-          moniker: eachValidator.moniker || '',
-          website: eachValidator.website || '',
-          commission_rate: eachValidator.commission_rate || '',
-          description: eachValidator.description || '',
-          temporary_image_uri: eachValidator.temporary_image_uri,
-          self_stake, initial_self_stake_prefix_sum,
-          reward, initial_reward_prefix_sum,
-          commission, initial_commission_prefix_sum,
-          total_stake, initial_total_stake_prefix_sum,
-          total_withdraw, initial_total_withdraw_prefix_sum,
-          percentage_sold, initial_percentage_sold,
-          self_stake_ratio, initial_self_stake_ratio,
-          chain_identifier: chain_identifier,
+          ...eachValidator,
+          self_stake,
+          reward,
+          commission,
+          total_stake,
+          total_withdraw: (reward + commission),
+          initial_self_stake_prefix_sum,
+          initial_reward_prefix_sum,
+          initial_commission_prefix_sum,
+          initial_total_stake_prefix_sum,
+          initial_total_withdraw_prefix_sum: (initial_reward_prefix_sum + initial_commission_prefix_sum),
+          percentage_sold,
+          initial_percentage_sold,
+          self_stake_ratio,
+          initial_self_stake_ratio,
+          average_total_stake: average_total_stake,
           ratio: ratio,
           sold: sold
         };
-        
-        if (!with_photos) {
-          delete eachValidator.website;
-          delete eachValidator.description;
-          delete pushObjectData.temporary_image_uri;
-        }
+
         valueArray.push(pushObjectData);
         index++;
       }
 
-      (order == 'desc' || order == -1)
-        ? valueArray.sort((a: any, b: any) => (b[sort_by] || 0) - (a[sort_by] || 0))
-        : valueArray.sort((a: any, b: any) => (a[sort_by] || 0) - (b[sort_by] || 0));
+      valueArray.sort((a: any, b: any) => {
+        const valA = a[sort_by] || 0;
+        const valB = b[sort_by] || 0;
+
+        if (valA == valB && sort_by == 'percentage_sold') {
+          const secA = a['average_total_stake'] || 0;
+          const secB = b['average_total_stake'] || 0;
+          return (order == 'asc' || order == 1)
+            ? secB - secA
+            : secA - secB;
+        }
+
+        return (order == 'desc' || order == -1)
+          ? valB - valA
+          : valA - valB;
+      });
 
       callback(null, {
         summary_data: {
           initial_total_stake_sum: initialTotalDelegation,
           initial_total_withdraw_sum: initialTotalWithdrawn,
-          total_sold: totalWithdrawnValidator - totalSelfStaked,
+          total_sold: totalSold,
           initial_total_sold: initialTotalWithdrawnValidator - initialTotalSelfStaked,
           initial_percentage_sold: (((initialTotalWithdrawnValidator - initialTotalSelfStaked) / initialTotalWithdrawnValidator) * 100),
-          percentage_sold: (((totalWithdrawnValidator - totalSelfStaked) / totalWithdrawnValidator) * 100),
-          initial_self_stake_amount: initialTotalSelfStaked,
-          self_stake_amount: totalSelfStaked,
+          percentage_sold: (totalPercentageSold / percentageSoldInvolvedValidatorCount),
+          initial_self_stake_sum: (initialTotalPercentageSold / valueArray.length),
+          self_stake_sum: totalSelfStaked,
           initial_average_self_stake_ratio: initialTotalSelfStakeRatio / valueArray.length,
           average_self_stake_ratio: totalSelfStakeRatio / valueArray.length
         },
@@ -589,7 +626,7 @@ validatorSchema.statics.updateActiveValidatorList = async function (
 ) {
 
   const { chain_identifier, chain_rpc_url, height, day, month, year, active_validators_pubkeys_array } = body;
- 
+
   if (active_validators_pubkeys_array && active_validators_pubkeys_array.length > 0) {
     return ActiveValidators.saveActiveValidators({
       chain_identifier: chain_identifier,
@@ -599,13 +636,13 @@ validatorSchema.statics.updateActiveValidatorList = async function (
       active_validators_pubkeys_array: active_validators_pubkeys_array
     }, (err, savedActiveValidators) => {
       if (err) return callback(err, null);
-      return callback(null, savedActiveValidators);    
+      return callback(null, savedActiveValidators);
     })
   }
 
   return getPubkeysOfActiveValidatorsByHeight(chain_rpc_url, height, (err, pubkeysOfActiveValidators) => {
     if (err || !pubkeysOfActiveValidators) return callback(err, null);
-    
+
     ActiveValidators.saveActiveValidators({
       chain_identifier: chain_identifier,
       month: month + 1,
@@ -614,14 +651,14 @@ validatorSchema.statics.updateActiveValidatorList = async function (
       active_validators_pubkeys_array: pubkeysOfActiveValidators
     }, (err, savedActiveValidators) => {
       if (err) return callback(err, null);
-      return callback(null, savedActiveValidators);    
+      return callback(null, savedActiveValidators);
     })
   });
 };
 
 
 validatorSchema.statics.exportCsv = function (
-  body: Parameters<ValidatorModel['exportCsv']>[0], 
+  body: Parameters<ValidatorModel['exportCsv']>[0],
   callback: Parameters<ValidatorModel['exportCsv']>[1]
 ) {
   const { sort_by, order, bottom_timestamp, top_timestamp, range = 1, chain_identifier } = body;
@@ -633,7 +670,7 @@ validatorSchema.statics.exportCsv = function (
   if ((timestampDifference / range) > 50 && range != 0) return callback('bad_request', null);
 
   const timestampRange = Math.min((topTimestamp - bottomTimestamp), (range ? range : (topTimestamp - bottomTimestamp)));
-  const csvDataMapping: any = {};
+  const csvDataMapping: Record<string, ValidatorInterface[]> = {};
 
   async.whilst(
     function test(cb) { cb(null, bottomTimestamp < topTimestamp); },
@@ -648,9 +685,8 @@ validatorSchema.statics.exportCsv = function (
       }, (err, results) => {
         if (err || !results) return next();
 
-        const { validators } = results;
-        
-        csvDataMapping[`validator-ranking-${formatTimestamp(bottomTimestamp)}_${formatTimestamp(bottomTimestamp + timestampRange)}.csv`] = validators;
+        csvDataMapping[`validator-ranking-${formatTimestamp(bottomTimestamp)}_${formatTimestamp(bottomTimestamp + timestampRange)}.csv`] = results.validators || [];
+
         bottomTimestamp += timestampRange;
         return next();
       })
@@ -665,8 +701,8 @@ validatorSchema.statics.exportCsv = function (
   )
 }
 
-validatorSchema.statics.exportCsvForAllRanges = function(
-  body: Parameters<ValidatorModel['exportCsvForAllRanges']>[0], 
+validatorSchema.statics.exportCsvForAllRanges = function (
+  body: Parameters<ValidatorModel['exportCsvForAllRanges']>[0],
   callback: Parameters<ValidatorModel['exportCsvForAllRanges']>[1]
 ) {
   const { sort_by, order, bottom_timestamp, top_timestamp, chain_identifier } = body;
@@ -707,102 +743,91 @@ validatorSchema.statics.getSummaryGraphData = function (
   body: Parameters<ValidatorModel['getSummaryGraphData']>[0],
   callback: Parameters<ValidatorModel['getSummaryGraphData']>[1],
 ) {
-  const { chain_identifier, bottom_timestamp, top_timestamp, by_array } = body;
-  const graphDataMapping: Record<string, any> = {};
+  const { chain_identifier, bottom_timestamp, top_timestamp } = body;
 
-  async.times(
-    by_array.length,
-    (i, next) => {
-      const by = by_array[i];
+  const numberOfDataPoints = 90;
+  const intervalMs = Math.ceil((top_timestamp - bottom_timestamp) / numberOfDataPoints);
 
-      const groupId: Record<string, any> = { year: '$year' };
-      if (by == 'm' || by == 'w' || by == 'd') groupId.month = '$month';
-      if (by == 'w' || by == 'd')
-        groupId.day = {
-          $floor: {
-            $divide: ['$day', by == 'w' ? 7 : 4]
-          }
-        };
-      
-      CompositeEventBlock.aggregate([
-        {
-          $match: {
-            chain_identifier: chain_identifier,
-            timestamp: {
-              $gte: bottom_timestamp,
-              $lte: top_timestamp,
-            },
-          },
-        },
-        {
-          $group: {
-            _id: groupId,
-            timestamp: { $first: '$timestamp' },
-            self_stake_sum: { $sum: '$self_stake' },
-            reward_sum: { $sum: '$reward' },
-            commission_sum: { $sum: '$commission' },
-            total_stake_sum: { $sum: '$total_stake' },
-            total_withdraw_sum: { $sum: '$total_withdraw' },
-          }
-        },
-        {
-          $addFields: {
-            total_sold: {
-              $subtract: [
-                { $add: ['$reward_sum', '$commission_sum'] },
-                '$self_stake_sum'
-              ]
-            },
-            percentage_sold: {
-              $cond: [
-                { $gt: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
-                {
-                  $min: [
-                    {
-                      $abs: {
-                        $divide: [
-                          {
-                            $subtract: [
-                              { $add: ['$reward_sum', '$commission_sum'] },
-                              '$self_stake_sum'
-                            ]
-                          },
-                          {
-                            $cond: [
-                              { $eq: [{ $add: ['$reward_sum', '$commission_sum'] }, 0] },
-                              1,
-                              { $add: ['$reward_sum', '$commission_sum'] }
-                            ]
-                          }
-                        ]
-                      }
-                    },
-                    1
-                  ]
-                },
-                0
-              ]
-            }    
-          }
-        },
-        {
-          $sort: {
-            timestamp: 1
-          }
-        },
-      ])
-        .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, total_withdraw: 1 })
-        .then((results: any) => {
-          graphDataMapping[by] = results;
-          next();
-        })
-        .catch(err => next(err))
-    },
-    (err) => {
-      if (err) return callback(err.toString(), null);
-      return callback(null, graphDataMapping);
+  const groupId: Record<string, any> = {
+    bucket: {
+      $floor: {
+        $divide: [{ $toLong: '$timestamp' }, intervalMs]
+      }
     }
-  )
+  };
+
+  const startBucket = Math.floor(bottom_timestamp / intervalMs);
+
+  CompositeEventBlock.aggregate([
+    {
+      $match: {
+        chain_identifier: chain_identifier,
+        timestamp: {
+          $gte: bottom_timestamp,
+          $lte: top_timestamp,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: groupId,
+        timestamp: { $first: '$timestamp' },
+        self_stake_sum: { $sum: '$self_stake' },
+        reward_sum: { $sum: '$reward' },
+        commission_sum: { $sum: '$commission' },
+        total_stake_sum: { $avg: '$total_stake_prefix_sum' },
+        balance_change_sum: { $sum: '$balance_change' },
+      }
+    },
+    {
+      $sort: {
+        timestamp: 1
+      }
+    },
+  ])
+    .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, balance_change: 1 })
+    .then((buckets: any) => {
+
+      const result: any = [];
+
+      let lastValue: any = null;
+      for (let i = 0; i < numberOfDataPoints; i++) {
+        const bucketIndex = startBucket + i;
+        const found = buckets.find((b: any) => b._id.bucket === bucketIndex);
+
+        if (found) {
+          const { timestamp, self_stake_sum, reward_sum, commission_sum, total_stake_sum, balance_change_sum } = found;
+
+          const sold = Math.max((balance_change_sum - (commission_sum + reward_sum) + self_stake_sum) * -1, 0);
+
+          result.push({
+            _id: { bucket: bucketIndex },
+            timestamp: timestamp,
+            self_stake_sum: self_stake_sum,
+            reward_sum: reward_sum,
+            commission_sum: commission_sum,
+            total_stake_sum: total_stake_sum,
+            total_sold: sold,
+            percentage_sold: getPercentageSoldWithoutRounding({ sold, self_stake: self_stake_sum, total_withdraw: reward_sum + commission_sum }),
+          });
+        } else {
+
+          const fake = {
+            _id: { bucket: bucketIndex },
+            timestamp: lastValue ? lastValue.timestamp : 0,
+            self_stake_sum: 0,
+            reward_sum: 0,
+            commission_sum: 0,
+            total_stake_sum: 0,
+            total_sold: 0,
+            percentage_sold: lastValue ? lastValue.percentage_sold : 0,
+          };
+          result.push(fake);
+        }
+      }
+      return callback(null, result);
+    })
+    .catch(err => callback(err, null))
 }
 
 
@@ -875,7 +900,7 @@ validatorSchema.statics.getSmallGraphData = function (
       }
     },
   ])
-    .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, total_withdraw: 1 })
+    .hint({ chain_identifier: 1, timestamp: 1, self_stake: 1, reward: 1, commission: 1, total_stake: 1, balance_change: 1 })
     .then(results => callback(null, results))
     .catch(err => callback(err, null))
 }
@@ -897,6 +922,18 @@ validatorSchema.statics.updateLastVisitedBlock = function (
       return callback(null, updatedChain);
     })
     .catch(err => callback(err, null))
+}
+
+
+validatorSchema.statics.findValidatorsByChainIdentifier = function (
+  body: Parameters<ValidatorModel['findValidatorsByChainIdentifier']>[0],
+  callback: Parameters<ValidatorModel['findValidatorsByChainIdentifier']>[1]
+) {
+  const { chain_identifier } = body;
+  Validator
+    .find({ chain_identifier: chain_identifier })
+    .then(validators => callback(null, validators))
+    .catch(err => callback(err, null));
 }
 
 

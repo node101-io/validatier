@@ -1,165 +1,99 @@
 import { Request, Response } from 'express';
-import Validator from '../../../models/Validator/Validator.js';
+import { ValidatorInterface } from '../../../models/Validator/Validator.js';
 import Chain, { ChainInterface } from '../../../models/Chain/Chain.js';
 import { NUMBER_OF_COLUMNS } from '../../Validator/getGraphData/get.js';
-import Cache, { CacheInterface, byArrayMapping } from '../../../models/Cache/Cache.js';
+import Cache from '../../../models/Cache/Cache.js';
 
-const indexGetController = (req: Request, res: Response): void => {
+const dayAsMilliseconds = 24 * 60 * 60 * 1000;
 
-  console.time('response_time');
+const graphMapping = new Proxy({
+  // self_staked_and_delegation: {
+  //   graph_title: 'Self-Staked & Delegation',
+  //   graph_description: 'Total Self-Staked & Total Delegation',
+  //   dataFields: ['total_stake_sum', 'self_stake_sum'],
+  //   colors: ['rgba(255, 149, 0, 1)', 'rgba(88, 86, 214, 1)']
+  // },
+  percentage_sold_graph: {
+    graph_title: 'Percentage Sold Graph',
+    graph_description: 'Total Sold / Total Reward Withdrawn',
+    dataFields: ['percentage_sold', 'price'],
+    colors: ['rgba(255, 149, 0, 1)', 'rgba(88, 86, 214, 1)']
+  },
+  other: {
+    graph_title: 'Reward Flow Overview',
+    graph_description: 'Shows how validators respond to changes in price and delegation in the market',
+    dataFields: ['price', 'total_sold', 'total_stake_sum'],
+    colors: ['rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)', 'rgba(255, 149, 0, 1)']
+  },
+}, {
+  get(target: any, prop: any) {
+    if (prop in target) {
+      return target[prop];
+    } else {
+      return target.other;
+    }
+  }
+});
 
-  const activeNetworkIdentifier = req.cookies.network ? req.cookies.network : 'cosmoshub';
-  const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime()): (new Date(1)).getTime();
-  const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()): Date.now();
+const isDev = process.env.NODE_ENV === 'development';
 
-  const specificRangeName = req.cookies.specificRangeName || 'All time';
-  const specificRange = req.cookies.specificRange || 'all_time';
+export default (req: Request, res: Response): void => {
+  if (isDev) console.time('response_time');
 
-  Promise.allSettled([
-    new Promise((resolve) => { 
-      Chain.getAllChains((err, chains) => {
-        resolve({ err: err, chains: chains });
-      })
-    }),
-    new Promise((resolve) => {      
-      if (specificRange && specificRange != 'custom') resolve({ err: null, results: true });
-      Validator.rankValidators(
-        { sort_by: 'percentage_sold', order: 'asc', bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp, chain_identifier: activeNetworkIdentifier, with_photos: true },
-        (err, results) => {
-          resolve({ err: err, results: results });
-        }
-      )
-    }),
-    new Promise((resolve) => {
-      if (!specificRange || specificRange == 'custom') resolve({ err: null, cache: true });
-      Cache.getCacheForChain({
-        chain_identifier: activeNetworkIdentifier,
-        interval: specificRange
-      }, (err, cache) => {
-        resolve({ err: err, cache: cache });
-      })
-    }),
-    new Promise((resolve) => {
-      if (specificRange && specificRange != 'custom') resolve({ err: null, summaryGraphData: true });
-      Validator.getSummaryGraphData({
-        chain_identifier: activeNetworkIdentifier,
-        bottom_timestamp: bottomTimestamp,
-        top_timestamp: topTimestamp,
-        by_array: byArrayMapping[specificRange]
-      }, (err, summaryGraphData) => {
-        resolve({ err: err, summaryGraphData: summaryGraphData });
-      })
-    }),
-    new Promise((resolve) => {
-      if (specificRange && specificRange != 'custom') resolve({ err: null, smallGraphData: true });
-      Validator.getSmallGraphData({
-        chain_identifier: activeNetworkIdentifier,
-        bottom_timestamp: bottomTimestamp,
-        top_timestamp: topTimestamp
-      }, (err, smallGraphData) => {
-        resolve({ err: err, smallGraphData: smallGraphData });
-      })
-    })
-  ])
-    .then((results: Record<string, any>[]) => {
+  const chainIdentifier = req.cookies.network ? req.cookies.network : 'cosmoshub';
 
-      const rawGraphMapping = {
-        self_staked_and_delegation: {
-          graph_title: 'Self-Staked & Delegation',
-          graph_description: 'Total Self-Staked & Total Delegation',
-          dataFields: ['total_stake_sum', 'self_stake_sum'],
-          colors: ['rgba(255, 149, 0, 1)', 'rgba(88, 86, 214, 1)']
-        },
-        percentage_sold_graph: {
-          graph_title: 'Percentage Sold Graph',
-          graph_description: 'Total Sold / Total Reward Withdrawn',
-          dataFields: ['percentage_sold'],
-          colors: ['rgba(255, 149, 0, 1)']
-        },
-        other: {
-          graph_title: 'Reward Flow Overview',
-          graph_description: 'Shows how validators respond to changes in total capitulation and delegation in the market',
-          dataFields: ['total_stake_sum', 'total_withdraw_sum', 'total_sold'],
-          colors: ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)']
-        },
-      };
-      
-      const graphMapping = new Proxy(rawGraphMapping, {
-        get(target: any, prop: any) {
-          if (prop in target) {
-            return target[prop];
-          } else {
-            return target.other;
-          }
-        }
-      });
+  const bottomTimestamp = req.cookies.selectedDateBottom ? Math.floor(new Date(req.cookies.selectedDateBottom).getTime()) : new Date().getTime() - dayAsMilliseconds * 365;
+  const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()) : new Date().getTime();
 
-      const [getAllChainsResult, rankValidatorsResult, cacheResults, summaryGraphResults, smallGraphResults] = results;
+  const specificRangeName = req.cookies.specificRangeName || 'Last year';
 
-      if (
-        !getAllChainsResult.value.chains || 
-        !rankValidatorsResult.value.results ||
-        !cacheResults.value.cache || 
-        !summaryGraphResults.value.summaryGraphData ||
-        !smallGraphResults.value.smallGraphData
-      ) return res.json({ success: false, err: 'bad_request' })
-    
-      const chains = getAllChainsResult.value.chains;
+  if (isDev) console.time('getAllChains_time');
+  Chain.getAllChains((err, chains) => {
+    if (isDev) console.timeEnd('getAllChains_time');
+    if (err || !chains) return res.json({ success: false, err: 'bad_request' });
 
-      let summaryData;
-      let validators;
-      let summaryGraphData;
-      let smallGraphData;
+    if (isDev) console.time('cache_time');
+    Cache.getCacheForChain({
+      chain_identifier: chainIdentifier,
+      interval: req.cookies.specificRange || 'last_365_days',
+    }, (err, cacheResult) => {
+      if (isDev) console.timeEnd('cache_time');
+      if (err || !cacheResult) return res.json({ success: false, err: 'bad_request' });
 
-      if (specificRange && specificRange != 'custom') {
-        const cache: Record<string, any> = {};
-        cacheResults.value.cache.forEach((eachCacheSummaryGraphData: CacheInterface) => {
-          cache[eachCacheSummaryGraphData.type] = eachCacheSummaryGraphData;
-        });
+      const data = cacheResult[0];
 
-        summaryData = cache.summary_data.data || {};
-        validators = cache.validators.data || {};
-        summaryGraphData = cache.summary_graph.data || {};
-        smallGraphData = cache.small_graph.data || {};
-      } else {
-        summaryData = rankValidatorsResult.value.results.summary_data;
-        validators = rankValidatorsResult.value.results.validators;
-        summaryGraphData = summaryGraphResults.value.summaryGraphData;
-        smallGraphData = smallGraphResults.value.smallGraphData;
-      }
+      const cummulativeActiveListData = data.cummulative_active_list
+        .filter(each => ((Math.abs(topTimestamp - bottomTimestamp) / 86400000) / 90) <= each.count)
+        .map(each => each._id);
 
-      const selectedChain = chains.find((element: ChainInterface) => element.name == activeNetworkIdentifier);  
-
-      const queryValidator = req.query.validator
-        ? (validators.filter((eachValidator: Record<string, any>) => eachValidator.operator_address == req.query.validator))[0]
-        : null;
+      const queryValidator = req.query.validator ? data.validators.find(each => each.operator_address == req.query.validator) : null;
 
       const url = req.originalUrl.replace('/', '');
 
-      console.timeEnd('response_time');
+      if (isDev) console.timeEnd('response_time');
 
       return res.render('index/index', {
         page: 'index/index',
         title: 'Validatier',
         includes: {
           external: {
-            css: ['page', 'general', 'header', 'summary', 'validators', 'graph', 'export', 'table'],
+            css: ['page', 'general', 'header', 'summary', 'validators', 'graph', 'export', 'table', 'intro', 'mobile_start'],
             js: ['page', 'functions'],
           },
         },
-        summaryData,
-        validators,
-        summaryGraphData,
-        smallGraphData,
-        selectedDateBottom: req.cookies.selectedDateBottom || (new Date(selectedChain.first_available_block_time)).toISOString().split('T')[0],
-        selectedDateTop: req.cookies.selectedDateTop || (new Date()).toISOString().split('T')[0],
+        summaryData: data.summary_data,
+        validators: data.validators.filter((eachValidator: ValidatorInterface) => cummulativeActiveListData.includes(eachValidator.pubkey)),
+        summaryGraphData: data.summary_graph,
+        smallGraphData: data.small_graph,
+        selectedDateBottom: req.cookies.selectedDateBottom || (new Date(bottomTimestamp)).toISOString().split('T')[0],
+        selectedDateTop: req.cookies.selectedDateTop || (new Date(topTimestamp)).toISOString().split('T')[0],
         specificRangeName,
-        specificRange,
+        specificRange: req.cookies.specificRange || 'last_365_days',
         startDay: req.cookies.startDay || 'monday',
         currency_type: req.cookies.currency_type || 'native',
-        chains,
+        chains: chains,
         isNavbarClose: req.cookies.isNavbarClose,
-        selectedChain: selectedChain,
+        selectedChain: chains.find((element: ChainInterface) => element.name == chainIdentifier),
         NUMBER_OF_COLUMNS,
         url,
         queryValidator: queryValidator ? JSON.stringify(queryValidator) : null,
@@ -168,11 +102,12 @@ const indexGetController = (req: Request, res: Response): void => {
         graph_title: graphMapping[url].graph_title,
         graph_description: graphMapping[url].graph_description,
         validatorGraph: {
-          dataFields: ['total_stake_sum', 'total_withdraw_sum', 'total_sold'],
-          colors: ['rgba(255, 149, 0, 1)', 'rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)']
-        }
-      });
+          dataFields: ['price', 'total_sold', 'total_stake_sum'],
+          colors: ['rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)', 'rgba(255, 149, 0, 1)']
+        },
+        priceGraphData: data.price_graph,
+        isStartClicked: req.cookies.isStartClicked,
+      })
     });
-};
-
-export default indexGetController;
+  });
+};;

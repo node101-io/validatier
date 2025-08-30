@@ -45,8 +45,8 @@ function handleExportEvents () {
       }
     } else if (event.target.id == 'export-choice-download-button' || event.target.parentNode.id == 'export-choice-download-button') {
 
-
-      const BASE_URL = !window.location.href.includes('#') ? window.location.href : window.location.href.split('#')[0];
+      const { protocol, host } = window.location;
+      const BASE_URL = `${protocol}//${host}/`;
       const EXPORT_API_ENDPOINT = 'validator/export_csv';
 
       const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
@@ -68,35 +68,35 @@ function handleExportEvents () {
       document.getElementById('export-choice-download-button').disabled = true;
       document.getElementById('export-choice-download-button').style.cursor = 'var(--pointer-default-dark)';
       fetch(url)
-      .then((response) => {
-        if (!response.ok) throw new Error(`${response.status}`);
-  
-        return response.blob().then((blob) => {
-          if (blob.size === 0) throw new Error('file_empty');
-  
-          const contentType = response.headers.get('Content-Type');
-          const isZip = contentType === 'application/zip';
-  
-          return { blob, isZip };
-        });
-      })
-      .then(({ blob, isZip }) => {
-          const downloadUrl = URL.createObjectURL(blob);
-          const fileExtension = isZip ? 'zip' : 'csv';
-          const a = document.createElement('a');
-          a.href = downloadUrl;
-          a.download = `validator-timeline-${formatTimestamp(parseInt(bottomTimestamp))}_${formatTimestamp(parseInt(topTimestamp))}.${fileExtension}`;
-  
-          document.body.appendChild(a);
-          a.click();
-  
-          document.body.removeChild(a);
-          URL.revokeObjectURL(downloadUrl);
-          document.getElementById('export-choice-download-button').innerHTML = downloadButtonInnerHTML;
-          document.getElementById('export-choice-download-button').disabled = false;
-          document.getElementById('export-choice-download-button').style.cursor = 'var(--pointer-hand-dark)';
-      })
-      .catch(error => console.error('Download failed:', error));
+        .then((response) => {
+          if (!response.ok) throw new Error(`${response.status}`);
+    
+          return response.blob().then((blob) => {
+            if (blob.size === 0) throw new Error('file_empty');
+    
+            const contentType = response.headers.get('Content-Type');
+            const isZip = contentType === 'application/zip';
+    
+            return { blob, isZip };
+          });
+        })
+        .then(({ blob, isZip }) => {
+            const downloadUrl = URL.createObjectURL(blob);
+            const fileExtension = isZip ? 'zip' : 'csv';
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = `validator-timeline-${formatTimestamp(parseInt(bottomTimestamp))}_${formatTimestamp(parseInt(topTimestamp))}.${fileExtension}`;
+    
+            document.body.appendChild(a);
+            a.click();
+    
+            document.body.removeChild(a);
+            URL.revokeObjectURL(downloadUrl);
+            document.getElementById('export-choice-download-button').innerHTML = downloadButtonInnerHTML;
+            document.getElementById('export-choice-download-button').disabled = false;
+            document.getElementById('export-choice-download-button').style.cursor = 'var(--pointer-hand-dark)';
+        })
+        .catch(error => console.error('Download failed:', error));
     } else {
       let target = event.target;
       while (target != document.body && !target.classList.contains('export-main-wrapper')) target = target.parentNode;

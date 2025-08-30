@@ -12,14 +12,10 @@ export function getDateRange(allTimeBottomTimestamp: number): {
     bottom: number,
     top: number
   },
-  this_year: {
+  last_365_days: {
     bottom: number,
     top: number
   },
-  last_calendar_year: {
-    bottom: number,
-    top: number
-  }
 } {
   const currentDateObj = new Date();
   const currentDateTimestamp = currentDateObj.getTime();
@@ -28,7 +24,7 @@ export function getDateRange(allTimeBottomTimestamp: number): {
 
   return {
     all_time: {
-      bottom: allTimeBottomTimestamp - (dayMiliseconds * 7),
+      bottom: allTimeBottomTimestamp,
       top: currentDateTimestamp
     },
     last_90_days: {
@@ -39,13 +35,9 @@ export function getDateRange(allTimeBottomTimestamp: number): {
       bottom: currentDateTimestamp - (dayMiliseconds * 180),
       top: currentDateTimestamp
     },
-    this_year: {
-      bottom: (new Date(currentDateObj.getFullYear(), 0, 1)).getTime(),
+    last_365_days: {
+      bottom: currentDateTimestamp - (dayMiliseconds * 365),
       top: currentDateTimestamp
     },
-    last_calendar_year: {
-      bottom: (new Date(currentDateObj.getFullYear() - 1, 0, 1)).getTime(),
-      top: (new Date(currentDateObj.getFullYear() - 1, 11, 31)).getTime()
-    }
   };
 }

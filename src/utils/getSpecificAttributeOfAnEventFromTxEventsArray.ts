@@ -1,5 +1,5 @@
 
-import { getOnlyNativeTokenValueFromCommissionOrRewardEvent } from '../listeners/functions/getOnlyNativeTokenValueFromCommissionOrRewardEvent.js';
+import { getOnlyNativeTokenValueFromAmountString } from '../listeners/functions/getOnlyNativeTokenValueFromAmountString.js';
 import { Event } from './decodeTxs.js';
 
 export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: Event[], specificEventTypes: string[], specificAttributeKey: string, denom: string): string {
@@ -20,8 +20,8 @@ export const getSpecificAttributeOfAnEventFromTxEventsArray = function (events: 
       let nativeTokenValue = 0;
 
       try {
-        if (eachAttribute.key == specificAttributeKey) nativeTokenValue = parseInt(getOnlyNativeTokenValueFromCommissionOrRewardEvent(eachAttribute.value, denom) ?? '0');
-        else if (atob(eachAttribute.key) == specificAttributeKey) nativeTokenValue = parseInt(getOnlyNativeTokenValueFromCommissionOrRewardEvent(atob(eachAttribute.value), denom) ?? '0');
+        if (eachAttribute.key == specificAttributeKey) nativeTokenValue = parseInt(getOnlyNativeTokenValueFromAmountString(eachAttribute.value, denom) ?? '0');
+        else if (atob(eachAttribute.key) == specificAttributeKey) nativeTokenValue = parseInt(getOnlyNativeTokenValueFromAmountString(atob(eachAttribute.value), denom) ?? '0');
         else continue;
   
         total += nativeTokenValue;

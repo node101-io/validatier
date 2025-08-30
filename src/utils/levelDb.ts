@@ -1,4 +1,5 @@
 import { Level } from 'level';
+import Validator from '../models/Validator/Validator.js';
 
 const db = new Level<string, string>('db', { valueEncoding: 'utf8' });
 
@@ -12,6 +13,8 @@ interface CompositeEventDataInterface {
   commission: number;
   total_stake: number;
   total_withdraw: number;
+  balance_change: number;
+  slash: number;
   timestamp: number;
 }
 
@@ -85,13 +88,15 @@ export function bulkSave(
             processNext();
           });
         }
-
+        
         const currentRecordJSON = JSON.parse(currentRecord);
         currentRecordJSON.self_stake = parseInt(currentRecordJSON.self_stake) + (compositeEventData.self_stake || 0);
         currentRecordJSON.commission = parseInt(currentRecordJSON.commission) + (compositeEventData.commission || 0);
         currentRecordJSON.reward = parseInt(currentRecordJSON.reward) + (compositeEventData.reward || 0);
         currentRecordJSON.total_stake = parseInt(currentRecordJSON.total_stake) + (compositeEventData.total_stake || 0);
         currentRecordJSON.total_withdraw = parseInt(currentRecordJSON.total_withdraw) + (compositeEventData.total_withdraw || 0);
+        currentRecordJSON.balance_change = parseInt(currentRecordJSON.balance_change) + (compositeEventData.balance_change || 0);
+        currentRecordJSON.slash = parseInt(currentRecordJSON.slash) + (compositeEventData.slash || 0);
 
         batch.put(eachOperatorAddress, JSON.stringify(currentRecordJSON));
         counter++;
@@ -141,17 +146,122 @@ export function clearChainData (
 ) {
   const batch = db.batch();
 
-  db.get(chain_identifier)
+  Validator.findValidatorsByChainIdentifier({ chain_identifier: chain_identifier }, (err, validators) => {
+    if (err) return callback('get_validators_failed:clearChainData', false);
+
+    const operatorAddresses = validators?.map(each => each.operator_address);
+    batch.put(chain_identifier, JSON.stringify(operatorAddresses));
+
+    if (!operatorAddresses || operatorAddresses.length <= 0) return callback('operator_addresses_null:clearChainData', false);
+    operatorAddresses.forEach((eachOperatorAddress: string) => batch.put(
+      eachOperatorAddress,
+      JSON.stringify({
+        self_stake: 0,
+        reward: 0,
+        commission: 0,
+        total_stake: 0,
+        total_withdraw: 0,
+        balance_change: 0,
+        slash: 0
+      })
+    ));
+
+    batch.write()
+      .then(() => callback(null, true))
+      .catch((err) => callback('bulk_delete_failed:clearChainData', false));
+  })
+}
+
+export function initializeOperatorAddressToWithdrawAddressMapping (
+  chain_identifier: string,
+  callback: (err: string | null, success: Boolean) => any
+) {
+  db.get(`withdraw_address_to_validators_mapping_${chain_identifier}`)
     .then((data) => {
-      if (!data) return callback(null, true);
-      const operatorAddresses = JSON.parse(data);
-      if (!operatorAddresses || operatorAddresses.length <= 0) return callback(null, true);
-      operatorAddresses.forEach((eachOperatorAddress: string) => batch.put(eachOperatorAddress, ''));
+      if (!data || data == '{}') {
+        Validator.findValidatorsByChainIdentifier({ chain_identifier: chain_identifier }, (err, validators) => {
+          if (err) callback(err, false);
+          const withdrawAddressToValidatorsMapping: Record<string, string[]> = {};
+          validators?.forEach(eachValidator => {
+            withdrawAddressToValidatorsMapping[eachValidator.delegator_address] = [eachValidator.operator_address];
+          });
 
-      batch.put(chain_identifier, JSON.stringify([]));
-
-      batch.write()
-        .then(() => callback(null, true))
-        .catch((err) => callback('bulk_delete_failed', false));
+          db.put(`withdraw_address_to_validators_mapping_${chain_identifier}`, JSON.stringify(withdrawAddressToValidatorsMapping))
+            .then(() => callback(null, true))
+            .catch(err => callback(err, false))
+        })
+      } else {
+        return callback(null, true);
+      }
     })
+}
+
+export function getValidatorsOfWithdrawAddress (
+  chain_identifier: string,
+  withdraw_address: string,
+  callback: (err: string | null, validatorAddresses: string[] | null) => any
+) {
+  db.get(`withdraw_address_to_validators_mapping_${chain_identifier}`)
+    .then((withdrawAddressToValidatorsMapping) => {
+      if (!withdrawAddressToValidatorsMapping)
+        return callback('bad_request', null);
+      const withdrawAddressToValidatorsMappingJSON = JSON.parse(withdrawAddressToValidatorsMapping);
+      return callback(null, withdrawAddressToValidatorsMappingJSON[withdraw_address]);
+    })
+}
+
+export function setWithdrawAddress(
+  chain_identifier: string,
+  operator_address: string,
+  new_withdraw_address: string,
+  callback: (err: string | null, success: boolean) => any
+) {
+  db.get(`withdraw_address_to_validators_mapping_${chain_identifier}`)
+    .then((withdrawAddressToValidatorsMapping) => {
+      if (!withdrawAddressToValidatorsMapping)
+        return callback('bad_request', false);
+
+      let withdrawAddressToValidatorsMappingJSON;
+      try {
+        withdrawAddressToValidatorsMappingJSON = JSON.parse(withdrawAddressToValidatorsMapping);
+      } catch (err) {
+        return callback(`json_parse_failed:${err}`, false);
+      }
+
+      if (!withdrawAddressToValidatorsMappingJSON[new_withdraw_address])
+        withdrawAddressToValidatorsMappingJSON[new_withdraw_address] = [];
+
+      if (!withdrawAddressToValidatorsMappingJSON[new_withdraw_address].includes(operator_address))
+        withdrawAddressToValidatorsMappingJSON[new_withdraw_address].push(operator_address);
+
+      db.put(
+        `withdraw_address_to_validators_mapping_${chain_identifier}`,
+        JSON.stringify(withdrawAddressToValidatorsMappingJSON)
+      )
+        .then(() => callback(null, true))
+        .catch(err => callback(`level_db_write_failed:${err}`, false));
+    })
+    .catch(err => callback(`level_db_read_failed:${err}`, false));
+}
+
+
+export function getWithdrawAddressMappingForChain (
+  chain_identifier: string,
+  callback: (err: string | null, withdrawAddressMappingForChain: Record<string, string[]> | null) => any
+) {
+  db.get(`withdraw_address_to_validators_mapping_${chain_identifier}`)
+    .then((withdrawAddressToValidatorsMapping) => {
+      if (!withdrawAddressToValidatorsMapping)
+        return callback('bad_request', null);
+      return callback(null, JSON.parse(withdrawAddressToValidatorsMapping));
+    })
+}
+
+export function resetWithdrawAddressMappingForChain (
+  chain_identifier: string,
+  callback: (err: string | null, success: Boolean) => any
+) {
+  db.put(`withdraw_address_to_validators_mapping_${chain_identifier}`, '')
+    .then(() => callback(null, true))
+    .catch((err) => callback(err, false))
 }
