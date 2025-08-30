@@ -24,7 +24,7 @@ export interface GraphDataInterface {
     commission_sum: number;
     total_stake_sum: number;
     total_sold: number;
-    percentage_sold: number;  
+    percentage_sold: number;
   }
 }[]
 
@@ -66,7 +66,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       commission_rate: string;
       keybase_id: string;
       created_at?: Date;
-    }, 
+    },
     callback: (
       err: string | null,
       newValidator: ValidatorInterface | null
@@ -103,7 +103,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
       security_contact: string;
       commission_rate: string;
       keybase_id: string;
-    }, 
+    },
     callback: (
       err: string | null,
       updatedValidator: ValidatorInterface | null
@@ -112,7 +112,7 @@ interface ValidatorModel extends Model<ValidatorInterface> {
   getValidatorByOperatorAddress: (
     body: {
       operator_address: string
-    }, 
+    },
     callback: (
       err: string | null,
       validator: ValidatorInterface | null
@@ -249,16 +249,16 @@ const validatorSchema = new Schema<ValidatorInterface>({
     trim: true,
     index: 1
   },
-  operator_address: { 
-    type: String, 
-    required: true, 
+  operator_address: {
+    type: String,
+    required: true,
     unique: true,
     trim: true,
     index: 1
   },
-  delegator_address: { 
-    type: String, 
-    required: false, 
+  delegator_address: {
+    type: String,
+    required: false,
     unique: true,
     trim: true,
     index: 1
@@ -268,31 +268,31 @@ const validatorSchema = new Schema<ValidatorInterface>({
     required: true,
     trim: true
   },
-  moniker: { 
-    type: String, 
+  moniker: {
+    type: String,
     required: true,
     trim: true,
     index: 1,
     minlength: 1,
     maxlength: MAX_DATABASE_TEXT_FIELD_LENGTH
   },
-  website: { 
-    type: String, 
+  website: {
+    type: String,
     trim: true,
     required: false
   },
-  description: { 
-    type: String, 
+  description: {
+    type: String,
     trim: true,
     required: false
   },
-  security_contact: { 
-    type: String, 
+  security_contact: {
+    type: String,
     trim: true,
     required: false
   },
-  commission_rate: { 
-    type: String, 
+  commission_rate: {
+    type: String,
     required: true,
     trim: true
   },
@@ -306,15 +306,19 @@ const validatorSchema = new Schema<ValidatorInterface>({
     type: String,
     required: false
   },
-  created_at: { 
-    type: Date, 
+  created_at: {
+    type: Date,
     required: true
   }
 });
 
+/*
+  TODO: Aynı pubkeye sahip bir validatör oluşturulduğunda farklı validatör olmasına rağmen aynı gibi davranıyoruz.
+  Validatörü pubkeyi ile identify etmemeliyiz. Farklı validatör saymalıyız.
+*/
 
 validatorSchema.statics.saveValidator = function (
-  body: Parameters<ValidatorModel['saveValidator']>[0], 
+  body: Parameters<ValidatorModel['saveValidator']>[0],
   callback: Parameters<ValidatorModel['saveValidator']>[1],
 ) {
   const { operator_address, moniker, commission_rate, keybase_id, chain_identifier, description, security_contact, website } = body;
@@ -325,7 +329,7 @@ validatorSchema.statics.saveValidator = function (
       chain_identifier: chain_identifier,
       operator_address: operator_address
     })
-    .then(oldValidator => { 
+    .then(oldValidator => {
       if (!oldValidator) {
         return Validator
           .create(body)
@@ -370,7 +374,7 @@ validatorSchema.statics.saveManyValidators = function (
       const existingOperatorAddresses = existingValidators.map(validator => validator.operator_address);
       const newValidators = validatorsArray.filter(validator => !existingOperatorAddresses.includes(validator.operator_address));
       const updateValidators = validatorsArray.filter(validator => existingOperatorAddresses.includes(validator.operator_address));
-  
+
       Validator
         .insertMany(newValidators, { ordered: false })
         .then(insertedValidators => {
@@ -385,7 +389,7 @@ validatorSchema.statics.saveManyValidators = function (
               } }
             }
           }));
-      
+
           Validator
             .bulkWrite(updateValidatorsBulk)
             .then(updatedValidators => {
@@ -401,12 +405,12 @@ validatorSchema.statics.saveManyValidators = function (
 
 
 validatorSchema.statics.updateValidator = function (
-  body: Parameters<ValidatorModel['updateValidator']>[0], 
+  body: Parameters<ValidatorModel['updateValidator']>[0],
   callback: Parameters<ValidatorModel['updateValidator']>[1],
 ) {
-  
+
   const { operator_address, moniker, commission_rate, keybase_id, website, security_contact, description } = body;
-  
+
   Validator
     .findOneAndUpdate(
       { operator_address: operator_address },
@@ -417,7 +421,7 @@ validatorSchema.statics.updateValidator = function (
         website: website,
         security_contact: security_contact,
         description: description
-      }  
+      }
     )
     .then(validator => {
       if (!validator) return callback('bad_request', null);
@@ -427,14 +431,14 @@ validatorSchema.statics.updateValidator = function (
 }
 
 validatorSchema.statics.getValidatorByOperatorAddress = function (
-  body: Parameters<ValidatorModel['getValidatorByOperatorAddress']>[0], 
+  body: Parameters<ValidatorModel['getValidatorByOperatorAddress']>[0],
   callback: Parameters<ValidatorModel['getValidatorByOperatorAddress']>[1],
 ) {
 
   const { operator_address } = body;
 
   Validator
-    .findOne({ operator_address }) 
+    .findOne({ operator_address })
     .then((validator) => {
       return callback(null, validator);
     })
@@ -442,7 +446,7 @@ validatorSchema.statics.getValidatorByOperatorAddress = function (
 }
 
 validatorSchema.statics.rankValidators = function (
-  body: Parameters<ValidatorModel['rankValidators']>[0], 
+  body: Parameters<ValidatorModel['rankValidators']>[0],
   callback: Parameters<ValidatorModel['rankValidators']>[1],
 ) {
   const { sort_by, order, bottom_timestamp, top_timestamp, with_photos, chain_identifier } = body;
@@ -484,7 +488,7 @@ validatorSchema.statics.rankValidators = function (
       let initialTotalWithdrawn = 0;
 
       let totalSold = 0;
-      
+
       let totalSelfStakeRatio = 0;
       let initialTotalSelfStakeRatio = 0;
 
@@ -494,10 +498,10 @@ validatorSchema.statics.rankValidators = function (
 
       const [validatorsResult, getPeriodicDataForValidatorSetResult] = results;
       if (
-        validatorsResult.status == 'rejected' || 
+        validatorsResult.status == 'rejected' ||
         getPeriodicDataForValidatorSetResult.status == 'rejected'
       ) return callback('bad_request', null);
-      
+
       const validators = validatorsResult.value;
       const validatorRecordMapping = getPeriodicDataForValidatorSetResult.value;
 
@@ -535,9 +539,9 @@ validatorSchema.statics.rankValidators = function (
 
         const initial_percentage_sold = Math.min(
           Math.max(
-            ((initial_sold <= 0 ? 0 : initial_sold) / ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 1) * 100), 
+            ((initial_sold <= 0 ? 0 : initial_sold) / ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 1) * 100),
             0
-          ), 
+          ),
           100
         );
 
@@ -548,10 +552,10 @@ validatorSchema.statics.rankValidators = function (
 
         totalDelegation += total_stake;
         initialTotalDelegation += initial_total_stake_prefix_sum;
-        
+
         totalWithdrawn += (reward + commission);
         initialTotalWithdrawn += (initial_reward_prefix_sum + initial_commission_prefix_sum);
-        
+
         totalSelfStaked += self_stake;
         initialTotalSelfStaked += initial_self_stake_prefix_sum;
 
@@ -584,7 +588,7 @@ validatorSchema.statics.rankValidators = function (
           ratio: ratio,
           sold: sold
         };
-        
+
         if (!with_photos) {
           delete eachValidator.website;
           delete eachValidator.description;
@@ -593,11 +597,11 @@ validatorSchema.statics.rankValidators = function (
         valueArray.push(pushObjectData);
         index++;
       }
-      
+
       valueArray.sort((a: any, b: any) => {
         const valA = a[sort_by] || 0;
         const valB = b[sort_by] || 0;
-    
+
         if (valA == valB && sort_by == 'percentage_sold') {
             const secA = a['average_total_stake'] || 0;
             const secB = b['average_total_stake'] || 0;
@@ -605,7 +609,7 @@ validatorSchema.statics.rankValidators = function (
                 ? secB - secA
                 : secA - secB;
         }
-    
+
         return (order == 'desc' || order == -1)
             ? valB - valA
             : valA - valB;
@@ -635,7 +639,7 @@ validatorSchema.statics.updateActiveValidatorList = async function (
 ) {
 
   const { chain_identifier, chain_rpc_url, height, day, month, year, active_validators_pubkeys_array } = body;
- 
+
   if (active_validators_pubkeys_array && active_validators_pubkeys_array.length > 0) {
     return ActiveValidators.saveActiveValidators({
       chain_identifier: chain_identifier,
@@ -645,13 +649,13 @@ validatorSchema.statics.updateActiveValidatorList = async function (
       active_validators_pubkeys_array: active_validators_pubkeys_array
     }, (err, savedActiveValidators) => {
       if (err) return callback(err, null);
-      return callback(null, savedActiveValidators);    
+      return callback(null, savedActiveValidators);
     })
   }
 
   return getPubkeysOfActiveValidatorsByHeight(chain_rpc_url, height, (err, pubkeysOfActiveValidators) => {
     if (err || !pubkeysOfActiveValidators) return callback(err, null);
-    
+
     ActiveValidators.saveActiveValidators({
       chain_identifier: chain_identifier,
       month: month + 1,
@@ -660,14 +664,14 @@ validatorSchema.statics.updateActiveValidatorList = async function (
       active_validators_pubkeys_array: pubkeysOfActiveValidators
     }, (err, savedActiveValidators) => {
       if (err) return callback(err, null);
-      return callback(null, savedActiveValidators);    
+      return callback(null, savedActiveValidators);
     })
   });
 };
 
 
 validatorSchema.statics.exportCsv = function (
-  body: Parameters<ValidatorModel['exportCsv']>[0], 
+  body: Parameters<ValidatorModel['exportCsv']>[0],
   callback: Parameters<ValidatorModel['exportCsv']>[1]
 ) {
   const { sort_by, order, bottom_timestamp, top_timestamp, range = 1, chain_identifier } = body;
@@ -695,7 +699,7 @@ validatorSchema.statics.exportCsv = function (
         if (err || !results) return next();
 
         const { validators } = results;
-        
+
         csvDataMapping[`validator-ranking-${formatTimestamp(bottomTimestamp)}_${formatTimestamp(bottomTimestamp + timestampRange)}.csv`] = validators;
         bottomTimestamp += timestampRange;
         return next();
@@ -712,7 +716,7 @@ validatorSchema.statics.exportCsv = function (
 }
 
 validatorSchema.statics.exportCsvForAllRanges = function(
-  body: Parameters<ValidatorModel['exportCsvForAllRanges']>[0], 
+  body: Parameters<ValidatorModel['exportCsvForAllRanges']>[0],
   callback: Parameters<ValidatorModel['exportCsvForAllRanges']>[1]
 ) {
   const { sort_by, order, bottom_timestamp, top_timestamp, chain_identifier } = body;
@@ -757,7 +761,7 @@ validatorSchema.statics.getSummaryGraphData = function (
 
   const numberOfDataPoints = 90;
   const intervalMs = Math.ceil((top_timestamp - bottom_timestamp) / numberOfDataPoints);
-  
+
   const groupId: Record<string, any> = {
     bucket: {
       $floor: {
@@ -821,7 +825,7 @@ validatorSchema.statics.getSummaryGraphData = function (
             percentage_sold: getPercentageSoldWithoutRounding({ sold, self_stake: self_stake_sum, total_withdraw: reward_sum + commission_sum }),
           });
         } else {
-          
+
           const fake = {
             _id: { bucket: bucketIndex },
             timestamp: lastValue ? lastValue.timestamp : 0,
