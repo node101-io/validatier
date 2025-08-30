@@ -20,15 +20,16 @@ const indexGetController = (req: Request, res: Response): void => {
   const topTimestamp = req.cookies.selectedDateTop ? Math.floor(new Date(req.cookies.selectedDateTop).getTime()) : new Date().getTime();
 
   const specificRangeName = req.cookies.specificRangeName || 'Last year';
-  const specificRange = 'custom';
+  req.cookies.specificRange = ''
+  const specificRange = req.cookies.specificRange || 'custom';
 
   Promise.allSettled([
-    new Promise((resolve) => { 
+    new Promise((resolve) => {
       Chain.getAllChains((err, chains) => {
         resolve({ err: err, chains: chains });
       })
     }),
-    new Promise((resolve) => {      
+    new Promise((resolve) => {
       if (specificRange && specificRange != 'custom') resolve({ err: null, results: true });
       Validator.rankValidators(
         { sort_by: 'percentage_sold', order: 'asc', bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp, chain_identifier: activeNetworkIdentifier, with_photos: true },
@@ -106,7 +107,7 @@ const indexGetController = (req: Request, res: Response): void => {
           colors: ['rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)', 'rgba(255, 149, 0, 1)']
         },
       };
-      
+
       const graphMapping = new Proxy(rawGraphMapping, {
         get(target: any, prop: any) {
           if (prop in target) {
@@ -128,7 +129,7 @@ const indexGetController = (req: Request, res: Response): void => {
         !priceGraphResults.value.priceGraphData ||
         !cummulativeActiveListResult.value.cummulativeActiveList
       ) return res.json({ success: false, err: 'bad_request' })
-    
+
       const chains = getAllChainsResult.value.chains;
 
       let summaryData;
@@ -158,10 +159,10 @@ const indexGetController = (req: Request, res: Response): void => {
         summaryGraphData = summaryGraphResults.value.summaryGraphData;
         smallGraphData = smallGraphResults.value.smallGraphData;
       }
-      
+
       const activeValidators = validators.filter((eachValidator: ValidatorInterface) => cummulativeActiveListData.includes(eachValidator.pubkey))
 
-      const selectedChain = chains.find((element: ChainInterface) => element.name == activeNetworkIdentifier);  
+      const selectedChain = chains.find((element: ChainInterface) => element.name == activeNetworkIdentifier);
 
       const queryValidator = req.query.validator
         ? (validators.filter((eachValidator: Record<string, any>) => eachValidator.operator_address == req.query.validator))[0]

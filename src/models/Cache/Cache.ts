@@ -10,7 +10,7 @@ export interface CacheInterface {
   type: 'summary_graph' | 'validators' | 'small_graph' | 'summary_data' | 'export',
   chain_identifier: string;
   interval: 'all_time' | 'last_30_days' | 'last_90_days' | 'last_365_days';
-  data: GraphDataInterface 
+  data: GraphDataInterface
   | {
     pubkey: string;
     operator_address: string;
@@ -86,7 +86,7 @@ const cacheSchema = new Schema<CacheInterface>({
 });
 
 cacheSchema.index({ chain_identifier: 1, interval: 1 });
- 
+
 cacheSchema.statics.saveCacheForChain = function (
   body: Parameters<CacheModel['saveCacheForChain']>[0],
   callback: Parameters<CacheModel['saveCacheForChain']>[1]
@@ -108,7 +108,7 @@ cacheSchema.statics.saveCacheForChain = function (
           bottom_timestamp: bottomTimestamp,
           top_timestamp: topTimestamp,
           order: 'asc',
-          with_photos: true 
+          with_photos: true
         },
         (err, results) => {
           if (err || !results) return next1(err);
@@ -119,7 +119,7 @@ cacheSchema.statics.saveCacheForChain = function (
             { sort_by: 'percentage_sold', order: 'asc', bottom_timestamp: bottomTimestamp, top_timestamp: topTimestamp, chain_identifier: chain.name },
             (err, rangeToCsvDataMapping) => {
               if (err) return next1({ success: false, err: err });
-            
+
               Validator.getSmallGraphData({
                 chain_identifier: chain.name,
                 bottom_timestamp: bottomTimestamp,

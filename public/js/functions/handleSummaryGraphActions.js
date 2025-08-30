@@ -21,16 +21,16 @@ function handleSummaryGraphActions() {
   })
 
   document.body.addEventListener('click', (event) => {
-    
+
     let target = event.target;
     while (target != document.body && (!target.classList.contains(headerClassName) && !target.classList.contains(contentClassName))) target = target.parentNode;
-    
+
     if (!target.classList.contains(headerClassName) && !target.classList.contains(contentClassName)) {
       target.parentNode.querySelectorAll('.' + dropdownArrowClassName).forEach(each => {
         each.style.transform = 'rotateX(0deg)';
         each.style.marginTop = '2px';
       });
-      target.parentNode.querySelectorAll('.' + contentClassName).forEach(each => 
+      target.parentNode.querySelectorAll('.' + contentClassName).forEach(each =>
         each.classList.remove(openContentClassName));
       return;
     };
@@ -39,19 +39,19 @@ function handleSummaryGraphActions() {
 
     const networkSwitchDropdown = target.nextSibling;
     const dropdownArrow = networkSwitchDropdown.parentNode.querySelector('.each-network-summary-network-graph-content-dropdown-arrow')
-    
+
     if (!networkSwitchDropdown.classList.contains(openContentClassName)) {
       dropdownArrow.style.marginTop = '4px';
       dropdownArrow.style.transform = 'rotateX(180deg)';
 
-      target.parentNode.querySelectorAll('.' + contentClassName).forEach(each => 
+      target.parentNode.querySelectorAll('.' + contentClassName).forEach(each =>
         each.classList.add(openContentClassName));
     }
     else {
       dropdownArrow.style.marginTop = '2px';
       dropdownArrow.style.transform = 'rotateX(0deg)';
 
-      target.parentNode.querySelectorAll('.' + contentClassName).forEach(each => 
+      target.parentNode.querySelectorAll('.' + contentClassName).forEach(each =>
         each.classList.remove(openContentClassName));
     };
   })
@@ -60,18 +60,18 @@ function handleSummaryGraphActions() {
 function createNetworkSummaryGraph (dataFields, colors) {
   const summaryData = JSON.parse(document.body.getAttribute('summaryData'));
   const targetCacheSummaryGraphData = JSON.parse(document.body.getAttribute('summaryGraphData'));
-  
+
   let priceGraphData = null;
-  
+
     priceGraphData = JSON.parse(document.body.getAttribute('priceGraphData'));
 
   while (priceGraphData.length != targetCacheSummaryGraphData.length) {
     if (priceGraphData.length > targetCacheSummaryGraphData.length)
       priceGraphData.pop();
-    else 
+    else
       targetCacheSummaryGraphData.pop();
   }
-  
+
 
   document.querySelectorAll('.each-network-summary-network-graph-content-each-dropdown').forEach(each => {
     if (!each.classList.contains('leaderboard-dropdown-option')) each.classList.add('section-hidden')
@@ -103,7 +103,7 @@ function createNetworkSummaryGraph (dataFields, colors) {
 
   let columnsPer = Math.round(targetCacheSummaryGraphData.length / 5);
   columnsPer = columnsPer % 2 == 0 ? columnsPer : columnsPer + 1;
-  
+
   const currentSumMapping = {};
   const showPercentageChange = document.body.getAttribute('showPercentageChange');
 
@@ -118,7 +118,7 @@ function createNetworkSummaryGraph (dataFields, colors) {
     price: 0
   };
 
-  const subplotGroupArray = dataFields[0] != 'percentage_sold' 
+  const subplotGroupArray = dataFields[0] != 'percentage_sold'
     ? [
       ['price'],
       ['total_sold'],
@@ -142,26 +142,26 @@ function createNetworkSummaryGraph (dataFields, colors) {
   let sumTotalStake = 0;
   let sumTotalSold = 0;
   const dataLength = targetCacheSummaryGraphData.length;
-  
+
   for (let i = 0; i < targetCacheSummaryGraphData.length; i++) {
     const data = targetCacheSummaryGraphData[i];
     sumTotalSold += data.total_sold;
 
     if (priceGraphData) data['price'] = priceGraphData[i];
-    
+
     dataFields.forEach(eachDataField => {
-      if (!currentSumMapping[eachDataField]) 
+      if (!currentSumMapping[eachDataField])
         !['total_stake_sum'].includes(eachDataField)
           ? currentSumMapping[eachDataField] = 0
           : currentSumMapping[eachDataField] = summaryData[`initial_${eachDataField}`];
-          
+
       if (
         eachDataField != 'price' &&
-        eachDataField != 'percentage_sold'        
+        eachDataField != 'percentage_sold'
       ) data[eachDataField] += currentSumMapping[eachDataField];
 
       currentSumMapping[eachDataField] = data[eachDataField];
-      
+
       // if(!showPercentageChange && eachDataField == 'total_withdraw_sum') return;
 
       // metric.querySelector('.percentage-change-value-content').innerHTML = '';
@@ -175,11 +175,11 @@ function createNetworkSummaryGraph (dataFields, colors) {
 
     sumPrice += data.price;
     sumTotalStake += data.total_stake_sum;
-    
+
     graphDataMapping[i] = data;
 
     const timestamp = data.timestamp;
-    
+
     const minValueArray = [];
     const maxValueArray = [];
     for (let i = 0; i < subplotGroupArray.length; i++) {
@@ -189,7 +189,7 @@ function createNetworkSummaryGraph (dataFields, colors) {
       let maxValue;
 
       let { minValue: min, maxValue: max } = calculateMaxAndMinValue(graphDataMapping, eachSubplotGroup);
-      
+
       if (
         eachSubplotGroup[0] != 'total_stake_sum' &&
         eachSubplotGroup[0] != 'percentage_sold' &&
@@ -200,7 +200,7 @@ function createNetworkSummaryGraph (dataFields, colors) {
 
       minValueArray.push(minValue);
       maxValueArray.push(maxValue);
-      
+
       document.documentElement.style.setProperty(`--min-value-summary-${i}`, minValue);
       document.documentElement.style.setProperty(`--max-value-summary-${i}`, maxValue);
     }
@@ -223,14 +223,14 @@ function createNetworkSummaryGraph (dataFields, colors) {
       columnsPer,
       subplotGroupMapping,
     });
-  
+
     if (
       insertedColumn.previousSibling &&
       insertedColumn.previousSibling.classList.contains('each-graph-column-wrapper')
     ) {
       adjustLineWidthAndAngle(insertedColumn.previousSibling, insertedColumn, 'summary', dataFields, subplotGroupMapping);
     } else {
-      document.documentElement.style.setProperty('--column-height-summary', insertedColumn.offsetHeight);      
+      document.documentElement.style.setProperty('--column-height-summary', insertedColumn.offsetHeight);
     }
   }
 
@@ -244,7 +244,7 @@ function createNetworkSummaryGraph (dataFields, colors) {
   const rightVerticalAxisWrapper = document.getElementById('summary-graph-vertical-axis-labels1');
   if (rightVerticalAxisWrapper)
     graphWrapper.appendChild(rightVerticalAxisWrapper);
-  
+
   const graphColumns = graphWrapper.querySelectorAll('.each-graph-column-wrapper');
   const lastColumn = graphColumns[graphColumns.length - 1];
   lastColumn.classList.add('each-graph-column-wrapper-last');
@@ -267,7 +267,7 @@ function createSmallGraphs () {
     const graphContainer = document.getElementById(`small-graph-${operatorAddress}`);
     const graphWrapper = plotValidatorGraph({ type: 'small', operatorAddress, decimals: null, usd_exchange_rate: null, symbol: null, validatorGraphEventListenersMapping: null, dataFields, graphContainer });
     const graphWidth = window.getComputedStyle(graphWrapper, null).getPropertyValue('width').replace('px', '');
-    
+
     const currentSumMapping = {};
 
     for (let i = 0; i < smallGraphData.length; i++) {
@@ -279,14 +279,14 @@ function createSmallGraphs () {
         currentSumMapping[eachDataField] = data[eachDataField];
       });
 
-      graphDataMapping[i] = data;    
+      graphDataMapping[i] = data;
       let { minValue, maxValue } = calculateMaxAndMinValue(graphDataMapping, dataFields);
       if (dataFields[0] == 'average_self_stake_ratio')
         maxValue = 100;
 
       document.documentElement.style.setProperty(`--min-value-${operatorAddress}`, minValue);
       document.documentElement.style.setProperty(`--max-value-${operatorAddress}`, maxValue);
-    
+
       const insertedColumn = addColumnToExistingGraph({
         type: 'small',
         operatorAddress,
@@ -303,7 +303,7 @@ function createSmallGraphs () {
         dataFields: dataFields,
         colors: colors
       });
-    
+
       if (
         insertedColumn.previousSibling &&
         insertedColumn.previousSibling.classList.contains('each-graph-column-wrapper')
