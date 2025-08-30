@@ -89,18 +89,10 @@
   background-color: rgba(37, 0, 84, 1);
   color: rgba(239, 239, 255, 1);
   padding: 14px 28px;
+  padding-bottom: 18px;
   margin: 0 auto;
   margin-bottom: auto;
   border-radius: 8px;
-}
-
-.mobile-start-menu-start-button[disabled] {
-  opacity: 0.8;
-  cursor: not-allowed;
-}
-
-.mobile-start-menu-start-button span {
-  margin-bottom: 4px;
 }
 
 .mobile-animate-star {

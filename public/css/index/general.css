@@ -48,9 +48,9 @@
 
   --footer-main-title-font-size: 48px;
   --footer-main-title-font-weight: 600;
-  
+
   --footer-socials-wrapper-gap: 56px;
-  
+
   --footer-main-wrapper-vertical-padding: 50px;
   --footer-main-wrapper-gap: 24px;
 
@@ -59,16 +59,16 @@
   --footer-main-wrapper-margin-top: 150px;
   --footer-main-wrapper-margin-bottom: 20px;
   --footer-main-wrapper-padding-bottom: 80px;
-  
+
   --each-social-icon-transition-duration: 0.25s;
   --each-social-icon-hover-scale: 1.2;
   --each-social-icon-size: 22px;
-  
+
   --switch-label-width: 50px;
   --switch-label-height: 25px;
   --switch-label-background-color: rgb(252, 252, 252);
   --switch-label-border-radius: 25px;
-  
+
   --switch-button-top: 2px;
   --switch-button-left: 2px;
   --switch-button-width: 21px;
@@ -83,6 +83,10 @@
   --each-footer-right-column-width: auto;
 
   --footer-contact-input-content-width: 200px;
+}
+
+.display-none {
+  display: none !important;
 }
 
 html {
