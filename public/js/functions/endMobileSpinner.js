@@ -1,8 +1,7 @@
 function endMobileSpinner () {
   const startButton = document.getElementById('mobile-intro-start-button');
 
-  if (!startButton)
-    return console.log('startButton not found');
+  if (!startButton) return;
 
   startButton.classList.remove('display-none');
 

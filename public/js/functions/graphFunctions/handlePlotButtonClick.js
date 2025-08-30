@@ -24,7 +24,7 @@ function changeSummaryGraph (target) {
 
   // document.getElementById('summary-graph-title').innerHTML = graphTitle;
   // document.getElementById('summary-graph-description').innerHTML = graphDescription;
-  
+
   // createNetworkSummaryGraph(dataFields, colors);
 
   const lastVisitedOperatorAddress = sessionStorage.getItem('last_visited_operator_address');
@@ -36,7 +36,7 @@ function changeSummaryGraph (target) {
 
   const validatorFilterInput = document.getElementById('validator-filter-input');
   validatorFilterInput.value = '';
-  
+
   document.getElementById('all-main-wrapper').scrollTo({
     top: document.getElementById(lastVisitedOperatorAddress).offsetTop + document.getElementById('all-validators-main-wrapper').offsetTop - parseInt(headerHeight),
     behavior: 'instant'
@@ -113,7 +113,7 @@ function generateGraph (validator) {
   const datePicker = document.getElementById('date-picker');
   const searchWrapper = document.querySelector('.search-wrapper');
   const innerMainWrapper = document.getElementById('inner-main-wrapper');
-  
+
   searchWrapper.style.visibility = 'hidden';
   bannerTitle.style.color = 'var(--banner-title-content-color-main)';
   document.documentElement.style.setProperty('--banner-logo-color', 'rgba(37, 0, 84, 1)');
@@ -139,7 +139,7 @@ function generateGraph (validator) {
   if (typeof validator == 'string') validator = JSON.parse(validator);
   const summaryData = JSON.parse(document.body.getAttribute('summaryData'));
   const validators = JSON.parse(document.body.getAttribute('validators'));
-  
+
   const operatorAddress = validator.operator_address;
   const pubkey = validator.pubkey;
   const chainIdentifier = validator.chain_identifier;
@@ -157,7 +157,7 @@ function generateGraph (validator) {
   document.getElementById('validator-details-website').href = `${validator.website || ''}`;
   document.getElementById('validator-details-explorer').href = `https://www.mintscan.io/cosmos/validators/${validator.operator_address || ''}`;
   document.getElementById('validator-details-stake').href = `https://wallet.keplr.app/chains/${chainIdentifier == 'cosmoshub' ? 'cosmos-hub' : chainIdentifier}?modal=validator&chain=${chainId}&validator_address=${validator.operator_address || ''}`;
-  
+
   validator_stats.forEach(stat => {
     if (stat.field == 'operator_address') {
       const validatorOperatorAddressContent = document.getElementById('validator-details-operator-address');
@@ -192,7 +192,7 @@ function generateGraph (validator) {
       document.getElementById(`${stat.id}-native`).innerHTML = '%' + (Math.round(shortNumberFormat(Math.min(Math.max(0.00, validator[stat.field]), 100)) * 100) / 100);
     }
 
-    if (stat.usdContent) 
+    if (stat.usdContent)
       document.getElementById(`${stat.id}-usd`).innerHTML = usdValue;
 
     if (stat.helperType == 'text')
@@ -205,7 +205,7 @@ function generateGraph (validator) {
         const ssrRank = ([...validators].sort((a, b) => b['self_stake_ratio'] - a['self_stake_ratio']).findIndex(v => v.operator_address === validator.operator_address) + 1);
         const averageRank = Math.floor((ssRank + ssrRank) / 2);
         const suffix = suffixArray[parseInt(averageRank.toString()[averageRank.toString().length - 1])];
-        
+
         document.getElementById(`${stat.id}-helper`).innerHTML = averageRank + `${suffix} out of ` + validators.length;
       } else {
         const rank = [...validators].sort((a, b) => a[stat.field] - b[stat.field]).findIndex(v => v.operator_address === validator.operator_address) + 1;
@@ -214,24 +214,24 @@ function generateGraph (validator) {
       }
     }
   });
-  
+
 
   const bottomDate = document.getElementById('periodic-query-bottom-timestamp').value;
   const topDate = document.getElementById('periodic-query-top-timestamp').value
   const bottomTimestamp = Math.floor(new Date(bottomDate).getTime());
-  const topTimestamp = Math.floor(new Date(topDate).getTime());   
-  
+  const topTimestamp = Math.floor(new Date(topDate).getTime());
+
   validatorListenerVariablesMapping[operatorAddress] = {
     isSelectingRange: false,
     rangeInitialColumn: '',
     rangeFinalColumn: '',
     isSelectionDirectionToLeft: false
   }
-  
+
   const graphDataMapping = {};
   const dataFields = ['price', 'total_sold', 'total_stake_sum'];
   const colors = ['rgba(50, 173, 230, 1)', 'rgba(88, 86, 214, 1)', 'rgba(255, 149, 0, 1)'];
-    
+
   dataFields.forEach(eachDataField => {
     const metric = document.getElementById(`validator-metric-${eachDataField}`);
     metric.classList.remove('section-hidden');
@@ -268,7 +268,7 @@ function generateGraph (validator) {
     ['total_sold'],
     ['total_stake_sum']
   ];
-  
+
   for (let i = 0; i < subplotGroupArray.length; i++) {
     const subplotSeperator = document.createElement('div');
     subplotSeperator.classList.add('subplot-seperator');
@@ -282,10 +282,10 @@ function generateGraph (validator) {
   let sumTotalSold = 0;
   let dataLength = 0;
   let inactivityIntervals = [];
-  
+
   eventSource.onmessage = (event) => {
     const response = JSON.parse(event.data);
-  
+
     if (!response.success || response.err) {
       eventSource.close();
       return;
@@ -298,8 +298,8 @@ function generateGraph (validator) {
         price: sumPrice / dataLength,
         total_sold: sumTotalSold,
       }
-      addColumnEventListener(operatorAddress.replace('@', '\\@'), dataFields, colors, symbol, usd_exchange_rate, decimals, summaryData, subplotGroupMapping, averageMapping);  
-    
+      addColumnEventListener(operatorAddress.replace('@', '\\@'), dataFields, colors, symbol, usd_exchange_rate, decimals, summaryData, subplotGroupMapping, averageMapping);
+
       document.querySelectorAll(`.column-wrapper-${operatorAddress}`).forEach(eachColumn => {
         const timestamp = eachColumn.getAttribute('timestamp');
         for (let i = 0; i < inactivityIntervals.length; i += 2) {
@@ -344,7 +344,7 @@ function generateGraph (validator) {
       let maxValue;
 
       let { minValue: min, maxValue: max } = calculateMaxAndMinValue(graphDataMapping, eachSubplotGroup);
-      
+
       // Değişmesi gerekirse buradan değiştir
       if (!['total_stake_sum', 'price'].includes(eachSubplotGroup[0])) minValue = min
       else minValue = 0;
@@ -352,11 +352,11 @@ function generateGraph (validator) {
 
       minValueArray.push(minValue);
       maxValueArray.push(maxValue);
-      
+
       document.documentElement.style.setProperty(`--min-value-${operatorAddress}-${i}`, minValue);
       document.documentElement.style.setProperty(`--max-value-${operatorAddress}-${i}`, maxValue);
     }
-  
+
     const insertedColumn = addColumnToExistingGraph({
       type: 'validator',
       operatorAddress: operatorAddress.replace('@', '\\@'),
@@ -375,7 +375,7 @@ function generateGraph (validator) {
       columnsPer: 18,
       subplotGroupMapping
     });
-  
+
     if (
       insertedColumn.previousSibling &&
       insertedColumn.previousSibling.classList.contains('each-graph-column-wrapper')
@@ -385,7 +385,7 @@ function generateGraph (validator) {
       document.documentElement.style.setProperty(`--column-height-${operatorAddress}`, insertedColumn.offsetHeight);
     }
   };
-  
+
 
   eventSource.addEventListener('end', () => {
     eventSource.close();
@@ -429,7 +429,13 @@ function handlePlotButtonClick () {
     generateGraph(validator)
   });
 
+  let previousHref = window.location.href;
   window.addEventListener('popstate', function(event) {
+    if (new URL(previousHref).searchParams.get('validator'))
+      return this.window.location.reload();
+
+    previousHref = window.location.href;
+
     const path = window.location.pathname.replace('/', '') || '';
     let target = document.body;
     if (path.includes('validator='))
@@ -443,18 +449,17 @@ function handlePlotButtonClick () {
     isResizing = true;
     const graphWrappersArray = document.querySelectorAll('.validator-graph-wrapper');
     setTimeout(() => {
-  
       for (let i = 0; i < graphWrappersArray.length; i++) {
         const eachGraphWrapper = graphWrappersArray[i];
         const operatorAddress = eachGraphWrapper.getAttribute('operator_address');
         const graphWidth = eachGraphWrapper.parentNode.offsetWidth;
-  
+
         document.documentElement.style.setProperty(
           `--graph-column-width-px-${operatorAddress.replace('\\@', '@')}`,
           `calc((${graphWidth - 10}px - var(--vertical-axis-labels-width)) / var(--number-of-columns-${operatorAddress}))`
         );
         document.documentElement.style.setProperty(
-          `--graph-column-width-${operatorAddress.replace('\\@', '@')}`, 
+          `--graph-column-width-${operatorAddress.replace('\\@', '@')}`,
           `calc((${graphWidth - 10} - var(--vertical-axis-labels-width-int)) / var(--number-of-columns-${operatorAddress}))`
         );
       }

@@ -2,7 +2,7 @@
   --date-picker-height: 46px;
   --date-picker-z-index: 1000;
   --date-picker-width: 300px;
-  
+
   --date-picker-display-initial: flex;
   --date-picker-display: flex;
 
@@ -15,7 +15,7 @@
   --selected-range-open-date-interval-description-span-display: flex;
 
   --selected-range-logo-color: rgba(255, 255, 255, 1);
-  
+
   --selected-range-background: rgba(245, 245, 255, 1);
   --selected-range-backdrop-filter: none;
   --selected-range-border-size: 1px;
@@ -27,7 +27,7 @@
   --selected-range-border-size-initial: var(--general-main-wrapper-border-size);
   --selected-range-border-color-initial: rgba(239, 239, 255, 1);
   --selected-range-color-initial: rgba(255, 255, 255, 1);
-  
+
   --selected-range-open-after-display: none;
 
   --date-interval-description-padding: 8px;
@@ -45,7 +45,7 @@
   --picker-main-wrapper-border-radius: 24px;
   --picker-main-wrapper-border-size-initial: var(--general-main-wrapper-border-size);
   --picker-main-wrapper-border-size: 1px;
-  
+
   --picker-content-wrapper-font-size: 20px;
   --picker-content-wrapper-margin-top: 5px;
 
@@ -84,7 +84,7 @@
   --date-range-gap: 2px;
   --date-range-margin-top: -2px;
   --date-range-width: fit-content;
-    
+
   --selected-date-border-size: 4px;
   --selected-date-border-radius: 20px;
 
@@ -98,10 +98,10 @@
 
   --network-switch-search-bar-width: 100%;
   --network-switch-search-icon-size: 36px;
-  
+
   --network-switch-search-bar-border-radius: 0px;
   --network-switch-search-bar-height: 48px;
-  
+
   --network-switch-search-bar-input-font-size: 16px;
   --network-switch-search-bar-input-margin-top: -2px;
 
@@ -123,7 +123,7 @@
   --network-switch-dropdown-transform-perspective: 1000px;
   --network-switch-dropdown-transform-rotate-x: -90deg;
   --network-switch-dropdown-transform-open-rotate-x: 0deg;
-  
+
   --network-switch-header-width: 250px;
   --network-switch-header-padding: 10px;
   --network-switch-header-background-color: rgba(232, 232, 255, 1);
@@ -146,11 +146,11 @@
   --network-switch-network-currency-font-size: 16px;
   --network-switch-network-currency-font-weight: 400;
   --network-switch-network-currency-color: rgba(73, 48, 111, 1);
-  
+
   --each-network-switch-main-numerical-value-color: rgba(73, 48, 111, 1);
   --each-network-switch-main-numerical-value-font-weight: 500;
   --each-network-switch-main-numerical-value-font-size: 16px;
-  
+
   --unselected-network-title-font-size: 20px;
   --unselected-network-title-font-weight: 400;
   --unselected-network-title-transition-duration: 0.25s;
@@ -160,7 +160,7 @@
   --each-chain-wrapper-height: 30px;
   --each-chain-wrapper-vertical-margin: 10px;
   --each-chain-wrapper-horizontal-margin: 20px;
-  
+
   --network-switch-chains-wrapper-max-height: 200px;
   --network-switch-dropdown-before-bottom: 0px;
   --network-switch-dropdown-before-height: 20px;
@@ -168,10 +168,10 @@
   --network-switch-dropdown-after-height: 20px;
 
   --network-switch-network-image-wrapper-margin-right: 5px;
-  
+
   --network-unselected-image-wrapper-margin-right: 15px;
   --network-switch-network-info-wrapper-margin-right: 40px;
-  
+
   --network-switch-dropdown-toggle-margin-top: 4px;
 
   --banner-logo-color: rgba(245, 245, 255, 1);
@@ -465,6 +465,7 @@
   flex-direction: row;
   align-items: center;
   z-index: 20;
+  user-select: none;
 }
 
 .banner-title-content {
@@ -589,8 +590,8 @@
 }
 
 .each-chain-wrapper {
-  display: flex; 
-  align-items: center; 
+  display: flex;
+  align-items: center;
   height: var(--each-chain-wrapper-height);
   margin: var(--each-chain-wrapper-vertical-margin) var(--each-chain-wrapper-horizontal-margin);
 }
@@ -681,7 +682,7 @@
 
 .network-switch-header-chain-content-wrapper {
   height: 100%;
-  justify-content: flex-start; 
+  justify-content: flex-start;
   gap: var(--network-switch-header-chain-content-wrapper-gap);
 }
 
@@ -716,7 +717,7 @@
 .network-switch-network-title-wrapper {
   display: flex;
   align-items: center;
-  gap: 15px;  
+  gap: 15px;
 }
 
 .network-switch-network-symbol {
@@ -728,7 +729,7 @@
 
 .network-switch-drowdown-toggle {
   transform-origin: center;
-  transition: all var(--dropdown-icon-transition-duration) ease 0s; 
+  transition: all var(--dropdown-icon-transition-duration) ease 0s;
   color: var(--network-switch-network-title-color);
 }
 
@@ -823,28 +824,28 @@
     --table-filters-subgroup-gap: 0px;
     --date-picker-height: 36px;
     --date-picker-display-initial: none;
-  
+
     --selected-range-font-size: 16px;
 
     --calendar-left-wrapper-dropdown-li-padding: 4px;
-  
+
     --calendar-left-wrapper-each-choice-font-size: 16px;
     --calendar-left-wrapper-each-choice-font-weight: 400;
-  
+
     --calendar-wrapper-padding: 10px;
     --picker-main-wrapper-right: -50px;
-  
+
     --date-input-month-year-info-content-font-size: 16px;
     --calendar-left-wrapper-width: 120px;
-  
+
     --days-header-wrapper-horizontal-margin: -5px;
     --days-header-wrapper-horizontal-padding: 5px;
     --days-header-wrapper-gap: 5px;
-  
+
     --date-font-size: 16px;
     --date-border-size: 4px;
     --date-padding: 0px;
-    
+
     --date-range-width: 100px;
 
     --header-banner-wrapper-height-initial: 13px;

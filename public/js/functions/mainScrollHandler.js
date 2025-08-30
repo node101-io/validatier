@@ -12,7 +12,7 @@ function mainScrollHandler() {
   const searchWrapper = document.querySelector('.search-wrapper');
   const innerMainWrapper = document.getElementById('inner-main-wrapper');
 
-  allMainWrapper.addEventListener('scroll', (event) => {    
+  allMainWrapper.addEventListener('scroll', (event) => {
     if (window.location.href.includes('validator=')) return;
 
     const scrollThreshold = window.innerWidth <= 500
@@ -65,7 +65,7 @@ function mainScrollHandler() {
 
       searchWrapper.style.opacity = `${Math.min(1 - ((scrollNormalizer - scrollTop) / (scrollNormalizer - scrollThreshold)), 1)}`;
       headerMainWrapper.style.height = `calc(var(--header-main-wrapper-height) * ${1 - 0.34 * Math.max(0, Math.min((scrollTop - scrollThreshold) / 100, 1))})`;
-    
+
       headerMainWrapper.classList.add('header-main-wrapper-main');
       headerMainWrapper.style.background = 'var(--header-main-background)';
       datePicker.style.display = 'var(--date-picker-display)';
@@ -80,12 +80,11 @@ function mainScrollHandler() {
     }
   });
 
-  const startButton = document.getElementById('mobile-intro-start-button');
+  const startButton = document.querySelector('.mobile-start-menu-start-button');
   const mobileMenuStartWrapper = document.getElementById('mobile-menu-start-wrapper');
-  const mobileMenuTitleWrapper = document.getElementById('mobile-menu-title-wrapper');
   const mobileMenuDescriptionWrapper = document.getElementById('mobile-menu-description-wrapper');
 
-  startButton.addEventListener('click', (event) => {
+  startButton?.addEventListener('click', (event) => {
     document.querySelectorAll('.ellipse-left').forEach(eachEllipse => {
       eachEllipse.style.transform = 'translateX(-1000px)';
       eachEllipse.style.opacity = '0';
