@@ -482,10 +482,14 @@
 
 .banner-logo-wrapper {
   height: 100%;
+  min-height: 100%;
+  min-width: fit-content;
 }
 
 .banner-logo-wrapper svg {
   height: 100%;
+  min-height: 100%;
+  aspect-ratio: 1.6/1;
   width: auto;
   display: block;
   max-height: 100%;

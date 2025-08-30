@@ -35,8 +35,10 @@ const graphMapping = new Proxy({
   }
 });
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export default (req: Request, res: Response): void => {
-  console.time('response_time');
+  if (isDev) console.time('response_time');
 
   const chainIdentifier = req.cookies.network ? req.cookies.network : 'cosmoshub';
 
@@ -45,17 +47,17 @@ export default (req: Request, res: Response): void => {
 
   const specificRangeName = req.cookies.specificRangeName || 'Last year';
 
-  console.time('getAllChains_time');
+  if (isDev) console.time('getAllChains_time');
   Chain.getAllChains((err, chains) => {
-    console.timeEnd('getAllChains_time');
+    if (isDev) console.timeEnd('getAllChains_time');
     if (err || !chains) return res.json({ success: false, err: 'bad_request' });
 
-    console.time('cache_time');
+    if (isDev) console.time('cache_time');
     Cache.getCacheForChain({
       chain_identifier: chainIdentifier,
       interval: req.cookies.specificRange || 'last_365_days',
     }, (err, cacheResult) => {
-      console.timeEnd('cache_time');
+      if (isDev) console.timeEnd('cache_time');
       if (err || !cacheResult) return res.json({ success: false, err: 'bad_request' });
 
       const data = cacheResult[0];
@@ -68,7 +70,7 @@ export default (req: Request, res: Response): void => {
 
       const url = req.originalUrl.replace('/', '');
 
-      console.timeEnd('response_time');
+      if (isDev) console.timeEnd('response_time');
 
       return res.render('index/index', {
         page: 'index/index',
