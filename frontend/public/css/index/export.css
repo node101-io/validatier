@@ -1,0 +1,131 @@
+:root {
+  --export-main-wrapper-color: rgba(41, 48, 80, 1);;
+  --export-wrapper-header-padding: 8px;
+  --export-wrapper-header-font-size: 20px;
+  --export-wrapper-header-gap: 20px;
+
+  --export-wrapper-content-width: 217px;
+  --export-wrapper-content-height: 241px;
+  --export-wrapper-content-box-shadow-color: rgba(23, 37, 76, 0.12);
+  --export-wrapper-content-padding: 20px;
+  --export-wrapper-content-font-size: 20px;
+  --export-wrapper-content-gap: 5px;
+  --export-wrapper-content-transition-duration: 0.25s;
+  --export-wrapper-content-transform-rotate-x: -90deg;
+  --export-wrapper-content-transform-perspective: 1000px;
+  --export-wrapper-content-top: 48px;
+  --export-wrapper-content-z-index: 1000;
+  --export-wrapper-content-opacity: 0;
+  --export-wrapper-content-right: 0;
+  --export-wrapper-content-border-radius: 24px;
+  --export-wrapper-content-title-font-size: 20px;
+  --each-export-choice-padding: 5px;
+  --each-export-choice-transition-duration: 0.25s;
+  --export-choice-selected-font-weight: 600;
+  
+  --each-export-choice-font-size: 20px;
+  --each-export-choice-gap: 10px;
+  --each-export-choice-span-margin-top: -4px;
+
+  --export-choice-download-button-padding: 0px;
+  --export-choice-download-button-font-size: 20px;
+  --export-choice-download-button-gap: 10px;
+  --export-choice-download-button-width: 92px;
+  --export-choice-download-button-height: 32px;
+  --export-choice-download-button-border-radius: 2px;
+  --export-choice-download-button-font-weight: 500;
+  --export-choice-download-button-background-color: rgba(202, 200, 255, 1);
+  --export-choice-download-button-span-margin-bottom: 2px;
+}
+
+.export-main-wrapper {
+  position: relative;
+  color: var(--export-main-wrapper-color);  
+}
+
+.export-wrapper-header {
+  width: calc(var(--selected-range-height) - (2 * var(--export-wrapper-header-padding)));
+  height: calc(var(--selected-range-height) - (2 * var(--export-wrapper-header-padding)));
+  padding: var(--export-wrapper-header-padding);
+  font-size: var(--export-wrapper-header-font-size);
+  gap: var(--export-wrapper-header-gap);
+  cursor: var(--pointer-hand-dark);
+  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
+  background-color: var(--body-main-wrapper-background);
+  border-radius: 16px;
+}
+
+.export-wrapper-content {
+  width: var(--export-wrapper-content-width);
+  height: var(--export-wrapper-content-height);
+  box-shadow: 0px 16px 32px 0px var(--export-wrapper-content-box-shadow-color);
+  padding: var(--export-wrapper-content-padding);
+  font-size: var(--export-wrapper-content-font-size);
+  gap: var(--export-wrapper-content-gap);
+  transition: all var(--export-wrapper-content-transition-duration) ease 0s;
+  transform: perspective(var(--export-wrapper-content-transform-perspective)) rotateX(var(--export-wrapper-content-transform-rotate-x));
+  top: var(--export-wrapper-content-top);
+  z-index: var(--export-wrapper-content-z-index);
+  opacity: var(--export-wrapper-content-opacity);
+  right: var(--export-wrapper-content-right);
+  border-radius: var(--export-wrapper-content-border-radius);
+  background-color: var(--color-dropdown-background);
+  display: flex;
+  flex-direction: column;
+  transform-origin: top;
+  position: absolute;
+}
+
+.export-wrapper-content-title {
+  font-size: 20px !important;
+}
+
+.each-export-choice {
+  padding: var(--each-export-choice-padding);
+  transition: all var(--each-export-choice-transition-duration) ease 0s;
+  display: flex;
+  align-items: center;
+  font-size: var(--each-export-choice-font-size);
+  gap: var(--each-export-choice-gap);
+  cursor: var(--pointer-hand-dark);  
+}
+
+.each-export-choice span {
+  margin-top: var(--each-export-choice-span-margin-top);
+}
+
+.export-choice-selected {
+  font-weight: var(--export-choice-selected-font-weight);
+}
+
+.export-action-buttons-wrapper {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.export-choice-action-button {
+  padding: var(--export-choice-download-button-padding);
+  font-size: var(--export-choice-download-button-font-size) !important;
+  gap: var(--export-choice-download-button-gap);
+  cursor: var(--pointer-hand-dark);
+  border: none;
+  width: var(--export-choice-download-button-width);
+  height: var(--export-choice-download-button-height);
+  border-radius: var(--export-choice-download-button-border-radius);
+  font-weight: var(--export-choice-download-button-font-weight);
+  background-color: transparent;
+}
+
+.export-choice-action-button span {
+  margin-bottom: var(--export-choice-download-button-span-margin-bottom);
+}
+
+.export-choice-download-button {
+  background-color: var(--export-choice-download-button-background-color);
+}
+
+.export-choice-download-button span {
+  font-size: calc(var(--export-choice-download-button-font-size) - 2px);
+}

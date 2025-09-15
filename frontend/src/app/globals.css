@@ -102,6 +102,57 @@ body {
     overflow: hidden;
 }
 
+.all-wrapper {
+    width: var(--all-wrapper-width);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    overflow-y: overlay;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+}
+
+.all-main-wrapper {
+    width: calc(var(--all-main-wrapper-width) - var(--navbar-width));
+    transition: all var(--navbar-toggle-transition-duration) linear 0s;
+    height: 100vh;
+    background-color: var(--all-main-wrapper-background-color);
+    position: relative;
+    border-radius: var(--all-main-wrapper-border-radius);
+    margin-left: var(--all-main-wrapper-margin-left);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scrollbar-width: var(--all-main-wrapper-webkit-scrollbar-width);
+}
+
+.all-main-wrapper::-webkit-scrollbar {
+    width: var(--all-main-wrapper-webkit-scrollbar-width);
+    position: absolute;
+    background-color: transparent;
+    top: 0;
+    left: 0;
+}
+
+.all-main-wrapper::-webkit-scrollbar-thumb {
+    background: var(--all-main-wrapper-webkit-scrollbar-thumb-background);
+    border-radius: var(--all-main-wrapper-webkit-scrollbar-thumb-border-radius);
+    transition: background
+        var(--all-main-wrapper-webkit-scrollbar-thumb-transition-duration)
+        ease-in-out;
+    letter-spacing: var(
+        --all-main-wrapper-webkit-scrollbar-thumb-letter-spacing
+    );
+}
+
+.all-main-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+    width: 0px !important;
+}
+
 a {
     color: var(--color-pale-black);
     text-decoration: none;
