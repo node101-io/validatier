@@ -60,7 +60,7 @@
 }
 
 .all-main-wrapper {
-    width: calc(var(--all-main-wrapper-width) - var(--navbar-width));
+    width: calc(var(--all-main-wrapper-width));
     transition: all var(--navbar-toggle-transition-duration) linear 0s;
     height: 100vh;
     background-color: var(--all-main-wrapper-background-color);
