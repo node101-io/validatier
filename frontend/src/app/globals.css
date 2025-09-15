@@ -1,0 +1,185 @@
+@import "tailwindcss";
+
+:root {
+    /* NAVBAR */
+    --navbar-horizontal-padding: 22px;
+    --navbar-vertical-padding: 50px;
+    --navbar-gap: 52px;
+    --navbar-position: unset;
+    --navbar-z-index: 10000;
+    --navbar-background-color: rgb(232, 232, 254);
+    --navbar-view-toggle-left: -10.5px;
+    --navbar-toggle-transition-duration: 0.25s;
+
+    /* COLORS */
+    --color-powder-blue: rgb(245, 245, 255);
+    --color-pale-dark: rgb(22, 22, 22);
+    --color-night-blue: rgba(37, 0, 84, 1);
+    --color-pale-white: rgb(248, 248, 248);
+    --color-dropdown-background: rgba(245, 245, 254, 1);
+    --color-triangle-unselected: rgba(183, 166, 198, 1);
+    --color-triangle-big-unselected: rgba(73, 48, 111, 1);
+    --color-middle-date-background: rgba(232, 232, 255, 1);
+    --color-selected-date-background: rgba(202, 200, 255, 1);
+    --color-network-switch: rgb(224, 228, 255);
+    --color-network-switch-dropdown-background: rgb(236, 240, 255);
+    --color-table-header-popup: rgba(209, 209, 209, 1);
+
+    /* POINTER */
+    --pointer-default-dark: url("/res/pointers/default-dark.svg") 4 0, auto;
+    --pointer-hand-dark: url("/res/pointers/hand-dark.svg") 6 0, auto;
+    --pointer-hand-drag-dark: url("/res/pointers/hand-drag-dark.svg") 6 0, auto;
+    --pointer-hand-click-dark: url("/res/pointers/hand-click-dark.svg") 6 0,
+        auto;
+
+    /* FONT */
+    --website-main-font-size: 16px;
+    --website-main-font-family: "Darker Grotesque";
+    --website-main-font-weight: 500;
+    --website-master-background-color: rgb(250, 250, 250);
+    --website-master-line-height: 12px;
+
+    /* SKELETON */
+    --skeleton-background-color: rgb(204, 204, 204);
+    --skeleton-text-border-radius: 20px;
+    --skeleton-transition-duration: 0.2s;
+
+    /* SPINNER */
+    --spinner-border-size: 4px;
+    --spinner-border-radius: 50%;
+    --spinner-animation-duration: 1s;
+
+    /* FOOTER */
+    --footer-main-title-font-size: 48px;
+    --footer-main-title-font-weight: 600;
+
+    --footer-socials-wrapper-gap: 56px;
+
+    --footer-main-wrapper-vertical-padding: 50px;
+    --footer-main-wrapper-gap: 24px;
+
+    --footer-main-wrapper-height: 300px;
+    --footer-main-wrapper-padding-horizontal: 0;
+    --footer-main-wrapper-margin-top: 150px;
+    --footer-main-wrapper-margin-bottom: 20px;
+    --footer-main-wrapper-padding-bottom: 80px;
+
+    --each-footer-right-column-margin-left: auto;
+    --each-footer-right-column-width: auto;
+
+    --footer-contact-input-content-width: 200px;
+
+    --each-new-footer-line-section-flex-direction: row;
+    --footer-banner-logo-height: 110px;
+    --footer-banner-title-font-size: 180px;
+    --footer-banner-title-line-height: 140px;
+    --footer-banner-logo-svg-margin-top: 16px;
+}
+
+.display-none {
+    display: none !important;
+}
+
+html {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-size: var(--website-main-font-size);
+    overflow: hidden;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    font-family: var(--website-main-font-family);
+    font-weight: var(--website-main-font-weight);
+    background-color: var(--color-pale-white);
+    color: var(--color-pale-dark);
+    cursor: var(--pointer-default-dark);
+    overflow: hidden;
+}
+
+a {
+    color: var(--color-pale-black);
+    text-decoration: none;
+}
+
+input {
+    font-family: var(--website-main-font-family);
+    padding-bottom: 4px;
+    line-height: 4px;
+}
+
+button {
+    font-family: var(--website-main-font-family);
+}
+
+input {
+    outline: none;
+    background-color: var(--color-pale-white);
+}
+
+.spinner {
+    border: var(--spinner-border-size) solid var(--color-powder-blue);
+    border-top: var(--spinner-border-size) solid
+        var(--color-triangle-unselected);
+    border-radius: var(--spinner-border-radius);
+    animation: spin var(--spinner-animation-duration) linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@media only screen and (max-width: 1200px) {
+    :root {
+        --footer-banner-logo-height: 75px;
+        --footer-banner-title-font-size: 120px;
+        --footer-banner-title-line-height: 100px;
+        --footer-banner-logo-svg-margin-top: 10px;
+    }
+}
+
+@media only screen and (max-width: 1000px) {
+    :root {
+        /* --navbar-position: absolute;
+    --all-main-wrapper-width: 100% + var(--navbar-width) - 76px; */
+        --inner-main-wrapper-horizontal-padding: 20px;
+    }
+}
+
+@media only screen and (max-width: 800px) {
+    :root {
+        --footer-banner-logo-height: 50px;
+        --footer-banner-title-font-size: 80px;
+        --footer-banner-title-line-height: 60px;
+        --footer-banner-logo-svg-margin-top: 8px;
+    }
+}
+
+@media only screen and (max-width: 520px) {
+    :root {
+        --footer-banner-logo-height: 30px;
+        --footer-banner-title-font-size: 50px;
+        --footer-banner-title-line-height: 40px;
+        --footer-banner-logo-svg-margin-top: 4px;
+
+        --each-new-footer-line-section-flex-direction: column;
+    }
+}
+
+@media only screen and (max-width: 500px) {
+    :root {
+        --each-footer-right-column-margin-left: auto;
+        --each-footer-right-column-width: 200px;
+        --footer-contact-input-content-width: 100px;
+    }
+}
