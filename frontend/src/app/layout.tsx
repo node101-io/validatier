@@ -4,6 +4,14 @@ import "./globals.css";
 import "@/../public/css/index/general.css";
 import "@/../public/css/index/index.css";
 import "@/../public/css/index/header.css";
+import "@/../public/css/index/intro.css";
+import "@/../public/css/index/navbar.css";
+import "@/../public/css/index/summary.css";
+import "@/../public/css/index/validators.css";
+import "@/../public/css/index/table.css";
+import "@/../public/css/index/graph.css";
+import "@/../public/css/index/export.css";
+import "@/../public/css/index/mobile_start.css";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -42,7 +50,7 @@ export default function RootLayout({
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                <div className="all-wrapper">{children}</div>
+                {children}
             </body>
         </html>
     );

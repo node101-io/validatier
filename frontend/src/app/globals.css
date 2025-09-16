@@ -1,1 +1,28 @@
 @import "tailwindcss";
+
+* {
+    box-sizing: content-box;
+}
+
+html {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-size: var(--website-main-font-size);
+    overflow: hidden;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    font-family: var(--website-main-font-family);
+    background-color: rgb(232, 232, 254) !important;
+    font-weight: var(--website-main-font-weight);
+    background-color: var(--color-pale-white);
+    color: var(--color-pale-dark);
+    cursor: var(--pointer-default-dark);
+    overflow: hidden;
+}
