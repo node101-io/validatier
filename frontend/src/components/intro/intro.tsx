@@ -12,12 +12,22 @@ export default function Intro() {
                 <div className="animate-star orbit-4"></div>
                 <div className="animate-star orbit-5"></div>
                 <div className="animate-star orbit-6"></div>
-                <Image
-                    src="/res/images/intro.svg"
-                    alt="intro"
-                    width={1440}
-                    height={525}
-                />
+                <div
+                    style={{
+                        position: "relative",
+                        width: "1440px",
+                        height: "525px",
+                        aspectRatio: "1440 / 525",
+                    }}
+                >
+                    <Image
+                        src="/res/images/intro.svg"
+                        alt="intro"
+                        fill
+                        style={{ objectFit: "cover", objectPosition: "center" }}
+                        priority
+                    />
+                </div>
             </div>
             <div className="intro-main-wrapper-title-wrapper">
                 <div>THE VALIDATOR'S</div>
