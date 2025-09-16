@@ -1,4 +1,5 @@
 import NetworkSummary from "@/components/network-summary/network-summary";
+import GraphMetrics from "@/components/graph-metrics/graph-metrics";
 
 export default function Inner() {
     return (
@@ -88,6 +89,7 @@ export default function Inner() {
                     </div>
                 </div>
             </div>
+            <GraphMetrics />
         </div>
     );
 }
