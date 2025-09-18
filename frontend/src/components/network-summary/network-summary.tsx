@@ -1,5 +1,3 @@
-import "@/../public/css/index/summary.css";
-
 export default function NetworkSummary({
     leftColumn,
     rightColumn,
@@ -12,13 +10,18 @@ export default function NetworkSummary({
     return (
         <>
             <div
-                className={`each-network-summary-stat ${componentName}`}
+                className={`flex justify-between relative 
+                    min-w-[calc(33.3%-57.2px)] max-w-[calc(33.3%-57.2px)] h-[76px]
+                    px-5.5 py-4
+                    bg-[#f5f5ff]
+                    rounded-[20px]
+                    [border-width:0.5px] border-[#bebee7]`}
                 id={componentName}
             >
-                <div className="each-network-summary-stat-column">
+                <div className="max-w-1/2 h-full flex flex-col justify-between">
                     {leftColumn}
                 </div>
-                <div className="each-network-summary-stat-column">
+                <div className="max-w-1/2 h-full flex flex-col justify-between">
                     {rightColumn}
                 </div>
             </div>
