@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "@/../public/css/index/general.css";
 import "@/../public/css/index/index.css";
-import "@/../public/css/index/header.css";
+// import "@/../public/css/index/header.css";
 import "@/../public/css/index/intro.css";
 // import "@/../public/css/index/navbar.css";
 import "@/../public/css/index/summary.css";
@@ -12,16 +12,6 @@ import "@/../public/css/index/table.css";
 import "@/../public/css/index/graph.css";
 import "@/../public/css/index/export.css";
 import "@/../public/css/index/mobile_start.css";
-
-const geistSans = Geist({
-    variable: "--font-geist-sans",
-    subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-    variable: "--font-geist-mono",
-    subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -47,11 +37,7 @@ export default function RootLayout({
                     rel="stylesheet"
                 />
             </head>
-            <body
-                className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-            >
-                {children}
-            </body>
+            <body>{children}</body>
         </html>
     );
 }
