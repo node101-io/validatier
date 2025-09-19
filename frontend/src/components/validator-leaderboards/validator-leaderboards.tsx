@@ -66,11 +66,11 @@ export default function ValidatorLeaderboards() {
     ];
 
     return (
-        <div className="mt-2">
+        <div className="mt-2 w-full">
             <div className="text-xl font-[500] text-[#7c70c3]">
                 Leaderboards
             </div>
-            <div className="flex justify-around w-full h-[650px] gap-5 my-2.5 overflow-y-hidden -ml-10 px-10">
+            <div className="flex justify-around w-full h-[650px] gap-5 my-2.5 overflow-y-hidden">
                 {leaderboards.map((leaderboard) => {
                     {
                         /* TODO: Use seperate component for each leaderboard since validators are different */
