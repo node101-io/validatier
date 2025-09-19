@@ -225,7 +225,7 @@ const seriesPrice = [{ name: "ATOM Price", data: [3, 5, 4, 6, 7] }];
 export default function GraphMetrics() {
     return (
         <>
-            <div className="w-fit mt-2 text-xl font-[500] text-[#7c70c3]">
+            <div className="w-fit my-2 text-xl font-[500] text-[#7c70c3]">
                 Graph Metrics
             </div>
             <div className="flex gap-5 flex-row h-fit w-full">

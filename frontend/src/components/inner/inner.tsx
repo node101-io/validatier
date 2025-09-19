@@ -1,5 +1,6 @@
 import NetworkSummary from "@/components/network-summary/network-summary";
 import GraphMetrics from "@/components/graph-metrics/graph-metrics";
+import ValidatorLeaderboards from "@/components/validator-leaderboards/validator-leaderboards";
 
 export default function Inner() {
     return (
@@ -92,6 +93,7 @@ export default function Inner() {
                 </div>
             </div>
             <GraphMetrics />
+            <ValidatorLeaderboards />
         </div>
     );
 }
