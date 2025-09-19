@@ -225,29 +225,29 @@ const seriesPrice = [{ name: "ATOM Price", data: [3, 5, 4, 6, 7] }];
 export default function GraphMetrics() {
     return (
         <>
-            <div className="network-summary-network-graph-metrics-wrapper-title each-section-title-content">
+            <div className="w-fit mt-2 text-xl font-[500] text-[#7c70c3]">
                 Graph Metrics
             </div>
-            <div className="network-summary-network-graph-main-wrapper">
-                <div className="network-summary-network-graph-metrics-wrapper">
-                    <div className="network-summary-network-graph-metrics-content-wrapper">
+            <div className="flex gap-5 flex-row h-fit w-full">
+                <div className="flex flex-col min-w-[230px] max-w-[230px] overflow-visible gap-3 ml-0 p-0">
+                    <div className="flex flex-col w-full h-full gap-5">
                         {metrics.map((metric) => (
                             <MetricContent key={metric.id} metric={metric} />
                         ))}
                     </div>
                 </div>
-                <div className="network-summary-network-graph-content-wrapper">
-                    <div className="network-summary-network-graph-content-header">
-                        <div className="network-summary-network-graph-content-header-main">
+                <div className="flex flex-col w-full p-2 bg-[#f5f5ff] rounded-[20px] border-[0.5px] border-[#bebee7]">
+                    <div className="flex flex-col items-center mb-5 py-2 px-4 h-11 w-full">
+                        <div className="flex items-baseline justify-between w-full">
                             <div
-                                className="network-summary-network-graph-content-title"
+                                className="text-[28px] font-[500] text-[#250054]"
                                 id="summary-graph-title"
                             >
                                 Reward Flow Overview
                             </div>
                         </div>
                         <div
-                            className="network-summary-network-graph-content-description"
+                            className="w-full text-start -mt-0.5 text-[#7c70c3] font-normal text-xl/4"
                             id="summary-graph-description"
                         >
                             Shows how validators respond to changes in price and
@@ -255,7 +255,7 @@ export default function GraphMetrics() {
                         </div>
                     </div>
                     <div
-                        className="network-summary-network-graph-content"
+                        className="w-full"
                         id="network-summary-graph-container"
                     >
                         <div

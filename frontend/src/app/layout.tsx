@@ -5,7 +5,7 @@ import "@/../public/css/index/index.css";
 // import "@/../public/css/index/header.css";
 import "@/../public/css/index/intro.css";
 // import "@/../public/css/index/navbar.css";
-import "@/../public/css/index/summary.css";
+// import "@/../public/css/index/summary.css";
 import "@/../public/css/index/validators.css";
 import "@/../public/css/index/table.css";
 import "@/../public/css/index/graph.css";
