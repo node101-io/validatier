@@ -5,7 +5,7 @@ import ValidatorLeaderboards from "@/components/validator-leaderboards/validator
 export default function Inner() {
     return (
         <div
-            className="w-[1000px] h-fit py-0 px-10 mt-37.5 mb-1"
+            className="flex flex-col w-[1100px] gap-5 h-fit py-0 px-10 mt-37.5 mb-1"
             id="inner-main-wrapper"
         >
             <div
