@@ -8,13 +8,13 @@ export default function Inner() {
             id="inner-main-wrapper"
         >
             <div
-                className="flex flex-col gap-5 mb-2.5"
+                className="flex flex-col w-full gap-5 mb-2.5"
                 id="network-summary-main-wrapper"
             >
                 <div className="text-xl font-normal text-[#7c70c3]">
                     Network Summary
                 </div>
-                <div className="flex w-full flex-row flex-nowrap justify-between gap-5 overflow-x-visible ml-0 p-0">
+                <div className="flex flex-row flex-nowrap justify-between gap-5 overflow-x-visible ml-0 p-0">
                     <NetworkSummary
                         leftColumn={
                             <>
