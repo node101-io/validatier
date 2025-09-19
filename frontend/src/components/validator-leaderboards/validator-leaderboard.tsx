@@ -25,21 +25,21 @@ export default function ValidatorLeaderboard({
                     </div>
                 </div>
             </div>
-            <div className="flex items-center justify-between mb-6 px-4">
+            <div className="flex items-center justify-between mb-6 px-4 max-h-[14px]">
                 {/* Each Leaderboard Summary */}
-                <div className="flex items-baseline flex-nowrap gap-1.25">
+                <div className="flex items-baseline flex-nowrap gap-1.25 mb-auto">
                     <div className="text-nowrap text-4xl/3 font-bold text-[#49306f] mb-0.5">
                         {leaderboard.summaryContent}
                     </div>
                     {leaderboard.usdValue && (
-                        <div className="flex flex-row justify-between items-baseline w-full font-[500] text-xl text-[#7c70c3]">
+                        <div className="block items-baseline w-full font-[500] text-xl text-[#7c70c3]">
                             {leaderboard.usdValue}
                         </div>
                     )}
                 </div>
             </div>
-            {validators.map((validator, index) => (
-                <div className="flex flex-col h-fit gap-0">
+            <div className="flex flex-col h-fit gap-0">
+                {validators.map((validator, index) => (
                     <div
                         className="flex items-center justify-between cursor-[var(--pointer-hand-dark)] py-3 px-4 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out"
                         operator-address={validator.operatorAddress}
@@ -108,8 +108,8 @@ export default function ValidatorLeaderboard({
                             )}
                         </div>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
 }

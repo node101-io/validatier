@@ -1,6 +1,8 @@
 import Intro from "@/components/intro/intro";
 import Navbar from "@/components/navbar/navbar";
 import Inner from "@/components/inner/inner";
+import StakeWithUs from "@/components/stake-with-us/stake-with-us";
+import Footer from "@/components/footer/footer";
 
 export default function Home() {
     return (
@@ -9,6 +11,8 @@ export default function Home() {
                 <Navbar />
                 <Intro />
                 <Inner />
+                <StakeWithUs />
+                <Footer />
             </div>
         </div>
     );

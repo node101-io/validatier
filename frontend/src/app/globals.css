@@ -62,3 +62,40 @@ input {
     outline: none;
     background-color: var(--color-pale-white);
 }
+
+.conic-gradient-bg {
+    background: conic-gradient(
+        from -33.92deg at 75.63% 116.37%,
+        #26004c -16.24deg,
+        #609aff 47.22deg,
+        #c0c0f2 214.21deg,
+        #26004c 343.76deg,
+        #609aff 407.22deg
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.footer-svg-wrapper svg {
+    width: 100%;
+    position: absolute;
+    left: -46px;
+    bottom: 0;
+    z-index: 0;
+    display: block;
+}
+
+.footer-svg-wrapper::after {
+    content: "";
+    width: 100%;
+    height: 50px;
+    position: absolute;
+    left: 0;
+    bottom: 250px;
+    background: linear-gradient(
+        0deg,
+        rgba(255, 255, 255, 0) 1%,
+        rgba(255, 255, 255, 1) 100%
+    );
+}

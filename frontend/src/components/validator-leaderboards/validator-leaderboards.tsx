@@ -11,13 +11,43 @@ export default function ValidatorLeaderboards() {
             image: "https://via.placeholder.com/150",
             totalStaked: 100,
             usdValue: "100",
+            percentageSold: 85,
         },
         {
-            id: "1",
-            name: "Validator 1",
-            operatorAddress: "validator1",
+            id: "2",
+            name: "Validator 2",
+            operatorAddress: "validator2",
             image: "https://via.placeholder.com/150",
-            percentageSold: 100,
+            totalStaked: 95,
+            usdValue: "95",
+            percentageSold: 72,
+        },
+        {
+            id: "3",
+            name: "Validator 3",
+            operatorAddress: "validator3",
+            image: "https://via.placeholder.com/150",
+            totalStaked: 90,
+            usdValue: "90",
+            percentageSold: 68,
+        },
+        {
+            id: "4",
+            name: "Validator 4",
+            operatorAddress: "validator4",
+            image: "https://via.placeholder.com/150",
+            totalStaked: 85,
+            usdValue: "85",
+            percentageSold: 55,
+        },
+        {
+            id: "5",
+            name: "Validator 5",
+            operatorAddress: "validator5",
+            image: "https://via.placeholder.com/150",
+            totalStaked: 80,
+            usdValue: "80",
+            percentageSold: 42,
         },
     ];
 
@@ -42,6 +72,9 @@ export default function ValidatorLeaderboards() {
             </div>
             <div className="flex justify-around w-full h-[650px] gap-5 my-2.5 overflow-y-hidden -ml-10 px-10">
                 {leaderboards.map((leaderboard) => {
+                    {
+                        /* TODO: Use seperate component for each leaderboard since validators are different */
+                    }
                     return (
                         <ValidatorLeaderboard
                             validators={validators}
