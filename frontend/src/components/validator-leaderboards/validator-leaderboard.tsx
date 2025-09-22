@@ -1,5 +1,6 @@
 import Validator from "@/types/validator";
 import Leaderboard from "@/types/leaderboard";
+import atomToUSD from "@/utils/atom-to-usd";
 
 export default function ValidatorLeaderboard({
     validators,
@@ -97,10 +98,14 @@ export default function ValidatorLeaderboard({
                             ) : leaderboard.type === "totalSold" ? (
                                 <>
                                     <div className="flex items-center !justify-end text-end text-xl min-w-[100px] max-w-[100px] w-[100px]">
-                                        {validator.totalStaked?.toFixed(2)} ATOM
+                                        {validator.totalSold?.toFixed(2)} ATOM
                                     </div>
                                     <div className="flex items-center !justify-end text-end text-xl min-w-[100px] max-w-[100px] w-[100px]">
-                                        {validator.usdValue} USD
+                                        {validator.totalSold
+                                            ? `$${atomToUSD(
+                                                  validator.totalSold
+                                              )}`
+                                            : "-"}
                                     </div>
                                 </>
                             ) : (

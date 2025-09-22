@@ -2,55 +2,11 @@ import ValidatorLeaderboard from "@/components/validator-leaderboards/validator-
 import Validator from "@/types/validator";
 import Leaderboard from "@/types/leaderboard";
 
-export default function ValidatorLeaderboards() {
-    const validators: Validator[] = [
-        {
-            id: "1",
-            name: "Validator 1",
-            operatorAddress: "validator1",
-            image: "https://via.placeholder.com/150",
-            totalStaked: 100,
-            usdValue: "100",
-            percentageSold: 85,
-        },
-        {
-            id: "2",
-            name: "Validator 2",
-            operatorAddress: "validator2",
-            image: "https://via.placeholder.com/150",
-            totalStaked: 95,
-            usdValue: "95",
-            percentageSold: 72,
-        },
-        {
-            id: "3",
-            name: "Validator 3",
-            operatorAddress: "validator3",
-            image: "https://via.placeholder.com/150",
-            totalStaked: 90,
-            usdValue: "90",
-            percentageSold: 68,
-        },
-        {
-            id: "4",
-            name: "Validator 4",
-            operatorAddress: "validator4",
-            image: "https://via.placeholder.com/150",
-            totalStaked: 85,
-            usdValue: "85",
-            percentageSold: 55,
-        },
-        {
-            id: "5",
-            name: "Validator 5",
-            operatorAddress: "validator5",
-            image: "https://via.placeholder.com/150",
-            totalStaked: 80,
-            usdValue: "80",
-            percentageSold: 42,
-        },
-    ];
-
+export default function ValidatorLeaderboards({
+    validators,
+}: {
+    validators: Validator[];
+}) {
     const leaderboards: Leaderboard[] = [
         {
             type: "percentageSold",

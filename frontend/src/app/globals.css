@@ -63,6 +63,7 @@ input {
     background-color: var(--color-pale-white);
 }
 
+/* Footer */
 .conic-gradient-bg {
     background: conic-gradient(
         from -33.92deg at 75.63% 116.37%,
@@ -98,4 +99,18 @@ input {
         rgba(255, 255, 255, 0) 1%,
         rgba(255, 255, 255, 1) 100%
     );
+}
+
+/* Validators Table */
+.validators-table-validator-name {
+    animation: auto ease 0s 1 normal none running none;
+}
+
+.validators-table-validator-name::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 100%;
 }

@@ -4,6 +4,8 @@ export default interface Validator {
     image: string;
     operatorAddress: string;
     percentageSold?: number;
-    totalStaked?: number;
-    usdValue?: string;
+    totalSold?: number;
+    avgDelegation?: number;
+    totalRewards?: number;
+    selfStake?: number;
 }

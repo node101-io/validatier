@@ -1,8 +1,10 @@
 import NetworkSummary from "@/components/network-summary/network-summary";
 import GraphMetrics from "@/components/graph-metrics/graph-metrics";
 import ValidatorLeaderboards from "@/components/validator-leaderboards/validator-leaderboards";
+import ValidatorTable from "../validator-table/validator-table";
+import Validator from "@/types/validator";
 
-export default function Inner() {
+export default function Inner({ validators }: { validators: Validator[] }) {
     return (
         <div
             className="flex flex-col w-[1100px] gap-5 h-fit py-0 px-10 mt-37.5 mb-1"
@@ -93,7 +95,8 @@ export default function Inner() {
                 </div>
             </div>
             <GraphMetrics />
-            <ValidatorLeaderboards />
+            <ValidatorLeaderboards validators={validators} />
+            <ValidatorTable validators={validators} />
         </div>
     );
 }
