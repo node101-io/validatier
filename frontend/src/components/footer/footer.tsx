@@ -27,10 +27,10 @@ export default function Footer() {
                 </div>
             </div>
             <div className="flex items-center gap-4 -mt-6 relative">
-                <div className="h-[110px] aspect-24/15">
+                <div className="xl:h-[110px] xl:mt-0 lg:h-[85px] lg:-mt-1 aspect-24/15">
                     <LogoSVG fill="#361661" className="w-full h-full mt-4" />
                 </div>
-                <div className="text-[180px]/[140px] font-[800] conic-gradient-bg">
+                <div className="xl:text-[180px]/[140px] lg:text-[140px]/[120px] font-[800] conic-gradient-bg">
                     VALIDATIER
                 </div>
             </div>
