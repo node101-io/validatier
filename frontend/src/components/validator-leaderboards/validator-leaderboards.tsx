@@ -27,12 +27,13 @@ export default function ValidatorLeaderboards({
                 Leaderboards
             </div>
             <div className="flex justify-around w-full h-[650px] gap-5 my-2.5 overflow-y-hidden">
-                {leaderboards.map((leaderboard) => {
+                {leaderboards.map((leaderboard, index) => {
                     {
                         /* TODO: Use seperate component for each leaderboard since validators are different */
                     }
                     return (
                         <ValidatorLeaderboard
+                            key={index}
                             validators={validators}
                             leaderboard={leaderboard}
                         />

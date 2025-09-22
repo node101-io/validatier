@@ -4,6 +4,20 @@ import ValidatorLeaderboards from "@/components/validator-leaderboards/validator
 import ValidatorTable from "../validator-table/validator-table";
 import Validator from "@/types/validator";
 
+const seriesDelegation = [
+    {
+        name: "Average Delegation",
+        data: [182_000_000, 210_000_000, 250_000_000, 265_000_000, 328_000_000],
+    },
+];
+const seriesSold = [
+    {
+        name: "Total Sold Amount",
+        data: [200_000, 2_000_000, 7_000_000, 13_000_000, 18_000_000],
+    },
+];
+const seriesPrice = [{ name: "ATOM Price", data: [3, 5, 4, 6, 7] }];
+
 export default function Inner({ validators }: { validators: Validator[] }) {
     return (
         <div
@@ -94,7 +108,11 @@ export default function Inner({ validators }: { validators: Validator[] }) {
                     />
                 </div>
             </div>
-            <GraphMetrics />
+            <GraphMetrics
+                firstSeries={seriesDelegation}
+                secondSeries={seriesSold}
+                thirdSeries={seriesPrice}
+            />
             <ValidatorLeaderboards validators={validators} />
             <ValidatorTable validators={validators} />
         </div>

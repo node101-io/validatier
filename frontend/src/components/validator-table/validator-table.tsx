@@ -1,22 +1,16 @@
+"use client";
+
 import Validator from "@/types/validator";
 import atomToUSD from "@/utils/atom-to-usd";
-import Link from "next/link";
-
-function formatNumber(num: number) {
-    if (num >= 1_000_000) {
-        return (num / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
-    }
-    if (num >= 1_000) {
-        return (num / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
-    }
-    return num.toString();
-}
+import formatNumber from "@/utils/format-number";
+import { useRouter } from "next/navigation";
 
 export default function ValidatorTable({
     validators,
 }: {
     validators: Validator[];
 }) {
+    const router = useRouter();
     return (
         <div className="flex flex-col gap-2.5">
             <div className="flex justify-between items-center w-full">
@@ -141,6 +135,15 @@ export default function ValidatorTable({
                                     className="grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 py-2.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
                                     operator-address={validator.operatorAddress}
                                     id={validator.operatorAddress}
+                                    onClick={() => {
+                                        sessionStorage.setItem(
+                                            `validator_${validator.operatorAddress}`,
+                                            JSON.stringify(validator)
+                                        );
+                                        router.push(
+                                            `/validator/${validator.operatorAddress}`
+                                        );
+                                    }}
                                 >
                                     <td className="flex items-center justify-start gap-4.5">
                                         {/* Name */}

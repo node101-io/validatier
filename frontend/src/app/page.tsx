@@ -9,7 +9,7 @@ const validators: Validator[] = [
     {
         id: "1",
         name: "Validator 1 asd asd ad asdadasdasdas asd as",
-        operatorAddress: "validator1",
+        operatorAddress: "validator1ewqeqweqweqw",
         image: "https://via.placeholder.com/150",
         totalSold: 100,
         percentageSold: 85,

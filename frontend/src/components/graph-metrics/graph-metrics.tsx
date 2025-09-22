@@ -3,6 +3,7 @@
 import MetricContent from "../metric-content/metric-content";
 import Metric from "@/types/metric";
 import dynamic from "next/dynamic";
+import { ApexOptions } from "apexcharts";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -208,21 +209,15 @@ const optionsPrice = {
     ],
 };
 
-const seriesDelegation = [
-    {
-        name: "Average Delegation",
-        data: [182_000_000, 210_000_000, 250_000_000, 265_000_000, 328_000_000],
-    },
-];
-const seriesSold = [
-    {
-        name: "Total Sold Amount",
-        data: [200_000, 2_000_000, 7_000_000, 13_000_000, 18_000_000],
-    },
-];
-const seriesPrice = [{ name: "ATOM Price", data: [3, 5, 4, 6, 7] }];
-
-export default function GraphMetrics() {
+export default function GraphMetrics({
+    firstSeries,
+    secondSeries,
+    thirdSeries,
+}: {
+    firstSeries: ApexOptions["series"];
+    secondSeries: ApexOptions["series"];
+    thirdSeries: ApexOptions["series"];
+}) {
     return (
         <>
             <div className="w-fit my-2 text-xl font-[500] text-[#7c70c3]">
@@ -270,7 +265,7 @@ export default function GraphMetrics() {
                             <Chart
                                 type="area"
                                 options={optionsDelegation as any}
-                                series={seriesDelegation as any}
+                                series={firstSeries as any}
                                 height={110}
                             />
                         </div>
@@ -286,7 +281,7 @@ export default function GraphMetrics() {
                             <Chart
                                 type="area"
                                 options={optionsSold as any}
-                                series={seriesSold as any}
+                                series={secondSeries as any}
                                 height={110}
                             />
                         </div>
@@ -301,7 +296,7 @@ export default function GraphMetrics() {
                             <Chart
                                 type="area"
                                 options={optionsPrice as any}
-                                series={seriesPrice as any}
+                                series={thirdSeries as any}
                                 height={150}
                             />
                         </div>
