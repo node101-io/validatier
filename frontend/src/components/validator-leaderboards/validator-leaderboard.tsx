@@ -10,7 +10,7 @@ export default function ValidatorLeaderboard({
     leaderboard: Leaderboard;
 }) {
     return (
-        <div className="flex flex-col overflow-hidden w-full h-full p-0 bg-[#f5f5ff] border-[0.5px] border-[#bebee7] rounded-[20px] gap-1">
+        <div className="flex flex-col overflow-hidden min-w-[500px] w-full h-full p-0 bg-[#f5f5ff] border-[0.5px] border-[#bebee7] rounded-[20px] gap-1">
             <div className="flex items-center justify-between w-full p-4">
                 {/* Each Leaderboard Header */}
                 <div className="flex items-center gap-1 cursor-[var(--pointer-hand-dark)] select-none">

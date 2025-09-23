@@ -223,15 +223,15 @@ export default function GraphMetrics({
             <div className="w-fit my-2 text-xl font-[500] text-[#7c70c3]">
                 Graph Metrics
             </div>
-            <div className="flex gap-5 flex-row h-fit w-full">
-                <div className="flex flex-col min-w-[230px] max-w-[230px] overflow-visible gap-3 ml-0 p-0">
-                    <div className="flex flex-col w-full h-full gap-5">
+            <div className="flex gap-5 flex-row h-fit w-full overflow-y-hidden overflow-x-auto no-scrollbar">
+                <div className="flex flex-row w-full lg:min-w-[230px] lg:max-w-[230px] overflow-x-auto lg:overflow-x-visible no-scrollbar gap-3 ml-0 p-0">
+                    <div className="flex flex-row lg:flex-col w-full h-full gap-5">
                         {metrics.map((metric) => (
                             <MetricContent key={metric.id} metric={metric} />
                         ))}
                     </div>
                 </div>
-                <div className="flex flex-col w-full p-2 bg-[#f5f5ff] rounded-[20px] border-[0.5px] border-[#bebee7]">
+                <div className="hidden lg:flex flex-col w-full p-2 bg-[#f5f5ff] rounded-[20px] border-[0.5px] border-[#bebee7]">
                     <div className="flex flex-col items-center mb-5 py-2 px-4 h-11 w-full">
                         <div className="flex items-baseline justify-between w-full">
                             <div

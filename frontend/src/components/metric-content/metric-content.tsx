@@ -3,7 +3,7 @@ import Metric from "@/types/metric";
 export default function MetricContent({ metric }: { metric: Metric }) {
     return (
         <div
-            className="flex flex-col justify-center h-full w-full !box-border py-4 px-[22px] rounded-[20px] border-[0.5px] border-[#bebee7] bg-[#f5f5ff] opacity-100 transition-all duration-250 ease-in-out"
+            className="flex flex-col justify-center h-full w-full min-w-[325px] lg:min-w-full !box-border py-4 px-[22px] rounded-[20px] border-[0.5px] border-[#bebee7] bg-[#f5f5ff] opacity-100 transition-all duration-250 ease-in-out"
             id={`summary-metric-${metric.id}`}
         >
             <div className="flex items-center h-fit w-full text-xl text-[#7c70c3] gap-2.5 mt-0">

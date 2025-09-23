@@ -21,7 +21,7 @@ const seriesPrice = [{ name: "ATOM Price", data: [3, 5, 4, 6, 7] }];
 export default function Inner({ validators }: { validators: Validator[] }) {
     return (
         <div
-            className="flex flex-col w-[1100px] gap-5 h-fit py-0 px-10 mt-37.5 mb-1"
+            className="flex flex-col w-full lg:w-[1100px] gap-5 h-fit py-0 lg:px-10 mt-37.5 mb-1"
             id="inner-main-wrapper"
         >
             <div
@@ -31,7 +31,7 @@ export default function Inner({ validators }: { validators: Validator[] }) {
                 <div className="text-xl font-normal text-[#7c70c3]">
                     Network Summary
                 </div>
-                <div className="flex flex-row flex-nowrap justify-between gap-5 overflow-x-visible ml-0 p-0">
+                <div className="flex flex-row flex-nowrap justify-between gap-5 overflow-y-hidden overflow-x-auto md:overflow-x-visible no-scrollbar ml-0">
                     <NetworkSummary
                         leftColumn={
                             <>
