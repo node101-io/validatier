@@ -9,10 +9,12 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@types/react-datepicker": "^6.2.0",
     "apexcharts": "^5.3.5",
     "next": "15.5.3",
     "react": "19.1.0",
     "react-apexcharts": "^1.7.0",
+    "react-datepicker": "^8.7.0",
     "react-dom": "19.1.0"
   },
   "devDependencies": {

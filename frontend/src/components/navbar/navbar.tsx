@@ -1,6 +1,7 @@
 import "@/../public/css/index/header.css";
 import "@/../public/css/index/navbar.css";
 import { LogoSVG } from "@/style/logo-svg";
+import DateRangePicker from "@/components/date-picker/date-picker";
 
 export default function Navbar({
     isValidatorPage = false,
@@ -37,7 +38,7 @@ export default function Navbar({
                 </div>
             </a>
             <div className="flex w-fit items-center gap-3 transition-all duration-1000 overflow-visible">
-                {isValidatorPage && (
+                {!isValidatorPage && (
                     <div className="w-fit h-fit relative">
                         <input
                             type="text"
@@ -46,8 +47,7 @@ export default function Navbar({
                         />
                     </div>
                 )}
-                <div className="date-picker" id="date-picker"></div>{" "}
-                {/* TODO: Add date picker and change its style */}
+                <DateRangePicker />
             </div>
         </div>
     );
