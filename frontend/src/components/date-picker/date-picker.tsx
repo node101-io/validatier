@@ -67,7 +67,7 @@ export default function DateRangePicker() {
         <div
             ref={containerRef}
             className={`w-full h-full overflow-visible relative z-20 rounded-2xl border-1 border-[#bebee7] bg-[#f5f5ff] text-[#7c70c3] ${
-                isOpen ? "shadow-xl top-[162px]" : ""
+                isOpen ? "shadow-xl md:top-[183px]" : ""
             }`}
         >
             <button
@@ -79,11 +79,11 @@ export default function DateRangePicker() {
                     <CalendarSVG stroke="#7c70c3" />
                 </span>
                 {isOpen && (
-                    <span className="whitespace-nowrap text-[16px] font-medium opacity-90">
+                    <span className="hidden lg:block whitespace-nowrap text-[16px] font-medium opacity-90">
                         {selectedRange}
                     </span>
                 )}
-                <span className="flex gap-0.5 -mt-0.5 w-fit overflow-hidden">
+                <span className="hidden lg:flex gap-0.5 -mt-0.5 w-fit overflow-hidden">
                     <span className="inline text-ellipsis">
                         {formatDate(startDate)}
                     </span>
@@ -93,7 +93,7 @@ export default function DateRangePicker() {
                     </span>
                 </span>
                 <div
-                    className={`-mb-1.5 mr-1 transition-transform ${
+                    className={`hidden lg:block -mb-1.5 mr-1 transition-transform ${
                         isOpen ? "rotate-180" : "rotate-0"
                     }`}
                 >
@@ -102,55 +102,63 @@ export default function DateRangePicker() {
             </button>
 
             {isOpen && (
-                <div
-                    className="pt-2 px-3 pb-3 w-full ml-auto"
-                    onMouseDown={(e) => e.stopPropagation()}
-                >
-                    <div className="flex gap-4">
-                        <div className="w-44 shrink-0">
-                            <div className="text-sm mb-2 font-medium opacity-80">
-                                {selectedRange}
+                <>
+                    {/* dimmed backdrop on mobile */}
+                    <div
+                        className="fixed inset-0 lg:hidden z-[180] bg-[#EBEBFF]/70"
+                        onClick={() => setIsOpen(false)}
+                    />
+                    <div
+                        className="fixed lg:static right-5 top-[98px] lg:top-auto z-[200] w-[320px] max-w-[92vw] lg:w-full lg:max-w-none rounded-2xl lg:rounded-none border-1 border-[#bebee7] lg:border-0 bg-[#f5f5ff] pt-3 px-3 pb-3 lg:pt-2 lg:px-3 lg:pb-3 ml-auto"
+                        onMouseDown={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
+                            <div className="w-full lg:w-44 shrink-0">
+                                <div className="text-sm mb-2 font-medium opacity-80">
+                                    {selectedRange}
+                                </div>
+                                <ul className="flex flex-col gap-1">
+                                    {predefinedRanges.map((range) => (
+                                        <li key={range.label}>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleRangeSelect(range)
+                                                }
+                                                className={`w-full text-left rounded-xl px-3 py-2 transition-colors ${
+                                                    selectedRange ===
+                                                    range.label
+                                                        ? "bg-[#e8e8ff]"
+                                                        : "hover:bg-[#ececff]"
+                                                }`}
+                                            >
+                                                {range.label}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
-                            <ul className="flex flex-col gap-1">
-                                {predefinedRanges.map((range) => (
-                                    <li key={range.label}>
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                handleRangeSelect(range)
-                                            }
-                                            className={`w-full text-left rounded-xl px-3 py-2 transition-colors ${
-                                                selectedRange === range.label
-                                                    ? "bg-[#e8e8ff]"
-                                                    : "hover:bg-[#ececff]"
-                                            }`}
-                                        >
-                                            {range.label}
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                        <div className="flex-1">
-                            <DatePicker
-                                selectsRange
-                                startDate={startDate || undefined}
-                                endDate={endDate || undefined}
-                                onChange={(
-                                    dates: [Date | null, Date | null]
-                                ) => {
-                                    const [start, end] = dates;
-                                    setStartDate(start);
-                                    setEndDate(end);
-                                }}
-                                inline
-                                showMonthDropdown
-                                showYearDropdown
-                                dropdownMode="select"
-                            />
+                            <div className="flex-1 min-w-0">
+                                <DatePicker
+                                    selectsRange
+                                    startDate={startDate || undefined}
+                                    endDate={endDate || undefined}
+                                    onChange={(
+                                        dates: [Date | null, Date | null]
+                                    ) => {
+                                        const [start, end] = dates;
+                                        setStartDate(start);
+                                        setEndDate(end);
+                                    }}
+                                    inline
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
+                </>
             )}
         </div>
     );
