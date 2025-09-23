@@ -42,6 +42,7 @@ export default function ValidatorLeaderboard({
             <div className="flex flex-col h-fit gap-0">
                 {validators.map((validator, index) => (
                     <div
+                        key={index + leaderboard.type}
                         className="flex items-center justify-between cursor-[var(--pointer-hand-dark)] py-3 px-4 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out"
                         operator-address={validator.operatorAddress}
                     >

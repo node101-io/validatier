@@ -2,7 +2,7 @@
 
 import Navbar from "@/components/navbar/navbar";
 import Validator from "@/types/validator";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Loading from "./loading";
 import NetworkSummary from "@/components/network-summary/network-summary";
@@ -27,12 +27,9 @@ const seriesSold = [
 ];
 const seriesPrice = [{ name: "ATOM Price", data: [3, 5, 4, 6, 7] }];
 
-export default function ValidatorPage({
-    params,
-}: {
-    params: { operatorAddress: string };
-}) {
-    const { operatorAddress } = params;
+export default function ValidatorPage() {
+    const routeParams = useParams<{ operatorAddress: string }>();
+    const operatorAddress = (routeParams?.operatorAddress || "") as string;
     const router = useRouter();
     const [validator, setValidator] = useState<Validator | null>(null);
 

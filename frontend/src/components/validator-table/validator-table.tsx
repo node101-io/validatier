@@ -132,6 +132,7 @@ export default function ValidatorTable({
                         <tbody className="w-full">
                             {validators.map((validator, index) => (
                                 <tr
+                                    key={index + "validator-table"}
                                     className="grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 py-2.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
                                     operator-address={validator.operatorAddress}
                                     id={validator.operatorAddress}
