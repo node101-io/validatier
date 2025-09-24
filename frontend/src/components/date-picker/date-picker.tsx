@@ -7,7 +7,11 @@ import "./date-picker.css";
 import { CalendarSVG } from "@/style/calendar-svg";
 import { ArrowDownSVG } from "@/style/arrow-down-svg";
 
-export default function DateRangePicker() {
+export default function DateRangePicker({
+    variant = "light",
+}: {
+    variant?: "light" | "dark";
+}) {
     const [startDate, setStartDate] = useState<Date | null>(
         new Date("2024-09-19")
     );
@@ -63,20 +67,30 @@ export default function DateRangePicker() {
             document.removeEventListener("mousedown", handleClickOutside);
     }, [isOpen]);
 
+    const isDark = variant === "dark";
+    const containerClasses = isDark
+        ? "border-white/60 bg-white/10 backdrop-blur-lg text-white"
+        : "border-[#bebee7] bg-[#f5f5ff] text-[#7c70c3]";
+    const iconStroke = isDark ? "#ffffff" : "#7c70c3";
+
     return (
         <div
             ref={containerRef}
-            className={`w-full h-full overflow-visible relative z-20 rounded-2xl border-1 border-[#bebee7] bg-[#f5f5ff] text-[#7c70c3] ${
+            className={`overflow-visible relative z-20 rounded-xl border-1 ${containerClasses} ${
                 isOpen ? "shadow-xl md:top-[162px]" : ""
+            } ${
+                variant === "light" ? "h-8 w-full sm:h-full" : "h-full w-full"
             }`}
         >
             <button
                 type="button"
                 onClick={() => setIsOpen((v) => !v)}
-                className="flex h-full w-full justify-between cursor-[var(--pointer-hand-dark)] items-center text-xl gap-2 p-1 rounded-2xl"
+                className={`flex h-full justify-between cursor-[var(--pointer-hand-dark)] items-center text-xl gap-2 p-1 rounded-2xl ${
+                    variant === "light" ? "w-8 sm:w-full" : "w-full"
+                }`}
             >
-                <span className="flex items-center gap-1 p-2">
-                    <CalendarSVG stroke="#7c70c3" />
+                <span className="flex items-center gap-1 p-0.5 sm:p-2">
+                    <CalendarSVG stroke={iconStroke} />
                 </span>
                 {isOpen && (
                     <span className="hidden lg:block whitespace-nowrap text-[16px] font-medium opacity-90">
@@ -97,7 +111,7 @@ export default function DateRangePicker() {
                         isOpen ? "rotate-180" : "rotate-0"
                     }`}
                 >
-                    <ArrowDownSVG stroke="#7c70c3" />
+                    <ArrowDownSVG stroke={iconStroke} />
                 </div>
             </button>
 
@@ -109,7 +123,7 @@ export default function DateRangePicker() {
                         onClick={() => setIsOpen(false)}
                     />
                     <div
-                        className="fixed lg:static right-5 top-[98px] lg:top-auto z-[200] w-[320px] max-w-[92vw] lg:w-full lg:max-w-none rounded-2xl lg:rounded-none border-1 border-[#bebee7] lg:border-0 bg-[#f5f5ff] pt-3 px-3 pb-3 lg:pt-2 lg:px-3 lg:pb-3 ml-auto"
+                        className="fixed lg:static right-5 top[98px] lg:top-auto z-[200] w[320px] max-w[92vw] lg:w-full lg:max-w-none rounded-2xl lg:rounded-none border-1 border-[#bebee7] lg:border-0 bg-[#f5f5ff] pt-3 px-3 pb-3 lg:pt-2 lg:px-3 lg:pb-3 ml-auto"
                         onMouseDown={(e) => e.stopPropagation()}
                     >
                         <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">

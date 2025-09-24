@@ -1,9 +1,20 @@
+"use client";
+
 import Image from "next/image";
 import "@/../public/css/index/intro.css";
+import { motion, useTransform } from "motion/react";
+import { useScrollContext } from "@/components/scroll/scroll-provider";
 
 export default function Intro() {
+    const { scrollY } = useScrollContext();
+    const y = scrollY ? useTransform(scrollY, (v) => -2 * v) : 0;
+
     return (
-        <div className="intro-main-wrapper" id="intro-main-wrapper">
+        <motion.div
+            className="intro-main-wrapper"
+            id="intro-main-wrapper"
+            style={{ y }}
+        >
             <div className="intro-main-background-content">
                 <div className="animate-star-3d"></div>
                 <div className="animate-star orbit-1"></div>
@@ -40,6 +51,6 @@ export default function Intro() {
                 </div>
                 <div>contributions, and impact within the Cosmos ecosystem</div>
             </div>
-        </div>
+        </motion.div>
     );
 }
