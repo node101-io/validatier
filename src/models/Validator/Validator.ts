@@ -1,7 +1,7 @@
 
 import async from 'async';
 
-import mongoose, { Schema, Model, Validator, SortOrder } from 'mongoose';
+import mongoose, { Schema, Model, SortOrder } from 'mongoose';
 import CompositeEventBlock, { ValidatorRecordInterface } from '../CompositeEventBlock/CompositeEventBlock.js';
 import Chain, { ChainInterface } from '../Chain/Chain.js';
 
@@ -18,16 +18,13 @@ export interface GraphDataInterface {
     month?: number;
     day?: number;
   },
-  data: {
-    self_stake_sum: number;
-    reward_sum: number;
-    commission_sum: number;
-    total_stake_sum: number;
-    total_sold: number;
-    percentage_sold: number;
-  }
+  self_stake_sum: number;
+  reward_sum: number;
+  commission_sum: number;
+  total_stake_sum: number;
+  total_sold: number;
+  percentage_sold: number;
 }[]
-
 
 const MAX_DATABASE_TEXT_FIELD_LENGTH = 1e4;
 const CHAIN_TO_DECIMALS_MAPPING: Record<string, any> = {
@@ -937,6 +934,6 @@ validatorSchema.statics.findValidatorsByChainIdentifier = function (
 }
 
 
-const Validator = mongoose.model<ValidatorInterface, ValidatorModel>('Validators', validatorSchema);
+const Validator = mongoose.models.Validators as ValidatorModel || mongoose.model<ValidatorInterface, ValidatorModel>('Validators', validatorSchema);
 
 export default Validator;

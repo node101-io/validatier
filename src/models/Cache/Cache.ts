@@ -12,7 +12,7 @@ export interface CacheInterface {
   interval: 'all_time' | 'last_30_days' | 'last_90_days' | 'last_365_days';
   validators: ValidatorInterface[];
   summary_data: ValidatorsSummaryDataInterface;
-  summary_graph: GraphDataInterface;
+  summary_graph: GraphDataInterface[];
   small_graph: GraphDataInterface;
   price_graph: number[];
   cummulative_active_list: CummulativeActiveListItemInterface[];
@@ -231,6 +231,6 @@ cacheSchema.statics.getCacheForChain = function (
     .catch(err => callback(err, null))
 }
 
-const Cache = mongoose.model<CacheInterface, CacheModel>('Caches', cacheSchema);
+const Cache = mongoose.models.Caches as CacheModel || mongoose.model<CacheInterface, CacheModel>('Caches', cacheSchema);
 
 export default Cache;

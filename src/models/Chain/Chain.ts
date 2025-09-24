@@ -285,6 +285,6 @@ chainSchema.statics.updateTimeOfLastActiveSetSave = function (
     .catch(err => callback(err, null));
 }
 
-const Chain = mongoose.model<ChainInterface, ChainModel>('Chains', chainSchema);
+const Chain = mongoose.models.Chains as ChainModel || mongoose.model<ChainInterface, ChainModel>('Chains', chainSchema);
 
 export default Chain;

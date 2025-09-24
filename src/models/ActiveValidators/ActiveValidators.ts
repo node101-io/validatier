@@ -227,6 +227,6 @@ activeValidatorsSchema.statics.getCummulativeActiveListByRange = function (
 }
 
 
-const ActiveValidators = mongoose.model<ActiveValidatorsInterface, ActiveValidatorsModel>('ActiveValidators', activeValidatorsSchema);
+const ActiveValidators = mongoose.models.ActiveValidators as ActiveValidatorsModel || mongoose.model<ActiveValidatorsInterface, ActiveValidatorsModel>('ActiveValidators', activeValidatorsSchema);
 
 export default ActiveValidators;
