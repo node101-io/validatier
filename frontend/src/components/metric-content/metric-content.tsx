@@ -15,7 +15,7 @@ export default function MetricContent({ metric }: { metric: Metric }) {
                     {metric.title}
                 </div>
             </div>
-            <div className="flex flex-col items-baseline justify-between w-full">
+            <div className="flex flex-row lg:flex-col items-baseline justify-between w-full">
                 <div className="text-nowrap text-[#49306f] font-[700] text-[28px]">
                     {metric.valueNative}
                 </div>

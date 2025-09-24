@@ -182,3 +182,11 @@
         border-width: 2px;
     }
 }
+
+/* md-lg adjustments */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .react-datepicker__month-container {
+        width: 100%;
+        margin-left: -5px;
+    }
+}

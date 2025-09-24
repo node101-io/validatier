@@ -10,12 +10,12 @@ export default function ValidatorLeaderboard({
     leaderboard: Leaderboard;
 }) {
     return (
-        <div className="flex flex-col overflow-hidden min-w-[500px] w-full h-full p-0 bg-[#f5f5ff] border-[0.5px] border-[#bebee7] rounded-[20px] gap-1">
-            <div className="flex items-center justify-between w-full p-4">
+        <div className="flex flex-col overflow-hidden min-w-[320px] sm:min-w-[420px] lg:min-w-[500px] w-full h-full p-0 bg-[#f5f5ff] border-[0.5px] border-[#bebee7] rounded-[20px] gap-1">
+            <div className="flex items-center justify-between w-full px-4 pt-4">
                 {/* Each Leaderboard Header */}
                 <div className="flex items-center gap-1 cursor-[var(--pointer-hand-dark)] select-none">
                     {/* Each Leaderboard Table Type Content */}
-                    <div className="text-[#7c70c3] font-normal text-xl">
+                    <div className="text-[#7c70c3] font-normal text-lg sm:text-xl">
                         {leaderboard.title}
                     </div>
                     <div className="flex flex-col justify-center gap-0.5 ml-1.25 -mb-0.75">
@@ -26,14 +26,14 @@ export default function ValidatorLeaderboard({
                     </div>
                 </div>
             </div>
-            <div className="flex items-center justify-between mb-6 px-4 max-h-[14px]">
+            <div className="flex items-center justify-between mb-4 sm:mb-6 px-4">
                 {/* Each Leaderboard Summary */}
                 <div className="flex items-baseline flex-nowrap gap-1.25 mb-auto">
-                    <div className="text-nowrap text-4xl/3 font-bold text-[#49306f] mb-0.5">
+                    <div className="text-nowrap text-2xl sm:text-4xl/3 font-bold text-[#49306f] mb-0.5">
                         {leaderboard.summaryContent}
                     </div>
                     {leaderboard.usdValue && (
-                        <div className="block items-baseline w-full font-[500] text-xl text-[#7c70c3]">
+                        <div className="block items-baseline w-full font-[500] text-base sm:text-xl text-[#7c70c3]">
                             {leaderboard.usdValue}
                         </div>
                     )}
@@ -59,12 +59,12 @@ export default function ValidatorLeaderboard({
                                     className="w-full h-full rounded-full aspect-square overflow-clip"
                                 />
                             </div>
-                            <div className="w-[150px] text-xl text-[#49306f] overflow-hidden text-ellipsis text-nowrap">
+                            <div className="w-[130px] sm:w-[150px] text-lg sm:text-xl text-[#49306f] overflow-hidden text-ellipsis text-nowrap">
                                 {/* Each Leaderboard Validator Name */}
                                 {validator.name}
                             </div>
                         </div>
-                        <div className="flex gap-5 text-[#7c70c3] text-[16px] text-nowrap">
+                        <div className="flex gap-4 sm:gap-5 text-[#7c70c3] text-[15px] sm:text-[16px] text-nowrap">
                             {/* Each Leaderboard Validator Data Wrapper */}
                             {leaderboard.type === "percentageSold" ? (
                                 <div className="flex items-center font-bold gap-1">
@@ -98,10 +98,10 @@ export default function ValidatorLeaderboard({
                                 </div>
                             ) : leaderboard.type === "totalSold" ? (
                                 <>
-                                    <div className="flex items-center !justify-end text-end text-xl min-w-[100px] max-w-[100px] w-[100px]">
+                                    <div className="flex items-center !justify-end text-end text-lg sm:text-xl min-w-[90px] sm:min-w-[100px] max-w-[100px] w-[100px]">
                                         {validator.totalSold?.toFixed(2)} ATOM
                                     </div>
-                                    <div className="flex items-center !justify-end text-end text-xl min-w-[100px] max-w-[100px] w-[100px]">
+                                    <div className="flex items-center !justify-end text-end text-lg sm:text-xl min-w-[90px] sm:min-w-[100px] max-w-[100px] w-[100px]">
                                         {validator.totalSold
                                             ? `$${atomToUSD(
                                                   validator.totalSold

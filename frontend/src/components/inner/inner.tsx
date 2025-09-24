@@ -31,7 +31,7 @@ export default function Inner({ validators }: { validators: Validator[] }) {
                 <div className="text-xl font-normal text-[#7c70c3]">
                     Network Summary
                 </div>
-                <div className="flex flex-row flex-nowrap justify-between gap-5 overflow-y-hidden overflow-x-auto md:overflow-x-visible no-scrollbar ml-0">
+                <div className="flex flex-row flex-nowrap justify-between gap-5 overflow-y-hidden overflow-x-scroll md:overflow-x-visible no-scrollbar px-5 lg:px-0 ml-0">
                     <NetworkSummary
                         leftColumn={
                             <>

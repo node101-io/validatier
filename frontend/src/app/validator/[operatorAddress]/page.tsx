@@ -54,50 +54,58 @@ export default function ValidatorPage() {
                 <Navbar isValidatorPage={true} />
                 <div className="mt-19 w-full lg:w-[1100px] h-fit lg:px-10">
                     <div className="flex flex-col w-full gap-5 mt-5">
-                        <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row items-center justify-between w-full rounded-3xl px-6 py-7.5 border-[0.5px] border-[#bebee7] bg-[#f5f5ff]">
-                            {/* Validator Info */}
-                            <div className="flex items-center gap-2.5">
-                                <img
-                                    src={validator.image}
-                                    alt={validator.name}
-                                    className="w-10 h-10 rounded-full"
-                                />
-                                <div>
-                                    <div className="text-xl font-semibold text-[#250054]">
-                                        {validator.name}
-                                    </div>
-                                    <div className="flex flex-row items-center cursor-pointer gap-1">
-                                        <span className="text-xl font-base text-[#250054]">
-                                            {truncateAddress(
-                                                validator.operatorAddress
-                                            )}
-                                        </span>
-                                        <img
-                                            src="/res/images/clipboard.svg"
-                                            alt="copy"
-                                            className="w-3 h-3 self-end mb-1"
-                                        />
+                        <div className="px-5 lg:px-0">
+                            <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row items-center justify-between w-full rounded-3xl px-6 py-7.5 border-[0.5px] border-[#bebee7] bg-[#f5f5ff]">
+                                {/* Validator Info */}
+                                <div className="flex items-center gap-2.5">
+                                    <img
+                                        src={validator.image}
+                                        alt={validator.name}
+                                        className="w-10 h-10 rounded-full"
+                                    />
+                                    <div>
+                                        <div className="text-xl font-semibold text-[#250054]">
+                                            {validator.name}
+                                        </div>
+                                        <div className="flex flex-row items-center cursor-pointer gap-1">
+                                            <span className="text-xl font-base text-[#250054]">
+                                                {truncateAddress(
+                                                    validator.operatorAddress
+                                                )}
+                                            </span>
+                                            <img
+                                                src="/res/images/clipboard.svg"
+                                                alt="copy"
+                                                className="w-3 h-3 self-end mb-1"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-5 text-base">
-                                <a href="" className="flex items-center gap-1">
-                                    <img
-                                        src="/res/images/web.svg"
-                                        alt="website"
-                                        className="w-3 h-3 overflow-clip"
-                                    />
-                                    <span className="mb-1">Website</span>
-                                </a>
-                                <a href="" className="flex items-center gap-1">
-                                    <span className="mb-1">Explorer</span>
-                                </a>
-                                <a className="flex items-center justify-center h-6 gap-1 rounded-xl px-2.5 bg-[#250054] !text-white cursor-pointer">
-                                    <span className="mb-1">Stake</span>
-                                </a>
+                                <div className="flex items-center gap-5 text-base">
+                                    <a
+                                        href=""
+                                        className="flex items-center gap-1"
+                                    >
+                                        <img
+                                            src="/res/images/web.svg"
+                                            alt="website"
+                                            className="w-3 h-3 overflow-clip"
+                                        />
+                                        <span className="mb-1">Website</span>
+                                    </a>
+                                    <a
+                                        href=""
+                                        className="flex items-center gap-1"
+                                    >
+                                        <span className="mb-1">Explorer</span>
+                                    </a>
+                                    <a className="flex items-center justify-center h-6 gap-1 rounded-xl px-2.5 bg-[#250054] !text-white cursor-pointer">
+                                        <span className="mb-1">Stake</span>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        <div className="flex flex-row flex-nowrap justify-start gap-5 overflow-y-hidden overflow-x-auto lg:overflow-x-hidden no-scrollbar ml-0 p-0">
+                        <div className="flex flex-col md:flex-row flex-nowrap justify-start gap-5 overflow-y-hidden ml-0 p-0 px-5 lg:px-0">
                             {/* Network Summary */}
                             <div className="shrink-0">
                                 <NetworkSummary

@@ -67,7 +67,7 @@ export default function DateRangePicker() {
         <div
             ref={containerRef}
             className={`w-full h-full overflow-visible relative z-20 rounded-2xl border-1 border-[#bebee7] bg-[#f5f5ff] text-[#7c70c3] ${
-                isOpen ? "shadow-xl md:top-[183px]" : ""
+                isOpen ? "shadow-xl md:top-[162px]" : ""
             }`}
         >
             <button
