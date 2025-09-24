@@ -1,23 +1,30 @@
 import ValidatorLeaderboard from "@/components/validator-leaderboards/validator-leaderboard";
 import Validator from "@/types/validator";
 import Leaderboard from "@/types/leaderboard";
+import { formatAtom, formatAtomUSD, formatPercentage } from "@/utils/format-numbers";
 
 export default function ValidatorLeaderboards({
     validators,
+    percentageSold,
+    totalSold,
+    price,
 }: {
     validators: Validator[];
+    percentageSold: number;
+    totalSold: number;
+    price: number;
 }) {
     const leaderboards: Leaderboard[] = [
         {
             type: "percentageSold",
             title: "Percentage Sold",
-            summaryContent: "24%",
+            summaryContent: `${formatPercentage(percentageSold)}%`,
         },
         {
             type: "totalSold",
             title: "Total Sold Amount",
-            summaryContent: "11.1M ATOM",
-            usdValue: "$51.9M",
+            summaryContent: `${formatAtom(totalSold, 1)} ATOM`,
+            usdValue: `$${formatAtomUSD(totalSold, price)}`,
         },
     ];
 
