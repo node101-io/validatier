@@ -7,29 +7,6 @@ import { ApexOptions } from "apexcharts";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const metrics: Metric[] = [
-    {
-        id: "total_stake_sum",
-        color: "#FF9404",
-        title: "Average Delegation",
-        valueNative: "317.7M ATOM",
-        valueUsd: "1433.0M",
-    },
-    {
-        id: "total_sold",
-        color: "#5856D7",
-        title: "Total Sold Amount",
-        valueNative: "14.0M ATOM",
-        valueUsd: "62.9M",
-    },
-    {
-        id: "price",
-        color: "#31ADE6",
-        title: "Average ATOM Price",
-        valueNative: "$5.08",
-    },
-];
-
 const labelColor = "#7E77B8";
 const gridColor = "#C9C4EE55";
 const yLabelMinMaxWidth = 64; // ensure identical left gutter across charts
@@ -210,10 +187,12 @@ const optionsPrice = {
 };
 
 export default function GraphMetrics({
+    metrics,
     firstSeries,
     secondSeries,
     thirdSeries,
 }: {
+    metrics: Metric[];
     firstSeries: ApexOptions["series"];
     secondSeries: ApexOptions["series"];
     thirdSeries: ApexOptions["series"];
