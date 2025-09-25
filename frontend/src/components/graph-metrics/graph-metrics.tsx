@@ -198,11 +198,11 @@ export default function GraphMetrics({
     thirdSeries: ApexOptions["series"];
 }) {
     return (
-        <div className="flex flex-col gap-2.5 px-5 lg:px-0">
-            <div className="w-fit my-2 text-xl font-[500] text-[#7c70c3]">
+        <div className="flex flex-col gap-2.5">
+            <div className="w-fit my-2 text-xl font-[500] text-[#7c70c3] px-5 lg:px-0">
                 Graph Metrics
             </div>
-            <div className="flex gap-5 flex-row h-fit w-full overflow-y-hidden overflow-x-scroll no-scrollbar">
+            <div className="flex gap-5 flex-row h-fit w-full overflow-y-hidden overflow-x-scroll no-scrollbar px-5 lg:px-0">
                 <div className="flex flex-row w-full lg:min-w-[230px] lg:max-w-[230px] gap-3 ml-0 p-0">
                     <div className="flex flex-row lg:flex-col w-full h-full gap-5">
                         {metrics.map((metric) => (

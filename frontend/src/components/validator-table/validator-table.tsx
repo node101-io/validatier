@@ -18,15 +18,15 @@ export default function ValidatorTable({
                     Validators
                 </div>
             </div>
-            <div className="flex flex-col relative rounded-[30px] bg-[#f5f5ff] border-[0.5px] border-[#bebee7]">
-                <div className="pt-2.5 pb-4 overflow-visible">
-                    <table className="w-full table-fixed border-collapse">
+            <div className="flex flex-col relative rounded-[30px] bg-[#f5f5ff] border-[0.5px] border-[#bebee7] overflow-hidden">
+                <div className="pt-2.5 pb-4 overflow-x-auto lg:overflow-visible">
+                    <table className="w-full min-w-[900px] table-fixed border-collapse">
                         <thead>
-                            <tr className="grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 mb-1">
-                                <th className="flex items-center justify-start text-left text-[#7c70c3] font-semibold gap-0 text-lg whitespace-nowrap">
+                            <tr className="grid grid-cols-[190px_1fr_1fr_1fr_1fr_1fr] sm:grid-cols-[210px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 mb-1">
+                                <th className="flex items-center sm:w-full justify-start text-left text-[#7c70c3] font-semibold gap-0 text-base lg:text-lg whitespace-nowrap sticky left-0 -ml-5 pl-5 z-20 bg-[#f5f5ff] lg:bg-transparent">
                                     Name
                                 </th>
-                                <th className="flex items-center justify-between gap-3 text-[#7c70c3] font-semibold text-lg justify-self-center">
+                                <th className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center">
                                     <div className="flex items-center gap-1">
                                         <span className="whitespace-nowrap">
                                             Percentage Sold
@@ -34,7 +34,7 @@ export default function ValidatorTable({
                                         <div className="relative group inline-flex">
                                             <img
                                                 src="/res/images/info.svg"
-                                                className="w-4 h-4"
+                                                className="w-3 h-3 lg:w-4 lg:h-4 relative top-[1px] lg:top-0"
                                             />
                                             <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 whitespace-nowrap rounded bg-[#161616] text-white text-xs px-2 py-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100">
                                                 (Total sold / Total rewards) *
@@ -42,12 +42,12 @@ export default function ValidatorTable({
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-center gap-0.5">
+                                    <div className="hidden lg:flex flex-col items-center gap-0.5">
                                         <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] border-b-[#161616]"></span>
                                         <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] border-t-[#161616]"></span>
                                     </div>
                                 </th>
-                                <th className="flex items-center justify-between gap-3 text-[#7c70c3] font-semibold text-lg justify-self-center">
+                                <th className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center">
                                     <div className="flex items-center gap-1">
                                         <span className="whitespace-nowrap">
                                             Avg Delegation
@@ -55,19 +55,19 @@ export default function ValidatorTable({
                                         <div className="relative group inline-flex">
                                             <img
                                                 src="/res/images/info.svg"
-                                                className="w-4 h-4"
+                                                className="w-3 h-3 lg:w-4 lg:h-4 relative top-[1px] lg:top-0"
                                             />
                                             <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 whitespace-nowrap rounded bg-[#161616] text-white text-xs px-2 py-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100">
                                                 Average delegation
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-center gap-0.5">
+                                    <div className="hidden lg:flex flex-col items-center gap-0.5">
                                         <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] border-b-[#161616]"></span>
                                         <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] border-t-[#161616]"></span>
                                     </div>
                                 </th>
-                                <th className="flex items-center justify-between gap-3 text-[#7c70c3] font-semibold text-lg justify-self-center">
+                                <th className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center">
                                     <div className="flex items-center gap-1">
                                         <span className="whitespace-nowrap">
                                             Total Rewards
@@ -75,19 +75,19 @@ export default function ValidatorTable({
                                         <div className="relative group inline-flex">
                                             <img
                                                 src="/res/images/info.svg"
-                                                className="w-4 h-4"
+                                                className="w-3 h-3 lg:w-4 lg:h-4 relative top-[1px] lg:top-0"
                                             />
                                             <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 whitespace-nowrap rounded bg-[#161616] text-white text-xs px-2 py-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100">
                                                 Total rewards
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-center gap-0.5">
+                                    <div className="hidden lg:flex flex-col items-center gap-0.5">
                                         <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] border-b-[#161616]"></span>
                                         <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] border-t-[#161616]"></span>
                                     </div>
                                 </th>
-                                <th className="flex items-center justify-between gap-3 text-[#7c70c3] font-semibold text-lg justify-self-center">
+                                <th className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center">
                                     <div className="flex items-center gap-1">
                                         <span className="whitespace-nowrap">
                                             Total Sold Amount
@@ -95,19 +95,19 @@ export default function ValidatorTable({
                                         <div className="relative group inline-flex">
                                             <img
                                                 src="/res/images/info.svg"
-                                                className="w-4 h-4"
+                                                className="w-3 h-3 lg:w-4 lg:h-4 relative top-[1px] lg:top-0"
                                             />
                                             <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 whitespace-nowrap rounded bg-[#161616] text-white text-xs px-2 py-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100">
                                                 Total sold amount
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-center gap-0.5">
+                                    <div className="hidden lg:flex flex-col items-center gap-0.5">
                                         <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] border-b-[#161616]"></span>
                                         <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] border-t-[#161616]"></span>
                                     </div>
                                 </th>
-                                <th className="flex items-center justify-between gap-3 text-[#7c70c3] font-semibold text-lg justify-self-center">
+                                <th className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center">
                                     <div className="flex items-center gap-1">
                                         <span className="whitespace-nowrap">
                                             Self Stake
@@ -115,14 +115,14 @@ export default function ValidatorTable({
                                         <div className="relative group inline-flex">
                                             <img
                                                 src="/res/images/info.svg"
-                                                className="w-4 h-4"
+                                                className="w-3 h-3 lg:w-4 lg:h-4 relative top-[1px] lg:top-0"
                                             />
                                             <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 whitespace-nowrap rounded bg-[#161616] text-white text-xs px-2 py-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100">
                                                 Self stake
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-center gap-0.5">
+                                    <div className="hidden lg:flex flex-col items-center gap-0.5">
                                         <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] border-b-[#161616]"></span>
                                         <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] border-t-[#161616]"></span>
                                     </div>
@@ -133,7 +133,7 @@ export default function ValidatorTable({
                             {validators.map((validator, index) => (
                                 <tr
                                     key={index + "validator-table"}
-                                    className="grid grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 py-2.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
+                                    className="grid grid-cols-[190px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 py-0 my-2.5 lg:my-0 lg:py-2.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
                                     operator-address={validator.operatorAddress}
                                     id={validator.operatorAddress}
                                     onClick={() => {
@@ -146,7 +146,7 @@ export default function ValidatorTable({
                                         );
                                     }}
                                 >
-                                    <td className="flex items-center justify-start gap-4.5">
+                                    <td className="flex items-center justify-start gap-4.5 h-full lg:h-auto sticky left-0 -ml-5 pl-5 z-10 bg-[#f5f5ff] lg:bg-transparent">
                                         {/* Name */}
                                         <div className="flex items-center relative rounded-full gap-2.5 aspect-square min-w-7.5 max-w-7.5">
                                             <div className="flex items-center justify-center min-w-[18px] max-w-[18px] min-h-[18px] max-h-[18px] absolute -left-1.5 -bottom-1.5 text-[14px] text-[#f5f5ff] bg-[#250055] border-1 border-[#f5f5ff] z-20 rounded-full">
