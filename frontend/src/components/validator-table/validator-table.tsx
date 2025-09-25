@@ -12,9 +12,9 @@ export default function ValidatorTable({
 }) {
     const router = useRouter();
     return (
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col gap-2.5 px-5 lg:px-0">
             <div className="flex justify-between items-center w-full">
-                <div className="text-xl font-[500] text-[#7c70c3]">
+                <div className="text-xl font-[500] text-[#7c70c3] my-2">
                     Validators
                 </div>
             </div>

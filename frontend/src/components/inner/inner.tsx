@@ -5,7 +5,11 @@ import Validator from "@/types/validator";
 import ValidatorTable from "../validator-table/validator-table";
 import { ValidatorsSummaryDataInterface } from "../../../../src/models/Validator/Validator";
 import Metric from "@/types/metric";
-import { formatPercentage, formatAtom, formatAtomUSD } from "@/utils/format-numbers";
+import {
+    formatPercentage,
+    formatAtom,
+    formatAtomUSD,
+} from "@/utils/format-numbers";
 
 export default function Inner({
     validators,
@@ -14,15 +18,15 @@ export default function Inner({
     metrics,
     delegationData,
     soldData,
-    priceData
+    priceData,
 }: {
-    validators: Validator[],
-    summaryData: ValidatorsSummaryDataInterface,
-    price: number,
-    metrics: Metric[],
-    delegationData: number[],
-    soldData: number[],
-    priceData: number[]
+    validators: Validator[];
+    summaryData: ValidatorsSummaryDataInterface;
+    price: number;
+    metrics: Metric[];
+    delegationData: number[];
+    soldData: number[];
+    priceData: number[];
 }) {
     return (
         <div
@@ -33,7 +37,7 @@ export default function Inner({
                 className="flex flex-col w-full gap-5 mb-2.5"
                 id="network-summary-main-wrapper"
             >
-                <div className="text-xl font-normal text-[#7c70c3]">
+                <div className="text-xl font-normal text-[#7c70c3] px-5 lg:px-0">
                     Network Summary
                 </div>
                 <div className="flex flex-row flex-nowrap justify-between gap-5 overflow-y-hidden overflow-x-scroll md:overflow-x-visible no-scrollbar px-5 lg:px-0 ml-0">
@@ -47,13 +51,18 @@ export default function Inner({
                                     className="text-[28px] font-bold text-[#49306f] leading-3 mb-0.5 text-nowrap"
                                     id="summary-self-stake-amount-native"
                                 >
-                                    {formatAtom(summaryData.self_stake_sum)} ATOM
+                                    {formatAtom(summaryData.self_stake_sum)}{" "}
+                                    ATOM
                                 </div>
                                 <div
                                     className="font-medium text-[20px] text-[#7c70c3]"
                                     id="summary-self-stake-amount-usd"
                                 >
-                                    ${formatAtomUSD(summaryData.self_stake_sum, price)}
+                                    $
+                                    {formatAtomUSD(
+                                        summaryData.self_stake_sum,
+                                        price
+                                    )}
                                 </div>
                             </>
                         }
@@ -69,7 +78,10 @@ export default function Inner({
                                     className="text-[36px] leading-[22px] font-bold text-[#49306f] text-nowrap mb-0.5"
                                     id="summary-percentage-sold-native"
                                 >
-                                    {formatPercentage(summaryData.percentage_sold)}%
+                                    {formatPercentage(
+                                        summaryData.percentage_sold
+                                    )}
+                                    %
                                 </div>
                                 <div className="font-medium text-[20px] text-[#7c70c3]"></div>
                             </>
@@ -78,16 +90,25 @@ export default function Inner({
                             <>
                                 <div className="flex w-20 aspect-square border-[0.5px] border-[#bebee7] rounded-full bg-[#e8e8ff] items-center relative text-[16px]">
                                     <span className="my-0 mx-auto mb-1 z-10">
-                                        {formatPercentage(100 - summaryData.percentage_sold)}%
+                                        {formatPercentage(
+                                            100 - summaryData.percentage_sold
+                                        )}
+                                        %
                                     </span>
                                     <div
                                         className="flex items-center justify-center relative right-0 aspect-square border-[0.5px] border-[#beebe7] text-[#e5e5ff] bg-[#7c70c3] rounded-full leading-[22px] font-bold text-nowrap"
                                         style={{
-                                            width: `max(calc(80px * ${summaryData.percentage_sold / 100}), 40%)`,
+                                            width: `max(calc(80px * ${
+                                                summaryData.percentage_sold /
+                                                100
+                                            }), 40%)`,
                                         }}
                                     >
                                         <span className="absolute left-0 mb-1 w-full text-center my-0 mx-auto z-10 font-normal">
-                                            {formatPercentage(summaryData.percentage_sold)}%
+                                            {formatPercentage(
+                                                summaryData.percentage_sold
+                                            )}
+                                            %
                                         </span>
                                     </div>
                                 </div>
@@ -104,7 +125,10 @@ export default function Inner({
                                     className="text-[36px] leading-[22px] font-bold text-[#49306f] text-nowrap mb-0.5"
                                     id="summary-average-self-stake-ratio-native"
                                 >
-                                    {formatPercentage(summaryData.average_self_stake_ratio)}%
+                                    {formatPercentage(
+                                        summaryData.average_self_stake_ratio
+                                    )}
+                                    %
                                 </div>
                                 <div className="font-medium text-[20px] text-[#7c70c3]"></div>
                             </>
@@ -114,18 +138,24 @@ export default function Inner({
                 </div>
             </div>
             <GraphMetrics
-                firstSeries={[{
-                    name: "Average Delegation",
-                    data: delegationData,
-                }]}
-                secondSeries={[{
-                    name: "Total Sold Amount",
-                    data: soldData,
-                }]}
-                thirdSeries={[{
-                    name: "ATOM Price",
-                    data: priceData,
-                }]}
+                firstSeries={[
+                    {
+                        name: "Average Delegation",
+                        data: delegationData,
+                    },
+                ]}
+                secondSeries={[
+                    {
+                        name: "Total Sold Amount",
+                        data: soldData,
+                    },
+                ]}
+                thirdSeries={[
+                    {
+                        name: "ATOM Price",
+                        data: priceData,
+                    },
+                ]}
                 metrics={metrics}
             />
             <ValidatorLeaderboards
