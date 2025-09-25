@@ -1,3 +1,45 @@
+/* Open animations for the date picker dropdown */
+@keyframes dp-fade-in-up {
+    0% {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.dp-animate-in {
+    animation: dp-fade-in-up 180ms ease-out both;
+}
+
+@keyframes dp-fade-in {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.dp-backdrop-in {
+    animation: dp-fade-in 150ms ease-out both;
+}
+
+@keyframes dp-trigger-in {
+    0% {
+        transform: scaleX(0.96);
+    }
+    100% {
+        transform: scaleX(1);
+    }
+}
+
+.dp-trigger-grow {
+    animation: dp-trigger-in 140ms ease-out both;
+    transform-origin: right center;
+}
 /* Custom DatePicker Styles */
 .react-datepicker-wrapper {
     width: 100%;
