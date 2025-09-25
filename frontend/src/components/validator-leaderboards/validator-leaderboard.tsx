@@ -33,7 +33,7 @@ export default function ValidatorLeaderboard({
                         {leaderboard.summaryContent}
                     </div>
                     {leaderboard.usdValue && (
-                        <div className="block items-baseline w-full font-[500] text-base sm:text-xl text-[#7c70c3]">
+                        <div className="block items-baseline w-full h-[14px] font-[500] text-base sm:text-xl text-[#7c70c3]">
                             {leaderboard.usdValue}
                         </div>
                     )}
