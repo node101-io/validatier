@@ -4,6 +4,7 @@ import Validator from "@/types/validator";
 import atomToUSD from "@/utils/atom-to-usd";
 import formatNumber from "@/utils/format-number";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function ValidatorTable({
     validators,
@@ -11,6 +12,31 @@ export default function ValidatorTable({
     validators: Validator[];
 }) {
     const router = useRouter();
+    useEffect(() => {
+        const update = () => {
+            const wrappers = document.querySelectorAll<HTMLElement>(
+                ".validators-table-validator-name-wrapper"
+            );
+            wrappers.forEach((wrap) => {
+                const span = wrap.querySelector<HTMLElement>(
+                    ".validators-table-validator-name"
+                );
+                if (!span) return;
+                const overflows = span.scrollWidth > wrap.clientWidth;
+                span.classList.toggle("can-scroll", overflows);
+            });
+            const others = document.querySelectorAll<HTMLElement>(
+                ".validator-moniker-text"
+            );
+            others.forEach((el) => {
+                const overflows = el.scrollWidth > el.clientWidth;
+                el.classList.toggle("can-scroll", overflows);
+            });
+        };
+        update();
+        window.addEventListener("resize", update);
+        return () => window.removeEventListener("resize", update);
+    }, [validators]);
     return (
         <div className="flex flex-col gap-2.5 px-5 lg:px-0">
             <div className="flex justify-between items-center w-full">
@@ -162,7 +188,7 @@ export default function ValidatorTable({
                                         </div>
                                         <div className="text-nowrap -mt-0.5 w-[80%]">
                                             <div className="flex text-xl gap-2.5 text-[#49306f]">
-                                                <div className="inline-block relative overflow-hidden whitespace-nowrap w-[120px]">
+                                                <div className="inline-block relative overflow-hidden whitespace-nowrap w-[120px] validators-table-validator-name-wrapper">
                                                     <span className="inline-block whitespace-nowrap validators-table-validator-name">
                                                         {validator.name}
                                                     </span>

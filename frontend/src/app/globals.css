@@ -63,6 +63,7 @@ input {
     background-color: var(--color-pale-white);
 }
 
+/* Navbar */
 .degrade-navbar {
     content: "";
     width: 100%;
@@ -117,13 +118,14 @@ input {
     animation: auto ease 0s 1 normal none running none;
 }
 
-.validators-table-validator-name::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 10px;
-    height: 100%;
+.validators-table-validator-name:hover,
+.validator-moniker-text:hover {
+    animation: none;
+}
+
+.validators-table-validator-name.can-scroll:hover,
+.validator-moniker-text.can-scroll:hover {
+    animation: scrollText 10s linear infinite;
 }
 
 @media (max-width: 768px) {
