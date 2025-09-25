@@ -26,6 +26,14 @@ export interface GraphDataInterface {
   percentage_sold: number;
 }[]
 
+export interface SmallGraphDataInterface {
+  _id: number;
+  timestamp: number;
+  self_stake_sum: number;
+  total_stake_sum: number;
+  average_self_stake_ratio: number;
+}
+
 const MAX_DATABASE_TEXT_FIELD_LENGTH = 1e4;
 const CHAIN_TO_DECIMALS_MAPPING: Record<string, any> = {
   'cosmoshub': 6,

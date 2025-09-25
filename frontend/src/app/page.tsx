@@ -162,6 +162,14 @@ export default async function Home() {
                 delegationData[i]
         );
 
+    const smallSelfStakeAmountGraphData = [cacheResult.small_graph[0].self_stake_sum];
+    for (let i = 1; i < cacheResult.small_graph.length; i++)
+        smallSelfStakeAmountGraphData.push(cacheResult.small_graph[i].self_stake_sum + smallSelfStakeAmountGraphData[i - 1]);
+
+    const smallSelfStakeRatioGraphData = [cacheResult.small_graph[0].average_self_stake_ratio];
+    for (let i = 1; i < cacheResult.small_graph.length; i++)
+        smallSelfStakeRatioGraphData.push(cacheResult.small_graph[i].average_self_stake_ratio + smallSelfStakeRatioGraphData[i - 1]);
+
     return (
         <ScrollProvider className="flex flex-col w-full items-center relative overflow-x-hidden overflow-y-scroll ml-0 h-screen rounded-0 bg-white transition-all duration-250">
             <Navbar />
@@ -197,6 +205,8 @@ export default async function Home() {
                 delegationData={delegationData}
                 soldData={soldData}
                 priceData={cacheResult.price_graph}
+                smallSelfStakeAmountGraphData={smallSelfStakeAmountGraphData}
+                smallSelfStakeRatioGraphData={smallSelfStakeRatioGraphData}
             />
             <StakeWithUs />
             <Footer />

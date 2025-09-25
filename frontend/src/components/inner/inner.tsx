@@ -19,6 +19,8 @@ export default function Inner({
     delegationData,
     soldData,
     priceData,
+    smallSelfStakeAmountGraphData,
+    smallSelfStakeRatioGraphData,
 }: {
     validators: Validator[];
     summaryData: ValidatorsSummaryDataInterface;
@@ -27,6 +29,8 @@ export default function Inner({
     delegationData: number[];
     soldData: number[];
     priceData: number[];
+    smallSelfStakeAmountGraphData: number[];
+    smallSelfStakeRatioGraphData: number[];
 }) {
     return (
         <div
