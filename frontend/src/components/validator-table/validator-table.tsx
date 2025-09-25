@@ -45,7 +45,7 @@ export default function ValidatorTable({
                 </div>
             </div>
             <div className="flex flex-col relative rounded-[30px] bg-[#f5f5ff] border-[0.5px] border-[#bebee7] overflow-hidden">
-                <div className="pt-2.5 pb-4 overflow-x-auto lg:overflow-visible">
+                <div className="pt-3 pb-4 overflow-x-auto lg:overflow-visible">
                     <table className="w-full min-w-[900px] table-fixed border-collapse">
                         <thead>
                             <tr className="grid grid-cols-[190px_1fr_1fr_1fr_1fr_1fr] sm:grid-cols-[210px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 mb-1">
@@ -58,10 +58,7 @@ export default function ValidatorTable({
                                             Percentage Sold
                                         </span>
                                         <div className="relative group inline-flex">
-                                            <img
-                                                src="/res/images/info.svg"
-                                                className="w-3 h-3 lg:w-4 lg:h-4 relative top-[1px] lg:top-0"
-                                            />
+                                            <span className="w-3 h-3 inline-block shrink-0 relative top-[1px] bg-[#7C71C3] [mask:url('/res/images/info.svg')] [mask-size:contain] [mask-repeat:no-repeat] [mask-position:center]" />
                                             <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 whitespace-nowrap rounded bg-[#161616] text-white text-xs px-2 py-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100">
                                                 (Total sold / Total rewards) *
                                                 100
@@ -79,10 +76,7 @@ export default function ValidatorTable({
                                             Avg Delegation
                                         </span>
                                         <div className="relative group inline-flex">
-                                            <img
-                                                src="/res/images/info.svg"
-                                                className="w-3 h-3 lg:w-4 lg:h-4 relative top-[1px] lg:top-0"
-                                            />
+                                            <span className="w-3 h-3 inline-block shrink-0 relative top-[1px] bg-[#7C71C3] [mask:url('/res/images/info.svg')] [mask-size:contain] [mask-repeat:no-repeat] [mask-position:center]" />
                                             <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 whitespace-nowrap rounded bg-[#161616] text-white text-xs px-2 py-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100">
                                                 Average delegation
                                             </div>
@@ -99,10 +93,7 @@ export default function ValidatorTable({
                                             Total Rewards
                                         </span>
                                         <div className="relative group inline-flex">
-                                            <img
-                                                src="/res/images/info.svg"
-                                                className="w-3 h-3 lg:w-4 lg:h-4 relative top-[1px] lg:top-0"
-                                            />
+                                            <span className="w-3 h-3 inline-block shrink-0 relative top-[1px] bg-[#7C71C3] [mask:url('/res/images/info.svg')] [mask-size:contain] [mask-repeat:no-repeat] [mask-position:center]" />
                                             <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 whitespace-nowrap rounded bg-[#161616] text-white text-xs px-2 py-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100">
                                                 Total rewards
                                             </div>
@@ -119,10 +110,7 @@ export default function ValidatorTable({
                                             Total Sold Amount
                                         </span>
                                         <div className="relative group inline-flex">
-                                            <img
-                                                src="/res/images/info.svg"
-                                                className="w-3 h-3 lg:w-4 lg:h-4 relative top-[1px] lg:top-0"
-                                            />
+                                            <span className="w-3 h-3 inline-block shrink-0 relative top-[1px] bg-[#7C71C3] [mask:url('/res/images/info.svg')] [mask-size:contain] [mask-repeat:no-repeat] [mask-position:center]" />
                                             <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 whitespace-nowrap rounded bg-[#161616] text-white text-xs px-2 py-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100">
                                                 Total sold amount
                                             </div>
@@ -139,10 +127,7 @@ export default function ValidatorTable({
                                             Self Stake
                                         </span>
                                         <div className="relative group inline-flex">
-                                            <img
-                                                src="/res/images/info.svg"
-                                                className="w-3 h-3 lg:w-4 lg:h-4 relative top-[1px] lg:top-0"
-                                            />
+                                            <span className="w-3 h-3 inline-block shrink-0 relative top-[1px] bg-[#7C71C3] [mask:url('/res/images/info.svg')] [mask-size:contain] [mask-repeat:no-repeat] [mask-position:center]" />
                                             <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 whitespace-nowrap rounded bg-[#161616] text-white text-xs px-2 py-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100">
                                                 Self stake
                                             </div>
