@@ -119,7 +119,7 @@ export default function Navbar({
                                     : "invisible opacity-0"
                             } border-[#bebee7] text-[#7c70c3] !bg-[#f5f5ff] bg-[url(/res/images/search.svg)] bg-no-repeat transition-all duration-500 ease-in-out relative ${
                                 pastIntro
-                                    ? "w-8 focus:w-[275px] sm:focus:w-[250px] sm:w-[250px] bg-position-[5px_5px] sm:bg-position-[13px_13px] h-8 sm:h-11.5 rounded-xl pl-8 focus:pl-10 sm:pl-10 focus:ml-[-168px] sm:focus:ml-0"
+                                    ? "w-8 focus:w-[275px] sm:focus:w-[250px] sm:w-[250px] bg-position-[6px_5px] sm:bg-position-[13px_13px] h-8 sm:h-11.5 rounded-xl pl-8 focus:pl-10 sm:pl-10 focus:ml-[-168px] sm:focus:ml-0"
                                     : "w-[250px] bg-position-[13px_13px] h-11.5 rounded-2xl pl-11.5 pb-1 mt-0.5"
                             }`}
                             placeholder="Search Validator"
