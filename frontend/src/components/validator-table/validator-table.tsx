@@ -25,13 +25,6 @@ export default function ValidatorTable({
                 const overflows = span.scrollWidth > wrap.clientWidth;
                 span.classList.toggle("can-scroll", overflows);
             });
-            const others = document.querySelectorAll<HTMLElement>(
-                ".validator-moniker-text"
-            );
-            others.forEach((el) => {
-                const overflows = el.scrollWidth > el.clientWidth;
-                el.classList.toggle("can-scroll", overflows);
-            });
         };
         update();
         window.addEventListener("resize", update);
@@ -48,7 +41,7 @@ export default function ValidatorTable({
                 <div className="pt-3 pb-4 overflow-x-auto lg:overflow-visible">
                     <table className="w-full min-w-[900px] table-fixed border-collapse">
                         <thead>
-                            <tr className="grid grid-cols-[190px_1fr_1fr_1fr_1fr_1fr] sm:grid-cols-[210px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 mb-1">
+                            <tr className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] sm:grid-cols-[210px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 mb-1">
                                 <th className="flex items-center sm:w-full justify-start text-left text-[#7c70c3] font-semibold gap-0 text-base lg:text-lg whitespace-nowrap sticky left-0 -ml-5 pl-5 z-20 bg-[#f5f5ff] lg:bg-transparent">
                                     Name
                                 </th>
@@ -144,7 +137,7 @@ export default function ValidatorTable({
                             {validators.map((validator, index) => (
                                 <tr
                                     key={index + "validator-table"}
-                                    className="grid grid-cols-[190px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 py-0 my-2.5 lg:my-0 lg:py-2.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
+                                    className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 py-0 my-2.5 lg:my-0 lg:py-2.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
                                     operator-address={validator.operatorAddress}
                                     id={validator.operatorAddress}
                                     onClick={() => {
@@ -157,7 +150,7 @@ export default function ValidatorTable({
                                         );
                                     }}
                                 >
-                                    <td className="flex items-center justify-start gap-4.5 h-full lg:h-auto sticky left-0 -ml-5 pl-5 z-10 bg-[#f5f5ff] lg:bg-transparent">
+                                    <td className="flex items-center justify-start gap-4.5 h-full lg:h-auto sticky left-0 -ml-5 pl-5 z-10 bg-[#f5f5ff] lg:bg-transparent overflow-hidden">
                                         {/* Name */}
                                         <div className="flex items-center relative rounded-full gap-2.5 aspect-square min-w-7.5 max-w-7.5">
                                             <div className="flex items-center justify-center min-w-[18px] max-w-[18px] min-h-[18px] max-h-[18px] absolute -left-1.5 -bottom-1.5 text-[14px] text-[#f5f5ff] bg-[#250055] border-1 border-[#f5f5ff] z-20 rounded-full">
