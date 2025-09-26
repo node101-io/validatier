@@ -4,7 +4,16 @@ import Validator from "@/types/validator";
 import atomToUSD from "@/utils/atom-to-usd";
 import formatNumber from "@/utils/format-number";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+type SortField =
+    | "name"
+    | "percentageSold"
+    | "avgDelegation"
+    | "totalRewards"
+    | "totalSold"
+    | "selfStake";
+type SortDirection = "asc" | "desc";
 
 export default function ValidatorTable({
     validators,
@@ -12,6 +21,64 @@ export default function ValidatorTable({
     validators: Validator[];
 }) {
     const router = useRouter();
+    const [sortField, setSortField] = useState<SortField | null>(null);
+    const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+
+    const handleSort = (field: SortField) => {
+        if (sortField === field) {
+            if (sortDirection === "asc") {
+                setSortDirection("desc");
+            } else if (sortDirection === "desc") {
+                // 3rd click - reset sorting
+                setSortField(null);
+                setSortDirection("asc");
+            }
+        } else {
+            setSortField(field);
+            setSortDirection("asc");
+        }
+    };
+
+    const sortedValidators = [...validators].sort((a, b) => {
+        if (!sortField) return 0;
+
+        let aValue: any;
+        let bValue: any;
+
+        switch (sortField) {
+            case "name":
+                aValue = a.name.toLowerCase();
+                bValue = b.name.toLowerCase();
+                break;
+            case "percentageSold":
+                aValue = a.percentageSold ?? 0;
+                bValue = b.percentageSold ?? 0;
+                break;
+            case "avgDelegation":
+                aValue = a.avgDelegation ?? 0;
+                bValue = b.avgDelegation ?? 0;
+                break;
+            case "totalRewards":
+                aValue = a.totalRewards ?? 0;
+                bValue = b.totalRewards ?? 0;
+                break;
+            case "totalSold":
+                aValue = a.totalSold ?? 0;
+                bValue = b.totalSold ?? 0;
+                break;
+            case "selfStake":
+                aValue = a.selfStake ?? 0;
+                bValue = b.selfStake ?? 0;
+                break;
+            default:
+                return 0;
+        }
+
+        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+    });
+
     useEffect(() => {
         const update = () => {
             const wrappers = document.querySelectorAll<HTMLElement>(
@@ -42,10 +109,34 @@ export default function ValidatorTable({
                     <table className="w-full min-w-[900px] table-fixed border-collapse">
                         <thead>
                             <tr className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] sm:grid-cols-[210px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 mb-1">
-                                <th className="flex items-center sm:w-full justify-start text-left text-[#7c70c3] font-semibold gap-0 text-base lg:text-lg whitespace-nowrap sticky left-0 -ml-5 pl-5 z-20 bg-[#f5f5ff] lg:bg-transparent">
+                                <th
+                                    className="flex items-center sm:w-full justify-start text-left text-[#7c70c3] font-semibold gap-0 text-base lg:text-lg whitespace-nowrap sticky left-0 -ml-5 pl-5 z-20 bg-[#f5f5ff] lg:bg-transparent cursor-[var(--pointer-hand-dark)] select-none"
+                                    onClick={() => handleSort("name")}
+                                >
                                     Name
+                                    <div className="hidden lg:flex flex-col items-center gap-0.5 ml-2">
+                                        <span
+                                            className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] ${
+                                                sortField === "name" &&
+                                                sortDirection === "asc"
+                                                    ? "border-b-[#161616]"
+                                                    : "border-b-transparent"
+                                            }`}
+                                        ></span>
+                                        <span
+                                            className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] ${
+                                                sortField === "name" &&
+                                                sortDirection === "desc"
+                                                    ? "border-t-[#161616]"
+                                                    : "border-t-transparent"
+                                            }`}
+                                        ></span>
+                                    </div>
                                 </th>
-                                <th className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center">
+                                <th
+                                    className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center cursor-[var(--pointer-hand-dark)] select-none"
+                                    onClick={() => handleSort("percentageSold")}
+                                >
                                     <div className="flex items-center gap-1">
                                         <span className="whitespace-nowrap">
                                             Percentage Sold
@@ -59,11 +150,30 @@ export default function ValidatorTable({
                                         </div>
                                     </div>
                                     <div className="hidden lg:flex flex-col items-center gap-0.5">
-                                        <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] border-b-[#161616]"></span>
-                                        <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] border-t-[#161616]"></span>
+                                        <span
+                                            className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] ${
+                                                sortField ===
+                                                    "percentageSold" &&
+                                                sortDirection === "asc"
+                                                    ? "border-b-[#161616]"
+                                                    : "border-b-transparent"
+                                            }`}
+                                        ></span>
+                                        <span
+                                            className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] ${
+                                                sortField ===
+                                                    "percentageSold" &&
+                                                sortDirection === "desc"
+                                                    ? "border-t-[#161616]"
+                                                    : "border-t-transparent"
+                                            }`}
+                                        ></span>
                                     </div>
                                 </th>
-                                <th className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center">
+                                <th
+                                    className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center cursor-[var(--pointer-hand-dark)] select-none"
+                                    onClick={() => handleSort("avgDelegation")}
+                                >
                                     <div className="flex items-center gap-1">
                                         <span className="whitespace-nowrap">
                                             Avg Delegation
@@ -76,11 +186,28 @@ export default function ValidatorTable({
                                         </div>
                                     </div>
                                     <div className="hidden lg:flex flex-col items-center gap-0.5">
-                                        <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] border-b-[#161616]"></span>
-                                        <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] border-t-[#161616]"></span>
+                                        <span
+                                            className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] ${
+                                                sortField === "avgDelegation" &&
+                                                sortDirection === "asc"
+                                                    ? "border-b-[#161616]"
+                                                    : "border-b-transparent"
+                                            }`}
+                                        ></span>
+                                        <span
+                                            className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] ${
+                                                sortField === "avgDelegation" &&
+                                                sortDirection === "desc"
+                                                    ? "border-t-[#161616]"
+                                                    : "border-t-transparent"
+                                            }`}
+                                        ></span>
                                     </div>
                                 </th>
-                                <th className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center">
+                                <th
+                                    className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center cursor-[var(--pointer-hand-dark)] select-none"
+                                    onClick={() => handleSort("totalRewards")}
+                                >
                                     <div className="flex items-center gap-1">
                                         <span className="whitespace-nowrap">
                                             Total Rewards
@@ -93,11 +220,28 @@ export default function ValidatorTable({
                                         </div>
                                     </div>
                                     <div className="hidden lg:flex flex-col items-center gap-0.5">
-                                        <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] border-b-[#161616]"></span>
-                                        <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] border-t-[#161616]"></span>
+                                        <span
+                                            className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] ${
+                                                sortField === "totalRewards" &&
+                                                sortDirection === "asc"
+                                                    ? "border-b-[#161616]"
+                                                    : "border-b-transparent"
+                                            }`}
+                                        ></span>
+                                        <span
+                                            className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] ${
+                                                sortField === "totalRewards" &&
+                                                sortDirection === "desc"
+                                                    ? "border-t-[#161616]"
+                                                    : "border-t-transparent"
+                                            }`}
+                                        ></span>
                                     </div>
                                 </th>
-                                <th className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center">
+                                <th
+                                    className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center cursor-[var(--pointer-hand-dark)] select-none"
+                                    onClick={() => handleSort("totalSold")}
+                                >
                                     <div className="flex items-center gap-1">
                                         <span className="whitespace-nowrap">
                                             Total Sold Amount
@@ -110,11 +254,28 @@ export default function ValidatorTable({
                                         </div>
                                     </div>
                                     <div className="hidden lg:flex flex-col items-center gap-0.5">
-                                        <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] border-b-[#161616]"></span>
-                                        <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] border-t-[#161616]"></span>
+                                        <span
+                                            className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] ${
+                                                sortField === "totalSold" &&
+                                                sortDirection === "asc"
+                                                    ? "border-b-[#161616]"
+                                                    : "border-b-transparent"
+                                            }`}
+                                        ></span>
+                                        <span
+                                            className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] ${
+                                                sortField === "totalSold" &&
+                                                sortDirection === "desc"
+                                                    ? "border-t-[#161616]"
+                                                    : "border-t-transparent"
+                                            }`}
+                                        ></span>
                                     </div>
                                 </th>
-                                <th className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center">
+                                <th
+                                    className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center cursor-[var(--pointer-hand-dark)] select-none"
+                                    onClick={() => handleSort("selfStake")}
+                                >
                                     <div className="flex items-center gap-1">
                                         <span className="whitespace-nowrap">
                                             Self Stake
@@ -127,14 +288,28 @@ export default function ValidatorTable({
                                         </div>
                                     </div>
                                     <div className="hidden lg:flex flex-col items-center gap-0.5">
-                                        <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] border-b-[#161616]"></span>
-                                        <span className="w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] border-t-[#161616]"></span>
+                                        <span
+                                            className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] ${
+                                                sortField === "selfStake" &&
+                                                sortDirection === "asc"
+                                                    ? "border-b-[#161616]"
+                                                    : "border-b-transparent"
+                                            }`}
+                                        ></span>
+                                        <span
+                                            className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] ${
+                                                sortField === "selfStake" &&
+                                                sortDirection === "desc"
+                                                    ? "border-t-[#161616]"
+                                                    : "border-t-transparent"
+                                            }`}
+                                        ></span>
                                     </div>
                                 </th>
                             </tr>
                         </thead>
                         <tbody className="w-full">
-                            {validators.map((validator, index) => (
+                            {sortedValidators.map((validator, index) => (
                                 <tr
                                     key={index + "validator-table"}
                                     className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 py-0 my-2.5 lg:my-0 lg:py-2.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
