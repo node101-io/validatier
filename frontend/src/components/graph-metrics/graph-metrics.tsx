@@ -161,13 +161,7 @@ const optionsPrice = {
         ...baseOptions("ns-shared").grid,
         padding: { left: 0, right: 0, top: -2, bottom: 16 },
     },
-    xaxis: {
-        ...baseOptions("ns-shared").xaxis,
-        labels: {
-            ...baseOptions("ns-shared").xaxis.labels,
-            show: true,
-        },
-    },
+    xaxis: { ...baseOptions("ns-shared").xaxis, labels: { show: false } },
     yaxis: [
         {
             min: 0,
@@ -270,15 +264,23 @@ export default function GraphMetrics({
                                 margin: 0,
                                 padding: 0,
                                 lineHeight: 0,
+                                width: "calc(100% - 18px)",
                             }}
                         >
                             <Chart
                                 type="area"
                                 options={optionsPrice as any}
                                 series={thirdSeries as any}
-                                height={140}
+                                height={130}
                             />
                         </div>
+                    </div>
+                    <div className="flex justify-between h-[28px] py-2 pl-11 text-[14px] text-[#7E77B8] select-none pointer-events-none">
+                        {categories.map((label) => (
+                            <span key={label} className="shrink-0">
+                                {label}
+                            </span>
+                        ))}
                     </div>
                 </div>
             </div>

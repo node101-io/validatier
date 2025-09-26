@@ -1,3 +1,5 @@
+"use client";
+
 import NetworkSummary from "@/components/network-summary/network-summary";
 import GraphMetrics from "@/components/graph-metrics/graph-metrics";
 import ValidatorLeaderboards from "@/components/validator-leaderboards/validator-leaderboards";
@@ -10,6 +12,45 @@ import {
     formatAtom,
     formatAtomUSD,
 } from "@/utils/format-numbers";
+import dynamic from "next/dynamic";
+import { ApexOptions } from "apexcharts";
+
+const MiniChart = dynamic(() => import("react-apexcharts"), { ssr: false });
+
+const miniOptions: ApexOptions = {
+    chart: {
+        type: "area",
+        animations: { enabled: false },
+        toolbar: { show: false },
+        sparkline: { enabled: true },
+        zoom: { enabled: false },
+        parentHeightOffset: 0,
+        foreColor: "#7E77B8",
+        fontFamily: "Darker Grotesque, sans-serif",
+    },
+    stroke: { curve: "smooth", width: 2 },
+    dataLabels: { enabled: false },
+    markers: { size: 0 },
+    grid: { show: false },
+    xaxis: {
+        labels: { show: false },
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+        tooltip: { enabled: false },
+    },
+    yaxis: { show: false },
+    tooltip: { enabled: false },
+    fill: {
+        type: "gradient",
+        gradient: {
+            shadeIntensity: 0,
+            opacityFrom: 0.18,
+            opacityTo: 0.04,
+            stops: [0, 90, 100],
+        },
+    },
+    colors: ["#5856D7"],
+};
 
 export default function Inner({
     validators,
@@ -70,7 +111,27 @@ export default function Inner({
                                 </div>
                             </>
                         }
-                        rightColumn={<div>TBA</div>}
+                        rightColumn={
+                            <div className="flex items-center h-full w-32 justify-end">
+                                <MiniChart
+                                    type="area"
+                                    height={80}
+                                    width={80}
+                                    options={{
+                                        ...miniOptions,
+                                        colors: ["#31ADE6"],
+                                    }}
+                                    series={
+                                        [
+                                            {
+                                                name: "Self Stake Amount",
+                                                data: smallSelfStakeAmountGraphData,
+                                            },
+                                        ] as ApexOptions["series"]
+                                    }
+                                />
+                            </div>
+                        }
                     />
                     <NetworkSummary
                         leftColumn={
@@ -137,7 +198,27 @@ export default function Inner({
                                 <div className="font-medium text-[20px] text-[#7c70c3]"></div>
                             </>
                         }
-                        rightColumn={<div>TBA</div>}
+                        rightColumn={
+                            <div className="flex items-center h-full w-32 justify-end">
+                                <MiniChart
+                                    type="area"
+                                    height={80}
+                                    width={80}
+                                    options={{
+                                        ...miniOptions,
+                                        colors: ["#FF9404"],
+                                    }}
+                                    series={
+                                        [
+                                            {
+                                                name: "Avg Self/Total Stake",
+                                                data: smallSelfStakeRatioGraphData,
+                                            },
+                                        ] as ApexOptions["series"]
+                                    }
+                                />
+                            </div>
+                        }
                     />
                 </div>
             </div>

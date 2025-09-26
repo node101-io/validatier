@@ -18,10 +18,10 @@ export default function NetworkSummary({
                     [border-width:0.5px] border-[#bebee7]`}
                 id={componentName}
             >
-                <div className="max-w-1/2 h-full flex flex-col justify-between">
+                <div className="w-1/2 h-full flex flex-col justify-between">
                     {leftColumn}
                 </div>
-                <div className="max-w-1/2 h-full flex flex-col justify-between">
+                <div className="w-1/2 h-full flex flex-col justify-between items-end text-right">
                     {rightColumn}
                 </div>
             </div>
