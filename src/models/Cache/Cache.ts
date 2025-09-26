@@ -3,7 +3,7 @@ import mongoose, { Schema, Model } from 'mongoose';
 import Chain, { ChainInterface, ChainModel } from '../Chain/Chain.js';
 import Validator, { ValidatorInterface, ValidatorsSummaryDataInterface } from '../Validator/Validator.js';
 import { getDateRange } from './functions/getRangeFromIntervalId.js';
-import { GraphDataInterface, ValidatorModel } from '../Validator/Validator.js';
+import { SmallGraphDataInterface, GraphDataInterface, ValidatorModel } from '../Validator/Validator.js';
 import ActiveValidators, { ActiveValidatorsModel, CummulativeActiveListItemInterface } from '../ActiveValidators/ActiveValidators.js';
 import Price, { PriceModel } from '../Price/Price.js';
 
@@ -13,7 +13,7 @@ export interface CacheInterface {
   validators: ValidatorInterface[];
   summary_data: ValidatorsSummaryDataInterface;
   summary_graph: GraphDataInterface[];
-  small_graph: GraphDataInterface;
+  small_graph: SmallGraphDataInterface[];
   price_graph: number[];
   cummulative_active_list: CummulativeActiveListItemInterface[];
   export: Record<string, any>;
