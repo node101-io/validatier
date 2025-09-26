@@ -7,7 +7,15 @@ import { useScrollContext } from "@/components/scroll/scroll-provider";
 
 export default function Intro() {
     const { scrollY } = useScrollContext();
-    const y = scrollY ? useTransform(scrollY, (v) => -2 * v) : 0;
+    // const y = scrollY ? useTransform(scrollY, (y) => {
+    //     if (y < 1000) return -2 * y;
+
+    //     return -1000;
+    // }) : 0;
+    // does the same thing as the above: https://motion.dev/docs/react-use-transform#value-mapping
+	const y = scrollY
+	  ? useTransform(scrollY, [0, 500, 1000], [0, -1000, -1000])
+	  : 0;
 
     return (
         <motion.div
