@@ -75,6 +75,12 @@ export interface ValidatorWithMetricsInterface extends ValidatorInterface {
     total_withdraw: number;
 }
 
+export interface SingleValidatorGraphDataInterface {
+    timestamps: number[];
+    total_stake: number[];
+    total_sold: number[];
+}
+
 export interface ValidatorsSummaryDataInterface {
     initial_total_stake_sum: number;
     initial_total_withdraw_sum: number;
@@ -154,7 +160,7 @@ export interface ValidatorModel extends Model<ValidatorInterface> {
         },
         callback: (
             err: string | null,
-            validator: ValidatorInterface | null
+            validator: ValidatorWithMetricsInterface | null
         ) => any
     ) => any;
     rankValidators: (
@@ -271,6 +277,18 @@ export interface ValidatorModel extends Model<ValidatorInterface> {
         callback: (
             err: string | null,
             validators: ValidatorInterface[] | null
+        ) => any
+    ) => any;
+    getValidatorGraphData: (
+        body: {
+            operator_address: string;
+            bottom_timestamp: number;
+            top_timestamp: number;
+            number_of_columns?: number;
+        },
+        callback: (
+            err: string | null,
+            data: SingleValidatorGraphDataInterface | null
         ) => any
     ) => any;
 }
@@ -506,8 +524,56 @@ validatorSchema.statics.getValidatorByOperatorAddress = function (
     const { operator_address } = body;
 
     Validator.findOne({ operator_address })
+        .lean()
         .then((validator) => {
-            return callback(null, validator);
+            if (!validator) return callback("bad_request", null);
+
+            const top_timestamp = Date.now();
+            const bottom_timestamp = top_timestamp - 365 * 86400 * 1000;
+
+            CompositeEventBlock.getPeriodicDataForValidatorSet(
+                {
+                    chain_identifier: validator.chain_identifier,
+                    bottom_timestamp: bottom_timestamp - 86_400_000,
+                    top_timestamp: top_timestamp,
+                },
+                (err, validatorRecordMapping) => {
+                    if (err) return callback("bad_request", null);
+
+                    const record =
+                        validatorRecordMapping?.[validator.operator_address] ||
+                        null;
+
+                    const reward = record?.reward || 0;
+                    const commission = record?.commission || 0;
+                    const self_stake = record?.self_stake || 0;
+                    const total_stake = record?.total_stake || 0;
+                    const average_total_stake = record?.average_total_stake || 0;
+                    const balance_change = record?.balance_change || 0;
+
+                    const sold = Math.max(
+                        (balance_change - (commission + reward) + self_stake) * -1,
+                        0
+                    );
+                    const percentage_sold = getPercentageSoldWithoutRounding({
+                        sold,
+                        self_stake,
+                        total_withdraw: reward + commission,
+                    });
+
+                    return callback(null, {
+                        ...validator,
+                        percentage_sold: percentage_sold,
+                        sold: sold,
+                        average_total_stake: average_total_stake,
+                        reward: reward,
+                        self_stake: self_stake,
+                        commission: commission,
+                        total_stake: total_stake,
+                        total_withdraw: reward + commission,
+                    });
+                }
+            );
         })
         .catch((err) => callback(err, null));
 };
@@ -1139,6 +1205,74 @@ validatorSchema.statics.findValidatorsByChainIdentifier = function (
     const { chain_identifier } = body;
     Validator.find({ chain_identifier: chain_identifier })
         .then((validators) => callback(null, validators))
+        .catch((err) => callback(err, null));
+};
+
+validatorSchema.statics.getValidatorGraphData = function (
+    body: Parameters<ValidatorModel["getValidatorGraphData"]>[0],
+    callback: Parameters<ValidatorModel["getValidatorGraphData"]>[1]
+) {
+    const {
+        operator_address,
+        bottom_timestamp,
+        top_timestamp,
+        number_of_columns = 90,
+    } = body;
+
+    if (!operator_address || !bottom_timestamp || !top_timestamp)
+        return callback("format_error", null);
+
+    const numberOfColumns = Math.max(1, number_of_columns);
+    const stepValue = Math.ceil((top_timestamp - bottom_timestamp) / numberOfColumns);
+
+    const timestamps: number[] = [];
+    const totalStakeSeries: number[] = [];
+    const totalSoldSeries: number[] = [];
+
+    const promises: Promise<void>[] = [];
+
+    let current = bottom_timestamp;
+    let index = 0;
+
+    while (current < top_timestamp) {
+        const end = Math.min(current + stepValue, top_timestamp);
+        const i = index;
+        promises.push(
+            new Promise<void>((resolve) => {
+                CompositeEventBlock.getPeriodicDataForGraphGeneration(
+                    {
+                        operator_address: operator_address,
+                        bottom_timestamp: bottom_timestamp - 86_400_000,
+                        top_timestamp: end,
+                        index: i,
+                    },
+                    (err, result) => {
+                        const mapping = result || {} as any;
+                        const values = mapping[operator_address] || {};
+                        const total_stake = values.total_stake || 0;
+                        const total_sold = values.total_sold || 0;
+
+                        timestamps[i] = bottom_timestamp + i * stepValue;
+                        totalStakeSeries[i] = total_stake / 1_000_000;
+                        totalSoldSeries[i] = total_sold / 1_000_000;
+                        return resolve();
+                    }
+                );
+            })
+        );
+
+        current += stepValue;
+        index++;
+    }
+
+    Promise.all(promises)
+        .then(() =>
+            callback(null, {
+                timestamps: timestamps,
+                total_stake: totalStakeSeries,
+                total_sold: totalSoldSeries,
+            })
+        )
         .catch((err) => callback(err, null));
 };
 
