@@ -1,6 +1,11 @@
+"use client";
+
 import Validator from "@/types/validator";
 import Leaderboard from "@/types/leaderboard";
 import { formatAtom, formatAtomUSD } from "@/utils/format-numbers";
+import { useState } from "react";
+
+type SortDirection = "asc" | "desc";
 
 export default function ValidatorLeaderboard({
     validators,
@@ -9,19 +14,68 @@ export default function ValidatorLeaderboard({
     validators: Validator[];
     leaderboard: Leaderboard;
 }) {
+    const [sortDirection, setSortDirection] = useState<SortDirection | null>(
+        null
+    );
+
+    const handleSort = () => {
+        if (sortDirection === null) {
+            setSortDirection("asc");
+        } else if (sortDirection === "asc") {
+            setSortDirection("desc");
+        } else {
+            setSortDirection(null);
+        }
+    };
+
+    const sortedValidators = [...validators].sort((a, b) => {
+        if (!sortDirection) return 0;
+
+        let aValue: any;
+        let bValue: any;
+
+        if (leaderboard.type === "percentageSold") {
+            aValue = a.percentage_sold ?? 0;
+            bValue = b.percentage_sold ?? 0;
+        } else if (leaderboard.type === "totalSold") {
+            aValue = a.sold ?? 0;
+            bValue = b.sold ?? 0;
+        } else {
+            return 0;
+        }
+
+        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+    });
     return (
         <div className="flex flex-col overflow-hidden min-w-[320px] sm:min-w-[420px] lg:min-w-[500px] w-full h-full p-0 bg-[#f5f5ff] border-[0.5px] border-[#bebee7] rounded-[20px] gap-1">
             <div className="flex items-center justify-between w-full px-4 pt-4">
                 {/* Each Leaderboard Header */}
-                <div className="flex items-center gap-1 cursor-[var(--pointer-hand-dark)] select-none">
+                <div
+                    className="flex items-center gap-1 cursor-[var(--pointer-hand-dark)] select-none"
+                    onClick={handleSort}
+                >
                     {/* Each Leaderboard Table Type Content */}
                     <div className="text-[#7c70c3] font-normal text-lg sm:text-xl">
                         {leaderboard.title}
                     </div>
                     <div className="flex flex-col justify-center gap-0.5 ml-1.25 -mb-0.75">
                         <div
-                            className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-[#49306f]"
+                            className={`w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] ${
+                                sortDirection === "asc"
+                                    ? "border-b-[#49306f]"
+                                    : "border-b-transparent"
+                            }`}
                             id="triangle-up-leaderboard"
+                        ></div>
+                        <div
+                            className={`w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] ${
+                                sortDirection === "desc"
+                                    ? "border-t-[#49306f]"
+                                    : "border-t-transparent"
+                            }`}
+                            id="triangle-down-leaderboard"
                         ></div>
                     </div>
                 </div>
@@ -40,7 +94,7 @@ export default function ValidatorLeaderboard({
                 </div>
             </div>
             <div className="flex flex-col h-fit gap-0">
-                {validators.map((validator, index) => (
+                {sortedValidators.map((validator, index) => (
                     <div
                         key={index + leaderboard.type}
                         className="flex items-center justify-between cursor-[var(--pointer-hand-dark)] py-3 px-4 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out"
@@ -105,7 +159,8 @@ export default function ValidatorLeaderboard({
                                     <div className="flex items-center !justify-end text-end text-lg sm:text-xl min-w-[90px] sm:min-w-[100px] max-w-[100px] w-[100px]">
                                         {validator.sold
                                             ? `$${formatAtomUSD(
-                                                  validator.sold ?? 0
+                                                  validator.sold ?? 0,
+                                                  2
                                               )}`
                                             : "-"}
                                     </div>
