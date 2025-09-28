@@ -2,7 +2,11 @@
 
 import Validator from "@/types/validator";
 import Leaderboard from "@/types/leaderboard";
-import { formatAtom, formatAtomUSD } from "@/utils/format-numbers";
+import {
+    formatAtom,
+    formatAtomUSD,
+    formatPercentage,
+} from "@/utils/format-numbers";
 import { useState } from "react";
 
 type SortDirection = "asc" | "desc";
@@ -122,33 +126,38 @@ export default function ValidatorLeaderboard({
                             {/* Each Leaderboard Validator Data Wrapper */}
                             {leaderboard.type === "percentageSold" ? (
                                 <div className="flex items-center font-bold gap-1">
-                                    <div
-                                        className={
-                                            validator.percentage_sold &&
-                                            validator.percentage_sold > 0
-                                                ? "text-[#13a719] text-xl"
-                                                : "text-[#b82200] text-xl"
-                                        }
-                                    >
-                                        %
-                                        {validator.percentage_sold &&
-                                        validator.percentage_sold <= 100
-                                            ? Math.max(
-                                                  validator.percentage_sold,
-                                                  0
-                                              ).toFixed(2)
-                                            : 100.0}
-                                    </div>
-                                    {validator.percentage_sold &&
-                                        validator.percentage_sold > 0 && (
-                                            <div className="flex items-center gap-1">
+                                    {validator.percentage_sold === undefined ||
+                                    validator.percentage_sold === null ? (
+                                        <span className="text-[#b82200] text-xl">
+                                            -
+                                        </span>
+                                    ) : (
+                                        <div className="flex items-center text-xl gap-1.5">
+                                            <span
+                                                className={`${
+                                                    validator.percentage_sold >
+                                                    50
+                                                        ? "text-[#b82200]"
+                                                        : validator.percentage_sold >
+                                                          25
+                                                        ? "text-[#ff6f43]"
+                                                        : "text-[#13a719]"
+                                                }`}
+                                            >
+                                                {formatPercentage(
+                                                    validator.percentage_sold,
+                                                    2
+                                                )}
+                                                %
+                                            </span>
+                                            {validator.percentage_sold < 25 && (
                                                 <img
+                                                    className="flex items-center justify-center"
                                                     src="/res/images/check_green.svg"
-                                                    alt="Check"
-                                                    className="flex justify-center items-center"
                                                 />
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             ) : leaderboard.type === "totalSold" ? (
                                 <>

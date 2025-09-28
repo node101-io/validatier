@@ -5,6 +5,7 @@ import {
     formatAtom,
     formatAtomUSD,
     formatNumber,
+    formatPercentage,
 } from "@/utils/format-numbers";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -20,8 +21,10 @@ type SortDirection = "asc" | "desc";
 
 export default function ValidatorTable({
     validators,
+    searchQuery = "",
 }: {
     validators: Validator[];
+    searchQuery?: string;
 }) {
     const router = useRouter();
     const [sortField, setSortField] = useState<SortField | null>(null);
@@ -100,6 +103,28 @@ export default function ValidatorTable({
         window.addEventListener("resize", update);
         return () => window.removeEventListener("resize", update);
     }, [validators]);
+
+    // Handle search filtering by showing/hiding rows
+    useEffect(() => {
+        if (!searchQuery) {
+            document
+                .querySelectorAll<HTMLElement>("[data-validator-row]")
+                .forEach((row) => {
+                    row.style.display = "";
+                });
+            return;
+        }
+
+        const query = searchQuery.toLowerCase();
+        document
+            .querySelectorAll<HTMLElement>("[data-validator-row]")
+            .forEach((row) => {
+                const moniker =
+                    row.getAttribute("data-validator-moniker")?.toLowerCase() ||
+                    "";
+                row.style.display = moniker.includes(query) ? "" : "none";
+            });
+    }, [searchQuery]);
     return (
         <div className="flex flex-col gap-2.5 px-5 lg:px-0">
             <div className="flex justify-between items-center w-full">
@@ -320,6 +345,8 @@ export default function ValidatorTable({
                                         validator.operator_address
                                     }
                                     id={validator.operator_address}
+                                    data-validator-row
+                                    data-validator-moniker={validator.moniker}
                                     onClick={() => {
                                         sessionStorage.setItem(
                                             `validator_${validator.operator_address}`,
@@ -377,7 +404,8 @@ export default function ValidatorTable({
                                                             : "text-[#13a719]"
                                                     }`}
                                                 >
-                                                    {validator.percentage_sold.toFixed(
+                                                    {formatPercentage(
+                                                        validator.percentage_sold,
                                                         2
                                                     )}
                                                     %

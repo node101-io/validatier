@@ -9,12 +9,15 @@ import { useScrollContext } from "@/components/scroll/scroll-provider";
 
 export default function Navbar({
     isValidatorPage = false,
+    onSearchChange,
 }: {
     isValidatorPage?: boolean;
+    onSearchChange?: (query: string) => void;
 }) {
     const { scrollY } = useScrollContext();
     const [introHeight, setIntroHeight] = useState<number>(300);
     const [pastIntro, setPastIntro] = useState<boolean>(false);
+    const [searchValue, setSearchValue] = useState<string>("");
 
     const heightClass = isValidatorPage
         ? "h-[75px]"
@@ -123,6 +126,13 @@ export default function Navbar({
                                     : "w-[250px] bg-position-[13px_13px] h-11.5 rounded-2xl pl-11.5 pb-1 mt-0.5"
                             }`}
                             placeholder="Search Validator"
+                            value={searchValue}
+                            onChange={(e) => {
+                                setSearchValue(e.target.value);
+                                if (onSearchChange) {
+                                    onSearchChange(e.target.value);
+                                }
+                            }}
                         />
                     </div>
                 )}

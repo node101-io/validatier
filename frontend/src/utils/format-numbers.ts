@@ -12,6 +12,7 @@ export function formatPercentage(
     value: number,
     maximumFractionDigits = 0
 ): string {
+    if (value > 100) return "100";
     return new Intl.NumberFormat("en-US", {
         maximumFractionDigits,
     }).format(value);

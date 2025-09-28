@@ -1,10 +1,5 @@
 import { cookies as getCookies } from "next/headers";
-import ScrollProvider from "@/components/scroll/scroll-provider";
-import Intro from "@/components/intro/intro";
-import Navbar from "@/components/navbar/navbar";
-import Inner from "@/components/inner/inner";
-import StakeWithUs from "@/components/stake-with-us/stake-with-us";
-import Footer from "@/components/footer/footer";
+import PageWrapper from "@/components/page-wrapper/page-wrapper";
 import Validator from "@/types/validator";
 import { connectMongoose } from "@/lib/mongoose";
 import Cache, { CacheInterface } from "../../../src/models/Cache/Cache";
@@ -132,46 +127,41 @@ export default async function Home() {
         average_total_stake: v.average_total_stake,
         reward: v.reward,
         self_stake: v.self_stake,
+        commission: v.commission,
     }));
 
     return (
-        <ScrollProvider className="flex flex-col w-full items-center relative overflow-x-hidden overflow-y-scroll ml-0 h-screen rounded-0 bg-white transition-all duration-250">
-            <Navbar />
-            <Intro />
-            <Inner
-                validators={validators}
-                summaryData={cacheResult.summary_data}
-                price={price}
-                metrics={[
-                    {
-                        id: "total_stake_sum",
-                        color: "#FF9404",
-                        title: "Average Delegation",
-                        valueNative: formatAtom(averageDelegation, 1) + " ATOM",
-                        valueUsd: "$" + formatAtomUSD(averageDelegation, 1),
-                    },
-                    {
-                        id: "total_sold",
-                        color: "#5856D7",
-                        title: "Total Sold Amount",
-                        valueNative: formatAtom(totalSoldAmount, 1) + " ATOM",
-                        valueUsd: "$" + formatAtomUSD(totalSoldAmount, 1),
-                    },
-                    {
-                        id: "price",
-                        color: "#31ADE6",
-                        title: "Average ATOM Price",
-                        valueNative: "$" + averagePrice.toFixed(2),
-                    },
-                ]}
-                delegationData={delegationData}
-                soldData={soldData}
-                priceData={cacheResult.price_graph}
-                smallSelfStakeAmountGraphData={smallSelfStakeAmountGraphData}
-                smallSelfStakeRatioGraphData={smallSelfStakeRatioGraphData}
-            />
-            <StakeWithUs />
-            <Footer />
-        </ScrollProvider>
+        <PageWrapper
+            validators={validators}
+            summaryData={cacheResult.summary_data}
+            price={price}
+            metrics={[
+                {
+                    id: "total_stake_sum",
+                    color: "#FF9404",
+                    title: "Average Delegation",
+                    valueNative: formatAtom(averageDelegation, 1) + " ATOM",
+                    valueUsd: "$" + formatAtomUSD(averageDelegation, 1),
+                },
+                {
+                    id: "total_sold",
+                    color: "#5856D7",
+                    title: "Total Sold Amount",
+                    valueNative: formatAtom(totalSoldAmount, 1) + " ATOM",
+                    valueUsd: "$" + formatAtomUSD(totalSoldAmount, 1),
+                },
+                {
+                    id: "price",
+                    color: "#31ADE6",
+                    title: "Average ATOM Price",
+                    valueNative: "$" + averagePrice.toFixed(2),
+                },
+            ]}
+            delegationData={delegationData}
+            soldData={soldData}
+            priceData={cacheResult.price_graph}
+            smallSelfStakeAmountGraphData={smallSelfStakeAmountGraphData}
+            smallSelfStakeRatioGraphData={smallSelfStakeRatioGraphData}
+        />
     );
 }

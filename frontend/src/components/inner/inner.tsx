@@ -62,6 +62,8 @@ export default function Inner({
     priceData,
     smallSelfStakeAmountGraphData,
     smallSelfStakeRatioGraphData,
+    searchQuery = "",
+    ref,
 }: {
     validators: Validator[];
     summaryData: ValidatorsSummaryDataInterface;
@@ -72,6 +74,8 @@ export default function Inner({
     priceData: number[];
     smallSelfStakeAmountGraphData: number[];
     smallSelfStakeRatioGraphData: number[];
+    searchQuery?: string;
+    ref?: React.RefObject<HTMLDivElement | null>;
 }) {
     return (
         <div
@@ -249,7 +253,12 @@ export default function Inner({
                 totalSold={summaryData.total_sold}
                 price={price}
             />
-            <ValidatorTable validators={validators} />
+            <div ref={ref}>
+                <ValidatorTable
+                    validators={validators}
+                    searchQuery={searchQuery}
+                />
+            </div>
         </div>
     );
 }

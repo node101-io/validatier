@@ -15,6 +15,7 @@ import GraphMetrics from "@/components/graph-metrics/graph-metrics";
 import truncateAddress from "@/utils/truncate-address";
 import StakeWithUs from "@/components/stake-with-us/stake-with-us";
 import Footer from "@/components/footer/footer";
+import Metric from "@/types/metric";
 
 const seriesDelegation = [
     {
@@ -35,13 +36,51 @@ export default function ValidatorPage() {
     const operatorAddress = (routeParams?.operatorAddress || "") as string;
     const router = useRouter();
     const [validator, setValidator] = useState<Validator | null>(null);
+    const [metrics, setMetrics] = useState<Metric[]>([]);
 
     useEffect(() => {
         const storedValidator = sessionStorage.getItem(
             `validator_${operatorAddress}`
         );
         if (storedValidator) {
-            setValidator(JSON.parse(storedValidator));
+            const validator: Validator = JSON.parse(storedValidator);
+            console.log(validator);
+            setValidator(validator);
+            setMetrics([
+                {
+                    id: "self_stake",
+                    color: "#FF9404",
+                    title: "Self Stake",
+                    valueNative: validator.self_stake
+                        ? formatAtom(validator.self_stake) + " ATOM"
+                        : "-",
+                    valueUsd: validator.self_stake
+                        ? "$" + formatAtomUSD(validator.self_stake)
+                        : "-",
+                },
+                {
+                    id: "percentage_sold",
+                    color: "#5856D7",
+                    title: "Percentage Sold",
+                    valueNative: validator.percentage_sold
+                        ? "%" + formatPercentage(validator.percentage_sold, 1)
+                        : "-",
+                    valueUsd: validator.percentage_sold
+                        ? "$" + formatAtomUSD(validator.percentage_sold)
+                        : "-",
+                },
+                {
+                    id: "commission",
+                    color: "#31ADE6",
+                    title: "Commission",
+                    valueNative: validator.commission
+                        ? formatAtom(validator.commission, 1) + " ATOM"
+                        : "-",
+                    valueUsd: validator.commission
+                        ? "$" + formatAtomUSD(validator.commission)
+                        : "-",
+                },
+            ]);
         } else {
             router.push("/404");
         }
@@ -131,8 +170,7 @@ export default function ValidatorPage() {
                                                 className="font-medium text-[20px] text-[#7c70c3]"
                                                 id="summary-self-stake-amount-usd"
                                             >
-                                                {validator.self_stake &&
-                                                validator.self_stake > 0
+                                                {validator.self_stake
                                                     ? `$${formatAtomUSD(
                                                           validator.self_stake
                                                       )}`
@@ -187,7 +225,10 @@ export default function ValidatorPage() {
                                                 id="summary-average-self-stake-ratio-native"
                                             >
                                                 {validator.commission
-                                                    ? `${validator.commission}%`
+                                                    ? `${formatPercentage(
+                                                          validator.commission,
+                                                          1
+                                                      )}%`
                                                     : "-"}
                                             </div>
                                             <div className="font-medium text-[20px] text-[#7c70c3]"></div>
@@ -202,7 +243,7 @@ export default function ValidatorPage() {
                             </div>
                         </div>
                         <GraphMetrics
-                            metrics={[]}
+                            metrics={metrics}
                             firstSeries={seriesDelegation}
                             secondSeries={seriesSold}
                             thirdSeries={seriesPrice}
