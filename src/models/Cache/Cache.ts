@@ -1,7 +1,7 @@
 
 import mongoose, { Schema, Model } from 'mongoose';
 import Chain, { ChainInterface, ChainModel } from '../Chain/Chain.js';
-import Validator, { ValidatorInterface, ValidatorsSummaryDataInterface } from '../Validator/Validator.js';
+import Validator, { ValidatorWithMetricsInterface, ValidatorsSummaryDataInterface } from '../Validator/Validator.js';
 import { getDateRange } from './functions/getRangeFromIntervalId.js';
 import { SmallGraphDataInterface, GraphDataInterface, ValidatorModel } from '../Validator/Validator.js';
 import ActiveValidators, { ActiveValidatorsModel, CummulativeActiveListItemInterface } from '../ActiveValidators/ActiveValidators.js';
