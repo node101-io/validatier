@@ -8,6 +8,7 @@ import {
     formatPercentage,
 } from "@/utils/format-numbers";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type SortDirection = "asc" | "desc";
 
@@ -18,6 +19,7 @@ export default function ValidatorLeaderboard({
     validators: Validator[];
     leaderboard: Leaderboard;
 }) {
+    const router = useRouter();
     const [sortDirection, setSortDirection] = useState<SortDirection | null>(
         null
     );
@@ -103,6 +105,15 @@ export default function ValidatorLeaderboard({
                         key={index + leaderboard.type}
                         className="flex items-center justify-between cursor-[var(--pointer-hand-dark)] py-3 px-4 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out"
                         operator-address={validator.operator_address}
+                        onClick={() => {
+                            sessionStorage.setItem(
+                                `validator_${validator.operator_address}`,
+                                JSON.stringify(validator)
+                            );
+                            router.push(
+                                `/validator/${validator.operator_address}`
+                            );
+                        }}
                     >
                         <div className="flex items-center gap-2">
                             {/* Each Leaderboard Validator Info Wrapper */}
