@@ -11,64 +11,6 @@ import Cache, { CacheInterface } from "../../../src/models/Cache/Cache";
 import Chain, { ChainInterface } from "../../../src/models/Chain/Chain";
 import { formatAtom, formatAtomUSD } from "@/utils/format-numbers";
 
-const validators: Validator[] = [
-    {
-        id: "1",
-        name: "Validator 1 asd asd ad asdadasdasdas asd as",
-        operatorAddress: "validator1ewqeqweqweqw",
-        image: "https://via.placeholder.com/150",
-        totalSold: 100,
-        percentageSold: 85,
-        avgDelegation: 12500,
-        totalRewards: 45000,
-        selfStake: 32000,
-    },
-    {
-        id: "2",
-        name: "Validator 2",
-        operatorAddress: "validator2",
-        image: "https://via.placeholder.com/150",
-        totalSold: 95,
-        percentageSold: 72,
-        avgDelegation: 9800,
-        totalRewards: 30000,
-        selfStake: 15000,
-    },
-    {
-        id: "3",
-        name: "Validator 3",
-        operatorAddress: "validator3",
-        image: "https://via.placeholder.com/150",
-        totalSold: 90,
-        percentageSold: 68,
-        avgDelegation: 7600,
-        totalRewards: 28000,
-        selfStake: 12000,
-    },
-    {
-        id: "4",
-        name: "Validator 4",
-        operatorAddress: "validator4",
-        image: "https://via.placeholder.com/150",
-        totalSold: 85,
-        percentageSold: 55,
-        avgDelegation: 5400,
-        totalRewards: 21000,
-        selfStake: 9000,
-    },
-    {
-        id: "5",
-        name: "Validator 5",
-        operatorAddress: "validator5",
-        image: "https://via.placeholder.com/150",
-        totalSold: 80,
-        percentageSold: 42,
-        avgDelegation: 4200,
-        totalRewards: 15000,
-        selfStake: 7000,
-    },
-];
-
 export default async function Home() {
     await connectMongoose();
 
@@ -162,20 +104,42 @@ export default async function Home() {
                 delegationData[i]
         );
 
-    const smallSelfStakeAmountGraphData = [cacheResult.small_graph[0].self_stake_sum];
+    const smallSelfStakeAmountGraphData = [
+        cacheResult.small_graph[0].self_stake_sum,
+    ];
     for (let i = 1; i < cacheResult.small_graph.length; i++)
-        smallSelfStakeAmountGraphData.push(cacheResult.small_graph[i].self_stake_sum + smallSelfStakeAmountGraphData[i - 1]);
+        smallSelfStakeAmountGraphData.push(
+            cacheResult.small_graph[i].self_stake_sum +
+                smallSelfStakeAmountGraphData[i - 1]
+        );
 
-    const smallSelfStakeRatioGraphData = [cacheResult.small_graph[0].average_self_stake_ratio];
+    const smallSelfStakeRatioGraphData = [
+        cacheResult.small_graph[0].average_self_stake_ratio,
+    ];
     for (let i = 1; i < cacheResult.small_graph.length; i++)
-        smallSelfStakeRatioGraphData.push(cacheResult.small_graph[i].average_self_stake_ratio + smallSelfStakeRatioGraphData[i - 1]);
+        smallSelfStakeRatioGraphData.push(
+            cacheResult.small_graph[i].average_self_stake_ratio +
+                smallSelfStakeRatioGraphData[i - 1]
+        );
+
+    const validators: Validator[] = cacheResult.validators.map((v, index) => ({
+        id: index,
+        moniker: v.moniker,
+        temporary_image_uri: v.temporary_image_uri ?? "",
+        operator_address: v.operator_address,
+        percentage_sold: v.percentage_sold,
+        sold: v.sold,
+        average_total_stake: v.average_total_stake,
+        reward: v.reward,
+        self_stake: v.self_stake,
+    }));
 
     return (
         <ScrollProvider className="flex flex-col w-full items-center relative overflow-x-hidden overflow-y-scroll ml-0 h-screen rounded-0 bg-white transition-all duration-250">
             <Navbar />
             <Intro />
             <Inner
-                validators={validators} // TODO: change to cacheResult.validators
+                validators={validators}
                 summaryData={cacheResult.summary_data}
                 price={price}
                 metrics={[
@@ -184,16 +148,14 @@ export default async function Home() {
                         color: "#FF9404",
                         title: "Average Delegation",
                         valueNative: formatAtom(averageDelegation, 1) + " ATOM",
-                        valueUsd:
-                            "$" + formatAtomUSD(averageDelegation, price, 1),
+                        valueUsd: "$" + formatAtomUSD(averageDelegation, 1),
                     },
                     {
                         id: "total_sold",
                         color: "#5856D7",
                         title: "Total Sold Amount",
                         valueNative: formatAtom(totalSoldAmount, 1) + " ATOM",
-                        valueUsd:
-                            "$" + formatAtomUSD(totalSoldAmount, price, 1),
+                        valueUsd: "$" + formatAtomUSD(totalSoldAmount, 1),
                     },
                     {
                         id: "price",

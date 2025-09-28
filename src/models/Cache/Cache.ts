@@ -10,7 +10,7 @@ import Price, { PriceModel } from '../Price/Price.js';
 export interface CacheInterface {
   chain_identifier: string;
   interval: 'all_time' | 'last_30_days' | 'last_90_days' | 'last_365_days';
-  validators: ValidatorInterface[];
+  validators: ValidatorWithMetricsInterface[];
   summary_data: ValidatorsSummaryDataInterface;
   summary_graph: GraphDataInterface[];
   small_graph: SmallGraphDataInterface[];

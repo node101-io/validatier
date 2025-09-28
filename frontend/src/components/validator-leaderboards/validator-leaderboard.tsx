@@ -1,6 +1,6 @@
 import Validator from "@/types/validator";
 import Leaderboard from "@/types/leaderboard";
-import atomToUSD from "@/utils/atom-to-usd";
+import { formatAtom, formatAtomUSD } from "@/utils/format-numbers";
 
 export default function ValidatorLeaderboard({
     validators,
@@ -44,7 +44,7 @@ export default function ValidatorLeaderboard({
                     <div
                         key={index + leaderboard.type}
                         className="flex items-center justify-between cursor-[var(--pointer-hand-dark)] py-3 px-4 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out"
-                        operator-address={validator.operatorAddress}
+                        operator-address={validator.operator_address}
                     >
                         <div className="flex items-center gap-2">
                             {/* Each Leaderboard Validator Info Wrapper */}
@@ -54,14 +54,14 @@ export default function ValidatorLeaderboard({
                                     {index + 1}
                                 </div>
                                 <img
-                                    src={validator.image}
-                                    alt={validator.name}
+                                    src={validator.temporary_image_uri}
+                                    alt={validator.moniker}
                                     className="w-full h-full rounded-full aspect-square overflow-clip"
                                 />
                             </div>
                             <div className="w-[130px] sm:w-[150px] text-lg sm:text-xl text-[#49306f] overflow-hidden text-ellipsis text-nowrap">
                                 {/* Each Leaderboard Validator Name */}
-                                {validator.name}
+                                {validator.moniker}
                             </div>
                         </div>
                         <div className="flex gap-4 sm:gap-5 text-[#7c70c3] text-[15px] sm:text-[16px] text-nowrap">
@@ -70,23 +70,23 @@ export default function ValidatorLeaderboard({
                                 <div className="flex items-center font-bold gap-1">
                                     <div
                                         className={
-                                            validator.percentageSold &&
-                                            validator.percentageSold > 0
+                                            validator.percentage_sold &&
+                                            validator.percentage_sold > 0
                                                 ? "text-[#13a719] text-xl"
                                                 : "text-[#b82200] text-xl"
                                         }
                                     >
                                         %
-                                        {validator.percentageSold &&
-                                        validator.percentageSold <= 100
+                                        {validator.percentage_sold &&
+                                        validator.percentage_sold <= 100
                                             ? Math.max(
-                                                  validator.percentageSold,
+                                                  validator.percentage_sold,
                                                   0
                                               ).toFixed(2)
                                             : 100.0}
                                     </div>
-                                    {validator.percentageSold &&
-                                        validator.percentageSold > 0 && (
+                                    {validator.percentage_sold &&
+                                        validator.percentage_sold > 0 && (
                                             <div className="flex items-center gap-1">
                                                 <img
                                                     src="/res/images/check_green.svg"
@@ -99,12 +99,13 @@ export default function ValidatorLeaderboard({
                             ) : leaderboard.type === "totalSold" ? (
                                 <>
                                     <div className="flex items-center !justify-end text-end text-lg sm:text-xl min-w-[90px] sm:min-w-[100px] max-w-[100px] w-[100px]">
-                                        {validator.totalSold?.toFixed(2)} ATOM
+                                        {formatAtom(validator.sold ?? 0, 2)}{" "}
+                                        ATOM
                                     </div>
                                     <div className="flex items-center !justify-end text-end text-lg sm:text-xl min-w-[90px] sm:min-w-[100px] max-w-[100px] w-[100px]">
-                                        {validator.totalSold
-                                            ? `$${atomToUSD(
-                                                  validator.totalSold
+                                        {validator.sold
+                                            ? `$${formatAtomUSD(
+                                                  validator.sold ?? 0
                                               )}`
                                             : "-"}
                                     </div>

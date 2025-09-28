@@ -6,8 +6,11 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Loading from "./loading";
 import NetworkSummary from "@/components/network-summary/network-summary";
-import atomToUSD from "@/utils/atom-to-usd";
-import formatNumber from "@/utils/format-number";
+import {
+    formatAtom,
+    formatAtomUSD,
+    formatPercentage,
+} from "@/utils/format-numbers";
 import GraphMetrics from "@/components/graph-metrics/graph-metrics";
 import truncateAddress from "@/utils/truncate-address";
 import StakeWithUs from "@/components/stake-with-us/stake-with-us";
@@ -59,18 +62,18 @@ export default function ValidatorPage() {
                                 {/* Validator Info */}
                                 <div className="flex items-center gap-2.5">
                                     <img
-                                        src={validator.image}
-                                        alt={validator.name}
+                                        src={validator.temporary_image_uri}
+                                        alt={validator.moniker}
                                         className="w-10 h-10 rounded-full"
                                     />
                                     <div>
                                         <div className="text-xl font-semibold text-[#250054]">
-                                            {validator.name}
+                                            {validator.moniker}
                                         </div>
                                         <div className="flex flex-row items-center cursor-pointer gap-1">
                                             <span className="text-xl font-base text-[#250054]">
                                                 {truncateAddress(
-                                                    validator.operatorAddress
+                                                    validator.operator_address
                                                 )}
                                             </span>
                                             <img
@@ -118,9 +121,9 @@ export default function ValidatorPage() {
                                                 className="text-[28px] font-bold text-[#49306f] leading-3 mb-0.5 text-nowrap"
                                                 id="summary-self-stake-amount-native"
                                             >
-                                                {validator.selfStake
-                                                    ? `${formatNumber(
-                                                          validator.selfStake
+                                                {validator.self_stake
+                                                    ? `${formatAtom(
+                                                          validator.self_stake
                                                       )} ATOM`
                                                     : "- ATOM"}
                                             </div>
@@ -128,12 +131,10 @@ export default function ValidatorPage() {
                                                 className="font-medium text-[20px] text-[#7c70c3]"
                                                 id="summary-self-stake-amount-usd"
                                             >
-                                                {validator.selfStake &&
-                                                validator.selfStake > 0
-                                                    ? `$${formatNumber(
-                                                          atomToUSD(
-                                                              validator.selfStake
-                                                          )
+                                                {validator.self_stake &&
+                                                validator.self_stake > 0
+                                                    ? `$${formatAtomUSD(
+                                                          validator.self_stake
                                                       )}`
                                                     : "-"}
                                             </div>
@@ -157,7 +158,12 @@ export default function ValidatorPage() {
                                                 className="text-[36px] leading-[22px] font-bold text-[#49306f] text-nowrap mb-0.5"
                                                 id="summary-percentage-sold-native"
                                             >
-                                                24%
+                                                {validator.percentage_sold
+                                                    ? `${formatPercentage(
+                                                          validator.percentage_sold,
+                                                          1
+                                                      )}%`
+                                                    : "-"}
                                             </div>
                                             <div className="font-medium text-[20px] text-[#7c70c3]"></div>
                                         </>
@@ -180,7 +186,9 @@ export default function ValidatorPage() {
                                                 className="text-[36px] leading-[22px] font-bold text-[#49306f] text-nowrap mb-0.5"
                                                 id="summary-average-self-stake-ratio-native"
                                             >
-                                                5%
+                                                {validator.commission
+                                                    ? `${validator.commission}%`
+                                                    : "-"}
                                             </div>
                                             <div className="font-medium text-[20px] text-[#7c70c3]"></div>
                                         </>
@@ -194,6 +202,7 @@ export default function ValidatorPage() {
                             </div>
                         </div>
                         <GraphMetrics
+                            metrics={[]}
                             firstSeries={seriesDelegation}
                             secondSeries={seriesSold}
                             thirdSeries={seriesPrice}

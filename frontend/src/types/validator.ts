@@ -1,11 +1,12 @@
 export default interface Validator {
-    id: string;
-    name: string;
-    image: string;
-    operatorAddress: string;
-    percentageSold?: number;
-    totalSold?: number;
-    avgDelegation?: number;
-    totalRewards?: number;
-    selfStake?: number;
+    id: number;
+    moniker: string;
+    temporary_image_uri: string;
+    operator_address: string;
+    percentage_sold?: number;
+    sold?: number;
+    average_total_stake?: number;
+    reward?: number;
+    self_stake?: number;
+    commission?: number;
 }

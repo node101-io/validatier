@@ -1,8 +1,11 @@
 "use client";
 
 import Validator from "@/types/validator";
-import atomToUSD from "@/utils/atom-to-usd";
-import formatNumber from "@/utils/format-number";
+import {
+    formatAtom,
+    formatAtomUSD,
+    formatNumber,
+} from "@/utils/format-numbers";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -47,28 +50,28 @@ export default function ValidatorTable({
 
         switch (sortField) {
             case "name":
-                aValue = a.name.toLowerCase();
-                bValue = b.name.toLowerCase();
+                aValue = a.moniker.toLowerCase();
+                bValue = b.moniker.toLowerCase();
                 break;
             case "percentageSold":
-                aValue = a.percentageSold ?? 0;
-                bValue = b.percentageSold ?? 0;
+                aValue = a.percentage_sold ?? 0;
+                bValue = b.percentage_sold ?? 0;
                 break;
             case "avgDelegation":
-                aValue = a.avgDelegation ?? 0;
-                bValue = b.avgDelegation ?? 0;
+                aValue = a.average_total_stake ?? 0;
+                bValue = b.average_total_stake ?? 0;
                 break;
             case "totalRewards":
-                aValue = a.totalRewards ?? 0;
-                bValue = b.totalRewards ?? 0;
+                aValue = a.reward ?? 0;
+                bValue = b.reward ?? 0;
                 break;
             case "totalSold":
-                aValue = a.totalSold ?? 0;
-                bValue = b.totalSold ?? 0;
+                aValue = a.sold ?? 0;
+                bValue = b.sold ?? 0;
                 break;
             case "selfStake":
-                aValue = a.selfStake ?? 0;
-                bValue = b.selfStake ?? 0;
+                aValue = a.self_stake ?? 0;
+                bValue = b.self_stake ?? 0;
                 break;
             default:
                 return 0;
@@ -313,19 +316,21 @@ export default function ValidatorTable({
                                 <tr
                                     key={index + "validator-table"}
                                     className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 py-0 my-2.5 lg:my-0 lg:py-2.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
-                                    operator-address={validator.operatorAddress}
-                                    id={validator.operatorAddress}
+                                    operator-address={
+                                        validator.operator_address
+                                    }
+                                    id={validator.operator_address}
                                     onClick={() => {
                                         sessionStorage.setItem(
-                                            `validator_${validator.operatorAddress}`,
+                                            `validator_${validator.operator_address}`,
                                             JSON.stringify(validator)
                                         );
                                         router.push(
-                                            `/validator/${validator.operatorAddress}`
+                                            `/validator/${validator.operator_address}`
                                         );
                                     }}
                                 >
-                                    <td className="flex items-center justify-start gap-4.5 h-full lg:h-auto sticky left-0 -ml-5 pl-5 z-10 bg-[#f5f5ff] lg:bg-transparent overflow-hidden">
+                                    <td className="flex items-center justify-start gap-4.5 h-full lg:h-full sticky left-0 -ml-5 pl-5 z-10 bg-[#f5f5ff] lg:bg-transparent overflow-hidden">
                                         {/* Name */}
                                         <div className="flex items-center relative rounded-full gap-2.5 aspect-square min-w-7.5 max-w-7.5">
                                             <div className="flex items-center justify-center min-w-[18px] max-w-[18px] min-h-[18px] max-h-[18px] absolute -left-1.5 -bottom-1.5 text-[14px] text-[#f5f5ff] bg-[#250055] border-1 border-[#f5f5ff] z-20 rounded-full">
@@ -334,8 +339,10 @@ export default function ValidatorTable({
                                                 </span>
                                             </div>
                                             <img
-                                                src={validator.image}
-                                                alt={validator.name}
+                                                src={
+                                                    validator.temporary_image_uri
+                                                }
+                                                alt={validator.moniker}
                                                 className="w-full h-full rounded-full"
                                             />
                                         </div>
@@ -343,7 +350,7 @@ export default function ValidatorTable({
                                             <div className="flex text-xl gap-2.5 text-[#49306f]">
                                                 <div className="inline-block relative overflow-hidden whitespace-nowrap w-[120px] validators-table-validator-name-wrapper">
                                                     <span className="inline-block whitespace-nowrap validators-table-validator-name">
-                                                        {validator.name}
+                                                        {validator.moniker}
                                                     </span>
                                                 </div>
                                             </div>
@@ -351,9 +358,9 @@ export default function ValidatorTable({
                                     </td>
                                     <td className="flex items-center justify-center font-bold gap-1.25 justify-self-center">
                                         {/* Percentage Sold */}
-                                        {validator.percentageSold ===
+                                        {validator.percentage_sold ===
                                             undefined ||
-                                        validator.percentageSold === null ? (
+                                        validator.percentage_sold === null ? (
                                             <span className="text-current">
                                                 -
                                             </span>
@@ -361,21 +368,21 @@ export default function ValidatorTable({
                                             <div className="flex items-center text-xl gap-1.5">
                                                 <span
                                                     className={`${
-                                                        validator.percentageSold >
+                                                        validator.percentage_sold >
                                                         50
                                                             ? "text-[#b82200]"
-                                                            : validator.percentageSold >
+                                                            : validator.percentage_sold >
                                                               25
                                                             ? "text-[#ff6f43]"
                                                             : "text-[#13a719]"
                                                     }`}
                                                 >
-                                                    {validator.percentageSold.toFixed(
+                                                    {validator.percentage_sold.toFixed(
                                                         2
                                                     )}
                                                     %
                                                 </span>
-                                                {validator.percentageSold <
+                                                {validator.percentage_sold <
                                                     25 && (
                                                     <img
                                                         className="flex items-center justify-center"
@@ -388,20 +395,20 @@ export default function ValidatorTable({
                                     <td className="text-center text-nowrap text-xl relative justify-self-center">
                                         {/* Avg Delegation */}
                                         <div className="inline-flex gap-1 text-xl text-[#633f9a]">
-                                            {validator.avgDelegation &&
-                                            validator.avgDelegation > 0
-                                                ? formatNumber(
-                                                      validator.avgDelegation
+                                            {validator.average_total_stake &&
+                                            validator.average_total_stake > 0
+                                                ? formatAtom(
+                                                      validator.average_total_stake,
+                                                      2
                                                   )
                                                 : "-"}{" "}
                                             ATOM
                                         </div>
                                         <div className="text-base font-[500] text-[#633f9a]">
-                                            {validator.avgDelegation
-                                                ? `$${formatNumber(
-                                                      atomToUSD(
-                                                          validator.avgDelegation
-                                                      )
+                                            {validator.average_total_stake
+                                                ? `$${formatAtomUSD(
+                                                      validator.average_total_stake,
+                                                      2
                                                   )}`
                                                 : "-"}
                                         </div>
@@ -409,20 +416,19 @@ export default function ValidatorTable({
                                     <td className="text-center text-nowrap text-xl relative justify-self-center">
                                         {/* Total Rewards */}
                                         <div className="inline-flex gap-1 text-xl text-[#633f9a]">
-                                            {validator.totalRewards &&
-                                            validator.totalRewards > 0
-                                                ? formatNumber(
-                                                      validator.totalRewards
+                                            {validator.reward &&
+                                            validator.reward > 0
+                                                ? formatAtom(
+                                                      validator.reward,
+                                                      2
                                                   )
                                                 : "-"}{" "}
                                             ATOM
                                         </div>
                                         <div className="text-base font-[500] text-[#633f9a]">
-                                            {validator.totalRewards
-                                                ? `$${formatNumber(
-                                                      atomToUSD(
-                                                          validator.totalRewards
-                                                      )
+                                            {validator.reward
+                                                ? `$${formatAtomUSD(
+                                                      validator.reward
                                                   )}`
                                                 : "-"}
                                         </div>
@@ -430,20 +436,16 @@ export default function ValidatorTable({
                                     <td className="text-center text-nowrap text-xl relative justify-self-center">
                                         {/* Total Sold Amount */}
                                         <div className="inline-flex gap-1 text-xl text-[#633f9a]">
-                                            {validator.totalSold &&
-                                            validator.totalSold > 0
-                                                ? formatNumber(
-                                                      validator.totalSold
-                                                  )
+                                            {validator.sold &&
+                                            validator.sold > 0
+                                                ? formatAtom(validator.sold, 2)
                                                 : "-"}{" "}
                                             ATOM
                                         </div>
                                         <div className="text-base font-[500] text-[#633f9a]">
-                                            {validator.totalSold
-                                                ? `$${formatNumber(
-                                                      atomToUSD(
-                                                          validator.totalSold
-                                                      )
+                                            {validator.sold
+                                                ? `$${formatAtomUSD(
+                                                      validator.sold
                                                   )}`
                                                 : "-"}
                                         </div>
@@ -451,20 +453,19 @@ export default function ValidatorTable({
                                     <td className="text-center text-nowrap text-xl relative justify-self-center">
                                         {/* Self Stake */}
                                         <div className="inline-flex gap-1 text-xl text-[#633f9a]">
-                                            {validator.selfStake &&
-                                            validator.selfStake > 0
-                                                ? formatNumber(
-                                                      validator.selfStake
+                                            {validator.self_stake &&
+                                            validator.self_stake > 0
+                                                ? formatAtom(
+                                                      validator.self_stake,
+                                                      2
                                                   )
                                                 : "-"}{" "}
                                             ATOM
                                         </div>
                                         <div className="text-base font-[500] text-[#633f9a]">
-                                            {validator.selfStake
-                                                ? `$${formatNumber(
-                                                      atomToUSD(
-                                                          validator.selfStake
-                                                      )
+                                            {validator.self_stake
+                                                ? `$${formatAtomUSD(
+                                                      validator.self_stake
                                                   )}`
                                                 : "-"}
                                         </div>
