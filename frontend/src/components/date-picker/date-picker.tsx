@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./date-picker.css";
@@ -12,6 +13,7 @@ export default function DateRangePicker({
 }: {
     variant?: "light" | "dark";
 }) {
+    const router = useRouter();
     const [startDate, setStartDate] = useState<Date | null>(
         new Date("2024-09-19")
     );
@@ -27,19 +29,72 @@ export default function DateRangePicker({
         { label: "All time", days: 0 },
     ];
 
+    const LABEL_TO_INTERVAL: Record<string, string> = {
+        "Last 3 months": "last_90_days",
+        "Last 6 months": "last_180_days",
+        "Last year": "last_365_days",
+        "All time": "all_time",
+    };
+    const INTERVAL_TO_LABEL: Record<string, string> = Object.fromEntries(
+        Object.entries(LABEL_TO_INTERVAL).map(([label, interval]) => [
+            interval,
+            label,
+        ])
+    );
+
+    const formatForCookie = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
+
+    const setCookie = (name: string, value: string) => {
+        // 90 days expiry by default; server only needs current values
+        const maxAge = 60 * 60 * 24 * 90;
+        document.cookie = `${name}=${encodeURIComponent(
+            value
+        )}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
+    };
+
+    const getCookie = (name: string) => {
+        if (typeof document === "undefined") return undefined;
+        const match = document.cookie
+            .split(";")
+            .map((c) => c.trim())
+            .find((c) => c.startsWith(`${name}=`));
+        return match ? decodeURIComponent(match.split("=")[1]) : undefined;
+    };
+
     const handleRangeSelect = (range: (typeof predefinedRanges)[0]) => {
         setSelectedRange(range.label);
         if (range.days === 0) {
             setStartDate(new Date("2020-01-01"));
             setEndDate(new Date());
+            // Set cookies for full range (all time) and specific interval
+            const bottom = formatForCookie(new Date("2020-01-01"));
+            const top = formatForCookie(new Date());
+            setCookie("selectedDateBottom", bottom);
+            setCookie("selectedDateTop", top);
+            const interval = LABEL_TO_INTERVAL[range.label];
+            if (interval) setCookie("specificRange", interval);
         } else {
             const today = new Date();
             const start = new Date(today);
             start.setDate(today.getDate() - range.days);
             setStartDate(start);
             setEndDate(today);
+            // Set cookies for computed range and specific interval
+            const bottom = formatForCookie(start);
+            const top = formatForCookie(today);
+            setCookie("selectedDateBottom", bottom);
+            setCookie("selectedDateTop", top);
+            const interval = LABEL_TO_INTERVAL[range.label];
+            if (interval) setCookie("specificRange", interval);
         }
         setIsOpen(false);
+        // Refresh server components to use new cookies immediately
+        router.refresh();
     };
 
     const formatDate = (date: Date | null) => {
@@ -66,6 +121,28 @@ export default function DateRangePicker({
         return () =>
             document.removeEventListener("mousedown", handleClickOutside);
     }, [isOpen]);
+
+    useEffect(() => {
+        const bottom = getCookie("selectedDateBottom");
+        const top = getCookie("selectedDateTop");
+        const interval = getCookie("specificRange");
+
+        if (bottom) {
+            const d = new Date(bottom);
+            if (!isNaN(d.getTime())) setStartDate(d);
+        }
+        if (top) {
+            const d = new Date(top);
+            if (!isNaN(d.getTime())) setEndDate(d);
+        }
+
+        const mapped = interval ? INTERVAL_TO_LABEL[interval] : undefined;
+        if (mapped) {
+            setSelectedRange(mapped);
+        } else if (bottom || top) {
+            setSelectedRange("Custom");
+        }
+    }, []);
 
     const isDark = variant === "dark";
     const containerClasses = isDark
@@ -163,6 +240,17 @@ export default function DateRangePicker({
                                         const [start, end] = dates;
                                         setStartDate(start);
                                         setEndDate(end);
+                                        if (start && end) {
+                                            setCookie(
+                                                "selectedDateBottom",
+                                                formatForCookie(start)
+                                            );
+                                            setCookie(
+                                                "selectedDateTop",
+                                                formatForCookie(end)
+                                            );
+                                            router.refresh();
+                                        }
                                     }}
                                     inline
                                     showMonthDropdown
