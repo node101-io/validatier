@@ -17,6 +17,7 @@ import Footer from "@/components/footer/footer";
 import { connectMongoose } from "@/lib/mongoose";
 import { cookies as getCookies } from "next/headers";
 import { redirect } from "next/navigation";
+import Cache, { CacheInterface } from "../../../../../src/models/Cache/Cache";
 
 export default async function ValidatorPage({
     params,
@@ -95,6 +96,46 @@ export default async function ValidatorPage({
     const averagePrice =
         pricaData.reduce((acc, each) => acc + each, 0) /
         (pricaData.length || 1);
+
+    const cacheResult = await new Promise<
+        CacheInterface | Omit<CacheInterface, "export">
+    >((resolve) => {
+        Cache.getCacheForChain(
+            {
+                chain_identifier: "cosmoshub",
+                interval: specificRangeCookie || "last_365_days",
+            },
+            (err, result) => {
+                if (err || !result) throw new Error(err ?? "unknown_error");
+                resolve(result[0]);
+            }
+        );
+    });
+
+    const allValidators = cacheResult.validators;
+    const totalValidators = allValidators.length;
+
+    const formatOrdinal = (rank: number) => {
+        const suffixes = ["th", "st", "nd", "rd"];
+        const lastTwoDigits = rank % 100;
+        const suffix =
+            suffixes[(lastTwoDigits - 20) % 10] ||
+            suffixes[lastTwoDigits] ||
+            suffixes[0];
+        return `${rank}${suffix}`;
+    };
+
+    // Ranks
+    const selfStake = validator.self_stake ?? 0;
+    const selfStakeRank =
+        1 + allValidators.filter((v) => (v.self_stake ?? 0) > selfStake).length;
+
+    const myPct = validator.percentage_sold ?? Number.POSITIVE_INFINITY;
+    const pctRank =
+        1 +
+        allValidators.filter(
+            (v) => (v.percentage_sold ?? Number.POSITIVE_INFINITY) < myPct
+        ).length;
 
     return (
         <div className="flex flex-col items-center relative overflow-hidden h-screen w-full">
@@ -186,7 +227,8 @@ export default async function ValidatorPage({
                                     }
                                     rightColumn={
                                         <div className="text-nowrap mt-auto text-[#7c70c3] font-medium text-base">
-                                            7th out of 215
+                                            {formatOrdinal(selfStakeRank)} out
+                                            of {totalValidators}
                                         </div>
                                     }
                                 />
@@ -214,7 +256,8 @@ export default async function ValidatorPage({
                                     }
                                     rightColumn={
                                         <div className="text-nowrap mt-auto text-[#7c70c3] font-medium text-base">
-                                            1st out of 215
+                                            {formatOrdinal(pctRank)} out of{" "}
+                                            {totalValidators}
                                         </div>
                                     }
                                 />
