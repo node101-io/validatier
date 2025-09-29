@@ -21,7 +21,7 @@ export default function ValidatorLeaderboard({
 }) {
     const router = useRouter();
     const [sortDirection, setSortDirection] = useState<SortDirection | null>(
-        null
+        "asc"
     );
 
     const handleSort = () => {

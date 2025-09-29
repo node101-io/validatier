@@ -18,6 +18,18 @@ export default function ValidatorLeaderboards({
     totalSold: number;
     price: number;
 }) {
+    const topByPercentageSold = [...validators]
+        .sort(
+            (a, b) =>
+                (a.percentage_sold ?? Infinity) -
+                (b.percentage_sold ?? Infinity)
+        )
+        .slice(0, 10);
+
+    const topByTotalSold = [...validators]
+        .sort((a, b) => (a.sold ?? Infinity) - (b.sold ?? Infinity))
+        .slice(0, 10);
+
     const leaderboards: Leaderboard[] = [
         {
             type: "percentageSold",
@@ -42,10 +54,16 @@ export default function ValidatorLeaderboards({
                     {
                         /* TODO: Use seperate component for each leaderboard since validators are different */
                     }
+                    const data =
+                        leaderboard.type === "percentageSold"
+                            ? topByPercentageSold
+                            : leaderboard.type === "totalSold"
+                            ? topByTotalSold
+                            : validators;
                     return (
                         <ValidatorLeaderboard
                             key={index}
-                            validators={validators}
+                            validators={data}
                             leaderboard={leaderboard}
                         />
                     );

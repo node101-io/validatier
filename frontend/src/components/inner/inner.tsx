@@ -248,7 +248,7 @@ export default function Inner({
                 metrics={metrics}
             />
             <ValidatorLeaderboards
-                validators={validators.slice(0, 10)}
+                validators={validators}
                 percentageSold={summaryData.percentage_sold}
                 totalSold={summaryData.total_sold}
                 price={price}
