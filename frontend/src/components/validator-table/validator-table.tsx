@@ -474,7 +474,7 @@ export default function ValidatorTable({
                                                       validator.reward,
                                                       2
                                                   )
-                                                : "0 ATOM"}{" "}
+                                                : "0"}{" "}
                                             ATOM
                                         </div>
                                         <div className="text-base font-[500] text-[#633f9a]">
@@ -491,7 +491,7 @@ export default function ValidatorTable({
                                             {validator.sold &&
                                             validator.sold > 0
                                                 ? formatAtom(validator.sold, 2)
-                                                : "0 ATOM"}{" "}
+                                                : "0"}{" "}
                                             ATOM
                                         </div>
                                         <div className="text-base font-[500] text-[#633f9a]">
@@ -511,7 +511,7 @@ export default function ValidatorTable({
                                                       validator.self_stake,
                                                       2
                                                   )
-                                                : "0 ATOM"}{" "}
+                                                : "0"}{" "}
                                             ATOM
                                         </div>
                                         <div className="text-base font-[500] text-[#633f9a]">
