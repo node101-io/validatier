@@ -193,6 +193,48 @@ export default function GraphMetrics({
     secondSeries: ApexOptions["series"];
     thirdSeries: ApexOptions["series"];
 }) {
+    const getCookie = (name: string) => {
+        if (typeof document === "undefined") return undefined;
+        const match = document.cookie
+            .split(";")
+            .map((c) => c.trim())
+            .find((c) => c.startsWith(`${name}=`));
+        return match ? decodeURIComponent(match.split("=")[1]) : undefined;
+    };
+
+    const dynamicCategories = useMemo(() => {
+        const bottom = getCookie("selectedDateBottom");
+        const top = getCookie("selectedDateTop");
+        const bottomDate = bottom ? new Date(bottom) : undefined;
+        const topDate = top ? new Date(top) : undefined;
+
+        const primaryLen = (firstSeries?.[0] as any)?.data?.length ?? 0;
+        const secondaryLen = (secondSeries?.[0] as any)?.data?.length ?? 0;
+        const tertiaryLen = (thirdSeries?.[0] as any)?.data?.length ?? 0;
+        const seriesLen = Math.max(primaryLen, secondaryLen, tertiaryLen);
+        if (!bottomDate || !topDate || !seriesLen) return [] as string[];
+
+        const spanMs = topDate.getTime() - bottomDate.getTime();
+        const spanDays = spanMs / (1000 * 60 * 60 * 24);
+        const labels: string[] = [];
+        for (let i = 0; i < seriesLen; i++) {
+            const t = seriesLen === 1 ? 0 : i / (seriesLen - 1);
+            const d = new Date(bottomDate.getTime() + t * spanMs);
+            const formatted =
+                spanDays > 400
+                    ? d.toLocaleDateString("en-GB", {
+                          month: "short",
+                          year: "numeric",
+                      })
+                    : d.toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                      });
+            labels.push(formatted);
+        }
+        return labels;
+    }, [firstSeries, secondSeries, thirdSeries]);
     const delegationMax = useMemo(
         () =>
             computeYAxisMax(
@@ -220,6 +262,11 @@ export default function GraphMetrics({
     const optionsDelegationDynamic = useMemo(
         () => ({
             ...optionsDelegation,
+            xaxis: {
+                ...optionsDelegation.xaxis,
+                categories: dynamicCategories,
+                tickAmount: dynamicCategories.length,
+            },
             yaxis: [
                 {
                     ...optionsDelegation.yaxis[0],
@@ -227,12 +274,17 @@ export default function GraphMetrics({
                 },
             ],
         }),
-        [delegationMax]
+        [delegationMax, dynamicCategories]
     );
 
     const optionsSoldDynamic = useMemo(
         () => ({
             ...optionsSold,
+            xaxis: {
+                ...optionsSold.xaxis,
+                categories: dynamicCategories,
+                tickAmount: dynamicCategories.length,
+            },
             yaxis: [
                 {
                     ...optionsSold.yaxis[0],
@@ -240,12 +292,17 @@ export default function GraphMetrics({
                 },
             ],
         }),
-        [soldMax]
+        [soldMax, dynamicCategories]
     );
 
     const optionsPriceDynamic = useMemo(
         () => ({
             ...optionsPrice,
+            xaxis: {
+                ...optionsPrice.xaxis,
+                categories: dynamicCategories,
+                tickAmount: dynamicCategories.length,
+            },
             yaxis: [
                 {
                     ...optionsPrice.yaxis[0],
@@ -253,8 +310,21 @@ export default function GraphMetrics({
                 },
             ],
         }),
-        [priceMax]
+        [priceMax, dynamicCategories]
     );
+
+    const footerAxisLabels = useMemo(() => {
+        const n = dynamicCategories.length;
+        if (n === 0) return [] as string[];
+        if (n <= 5) return dynamicCategories;
+        const result: string[] = [];
+        const steps = 4;
+        for (let i = 0; i <= steps; i++) {
+            const idx = Math.round((i * (n - 1)) / steps);
+            result.push(dynamicCategories[idx]);
+        }
+        return result;
+    }, [dynamicCategories]);
 
     return (
         <div className="flex flex-col gap-2.5">
@@ -341,7 +411,7 @@ export default function GraphMetrics({
                         </div>
                     </div>
                     <div className="flex justify-between h-[28px] py-2 pl-11 text-[14px] text-[#7E77B8] select-none pointer-events-none">
-                        {categories.map((label) => (
+                        {footerAxisLabels.map((label) => (
                             <span key={label} className="shrink-0">
                                 {label}
                             </span>
