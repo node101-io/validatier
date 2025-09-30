@@ -200,7 +200,7 @@ export default function DateRangePicker({
                         onClick={() => setIsOpen(false)}
                     />
                     <div
-                        className="fixed lg:static right-5 top[98px] lg:top-auto z-[200] w[320px] max-w[92vw] lg:w/full lg:max-w-none rounded-2xl lg:rounded-none border-1 border-[#bebee7] lg:border-0 bg-[#f5f5ff] pt-3 px-3 pb-3 lg:pt-2 lg:px-3 lg:pb-3 ml-auto dp-animate-in"
+                        className="fixed lg:static right-5.25 top[98px] lg:top-auto z-[200] w[320px] max-w[92vw] lg:w/full lg:max-w-none rounded-2xl lg:rounded-none border-1 border-[#bebee7] lg:border-0 bg-[#f5f5ff] pt-3 px-3 pb-3 lg:pt-2 lg:px-3 lg:pb-3 ml-auto dp-animate-in"
                         onMouseDown={(e) => e.stopPropagation()}
                     >
                         <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
