@@ -29,6 +29,7 @@ export default function ValidatorTable({
     const router = useRouter();
     const [sortField, setSortField] = useState<SortField | null>(null);
     const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+    const [isMobile, setIsMobile] = useState(false);
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
@@ -103,6 +104,14 @@ export default function ValidatorTable({
         window.addEventListener("resize", update);
         return () => window.removeEventListener("resize", update);
     }, [validators]);
+
+    // Track mobile viewport for moniker truncation on small screens only
+    useEffect(() => {
+        const onResize = () => setIsMobile(window.innerWidth < 768);
+        onResize();
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, []);
 
     // Handle search filtering by showing/hiding rows
     useEffect(() => {
@@ -382,10 +391,17 @@ export default function ValidatorTable({
                                             />
                                         </div>
                                         <div className="text-nowrap -mt-0.5 w-[80%]">
-                                            <div className="flex text-xl gap-2.5 text-[#49306f]">
+                                            <div className="flex text-base md:text-xl gap-2.5 text-[#49306f]">
                                                 <div className="inline-block relative overflow-hidden whitespace-nowrap w-[120px] validators-table-validator-name-wrapper">
                                                     <span className="inline-block whitespace-nowrap validators-table-validator-name">
-                                                        {validator.moniker}
+                                                        {isMobile &&
+                                                        validator.moniker
+                                                            .length > 13
+                                                            ? `${validator.moniker.slice(
+                                                                  0,
+                                                                  13
+                                                              )}...`
+                                                            : validator.moniker}
                                                     </span>
                                                 </div>
                                             </div>
