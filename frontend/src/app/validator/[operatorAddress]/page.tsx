@@ -221,7 +221,7 @@ export default async function ValidatorPage({
                                                     ? `$${formatAtomUSD(
                                                           validator.self_stake
                                                       )}`
-                                                    : "-"}
+                                                    : "$0"}
                                             </div>
                                         </>
                                     }
@@ -249,7 +249,7 @@ export default async function ValidatorPage({
                                                           validator.percentage_sold,
                                                           1
                                                       )}%`
-                                                    : "-"}
+                                                    : "%0"}
                                             </div>
                                             <div className="font-medium text-[20px] text-[#7c70c3]"></div>
                                         </>
@@ -278,7 +278,7 @@ export default async function ValidatorPage({
                                                           validator.commission,
                                                           1
                                                       )}%`
-                                                    : "-"}
+                                                    : "0%"}
                                             </div>
                                             <div className="font-medium text-[20px] text-[#7c70c3]"></div>
                                         </>

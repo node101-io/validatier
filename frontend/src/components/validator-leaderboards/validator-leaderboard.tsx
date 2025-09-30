@@ -182,7 +182,7 @@ export default function ValidatorLeaderboard({
                                                   validator.sold ?? 0,
                                                   2
                                               )}`
-                                            : "-"}
+                                            : "0 ATOM"}
                                     </div>
                                 </>
                             ) : (
