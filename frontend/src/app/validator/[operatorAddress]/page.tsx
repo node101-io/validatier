@@ -172,7 +172,8 @@ export default async function ValidatorPage({
                                 </div>
                                 <div className="flex items-center gap-5 text-base">
                                     <a
-                                        href=""
+                                        href={validator.website}
+                                        target="_blank"
                                         className="flex items-center gap-1"
                                     >
                                         <img
@@ -183,12 +184,17 @@ export default async function ValidatorPage({
                                         <span className="mb-1">Website</span>
                                     </a>
                                     <a
-                                        href=""
+                                        href={`https://www.mintscan.io/cosmos/validators/${validator.operator_address}`}
+                                        target="_blank"
                                         className="flex items-center gap-1"
                                     >
                                         <span className="mb-1">Explorer</span>
                                     </a>
-                                    <a className="flex items-center justify-center h-6 gap-1 rounded-xl px-2.5 bg-[#250054] !text-white cursor-pointer">
+                                    <a
+                                        href={`https://wallet.keplr.app/chains/cosmos-hub?modal=validator&chain=cosmoshub-4&validator_address=${validator.operator_address}`}
+                                        target="_blank"
+                                        className="flex items-center justify-center h-6 gap-1 rounded-xl px-2.5 bg-[#250054] !text-white cursor-pointer"
+                                    >
                                         <span className="mb-1">Stake</span>
                                     </a>
                                 </div>
