@@ -120,7 +120,8 @@ export default async function Home() {
     const validators: Validator[] = cacheResult.validators.map((v, index) => ({
         id: index,
         moniker: v.moniker,
-        temporary_image_uri: v.temporary_image_uri ?? "",
+        temporary_image_uri:
+            v.temporary_image_uri ?? "/res/images/default_validator_photo.svg",
         operator_address: v.operator_address,
         percentage_sold: v.percentage_sold,
         sold: v.sold,
