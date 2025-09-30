@@ -27,7 +27,7 @@
 } */
 
 :root {
-  --animate-star-width: 20px;
+  --animate-star-width: 10px;
 }
 
 .animate-star, .animate-star-3d {
