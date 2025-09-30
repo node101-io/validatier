@@ -128,7 +128,7 @@ export default async function Home() {
         average_total_stake: v.average_total_stake,
         reward: v.reward,
         self_stake: v.self_stake,
-        commission: v.commission,
+        commission: Number(v.commission_rate) * 100,
     }));
 
     return (

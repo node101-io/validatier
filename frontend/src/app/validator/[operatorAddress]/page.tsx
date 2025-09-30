@@ -279,10 +279,12 @@ export default async function ValidatorPage({
                                                 className="text-[36px] leading-[22px] font-bold text-[#49306f] text-nowrap mb-0.5"
                                                 id="summary-average-self-stake-ratio-native"
                                             >
-                                                {validator.commission
+                                                {validator.commission_rate
                                                     ? `${formatPercentage(
-                                                          validator.commission,
-                                                          1
+                                                          Number(
+                                                              validator.commission_rate
+                                                          ),
+                                                          2
                                                       )}%`
                                                     : "0%"}
                                             </div>
