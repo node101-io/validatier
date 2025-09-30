@@ -18,17 +18,29 @@ export default function ValidatorLeaderboards({
     totalSold: number;
     price: number;
 }) {
-    const topByPercentageSold = [...validators]
-        .sort(
-            (a, b) =>
-                (a.percentage_sold ?? Infinity) -
-                (b.percentage_sold ?? Infinity)
+    const percentageSoldAsc = [...validators]
+        .filter(
+            (v) => v.percentage_sold !== undefined && v.percentage_sold !== null
         )
+        .sort((a, b) => (a.percentage_sold ?? 0) - (b.percentage_sold ?? 0))
         .slice(0, 10);
+    const percentageSoldDesc = [...validators]
+        .filter(
+            (v) => v.percentage_sold !== undefined && v.percentage_sold !== null
+        )
+        .sort((a, b) => (b.percentage_sold ?? 0) - (a.percentage_sold ?? 0))
+        .slice(0, 10);
+    const topByPercentageSold = [...percentageSoldAsc, ...percentageSoldDesc];
 
-    const topByTotalSold = [...validators]
-        .sort((a, b) => (a.sold ?? Infinity) - (b.sold ?? Infinity))
+    const totalSoldAsc = [...validators]
+        .filter((v) => v.sold !== undefined && v.sold !== null)
+        .sort((a, b) => (a.sold ?? 0) - (b.sold ?? 0))
         .slice(0, 10);
+    const totalSoldDesc = [...validators]
+        .filter((v) => v.sold !== undefined && v.sold !== null)
+        .sort((a, b) => (b.sold ?? 0) - (a.sold ?? 0))
+        .slice(0, 10);
+    const topByTotalSold = [...totalSoldAsc, ...totalSoldDesc];
 
     const leaderboards: Leaderboard[] = [
         {
@@ -51,9 +63,6 @@ export default function ValidatorLeaderboards({
             </div>
             <div className="flex justify-around w-full h-[650px] gap-5 my-2.5 overflow-x-scroll lg:overflow-hidden no-scrollbar px-5 lg:px-0">
                 {leaderboards.map((leaderboard, index) => {
-                    {
-                        /* TODO: Use seperate component for each leaderboard since validators are different */
-                    }
                     const data =
                         leaderboard.type === "percentageSold"
                             ? topByPercentageSold

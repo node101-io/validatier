@@ -21,7 +21,7 @@ export default function ValidatorLeaderboard({
 }) {
     const router = useRouter();
     const [sortDirection, setSortDirection] = useState<SortDirection | null>(
-        "asc"
+        leaderboard.type === "totalSold" ? "desc" : "asc"
     );
 
     const handleSort = () => {
@@ -34,26 +34,12 @@ export default function ValidatorLeaderboard({
         }
     };
 
-    const sortedValidators = [...validators].sort((a, b) => {
-        if (!sortDirection) return 0;
-
-        let aValue: any;
-        let bValue: any;
-
-        if (leaderboard.type === "percentageSold") {
-            aValue = a.percentage_sold ?? 0;
-            bValue = b.percentage_sold ?? 0;
-        } else if (leaderboard.type === "totalSold") {
-            aValue = a.sold ?? 0;
-            bValue = b.sold ?? 0;
-        } else {
-            return 0;
-        }
-
-        if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-        if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-        return 0;
-    });
+    const sortedValidators = (() => {
+        if (sortDirection === "asc") return validators.slice(0, 10);
+        if (sortDirection === "desc") return validators.slice(10, 20);
+        if (leaderboard.type === "totalSold") return validators.slice(10, 20);
+        return validators.slice(0, 10);
+    })();
     return (
         <div className="flex flex-col overflow-hidden min-w-[320px] sm:min-w-[420px] lg:min-w-[500px] w-full h-full p-0 bg-[#f5f5ff] border-[0.5px] border-[#bebee7] rounded-[20px] gap-1">
             <div className="flex items-center justify-between w-full px-4 pt-4">
