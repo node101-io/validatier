@@ -114,9 +114,16 @@ export default function ValidatorLeaderboard({
                                     className="w-full h-full rounded-full aspect-square overflow-clip"
                                 />
                             </div>
-                            <div className="w-[130px] sm:w-[150px] text-lg sm:text-xl text-[#49306f] overflow-hidden text-ellipsis text-nowrap">
+                            <div className="w-[90px] sm:w-[150px] text-base sm:text-lg text-[#49306f] overflow-hidden text-ellipsis text-nowrap">
                                 {/* Each Leaderboard Validator Name */}
-                                {validator.moniker}
+                                <span className="sm:hidden">
+                                    {validator.moniker.length > 9
+                                        ? `${validator.moniker.slice(0, 9)}...`
+                                        : validator.moniker}
+                                </span>
+                                <span className="hidden sm:inline">
+                                    {validator.moniker}
+                                </span>
                             </div>
                         </div>
                         <div className="flex gap-4 sm:gap-5 text-[#7c70c3] text-[15px] sm:text-[16px] text-nowrap">
@@ -157,12 +164,12 @@ export default function ValidatorLeaderboard({
                                     )}
                                 </div>
                             ) : leaderboard.type === "totalSold" ? (
-                                <>
-                                    <div className="flex items-center !justify-end text-end text-lg sm:text-xl min-w-[90px] sm:min-w-[100px] max-w-[100px] w-[100px]">
+                                <div className="flex flex-row items-center gap-2 sm:gap-3 w-full justify-end">
+                                    <div className="flex items-center !justify-end text-end text-sm sm:text-lg min-w-0 max-w-[110px] truncate">
                                         {formatAtom(validator.sold ?? 0, 2)}{" "}
                                         ATOM
                                     </div>
-                                    <div className="flex items-center !justify-end text-end text-lg sm:text-xl min-w-[90px] sm:min-w-[100px] max-w-[100px] w-[100px]">
+                                    <div className="flex items-center !justify-end text-end text-sm sm:text-lg min-w-0 max-w-[110px] truncate">
                                         {validator.sold
                                             ? `$${formatAtomUSD(
                                                   validator.sold ?? 0,
@@ -170,7 +177,7 @@ export default function ValidatorLeaderboard({
                                               )}`
                                             : "0 ATOM"}
                                     </div>
-                                </>
+                                </div>
                             ) : (
                                 <></>
                             )}

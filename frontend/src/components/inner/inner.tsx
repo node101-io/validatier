@@ -165,15 +165,15 @@ export default function Inner({
                                         %
                                     </span>
                                     <div
-                                        className="flex items-center justify-center relative text-sm right-0 aspect-square border-[0.5px] border-[#beebe7] text-[#e5e5ff] bg-[#7c70c3] rounded-full leading-[22px] font-bold text-nowrap"
+                                        className="flex items-center justify-center relative right-0 aspect-square border-[0.5px] border-[#beebe7] text-[#e5e5ff] bg-[#7c70c3] rounded-full leading-[22px] font-bold overflow-hidden"
                                         style={{
                                             width: `max(calc(80px * ${
                                                 summaryData.percentage_sold /
                                                 100
-                                            }), 30%)`,
+                                            }), 40%)`,
                                         }}
                                     >
-                                        <span className="absolute left-0 mb-1 w-full text-center my-0 mx-auto z-10 font-normal">
+                                        <span className="absolute inset-0 flex items-center justify-center z-10 font-normal text-[12px] leading-none">
                                             {formatPercentage(
                                                 summaryData.percentage_sold
                                             )}
