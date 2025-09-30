@@ -249,6 +249,23 @@ export default function DateRangePicker({
                                                 "selectedDateTop",
                                                 formatForCookie(end)
                                             );
+                                            const diffDays = Math.ceil(
+                                                (end.getTime() -
+                                                    start.getTime()) /
+                                                    (1000 * 60 * 60 * 24)
+                                            );
+                                            const interval =
+                                                diffDays <= 90
+                                                    ? "last_90_days"
+                                                    : diffDays <= 180
+                                                    ? "last_180_days"
+                                                    : diffDays <= 365
+                                                    ? "last_365_days"
+                                                    : "all_time";
+                                            setCookie(
+                                                "specificRange",
+                                                interval
+                                            );
                                             router.refresh();
                                         }
                                     }}
