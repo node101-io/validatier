@@ -283,7 +283,7 @@ export default async function ValidatorPage({
                                                     ? `${formatPercentage(
                                                           Number(
                                                               validator.commission_rate
-                                                          ),
+                                                          ) * 100,
                                                           2
                                                       )}%`
                                                     : "0%"}
