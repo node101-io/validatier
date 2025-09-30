@@ -89,7 +89,7 @@ export default function ValidatorLeaderboard({
                 {sortedValidators.map((validator, index) => (
                     <div
                         key={index + leaderboard.type}
-                        className="flex items-center justify-between cursor-[var(--pointer-hand-dark)] py-3 px-4 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out"
+                        className="flex items-center justify-between cursor-[var(--pointer-hand-dark)] py-3 px-3 lg:px-4 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out"
                         operator-address={validator.operator_address}
                         onClick={() => {
                             sessionStorage.setItem(
@@ -101,20 +101,20 @@ export default function ValidatorLeaderboard({
                             );
                         }}
                     >
-                        <div className="flex items-center gap-2">
-                            {/* Each Leaderboard Validator Info Wrapper */}
-                            <div className="flex items-center relative min-w-7.5 max-w-7.5 aspect-square gap-2.5 rounded-full">
-                                {/* Each Leaderboard Validator Image */}
-                                <div className="flex items-center justify-center absolute -left-1.5 -bottom-1.5 text-[#f5f5ff] bg-[#250055] border-1 border-[#f5f5ff] rounded-full z-20 min-w-4 max-w-4 min-h-4 max-h-4 text-sm">
-                                    {index + 1}
-                                </div>
+                        <div className="flex items-center gap-2 lg:gap-3 min-w-0">
+                            {/* Row index (separate from avatar) */}
+                            <div className="w-3 text-right text-[#7c70c3] select-none shrink-0">
+                                {index + 1}
+                            </div>
+                            {/* Avatar image */}
+                            <div className="flex items-center min-w-7.5 max-w-7.5 aspect-square rounded-full overflow-hidden shrink-0">
                                 <img
                                     src={validator.temporary_image_uri}
                                     alt={validator.moniker}
-                                    className="w-full h-full rounded-full aspect-square overflow-clip"
+                                    className="w-full h-full rounded-full"
                                 />
                             </div>
-                            <div className="w-[90px] sm:w-[150px] text-base sm:text-lg text-[#49306f] overflow-hidden text-ellipsis text-nowrap">
+                            <div className="flex-1 min-w-0 w-auto sm:w-[150px] text-base sm:text-lg text-[#49306f] overflow-hidden text-ellipsis text-nowrap">
                                 {/* Each Leaderboard Validator Name */}
                                 <span className="sm:hidden">
                                     {validator.moniker.length > 9

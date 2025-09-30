@@ -369,19 +369,6 @@ export default function ValidatorTable({
                                     <td className="flex items-center justify-start gap-4.5 h-full lg:h-full sticky left-0 -ml-5 pl-5 z-10 bg-[#f5f5ff] lg:bg-transparent overflow-hidden">
                                         {/* Name */}
                                         <div className="flex items-center relative rounded-full gap-2.5 aspect-square min-w-7.5 max-w-7.5">
-                                            <div
-                                                className={`flex items-center justify-center min-w-[18px] max-w-[18px] min-h-[18px] max-h-[18px] absolute -left-1.5 -bottom-1.5 text-[#f5f5ff] bg-[#250055] border-1 border-[#f5f5ff] z-20 rounded-full ${
-                                                    index + 1 >= 100
-                                                        ? "text-[10px]"
-                                                        : index + 1 >= 10
-                                                        ? "text-[12px]"
-                                                        : "text-[14px]"
-                                                }`}
-                                            >
-                                                <span className="mb-1 ml-0">
-                                                    {index + 1}
-                                                </span>
-                                            </div>
                                             <img
                                                 src={
                                                     validator.temporary_image_uri
