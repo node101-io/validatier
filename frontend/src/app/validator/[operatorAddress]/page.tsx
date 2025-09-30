@@ -217,7 +217,7 @@ export default async function ValidatorPage({
                                                     ? `${formatAtom(
                                                           validator.self_stake
                                                       )} ATOM`
-                                                    : "- ATOM"}
+                                                    : "0 ATOM"}
                                             </div>
                                             <div
                                                 className="font-medium text-[20px] text-[#7c70c3]"
