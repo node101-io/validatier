@@ -28,9 +28,9 @@ export function formatAtom(value: number, maximumFractionDigits = 0): string {
 
 export function formatAtomUSD(
     value: number,
+    price: number,
     maximumFractionDigits = 1
 ): string {
-    const price = 1000; // TODO: get price from API
     return new Intl.NumberFormat("en-US", {
         notation: "compact",
         compactDisplay: "short",

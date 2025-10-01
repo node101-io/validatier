@@ -18,6 +18,7 @@ import { connectMongoose } from "@/lib/mongoose";
 import { cookies as getCookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Cache, { CacheInterface } from "../../../../../src/models/Cache/Cache";
+import Chain, { ChainInterface } from "../../../../../src/models/Chain/Chain";
 
 export default async function ValidatorPage({
     params,
@@ -43,6 +44,19 @@ export default async function ValidatorPage({
           ).getTime();
 
     const topTimestamp = topCookie ? new Date(topCookie).getTime() : Date.now();
+
+    const chains = await new Promise<ChainInterface[]>((resolve) => {
+        Chain.getAllChains((err, chains) => {
+            console.log(err, chains);
+            if (err || !chains) throw new Error(err ?? "unknown_error");
+
+            resolve(chains);
+        });
+    });
+
+    const price =
+        chains.find((chain) => chain.name === "cosmoshub")?.usd_exchange_rate ??
+        0;
 
     const validator = await new Promise<ValidatorWithMetricsInterface | null>(
         (resolve) => {
@@ -225,7 +239,8 @@ export default async function ValidatorPage({
                                             >
                                                 {validator.self_stake
                                                     ? `$${formatAtomUSD(
-                                                          validator.self_stake
+                                                          validator.self_stake,
+                                                          price
                                                       )}`
                                                     : "$0"}
                                             </div>
@@ -311,6 +326,7 @@ export default async function ValidatorPage({
                                     )} ATOM`,
                                     valueUsd: `$${formatAtomUSD(
                                         averageDelegation,
+                                        price,
                                         1
                                     )}`,
                                 },
@@ -324,6 +340,7 @@ export default async function ValidatorPage({
                                     )} ATOM`,
                                     valueUsd: `$${formatAtomUSD(
                                         totalSoldAmount,
+                                        price,
                                         1
                                     )}`,
                                 },

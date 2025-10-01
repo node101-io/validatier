@@ -13,6 +13,7 @@
     "apexcharts": "^5.3.5",
     "motion": "^12.23.21",
     "next": "15.5.3",
+    "radix-ui": "^1.4.3",
     "react": "19.1.0",
     "react-apexcharts": "^1.7.0",
     "react-datepicker": "^8.7.0",

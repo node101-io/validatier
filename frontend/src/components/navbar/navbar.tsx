@@ -19,11 +19,7 @@ export default function Navbar({
     const [pastIntro, setPastIntro] = useState<boolean>(false);
     const [searchValue, setSearchValue] = useState<string>("");
 
-    const heightClass = isValidatorPage
-        ? "h-[75px]"
-        : pastIntro
-        ? "h-[50px] sm:h-[100px]"
-        : "h-[75px] sm:h-[150px]";
+    const heightClass = "h-[80px]";
 
     useEffect(() => {
         if (typeof window === "undefined") return;
@@ -71,9 +67,9 @@ export default function Navbar({
         <div
             className={`flex flex-row w-full ${heightClass} px-6 ${backgroundClass} ${borderClass} ${
                 pastIntro || isValidatorPage
-                    ? "justify-between"
-                    : "justify-center sm:justify-between"
-            } items-center gap-3 flex-nowrap fixed z-[100] top-0 left-0 right-0 transition-all duration-300 group`}
+                    ? "justify-between py-4"
+                    : "justify-center sm:justify-between py-8"
+            } items-start gap-3 flex-nowrap fixed z-[100] top-0 left-0 right-0 transition-all duration-300 group`}
         >
             <a
                 href="/"
@@ -104,7 +100,7 @@ export default function Navbar({
                 </div>
             </a>
             <div
-                className={`flex w-fit items-center gap-3 transition-all duration-1000 overflow-visible ${
+                className={`flex w-fit items-start gap-3 transition-all duration-1000 overflow-visible ${
                     !pastIntro && !isValidatorPage ? "hidden sm:flex" : "flex"
                 }`}
             >
@@ -123,7 +119,7 @@ export default function Navbar({
                             } border-[#bebee7] text-[#7c70c3] !bg-[#f5f5ff] bg-[url(/res/images/search.svg)] bg-no-repeat transition-all duration-500 ease-in-out relative ${
                                 pastIntro
                                     ? "w-8 focus:w-[275px] sm:focus:w-[250px] sm:w-[250px] bg-position-[6px_5px] sm:bg-position-[13px_13px] h-8 sm:h-11.5 rounded-xl pl-8 focus:pl-10 sm:pl-10 focus:ml-[-168px] sm:focus:ml-0"
-                                    : "w-[250px] bg-position-[13px_13px] h-11.5 rounded-2xl pl-11.5 pb-1 mt-0.5"
+                                    : "w-[250px] bg-position-[13px_13px] h-11.5 rounded-2xl pl-11.5 pb-1"
                             }`}
                             placeholder="Search Validator"
                             value={searchValue}

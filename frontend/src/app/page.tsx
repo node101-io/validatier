@@ -108,14 +108,7 @@ export default async function Home() {
                 smallSelfStakeAmountGraphData[i - 1]
         );
 
-    const smallSelfStakeRatioGraphData = [
-        cacheResult.small_graph[0].average_self_stake_ratio,
-    ];
-    for (let i = 1; i < cacheResult.small_graph.length; i++)
-        smallSelfStakeRatioGraphData.push(
-            cacheResult.small_graph[i].average_self_stake_ratio +
-                smallSelfStakeRatioGraphData[i - 1]
-        );
+    const smallSelfStakeRatioGraphData = cacheResult.small_graph.map((each) => each.average_self_stake_ratio < 0 ? 0 : each.average_self_stake_ratio);
 
     const validators: Validator[] = cacheResult.validators.map((v, index) => ({
         id: index,
@@ -142,14 +135,14 @@ export default async function Home() {
                     color: "#FF9404",
                     title: "Average Delegation",
                     valueNative: formatAtom(averageDelegation, 1) + " ATOM",
-                    valueUsd: "$" + formatAtomUSD(averageDelegation, 1),
+                    valueUsd: "$" + formatAtomUSD(averageDelegation, price, 1),
                 },
                 {
                     id: "total_sold",
                     color: "#5856D7",
                     title: "Total Sold Amount",
                     valueNative: formatAtom(totalSoldAmount, 1) + " ATOM",
-                    valueUsd: "$" + formatAtomUSD(totalSoldAmount, 1),
+                    valueUsd: "$" + formatAtomUSD(totalSoldAmount, price, 1),
                 },
                 {
                     id: "price",

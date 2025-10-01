@@ -4,7 +4,7 @@ import MetricContent from "../metric-content/metric-content";
 import Metric from "@/types/metric";
 import dynamic from "next/dynamic";
 import { ApexOptions } from "apexcharts";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { computeYAxisMax } from "@/utils/chart-axis";
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -193,6 +193,10 @@ export default function GraphMetrics({
     secondSeries: ApexOptions["series"];
     thirdSeries: ApexOptions["series"];
 }) {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
     const getCookie = (name: string) => {
         if (typeof document === "undefined") return undefined;
         const match = document.cookie
@@ -410,13 +414,15 @@ export default function GraphMetrics({
                             />
                         </div>
                     </div>
-                    <div className="flex justify-between h-[28px] py-2 pl-11 text-[14px] text-[#7E77B8] select-none pointer-events-none">
-                        {footerAxisLabels.map((label) => (
-                            <span key={label} className="shrink-0">
-                                {label}
-                            </span>
-                        ))}
-                    </div>
+                    {mounted && footerAxisLabels.length > 0 && (
+                        <div className="flex justify-between h-[28px] py-2 pl-11 text-[14px] text-[#7E77B8] select-none pointer-events-none">
+                            {footerAxisLabels.map((label, idx) => (
+                                <span key={`${label}-${idx}`} className="shrink-0">
+                                    {label}
+                                </span>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

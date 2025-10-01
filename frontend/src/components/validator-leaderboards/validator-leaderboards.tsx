@@ -61,7 +61,7 @@ export default function ValidatorLeaderboards({
             <div className="text-xl font-[500] text-[#7c70c3] px-5">
                 Leaderboards
             </div>
-            <div className="flex justify-around w-full h-[650px] gap-5 my-2.5 overflow-x-scroll lg:overflow-hidden no-scrollbar px-5 lg:px-0">
+            <div className="flex justify-around w-full h-fit gap-5 my-2.5 overflow-x-scroll lg:overflow-hidden no-scrollbar px-5 lg:px-0">
                 {leaderboards.map((leaderboard, index) => {
                     const data =
                         leaderboard.type === "percentageSold"
@@ -74,6 +74,7 @@ export default function ValidatorLeaderboards({
                             key={index}
                             validators={data}
                             leaderboard={leaderboard}
+                            price={price}
                         />
                     );
                 })}

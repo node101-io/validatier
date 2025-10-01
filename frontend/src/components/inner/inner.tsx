@@ -43,10 +43,10 @@ const miniOptions: ApexOptions = {
     fill: {
         type: "gradient",
         gradient: {
-            shadeIntensity: 0,
-            opacityFrom: 0.18,
-            opacityTo: 0.04,
-            stops: [0, 90, 100],
+            shadeIntensity: 1,
+            opacityFrom: 0,
+            opacityTo: 0,
+            stops: [0, 100],
         },
     },
     colors: ["#5856D7"],
@@ -77,6 +77,13 @@ export default function Inner({
     searchQuery?: string;
     ref?: React.RefObject<HTMLDivElement | null>;
 }) {
+    const selfStakeAmountMax =
+        smallSelfStakeAmountGraphData &&
+        smallSelfStakeAmountGraphData.length > 0
+            ? Math.max(...smallSelfStakeAmountGraphData)
+            : 0;
+    const selfStakeRatioMax = 100;
+
     return (
         <div
             className="flex flex-col w-full lg:w-[1100px] gap-5 h-fit py-0 lg:px-10 mt-37.5 mb-1"
@@ -100,7 +107,7 @@ export default function Inner({
                                     className="text-[28px] font-bold text-[#49306f] leading-3 mb-0.5 text-nowrap"
                                     id="summary-self-stake-amount-native"
                                 >
-                                    {formatAtom(summaryData.self_stake_sum)}{" "}
+                                    {formatAtom(summaryData.self_stake_sum, 1)}{" "}
                                     ATOM
                                 </div>
                                 <div
@@ -110,7 +117,8 @@ export default function Inner({
                                     $
                                     {formatAtomUSD(
                                         summaryData.self_stake_sum,
-                                        price
+                                        price,
+                                        1
                                     )}
                                 </div>
                             </>
@@ -123,7 +131,12 @@ export default function Inner({
                                     width={80}
                                     options={{
                                         ...miniOptions,
-                                        colors: ["#31ADE6"],
+                                        colors: ["#5856D7"],
+                                        yaxis: {
+                                            show: false,
+                                            min: 0,
+                                            max: selfStakeAmountMax,
+                                        },
                                     }}
                                     series={
                                         [
@@ -158,22 +171,22 @@ export default function Inner({
                         rightColumn={
                             <>
                                 <div className="flex w-20 aspect-square border-[0.5px] border-[#bebee7] rounded-full bg-[#e8e8ff] items-center relative text-[16px]">
-                                    <span className="my-0 mx-auto mb-1 z-10">
+                                    <span className="my-0 mx-auto px-1 mb-1 z-10">
                                         {formatPercentage(
                                             100 - summaryData.percentage_sold
                                         )}
                                         %
                                     </span>
                                     <div
-                                        className="flex items-center justify-center relative right-0 aspect-square border-[0.5px] border-[#beebe7] text-[#e5e5ff] bg-[#7c70c3] rounded-full leading-[22px] font-bold overflow-hidden"
+                                        className="flex items-center justify-center relative right-0 aspect-square border-[0.5px] border-[#bebee7] text-[#e5e5ff] bg-[#7c70c3] rounded-full leading-[22px] font-bold overflow-hidden"
                                         style={{
                                             width: `max(calc(80px * ${
                                                 summaryData.percentage_sold /
                                                 100
-                                            }), 40%)`,
+                                            }), 50%)`,
                                         }}
                                     >
-                                        <span className="absolute inset-0 flex items-center justify-center z-10 font-normal text-[12px] leading-none">
+                                        <span className="absolute inset-0 flex items-center justify-center z-10 font-normal leading-none mb-1">
                                             {formatPercentage(
                                                 summaryData.percentage_sold
                                             )}
@@ -210,7 +223,12 @@ export default function Inner({
                                     width={80}
                                     options={{
                                         ...miniOptions,
-                                        colors: ["#FF9404"],
+                                        colors: ["#5856D7"],
+                                        yaxis: {
+                                            show: false,
+                                            min: 0,
+                                            max: selfStakeRatioMax,
+                                        },
                                     }}
                                     series={
                                         [
@@ -257,6 +275,7 @@ export default function Inner({
                 <ValidatorTable
                     validators={validators}
                     searchQuery={searchQuery}
+                    price={price}
                 />
             </div>
         </div>
