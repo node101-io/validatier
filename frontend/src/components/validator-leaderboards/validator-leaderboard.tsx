@@ -35,7 +35,7 @@ export default function ValidatorLeaderboard({
       ? validators.slice(0, 10)
       : validators.slice(10, 20);
   return (
-    <div className="flex flex-col pt-4 overflow-hidden min-w-[320px] sm:min-w-[420px] lg:min-w-[500px] w-full h-full p-0 bg-[#f5f5ff] border-[0.5px] border-[#bebee7] rounded-[20px] gap-1">
+    <div className="flex flex-col pt-4 pb-2 overflow-hidden min-w-[320px] sm:min-w-[420px] lg:min-w-[500px] w-full h-full p-0 bg-[#f5f5ff] border-[0.5px] border-[#bebee7] rounded-[20px] gap-1">
       <div className="flex items-center justify-between w-full px-4">
         {/* Each Leaderboard Header */}
         <div

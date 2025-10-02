@@ -66,8 +66,6 @@ export default function Navbar({
   }, [isValidatorPage, pastIntro]);
 
   const brandFill = isValidatorPage || pastIntro ? "#250754" : "#f5f5ff";
-  const brandTextClass =
-    isValidatorPage || pastIntro ? "text-[#250754]" : "text-[#f5f5ff]";
   const showSearch = !isValidatorPage && pastIntro;
 
   return (
@@ -76,35 +74,19 @@ export default function Navbar({
         pastIntro || isValidatorPage
           ? "justify-between py-4"
           : "justify-center sm:justify-between py-8"
-      } items-start gap-3 flex-nowrap fixed z-[100] top-0 left-0 right-0 transition-all duration-300 group`}
+      } items-start gap-3 flex-nowrap fixed z-[100] top-0 left-0 right-0 transition-all duration-300 group h-fit`}
+      style={{
+        background:
+          pastIntro || isValidatorPage
+            ? "transparent"
+            : "linear-gradient(0deg, transparent 0%, rgba(46, 74, 122, 0.7) 72%, rgba(46, 74, 122, 1) 100%)",
+      }}
     >
       <Link
         href="/"
-        className={`flex gap-2 mr-0 sm:mr-8 z-20 user-select-none flex-row items-center justify-center transition-all duration-500 ${
-          pastIntro || isValidatorPage
-            ? "h-[17px] sm:h-[26px] my-1.5"
-            : "h-[11px] sm:h-[26px] my-0 sm:my-1.5"
-        } group-focus-within:opacity-0 group-focus-within:translate-x-[-100%] sm:group-focus-within:opacity-100 sm:group-focus-within:translate-x-0`}
+        className={`flex gap-2 mr-0 sm:mr-8 z-20 user-select-none flex-row items-center justify-center transition-all duration-500 h-[17px] h-full group-focus-within:opacity-0 group-focus-within:translate-x-[-100%] sm:group-focus-within:opacity-100 sm:group-focus-within:translate-x-0`}
       >
-        <div
-          className="flex min-w-fit h-full min-h-full items-center justify-center"
-          id="banner-logo"
-        >
-          <LogoSVG
-            fill={brandFill}
-            className="aspect-[1.6] block min-h-full h-full w-auto max-h-full max-w-full"
-          />
-        </div>
-        <div
-          className={`transition-all duration-250 ease-in-out font-bold text-nowrap ${brandTextClass} ${
-            pastIntro || isValidatorPage
-              ? "text-[26px] sm:text-[42px] -mt-1.5"
-              : "text-xl sm:text-[42px] -mt-0 sm:-mt-1.5"
-          }`}
-          id="banner-title"
-        >
-          VALIDATIER
-        </div>
+        <LogoSVG fill={brandFill} className="block w-full h-full" />
       </Link>
       <div
         className={`flex w-fit items-start gap-3 transition-all duration-1000 overflow-visible ${

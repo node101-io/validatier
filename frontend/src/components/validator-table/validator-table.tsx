@@ -76,7 +76,7 @@ const SortableHeader = ({
         onClick={() => onSort(field)}
       >
         <span className="size-[14px] shrink-0 bg-[url('/res/images/info.svg')] bg-no-repeat bg-center bg-cover" />
-        <span className="whitespace-nowrap mb-1">{label}</span>
+        <span className="whitespace-nowrap mb-1 font-medium">{label}</span>
       </TooltipTrigger>
       <TooltipContent
         className="bg-[#2C2749] text-white text-xs py-1.5 px-2 rounded-md cursor-default"
@@ -258,7 +258,7 @@ export default function ValidatorTable({
                     <div className="text-nowrap -mt-0.5 w-[80%]">
                       <div className="flex text-base md:text-xl gap-2.5 text-[#49306f]">
                         <div className="inline-block relative overflow-hidden whitespace-nowrap w-[120px] validators-table-validator-name-wrapper">
-                          <span className="inline-block whitespace-nowrap validators-table-validator-name">
+                          <span className="inline-block whitespace-nowrap validators-table-validator-name mb-1">
                             {isMobile && validator.moniker.length > 13
                               ? `${validator.moniker.slice(0, 13)}...`
                               : validator.moniker}
@@ -275,7 +275,7 @@ export default function ValidatorTable({
                     ) : (
                       <div className="flex items-center text-xl gap-1.5">
                         <span
-                          className={`${
+                          className={`mb-1 ${
                             validator.percentage_sold > 50
                               ? "text-[#b82200]"
                               : validator.percentage_sold > 25
@@ -294,16 +294,16 @@ export default function ValidatorTable({
                       </div>
                     )}
                   </td>
-                  <td className="text-center text-nowrap text-xl relative justify-self-center">
+                  <td className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1">
                     {/* Avg Delegation */}
-                    <div className="inline-flex gap-1 text-xl text-[#633f9a]">
+                    <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
                       {validator.average_total_stake &&
                       validator.average_total_stake > 0
                         ? formatAtom(validator.average_total_stake, 2)
                         : "0"}{" "}
                       ATOM
                     </div>
-                    <div className="text-base font-[500] text-[#633f9a]">
+                    <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
                       {validator.average_total_stake
                         ? `$${formatAtomUSD(
                             validator.average_total_stake,
@@ -313,43 +313,43 @@ export default function ValidatorTable({
                         : "$0"}
                     </div>
                   </td>
-                  <td className="text-center text-nowrap text-xl relative justify-self-center">
+                  <td className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1">
                     {/* Total Rewards */}
-                    <div className="inline-flex gap-1 text-xl text-[#633f9a]">
+                    <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
                       {validator.reward && validator.reward > 0
                         ? formatAtom(validator.reward, 2)
                         : "0"}{" "}
                       ATOM
                     </div>
-                    <div className="text-base font-[500] text-[#633f9a]">
+                    <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
                       {validator.reward
                         ? `$${formatAtomUSD(validator.reward, price)}`
                         : "$0"}
                     </div>
                   </td>
-                  <td className="text-center text-nowrap text-xl relative justify-self-center">
+                  <td className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1">
                     {/* Total Sold Amount */}
-                    <div className="inline-flex gap-1 text-xl text-[#633f9a]">
+                    <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
                       {validator.sold && validator.sold > 0
                         ? formatAtom(validator.sold, 2)
                         : "0"}{" "}
                       ATOM
                     </div>
-                    <div className="text-base font-[500] text-[#633f9a]">
+                    <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
                       {validator.sold
                         ? `$${formatAtomUSD(validator.sold, price)}`
                         : "$0"}
                     </div>
                   </td>
-                  <td className="text-center text-nowrap text-xl relative justify-self-center">
+                  <td className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1">
                     {/* Self Stake */}
-                    <div className="inline-flex gap-1 text-xl text-[#633f9a]">
+                    <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
                       {validator.self_stake && validator.self_stake > 0
                         ? formatAtom(validator.self_stake, 2)
                         : "0"}{" "}
                       ATOM
                     </div>
-                    <div className="text-base font-[500] text-[#633f9a]">
+                    <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
                       {validator.self_stake
                         ? `$${formatAtomUSD(validator.self_stake, price)}`
                         : "$0"}
