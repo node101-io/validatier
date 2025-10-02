@@ -4,33 +4,33 @@ import { MotionValue } from "motion/react";
 import { useScroll } from "motion/react";
 
 export type ScrollContextValue = {
-    scrollY: MotionValue<number> | null;
+  scrollY: MotionValue<number> | null;
 };
 
 const ScrollContext = createContext<ScrollContextValue>({ scrollY: null });
 
 export function useScrollContext() {
-    return useContext(ScrollContext);
+  return useContext(ScrollContext);
 }
 
 type ScrollProviderProps = PropsWithChildren<{
-    className?: string;
+  className?: string;
 }>;
 
 export default function ScrollProvider({
-    className,
-    children,
+  className,
+  children,
 }: ScrollProviderProps) {
-    const containerRef = useRef<HTMLDivElement | null>(null);
-    const { scrollY } = useScroll({ container: containerRef });
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const { scrollY } = useScroll({ container: containerRef });
 
-    return (
-        <div className="flex flex-col items-center relative overflow-hidden h-screen w-full">
-            <div ref={containerRef} className={className}>
-                <ScrollContext.Provider value={{ scrollY }}>
-                    {children}
-                </ScrollContext.Provider>
-            </div>
-        </div>
-    );
+  return (
+    <div className="flex flex-col items-center relative overflow-hidden h-screen w-full">
+      <div ref={containerRef} className={className}>
+        <ScrollContext.Provider value={{ scrollY }}>
+          {children}
+        </ScrollContext.Provider>
+      </div>
+    </div>
+  );
 }

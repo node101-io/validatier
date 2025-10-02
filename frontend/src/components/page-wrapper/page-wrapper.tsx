@@ -12,64 +12,69 @@ import { ValidatorsSummaryDataInterface } from "../../../../src/models/Validator
 import Metric from "@/types/metric";
 
 interface PageWrapperProps {
-    validators: Validator[];
-    summaryData: ValidatorsSummaryDataInterface;
-    price: number;
-    metrics: Metric[];
-    delegationData: number[];
-    soldData: number[];
-    priceData: number[];
-    smallSelfStakeAmountGraphData: number[];
-    smallSelfStakeRatioGraphData: number[];
+  validators: Validator[];
+  summaryData: ValidatorsSummaryDataInterface;
+  price: number;
+  metrics: Metric[];
+  delegationData: number[];
+  soldData: number[];
+  priceData: number[];
+  smallSelfStakeAmountGraphData: number[];
+  smallSelfStakeRatioGraphData: number[];
+  initialStartDate?: Date;
+  initialEndDate?: Date;
+  initialInterval?: string;
 }
 
 export default function PageWrapper({
-    validators,
-    summaryData,
-    price,
-    metrics,
-    delegationData,
-    soldData,
-    priceData,
-    smallSelfStakeAmountGraphData,
-    smallSelfStakeRatioGraphData,
+  validators,
+  summaryData,
+  price,
+  metrics,
+  delegationData,
+  soldData,
+  priceData,
+  smallSelfStakeAmountGraphData,
+  smallSelfStakeRatioGraphData,
+  initialStartDate,
+  initialEndDate,
+  initialInterval,
 }: PageWrapperProps) {
-    const [searchQuery, setSearchQuery] = useState("");
-    const innerRef = useRef<HTMLDivElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const innerRef = useRef<HTMLDivElement>(null);
 
-    const handleSearchChange = (query: string) => {
-        setSearchQuery(query);
-        if (query && innerRef.current) {
-            const element = innerRef.current;
-            const elementPosition = element.offsetTop;
-            const offsetPosition = elementPosition - 75;
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    innerRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
+  };
 
-            window.scrollTo({
-                top: offsetPosition,
-                behavior: "smooth",
-            });
-        }
-    };
-
-    return (
-        <ScrollProvider className="flex flex-col w-full items-center relative overflow-x-hidden overflow-y-scroll ml-0 h-screen rounded-0 bg-white transition-all duration-250">
-            <Navbar onSearchChange={handleSearchChange} />
-            <Intro />
-            <Inner
-                validators={validators}
-                summaryData={summaryData}
-                price={price}
-                metrics={metrics}
-                delegationData={delegationData}
-                soldData={soldData}
-                priceData={priceData}
-                smallSelfStakeAmountGraphData={smallSelfStakeAmountGraphData}
-                smallSelfStakeRatioGraphData={smallSelfStakeRatioGraphData}
-                searchQuery={searchQuery}
-                ref={innerRef}
-            />
-            <StakeWithUs />
-            <Footer />
-        </ScrollProvider>
-    );
+  return (
+    <ScrollProvider className="flex flex-col w-full items-center relative overflow-x-hidden overflow-y-scroll ml-0 h-screen rounded-0 bg-white transition-all duration-250">
+      <Navbar
+        onSearchChange={handleSearchChange}
+        initialStartDate={initialStartDate}
+        initialEndDate={initialEndDate}
+        initialInterval={initialInterval}
+      />
+      <Intro />
+      <Inner
+        validators={validators}
+        summaryData={summaryData}
+        price={price}
+        metrics={metrics}
+        delegationData={delegationData}
+        soldData={soldData}
+        priceData={priceData}
+        smallSelfStakeAmountGraphData={smallSelfStakeAmountGraphData}
+        smallSelfStakeRatioGraphData={smallSelfStakeRatioGraphData}
+        searchQuery={searchQuery}
+        ref={innerRef}
+      />
+      <StakeWithUs />
+      <Footer />
+    </ScrollProvider>
+  );
 }

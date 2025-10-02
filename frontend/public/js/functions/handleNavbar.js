@@ -1,4 +1,3 @@
-
 // function changeSummaryGraph (target) {
 //   document.querySelectorAll('.each-sub-menu-link-content').forEach(eachLink => {
 //     eachLink.classList.remove('navbar-link-selected');
@@ -27,7 +26,7 @@
 
 //   document.getElementById('summary-graph-title').innerHTML = graphTitle;
 //   document.getElementById('summary-graph-description').innerHTML = graphDescription;
-    
+
 //   createNetworkSummaryGraph(dataFields, colors);
 // }
 
@@ -60,13 +59,13 @@
 //         const eachGraphWrapper = graphWrappersArray[i];
 //         const operatorAddress = eachGraphWrapper.getAttribute('operator_address');
 //         const graphWidth = eachGraphWrapper.parentNode.offsetWidth;
-        
+
 //         document.documentElement.style.setProperty(
 //           `--graph-column-width-px-${operatorAddress.replace('\\@', '@')}`,
 //           `calc((${graphWidth - 10}px - var(--vertical-axis-labels-width)) / var(--number-of-columns-${operatorAddress}))`
 //         );
 //         document.documentElement.style.setProperty(
-//           `--graph-column-width-${operatorAddress.replace('\\@', '@')}`, 
+//           `--graph-column-width-${operatorAddress.replace('\\@', '@')}`,
 //           `calc((${graphWidth - 10} - var(--vertical-axis-labels-width-int)) / var(--number-of-columns-${operatorAddress}))`
 //         );
 //       }
@@ -75,7 +74,7 @@
 //       document.documentElement.style.setProperty('--navbar-width', '237px');
 //       navbarWrapper.classList.remove('navbar-close');
 //       navbarViewToggle.querySelector('span').classList.remove('navbar-arrow-close');
-      
+
 //       if (window.innerWidth <= 1000)
 //         navbarViewToggle.style.left = 'calc(237px - 32px - (2 * var(--navbar-horizontal-padding)) + var(--navbar-view-toggle-left))';
 
@@ -89,27 +88,27 @@
 //     }
 //   })
 
-  // document.addEventListener('click', (event) => {
-  //   let target = event.target;
-  //   while (target != document.body && !target.classList.contains('each-sub-menu-link-content') && target.id != 'network-summary-stat-percentage_sold') {
-  //     if (target.id == 'network-summary-stat-close-button-percentage-sold') return;
-  //     target = target.parentNode;
-  //   };
-  //   if (!target.classList.contains('each-sub-menu-link-content') && target.id != 'network-summary-stat-percentage_sold') return;
+// document.addEventListener('click', (event) => {
+//   let target = event.target;
+//   while (target != document.body && !target.classList.contains('each-sub-menu-link-content') && target.id != 'network-summary-stat-percentage_sold') {
+//     if (target.id == 'network-summary-stat-close-button-percentage-sold') return;
+//     target = target.parentNode;
+//   };
+//   if (!target.classList.contains('each-sub-menu-link-content') && target.id != 'network-summary-stat-percentage_sold') return;
 
-  //   document.getElementById('inner-main-wrapper').scrollTo({
-  //     top: 0,
-  //     left: 0,
-  //   });
+//   document.getElementById('inner-main-wrapper').scrollTo({
+//     top: 0,
+//     left: 0,
+//   });
 
-  //   if (target.id == 'network-summary-stat-percentage_sold') {
-  //     document.getElementById('network-summary-stat-percentage_sold').classList.add('network-summary-stat-percentage_sold-clicked');
-  //     return changeSummaryGraph(document.getElementById('percentage_sold_graph'))
-  //   };
-  //   if (target.id == 'percentage_sold_graph') document.getElementById('network-summary-stat-percentage_sold').classList.add('network-summary-stat-percentage_sold-clicked');
-  //   else document.getElementById('network-summary-stat-percentage_sold').classList.remove('network-summary-stat-percentage_sold-clicked');
-  //   return changeSummaryGraph(target);
-  // })
+//   if (target.id == 'network-summary-stat-percentage_sold') {
+//     document.getElementById('network-summary-stat-percentage_sold').classList.add('network-summary-stat-percentage_sold-clicked');
+//     return changeSummaryGraph(document.getElementById('percentage_sold_graph'))
+//   };
+//   if (target.id == 'percentage_sold_graph') document.getElementById('network-summary-stat-percentage_sold').classList.add('network-summary-stat-percentage_sold-clicked');
+//   else document.getElementById('network-summary-stat-percentage_sold').classList.remove('network-summary-stat-percentage_sold-clicked');
+//   return changeSummaryGraph(target);
+// })
 
 //   window.addEventListener('resize', (event) => resizeNavbar(navbarWrapper));
 

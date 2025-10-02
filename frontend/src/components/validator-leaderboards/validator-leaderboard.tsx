@@ -102,11 +102,13 @@ export default function ValidatorLeaderboard({
                 {index + 1}
               </div>
               {/* Avatar image */}
-              <div className="flex items-center min-w-7.5 max-w-7.5 aspect-square rounded-full overflow-hidden shrink-0">
+              <div
+                className={`flex items-center min-w-7.5 max-w-7.5 aspect-square ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"} overflow-hidden shrink-0`}
+              >
                 <img
                   src={validator.temporary_image_uri}
                   alt={validator.moniker}
-                  className="w-full h-full rounded-full"
+                  className={`w-full h-full ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"}`}
                 />
               </div>
               <div className="flex-1 min-w-0 w-auto sm:w-[150px] text-base sm:text-lg text-[#49306f] overflow-hidden text-ellipsis text-nowrap">
@@ -133,8 +135,8 @@ export default function ValidatorLeaderboard({
                           validator.percentage_sold > 50
                             ? "text-[#b82200]"
                             : validator.percentage_sold > 25
-                            ? "text-[#ff6f43]"
-                            : "text-[#13a719]"
+                              ? "text-[#ff6f43]"
+                              : "text-[#13a719]"
                         }`}
                       >
                         {formatPercentage(validator.percentage_sold, 2)}%

@@ -1,5 +1,17 @@
-const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const months = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 function formatTimestampLarge(timestamp) {
   const date = new Date(timestamp);
@@ -16,32 +28,38 @@ function formatTimestampSmall(timestamp) {
 
 const dayAsMilliseconds = 86400000;
 
-function generateSingleHorizontalAxisLabel (labelMapping) {
-  const { currentIntervalLeft, currentIntervalRight, columnToAppendHorizontalLabel } = labelMapping;
+function generateSingleHorizontalAxisLabel(labelMapping) {
+  const {
+    currentIntervalLeft,
+    currentIntervalRight,
+    columnToAppendHorizontalLabel,
+  } = labelMapping;
 
-  const horizontalAxisLabel = document.createElement('div');
-  horizontalAxisLabel.classList.add('horizontal-axis-label');
+  const horizontalAxisLabel = document.createElement("div");
+  horizontalAxisLabel.classList.add("horizontal-axis-label");
 
-  const horizontalAxisLabelCompact = document.createElement('div');
-  horizontalAxisLabelCompact.classList.add('horizontal-axis-label', 'horizontal-axis-label-compact');
+  const horizontalAxisLabelCompact = document.createElement("div");
+  horizontalAxisLabelCompact.classList.add(
+    "horizontal-axis-label",
+    "horizontal-axis-label-compact"
+  );
 
-  let formattedDateLeft = '';
-  let formattedDateRight = '';
+  let formattedDateLeft = "";
+  let formattedDateRight = "";
 
   if ((currentIntervalRight - currentIntervalLeft) / dayAsMilliseconds > 60) {
     formattedDateLeft = formatTimestampLarge(currentIntervalLeft);
     formattedDateRight = formatTimestampLarge(currentIntervalRight);
-  }
-  else {
+  } else {
     formattedDateLeft = formatTimestampLarge(currentIntervalLeft);
     formattedDateRight = formatTimestampLarge(currentIntervalRight);
   }
 
   horizontalAxisLabel.innerHTML = `${formattedDateLeft} - ${formattedDateRight}`;
 
-  const compactLine1 = document.createElement('span');
+  const compactLine1 = document.createElement("span");
   compactLine1.innerHTML = formattedDateLeft;
-  const compactLine2 = document.createElement('span');
+  const compactLine2 = document.createElement("span");
   compactLine2.innerHTML = formattedDateRight;
   horizontalAxisLabelCompact.appendChild(compactLine1);
   horizontalAxisLabelCompact.appendChild(compactLine2);

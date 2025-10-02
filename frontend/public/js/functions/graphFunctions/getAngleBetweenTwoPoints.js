@@ -1,21 +1,30 @@
-
-function getAngleBetweenTwoPoints (column1, column2, operatorAddress, dataFields, subplotGroupMapping) {
-  
+function getAngleBetweenTwoPoints(
+  column1,
+  column2,
+  operatorAddress,
+  dataFields,
+  subplotGroupMapping
+) {
   const angleHypotenuseMapping = {};
-  
+
   const deltaX = `--graph-column-width-${operatorAddress}`;
 
-  dataFields.forEach(eachDataField => {
-
-    const subPlotGroup = subplotGroupMapping ? subplotGroupMapping[eachDataField] : '';
-    const minMaxAddOn = subplotGroupMapping ? `-${eachDataField != 'price' ? subPlotGroup : '0'}` : '';
-    const numOfGroups = subplotGroupMapping ? subplotGroupMapping['number_of_groups'] : 1;
+  dataFields.forEach((eachDataField) => {
+    const subPlotGroup = subplotGroupMapping
+      ? subplotGroupMapping[eachDataField]
+      : "";
+    const minMaxAddOn = subplotGroupMapping
+      ? `-${eachDataField != "price" ? subPlotGroup : "0"}`
+      : "";
+    const numOfGroups = subplotGroupMapping
+      ? subplotGroupMapping["number_of_groups"]
+      : 1;
 
     const data_1 = column1.getAttribute(eachDataField);
     const data_2 = column2.getAttribute(eachDataField);
 
     const dataDeltaY = `(
-      (${(data_2 - data_1)} / 
+      (${data_2 - data_1} / 
       (var(--max-value-${operatorAddress}${minMaxAddOn}) - var(--min-value-${operatorAddress}${minMaxAddOn})))
       * (var(--column-height-${operatorAddress}) / ${numOfGroups})
     )`;
@@ -28,9 +37,9 @@ function getAngleBetweenTwoPoints (column1, column2, operatorAddress, dataFields
 
     angleHypotenuseMapping[eachDataField] = {
       hypotenuse: hypotenuse,
-      angle: angle
-    }
-  })
+      angle: angle,
+    };
+  });
 
   return angleHypotenuseMapping;
 }

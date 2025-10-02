@@ -1,5 +1,5 @@
 :root {
-  --export-main-wrapper-color: rgba(41, 48, 80, 1);;
+  --export-main-wrapper-color: rgba(41, 48, 80, 1);
   --export-wrapper-header-padding: 8px;
   --export-wrapper-header-font-size: 20px;
   --export-wrapper-header-gap: 20px;
@@ -22,7 +22,7 @@
   --each-export-choice-padding: 5px;
   --each-export-choice-transition-duration: 0.25s;
   --export-choice-selected-font-weight: 600;
-  
+
   --each-export-choice-font-size: 20px;
   --each-export-choice-gap: 10px;
   --each-export-choice-span-margin-top: -4px;
@@ -40,17 +40,22 @@
 
 .export-main-wrapper {
   position: relative;
-  color: var(--export-main-wrapper-color);  
+  color: var(--export-main-wrapper-color);
 }
 
 .export-wrapper-header {
-  width: calc(var(--selected-range-height) - (2 * var(--export-wrapper-header-padding)));
-  height: calc(var(--selected-range-height) - (2 * var(--export-wrapper-header-padding)));
+  width: calc(
+    var(--selected-range-height) - (2 * var(--export-wrapper-header-padding))
+  );
+  height: calc(
+    var(--selected-range-height) - (2 * var(--export-wrapper-header-padding))
+  );
   padding: var(--export-wrapper-header-padding);
   font-size: var(--export-wrapper-header-font-size);
   gap: var(--export-wrapper-header-gap);
   cursor: var(--pointer-hand-dark);
-  border: var(--general-main-wrapper-border-size) solid var(--general-main-wrapper-border-color);
+  border: var(--general-main-wrapper-border-size) solid
+    var(--general-main-wrapper-border-color);
   background-color: var(--body-main-wrapper-background);
   border-radius: 16px;
 }
@@ -63,7 +68,8 @@
   font-size: var(--export-wrapper-content-font-size);
   gap: var(--export-wrapper-content-gap);
   transition: all var(--export-wrapper-content-transition-duration) ease 0s;
-  transform: perspective(var(--export-wrapper-content-transform-perspective)) rotateX(var(--export-wrapper-content-transform-rotate-x));
+  transform: perspective(var(--export-wrapper-content-transform-perspective))
+    rotateX(var(--export-wrapper-content-transform-rotate-x));
   top: var(--export-wrapper-content-top);
   z-index: var(--export-wrapper-content-z-index);
   opacity: var(--export-wrapper-content-opacity);
@@ -87,7 +93,7 @@
   align-items: center;
   font-size: var(--each-export-choice-font-size);
   gap: var(--each-export-choice-gap);
-  cursor: var(--pointer-hand-dark);  
+  cursor: var(--pointer-hand-dark);
 }
 
 .each-export-choice span {

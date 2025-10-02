@@ -8,7 +8,7 @@ import {
   formatPercentage,
 } from "@/utils/format-numbers";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -23,6 +23,89 @@ type SortField =
   | "totalSold"
   | "selfStake";
 type SortDirection = "asc" | "desc";
+
+interface SortableHeaderProps {
+  field: SortField;
+  label: string;
+  tooltip: string;
+  sortField: SortField;
+  sortDirection: SortDirection;
+  onSort: (field: SortField) => void;
+}
+
+const sortableHeaders = [
+  {
+    field: "percentageSold" as const,
+    label: "Percentage Sold",
+    tooltip: "(Total sold / Total rewards) * 100",
+  },
+  {
+    field: "avgDelegation" as const,
+    label: "Avg Delegation",
+    tooltip: "Average delegation",
+  },
+  {
+    field: "totalRewards" as const,
+    label: "Total Rewards",
+    tooltip: "Total rewards",
+  },
+  {
+    field: "totalSold" as const,
+    label: "Total Sold Amount",
+    tooltip: "Total sold amount",
+  },
+  {
+    field: "selfStake" as const,
+    label: "Self Stake",
+    tooltip: "Self stake",
+  },
+];
+
+const SortableHeader = ({
+  field,
+  label,
+  tooltip,
+  sortField,
+  sortDirection,
+  onSort,
+}: SortableHeaderProps) => (
+  <th className="flex items-center justify-between gap-2 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center select-none cursor-pointer">
+    <Tooltip>
+      <TooltipTrigger
+        className="flex items-center gap-1 cursor-pointer"
+        onClick={() => onSort(field)}
+      >
+        <span className="size-[14px] shrink-0 bg-[url('/res/images/info.svg')] bg-no-repeat bg-center bg-cover" />
+        <span className="whitespace-nowrap mb-1">{label}</span>
+      </TooltipTrigger>
+      <TooltipContent
+        className="bg-[#2C2749] text-white text-xs py-1.5 px-2 rounded-md cursor-default"
+        side="top"
+      >
+        {tooltip}
+      </TooltipContent>
+    </Tooltip>
+    <div
+      className="hidden lg:flex flex-col items-center gap-0.5"
+      onClick={() => onSort(field)}
+    >
+      <span
+        className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[5px] ${
+          sortField === field && sortDirection === "asc"
+            ? "border-b-[#161616]"
+            : "border-b-[#B7A6C6]"
+        }`}
+      ></span>
+      <span
+        className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[5px] ${
+          sortField === field && sortDirection === "desc"
+            ? "border-t-[#161616]"
+            : "border-t-[#B7A6C6]"
+        }`}
+      ></span>
+    </div>
+  </th>
+);
 
 export default function ValidatorTable({
   validators,
@@ -47,43 +130,54 @@ export default function ValidatorTable({
     }
   };
 
-  const sortedValidators = [...validators].sort((a, b) => {
-    let aValue: any;
-    let bValue: any;
+  // Filter and sort validators using useMemo for better performance
+  const filteredAndSortedValidators = useMemo(() => {
+    // First filter by search query
+    const filtered = searchQuery
+      ? validators.filter((validator) =>
+          validator.moniker.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : validators;
 
-    switch (sortField) {
-      case "name":
-        aValue = a.moniker.toLowerCase();
-        bValue = b.moniker.toLowerCase();
-        break;
-      case "percentageSold":
-        aValue = a.percentage_sold ?? 0;
-        bValue = b.percentage_sold ?? 0;
-        break;
-      case "avgDelegation":
-        aValue = a.average_total_stake ?? 0;
-        bValue = b.average_total_stake ?? 0;
-        break;
-      case "totalRewards":
-        aValue = a.reward ?? 0;
-        bValue = b.reward ?? 0;
-        break;
-      case "totalSold":
-        aValue = a.sold ?? 0;
-        bValue = b.sold ?? 0;
-        break;
-      case "selfStake":
-        aValue = a.self_stake ?? 0;
-        bValue = b.self_stake ?? 0;
-        break;
-      default:
-        return 0;
-    }
+    // Then sort
+    return [...filtered].sort((a, b) => {
+      let aValue;
+      let bValue;
 
-    if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-    if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-    return 0;
-  });
+      switch (sortField) {
+        case "name":
+          aValue = a.moniker.toLowerCase();
+          bValue = b.moniker.toLowerCase();
+          break;
+        case "percentageSold":
+          aValue = a.percentage_sold ?? 0;
+          bValue = b.percentage_sold ?? 0;
+          break;
+        case "avgDelegation":
+          aValue = a.average_total_stake ?? 0;
+          bValue = b.average_total_stake ?? 0;
+          break;
+        case "totalRewards":
+          aValue = a.reward ?? 0;
+          bValue = b.reward ?? 0;
+          break;
+        case "totalSold":
+          aValue = a.sold ?? 0;
+          bValue = b.sold ?? 0;
+          break;
+        case "selfStake":
+          aValue = a.self_stake ?? 0;
+          bValue = b.self_stake ?? 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [validators, searchQuery, sortField, sortDirection]);
 
   useEffect(() => {
     const update = () => {
@@ -111,27 +205,6 @@ export default function ValidatorTable({
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
-
-  // Handle search filtering by showing/hiding rows
-  useEffect(() => {
-    if (!searchQuery) {
-      document
-        .querySelectorAll<HTMLElement>("[data-validator-row]")
-        .forEach((row) => {
-          row.style.display = "";
-        });
-      return;
-    }
-
-    const query = searchQuery.toLowerCase();
-    document
-      .querySelectorAll<HTMLElement>("[data-validator-row]")
-      .forEach((row) => {
-        const moniker =
-          row.getAttribute("data-validator-moniker")?.toLowerCase() || "";
-        row.style.display = moniker.includes(query) ? "" : "none";
-      });
-  }, [searchQuery]);
   return (
     <div className="flex flex-col gap-2.5 px-5 lg:px-0">
       <div className="flex justify-between items-center w-full">
@@ -142,175 +215,27 @@ export default function ValidatorTable({
           <table className="w-full min-w-[900px] table-fixed border-collapse">
             <thead>
               <tr className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] sm:grid-cols-[210px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 mb-1">
-                <th
-                  className="flex items-center sm:w-full justify-start text-left text-[#7c70c3] font-semibold gap-0 text-base lg:text-lg whitespace-nowrap sticky left-0 -ml-5 pl-5 z-20 bg-[#f5f5ff] lg:bg-transparent cursor-[var(--pointer-hand-dark)] select-none"
-                >
+                <th className="flex mb-1 items-center sm:w-full justify-start text-left text-[#7c70c3] font-semibold gap-0 text-base lg:text-lg whitespace-nowrap sticky left-0 -ml-5 pl-5 z-20 bg-[#f5f5ff] lg:bg-transparent select-none">
                   Name
                 </th>
-                <th
-                  className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center cursor-[var(--pointer-hand-dark)] select-none"
-                  onClick={() => handleSort("percentageSold")}
-                >
-                  <Tooltip>
-                    <TooltipTrigger className="flex items-center gap-1">
-                      <span className="w-3 h-3 inline-block shrink-0 relative top-[1px] bg-[#7C71C3] [mask:url('/res/images/info.svg')] [mask-size:contain] [mask-repeat:no-repeat] [mask-position:center]" />
-                      <span className="whitespace-nowrap">Percentage Sold</span>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-[#2C2749] text-white text-xs py-1.5 px-2 rounded-md" side="top">
-                      (Total sold / Total rewards) * 100
-                    </TooltipContent>
-                  </Tooltip>
-                  <div className="hidden lg:flex flex-col items-center gap-0.5">
-                    <span
-                      className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] ${
-                        sortField === "percentageSold" &&
-                        sortDirection === "asc"
-                          ? "border-b-[#161616]"
-                          : "border-b-[#B7A6C6]"
-                      }`}
-                    ></span>
-                    <span
-                      className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] ${
-                        sortField === "percentageSold" &&
-                        sortDirection === "desc"
-                          ? "border-t-[#161616]"
-                          : "border-t-[#B7A6C6]"
-                      }`}
-                    ></span>
-                  </div>
-                </th>
-                <th
-                  className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center cursor-[var(--pointer-hand-dark)] select-none"
-                  onClick={() => handleSort("avgDelegation")}
-                >
-                  <Tooltip>
-                    <TooltipTrigger className="flex items-center gap-1">
-                      <span className="w-3 h-3 inline-block shrink-0 relative top-[1px] bg-[#7C71C3] [mask:url('/res/images/info.svg')] [mask-size:contain] [mask-repeat:no-repeat] [mask-position:center]" />
-                      <span className="whitespace-nowrap">Avg Delegation</span>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-[#2C2749] text-white text-xs py-1.5 px-2 rounded-md" side="top">
-                      Average delegation
-                    </TooltipContent>
-                  </Tooltip>
-                  <div className="hidden lg:flex flex-col items-center gap-0.5">
-                    <span
-                      className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] ${
-                        sortField === "avgDelegation" && sortDirection === "asc"
-                          ? "border-b-[#161616]"
-                          : "border-b-[#B7A6C6]"
-                      }`}
-                    ></span>
-                    <span
-                      className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] ${
-                        sortField === "avgDelegation" &&
-                        sortDirection === "desc"
-                          ? "border-t-[#161616]"
-                          : "border-t-[#B7A6C6]"
-                      }`}
-                    ></span>
-                  </div>
-                </th>
-                <th
-                  className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center cursor-[var(--pointer-hand-dark)] select-none"
-                  onClick={() => handleSort("totalRewards")}
-                >
-                  <Tooltip>
-                    <TooltipTrigger className="flex items-center gap-1">
-                      <span className="w-3 h-3 inline-block shrink-0 relative top-[1px] bg-[#7C71C3] [mask:url('/res/images/info.svg')] [mask-size:contain] [mask-repeat:no-repeat] [mask-position:center]" />
-                      <span className="whitespace-nowrap">Total Rewards</span>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-[#2C2749] text-white text-xs py-1.5 px-2 rounded-md" side="top">
-                      Total rewards
-                    </TooltipContent>
-                  </Tooltip>
-                  <div className="hidden lg:flex flex-col items-center gap-0.5">
-                    <span
-                      className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] ${
-                        sortField === "totalRewards" && sortDirection === "asc"
-                          ? "border-b-[#161616]"
-                          : "border-b-[#B7A6C6]"
-                      }`}
-                    ></span>
-                    <span
-                      className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] ${
-                        sortField === "totalRewards" && sortDirection === "desc"
-                          ? "border-t-[#161616]"
-                          : "border-t-[#B7A6C6]"
-                      }`}
-                    ></span>
-                  </div>
-                </th>
-                <th
-                  className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center cursor-[var(--pointer-hand-dark)] select-none"
-                  onClick={() => handleSort("totalSold")}
-                >
-                  <Tooltip>
-                    <TooltipTrigger className="flex items-center gap-1">
-                      <span className="w-3 h-3 inline-block shrink-0 relative top-[1px] bg-[#7C71C3] [mask:url('/res/images/info.svg')] [mask-size:contain] [mask-repeat:no-repeat] [mask-position:center]" />
-                      <span className="whitespace-nowrap">Total Sold Amount</span>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-[#2C2749] text-white text-xs py-1.5 px-2 rounded-md" side="top">
-                      Total sold amount
-                    </TooltipContent>
-                  </Tooltip>
-                  <div className="hidden lg:flex flex-col items-center gap-0.5">
-                    <span
-                      className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] ${
-                        sortField === "totalSold" && sortDirection === "asc"
-                          ? "border-b-[#161616]"
-                          : "border-b-[#B7A6C6]"
-                      }`}
-                    ></span>
-                    <span
-                      className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] ${
-                        sortField === "totalSold" && sortDirection === "desc"
-                          ? "border-t-[#161616]"
-                          : "border-t-[#B7A6C6]"
-                      }`}
-                    ></span>
-                  </div>
-                </th>
-                <th
-                  className="flex items-center justify-between gap-2 lg:gap-3 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center cursor-[var(--pointer-hand-dark)] select-none"
-                  onClick={() => handleSort("selfStake")}
-                >
-                  <Tooltip>
-                    <TooltipTrigger className="flex items-center gap-1">
-                      <span className="w-3 h-3 inline-block shrink-0 relative top-[1px] bg-[#7C71C3] [mask:url('/res/images/info.svg')] [mask-size:contain] [mask-repeat:no-repeat] [mask-position:center]" />
-                      <span className="whitespace-nowrap">Self Stake</span>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-[#2C2749] text-white text-xs py-1.5 px-2 rounded-md" side="top">
-                      Self stake
-                    </TooltipContent>
-                  </Tooltip>
-                  <div className="hidden lg:flex flex-col items-center gap-0.5">
-                    <span
-                      className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[7px] ${
-                        sortField === "selfStake" && sortDirection === "asc"
-                          ? "border-b-[#161616]"
-                          : "border-b-[#B7A6C6]"
-                      }`}
-                    ></span>
-                    <span
-                      className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[7px] ${
-                        sortField === "selfStake" && sortDirection === "desc"
-                          ? "border-t-[#161616]"
-                          : "border-t-[#B7A6C6]"
-                      }`}
-                    ></span>
-                  </div>
-                </th>
+                {sortableHeaders.map((header) => (
+                  <SortableHeader
+                    key={header.field}
+                    field={header.field}
+                    label={header.label}
+                    tooltip={header.tooltip}
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                  />
+                ))}
               </tr>
             </thead>
             <tbody className="w-full">
-              {sortedValidators.map((validator, index) => (
+              {filteredAndSortedValidators.map((validator, index) => (
                 <tr
-                  key={index + "validator-table"}
+                  key={validator.operator_address}
                   className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 py-0 my-2.5 lg:my-0 lg:py-1.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
-                  operator-address={validator.operator_address}
-                  id={validator.operator_address}
-                  data-validator-row
-                  data-validator-moniker={validator.moniker}
                   onClick={() => {
                     sessionStorage.setItem(
                       `validator_${validator.operator_address}`,
@@ -321,11 +246,13 @@ export default function ValidatorTable({
                 >
                   <td className="flex items-center justify-start gap-4.5 h-full lg:h-full sticky left-0 -ml-5 pl-5 z-10 bg-[#f5f5ff] lg:bg-transparent overflow-hidden">
                     {/* Name */}
-                    <div className="flex items-center relative rounded-full gap-2.5 aspect-square min-w-7.5 max-w-7.5">
+                    <div
+                      className={`flex items-center relative ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"} gap-2.5 aspect-square min-w-7.5 max-w-7.5`}
+                    >
                       <img
                         src={validator.temporary_image_uri}
                         alt={validator.moniker}
-                        className="w-full h-full rounded-full"
+                        className={`w-full h-full ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"}`}
                       />
                     </div>
                     <div className="text-nowrap -mt-0.5 w-[80%]">
@@ -352,8 +279,8 @@ export default function ValidatorTable({
                             validator.percentage_sold > 50
                               ? "text-[#b82200]"
                               : validator.percentage_sold > 25
-                              ? "text-[#ff6f43]"
-                              : "text-[#13a719]"
+                                ? "text-[#ff6f43]"
+                                : "text-[#13a719]"
                           }`}
                         >
                           {formatPercentage(validator.percentage_sold, 2)}%

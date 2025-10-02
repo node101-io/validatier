@@ -2,63 +2,59 @@
 
 import Image from "next/image";
 import "@/../public/css/index/intro.css";
-import { motion, useTransform } from "motion/react";
+import { motion, useTransform, MotionValue } from "motion/react";
 import { useScrollContext } from "@/components/scroll/scroll-provider";
 
 export default function Intro() {
-    const { scrollY } = useScrollContext();
-    // const y = scrollY ? useTransform(scrollY, (y) => {
-    //     if (y < 1000) return -2 * y;
+  const { scrollY } = useScrollContext();
+  const y = useTransform(
+    scrollY || new MotionValue(0),
+    [0, 500, 1000],
+    [0, -1000, -1000]
+  );
 
-    //     return -1000;
-    // }) : 0;
-    // does the same thing as the above: https://motion.dev/docs/react-use-transform#value-mapping
-	const y = scrollY
-	  ? useTransform(scrollY, [0, 500, 1000], [0, -1000, -1000])
-	  : 0;
-
-    return (
-        <motion.div
-            className="intro-main-wrapper"
-            id="intro-main-wrapper"
-            style={{ y }}
+  return (
+    <motion.div
+      className="intro-main-wrapper"
+      id="intro-main-wrapper"
+      style={{ y }}
+    >
+      <div className="intro-main-background-content">
+        <div className="animate-star-3d"></div>
+        <div className="animate-star orbit-1"></div>
+        <div className="animate-star orbit-2"></div>
+        <div className="animate-star orbit-3"></div>
+        <div className="animate-star orbit-4"></div>
+        <div className="animate-star orbit-5"></div>
+        <div className="animate-star orbit-6"></div>
+        <div
+          style={{
+            position: "relative",
+            width: "1440px",
+            height: "525px",
+            aspectRatio: "1440 / 525",
+          }}
         >
-            <div className="intro-main-background-content">
-                <div className="animate-star-3d"></div>
-                <div className="animate-star orbit-1"></div>
-                <div className="animate-star orbit-2"></div>
-                <div className="animate-star orbit-3"></div>
-                <div className="animate-star orbit-4"></div>
-                <div className="animate-star orbit-5"></div>
-                <div className="animate-star orbit-6"></div>
-                <div
-                    style={{
-                        position: "relative",
-                        width: "1440px",
-                        height: "525px",
-                        aspectRatio: "1440 / 525",
-                    }}
-                >
-                    <Image
-                        src="/res/images/intro.svg"
-                        alt="intro"
-                        fill
-                        style={{ objectFit: "cover", objectPosition: "center" }}
-                        priority
-                    />
-                </div>
-            </div>
-            <div className="intro-main-wrapper-title-wrapper">
-                <div>THE VALIDATOR'S</div>
-                <div>GUIDE TO THE GALAXY</div>
-            </div>
-            <div className="intro-main-wrapper-description-wrapper">
-                <div>
-                    node101 | CosmosHub Validatier showcases the validators'
-                    behaviors,
-                </div>
-                <div>contributions, and impact within the Cosmos ecosystem</div>
-            </div>
-        </motion.div>
-    );
+          <Image
+            src="/res/images/intro.svg"
+            alt="intro"
+            fill
+            style={{ objectFit: "cover", objectPosition: "center" }}
+            priority
+          />
+        </div>
+      </div>
+      <div className="intro-main-wrapper-title-wrapper">
+        <div>THE VALIDATOR&apos;S</div>
+        <div>GUIDE TO THE GALAXY</div>
+      </div>
+      <div className="intro-main-wrapper-description-wrapper">
+        <div>
+          node101 | CosmosHub Validatier showcases the validators&apos;
+          behaviors,
+        </div>
+        <div>contributions, and impact within the Cosmos ecosystem</div>
+      </div>
+    </motion.div>
+  );
 }

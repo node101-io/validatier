@@ -10,16 +10,16 @@
   --validator-graph-wrapper-small-min-width: 80px;
   --validator-graph-wrapper-small-max-width: 80px;
   --validator-graph-wrapper-small-height: 90px;
-  
+
   --each-data-point-max-width: 10px;
   --each-data-point-min-width: 10px;
   --each-data-point-margin-bottom: -5px;
-  --each-data-point-z-index: 32; 
-  
+  --each-data-point-z-index: 32;
+
   --each-data-line-height: 2px;
   --each-data-line-z-index: 32;
   --each-data-line-transition-duration: 0.25s;
-  
+
   --horizontal-axis-label-font-size: 16px;
   --horizontal-axis-label-font-weight: 400;
   --horizontal-axis-label-transform-rotate-deg: 0deg;
@@ -27,12 +27,12 @@
   --horizontal-axis-label-width: 20px;
   --horizontal-axis-label-bottom: -30px;
   --horizontal-axis-label-z-index: 50;
-  
+
   --horizontal-axis-label-display: block;
   --horizontal-axis-label-compact-display: none;
-  
+
   --each-data-point-horizontal-label-hovered-font-weight: 800;
-  
+
   --vertical-axis-labels-width: 100px;
   --vertical-axis-labels-width-int: 100;
   --vertical-axis-labels-border-right-size: 0px;
@@ -44,7 +44,7 @@
   --each-vertical-label-margin-right: auto;
   --each-vertical-label-width: 40px;
   --each-vertical-label-color: rgba(124, 112, 195, 1);
-  
+
   --graph-range-paint-bar-opacity: 0.1;
   --each-data-indicator-vertical-line-border-right-size: 1px;
   --each-data-indicator-vertical-line-border-color: rgba(124, 112, 195, 1);
@@ -61,9 +61,10 @@
 .validator-graph-wrapper {
   width: calc(100% - (2 * var(--validator-graph-wrapper-horizontal-padding)));
   height: var(--validator-graph-wrapper-height);
-  transition: all var(--validator-graph-wrapper-transition-duration) ease-in-out 0s;
+  transition: all var(--validator-graph-wrapper-transition-duration) ease-in-out
+    0s;
   padding: 0 var(--validator-graph-wrapper-horizontal-padding);
-  padding-bottom: var(--validator-graph-wrapper-bottom-padding); 
+  padding-bottom: var(--validator-graph-wrapper-bottom-padding);
   overflow: hidden;
   display: flex;
   user-select: none;
@@ -92,8 +93,9 @@
   justify-content: center;
 }
 
-.each-graph-column-wrapper::before, .column-wrapper-summary-subplot::after {
-  content: '';
+.each-graph-column-wrapper::before,
+.column-wrapper-summary-subplot::after {
+  content: "";
   width: 100%;
   background-color: var(--body-main-wrapper-background);
   position: absolute;
@@ -102,7 +104,9 @@
   z-index: 35;
 }
 
-.each-graph-column-wrapper-inactivity-indicator, .each-graph-column-wrapper-inactivity-indicator::after, .each-graph-column-wrapper-inactivity-indicator div:nth-child(1):after {
+.each-graph-column-wrapper-inactivity-indicator,
+.each-graph-column-wrapper-inactivity-indicator::after,
+.each-graph-column-wrapper-inactivity-indicator div:nth-child(1):after {
   background-color: rgb(255, 206, 199) !important;
 }
 
@@ -114,7 +118,7 @@
 }
 
 .column-wrapper-summary-subplot div:nth-child(1):after {
-  content: '';
+  content: "";
   width: 100%;
   position: absolute;
   left: 0;
@@ -166,7 +170,8 @@
   font-weight: var(--horizontal-axis-label-font-weight);
   transform-origin: center;
   transform: rotateZ(var(--horizontal-axis-label-transform-rotate-deg));
-  transition: font-weight var(--horizontal-axis-label-transition-duration) ease 0s;
+  transition: font-weight var(--horizontal-axis-label-transition-duration) ease
+    0s;
   position: absolute;
   bottom: var(--horizontal-axis-label-bottom);
   z-index: var(--horizontal-axis-label-z-index);
@@ -202,7 +207,8 @@
   text-wrap: nowrap;
   align-items: start;
   margin-top: 0px;
-  border-right: var(--vertical-axis-labels-border-right-size) solid var(--color-triangle-unselected);
+  border-right: var(--vertical-axis-labels-border-right-size) solid
+    var(--color-triangle-unselected);
   padding: 0;
   padding-bottom: 20px;
 }
@@ -247,13 +253,18 @@
 
 .each-data-indicator-vertical-line {
   width: 0;
-  border-right: var(--each-data-indicator-vertical-line-border-right-size) dashed var(--each-data-indicator-vertical-line-border-color);
-  height: calc(var(--each-data-indicator-vertical-line-height) - var(--each-data-indicator-vertical-line-top) + 30px);
+  border-right: var(--each-data-indicator-vertical-line-border-right-size)
+    dashed var(--each-data-indicator-vertical-line-border-color);
+  height: calc(
+    var(--each-data-indicator-vertical-line-height) -
+      var(--each-data-indicator-vertical-line-top) + 30px
+  );
   top: var(--each-data-indicator-vertical-line-top);
   left: var(--each-data-indicator-vertical-line-left);
   position: absolute;
   opacity: 0;
-  transition: all var(--each-data-indicator-vertical-line-transition-duration) ease 0s;
+  transition: all var(--each-data-indicator-vertical-line-transition-duration)
+    ease 0s;
   z-index: 32;
 }
 
@@ -271,11 +282,17 @@
 }
 
 .subplot-seperator {
-  width: calc(100% - var(--vertical-axis-labels-width) - (2 * var(--validator-graph-wrapper-horizontal-padding)));
+  width: calc(
+    100% - var(--vertical-axis-labels-width) -
+      (2 * var(--validator-graph-wrapper-horizontal-padding))
+  );
   border-bottom: 1px solid var(--graph-horizontal-axis-color);
   position: absolute;
   background-color: var(--body-main-wrapper-background);
-  left: calc(var(--vertical-axis-labels-width) + var(--validator-graph-wrapper-horizontal-padding));
+  left: calc(
+    var(--vertical-axis-labels-width) +
+      var(--validator-graph-wrapper-horizontal-padding)
+  );
 }
 
 @media only screen and (max-width: 1000px) {

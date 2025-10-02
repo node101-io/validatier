@@ -18,7 +18,7 @@
 
 //   for (let i = 0; i < inactivityIntervals.length; i += 2) {
 //     const eachDetailText = `${formatTimestampToDate(inactivityIntervals[i])} - ${formatTimestampToDate(inactivityIntervals[i + 1] || '')}`
-  
+
 //     const eachDetailWrapper = document.createElement('div');
 //     eachDetailWrapper.classList.add('each-inactivity-line-display-content');
 //     eachDetailWrapper.innerHTML = eachDetailText;

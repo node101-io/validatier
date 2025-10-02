@@ -1,146 +1,145 @@
 @import "tailwindcss";
 
 :root {
-    /* POINTER */
-    --pointer-default-dark: url("/res/pointers/default-dark.svg") 4 0, auto;
-    --pointer-hand-dark: url("/res/pointers/hand-dark.svg") 6 0, auto;
-    --pointer-hand-drag-dark: url("/res/pointers/hand-drag-dark.svg") 6 0, auto;
-    --pointer-hand-click-dark: url("/res/pointers/hand-click-dark.svg") 6 0,
-        auto;
+  /* POINTER */
+  --pointer-default-dark: url("/res/pointers/default-dark.svg") 4 0, auto;
+  --pointer-hand-dark: url("/res/pointers/hand-dark.svg") 6 0, auto;
+  --pointer-hand-drag-dark: url("/res/pointers/hand-drag-dark.svg") 6 0, auto;
+  --pointer-hand-click-dark: url("/res/pointers/hand-click-dark.svg") 6 0, auto;
 
-    /* FONT */
-    --website-main-font-size: 16px;
-    --website-main-font-family: "Darker Grotesque";
-    --website-main-font-weight: 500;
-    --website-master-background-color: rgb(250, 250, 250);
-    --website-master-line-height: 12px;
+  /* FONT */
+  --website-main-font-size: 16px;
+  --website-main-font-family: "Darker Grotesque";
+  --website-main-font-weight: 500;
+  --website-master-background-color: rgb(250, 250, 250);
+  --website-master-line-height: 12px;
 }
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html {
-    width: 100vw;
-    height: 100vh;
-    margin: 0;
-    padding: 0;
-    font-size: var(--website-main-font-size);
-    overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-size: var(--website-main-font-size);
+  overflow: hidden;
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    width: 100%;
-    font-family: var(--website-main-font-family);
-    background-color: rgb(232, 232, 254) !important;
-    font-weight: var(--website-main-font-weight);
-    background-color: var(--color-pale-white);
-    color: var(--color-pale-dark);
-    cursor: var(--pointer-default-dark);
-    overflow: hidden;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: var(--website-main-font-family);
+  background-color: rgb(232, 232, 254) !important;
+  font-weight: var(--website-main-font-weight);
+  background-color: var(--color-pale-white);
+  color: var(--color-pale-dark);
+  cursor: var(--pointer-default-dark);
+  overflow: hidden;
 }
 
 a {
-    color: var(--color-pale-black);
-    text-decoration: none;
+  color: var(--color-pale-black);
+  text-decoration: none;
 }
 
 input {
-    font-family: var(--website-main-font-family);
-    padding-bottom: 4px;
-    line-height: 4px;
+  font-family: var(--website-main-font-family);
+  padding-bottom: 4px;
+  line-height: 4px;
 }
 
 button {
-    font-family: var(--website-main-font-family);
+  font-family: var(--website-main-font-family);
 }
 
 input {
-    outline: none;
-    background-color: var(--color-pale-white);
+  outline: none;
+  background-color: var(--color-pale-white);
 }
 
 /* Navbar */
 .degrade-navbar {
-    content: "";
-    width: 100%;
-    background: linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 1) 0%,
-        rgba(255, 255, 255, 1) 92%,
-        rgba(255, 255, 255, 0) 100%
-    );
+  content: "";
+  width: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 1) 92%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 /* Footer */
 .conic-gradient-bg {
-    background: conic-gradient(
-        from -33.92deg at 75.63% 116.37%,
-        #26004c -16.24deg,
-        #609aff 47.22deg,
-        #c0c0f2 214.21deg,
-        #26004c 343.76deg,
-        #609aff 407.22deg
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+  background: conic-gradient(
+    from -33.92deg at 75.63% 116.37%,
+    #26004c -16.24deg,
+    #609aff 47.22deg,
+    #c0c0f2 214.21deg,
+    #26004c 343.76deg,
+    #609aff 407.22deg
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .footer-svg-wrapper svg {
-    width: 100%;
-    position: absolute;
-    left: -46px;
-    bottom: 0;
-    z-index: 0;
-    display: block;
+  width: 100%;
+  position: absolute;
+  left: -46px;
+  bottom: 0;
+  z-index: 0;
+  display: block;
 }
 
 .footer-svg-wrapper::after {
-    content: "";
-    width: 100%;
-    height: 50px;
-    position: absolute;
-    left: 0;
-    bottom: 250px;
-    background: linear-gradient(
-        0deg,
-        rgba(255, 255, 255, 0) 1%,
-        rgba(255, 255, 255, 1) 100%
-    );
+  content: "";
+  width: 100%;
+  height: 50px;
+  position: absolute;
+  left: 0;
+  bottom: 250px;
+  background: linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0) 1%,
+    rgba(255, 255, 255, 1) 100%
+  );
 }
 
 /* Validators Table */
 @keyframes scrollText {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-100%);
-    }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }
 
 .validators-table-validator-name {
-    animation: auto ease 0s 1 normal none running none;
-    display: inline-block;
-    will-change: transform;
+  animation: auto ease 0s 1 normal none running none;
+  display: inline-block;
+  will-change: transform;
 }
 
 .validators-table-validator-name.can-scroll:hover,
 .validator-moniker-text.can-scroll:hover {
-    animation: scrollText 10s linear infinite !important;
+  animation: scrollText 10s linear infinite !important;
 }
 
 @media (max-width: 768px) {
-    .degrade-navbar {
-        background: linear-gradient(
-            180deg,
-            rgba(255, 255, 255, 1) 0%,
-            rgba(255, 255, 255, 1) 90%,
-            rgba(255, 255, 255, 0) 100%
-        );
-    }
+  .degrade-navbar {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 255, 255, 1) 90%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
 }
