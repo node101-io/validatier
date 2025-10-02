@@ -1,5 +1,4 @@
 import FooterSVG from "@/style/footer-svg";
-import { LogoSVG } from "@/style/logo-svg";
 
 export default function Footer() {
   return (
@@ -26,9 +25,6 @@ export default function Footer() {
         </div>
       </div>
       <div className="flex items-end gap-4 -mt-2 sm:-mt-6 relative">
-        <div className="h-[36px] sm:h-[72px] lg:h-[84px] xl:h-[110px] aspect-24/15 mb-0.5 lg:mb-1 xl:mb-0">
-          <LogoSVG fill="#361661" className="w-full h-full" />
-        </div>
         <div className="text-[56px]/[48px] sm:text-[120px]/[96px] lg:text-[140px]/[120px] xl:text-[180px]/[140px] font-[800] conic-gradient-bg">
           VALIDATIER
         </div>

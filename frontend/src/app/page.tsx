@@ -128,6 +128,7 @@ export default async function Home() {
     reward: v.reward,
     self_stake: v.self_stake,
     commission: Number(v.commission_rate) * 100,
+    total_withdraw: v.total_withdraw,
   }));
 
   return (

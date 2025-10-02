@@ -172,9 +172,9 @@ export default async function ValidatorPage({
                 {/* Validator Info */}
                 <div className="flex items-center gap-2.5">
                   <img
-                    src={validator.temporary_image_uri}
+                    src={validator.temporary_image_uri || "/res/images/default_validator_photo.svg"}
                     alt={validator.moniker}
-                    className={`w-10 h-10 ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"}`}
+                    className={`size-10 ${validator.temporary_image_uri ? "rounded-full" : "rounded-none"}`}
                   />
                   <div>
                     <div className="text-xl font-semibold text-[#250054]">

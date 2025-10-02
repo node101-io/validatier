@@ -142,7 +142,7 @@ export default function DateRangePicker({
   return (
     <div
       ref={containerRef}
-      className={`overflow-visible relative z-20 rounded-xl border-1 ${containerClasses} ${
+      className={`overflow-hidden relative z-20 rounded-xl border-1 ${containerClasses} ${
         isOpen ? "shadow-xl lg:dp-trigger-grow" : ""
       } ${variant === "light" ? "h-8 w-full sm:h-full" : "h-full w-full"}`}
     >
@@ -163,11 +163,11 @@ export default function DateRangePicker({
           <CalendarSVG stroke={iconStroke} />
         </span>
         {isOpen && (
-          <span className="hidden lg:block whitespace-nowrap text-[16px] font-medium opacity-90">
+          <span className="hidden lg:block whitespace-nowrap text-xl font-medium opacity-90 mb-1">
             {selectedRange}
           </span>
         )}
-        <span className="hidden lg:flex gap-0.5 -mt-0.5 w-fit overflow-hidden">
+        <span className="hidden lg:flex gap-0.5 -mt-0.5 w-fit overflow-hidden mx-auto">
           <span className="inline text-ellipsis">{formatDate(startDate)}</span>
           <span>-</span>
           <span className="inline text-ellipsis">{formatDate(endDate)}</span>
@@ -189,21 +189,18 @@ export default function DateRangePicker({
             onClick={() => setIsOpen(false)}
           />
           <div
-            className="fixed lg:static right-5.25 lg:top-auto z-[200] lg:w/full lg:max-w-none rounded-2xl lg:rounded-xl border-1 border-[#bebee7] lg:border-0 bg-[#f5f5ff] pt-3 px-3 pb-3 lg:pt-2 lg:px-3 lg:pb-3 ml-auto dp-animate-in"
+            className="fixed lg:static right-5.25 lg:top-auto z-[200] lg:w-full lg:max-w-none border-1 border-[#bebee7] lg:border-0 bg-[#f5f5ff] pt-3 px-3 pb-3 lg:pt-2 lg:px-3 lg:pb-3 ml-auto dp-animate-in"
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
-              <div className="w-full lg:w-44 shrink-0">
-                <div className="text-sm mb-2 font-medium opacity-80 !text-[#7c70c3]">
-                  {selectedRange}
-                </div>
+              <div className="w-full lg:w-44 shrink-0 py-2">
                 <ul className="flex flex-col gap-1">
                   {predefinedRanges.map((range) => (
                     <li key={range.label}>
                       <button
                         type="button"
                         onClick={() => handleRangeSelect(range)}
-                        className={`w-full text-left !text-[#7c70c3] rounded-xl px-3 py-2 cursor-pointer transition-colors ${
+                        className={`w-full text-left !text-[#161616] text-lg rounded-xl px-3 pt-1.5 pb-2.5 cursor-pointer transition-colors ${
                           selectedRange === range.label
                             ? "bg-[#e8e8ff]"
                             : "hover:bg-[#ececff]"
@@ -246,6 +243,7 @@ export default function DateRangePicker({
                     }
                   }}
                   inline
+                  calendarStartDay={1}
                   showMonthDropdown
                   showYearDropdown
                   dropdownMode="select"

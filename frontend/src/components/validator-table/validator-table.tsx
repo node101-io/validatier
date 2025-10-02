@@ -8,6 +8,7 @@ import {
   formatPercentage,
 } from "@/utils/format-numbers";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useEffect, useState, useMemo } from "react";
 import {
   Tooltip,
@@ -41,17 +42,17 @@ const sortableHeaders = [
   },
   {
     field: "avgDelegation" as const,
-    label: "Avg Delegation",
+    label: "Avg. Delegation",
     tooltip: "Average delegation",
   },
   {
     field: "totalRewards" as const,
-    label: "Total Rewards",
+    label: "Rewards",
     tooltip: "Total rewards",
   },
   {
     field: "totalSold" as const,
-    label: "Total Sold Amount",
+    label: "Sold Amount",
     tooltip: "Total sold amount",
   },
   {
@@ -75,7 +76,7 @@ const SortableHeader = ({
         className="flex items-center gap-1 cursor-pointer"
         onClick={() => onSort(field)}
       >
-        <span className="size-[14px] shrink-0 bg-[url('/res/images/info.svg')] bg-no-repeat bg-center bg-cover" />
+        <Image src="/res/images/info.svg" alt="Info" width={14} height={14} />
         <span className="whitespace-nowrap mb-1 font-medium">{label}</span>
       </TooltipTrigger>
       <TooltipContent
@@ -130,17 +131,9 @@ export default function ValidatorTable({
     }
   };
 
-  // Filter and sort validators using useMemo for better performance
-  const filteredAndSortedValidators = useMemo(() => {
-    // First filter by search query
-    const filtered = searchQuery
-      ? validators.filter((validator) =>
-          validator.moniker.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-      : validators;
-
-    // Then sort
-    return [...filtered].sort((a, b) => {
+  // Sort validators first to establish the original ranking
+  const sortedValidators = useMemo(() => {
+    return [...validators].sort((a, b) => {
       let aValue;
       let bValue;
 
@@ -177,7 +170,26 @@ export default function ValidatorTable({
       if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
-  }, [validators, searchQuery, sortField, sortDirection]);
+  }, [validators, sortField, sortDirection]);
+
+  // Create a map of validator rankings for O(1) lookup
+  const validatorRankMap = useMemo(() => {
+    const map = new Map<string, number>();
+    sortedValidators.forEach((validator, index) => {
+      map.set(validator.operator_address, index + 1);
+    });
+    return map;
+  }, [sortedValidators]);
+
+  // Filter and sort validators using useMemo for better performance
+  const filteredAndSortedValidators = useMemo(() => {
+    // Filter by search query
+    return searchQuery
+      ? sortedValidators.filter((validator) =>
+          validator.moniker.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : sortedValidators;
+  }, [sortedValidators, searchQuery]);
 
   useEffect(() => {
     const update = () => {
@@ -214,7 +226,7 @@ export default function ValidatorTable({
         <div className="pt-3 pb-4 overflow-x-auto lg:overflow-visible">
           <table className="w-full min-w-[900px] table-fixed border-collapse">
             <thead>
-              <tr className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] sm:grid-cols-[210px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 mb-1">
+              <tr className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] sm:grid-cols-[210px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-3 mb-1">
                 <th className="flex mb-1 items-center sm:w-full justify-start text-left text-[#7c70c3] font-semibold gap-0 text-base lg:text-lg whitespace-nowrap sticky left-0 -ml-5 pl-5 z-20 bg-[#f5f5ff] lg:bg-transparent select-none">
                   Name
                 </th>
@@ -254,6 +266,15 @@ export default function ValidatorTable({
                         alt={validator.moniker}
                         className={`w-full h-full ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"}`}
                       />
+                      {(() => {
+                        const rank = validatorRankMap.get(validator.operator_address) || 0;
+                        const fontSize = rank < 10 ? "text-[12px]" : rank < 100 ? "text-[10px]" : "text-[9px]";
+                        return (
+                          <div className={`absolute -bottom-1.5 -left-1.5 bg-[#250055] text-white font-medium rounded-full flex items-center justify-center border-1 border-white w-5 h-5 pb-px ${fontSize}`}>
+                            {rank}
+                          </div>
+                        );
+                      })()}
                     </div>
                     <div className="text-nowrap -mt-0.5 w-[80%]">
                       <div className="flex text-base md:text-xl gap-2.5 text-[#49306f]">
@@ -299,60 +320,65 @@ export default function ValidatorTable({
                     <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
                       {validator.average_total_stake &&
                       validator.average_total_stake > 0
-                        ? formatAtom(validator.average_total_stake, 2)
+                        ? formatAtom(validator.average_total_stake, 1)
                         : "0"}{" "}
                       ATOM
                     </div>
                     <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
-                      {validator.average_total_stake
-                        ? `$${formatAtomUSD(
-                            validator.average_total_stake,
-                            price,
-                            2
-                          )}`
-                        : "$0"}
+                      {`$${validator.average_total_stake && validator.average_total_stake > 0 ? formatAtomUSD(validator.average_total_stake, price, 1) : 0}`}
                     </div>
                   </td>
                   <td className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1">
                     {/* Total Rewards */}
                     <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
                       {validator.reward && validator.reward > 0
-                        ? formatAtom(validator.reward, 2)
+                        ? formatAtom(validator.reward, 1)
                         : "0"}{" "}
                       ATOM
                     </div>
                     <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
-                      {validator.reward
-                        ? `$${formatAtomUSD(validator.reward, price)}`
-                        : "$0"}
+                      {`$${validator.reward && validator.reward > 0 ? formatAtomUSD(validator.reward, price, 1) : 0}`}
                     </div>
                   </td>
                   <td className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1">
                     {/* Total Sold Amount */}
-                    <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
+                    <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5 items-center">
                       {validator.sold && validator.sold > 0
-                        ? formatAtom(validator.sold, 2)
+                        ? formatAtom(validator.sold, 1)
                         : "0"}{" "}
                       ATOM
+                      {validator.total_withdraw !== undefined &&
+                        validator.sold !== undefined &&
+                        validator.total_withdraw < validator.sold && (
+                          <Tooltip>
+                            <TooltipTrigger className="flex items-center cursor-pointer ml-1">
+                              <Image src="/res/images/warning.svg" alt="Warning" width={14} height={14} className="mt-0.5"/>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              className="bg-[#2C2749] text-white text-base pt-1 pb-2 px-2 rounded-md cursor-default mb-1"
+                              side="top"
+                            >
+                              The amount sold exceeds the total rewards<br />
+                              because the validator also sold tokens received<br />
+                              before the queried time interval.
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
                     </div>
                     <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
-                      {validator.sold
-                        ? `$${formatAtomUSD(validator.sold, price)}`
-                        : "$0"}
+                      {`$${validator.sold && validator.sold > 0 ? formatAtomUSD(validator.sold, price, 1) : 0}`}
                     </div>
                   </td>
                   <td className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1">
                     {/* Self Stake */}
                     <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
                       {validator.self_stake && validator.self_stake > 0
-                        ? formatAtom(validator.self_stake, 2)
+                        ? formatAtom(validator.self_stake, 1)
                         : "0"}{" "}
                       ATOM
                     </div>
                     <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
-                      {validator.self_stake
-                        ? `$${formatAtomUSD(validator.self_stake, price)}`
-                        : "$0"}
+                      {`$${validator.self_stake && validator.self_stake > 0 ? formatAtomUSD(validator.self_stake, price, 1) : 0}`}
                     </div>
                   </td>
                 </tr>

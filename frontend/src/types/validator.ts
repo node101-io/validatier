@@ -5,6 +5,7 @@ export default interface Validator {
   operator_address: string;
   percentage_sold?: number;
   sold?: number;
+  total_withdraw?: number;
   average_total_stake?: number;
   reward?: number;
   self_stake?: number;

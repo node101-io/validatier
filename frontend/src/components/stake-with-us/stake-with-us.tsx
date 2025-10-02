@@ -7,7 +7,7 @@ export default function StakeWithUs() {
         CONTRIBUTIONS TO INTERCHAIN
       </div>
       <a
-        className="inline-flex items-center justify-center py-2 px-5 sm:py-2.5 sm:px-6 pb-3 bg-[#619bff] !text-[#fafafa] rounded-2xl text-base sm:text-xl font-semibold cursor-[var(--pointer-hand-dark)] transition-all hover:scale-105 duration-300 ease"
+        className="inline-flex items-center justify-center pt-1 pb-2 px-5 sm:px-6 bg-[#619bff] !text-[#fafafa] rounded-2xl text-base sm:text-xl font-semibold cursor-[var(--pointer-hand-dark)] transition-all hover:scale-103 active:scale-100 duration-300 ease"
         href="https://wallet.keplr.app/chains/cosmos-hub?modal=staking&chain=cosmoshub-4&validator_address=cosmosvaloper1lrzxwu4dmy8030waevcpft7rpxjjz26cpzvumd&step_id=2"
       >
         Stake With Us
