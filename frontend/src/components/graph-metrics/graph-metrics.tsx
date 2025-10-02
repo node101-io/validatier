@@ -324,7 +324,8 @@ export default function GraphMetrics({
 
   // Normalize series data to have the same length
   const normalizedFirstSeries = useMemo(() => {
-    if (!firstSeries?.[0] || typeof firstSeries[0] === "number") return firstSeries;
+    if (!firstSeries?.[0] || typeof firstSeries[0] === "number")
+      return firstSeries;
     const maxLen = dynamicCategories.length;
     const currentLen = firstSeries[0].data?.length ?? 0;
     if (currentLen >= maxLen) return firstSeries;
@@ -334,7 +335,8 @@ export default function GraphMetrics({
   }, [firstSeries, dynamicCategories.length]);
 
   const normalizedSecondSeries = useMemo(() => {
-    if (!secondSeries?.[0] || typeof secondSeries[0] === "number") return secondSeries;
+    if (!secondSeries?.[0] || typeof secondSeries[0] === "number")
+      return secondSeries;
     const maxLen = dynamicCategories.length;
     const currentLen = secondSeries[0].data?.length ?? 0;
     if (currentLen >= maxLen) return secondSeries;
@@ -344,7 +346,8 @@ export default function GraphMetrics({
   }, [secondSeries, dynamicCategories.length]);
 
   const normalizedThirdSeries = useMemo(() => {
-    if (!thirdSeries?.[0] || typeof thirdSeries[0] === "number") return thirdSeries;
+    if (!thirdSeries?.[0] || typeof thirdSeries[0] === "number")
+      return thirdSeries;
     const maxLen = dynamicCategories.length;
     const currentLen = thirdSeries[0].data?.length ?? 0;
     if (currentLen >= maxLen) return thirdSeries;

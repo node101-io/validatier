@@ -14,10 +14,10 @@ export default function Intro() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
+
     checkMobile();
     window.addEventListener("resize", checkMobile);
-    
+
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
@@ -63,9 +63,7 @@ export default function Intro() {
         <div>GUIDE TO THE GALAXY</div>
       </div>
       <div className="intro-main-wrapper-description-wrapper">
-        <div>
-          Validatier showcases the validators&apos;behaviors,
-        </div>
+        <div>Validatier showcases the validators&apos;behaviors,</div>
         <div>contributions, and impact within the Cosmos ecosystem</div>
       </div>
     </motion.div>

@@ -225,16 +225,18 @@ export default function DateRangePicker({
                       // Calculate the difference in days
                       const diffInMs = end.getTime() - start.getTime();
                       const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
-                      
+
                       // Minimum 90 days (3 months) required
                       if (diffInDays < 90) {
                         // Reset the selection if less than 90 days
                         setStartDate(null);
                         setEndDate(null);
-                        alert("Please select a date range of at least 3 months (90 days).");
+                        alert(
+                          "Please select a date range of at least 3 months (90 days)."
+                        );
                         return;
                       }
-                      
+
                       setCookie("selectedDateBottom", formatForCookie(start));
                       setCookie("selectedDateTop", formatForCookie(end));
                       // Set custom interval to trigger dynamic data generation
