@@ -575,6 +575,6 @@ compositeEventBlockSchema.statics.removeDuplicates = function (
 };
 
 
-const CompositeEventBlock = mongoose.model<CompositeEventBlockInterface, CompositeEventBlockModel>('CompositeEventBlocks', compositeEventBlockSchema);
+const CompositeEventBlock = mongoose.models.CompositeEventBlocks as CompositeEventBlockModel || mongoose.model<CompositeEventBlockInterface, CompositeEventBlockModel>('CompositeEventBlocks', compositeEventBlockSchema);
 
 export default CompositeEventBlock;

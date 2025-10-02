@@ -150,6 +150,6 @@ PriceSchema.statics.getPriceGraphData = function (
     .catch(err => callback(err, null))
 }
 
-const Price = mongoose.model<PriceInterface, PriceModel>('Price', PriceSchema);
+const Price = mongoose.models.Price as PriceModel || mongoose.model<PriceInterface, PriceModel>('Price', PriceSchema);
 
 export default Price;
