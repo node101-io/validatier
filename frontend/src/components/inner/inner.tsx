@@ -244,6 +244,7 @@ export default function Inner({
           },
         ]}
         metrics={metrics}
+        price={price}
       />
       <ValidatorLeaderboards
         validators={validators}

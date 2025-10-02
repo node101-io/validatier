@@ -5,6 +5,8 @@ import CompositeEventBlock, {
     ValidatorRecordInterface,
 } from "../CompositeEventBlock/CompositeEventBlock.js";
 import Chain, { ChainInterface } from "../Chain/Chain.js";
+import Cache, { CacheInterface } from "../Cache/Cache.js";
+import Price from "../Price/Price.js";
 
 import { isOperatorAddressValid } from "../../utils/validationFunctions.js";
 import { getCsvExportData } from "./functions/getCsvExportData.js";
@@ -17,6 +19,10 @@ import {
     getPercentageSold,
     getPercentageSoldWithoutRounding,
 } from "./functions/getPercentageSold.js";
+import {
+    getFormattedValidatorPageData,
+    FormattedValidatorPageData,
+} from "./functions/getFormattedValidatorPageData.js";
 
 export interface GraphDataInterface {
     _id: {
@@ -157,6 +163,8 @@ export interface ValidatorModel extends Model<ValidatorInterface> {
     getValidatorByOperatorAddress: (
         body: {
             operator_address: string;
+            bottom_timestamp?: number;
+            top_timestamp?: number;
         },
         callback: (
             err: string | null,
@@ -289,6 +297,19 @@ export interface ValidatorModel extends Model<ValidatorInterface> {
         callback: (
             err: string | null,
             data: SingleValidatorGraphDataInterface | null
+        ) => any
+    ) => any;
+    getFormattedValidatorPageData: (
+        body: {
+            operator_address: string;
+            bottom_timestamp: number;
+            top_timestamp: number;
+            chain_identifier: string;
+            interval: string;
+        },
+        callback: (
+            err: string | null,
+            data: FormattedValidatorPageData | null
         ) => any
     ) => any;
 }
@@ -521,21 +542,21 @@ validatorSchema.statics.getValidatorByOperatorAddress = function (
     body: Parameters<ValidatorModel["getValidatorByOperatorAddress"]>[0],
     callback: Parameters<ValidatorModel["getValidatorByOperatorAddress"]>[1]
 ) {
-    const { operator_address } = body;
+    const { operator_address, bottom_timestamp, top_timestamp } = body;
 
     Validator.findOne({ operator_address })
         .lean()
         .then((validator) => {
             if (!validator) return callback("bad_request", null);
 
-            const top_timestamp = Date.now();
-            const bottom_timestamp = top_timestamp - 365 * 86400 * 1000;
+            const final_top_timestamp = top_timestamp ?? Date.now();
+            const final_bottom_timestamp = bottom_timestamp ?? (final_top_timestamp - 365 * 86400 * 1000);
 
             CompositeEventBlock.getPeriodicDataForValidatorSet(
                 {
                     chain_identifier: validator.chain_identifier,
-                    bottom_timestamp: bottom_timestamp - 86_400_000,
-                    top_timestamp: top_timestamp,
+                    bottom_timestamp: final_bottom_timestamp - 86_400_000,
+                    top_timestamp: final_top_timestamp,
                 },
                 (err, validatorRecordMapping) => {
                     if (err) return callback("bad_request", null);
@@ -1274,6 +1295,145 @@ validatorSchema.statics.getValidatorGraphData = function (
             })
         )
         .catch((err) => callback(err, null));
+};
+
+validatorSchema.statics.getFormattedValidatorPageData = function (
+    body: Parameters<ValidatorModel["getFormattedValidatorPageData"]>[0],
+    callback: Parameters<ValidatorModel["getFormattedValidatorPageData"]>[1]
+) {
+    const {
+        operator_address,
+        bottom_timestamp,
+        top_timestamp,
+        chain_identifier,
+        interval,
+    } = body;
+
+    if (!operator_address || !bottom_timestamp || !top_timestamp || !chain_identifier || !interval)
+        return callback("format_error", null);
+
+    // Get all data in parallel
+    Promise.allSettled([
+        // Get validator info
+        new Promise<ValidatorWithMetricsInterface>((resolve, reject) => {
+            Validator.getValidatorByOperatorAddress(
+                { 
+                    operator_address,
+                    bottom_timestamp,
+                    top_timestamp
+                },
+                (err, validator) => {
+                    if (err || !validator) return reject(err);
+                    resolve(validator);
+                }
+            );
+        }),
+        // Get validator graph data
+        new Promise<SingleValidatorGraphDataInterface>((resolve, reject) => {
+            Validator.getValidatorGraphData(
+                {
+                    operator_address,
+                    bottom_timestamp,
+                    top_timestamp,
+                    number_of_columns: 90,
+                },
+                (err, data) => {
+                    if (err || !data) return reject(err);
+                    resolve(data);
+                }
+            );
+        }),
+        // Get price data
+        new Promise<number[]>((resolve, reject) => {
+            Price.getPriceGraphData(
+                {
+                    bottom_timestamp,
+                    top_timestamp,
+                },
+                (err, priceData) => {
+                    if (err || !priceData) return reject(err);
+                    resolve(priceData);
+                }
+            );
+        }),
+        // Get cache for rankings
+        new Promise<CacheInterface | Omit<CacheInterface, "export" | "interval">>(
+            (resolve, reject) => {
+                // Check if custom range
+                const predefinedIntervals = ['all_time', 'last_90_days', 'last_180_days', 'last_365_days'];
+                const isCustomRange = !predefinedIntervals.includes(interval);
+                
+                if (isCustomRange) {
+                    // Generate fresh data for custom range
+                    Cache.generateCacheData(
+                        {
+                            chain_identifier,
+                            bottom_timestamp,
+                            top_timestamp,
+                        },
+                        (err, result) => {
+                            if (err || !result) return reject(err);
+                            resolve(result);
+                        }
+                    );
+                } else {
+                    // Use cached data for predefined intervals
+                    Cache.getCacheForChain(
+                        {
+                            chain_identifier,
+                            interval,
+                        },
+                        (err, result) => {
+                            if (err || !result) return reject(err);
+                            resolve(result[0]);
+                        }
+                    );
+                }
+            }
+        ),
+    ]).then((results) => {
+        const [
+            validatorResult,
+            graphDataResult,
+            priceDataResult,
+            cacheResult,
+        ] = results;
+
+        if (
+            validatorResult.status === "rejected" ||
+            graphDataResult.status === "rejected" ||
+            priceDataResult.status === "rejected" ||
+            cacheResult.status === "rejected"
+        ) {
+            return callback("bad_request", null);
+        }
+
+        const validator = validatorResult.value;
+        const graphData = graphDataResult.value;
+        const priceData = priceDataResult.value;
+        const cache = cacheResult.value;
+
+        // Build cummulativeActiveSet from cache
+        const cummulativeActiveSet = new Set<string>();
+        const daysDiff = Math.abs(top_timestamp - bottom_timestamp) / 86400000;
+        const threshold = daysDiff / 90;
+
+        for (const each of cache.cummulative_active_list) {
+            if (threshold <= each.count) {
+                cummulativeActiveSet.add(each._id);
+            }
+        }
+
+        const formattedData = getFormattedValidatorPageData(
+            validator,
+            graphData,
+            priceData,
+            cache.validators,
+            cummulativeActiveSet
+        );
+
+        return callback(null, formattedData);
+    });
 };
 
 const Validator =

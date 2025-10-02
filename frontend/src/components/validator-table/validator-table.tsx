@@ -43,22 +43,22 @@ const sortableHeaders = [
   {
     field: "avgDelegation" as const,
     label: "Avg. Delegation",
-    tooltip: "Average delegation",
+    tooltip: "Average total stake of the validator",
   },
   {
     field: "totalRewards" as const,
     label: "Rewards",
-    tooltip: "Total rewards",
+    tooltip: "Commission rewards + self stake rewards",
   },
   {
     field: "totalSold" as const,
     label: "Sold Amount",
-    tooltip: "Total sold amount",
+    tooltip: "Total transferred out from wallet (cummulative)",
   },
   {
     field: "selfStake" as const,
     label: "Self Stake",
-    tooltip: "Self stake",
+    tooltip: "Validator's own stake on itself",
   },
 ];
 
@@ -151,8 +151,8 @@ export default function ValidatorTable({
           bValue = b.average_total_stake ?? 0;
           break;
         case "totalRewards":
-          aValue = a.reward ?? 0;
-          bValue = b.reward ?? 0;
+          aValue = a.total_withdraw ?? 0;
+          bValue = b.total_withdraw ?? 0;
           break;
         case "totalSold":
           aValue = a.sold ?? 0;
@@ -226,7 +226,7 @@ export default function ValidatorTable({
         <div className="pt-3 pb-4 overflow-x-auto lg:overflow-visible">
           <table className="w-full min-w-[900px] table-fixed border-collapse">
             <thead>
-              <tr className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] sm:grid-cols-[210px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-3 mb-1">
+              <tr className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] sm:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-3 mb-1">
                 <th className="flex mb-1 items-center sm:w-full justify-start text-left text-[#7c70c3] font-semibold gap-0 text-base lg:text-lg whitespace-nowrap sticky left-0 -ml-5 pl-5 z-20 bg-[#f5f5ff] lg:bg-transparent select-none">
                   Name
                 </th>
@@ -249,10 +249,6 @@ export default function ValidatorTable({
                   key={validator.operator_address}
                   className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 py-0 my-2.5 lg:my-0 lg:py-1.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
                   onClick={() => {
-                    sessionStorage.setItem(
-                      `validator_${validator.operator_address}`,
-                      JSON.stringify(validator)
-                    );
                     router.push(`/validator/${validator.operator_address}`);
                   }}
                 >
@@ -267,10 +263,18 @@ export default function ValidatorTable({
                         className={`w-full h-full ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"}`}
                       />
                       {(() => {
-                        const rank = validatorRankMap.get(validator.operator_address) || 0;
-                        const fontSize = rank < 10 ? "text-[12px]" : rank < 100 ? "text-[10px]" : "text-[9px]";
+                        const rank =
+                          validatorRankMap.get(validator.operator_address) || 0;
+                        const fontSize =
+                          rank < 10
+                            ? "text-[12px]"
+                            : rank < 100
+                              ? "text-[10px]"
+                              : "text-[9px]";
                         return (
-                          <div className={`absolute -bottom-1.5 -left-1.5 bg-[#250055] text-white font-medium rounded-full flex items-center justify-center border-1 border-white w-5 h-5 pb-px ${fontSize}`}>
+                          <div
+                            className={`absolute -bottom-1.5 -left-1.5 bg-[#250055] text-white font-medium rounded-full flex items-center justify-center border-1 border-white w-5 h-5 pb-px ${fontSize}`}
+                          >
                             {rank}
                           </div>
                         );
@@ -331,13 +335,13 @@ export default function ValidatorTable({
                   <td className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1">
                     {/* Total Rewards */}
                     <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
-                      {validator.reward && validator.reward > 0
-                        ? formatAtom(validator.reward, 1)
+                      {validator.total_withdraw && validator.total_withdraw > 0
+                        ? formatAtom(validator.total_withdraw, 1)
                         : "0"}{" "}
                       ATOM
                     </div>
                     <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
-                      {`$${validator.reward && validator.reward > 0 ? formatAtomUSD(validator.reward, price, 1) : 0}`}
+                      {`$${validator.total_withdraw && validator.total_withdraw > 0 ? formatAtomUSD(validator.total_withdraw, price, 1) : 0}`}
                     </div>
                   </td>
                   <td className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1">
@@ -352,14 +356,22 @@ export default function ValidatorTable({
                         validator.total_withdraw < validator.sold && (
                           <Tooltip>
                             <TooltipTrigger className="flex items-center cursor-pointer ml-1">
-                              <Image src="/res/images/warning.svg" alt="Warning" width={14} height={14} className="mt-0.5"/>
+                              <Image
+                                src="/res/images/warning.svg"
+                                alt="Warning"
+                                width={14}
+                                height={14}
+                                className="mt-0.5"
+                              />
                             </TooltipTrigger>
                             <TooltipContent
                               className="bg-[#2C2749] text-white text-base pt-1 pb-2 px-2 rounded-md cursor-default mb-1"
                               side="top"
                             >
-                              The amount sold exceeds the total rewards<br />
-                              because the validator also sold tokens received<br />
+                              The amount sold exceeds the total rewards
+                              <br />
+                              because the validator also sold tokens received
+                              <br />
                               before the queried time interval.
                             </TooltipContent>
                           </Tooltip>

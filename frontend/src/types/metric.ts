@@ -2,7 +2,7 @@ export default interface Metric {
   id: string;
   color: string;
   title: string;
-  valueNative: string;
-  valueUsd?: string;
+  valueNative: number;
+  valueUsd?: number;
   percentageChange?: string;
 }

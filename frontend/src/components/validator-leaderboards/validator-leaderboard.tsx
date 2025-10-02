@@ -89,10 +89,6 @@ export default function ValidatorLeaderboard({
             className="flex items-center justify-between cursor-[var(--pointer-hand-dark)] py-2 px-3 lg:px-4 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out"
             operator-address={validator.operator_address}
             onClick={() => {
-              sessionStorage.setItem(
-                `validator_${validator.operator_address}`,
-                JSON.stringify(validator)
-              );
               router.push(`/validator/${validator.operator_address}`);
             }}
           >

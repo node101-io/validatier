@@ -133,7 +133,7 @@ input {
   animation: scrollText 10s linear infinite !important;
 }
 
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .degrade-navbar {
     background: linear-gradient(
       180deg,
@@ -142,4 +142,4 @@ input {
       rgba(255, 255, 255, 0) 100%
     );
   }
-}
+} */

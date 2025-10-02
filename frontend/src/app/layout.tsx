@@ -3,10 +3,11 @@ import "./globals.css";
 import { Tooltip } from "radix-ui";
 
 const title = "Validatier";
-const description = "Your validators' guide to the galaxy - showcasing behaviors, contributions, and impact within the Cosmos ecosystem";
+const description =
+  "Your validators' guide to the galaxy - showcasing behaviors, contributions, and impact within the Cosmos ecosystem";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://validatier.node101.io'),
+  metadataBase: new URL("https://validatier.node101.io"),
   title: title,
   description: description,
   keywords: [

@@ -189,7 +189,7 @@ export default function DateRangePicker({
             onClick={() => setIsOpen(false)}
           />
           <div
-            className="fixed lg:static right-5.25 lg:top-auto z-[200] lg:w-full lg:max-w-none border-1 border-[#bebee7] lg:border-0 bg-[#f5f5ff] pt-3 px-3 pb-3 lg:pt-2 lg:px-3 lg:pb-3 ml-auto dp-animate-in"
+            className="fixed lg:static max-lg:rounded-xl max-lg:left-1/2 max-lg:top-1/2 max-lg:-translate-x-1/2 max-lg:-translate-y-1/2 max-lg:w-[90%] max-lg:max-w-2xl lg:top-auto z-[200] lg:w-full lg:max-w-none border-1 border-[#bebee7] lg:border-0 bg-[#f5f5ff] pt-3 px-3 pb-3 lg:pt-2 lg:px-3 lg:pb-3 ml-auto dp-animate-in"
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col lg:flex-row gap-3 lg:gap-4">
@@ -212,7 +212,7 @@ export default function DateRangePicker({
                   ))}
                 </ul>
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="hidden lg:block flex-1 min-w-0">
                 <DatePicker
                   selectsRange
                   startDate={startDate || undefined}
@@ -222,21 +222,25 @@ export default function DateRangePicker({
                     setStartDate(start);
                     setEndDate(end);
                     if (start && end) {
+                      // Calculate the difference in days
+                      const diffInMs = end.getTime() - start.getTime();
+                      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+                      
+                      // Minimum 90 days (3 months) required
+                      if (diffInDays < 90) {
+                        // Reset the selection if less than 90 days
+                        setStartDate(null);
+                        setEndDate(null);
+                        alert("Please select a date range of at least 3 months (90 days).");
+                        return;
+                      }
+                      
                       setCookie("selectedDateBottom", formatForCookie(start));
                       setCookie("selectedDateTop", formatForCookie(end));
-                      // Calculate month difference
-                      const diffMonths =
-                        (end.getFullYear() - start.getFullYear()) * 12 +
-                        (end.getMonth() - start.getMonth());
-                      const interval =
-                        diffMonths <= 3
-                          ? "last_90_days"
-                          : diffMonths <= 6
-                            ? "last_180_days"
-                            : diffMonths <= 12
-                              ? "last_365_days"
-                              : "all_time";
-                      setCookie("specificRange", interval);
+                      // Set custom interval to trigger dynamic data generation
+                      setCookie("specificRange", "custom");
+                      setSelectedRange("Custom");
+                      setIsOpen(false);
                       startTransition(() => {
                         router.refresh();
                       });

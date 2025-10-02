@@ -4,13 +4,27 @@ import Image from "next/image";
 import "@/../public/css/index/intro.css";
 import { motion, useTransform, MotionValue } from "motion/react";
 import { useScrollContext } from "@/components/scroll/scroll-provider";
+import { useState, useEffect } from "react";
 
 export default function Intro() {
   const { scrollY } = useScrollContext();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const y = useTransform(
     scrollY || new MotionValue(0),
     [0, 500, 1000],
-    [0, -1000, -1000]
+    isMobile ? [0, 0, 0] : [0, -1000, -1000]
   );
 
   return (
@@ -50,8 +64,7 @@ export default function Intro() {
       </div>
       <div className="intro-main-wrapper-description-wrapper">
         <div>
-          node101 | CosmosHub Validatier showcases the validators&apos;
-          behaviors,
+          Validatier showcases the validators&apos;behaviors,
         </div>
         <div>contributions, and impact within the Cosmos ecosystem</div>
       </div>

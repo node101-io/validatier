@@ -1,9 +1,6 @@
 import Navbar from "@/components/navbar/navbar";
-import Validator, {
-  ValidatorWithMetricsInterface,
-  SingleValidatorGraphDataInterface,
-} from "../../../../../src/models/Validator/Validator";
-import Price from "../../../../../src/models/Price/Price";
+import Validator from "../../../../../src/models/Validator/Validator";
+import { FormattedValidatorPageData } from "../../../../../src/models/Validator/functions/getFormattedValidatorPageData";
 import NetworkSummary from "@/components/network-summary/network-summary";
 import {
   formatAtom,
@@ -16,9 +13,15 @@ import Footer from "@/components/footer/footer";
 import { connectMongoose } from "@/lib/mongoose";
 import { cookies as getCookies } from "next/headers";
 import { redirect } from "next/navigation";
-import Cache, { CacheInterface } from "../../../../../src/models/Cache/Cache";
 import Chain, { ChainInterface } from "../../../../../src/models/Chain/Chain";
 import CopyableOperatorAddress from "@/components/copyable-operator-address/copyable-operator-address";
+
+const getDefaultDates = () => {
+  const today = new Date();
+  const lastYear = new Date(today);
+  lastYear.setMonth(today.getMonth() - 12);
+  return { start: lastYear, end: today };
+};
 
 export default async function ValidatorPage({
   params,
@@ -35,14 +38,6 @@ export default async function ValidatorPage({
   const topCookie = cookies.get("selectedDateTop")?.value;
   const specificRangeCookie = cookies.get("specificRange")?.value;
 
-  // Calculate default dates (last year)
-  const getDefaultDates = () => {
-    const today = new Date();
-    const lastYear = new Date(today);
-    lastYear.setMonth(today.getMonth() - 12);
-    return { start: lastYear, end: today };
-  };
-
   const defaultDates = getDefaultDates();
   const initialStartDate = bottomCookie
     ? new Date(bottomCookie)
@@ -53,86 +48,36 @@ export default async function ValidatorPage({
   const bottomTimestamp = initialStartDate.getTime();
   const topTimestamp = initialEndDate.getTime();
 
-  const chains = await new Promise<ChainInterface[]>((resolve) => {
-    Chain.getAllChains((err, chains) => {
-      if (err || !chains) throw new Error(err ?? "unknown_error");
+  const [chains, formattedData] = await Promise.all([
+    new Promise<ChainInterface[]>((resolve) => {
+      Chain.getAllChains((err, chains) => {
+        if (err || !chains) throw new Error(err ?? "unknown_error");
 
-      resolve(chains);
-    });
-  });
-
-  const price =
-    chains.find((chain) => chain.name === "cosmoshub")?.usd_exchange_rate ?? 0;
-
-  const validator = await new Promise<ValidatorWithMetricsInterface | null>(
-    (resolve) => {
-      Validator.getValidatorByOperatorAddress(
-        {
-          operator_address: operatorAddress,
-        },
-        (err, validator) => {
-          if (err) throw new Error(err);
-          resolve(validator);
-        }
-      );
-    }
-  );
-
-  const pricaData = await new Promise<number[]>((resolve) => {
-    Price.getPriceGraphData(
-      {
-        bottom_timestamp: bottomTimestamp,
-        top_timestamp: topTimestamp,
-      },
-      (err, priceData) => {
-        if (err || !priceData) throw new Error(err ?? "unknown_error");
-
-        resolve(priceData);
-      }
-    );
-  });
-
-  const validatorGraphData =
-    await new Promise<SingleValidatorGraphDataInterface>((resolve) => {
-      Validator.getValidatorGraphData(
+        resolve(chains);
+      });
+    }),
+    new Promise<FormattedValidatorPageData>((resolve) => {
+      Validator.getFormattedValidatorPageData(
         {
           operator_address: operatorAddress,
           bottom_timestamp: bottomTimestamp,
           top_timestamp: topTimestamp,
-          number_of_columns: 90,
+          chain_identifier: "cosmoshub",
+          interval: specificRangeCookie || "last_365_days",
         },
         (err, data) => {
           if (err || !data) throw new Error(err ?? "unknown_error");
+
           resolve(data);
         }
       );
-    });
+    }),
+  ]);
 
-  if (!validator) return redirect("/");
+  const price =
+    chains.find((chain) => chain.name === "cosmoshub")?.usd_exchange_rate ?? 0;
 
-  // Compute validator-level metrics similar to home page cards
-  const averageDelegation = validator.average_total_stake ?? 0;
-  const totalSoldAmount = validator.sold ?? 0;
-  const averagePrice =
-    pricaData.reduce((acc, each) => acc + each, 0) / (pricaData.length || 1);
-
-  const cacheResult = await new Promise<
-    CacheInterface | Omit<CacheInterface, "export">
-  >((resolve) => {
-    Cache.getCacheForChain(
-      {
-        chain_identifier: "cosmoshub",
-        interval: specificRangeCookie || "last_365_days",
-      },
-      (err, result) => {
-        if (err || !result) throw new Error(err ?? "unknown_error");
-        resolve(result[0]);
-      }
-    );
-  });
-
-  const allValidators = cacheResult.validators;
-  const totalValidators = allValidators.length;
+  if (!formattedData.validator) return redirect("/");
 
   const formatOrdinal = (rank: number) => {
     const suffixes = ["th", "st", "nd", "rd"];
@@ -143,18 +88,6 @@ export default async function ValidatorPage({
       suffixes[0];
     return `${rank}${suffix}`;
   };
-
-  // Ranks
-  const selfStake = validator.self_stake ?? 0;
-  const selfStakeRank =
-    1 + allValidators.filter((v) => (v.self_stake ?? 0) > selfStake).length;
-
-  const myPct = validator.percentage_sold ?? Number.POSITIVE_INFINITY;
-  const pctRank =
-    1 +
-    allValidators.filter(
-      (v) => (v.percentage_sold ?? Number.POSITIVE_INFINITY) < myPct
-    ).length;
 
   return (
     <div className="flex flex-col items-center relative overflow-hidden h-screen w-full">
@@ -172,22 +105,25 @@ export default async function ValidatorPage({
                 {/* Validator Info */}
                 <div className="flex items-center gap-2.5">
                   <img
-                    src={validator.temporary_image_uri || "/res/images/default_validator_photo.svg"}
-                    alt={validator.moniker}
-                    className={`size-10 ${validator.temporary_image_uri ? "rounded-full" : "rounded-none"}`}
+                    src={
+                      formattedData.validator.temporary_image_uri ||
+                      "/res/images/default_validator_photo.svg"
+                    }
+                    alt={formattedData.validator.moniker}
+                    className={`size-10 ${formattedData.validator.temporary_image_uri ? "rounded-full" : "rounded-none"}`}
                   />
                   <div>
-                    <div className="text-xl font-semibold text-[#250054]">
-                      {validator.moniker}
+                    <div className="text-xl font-semibold text-[#250054] leading-5">
+                      {formattedData.validator.moniker}
                     </div>
                     <CopyableOperatorAddress
-                      operatorAddress={validator.operator_address}
+                      operatorAddress={formattedData.validator.operator_address}
                     />
                   </div>
                 </div>
                 <div className="flex items-center gap-5 text-base">
                   <a
-                    href={validator.website}
+                    href={formattedData.validator.website}
                     target="_blank"
                     className="flex items-center gap-1"
                   >
@@ -199,14 +135,14 @@ export default async function ValidatorPage({
                     <span className="mb-1">Website</span>
                   </a>
                   <a
-                    href={`https://www.mintscan.io/cosmos/validators/${validator.operator_address}`}
+                    href={`https://www.mintscan.io/cosmos/validators/${formattedData.validator.operator_address}`}
                     target="_blank"
                     className="flex items-center gap-1"
                   >
                     <span className="mb-1">Explorer</span>
                   </a>
                   <a
-                    href={`https://wallet.keplr.app/chains/cosmos-hub?modal=validator&chain=cosmoshub-4&validator_address=${validator.operator_address}`}
+                    href={`https://wallet.keplr.app/chains/cosmos-hub?modal=validator&chain=cosmoshub-4&validator_address=${formattedData.validator.operator_address}`}
                     target="_blank"
                     className="flex items-center justify-center h-6 gap-1 rounded-xl px-2.5 bg-[#250054] !text-white cursor-pointer"
                   >
@@ -228,23 +164,24 @@ export default async function ValidatorPage({
                         className="text-[28px] font-bold text-[#49306f] leading-3 mb-0.5 text-nowrap"
                         id="summary-self-stake-amount-native"
                       >
-                        {validator.self_stake
-                          ? `${formatAtom(validator.self_stake)} ATOM`
+                        {formattedData.validator.self_stake
+                          ? `${formatAtom(formattedData.validator.self_stake)} ATOM`
                           : "0 ATOM"}
                       </div>
                       <div
                         className="font-medium text-[20px] text-[#7c70c3]"
                         id="summary-self-stake-amount-usd"
                       >
-                        {validator.self_stake
-                          ? `$${formatAtomUSD(validator.self_stake, price)}`
+                        {formattedData.validator.self_stake
+                          ? `$${formatAtomUSD(formattedData.validator.self_stake, price)}`
                           : "$0"}
                       </div>
                     </>
                   }
                   rightColumn={
                     <div className="text-nowrap mt-auto text-[#7c70c3] font-medium text-base">
-                      {formatOrdinal(selfStakeRank)} out of {totalValidators}
+                      {formatOrdinal(formattedData.ranks.selfStakeRank)} out of{" "}
+                      {formattedData.ranks.totalValidators}
                     </div>
                   }
                 />
@@ -260,8 +197,8 @@ export default async function ValidatorPage({
                         className="text-[36px] leading-[22px] font-bold text-[#49306f] text-nowrap mb-0.5"
                         id="summary-percentage-sold-native"
                       >
-                        {validator.percentage_sold
-                          ? `${formatPercentage(validator.percentage_sold, 1)}%`
+                        {formattedData.validator.percentage_sold
+                          ? `${formatPercentage(formattedData.validator.percentage_sold, 1)}%`
                           : "%0"}
                       </div>
                       <div className="font-medium text-[20px] text-[#7c70c3]"></div>
@@ -269,7 +206,8 @@ export default async function ValidatorPage({
                   }
                   rightColumn={
                     <div className="text-nowrap mt-auto text-[#7c70c3] font-medium text-base">
-                      {formatOrdinal(pctRank)} out of {totalValidators}
+                      {formatOrdinal(formattedData.ranks.percentageSoldRank)}{" "}
+                      out of {formattedData.ranks.totalValidators}
                     </div>
                   }
                 />
@@ -285,9 +223,10 @@ export default async function ValidatorPage({
                         className="text-[36px] leading-[22px] font-bold text-[#49306f] text-nowrap mb-0.5"
                         id="summary-average-self-stake-ratio-native"
                       >
-                        {validator.commission_rate
+                        {formattedData.validator.commission_rate
                           ? `${formatPercentage(
-                              Number(validator.commission_rate) * 100,
+                              Number(formattedData.validator.commission_rate) *
+                                100,
                               2
                             )}%`
                           : "0%"}
@@ -304,44 +243,24 @@ export default async function ValidatorPage({
               </div>
             </div>
             <GraphMetrics
-              metrics={[
-                {
-                  id: "total_stake_sum",
-                  color: "#FF9404",
-                  title: "Average Delegation",
-                  valueNative: `${formatAtom(averageDelegation, 1)} ATOM`,
-                  valueUsd: `$${formatAtomUSD(averageDelegation, price, 1)}`,
-                },
-                {
-                  id: "total_sold",
-                  color: "#5856D7",
-                  title: "Total Sold Amount",
-                  valueNative: `${formatAtom(totalSoldAmount, 1)} ATOM`,
-                  valueUsd: `$${formatAtomUSD(totalSoldAmount, price, 1)}`,
-                },
-                {
-                  id: "price",
-                  color: "#31ADE6",
-                  title: "Average ATOM Price",
-                  valueNative: `$${averagePrice.toFixed(2)}`,
-                },
-              ]}
+              price={price}
+              metrics={formattedData.metrics}
               firstSeries={[
                 {
                   name: "Average Delegation",
-                  data: validatorGraphData.total_stake,
+                  data: formattedData.validatorGraphData.total_stake,
                 },
               ]}
               secondSeries={[
                 {
                   name: "Total Sold Amount",
-                  data: validatorGraphData.total_sold,
+                  data: formattedData.validatorGraphData.total_sold,
                 },
               ]}
               thirdSeries={[
                 {
                   name: "ATOM Price",
-                  data: pricaData,
+                  data: formattedData.priceData,
                 },
               ]}
             />

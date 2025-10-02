@@ -11,7 +11,7 @@ export default function NetworkSummary({
     <>
       <div
         className={`flex justify-between relative 
-                    w-full min-w-[280px] md:min-w-[325px] h-[114px]
+                    w-full min-w-[280px] h-[114px]
                     px-5.5 py-4
                     bg-[#f5f5ff]
                     rounded-[20px]

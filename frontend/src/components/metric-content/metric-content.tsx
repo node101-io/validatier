@@ -1,6 +1,26 @@
 import Metric from "@/types/metric";
+import { formatAtom, formatAtomUSD } from "@/utils/format-numbers";
 
-export default function MetricContent({ metric }: { metric: Metric }) {
+export default function MetricContent({
+  metric,
+  price,
+}: {
+  metric: Metric;
+  price?: number;
+}) {
+  const getFormattedNative = () => {
+    if (metric.id === "price") {
+      return `$${metric.valueNative.toFixed(2)}`;
+    }
+    return `${formatAtom(metric.valueNative, 1)} ATOM`;
+  };
+
+  const getFormattedUsd = () => {
+    if (metric.id === "price") return null;
+    if (!price || price === 0) return null;
+    return `$${formatAtomUSD(metric.valueNative, price, 1)}`;
+  };
+
   return (
     <div
       className="flex flex-col justify-center h-full w-full min-w-[280px] lg:min-w-full !box-border py-4 px-[22px] rounded-[20px] border-[0.5px] border-[#bebee7] bg-[#f5f5ff] opacity-100 transition-all duration-250 ease-in-out"
@@ -17,10 +37,10 @@ export default function MetricContent({ metric }: { metric: Metric }) {
       </div>
       <div className="flex flex-row lg:flex-col items-baseline justify-between w-full">
         <div className="text-nowrap text-[#49306f] font-[700] text-[28px]">
-          {metric.valueNative}
+          {getFormattedNative()}
         </div>
-        <div className="text-nowrap font-semibold text-xl text-[#7c70c3] mt-0">
-          {metric.valueUsd}
+        <div className="text-nowrap font-semibold text-xl text-[#7c70c3] mt-0 leading-5">
+          {getFormattedUsd()}
         </div>
       </div>
       <div className="text-[#7c70c3] font-normal text-xl">

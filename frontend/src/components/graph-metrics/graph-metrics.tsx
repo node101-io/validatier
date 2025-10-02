@@ -12,7 +12,24 @@ const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 const labelColor = "#7E77B8";
 const gridColor = "#C9C4EE55";
 const yLabelMinMaxWidth = 64; // ensure identical left gutter across charts
-const categories = ["Sep ’24", "Oct ’24", "Dec ’24", "Mar ’25", "May ’25"];
+
+// Format ATOM amounts dynamically based on value
+const formatAtomAmount = (value: number): string => {
+  if (value === 0) return "0.00";
+
+  const absValue = Math.abs(value);
+
+  // Already in millions from backend
+  if (absValue >= 1) {
+    return `${value.toFixed(2)}M`;
+  } else if (absValue >= 0.001) {
+    // Convert to K (thousands)
+    return `${(value * 1000).toFixed(2)}K`;
+  } else {
+    // Show as is (small values)
+    return `${(value * 1_000_000).toFixed(0)}`;
+  }
+};
 
 const baseOptions = (group: string): ApexOptions => ({
   chart: {
@@ -43,18 +60,16 @@ const baseOptions = (group: string): ApexOptions => ({
     padding: { left: 0, right: 0, top: 0, bottom: 0 },
   },
   xaxis: {
-    categories,
     axisBorder: { show: false },
     axisTicks: { show: false },
     labels: {
       style: {
-        colors: Array(categories.length).fill(labelColor),
+        colors: labelColor,
         fontFamily: "Darker Grotesque, sans-serif",
         fontSize: "14px",
       },
     },
     tooltip: { enabled: false },
-    tickAmount: categories.length,
   },
   yaxis: [
     {
@@ -82,13 +97,19 @@ const baseOptions = (group: string): ApexOptions => ({
   legend: { show: false },
   tooltip: {
     enabled: true,
-    shared: false,
+    shared: true,
     intersect: false,
-    followCursor: true,
+    followCursor: false,
     theme: "light",
     x: { show: true },
-    marker: { show: false },
+    marker: { show: true },
     style: { fontFamily: "Darker Grotesque, sans-serif" },
+    fixed: {
+      enabled: true,
+      position: "topRight",
+      offsetX: 0,
+      offsetY: -18,
+    },
   },
 });
 
@@ -97,7 +118,8 @@ const optionsDelegation = {
   colors: ["#FF9404"],
   chart: {
     ...baseOptions("ns-shared").chart,
-    group: "ns-shared-top",
+    id: "chart-delegation",
+    group: "ns-shared",
   },
   grid: {
     ...baseOptions("ns-shared").grid,
@@ -110,8 +132,7 @@ const optionsDelegation = {
       tickAmount: 2,
       forceNiceScale: false,
       labels: {
-        formatter: (v: number) =>
-          v === 0 ? "0.00" : `${(v / 1_000_000).toFixed(1)}M`,
+        formatter: (v: number) => formatAtomAmount(v / 1_000_000),
         style: { colors: [labelColor] },
         minWidth: yLabelMinMaxWidth,
         maxWidth: yLabelMinMaxWidth,
@@ -120,6 +141,13 @@ const optionsDelegation = {
     },
   ],
   xaxis: { ...baseOptions("ns-shared").xaxis, labels: { show: false } },
+  tooltip: {
+    ...baseOptions("ns-shared").tooltip,
+    y: {
+      formatter: (v: number) => `${formatAtomAmount(v / 1_000_000)} ATOM`,
+      title: { formatter: () => "Average Delegation:" },
+    },
+  },
 };
 
 const optionsSold = {
@@ -127,7 +155,8 @@ const optionsSold = {
   colors: ["#5856D7"],
   chart: {
     ...baseOptions("ns-shared").chart,
-    group: "ns-shared-middle",
+    id: "chart-sold",
+    group: "ns-shared",
   },
   grid: {
     ...baseOptions("ns-shared").grid,
@@ -139,8 +168,7 @@ const optionsSold = {
       max: 20_000_000,
       tickAmount: 3,
       labels: {
-        formatter: (v: number) =>
-          v === 0 ? "0.00" : `${(v / 1_000_000).toFixed(1)}M`,
+        formatter: (v: number) => formatAtomAmount(v / 1_000_000),
         style: { colors: [labelColor] },
         minWidth: yLabelMinMaxWidth,
         maxWidth: yLabelMinMaxWidth,
@@ -149,6 +177,13 @@ const optionsSold = {
     },
   ],
   xaxis: { ...baseOptions("ns-shared").xaxis, labels: { show: false } },
+  tooltip: {
+    ...baseOptions("ns-shared").tooltip,
+    y: {
+      formatter: (v: number) => `${formatAtomAmount(v / 1_000_000)} ATOM`,
+      title: { formatter: () => "Total Sold Amount:" },
+    },
+  },
 };
 
 const optionsPrice = {
@@ -156,7 +191,8 @@ const optionsPrice = {
   colors: ["#31ADE6"],
   chart: {
     ...baseOptions("ns-shared").chart,
-    group: "ns-shared-bottom",
+    id: "chart-price",
+    group: "ns-shared",
   },
   grid: {
     ...baseOptions("ns-shared").grid,
@@ -179,6 +215,13 @@ const optionsPrice = {
       },
     },
   ],
+  tooltip: {
+    ...baseOptions("ns-shared").tooltip,
+    y: {
+      formatter: (v: number) => `$${v.toFixed(2)}`,
+      title: { formatter: () => "ATOM Price:" },
+    },
+  },
 };
 
 export default function GraphMetrics({
@@ -186,11 +229,13 @@ export default function GraphMetrics({
   firstSeries,
   secondSeries,
   thirdSeries,
+  price,
 }: {
   metrics: Metric[];
   firstSeries: ApexOptions["series"];
   secondSeries: ApexOptions["series"];
   thirdSeries: ApexOptions["series"];
+  price: number;
 }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -270,9 +315,51 @@ export default function GraphMetrics({
     [thirdSeries]
   );
 
+  // Create a stable group id per selected date range to avoid cross-range sync artifacts
+  const chartGroupId = useMemo(() => {
+    const firstLabel = dynamicCategories[0] ?? "";
+    const lastLabel = dynamicCategories[dynamicCategories.length - 1] ?? "";
+    return `ns-shared-${firstLabel}-${lastLabel}-${dynamicCategories.length}`;
+  }, [dynamicCategories]);
+
+  // Normalize series data to have the same length
+  const normalizedFirstSeries = useMemo(() => {
+    if (!firstSeries?.[0] || typeof firstSeries[0] === "number") return firstSeries;
+    const maxLen = dynamicCategories.length;
+    const currentLen = firstSeries[0].data?.length ?? 0;
+    if (currentLen >= maxLen) return firstSeries;
+    const paddedData = [...(firstSeries[0].data ?? [])];
+    while (paddedData.length < maxLen) paddedData.push(null);
+    return [{ ...firstSeries[0], data: paddedData }] as ApexOptions["series"];
+  }, [firstSeries, dynamicCategories.length]);
+
+  const normalizedSecondSeries = useMemo(() => {
+    if (!secondSeries?.[0] || typeof secondSeries[0] === "number") return secondSeries;
+    const maxLen = dynamicCategories.length;
+    const currentLen = secondSeries[0].data?.length ?? 0;
+    if (currentLen >= maxLen) return secondSeries;
+    const paddedData = [...(secondSeries[0].data ?? [])];
+    while (paddedData.length < maxLen) paddedData.push(null);
+    return [{ ...secondSeries[0], data: paddedData }] as ApexOptions["series"];
+  }, [secondSeries, dynamicCategories.length]);
+
+  const normalizedThirdSeries = useMemo(() => {
+    if (!thirdSeries?.[0] || typeof thirdSeries[0] === "number") return thirdSeries;
+    const maxLen = dynamicCategories.length;
+    const currentLen = thirdSeries[0].data?.length ?? 0;
+    if (currentLen >= maxLen) return thirdSeries;
+    const paddedData = [...(thirdSeries[0].data ?? [])];
+    while (paddedData.length < maxLen) paddedData.push(null);
+    return [{ ...thirdSeries[0], data: paddedData }] as ApexOptions["series"];
+  }, [thirdSeries, dynamicCategories.length]);
+
   const optionsDelegationDynamic = useMemo(
     () => ({
       ...optionsDelegation,
+      chart: {
+        ...optionsDelegation.chart,
+        group: chartGroupId,
+      },
       xaxis: {
         ...optionsDelegation.xaxis,
         categories: dynamicCategories,
@@ -285,12 +372,16 @@ export default function GraphMetrics({
         },
       ],
     }),
-    [delegationMax, dynamicCategories]
+    [delegationMax, dynamicCategories, chartGroupId]
   );
 
   const optionsSoldDynamic = useMemo(
     () => ({
       ...optionsSold,
+      chart: {
+        ...optionsSold.chart,
+        group: chartGroupId,
+      },
       xaxis: {
         ...optionsSold.xaxis,
         categories: dynamicCategories,
@@ -303,12 +394,16 @@ export default function GraphMetrics({
         },
       ],
     }),
-    [soldMax, dynamicCategories]
+    [soldMax, dynamicCategories, chartGroupId]
   );
 
   const optionsPriceDynamic = useMemo(
     () => ({
       ...optionsPrice,
+      chart: {
+        ...optionsPrice.chart,
+        group: chartGroupId,
+      },
       xaxis: {
         ...optionsPrice.xaxis,
         categories: dynamicCategories,
@@ -321,7 +416,7 @@ export default function GraphMetrics({
         },
       ],
     }),
-    [priceMax, dynamicCategories]
+    [priceMax, dynamicCategories, chartGroupId]
   );
 
   const footerAxisLabels = useMemo(() => {
@@ -346,12 +441,12 @@ export default function GraphMetrics({
         <div className="flex flex-row w-full lg:min-w-[230px] lg:max-w-[230px] gap-3 ml-0 p-0">
           <div className="flex flex-row lg:flex-col w-full h-full gap-5 overflow-y-hidden overflow-x-scroll no-scrollbar px-5 lg:px-0">
             {metrics.map((metric) => (
-              <MetricContent key={metric.id} metric={metric} />
+              <MetricContent key={metric.id} metric={metric} price={price} />
             ))}
           </div>
         </div>
         <div className="hidden lg:flex flex-col w-full p-2 bg-[#f5f5ff] rounded-[20px] border-[0.5px] border-[#bebee7]">
-          <div className="flex flex-col items-center mb-5 py-2 px-4 h-11 w-full">
+          <div className="flex flex-col items-center py-2 px-4 h-11 w-full">
             <div className="flex items-baseline justify-between w-full">
               <div
                 className="text-[28px] font-[500] text-[#250054]"
@@ -359,13 +454,6 @@ export default function GraphMetrics({
               >
                 Reward Flow Overview
               </div>
-            </div>
-            <div
-              className="w-full text-start -mt-0.5 text-[#7c70c3] font-normal text-xl/4"
-              id="summary-graph-description"
-            >
-              Shows how validators respond to changes in price and delegation in
-              the market
             </div>
           </div>
           <div className="w-full" id="network-summary-graph-container">
@@ -381,7 +469,8 @@ export default function GraphMetrics({
               <Chart
                 type="area"
                 options={optionsDelegationDynamic}
-                series={firstSeries}
+                series={normalizedFirstSeries}
+                key={`chart-delegation-${chartGroupId}`}
                 height={110}
               />
             </div>
@@ -397,7 +486,8 @@ export default function GraphMetrics({
               <Chart
                 type="area"
                 options={optionsSoldDynamic}
-                series={secondSeries}
+                series={normalizedSecondSeries}
+                key={`chart-sold-${chartGroupId}`}
                 height={110}
               />
             </div>
@@ -413,7 +503,8 @@ export default function GraphMetrics({
               <Chart
                 type="area"
                 options={optionsPriceDynamic}
-                series={thirdSeries}
+                series={normalizedThirdSeries}
+                key={`chart-price-${chartGroupId}`}
                 height={130}
               />
             </div>
