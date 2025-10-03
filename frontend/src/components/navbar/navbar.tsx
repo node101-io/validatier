@@ -80,10 +80,10 @@ export default function Navbar({
     >
       <Link
         href="/"
-        className={`flex flex-col h-[46px] max-sm:h-[30px] z-20 user-select-none max-h-full items-center justify-center transition-all duration-500 group-focus-within:opacity-0 group-focus-within:translate-x-[-100%] sm:group-focus-within:opacity-100 sm:group-focus-within:translate-x-0`}
+        className="flex items-center justify-center z-20 user-select-none h-[46px] max-sm:h-[30px]"
         onFocus={(e) => e.currentTarget.blur()}
       >
-        <LogoSVG fill={brandFill} className="w-full h-full" />
+        <LogoSVG fill={brandFill} className="h-full w-auto" />
       </Link>
       <div
         className={`flex w-fit items-start gap-3 transition-all duration-1000 overflow-visible ${

@@ -139,8 +139,8 @@ export default function ValidatorLeaderboard({
                           className="flex items-center justify-center"
                           src="/res/images/check_green.svg"
                           alt="check"
-                          width={20}
-                          height={20}
+                          width={14}
+                          height={14}
                         />
                       )}
                     </div>
