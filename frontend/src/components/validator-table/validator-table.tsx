@@ -7,7 +7,7 @@ import {
   formatNumber,
   formatPercentage,
 } from "@/utils/format-numbers";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next13-progressbar";
 import Image from "next/image";
 import { useEffect, useState, useMemo } from "react";
 import {
@@ -255,7 +255,7 @@ export default function ValidatorTable({
                   <td className="flex items-center justify-start gap-4.5 h-full lg:h-full sticky left-0 -ml-5 pl-5 z-10 bg-[#f5f5ff] lg:bg-transparent overflow-hidden">
                     {/* Name */}
                     <div
-                      className={`flex items-center relative ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"} gap-2.5 aspect-square min-w-7.5 max-w-7.5`}
+                      className={`flex items-center relative ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"} gap-2.5 aspect-square size-7.5 shrink-0`}
                     >
                       <img
                         src={validator.temporary_image_uri}
@@ -311,9 +311,12 @@ export default function ValidatorTable({
                           {formatPercentage(validator.percentage_sold, 2)}%
                         </span>
                         {validator.percentage_sold < 25 && (
-                          <img
+                          <Image
                             className="flex items-center justify-center"
                             src="/res/images/check_green.svg"
+                            alt="check"
+                            width={20}
+                            height={20}
                           />
                         )}
                       </div>

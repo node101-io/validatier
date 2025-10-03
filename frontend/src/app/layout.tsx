@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Tooltip } from "radix-ui";
+import Providers from "./providers";
 
 const title = "Validatier";
 const description =
@@ -61,7 +62,9 @@ export default function RootLayout({
             rel="stylesheet"
           />
         </head>
-        <body>{children}</body>
+        <body>
+          <Providers>{children}</Providers>
+        </body>
       </html>
     </Tooltip.Provider>
   );

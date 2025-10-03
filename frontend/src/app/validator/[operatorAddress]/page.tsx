@@ -15,6 +15,8 @@ import { cookies as getCookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Chain, { ChainInterface } from "../../../../../src/models/Chain/Chain";
 import CopyableOperatorAddress from "@/components/copyable-operator-address/copyable-operator-address";
+import Link from "next/link";
+import Image from "next/image";
 
 const getDefaultDates = () => {
   const today = new Date();
@@ -110,7 +112,7 @@ export default async function ValidatorPage({
                       "/res/images/default_validator_photo.svg"
                     }
                     alt={formattedData.validator.moniker}
-                    className={`size-10 ${formattedData.validator.temporary_image_uri ? "rounded-full" : "rounded-none"}`}
+                    className={`size-10 object-cover ${formattedData.validator.temporary_image_uri ? "rounded-full" : "rounded-none"}`}
                   />
                   <div>
                     <div className="text-xl font-semibold text-[#250054] leading-5">
@@ -122,38 +124,43 @@ export default async function ValidatorPage({
                   </div>
                 </div>
                 <div className="flex items-center gap-5 text-base">
-                  <a
+                  <Link
                     href={formattedData.validator.website}
                     target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center gap-1"
                   >
-                    <img
+                    <Image
                       src="/res/images/web.svg"
                       alt="website"
+                      width={12}
+                      height={12}
                       className="w-3 h-3 overflow-clip"
                     />
                     <span className="mb-1">Website</span>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href={`https://www.mintscan.io/cosmos/validators/${formattedData.validator.operator_address}`}
                     target="_blank"
                     className="flex items-center gap-1"
+                    rel="noopener noreferrer"
                   >
                     <span className="mb-1">Explorer</span>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href={`https://wallet.keplr.app/chains/cosmos-hub?modal=validator&chain=cosmoshub-4&validator_address=${formattedData.validator.operator_address}`}
                     target="_blank"
                     className="flex items-center justify-center h-6 gap-1 rounded-xl px-2.5 bg-[#250054] !text-white cursor-pointer"
+                    rel="noopener noreferrer"
                   >
                     <span className="mb-1">Stake</span>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
             <div className="flex flex-col md:flex-row flex-nowrap justify-start gap-5 overflow-y-hidden ml-0 p-0 px-5 lg:px-0">
               {/* Network Summary */}
-              <div className="shrink-0">
+              <div className="shrink-0 flex-1">
                 <NetworkSummary
                   leftColumn={
                     <>
@@ -186,7 +193,7 @@ export default async function ValidatorPage({
                   }
                 />
               </div>
-              <div className="shrink-0">
+              <div className="shrink-0 flex-1">
                 <NetworkSummary
                   leftColumn={
                     <>
@@ -212,7 +219,7 @@ export default async function ValidatorPage({
                   }
                 />
               </div>
-              <div className="shrink-0">
+              <div className="shrink-0 flex-1">
                 <NetworkSummary
                   leftColumn={
                     <>

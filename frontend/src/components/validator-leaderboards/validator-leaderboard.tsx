@@ -8,7 +8,8 @@ import {
   formatPercentage,
 } from "@/utils/format-numbers";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 
 type SortDirection = "asc" | "desc";
 
@@ -21,7 +22,6 @@ export default function ValidatorLeaderboard({
   leaderboard: Leaderboard;
   price: number;
 }) {
-  const router = useRouter();
   const [sortDirection, setSortDirection] = useState<SortDirection>(
     leaderboard.type === "totalSold" ? "desc" : "asc"
   );
@@ -84,13 +84,10 @@ export default function ValidatorLeaderboard({
       </div>
       <div className="flex flex-col h-fit gap-0">
         {sortedValidators.map((validator, index) => (
-          <div
+          <Link
             key={index + leaderboard.type}
+            href={`/validator/${validator.operator_address}`}
             className="flex items-center justify-between cursor-[var(--pointer-hand-dark)] py-2 px-3 lg:px-4 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out"
-            operator-address={validator.operator_address}
-            onClick={() => {
-              router.push(`/validator/${validator.operator_address}`);
-            }}
           >
             <div className="flex items-center gap-2 lg:gap-3 min-w-0">
               {/* Row index (separate from avatar) */}
@@ -104,7 +101,7 @@ export default function ValidatorLeaderboard({
                 <img
                   src={validator.temporary_image_uri}
                   alt={validator.moniker}
-                  className={`w-full h-full ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"}`}
+                  className={`w-full h-full object-cover ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"}`}
                 />
               </div>
               <div className="flex-1 min-w-0 w-auto sm:w-[150px] text-base sm:text-lg text-[#49306f] overflow-hidden text-ellipsis text-nowrap">
@@ -138,9 +135,12 @@ export default function ValidatorLeaderboard({
                         {formatPercentage(validator.percentage_sold, 2)}%
                       </span>
                       {validator.percentage_sold < 25 && (
-                        <img
+                        <Image
                           className="flex items-center justify-center"
                           src="/res/images/check_green.svg"
+                          alt="check"
+                          width={20}
+                          height={20}
                         />
                       )}
                     </div>
@@ -161,7 +161,7 @@ export default function ValidatorLeaderboard({
                 <></>
               )}
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

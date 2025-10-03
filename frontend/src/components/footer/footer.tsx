@@ -1,4 +1,5 @@
 import FooterSVG from "@/style/footer-svg";
+import Link from "next/link";
 
 export default function Footer() {
   return (
@@ -8,20 +9,20 @@ export default function Footer() {
       </div>
       <div className="flex w-full flex-col sm:flex-row justify-between items-center gap-3 sm:gap-0 relative z-100">
         <div className="flex flex-row flex-wrap items-center gap-3">
-          <a href="mailto:hello@node101.io" target="_blank">
+          <Link href="mailto:hello@node101.io" target="_blank">
             hello@node101.io
-          </a>
-          <a href="https://node101.io" target="_blank">
+          </Link>
+          <Link href="https://node101.io" target="_blank">
             node101.io
-          </a>
+          </Link>
         </div>
         <div className="flex flex-row items-center gap-3 mt-2 sm:mt-0">
-          <a href="https://x.com/node_101" target="_blank">
+          <Link href="https://x.com/node_101" target="_blank">
             X
-          </a>
-          <a href="https://github.com/node101-io" target="_blank">
+          </Link>
+          <Link href="https://github.com/node101-io" target="_blank">
             Github
-          </a>
+          </Link>
         </div>
       </div>
       <div className="flex items-end gap-4 -mt-2 sm:-mt-6 relative">
