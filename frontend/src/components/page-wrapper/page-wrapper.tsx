@@ -8,7 +8,7 @@ import Inner from "@/components/inner/inner";
 import StakeWithUs from "@/components/stake-with-us/stake-with-us";
 import Footer from "@/components/footer/footer";
 import Validator from "@/types/validator";
-import { ValidatorsSummaryDataInterface } from "../../../../src/models/Validator/Validator";
+import { ValidatorsSummaryDataInterface } from "../../../../backend/models/Validator/Validator";
 import Metric from "@/types/metric";
 
 interface PageWrapperProps {

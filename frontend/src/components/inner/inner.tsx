@@ -5,7 +5,7 @@ import GraphMetrics from "@/components/graph-metrics/graph-metrics";
 import ValidatorLeaderboards from "@/components/validator-leaderboards/validator-leaderboards";
 import Validator from "@/types/validator";
 import ValidatorTable from "../validator-table/validator-table";
-import { ValidatorsSummaryDataInterface } from "../../../../src/models/Validator/Validator";
+import { ValidatorsSummaryDataInterface } from "../../../../backend/models/Validator/Validator";
 import Metric from "@/types/metric";
 import {
   formatPercentage,

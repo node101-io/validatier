@@ -1,6 +1,6 @@
 import Navbar from "@/components/navbar/navbar";
-import Validator from "../../../../../src/models/Validator/Validator";
-import { FormattedValidatorPageData } from "../../../../../src/models/Validator/functions/getFormattedValidatorPageData";
+import Validator from "../../../../../backend/models/Validator/Validator";
+import { FormattedValidatorPageData } from "../../../../../backend/models/Validator/functions/getFormattedValidatorPageData";
 import NetworkSummary from "@/components/network-summary/network-summary";
 import {
   formatAtom,
@@ -13,7 +13,7 @@ import Footer from "@/components/footer/footer";
 import { connectMongoose } from "@/lib/mongoose";
 import { cookies as getCookies } from "next/headers";
 import { redirect } from "next/navigation";
-import Chain, { ChainInterface } from "../../../../../src/models/Chain/Chain";
+import Chain, { ChainInterface } from "../../../../../backend/models/Chain/Chain";
 import CopyableOperatorAddress from "@/components/copyable-operator-address/copyable-operator-address";
 import Link from "next/link";
 import Image from "next/image";

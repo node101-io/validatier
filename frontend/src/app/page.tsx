@@ -1,8 +1,8 @@
 import { cookies as getCookies } from "next/headers";
 import PageWrapper from "@/components/page-wrapper/page-wrapper";
 import { connectMongoose } from "@/lib/mongoose";
-import Cache, { FormattedCacheData } from "../../../src/models/Cache/Cache";
-import Chain, { ChainInterface } from "../../../src/models/Chain/Chain";
+import Cache, { FormattedCacheData } from "../../../backend/models/Cache/Cache";
+import Chain, { ChainInterface } from "../../../backend/models/Chain/Chain";
 
 const getDefaultDates = () => {
   const today = new Date();
