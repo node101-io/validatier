@@ -112,7 +112,7 @@ export default function Inner({
                   className="font-medium text-[20px] text-[#7c70c3]"
                   id="summary-self-stake-amount-usd"
                 >
-                  ${formatAtomUSD(summaryData.self_stake_sum, price, 1)}
+                  ${formatAtomUSD(summaryData.self_stake_sum + summaryData.initial_self_stake_sum, price, 1)}
                 </div>
               </>
             }

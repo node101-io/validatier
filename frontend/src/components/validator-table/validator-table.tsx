@@ -226,7 +226,7 @@ export default function ValidatorTable({
         <div className="pt-3 pb-4 overflow-x-auto lg:overflow-visible">
           <table className="w-full min-w-[900px] table-fixed border-collapse">
             <thead>
-              <tr className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] sm:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-3 mb-1">
+              <tr className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] sm:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-3 mb-3">
                 <th className="flex mb-1 items-center sm:w-full justify-start text-left text-[#7c70c3] font-semibold gap-0 text-base lg:text-lg whitespace-nowrap sticky left-0 -ml-5 pl-5 z-20 bg-[#f5f5ff] lg:bg-transparent select-none">
                   Name
                 </th>

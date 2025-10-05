@@ -201,7 +201,7 @@ export default function DateRangePicker({
                       <button
                         type="button"
                         onClick={() => handleRangeSelect(range)}
-                        className={`w-full text-left !text-[#161616] text-lg rounded-xl px-3 pt-1.5 pb-2.5 cursor-pointer transition-colors ${
+                        className={`w-full text-left !text-[#250054] text-lg rounded-xl px-3 pt-1.5 pb-2.5 cursor-pointer transition-colors ${
                           selectedRange === range.label
                             ? "bg-[#e8e8ff]"
                             : "hover:bg-[#ececff]"

@@ -117,10 +117,10 @@ export function getFormattedCacheData(
     smallSelfStakeAmountGraphData.push(val < 0 ? 0 : val);
   }
 
-  // 8. Build smallSelfStakeRatioGraphData
+  // 8. Build smallSelfStakeRatioGraphData (cap at 100)
   const smallSelfStakeRatioGraphData = smallGraph.map((each) => {
     const ratio = Number(each?.average_self_stake_ratio) || 0;
-    return ratio < 0 ? 0 : ratio;
+    return ratio < 0 ? 0 : Math.min(ratio, 100);
   });
 
   // 9. Format validators and filter by cummulativeActiveSet
