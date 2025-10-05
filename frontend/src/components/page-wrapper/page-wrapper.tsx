@@ -52,7 +52,7 @@ export default function PageWrapper({
   };
 
   return (
-    <ScrollProvider className="flex flex-col w-full items-center relative overflow-x-hidden overflow-y-scroll ml-0 h-screen rounded-0 bg-white transition-all duration-250">
+    <ScrollProvider className="flex flex-col w-full items-center relative overflow-x-hidden overflow-y-auto ml-0 h-screen rounded-0 bg-white transition-all duration-250">
       <Navbar
         onSearchChange={handleSearchChange}
         initialStartDate={initialStartDate}

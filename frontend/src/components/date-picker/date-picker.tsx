@@ -7,6 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "./date-picker.css";
 import { CalendarSVG } from "@/style/calendar-svg";
 import { ArrowDownSVG } from "@/style/arrow-down-svg";
+import { genesisDate } from "../../../../backend/models/Cache/functions/getFormattedCacheData";
 
 export default function DateRangePicker({
   variant = "light",
@@ -69,10 +70,10 @@ export default function DateRangePicker({
     setSelectedRange(range.label);
     if (range.months === 0) {
       // All time - use genesis date
-      setStartDate(new Date("2021-02-18"));
+      setStartDate(genesisDate);
       setEndDate(new Date());
       // Set cookies for full range (all time) and specific interval
-      const bottom = formatForCookie(new Date("2021-02-18"));
+      const bottom = formatForCookie(genesisDate);
       const top = formatForCookie(new Date());
       setCookie("selectedDateBottom", bottom);
       setCookie("selectedDateTop", top);
@@ -217,6 +218,8 @@ export default function DateRangePicker({
                   selectsRange
                   startDate={startDate || undefined}
                   endDate={endDate || undefined}
+                  minDate={genesisDate}
+                  maxDate={new Date()}
                   onChange={(dates: [Date | null, Date | null]) => {
                     const [start, end] = dates;
                     setStartDate(start);

@@ -89,7 +89,9 @@ export interface SingleValidatorGraphDataInterface {
 
 export interface ValidatorsSummaryDataInterface {
     initial_total_stake_sum: number;
+    total_stake_sum: number;
     initial_total_withdraw_sum: number;
+    total_withdraw_sum: number;
     initial_total_sold: number;
     total_sold: number;
     initial_percentage_sold: number;
@@ -572,10 +574,9 @@ validatorSchema.statics.getValidatorByOperatorAddress = function (
                     const average_total_stake = record?.average_total_stake || 0;
                     const balance_change = record?.balance_change || 0;
 
-                    const sold = Math.max(
-                        (balance_change - (commission + reward) + self_stake) * -1,
-                        0
-                    );
+                    const outflow = Math.max((balance_change) * -1, 0);
+                    const availableToSell = Math.max((reward + commission) - Math.max(self_stake, 0), 0);
+                    const sold = Math.min(outflow, availableToSell);
                     const percentage_sold = getPercentageSoldWithoutRounding({
                         sold,
                         self_stake,
@@ -644,9 +645,6 @@ validatorSchema.statics.rankValidators = function (
         let totalSelfStaked = 0;
         let initialTotalSelfStaked = 0;
 
-        let totalWithdrawnValidator = 0;
-        let initialTotalWithdrawnValidator = 0;
-
         let totalDelegation = 0;
         let initialTotalDelegation = 0;
 
@@ -658,9 +656,7 @@ validatorSchema.statics.rankValidators = function (
         let totalSelfStakeRatio = 0;
         let initialTotalSelfStakeRatio = 0;
 
-        let totalPercentageSold = 0;
         let initialTotalPercentageSold = 0;
-        let percentageSoldInvolvedValidatorCount = 0;
 
         const [validatorsResult, getPeriodicDataForValidatorSetResult] =
             results;
@@ -697,30 +693,18 @@ validatorSchema.statics.rankValidators = function (
 
             const ratio =
                 (self_stake || 0) /
-                (reward + commission ||
-                    10 ** CHAIN_TO_DECIMALS_MAPPING[`${chain_identifier}`]);
-            const sold = Math.max(
-                (balance_change - (commission + reward) + self_stake) * -1,
-                0
-            );
+                ((reward + commission) || 10 ** CHAIN_TO_DECIMALS_MAPPING[`${chain_identifier}`]);
+            const outflow = Math.max((balance_change) * -1, 0);
+            const availableToSell = Math.max((reward + commission) - Math.max(self_stake, 0), 0);
+            const sold = Math.min(outflow, availableToSell);
             const initial_sold =
-                (initial_reward_prefix_sum + initial_commission_prefix_sum ||
-                    0) - (initial_self_stake_prefix_sum || 0);
+                ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 0) - (initial_self_stake_prefix_sum || 0);
 
             const percentage_sold = getPercentageSoldWithoutRounding({
                 sold,
                 self_stake,
                 total_withdraw: reward + commission,
             });
-
-            if (reward + commission != 0) {
-                totalPercentageSold += getPercentageSold({
-                    sold,
-                    self_stake,
-                    total_withdraw: reward + commission,
-                });
-            }
-            percentageSoldInvolvedValidatorCount++;
 
             const initial_percentage_sold = Math.min(
                 Math.max(
@@ -756,10 +740,6 @@ validatorSchema.statics.rankValidators = function (
             totalSelfStaked += self_stake;
             initialTotalSelfStaked += initial_self_stake_prefix_sum;
 
-            totalWithdrawnValidator += reward + commission;
-            initialTotalWithdrawnValidator +=
-                initial_reward_prefix_sum + initial_commission_prefix_sum;
-
             totalSelfStakeRatio += self_stake_ratio;
             initialTotalSelfStakeRatio += initial_self_stake_ratio;
 
@@ -779,7 +759,7 @@ validatorSchema.statics.rankValidators = function (
                 initial_total_withdraw_prefix_sum:
                     initial_reward_prefix_sum + initial_commission_prefix_sum,
                 percentage_sold,
-                initial_percentage_sold,
+                initial_percentage_sold: initialTotalPercentageSold,
                 self_stake_ratio,
                 initial_self_stake_ratio,
                 average_total_stake: average_total_stake,
@@ -807,18 +787,19 @@ validatorSchema.statics.rankValidators = function (
         callback(null, {
             summary_data: {
                 initial_total_stake_sum: initialTotalDelegation,
+                total_stake_sum: totalDelegation,
                 initial_total_withdraw_sum: initialTotalWithdrawn,
+                total_withdraw_sum: totalWithdrawn,
                 total_sold: totalSold,
                 initial_total_sold:
-                    initialTotalWithdrawnValidator - initialTotalSelfStaked,
+                    initialTotalWithdrawn - initialTotalSelfStaked,
                 initial_percentage_sold:
-                    ((initialTotalWithdrawnValidator - initialTotalSelfStaked) /
-                        initialTotalWithdrawnValidator) *
+                    ((initialTotalWithdrawn - initialTotalSelfStaked) /
+                        initialTotalWithdrawn) *
                     100,
                 percentage_sold:
-                    totalPercentageSold / percentageSoldInvolvedValidatorCount,
-                initial_self_stake_sum:
-                    initialTotalPercentageSold / valueArray.length,
+                    Math.min(((totalSold / (totalWithdrawn || 1)) * 100), 100),
+                initial_self_stake_sum: initialTotalSelfStaked,
                 self_stake_sum: totalSelfStaked,
                 initial_average_self_stake_ratio:
                     initialTotalSelfStakeRatio / valueArray.length,
@@ -1011,111 +992,145 @@ validatorSchema.statics.getSummaryGraphData = function (
         (top_timestamp - bottom_timestamp) / numberOfDataPoints
     );
 
-    const groupId: Record<string, any> = {
-        bucket: {
-            $floor: {
-                $divide: [{ $toLong: "$timestamp" }, intervalMs],
-            },
-        },
-    };
-
-    const startBucket = Math.floor(bottom_timestamp / intervalMs);
-
-    CompositeEventBlock.aggregate([
-        {
-            $match: {
-                chain_identifier: chain_identifier,
-                timestamp: {
-                    $gte: bottom_timestamp,
-                    $lte: top_timestamp,
-                },
-            },
-        },
-        {
-            $group: {
-                _id: groupId,
-                timestamp: { $first: "$timestamp" },
-                self_stake_sum: { $sum: "$self_stake" },
-                reward_sum: { $sum: "$reward" },
-                commission_sum: { $sum: "$commission" },
-                total_stake_sum: { $avg: "$total_stake_prefix_sum" },
-                balance_change_sum: { $sum: "$balance_change" },
-            },
-        },
-        {
-            $sort: {
-                timestamp: 1,
-            },
-        },
-    ])
-        .hint({
-            chain_identifier: 1,
-            timestamp: 1,
-            self_stake: 1,
-            reward: 1,
-            commission: 1,
-            total_stake: 1,
-            balance_change: 1,
-        })
-        .then((buckets: any) => {
-            const result: any = [];
-
-            let lastValue: any = null;
-            for (let i = 0; i < numberOfDataPoints; i++) {
-                const bucketIndex = startBucket + i;
-                const found = buckets.find(
-                    (b: any) => b._id.bucket === bucketIndex
+    // Cumulative series for correct Total Sold/Stake graph
+    const cumulativePromises: Promise<{ index: number; sold: number; reward: number; commission: number; self_stake: number; total_stake_sum: number; timestamp: number }>[] = [];
+    // Additive per-bucket series for accurate percentage_sold
+    const additivePromises: Promise<{ index: number; sold: number; reward: number; commission: number; self_stake: number }>[] = [];
+    for (let i = 0; i < numberOfDataPoints; i++) {
+        const start = bottom_timestamp + i * intervalMs;
+        const end = Math.min(start + intervalMs, top_timestamp);
+        const index = i;
+        // Cumulative up to 'end'
+        cumulativePromises.push(
+            new Promise((resolve) => {
+                CompositeEventBlock.getPeriodicDataForValidatorSet(
+                    {
+                        chain_identifier,
+                        bottom_timestamp: bottom_timestamp - 86_400_000,
+                        top_timestamp: end,
+                    },
+                    (err, mapping) => {
+                        if (err || !mapping)
+                            return resolve({ index, sold: 0, reward: 0, commission: 0, self_stake: 0, total_stake_sum: 0, timestamp: end } as any);
+                        let soldSum = 0;
+                        let rewardSum = 0;
+                        let commissionSum = 0;
+                        let selfStakeSum = 0;
+                        let totalStakeSum = 0;
+                        for (const op of Object.keys(mapping)) {
+                            const rec = (mapping as any)[op] || {};
+                            const reward = rec.reward || 0;
+                            const commission = rec.commission || 0;
+                            const self_stake = rec.self_stake || 0;
+                            const balance_change = rec.balance_change || 0;
+                            const total_stake = rec.total_stake || 0;
+                            const outflow = Math.max(balance_change * -1, 0);
+                            const availableToSell = Math.max(reward + commission - Math.max(self_stake, 0), 0);
+                            const sold = Math.min(outflow, availableToSell);
+                            soldSum += sold;
+                            rewardSum += reward;
+                            commissionSum += commission;
+                            selfStakeSum += self_stake;
+                            totalStakeSum += total_stake;
+                        }
+                        return resolve({ index, sold: soldSum, reward: rewardSum, commission: commissionSum, self_stake: selfStakeSum, total_stake_sum: totalStakeSum, timestamp: end } as any);
+                    }
                 );
+            })
+        );
+        // Additive for bucket [start, end]
+        additivePromises.push(
+            new Promise((resolve) => {
+                CompositeEventBlock.getPeriodicDataForValidatorSet(
+                    { chain_identifier, bottom_timestamp: start, top_timestamp: end },
+                    (err, mapping) => {
+                        if (err || !mapping) return resolve({ index, sold: 0, reward: 0, commission: 0, self_stake: 0 });
+                        let bucketSold = 0;
+                        let bucketReward = 0;
+                        let bucketCommission = 0;
+                        let bucketSelfStake = 0;
+                        for (const op of Object.keys(mapping)) {
+                            const rec = (mapping as any)[op] || {};
+                            const reward = rec.reward || 0;
+                            const commission = rec.commission || 0;
+                            const self_stake = rec.self_stake || 0;
+                            const balance_change = rec.balance_change || 0;
+                            const outflow = Math.max(balance_change * -1, 0);
+                            const availableToSell = Math.max(reward + commission - Math.max(self_stake, 0), 0);
+                            const sold = Math.min(outflow, availableToSell);
+                            bucketSold += sold;
+                            bucketReward += reward;
+                            bucketCommission += commission;
+                            bucketSelfStake += self_stake;
+                        }
+                        return resolve({ index, sold: bucketSold, reward: bucketReward, commission: bucketCommission, self_stake: bucketSelfStake });
+                    }
+                );
+            })
+        );
+    }
 
-                if (found) {
-                    const {
-                        timestamp,
-                        self_stake_sum,
-                        reward_sum,
-                        commission_sum,
-                        total_stake_sum,
-                        balance_change_sum,
-                    } = found;
+    Promise.all([Promise.all(cumulativePromises), Promise.all(additivePromises)])
+        .then(([bucketResults, additiveResults]) => {
+            // Sort bucket results by index to build cumulative series
+            (bucketResults as any[]).sort((a, b) => a.index - b.index);
+            (additiveResults as any[]).sort((a, b) => a.index - b.index);
 
-                    const sold = Math.max(
-                        (balance_change_sum -
-                            (commission_sum + reward_sum) +
-                            self_stake_sum) *
-                            -1,
-                        0
-                    );
+            const result: any[] = [];
+            let lastValue: any = null;
 
-                    result.push({
-                        _id: { bucket: bucketIndex },
-                        timestamp: timestamp,
-                        self_stake_sum: self_stake_sum,
-                        reward_sum: reward_sum,
-                        commission_sum: commission_sum,
-                        total_stake_sum: total_stake_sum,
-                        total_sold: sold,
-                        percentage_sold: getPercentageSoldWithoutRounding({
-                            sold,
-                            self_stake: self_stake_sum,
-                            total_withdraw: reward_sum + commission_sum,
-                        }),
-                    });
-                } else {
-                    const fake = {
-                        _id: { bucket: bucketIndex },
-                        timestamp: lastValue ? lastValue.timestamp : 0,
-                        self_stake_sum: 0,
-                        reward_sum: 0,
-                        commission_sum: 0,
-                        total_stake_sum: 0,
-                        total_sold: 0,
-                        percentage_sold: lastValue
-                            ? lastValue.percentage_sold
-                            : 0,
-                    };
-                    result.push(fake);
-                }
+            for (let i = 0; i < numberOfDataPoints; i++) {
+                const br: any = (bucketResults as any[])[i] || {
+                    index: i,
+                    sold: 0,
+                    reward: 0,
+                    commission: 0,
+                    self_stake: 0,
+                    total_stake_sum: 0,
+                    timestamp: bottom_timestamp + (i + 1) * intervalMs,
+                };
+                // br.* değerleri zaten bottom-1günden bu bucket sonuna kadar birikimli
+                const cumulativeSold = br.sold || 0;
+                const cumulativeReward = br.reward || 0;
+                const cumulativeCommission = br.commission || 0;
+                const cumulativeSelfStake = br.self_stake || 0;
+                const stake =
+                    br.total_stake_sum || (lastValue ? lastValue.total_stake_sum : 0);
+                const ts = br.timestamp;
+
+                const value = {
+                    _id: { bucket: i },
+                    timestamp: ts,
+                    self_stake_sum: cumulativeSelfStake,
+                    reward_sum: cumulativeReward,
+                    commission_sum: cumulativeCommission,
+                    total_stake_sum: stake,
+                    total_sold: cumulativeSold,
+                    percentage_sold: 0, // override below using additive method
+                };
+                result.push(value);
+                lastValue = value;
             }
-            return callback(null, result);
+
+            // Compute additive-based percentage series to match example
+            let addSold = 0;
+            let addReward = 0;
+            let addCommission = 0;
+            let addSelfStake = 0;
+            for (let i = 0; i < numberOfDataPoints; i++) {
+                const ar: any = (additiveResults as any[])[i] || { sold: 0, reward: 0, commission: 0, self_stake: 0 };
+                addSold += ar.sold || 0;
+                addReward += ar.reward || 0;
+                addCommission += ar.commission || 0;
+                addSelfStake += ar.self_stake || 0;
+                result[i].percentage_sold = getPercentageSoldWithoutRounding({
+                    sold: addSold,
+                    self_stake: addSelfStake,
+                    total_withdraw: addReward + addCommission,
+                });
+            }
+
+            return callback(null, result as unknown as any);
         })
         .catch((err) => callback(err, null));
 };
@@ -1317,7 +1332,7 @@ validatorSchema.statics.getFormattedValidatorPageData = function (
         // Get validator info
         new Promise<ValidatorWithMetricsInterface>((resolve, reject) => {
             Validator.getValidatorByOperatorAddress(
-                { 
+                {
                     operator_address,
                     bottom_timestamp,
                     top_timestamp
@@ -1362,7 +1377,7 @@ validatorSchema.statics.getFormattedValidatorPageData = function (
                 // Check if custom range
                 const predefinedIntervals = ['all_time', 'last_90_days', 'last_180_days', 'last_365_days'];
                 const isCustomRange = !predefinedIntervals.includes(interval);
-                
+
                 if (isCustomRange) {
                     // Generate fresh data for custom range
                     Cache.generateCacheData(

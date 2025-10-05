@@ -93,7 +93,7 @@ export default async function ValidatorPage({
 
   return (
     <div className="flex flex-col items-center relative overflow-hidden h-screen w-full">
-      <div className="flex flex-col w-full items-center relative overflow-x-hidden overflow-y-scroll ml-0 h-screen rounded-0 bg-white transition-all duration-250">
+      <div className="flex flex-col w-full items-center relative overflow-x-hidden overflow-y-auto ml-0 h-screen rounded-0 bg-white transition-all duration-250">
         <Navbar
           isValidatorPage={true}
           initialStartDate={initialStartDate}

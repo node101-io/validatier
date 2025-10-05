@@ -231,11 +231,13 @@ compositeEventBlockSchema.statics.getPeriodicDataForGraphGeneration = function (
         const commission = (record.mostRecentRecord.commission_prefix_sum - (record.leastRecentRecord.commission_prefix_sum || 0)) + (record.leastRecentRecord.commission || 0);
         const reward = (record.mostRecentRecord.reward_prefix_sum - (record.leastRecentRecord.reward_prefix_sum || 0)) + (record.leastRecentRecord.reward || 0);
 
-        const total_rewards = (commission || 0) + (reward || 0);
+        const outflow = Math.max((balanceChange) * -1, 0);
+        const availableToSell = Math.max((reward || 0) + (commission || 0) - Math.max(totalSelfStake, 0), 0);
+        const sold = Math.min(outflow, availableToSell);
 
         mapping[record._id] = {
           total_stake: (totalStake || 0),
-          total_sold: Math.max(((balanceChange * -1) + total_rewards - totalSelfStake), 0)
+          total_sold: sold
         };
       });
 

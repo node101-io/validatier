@@ -106,7 +106,7 @@ export default function Inner({
                   className="text-[28px] font-bold text-[#49306f] leading-3 mb-0.5 text-nowrap"
                   id="summary-self-stake-amount-native"
                 >
-                  {formatAtom(summaryData.self_stake_sum, 1)} ATOM
+                  {formatAtom(summaryData.self_stake_sum + summaryData.initial_self_stake_sum, 1)} ATOM
                 </div>
                 <div
                   className="font-medium text-[20px] text-[#7c70c3]"

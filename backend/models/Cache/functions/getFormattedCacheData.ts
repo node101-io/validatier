@@ -34,6 +34,8 @@ export interface FormattedCacheData {
   cummulativeActiveSet: Set<string>;
 }
 
+export const genesisDate = new Date("2021-02-18");
+
 export function getFormattedCacheData(
   cacheData: CacheInterface,
   bottomTimestamp: number,
@@ -44,78 +46,88 @@ export function getFormattedCacheData(
   const daysDiff = Math.abs(topTimestamp - bottomTimestamp) / 86400000;
   const threshold = daysDiff / 90;
 
-  for (const each of cacheData.cummulative_active_list) {
+  const cummulativeActiveList = Array.isArray(cacheData.cummulative_active_list)
+    ? cacheData.cummulative_active_list
+    : [];
+  for (const each of cummulativeActiveList) {
     if (threshold <= each.count) {
       cummulativeActiveSet.add(each._id);
     }
   }
 
-  // 2. Calculate averageDelegation with weighted sum
-  const { weightedSum, length } = cacheData.summary_graph.reduce(
+  // 2. Calculate averageDelegation (shift by initial to get absolute values)
+  const summaryGraph = Array.isArray(cacheData.summary_graph)
+    ? cacheData.summary_graph
+    : [];
+
+  const initialTotalStakeSum =
+    bottomTimestamp <= genesisDate.getTime() + 24 * 60 * 60 * 1000
+      ? 0
+      : Number(cacheData?.summary_data?.initial_total_stake_sum) || 0;
+
+  // Weighted average: more recent values have higher weight
+  const { weightedSum, totalWeight } = summaryGraph.reduce(
     (acc, each, idx, arr) => {
-      const weight = arr.length - idx;
-      acc.weightedSum += each.total_stake_sum * weight;
-      acc.length = arr.length;
+      const weight = arr.length - idx; // More weight for recent data
+      const totalStakeDelta = Number(each?.total_stake_sum) || 0;
+      const totalStakeAbsolute = initialTotalStakeSum + totalStakeDelta;
+      acc.weightedSum += totalStakeAbsolute * weight;
+      acc.totalWeight += weight;
       return acc;
     },
-    { weightedSum: 0, length: 0 }
+    { weightedSum: 0, totalWeight: 0 }
   );
 
-  const averageDelegation =
-    cacheData.summary_data.initial_total_stake_sum + 
-    (length > 0 ? weightedSum / length : 0);
+  const averageDelegation = totalWeight > 0 ? weightedSum / totalWeight : 0;
 
-  // 3. Calculate totalSoldAmount
-  const totalSoldAmount = cacheData.summary_graph.reduce(
-    (acc, each) => acc + each.total_sold,
-    0
-  );
+  // 3. Calculate totalSoldAmount (use summary_data which comes from rankValidators - it's correct)
+  const totalSoldAmount = cacheData.summary_data.total_sold || 0;
 
   // 4. Calculate averagePrice
-  const averagePrice =
-    cacheData.price_graph.length > 0
-      ? cacheData.price_graph.reduce((acc, each) => acc + each, 0) /
-        cacheData.price_graph.length
-      : 0;
+  const priceGraph = Array.isArray(cacheData.price_graph)
+    ? cacheData.price_graph
+    : [];
+  const averagePrice = priceGraph.length > 0
+    ? priceGraph.reduce((acc, each) => acc + (Number(each) || 0), 0) / priceGraph.length
+    : 0;
 
-  // 5. Build soldData (cumulative)
+  // 5. Build soldData (direct values from backend, no cumulative sum needed)
   const soldData: number[] = [];
-  for (let i = 0; i < cacheData.summary_graph.length; i++) {
-    soldData.push(
-      cacheData.summary_graph[i].total_sold / 1_000_000 +
-        (soldData[i - 1] ?? 0)
-    );
+  for (let i = 0; i < summaryGraph.length; i++) {
+    soldData.push((Number(summaryGraph[i]?.total_sold) || 0) / 1_000_000);
   }
 
-  // 6. Build delegationData (cumulative)
-  const delegationData: number[] = [
-    cacheData.summary_data.initial_total_stake_sum / 1_000_000,
-  ];
-  for (let i = 0; i < cacheData.summary_graph.length; i++) {
-    delegationData.push(
-      cacheData.summary_graph[i].total_stake_sum / 1_000_000 +
-        delegationData[i]
-    );
+  // 6. Build delegationData (shift series by initial to get absolute values)
+  const delegationData: number[] = [];
+  for (let i = 0; i < summaryGraph.length; i++) {
+    const delta = Number(summaryGraph[i]?.total_stake_sum) || 0;
+    const absolute = initialTotalStakeSum + delta;
+    delegationData.push(absolute / 1_000_000);
   }
 
   // 7. Build smallSelfStakeAmountGraphData (cumulative)
-  const smallSelfStakeAmountGraphData = [
-    cacheData.small_graph[0]?.self_stake_sum ?? 0,
-  ];
-  for (let i = 1; i < cacheData.small_graph.length; i++) {
-    smallSelfStakeAmountGraphData.push(
-      cacheData.small_graph[i].self_stake_sum +
-        smallSelfStakeAmountGraphData[i - 1]
-    );
+  const smallGraph = Array.isArray(cacheData.small_graph)
+    ? cacheData.small_graph
+    : [];
+  const smallSelfStakeAmountGraphData = smallGraph.length > 0
+    ? [Math.max(Number(smallGraph[0]?.self_stake_sum) || 0, 0)]
+    : [0];
+  for (let i = 1; i < smallGraph.length; i++) {
+    const val = (Number(smallGraph[i]?.self_stake_sum) || 0) + (smallSelfStakeAmountGraphData[i - 1] || 0);
+    smallSelfStakeAmountGraphData.push(val < 0 ? 0 : val);
   }
 
   // 8. Build smallSelfStakeRatioGraphData
-  const smallSelfStakeRatioGraphData = cacheData.small_graph.map((each) =>
-    each.average_self_stake_ratio < 0 ? 0 : each.average_self_stake_ratio
-  );
+  const smallSelfStakeRatioGraphData = smallGraph.map((each) => {
+    const ratio = Number(each?.average_self_stake_ratio) || 0;
+    return ratio < 0 ? 0 : ratio;
+  });
 
   // 9. Format validators and filter by cummulativeActiveSet
-  const validators: FormattedValidator[] = cacheData.validators
+  const validatorsArray = Array.isArray(cacheData.validators)
+    ? cacheData.validators
+    : [];
+  const validators: FormattedValidator[] = validatorsArray
     .filter((v) => cummulativeActiveSet.has(v.pubkey))
     .map((v, index) => ({
       id: index,
@@ -160,7 +172,7 @@ export function getFormattedCacheData(
     metrics,
     delegationData,
     soldData,
-    priceData: cacheData.price_graph,
+    priceData: priceGraph,
     smallSelfStakeAmountGraphData,
     smallSelfStakeRatioGraphData,
     cummulativeActiveSet,

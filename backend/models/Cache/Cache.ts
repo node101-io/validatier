@@ -139,6 +139,9 @@ cacheSchema.statics.saveCacheForChain = async function (
           bottom_timestamp: bottomTimestamp,
           top_timestamp: topTimestamp,
         }, (err, summaryGraphData) => {
+          if (err) {
+            console.error(`[Cache.saveCacheForChain] getSummaryGraphData error for interval ${eachDateRangeKey}:`, err);
+          }
           resolve({ err: err, summaryGraphData: summaryGraphData });
         })
       }),
@@ -213,6 +216,14 @@ cacheSchema.statics.saveCacheForChain = async function (
       return callback(JSON.stringify(results.find((eachResult) => eachResult.status === 'rejected')?.reason), null);
     }
 
+    // Correct percentage_sold to be additive using summary graph's final point
+    const baseSummaryData = rankValidatorsResult.value.results?.summary_data as any;
+    const sg = (summaryGraphResults.value.summaryGraphData as unknown) as any[] || [];
+    const lastPoint = sg.length > 0 ? sg[sg.length - 1] : null;
+    const correctedSummaryData = lastPoint
+      ? { ...baseSummaryData, percentage_sold: Math.min(Math.max(Number(lastPoint.percentage_sold) || 0, 0), 100) }
+      : baseSummaryData;
+
     const updateResult = await Cache.updateOne({
       chain_identifier: chain.name,
       interval: eachDateRangeKey
@@ -221,7 +232,7 @@ cacheSchema.statics.saveCacheForChain = async function (
         chain_identifier: chain.name,
         interval: eachDateRangeKey,
         validators: rankValidatorsResult.value.results?.validators,
-        summary_data: rankValidatorsResult.value.results?.summary_data,
+        summary_data: correctedSummaryData,
         summary_graph: summaryGraphResults.value.summaryGraphData,
         small_graph: smallGraphResults.value.smallGraphData,
         price_graph: priceGraphResults.value.priceGraphData,
@@ -269,6 +280,9 @@ cacheSchema.statics.generateCacheData = async function (
       Validator.rankValidators(
         { sort_by: 'percentage_sold', order: 'asc', bottom_timestamp, top_timestamp, chain_identifier },
         (err, results) => {
+          if (err) {
+            console.error(`[Cache.generateCacheData] rankValidators error:`, err);
+          }
           resolve({ err: err, results: results });
         }
       )
@@ -282,6 +296,9 @@ cacheSchema.statics.generateCacheData = async function (
         bottom_timestamp,
         top_timestamp,
       }, (err, summaryGraphData) => {
+        if (err) {
+          console.error(`[Cache.generateCacheData] getSummaryGraphData error:`, err);
+        }
         resolve({ err: err, summaryGraphData: summaryGraphData });
       })
     }),
@@ -294,6 +311,9 @@ cacheSchema.statics.generateCacheData = async function (
         bottom_timestamp,
         top_timestamp
       }, (err, smallGraphData) => {
+        if (err) {
+          console.error(`[Cache.generateCacheData] getSmallGraphData error:`, err);
+        }
         resolve({ err: err, smallGraphData: smallGraphData });
       })
     }),
@@ -305,6 +325,9 @@ cacheSchema.statics.generateCacheData = async function (
         bottom_timestamp,
         top_timestamp
       }, (err, priceGraphData) => {
+        if (err) {
+          console.error(`[Cache.generateCacheData] getPriceGraphData error:`, err);
+        }
         resolve({ err: err, priceGraphData: priceGraphData });
       })
     }),
@@ -317,6 +340,9 @@ cacheSchema.statics.generateCacheData = async function (
         bottom_timestamp,
         top_timestamp
       }, (err, cummulativeActiveList) => {
+        if (err) {
+          console.error(`[Cache.generateCacheData] getCummulativeActiveListByRange error:`, err);
+        }
         resolve({ err: err, cummulativeActiveList: cummulativeActiveList })
       })
     }),
@@ -331,6 +357,9 @@ cacheSchema.statics.generateCacheData = async function (
         top_timestamp,
         chain_identifier
       }, (err, rangeToCsvDataMapping) => {
+        if (err) {
+          console.error(`[Cache.generateCacheData] exportCsvForAllRanges error:`, err);
+        }
         resolve({ err: err, rangeToCsvDataMapping: rangeToCsvDataMapping })
       })
     })
@@ -356,22 +385,31 @@ cacheSchema.statics.generateCacheData = async function (
     return callback(JSON.stringify(results.find((eachResult) => eachResult.status === 'rejected')?.reason), null);
   }
 
-  if (
-    !rankValidatorsResult.value.results?.validators ||
-    !rankValidatorsResult.value.results?.summary_data ||
-    !summaryGraphResults.value.summaryGraphData ||
-    !smallGraphResults.value.smallGraphData ||
-    !priceGraphResults.value.priceGraphData ||
-    !cummulativeActiveListResult.value.cummulativeActiveList ||
-    !exportCsvForAllRangesResult.value.rangeToCsvDataMapping
-  ) {
-    return callback('incomplete_data', null);
+  const missingData = [];
+  if (!rankValidatorsResult.value.results?.validators) missingData.push('validators');
+  if (!rankValidatorsResult.value.results?.summary_data) missingData.push('summary_data');
+  if (!summaryGraphResults.value.summaryGraphData) missingData.push('summaryGraphData');
+  if (!smallGraphResults.value.smallGraphData) missingData.push('smallGraphData');
+  if (!priceGraphResults.value.priceGraphData) missingData.push('priceGraphData');
+  if (!cummulativeActiveListResult.value.cummulativeActiveList) missingData.push('cummulativeActiveList');
+  if (!exportCsvForAllRangesResult.value.rangeToCsvDataMapping) missingData.push('rangeToCsvDataMapping');
+
+  if (missingData.length > 0) {
+    console.error(`[Cache.generateCacheData] Missing data for custom range (${bottom_timestamp} - ${top_timestamp}):`, missingData);
+    return callback(`incomplete_data: ${missingData.join(', ')}`, null);
   }
 
   const cacheData = {
     chain_identifier,
-    validators: rankValidatorsResult.value.results.validators,
-    summary_data: rankValidatorsResult.value.results.summary_data,
+    validators: rankValidatorsResult.value.results!.validators,
+    // Use additive percentage_sold from summary graph's last cumulative point
+    summary_data: (() => {
+      const base = rankValidatorsResult.value.results!.summary_data as any;
+      const sg = summaryGraphResults.value.summaryGraphData as unknown as any[];
+      const last = Array.isArray(sg) && sg.length > 0 ? sg[sg.length - 1] : null;
+      if (!last) return base;
+      return { ...base, percentage_sold: Math.min(Math.max(Number(last.percentage_sold) || 0, 0), 100) };
+    })(),
     summary_graph: summaryGraphResults.value.summaryGraphData,
     small_graph: smallGraphResults.value.smallGraphData,
     price_graph: priceGraphResults.value.priceGraphData,
@@ -387,14 +425,14 @@ cacheSchema.statics.getFormattedCacheForChain = async function (
   callback: Parameters<CacheModel['getFormattedCacheForChain']>[1]
 ) {
   const { chain_identifier, interval, bottom_timestamp, top_timestamp } = body;
-  
+
   // Predefined intervals that have cached data
   const predefinedIntervals = ['all_time', 'last_90_days', 'last_180_days', 'last_365_days'];
   const intervalToUse = interval || 'last_365_days';
-  
+
   // Check if this is a predefined interval with cached data
   const isCustomRange = !predefinedIntervals.includes(intervalToUse);
-  
+
   if (isCustomRange) {
     // Custom date range - generate fresh data without caching
     Cache.generateCacheData(
@@ -434,8 +472,26 @@ cacheSchema.statics.getFormattedCacheForChain = async function (
         }
 
         const cacheData = cacheResults[0];
+        // Adjust summary percentage on-the-fly for legacy caches using graph's last cumulative percentage
+        const adjustedCacheData = (() => {
+          try {
+            const sg: any[] = ((cacheData as any).summary_graph as unknown as any[]) || [];
+            const last = Array.isArray(sg) && sg.length > 0 ? sg[sg.length - 1] : null;
+            if (!last) return cacheData;
+            const fixed = {
+              ...(cacheData as any)._doc ? { ...(cacheData as any)._doc } : { ...(cacheData as any) }
+            };
+            fixed.summary_data = {
+              ...(fixed.summary_data || {}),
+              percentage_sold: Math.min(Math.max(Number(last.percentage_sold) || 0, 0), 100)
+            };
+            return fixed as any;
+          } catch {
+            return cacheData as any;
+          }
+        })();
         const formattedData = getFormattedCacheData(
-          cacheData,
+          adjustedCacheData as any,
           bottom_timestamp,
           top_timestamp
         );
