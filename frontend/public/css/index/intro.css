@@ -37,6 +37,9 @@
   margin-bottom: calc(-100px - var(--header-main-wrapper-height));
   position: relative;
   overflow: hidden;
+  /* Create a new paint layer and hint upcoming transforms from Framer Motion */
+  contain: paint;
+  will-change: transform;
   transition: min-height var(--intro-transition-duration) ease, max-height var(--intro-transition-duration) ease;
 }
 
@@ -71,6 +74,8 @@
   #inner-main-wrapper {
     transition: margin-top var(--intro-transition-duration) ease, opacity var(--intro-transition-duration) ease var(--intro-transition-duration);
     opacity: 1;
+    /* Anticipate margin-top/opacity changes during mobile toggle */
+    will-change: margin-top, opacity;
   }
 
   .intro-continue-button {
@@ -87,6 +92,8 @@
     align-items: center;
     justify-content: center;
     font-size: 18px;
+    /* AnimatePresence toggles opacity/height; hint compositor */
+    will-change: opacity, height, margin-top;
   }
 
   /* Visual container for orbits + SVG - Base mobile rules */
@@ -161,6 +168,8 @@
   overflow: hidden;
   display: flex;
   justify-content: center;
+  /* Isolate background painting/layout from page */
+  contain: layout paint;
 }
 
 #intro-svg {
@@ -170,6 +179,9 @@
   justify-self: center;
   margin-top: 40px;
   overflow: visible;
+  /* Hint that transforms/opacities may change during intro sequence */
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 @media only screen and (max-width: 640px) {

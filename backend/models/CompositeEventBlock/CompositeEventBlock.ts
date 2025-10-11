@@ -232,8 +232,8 @@ compositeEventBlockSchema.statics.getPeriodicDataForGraphGeneration = function (
         const reward = (record.mostRecentRecord.reward_prefix_sum - (record.leastRecentRecord.reward_prefix_sum || 0)) + (record.leastRecentRecord.reward || 0);
 
         const outflow = Math.max((balanceChange) * -1, 0);
-        const availableToSell = Math.max((reward || 0) + (commission || 0) - Math.max(totalSelfStake, 0), 0);
-        const sold = Math.min(outflow, availableToSell);
+        // For validator detail graphs, show raw outflow as sold to match card value
+        const sold = outflow;
 
         mapping[record._id] = {
           total_stake: (totalStake || 0),

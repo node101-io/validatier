@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import "@/../public/css/index/intro.css";
 import { motion, useTransform, MotionValue, AnimatePresence } from "motion/react";
 import { useScrollContext } from "@/components/scroll/scroll-provider";

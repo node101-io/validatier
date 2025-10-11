@@ -576,9 +576,12 @@ validatorSchema.statics.getValidatorByOperatorAddress = function (
 
                     const outflow = Math.max((balance_change) * -1, 0);
                     const availableToSell = Math.max((reward + commission) - Math.max(self_stake, 0), 0);
-                    const sold = Math.min(outflow, availableToSell);
+                    // sold used for percentage and summaries should be capped by available rewards in range
+                    const sold_for_percentage = Math.min(outflow, availableToSell);
+                    // display sold should reflect raw outflow to allow warning when > total_withdraw
+                    const sold_display = outflow;
                     const percentage_sold = getPercentageSoldWithoutRounding({
-                        sold,
+                        sold: sold_for_percentage,
                         self_stake,
                         total_withdraw: reward + commission,
                     });
@@ -586,7 +589,7 @@ validatorSchema.statics.getValidatorByOperatorAddress = function (
                     return callback(null, {
                         ...validator,
                         percentage_sold: percentage_sold,
-                        sold: sold,
+                        sold: sold_display,
                         average_total_stake: average_total_stake,
                         reward: reward,
                         self_stake: self_stake,
@@ -696,12 +699,14 @@ validatorSchema.statics.rankValidators = function (
                 ((reward + commission) || 10 ** CHAIN_TO_DECIMALS_MAPPING[`${chain_identifier}`]);
             const outflow = Math.max((balance_change) * -1, 0);
             const availableToSell = Math.max((reward + commission) - Math.max(self_stake, 0), 0);
-            const sold = Math.min(outflow, availableToSell);
+            // Use capped value for percentages/totals, but raw outflow for display
+            const sold_for_percentage = Math.min(outflow, availableToSell);
+            const sold_display = outflow;
             const initial_sold =
                 ((initial_reward_prefix_sum + initial_commission_prefix_sum) || 0) - (initial_self_stake_prefix_sum || 0);
 
             const percentage_sold = getPercentageSoldWithoutRounding({
-                sold,
+                sold: sold_for_percentage,
                 self_stake,
                 total_withdraw: reward + commission,
             });
@@ -717,7 +722,7 @@ validatorSchema.statics.rankValidators = function (
                 100
             );
 
-            totalSold += sold;
+            totalSold += sold_for_percentage;
 
             const self_stake_ratio =
                 Math.min(Math.abs(self_stake / (total_stake || 1)), 1) * 100;
@@ -764,7 +769,7 @@ validatorSchema.statics.rankValidators = function (
                 initial_self_stake_ratio,
                 average_total_stake: average_total_stake,
                 ratio: ratio,
-                sold: sold,
+                sold: sold_display,
             };
 
             valueArray.push(pushObjectData);

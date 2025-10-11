@@ -165,7 +165,7 @@ export default async function ValidatorPage({
                   leftColumn={
                     <>
                       <div className="flex text-xl font-normal text-[#7c70c3] text-nowrap items-center">
-                        Self Stake
+                        Self Stake Change
                       </div>
                       <div
                         className="text-[28px] font-bold text-[#49306f] leading-3 mb-0.5 text-nowrap"
