@@ -10,6 +10,7 @@ export interface FormattedValidator {
   sold?: number;
   average_total_stake?: number;
   self_stake?: number;
+  initial_self_stake_prefix_sum?: number;
   commission: number;
   total_withdraw?: number;
 }
@@ -140,6 +141,7 @@ export function getFormattedCacheData(
       sold: v.sold,
       average_total_stake: v.average_total_stake,
       self_stake: v.self_stake,
+      initial_self_stake_prefix_sum: v.initial_self_stake_prefix_sum,
       commission: Number(v.commission_rate) * 100,
       total_withdraw: v.total_withdraw,
     }));

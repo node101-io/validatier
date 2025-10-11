@@ -9,6 +9,7 @@ export default interface Validator {
   average_total_stake?: number;
   reward?: number;
   self_stake?: number;
+  initial_self_stake_prefix_sum?: number;
   commission?: number;
   pubkey: string;
 }

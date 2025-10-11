@@ -217,7 +217,7 @@ cacheSchema.statics.saveCacheForChain = async function (
     }
 
     // Correct percentage_sold to be additive using summary graph's final point
-    const baseSummaryData = rankValidatorsResult.value.results?.summary_data as any;
+    const baseSummaryData = rankValidatorsResult.value.results?.summary_data;
     const sg = (summaryGraphResults.value.summaryGraphData as unknown) as any[] || [];
     const lastPoint = sg.length > 0 ? sg[sg.length - 1] : null;
     const correctedSummaryData = lastPoint
@@ -404,8 +404,8 @@ cacheSchema.statics.generateCacheData = async function (
     validators: rankValidatorsResult.value.results!.validators,
     // Use additive percentage_sold from summary graph's last cumulative point
     summary_data: (() => {
-      const base = rankValidatorsResult.value.results!.summary_data as any;
-      const sg = summaryGraphResults.value.summaryGraphData as unknown as any[];
+      const base = rankValidatorsResult.value.results!.summary_data;
+      const sg = summaryGraphResults.value.summaryGraphData;
       const last = Array.isArray(sg) && sg.length > 0 ? sg[sg.length - 1] : null;
       if (!last) return base;
       return { ...base, percentage_sold: Math.min(Math.max(Number(last.percentage_sold) || 0, 0), 100) };
@@ -475,23 +475,20 @@ cacheSchema.statics.getFormattedCacheForChain = async function (
         // Adjust summary percentage on-the-fly for legacy caches using graph's last cumulative percentage
         const adjustedCacheData = (() => {
           try {
-            const sg: any[] = ((cacheData as any).summary_graph as unknown as any[]) || [];
+            const sg = ((cacheData).summary_graph) || [];
             const last = Array.isArray(sg) && sg.length > 0 ? sg[sg.length - 1] : null;
             if (!last) return cacheData;
-            const fixed = {
-              ...(cacheData as any)._doc ? { ...(cacheData as any)._doc } : { ...(cacheData as any) }
-            };
-            fixed.summary_data = {
-              ...(fixed.summary_data || {}),
+            cacheData.summary_data = {
+              ...(cacheData.summary_data || {}),
               percentage_sold: Math.min(Math.max(Number(last.percentage_sold) || 0, 0), 100)
             };
-            return fixed as any;
+            return cacheData;
           } catch {
-            return cacheData as any;
+            return cacheData;
           }
         })();
         const formattedData = getFormattedCacheData(
-          adjustedCacheData as any,
+          adjustedCacheData,
           bottom_timestamp,
           top_timestamp
         );

@@ -44,9 +44,9 @@ export function getFormattedValidatorPageData(
   const activeValidators = cacheValidators.filter((v) => cummulativeActiveSet.has(v.pubkey));
 
   // 3. Calculate ranks based on active validators only
-  const selfStake = validator.self_stake ?? 0;
+  const selfStake = (validator.self_stake ?? 0) + (validator.initial_self_stake_prefix_sum ?? 0);
   const selfStakeRank =
-    1 + activeValidators.filter((v) => (v.self_stake ?? 0) > selfStake).length;
+    1 + activeValidators.filter((v) => ((v.self_stake ?? 0) + (v.initial_self_stake_prefix_sum ?? 0)) > selfStake).length;
 
   const myPct = validator.percentage_sold ?? Number.POSITIVE_INFINITY;
   const percentageSoldRank =

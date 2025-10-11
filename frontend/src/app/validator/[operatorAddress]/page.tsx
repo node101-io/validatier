@@ -165,23 +165,27 @@ export default async function ValidatorPage({
                   leftColumn={
                     <>
                       <div className="flex text-xl font-normal text-[#7c70c3] text-nowrap items-center">
-                        Self Stake Change
+                        Total Self Stake
                       </div>
                       <div
                         className="text-[28px] font-bold text-[#49306f] leading-3 mb-0.5 text-nowrap"
                         id="summary-self-stake-amount-native"
                       >
-                        {formattedData.validator.self_stake
-                          ? `${formatAtom(formattedData.validator.self_stake)} ATOM`
-                          : "0 ATOM"}
+                        {(() => {
+                          const initial = (formattedData.validator).initial_self_stake_prefix_sum ?? 0;
+                          const total = Math.max((formattedData.validator.self_stake ?? 0) + initial, 0);
+                          return `${formatAtom(total)} ATOM`;
+                        })()}
                       </div>
                       <div
                         className="font-medium text-[20px] text-[#7c70c3]"
                         id="summary-self-stake-amount-usd"
                       >
-                        {formattedData.validator.self_stake
-                          ? `$${formatAtomUSD(formattedData.validator.self_stake, price)}`
-                          : "$0"}
+                        {(() => {
+                          const initial = (formattedData.validator).initial_self_stake_prefix_sum ?? 0;
+                          const total = Math.max((formattedData.validator.self_stake ?? 0) + initial, 0);
+                          return `$${formatAtomUSD(total, price)}`;
+                        })()}
                       </div>
                     </>
                   }

@@ -76,6 +76,7 @@ export interface ValidatorWithMetricsInterface extends ValidatorInterface {
     average_total_stake: number;
     reward: number;
     self_stake: number;
+    initial_self_stake_prefix_sum?: number;
     commission: number;
     total_stake: number;
     total_withdraw: number;
@@ -593,6 +594,7 @@ validatorSchema.statics.getValidatorByOperatorAddress = function (
                         average_total_stake: average_total_stake,
                         reward: reward,
                         self_stake: self_stake,
+                        initial_self_stake_prefix_sum: record?.initial_self_stake_prefix_sum || 0,
                         commission: commission,
                         total_stake: total_stake,
                         total_withdraw: reward + commission,
@@ -1016,14 +1018,14 @@ validatorSchema.statics.getSummaryGraphData = function (
                     },
                     (err, mapping) => {
                         if (err || !mapping)
-                            return resolve({ index, sold: 0, reward: 0, commission: 0, self_stake: 0, total_stake_sum: 0, timestamp: end } as any);
+                            return resolve({ index, sold: 0, reward: 0, commission: 0, self_stake: 0, total_stake_sum: 0, timestamp: end });
                         let soldSum = 0;
                         let rewardSum = 0;
                         let commissionSum = 0;
                         let selfStakeSum = 0;
                         let totalStakeSum = 0;
                         for (const op of Object.keys(mapping)) {
-                            const rec = (mapping as any)[op] || {};
+                            const rec = mapping[op] || {};
                             const reward = rec.reward || 0;
                             const commission = rec.commission || 0;
                             const self_stake = rec.self_stake || 0;
@@ -1038,7 +1040,7 @@ validatorSchema.statics.getSummaryGraphData = function (
                             selfStakeSum += self_stake;
                             totalStakeSum += total_stake;
                         }
-                        return resolve({ index, sold: soldSum, reward: rewardSum, commission: commissionSum, self_stake: selfStakeSum, total_stake_sum: totalStakeSum, timestamp: end } as any);
+                        return resolve({ index, sold: soldSum, reward: rewardSum, commission: commissionSum, self_stake: selfStakeSum, total_stake_sum: totalStakeSum, timestamp: end });
                     }
                 );
             })
@@ -1055,7 +1057,7 @@ validatorSchema.statics.getSummaryGraphData = function (
                         let bucketCommission = 0;
                         let bucketSelfStake = 0;
                         for (const op of Object.keys(mapping)) {
-                            const rec = (mapping as any)[op] || {};
+                            const rec = (mapping)[op] || {};
                             const reward = rec.reward || 0;
                             const commission = rec.commission || 0;
                             const self_stake = rec.self_stake || 0;
@@ -1078,14 +1080,14 @@ validatorSchema.statics.getSummaryGraphData = function (
     Promise.all([Promise.all(cumulativePromises), Promise.all(additivePromises)])
         .then(([bucketResults, additiveResults]) => {
             // Sort bucket results by index to build cumulative series
-            (bucketResults as any[]).sort((a, b) => a.index - b.index);
-            (additiveResults as any[]).sort((a, b) => a.index - b.index);
+            (bucketResults).sort((a, b) => a.index - b.index);
+            (additiveResults).sort((a, b) => a.index - b.index);
 
-            const result: any[] = [];
+            const result = [];
             let lastValue: any = null;
 
             for (let i = 0; i < numberOfDataPoints; i++) {
-                const br: any = (bucketResults as any[])[i] || {
+                const br = (bucketResults)[i] || {
                     index: i,
                     sold: 0,
                     reward: 0,
@@ -1123,7 +1125,7 @@ validatorSchema.statics.getSummaryGraphData = function (
             let addCommission = 0;
             let addSelfStake = 0;
             for (let i = 0; i < numberOfDataPoints; i++) {
-                const ar: any = (additiveResults as any[])[i] || { sold: 0, reward: 0, commission: 0, self_stake: 0 };
+                const ar: any = (additiveResults)[i] || { sold: 0, reward: 0, commission: 0, self_stake: 0 };
                 addSold += ar.sold || 0;
                 addReward += ar.reward || 0;
                 addCommission += ar.commission || 0;
@@ -1288,7 +1290,7 @@ validatorSchema.statics.getValidatorGraphData = function (
                         index: i,
                     },
                     (err, result) => {
-                        const mapping = result || {} as any;
+                        const mapping = result || {};
                         const values = mapping[operator_address] || {};
                         const total_stake = values.total_stake || 0;
                         const total_sold = values.total_sold || 0;

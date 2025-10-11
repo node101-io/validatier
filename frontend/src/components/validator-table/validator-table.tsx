@@ -58,7 +58,7 @@ const sortableHeaders = [
   {
     field: "selfStake" as const,
     label: "Self Stake",
-    tooltip: "Validator's own stake on itself",
+    tooltip: "Validator's own stake on itself (initial + delta)",
   },
 ];
 
@@ -158,10 +158,13 @@ export default function ValidatorTable({
           aValue = a.sold ?? 0;
           bValue = b.sold ?? 0;
           break;
-        case "selfStake":
-          aValue = a.self_stake ?? 0;
-          bValue = b.self_stake ?? 0;
+        case "selfStake": {
+          const aInitial = a.initial_self_stake_prefix_sum ?? 0;
+          const bInitial = b.initial_self_stake_prefix_sum ?? 0;
+          aValue = (a.self_stake ?? 0) + aInitial;
+          bValue = (b.self_stake ?? 0) + bInitial;
           break;
+        }
         default:
           return 0;
       }
@@ -387,13 +390,19 @@ export default function ValidatorTable({
                   <td className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1">
                     {/* Self Stake */}
                     <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
-                      {validator.self_stake && validator.self_stake > 0
-                        ? formatAtom(validator.self_stake, 1)
-                        : "0"}{" "}
+                      {(() => {
+                        const initial = validator.initial_self_stake_prefix_sum ?? 0;
+                        const total = (validator.self_stake ?? 0) + initial;
+                        return total > 0 ? formatAtom(total, 1) : "0";
+                      })()} {" "}
                       ATOM
                     </div>
                     <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
-                      {`$${validator.self_stake && validator.self_stake > 0 ? formatAtomUSD(validator.self_stake, price, 1) : 0}`}
+                      {(() => {
+                        const initial = validator.initial_self_stake_prefix_sum ?? 0;
+                        const total = (validator.self_stake ?? 0) + initial;
+                        return `$${total > 0 ? formatAtomUSD(total, price, 1) : 0}`;
+                      })()}
                     </div>
                   </td>
                 </tr>
