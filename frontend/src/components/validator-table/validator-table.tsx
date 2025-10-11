@@ -226,8 +226,8 @@ export default function ValidatorTable({
         <div className="pt-3 pb-4 overflow-x-auto lg:overflow-visible">
           <table className="w-full min-w-[900px] table-fixed border-collapse">
             <thead>
-              <tr className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] sm:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-3 mb-3">
-                <th className="flex mb-1 items-center sm:w-full justify-start text-left text-[#7c70c3] font-semibold gap-0 text-base lg:text-lg whitespace-nowrap sticky left-0 -ml-5 pl-5 z-20 bg-[#f5f5ff] lg:bg-transparent select-none">
+              <tr className="grid grid-cols-[20fr_14fr_14fr_10fr_12fr_11fr] items-center w-full pl-6 pr-2 gap-3 mb-3">
+                <th className="flex w-full mb-1 items-center justify-start text-left text-[#7c70c3] font-semibold gap-0 text-base lg:text-lg whitespace-nowrap sticky left-0 -ml-6 pl-6 z-20 bg-[#f5f5ff] lg:bg-transparent select-none">
                   Name
                 </th>
                 {sortableHeaders.map((header) => (
@@ -247,12 +247,12 @@ export default function ValidatorTable({
               {filteredAndSortedValidators.map((validator, index) => (
                 <tr
                   key={validator.operator_address}
-                  className="grid grid-cols-[140px_1fr_1fr_1fr_1fr_1fr] lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr_1fr] items-center w-full px-5 gap-5 py-0 my-2.5 lg:my-0 lg:py-1.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
+                  className="grid grid-cols-[20fr_14fr_14fr_10fr_12fr_11fr] items-center w-full pl-6 pr-2 gap-3 py-0 my-2.5 lg:my-0 lg:py-1.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
                   onClick={() => {
                     router.push(`/validator/${validator.operator_address}`);
                   }}
                 >
-                  <td className="flex items-center justify-start gap-4.5 h-full lg:h-full sticky left-0 -ml-5 pl-5 z-10 bg-[#f5f5ff] lg:bg-transparent overflow-hidden">
+                  <td className="flex w-full items-center justify-start gap-4.5 h-full lg:h-full sticky left-0 -ml-6 pl-6 z-10 bg-[#f5f5ff] lg:bg-transparent overflow-hidden">
                     {/* Name */}
                     <div
                       className={`flex items-center relative ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"} gap-2.5 aspect-square size-7.5 shrink-0`}

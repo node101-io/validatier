@@ -92,7 +92,7 @@ export default function Inner({
         className="flex flex-col w-full gap-5 mb-2.5"
         id="network-summary-main-wrapper"
       >
-        <div className="text-xl font-normal text-[#7c70c3] px-5 lg:px-0">
+        <div className="text-xl font-normal text-[#7c70c3] px-5 lg:px-0 max-sm:!opacity-0">
           Network Summary
         </div>
         <div className="flex flex-row flex-nowrap justify-between gap-5 overflow-y-hidden overflow-x-scroll md:overflow-x-visible no-scrollbar px-5 lg:px-0 ml-0">

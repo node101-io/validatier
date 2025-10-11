@@ -26,7 +26,7 @@ export default function ScrollProvider({
 
   return (
     <div className="flex flex-col items-center relative overflow-hidden h-screen w-full">
-      <div ref={containerRef} className={className}>
+      <div ref={containerRef} className={className} id="scroll-container">
         <ScrollContext.Provider value={{ scrollY }}>
           {children}
         </ScrollContext.Provider>
