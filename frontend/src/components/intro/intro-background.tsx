@@ -5,42 +5,44 @@ export default function IntroBackgroundSVG() {
     <svg
       id="intro-svg"
       width="1440"
-      height="550"
-      viewBox="0 0 1440 550"
+      height="545"
+      viewBox="0 0 1440 545"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      style={{
-        width: "100%",
-        height: "105%",
-        display: "block"
-      }}
+      xmlnsXlink="http://www.w3.org/1999/xlink"
     >
       <path
+        id="orbit-path-1"
         d="M1114.55 531.875c217.9 0 394.55-118.903 394.55-265.577S1332.45.721 1114.55.721c-217.912 0-394.561 118.903-394.561 265.577s176.649 265.577 394.561 265.577Z"
         stroke="url(#a)"
         strokeMiterlimit="10"
       />
       <path
+        id="orbit-path-2"
         d="M984.874 532.621c217.906 0 394.556-118.903 394.556-265.577S1202.78 1.467 984.874 1.467c-217.908 0-394.556 118.903-394.556 265.577s176.648 265.577 394.556 265.577Z"
         stroke="url(#b)"
         strokeMiterlimit="10"
       />
       <path
+        id="orbit-path-3"
         d="M807.545 532.621c217.905 0 394.555-118.903 394.555-265.577S1025.45 1.467 807.545 1.467c-217.907 0-394.556 118.903-394.556 265.577s176.649 265.577 394.556 265.577Z"
         stroke="url(#c)"
         strokeMiterlimit="10"
       />
       <path
+        id="orbit-path-4"
         d="M630.216 532.621c217.908 0 394.554-118.903 394.554-265.577S848.124 1.467 630.216 1.467 235.66 120.37 235.66 267.044s176.649 265.577 394.556 265.577Z"
         stroke="url(#d)"
         strokeMiterlimit="10"
       />
       <path
+        id="orbit-path-5"
         d="M452.888 532.621c217.907 0 394.556-118.903 394.556-265.577S670.795 1.467 452.888 1.467C234.98 1.467 58.331 120.37 58.331 267.044S234.98 532.621 452.888 532.621Z"
         stroke="url(#e)"
         strokeMiterlimit="10"
       />
       <path
+        id="orbit-path-6"
         d="M324.324 532.621c217.908 0 394.557-118.903 394.557-265.577S542.232 1.467 324.324 1.467c-217.907 0-394.556 118.903-394.556 265.577s176.649 265.577 394.556 265.577Z"
         stroke="url(#f)"
         strokeMiterlimit="10"
@@ -50,6 +52,39 @@ export default function IntroBackgroundSVG() {
         stroke="url(#g)"
         strokeMiterlimit="10"
       />
+      {/* Animated orbiters following each path */}
+      <g id="orbiters">
+        <circle r="5" fill="#FFFFFF">
+          <animateMotion dur="120s" repeatCount="indefinite">
+            <mpath xlinkHref="#orbit-path-1" />
+          </animateMotion>
+        </circle>
+        <circle r="5" fill="#F1F1FF">
+          <animateMotion dur="120s" begin="-20s" repeatCount="indefinite">
+            <mpath xlinkHref="#orbit-path-2" />
+          </animateMotion>
+        </circle>
+        <circle r="5" fill="#E6E6FF">
+          <animateMotion dur="120s" begin="-40s" repeatCount="indefinite">
+            <mpath xlinkHref="#orbit-path-3" />
+          </animateMotion>
+        </circle>
+        <circle r="5" fill="#DADAFE">
+          <animateMotion dur="120s" begin="-60s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1">
+            <mpath xlinkHref="#orbit-path-4" />
+          </animateMotion>
+        </circle>
+        <circle r="5" fill="#CFCFFF">
+          <animateMotion dur="120s" begin="-80s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1">
+            <mpath xlinkHref="#orbit-path-5" />
+          </animateMotion>
+        </circle>
+        <circle r="5" fill="#C4C4FF">
+          <animateMotion dur="120s" begin="-100s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1">
+            <mpath xlinkHref="#orbit-path-6" />
+          </animateMotion>
+        </circle>
+      </g>
       <defs>
         <linearGradient
           id="a"

@@ -56,28 +56,7 @@ export default function Intro() {
       style={{ y }}
     >
       <div className="intro-main-background-content">
-        <div className="intro-visual">
-          <div className="animate-star-3d"></div>
-          <div className="animate-star orbit-1"></div>
-          <div className="animate-star orbit-2"></div>
-          <div className="animate-star orbit-3"></div>
-          <div className="animate-star orbit-4"></div>
-          <div className="animate-star orbit-5"></div>
-          <div className="animate-star orbit-6"></div>
-          <div
-            className="intro-image-wrapper"
-            style={{
-              position: "relative",
-              width: "calc(40dvh * 1440 / 525)",
-              height: "calc(40dvh)",
-              aspectRatio: "1440 / 525",
-              marginLeft: "auto",
-              marginRight: "auto",
-            }}
-          >
-            <IntroBackgroundSVG />
-          </div>
-        </div>
+        <IntroBackgroundSVG />
       </div>
       <div className="intro-main-wrapper-title-wrapper">
         <div>THE VALIDATOR&apos;S</div>
