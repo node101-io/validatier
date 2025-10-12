@@ -89,9 +89,16 @@ const baseOptions = (group: string): ApexOptions => ({
     type: "gradient",
     gradient: {
       shadeIntensity: 0,
-      opacityFrom: 0.15,
-      opacityTo: 0.02,
-      stops: [0, 90, 100],
+      opacityFrom: 0.8,
+      opacityTo: 0.1,
+      stops: [0, 100],
+      gradientToColors: ["#FF6B6B"], // Yukarıdan aşağıya gradient için ikinci renk
+      type: "vertical", // Yukarıdan aşağıya gradient
+    },
+  },
+  plotOptions: {
+    area: {
+      fillTo: "end",
     },
   },
   legend: { show: false },
@@ -120,6 +127,17 @@ const optionsDelegation = {
     ...baseOptions("ns-shared").chart,
     id: "chart-delegation",
     group: "ns-shared",
+  },
+  fill: {
+    type: "gradient",
+    gradient: {
+      shadeIntensity: 0,
+      opacityFrom: 0.6,
+      opacityTo: 0.1,
+      stops: [0, 100],
+      gradientToColors: ["#FFB84D"], // Orange gradient
+      type: "vertical",
+    },
   },
   grid: {
     ...baseOptions("ns-shared").grid,
@@ -158,6 +176,17 @@ const optionsSold = {
     id: "chart-sold",
     group: "ns-shared",
   },
+  fill: {
+    type: "gradient",
+    gradient: {
+      shadeIntensity: 0,
+      opacityFrom: 0.6,
+      opacityTo: 0.1,
+      stops: [0, 100],
+      gradientToColors: ["#8B7ED8"], // Purple gradient
+      type: "vertical",
+    },
+  },
   grid: {
     ...baseOptions("ns-shared").grid,
     padding: { left: 0, right: 0, top: -2, bottom: 0 },
@@ -193,6 +222,17 @@ const optionsPrice = {
     ...baseOptions("ns-shared").chart,
     id: "chart-price",
     group: "ns-shared",
+  },
+  fill: {
+    type: "gradient",
+    gradient: {
+      shadeIntensity: 0,
+      opacityFrom: 0.6,
+      opacityTo: 0.1,
+      stops: [0, 100],
+      gradientToColors: ["#5BC0EB"], // Blue gradient
+      type: "vertical",
+    },
   },
   grid: {
     ...baseOptions("ns-shared").grid,

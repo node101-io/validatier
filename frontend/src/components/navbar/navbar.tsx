@@ -29,7 +29,9 @@ export default function Navbar({
   const [searchValue, setSearchValue] = useState<string>("");
   const [searchFocused, setSearchFocused] = useState<boolean>(false);
   const [mobileLogoActive, setMobileLogoActive] = useState<boolean>(false);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
   const blurTimeoutRef = useRef<number | null>(null);
+  const searchTimeoutRef = useRef<number | null>(null);
 
   const heightClass = "h-[80px]";
 
@@ -60,6 +62,18 @@ export default function Navbar({
     }
   }, [scrollY, introHeight]);
 
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (blurTimeoutRef.current) {
+        window.clearTimeout(blurTimeoutRef.current);
+      }
+      if (searchTimeoutRef.current) {
+        window.clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const backgroundClass = useMemo(() => {
     if (isValidatorPage) return "after:bg-white";
     return pastIntro
@@ -74,7 +88,7 @@ export default function Navbar({
 
   const brandFill = isValidatorPage || pastIntro ? "#250754" : "#f5f5ff";
   const showSearch = !isValidatorPage && pastIntro;
-  const mobileShowsSmallLogo = isValidatorPage || (showSearch && mobileLogoActive);
+  const mobileShowsSmallLogo = isValidatorPage || (showSearch && mobileLogoActive && !isSearching);
 
   return (
     <div
@@ -139,6 +153,8 @@ export default function Navbar({
             className={`text-xl font-[500] border-1 ml-auto ${
               showSearch ? "visible opacity-100" : "invisible opacity-0"
             } border-[#bebee7] text-[#7c70c3] !bg-[#f5f5ff] bg-[url(/res/images/search.svg)] bg-no-repeat transition-all duration-500 ease-in-out relative ${
+              isSearching ? "animate-pulse" : ""
+            } ${
               pastIntro
                 ? `${searchFocused ? "max-sm:w-full sm:w-[275px] max-sm:pl-10" : "max-sm:w-8 sm:w-[250px] max-sm:pl-8"} bg-position-[6px_5px] sm:bg-position-[13px_13px] max-sm:h-8 sm:h-11.5 rounded-xl sm:pl-10`
                 : "w-[250px] bg-position-[13px_13px] h-11.5 rounded-2xl pl-11.5 pb-1"
@@ -146,10 +162,24 @@ export default function Navbar({
             placeholder="Search Validator"
             value={searchValue}
             onChange={(e) => {
-              setSearchValue(e.target.value);
-              if (onSearchChange) {
-                onSearchChange(e.target.value);
+              const newValue = e.target.value;
+              setSearchValue(newValue);
+              
+              // Clear existing timeout
+              if (searchTimeoutRef.current) {
+                window.clearTimeout(searchTimeoutRef.current);
               }
+              
+              // Add bounce-back effect and debounced search
+              setIsSearching(true);
+              
+              searchTimeoutRef.current = window.setTimeout(() => {
+                if (onSearchChange) {
+                  onSearchChange(newValue);
+                }
+                setIsSearching(false);
+                searchTimeoutRef.current = null;
+              }, 300); // 300ms debounce
             }}
             onFocus={() => {
               setSearchFocused(true);
@@ -157,7 +187,10 @@ export default function Navbar({
                 window.clearTimeout(blurTimeoutRef.current);
                 blurTimeoutRef.current = null;
               }
-              setMobileLogoActive(true);
+              // Only activate mobile logo if not currently searching
+              if (!isSearching) {
+                setMobileLogoActive(true);
+              }
             }}
             onBlur={() => {
               setSearchFocused(false);
@@ -165,7 +198,10 @@ export default function Navbar({
                 window.clearTimeout(blurTimeoutRef.current);
               }
               blurTimeoutRef.current = window.setTimeout(() => {
-                setMobileLogoActive(false);
+                // Only deactivate mobile logo if not currently searching
+                if (!isSearching) {
+                  setMobileLogoActive(false);
+                }
                 blurTimeoutRef.current = null;
               }, 250);
             }}
