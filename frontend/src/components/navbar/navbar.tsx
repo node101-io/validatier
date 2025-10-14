@@ -78,7 +78,7 @@ export default function Navbar({
     if (isValidatorPage) return "after:bg-white";
     return pastIntro
       ? "after:bg-white"
-      : "after:bg-[linear-gradient(0deg,transparent_0%,rgba(46,74,122,0.8)_50%,rgba(46,74,122,1)_100%)]";
+      : "after:bg-[linear-gradient(0deg,hsla(216,47%,33%,0)0%,hsla(216,47%,33%,0.01)8.1%,hsla(216,47%,33%,0.04)15.5%,hsla(216,47%,33%,0.09)22.5%,hsla(216,47%,33%,0.16)29%,hsla(216,47%,33%,0.25)35.3%,hsla(216,47%,33%,0.36)41.2%,hsla(216,47%,33%,0.5)47.1%,hsla(216,47%,33%,0.64)52.9%,hsla(216,47%,33%,0.75)58.8%,hsla(216,47%,33%,0.84)64.7%,hsla(216,47%,33%,0.91)71%,hsla(216,47%,33%,0.96)77.5%,hsla(216,47%,33%,0.99)84.5%,hsla(216,47%,33%,1)91.9%,hsla(216,47%,33%,1)100%)]";
   }, [isValidatorPage, pastIntro]);
 
   const borderClass = useMemo(() => {
@@ -88,7 +88,8 @@ export default function Navbar({
 
   const brandFill = isValidatorPage || pastIntro ? "#250754" : "#f5f5ff";
   const showSearch = !isValidatorPage && pastIntro;
-  const mobileShowsSmallLogo = isValidatorPage || (showSearch && mobileLogoActive && !isSearching);
+  const mobileShowsSmallLogo =
+    isValidatorPage || (showSearch && mobileLogoActive && !isSearching);
 
   return (
     <div
@@ -156,23 +157,23 @@ export default function Navbar({
               isSearching ? "animate-pulse" : ""
             } ${
               pastIntro
-                ? `${searchFocused ? "max-sm:w-full sm:w-[275px] max-sm:pl-10" : "max-sm:w-8 sm:w-[250px] max-sm:pl-8"} bg-position-[6px_5px] sm:bg-position-[13px_13px] max-sm:h-8 sm:h-11.5 rounded-xl sm:pl-10`
-                : "w-[250px] bg-position-[13px_13px] h-11.5 rounded-2xl pl-11.5 pb-1"
+                ? `${searchFocused ? "max-sm:w-full sm:w-[250px] max-sm:pl-10" : "max-sm:w-8 sm:w-[200px] max-sm:pl-8"} bg-position-[6px_5px] sm:bg-position-[13px_13px] max-sm:h-8 sm:h-11.5 rounded-xl sm:pl-10`
+                : "w-[200px] bg-position-[13px_13px] h-11.5 rounded-2xl pl-11.5 pb-1"
             }`}
             placeholder="Search Validator"
             value={searchValue}
             onChange={(e) => {
               const newValue = e.target.value;
               setSearchValue(newValue);
-              
+
               // Clear existing timeout
               if (searchTimeoutRef.current) {
                 window.clearTimeout(searchTimeoutRef.current);
               }
-              
+
               // Add bounce-back effect and debounced search
               setIsSearching(true);
-              
+
               searchTimeoutRef.current = window.setTimeout(() => {
                 if (onSearchChange) {
                   onSearchChange(newValue);
@@ -209,6 +210,7 @@ export default function Navbar({
         </motion.div>
       )}
       <div
+        role="table"
         className={`flex items-start transition-all duration-1000 ${
           !pastIntro && !isValidatorPage ? "hidden sm:flex" : "flex"
         }`}

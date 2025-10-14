@@ -117,18 +117,10 @@ input {
   0% {
     transform: translateX(0);
   }
+  5% {
+    transform: translateX(0);
+  }
   100% {
     transform: translateX(-100%);
   }
-}
-
-.validators-table-validator-name {
-  animation: auto ease 0s 1 normal none running none;
-  display: inline-block;
-  will-change: transform;
-}
-
-.validators-table-validator-name.can-scroll:hover,
-.validator-moniker-text.can-scroll:hover {
-  animation: scrollText 10s linear infinite !important;
 }

@@ -13,7 +13,7 @@ export default function Intro() {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      setIsMobile(window.innerWidth <= 640);
     };
 
     checkMobile();
@@ -28,6 +28,7 @@ export default function Intro() {
     const container = document.getElementById("scroll-container");
     if (!container) return;
     if (!mobileNormal) {
+      container.scrollTo({ top: 0 });
       const prevOverflow = container.style.overflow;
       const prevTouchAction = container.style.touchAction as string;
       container.style.overflowY = "hidden";

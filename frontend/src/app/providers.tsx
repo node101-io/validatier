@@ -14,12 +14,12 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
           trickleSpeed: 50,
           minimum: 0.08,
           easing: 'ease',
-          speed: 200
+          speed: 220
         }}
         showOnShallow
-        startPosition={0.3}
-        stopDelayMs={1500}
-        delay={0}
+        startPosition={0.25}
+        stopDelayMs={250}
+        delay={120}
       />
     </>
   );

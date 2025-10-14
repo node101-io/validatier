@@ -4,10 +4,9 @@ import Validator from "@/types/validator";
 import {
   formatAtom,
   formatAtomUSD,
-  formatNumber,
   formatPercentage,
 } from "@/utils/format-numbers";
-import { useRouter } from "next13-progressbar";
+import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState, useMemo } from "react";
 import {
@@ -69,44 +68,63 @@ const SortableHeader = ({
   sortField,
   sortDirection,
   onSort,
-}: SortableHeaderProps) => (
-  <th className="flex items-center justify-between gap-2 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center select-none cursor-pointer">
-    <Tooltip>
-      <TooltipTrigger
-        className="flex items-center gap-1 cursor-pointer"
-        onClick={() => onSort(field)}
-      >
-        <Image src="/res/images/info.svg" alt="Info" width={14} height={14} />
-        <span className="whitespace-nowrap mb-1 font-medium">{label}</span>
-      </TooltipTrigger>
-      <TooltipContent
-        className="bg-[#2C2749] text-white text-xs py-1.5 px-2 rounded-md cursor-default"
-        side="top"
-      >
-        {tooltip}
-      </TooltipContent>
-    </Tooltip>
+}: SortableHeaderProps) => {
+  const ariaSort =
+    sortField === field
+      ? sortDirection === "asc"
+        ? "ascending"
+        : "descending"
+      : "none";
+
+  return (
     <div
-      className="hidden lg:flex flex-col items-center gap-0.5"
-      onClick={() => onSort(field)}
+      role="columnheader"
+      aria-sort={ariaSort}
+      className="flex items-center justify-between gap-2 text-[#7c70c3] font-semibold text-base lg:text-lg justify-self-center select-none"
     >
-      <span
-        className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[5px] ${
-          sortField === field && sortDirection === "asc"
-            ? "border-b-[#161616]"
-            : "border-b-[#B7A6C6]"
-        }`}
-      ></span>
-      <span
-        className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[5px] ${
-          sortField === field && sortDirection === "desc"
-            ? "border-t-[#161616]"
-            : "border-t-[#B7A6C6]"
-        }`}
-      ></span>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            className="flex items-center gap-1 cursor-pointer"
+            onClick={() => onSort(field)}
+          >
+            <Image src="/res/images/info.svg" alt="Info" width={14} height={14} className="mb-px"/>
+            <span className="whitespace-nowrap mb-1 font-medium">{label}</span>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent
+          className="bg-[#2C2749] text-white text-xs py-1.5 px-2 rounded-md cursor-default"
+          side="top"
+        >
+          {tooltip}
+        </TooltipContent>
+      </Tooltip>
+      <button
+        type="button"
+        aria-hidden
+        tabIndex={-1}
+        onClick={() => onSort(field)}
+        className="hidden lg:flex flex-col items-center gap-0.5 cursor-pointer"
+      >
+        <span
+          className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-b-[5px] ${
+            sortField === field && sortDirection === "asc"
+              ? "border-b-[#161616]"
+              : "border-b-[#B7A6C6]"
+          }`}
+        ></span>
+        <span
+          className={`w-0 h-0 border-l-[5px] border-r-[5px] border-l-transparent border-r-transparent border-t-[5px] ${
+            sortField === field && sortDirection === "desc"
+              ? "border-t-[#161616]"
+              : "border-t-[#B7A6C6]"
+          }`}
+        ></span>
+      </button>
     </div>
-  </th>
-);
+  );
+};
 
 export default function ValidatorTable({
   validators,
@@ -117,7 +135,6 @@ export default function ValidatorTable({
   searchQuery?: string;
   price: number;
 }) {
-  const router = useRouter();
   const [sortField, setSortField] = useState<SortField>("percentageSold");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [isMobile, setIsMobile] = useState(false);
@@ -215,7 +232,7 @@ export default function ValidatorTable({
 
   // Track mobile viewport for moniker truncation on small screens only
   useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 768);
+    const onResize = () => setIsMobile(window.innerWidth < 640);
     onResize();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
@@ -227,12 +244,18 @@ export default function ValidatorTable({
       </div>
       <div className="flex flex-col relative rounded-[30px] bg-[#f5f5ff] border-[0.5px] border-[#bebee7] overflow-hidden">
         <div className="pt-3 pb-4 overflow-x-auto lg:overflow-visible">
-          <table className="w-full min-w-[900px] table-fixed border-collapse">
-            <thead>
-              <tr className="grid grid-cols-[20fr_14fr_14fr_10fr_12fr_11fr] items-center w-full pl-6 pr-2 gap-3 mb-3">
-                <th className="flex w-full mb-1 items-center justify-start text-left text-[#7c70c3] font-semibold gap-0 text-base lg:text-lg whitespace-nowrap sticky left-0 -ml-6 pl-6 z-20 bg-[#f5f5ff] lg:bg-transparent select-none">
+          <div role="table" className="w-full min-w-[900px]">
+            <div role="rowgroup">
+              <div
+                role="row"
+                className="grid grid-cols-[20fr_14fr_14fr_10fr_12fr_11fr] items-center w-full pl-6 pr-2 gap-3 mb-3"
+              >
+                <div
+                  role="columnheader"
+                  className="flex w-full mb-1 items-center justify-start text-left text-[#7c70c3] font-semibold gap-0 text-base lg:text-lg whitespace-nowrap sticky left-0 -ml-6 pl-6 z-20 bg-[#f5f5ff] lg:bg-transparent select-none"
+                >
                   Name
-                </th>
+                </div>
                 {sortableHeaders.map((header) => (
                   <SortableHeader
                     key={header.field}
@@ -244,18 +267,21 @@ export default function ValidatorTable({
                     onSort={handleSort}
                   />
                 ))}
-              </tr>
-            </thead>
-            <tbody className="w-full">
-              {filteredAndSortedValidators.map((validator, index) => (
-                <tr
+              </div>
+            </div>
+            <div role="rowgroup" className="w-full">
+              {filteredAndSortedValidators.map((validator) => (
+                <Link
                   key={validator.operator_address}
-                  className="grid grid-cols-[20fr_14fr_14fr_10fr_12fr_11fr] items-center w-full pl-6 pr-2 gap-3 py-0 my-2.5 lg:my-0 lg:py-1.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
-                  onClick={() => {
-                    router.push(`/validator/${validator.operator_address}`);
-                  }}
+                  href={`/validator/${validator.operator_address}`}
+                  role="row"
+                  className="grid grid-cols-[20fr_14fr_14fr_10fr_12fr_11fr] items-center w-full pr-2 gap-3 py-0 my-2.5 lg:my-0 lg:py-1.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
+                  aria-label={`Open details for ${validator.moniker}`}
                 >
-                  <td className="flex w-full items-center justify-start gap-4.5 h-full lg:h-full sticky left-0 -ml-6 pl-6 z-10 bg-[#f5f5ff] lg:bg-transparent overflow-hidden">
+                  <div
+                    role="cell"
+                    className="flex w-full items-center justify-start gap-4.5 h-full lg:h-full sticky left-0 pl-6 z-10 bg-[#f5f5ff] lg:bg-transparent overflow-hidden"
+                  >
                     {/* Name */}
                     <div
                       className={`flex items-center relative ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"} gap-2.5 aspect-square size-7.5 shrink-0`}
@@ -283,10 +309,10 @@ export default function ValidatorTable({
                         );
                       })()}
                     </div>
-                    <div className="text-nowrap -mt-0.5 w-[80%]">
-                      <div className="flex text-base md:text-xl gap-2.5 text-[#49306f]">
-                        <div className="inline-block relative overflow-hidden whitespace-nowrap w-[120px] validators-table-validator-name-wrapper">
-                          <span className="inline-block whitespace-nowrap validators-table-validator-name mb-1">
+                    <div className="text-nowrap -mt-0.5 w-fit overflow-hidden">
+                      <div className="flex text-base md:text-xl gap-2.5 text-[#49306f] group">
+                        <div className="relative overflow-hidden whitespace-nowrap flex-1 validators-table-validator-name-wrapper">
+                          <span className="validators-table-validator-name whitespace-nowrap inline-block will-change-transform mb-1 [:is(.can-scroll)&]:group-hover:animate-[scrollText_10s_linear_infinite]">
                             {isMobile && validator.moniker.length > 13
                               ? `${validator.moniker.slice(0, 13)}...`
                               : validator.moniker}
@@ -294,8 +320,11 @@ export default function ValidatorTable({
                         </div>
                       </div>
                     </div>
-                  </td>
-                  <td className="flex items-center justify-center font-bold gap-1.25 justify-self-center">
+                  </div>
+                  <div
+                    role="cell"
+                    className="flex items-center justify-center font-bold gap-1.25 justify-self-center"
+                  >
                     {/* Percentage Sold */}
                     {validator.percentage_sold === undefined ||
                     validator.percentage_sold === null ? (
@@ -324,8 +353,11 @@ export default function ValidatorTable({
                         )}
                       </div>
                     )}
-                  </td>
-                  <td className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1">
+                  </div>
+                  <div
+                    role="cell"
+                    className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1"
+                  >
                     {/* Avg Delegation */}
                     <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
                       {validator.average_total_stake &&
@@ -337,8 +369,11 @@ export default function ValidatorTable({
                     <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
                       {`$${validator.average_total_stake && validator.average_total_stake > 0 ? formatAtomUSD(validator.average_total_stake, price, 1) : 0}`}
                     </div>
-                  </td>
-                  <td className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1">
+                  </div>
+                  <div
+                    role="cell"
+                    className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1"
+                  >
                     {/* Total Rewards */}
                     <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
                       {validator.total_withdraw && validator.total_withdraw > 0
@@ -349,8 +384,11 @@ export default function ValidatorTable({
                     <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
                       {`$${validator.total_withdraw && validator.total_withdraw > 0 ? formatAtomUSD(validator.total_withdraw, price, 1) : 0}`}
                     </div>
-                  </td>
-                  <td className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1">
+                  </div>
+                  <div
+                    role="cell"
+                    className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1"
+                  >
                     {/* Total Sold Amount */}
                     <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5 items-center">
                       {validator.sold && validator.sold > 0
@@ -386,15 +424,18 @@ export default function ValidatorTable({
                     <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
                       {`$${validator.sold && validator.sold > 0 ? formatAtomUSD(validator.sold, price, 1) : 0}`}
                     </div>
-                  </td>
-                  <td className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1">
+                  </div>
+                  <div
+                    role="cell"
+                    className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1"
+                  >
                     {/* Self Stake */}
                     <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
                       {(() => {
                         const initial = validator.initial_self_stake_prefix_sum ?? 0;
                         const total = (validator.self_stake ?? 0) + initial;
                         return total > 0 ? formatAtom(total, 1) : "0";
-                      })()} {" "}
+                      })()}{" "}
                       ATOM
                     </div>
                     <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
@@ -404,11 +445,11 @@ export default function ValidatorTable({
                         return `$${total > 0 ? formatAtomUSD(total, price, 1) : 0}`;
                       })()}
                     </div>
-                  </td>
-                </tr>
+                  </div>
+                </Link>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>

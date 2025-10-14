@@ -518,25 +518,6 @@
   );
 }
 
-.validator-moniker-text {
-  display: inline-block;
-  white-space: nowrap;
-}
-
-@keyframes scrollText {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(
-      calc(
-        var(--validator-moniker-text-content-width) -
-          var(--validator-moniker-overflow-animation-scroll-percentage)
-      )
-    );
-  }
-}
-
 .validator-each-numeric-info {
   position: relative;
   font-size: var(--validator-each-numeric-info-font-size);

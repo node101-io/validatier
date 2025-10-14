@@ -223,7 +223,7 @@
 }
 
 /* Small and Medium adjustments */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .react-datepicker {
     width: 100%;
     max-width: 100%;
@@ -277,7 +277,7 @@
 }
 
 /* md-lg adjustments */
-@media (min-width: 768px) and (max-width: 1024px) {
+@media (min-width: 640px) and (max-width: 1024px) {
   .react-datepicker__month-container {
     width: 100%;
     margin-left: -5px;
