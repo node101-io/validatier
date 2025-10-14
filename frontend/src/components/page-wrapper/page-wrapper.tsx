@@ -51,10 +51,29 @@ export default function PageWrapper({
     });
   };
 
+  const handleSearchFocus = (): boolean => {
+    // Check if validator table is in viewport
+    if (innerRef.current) {
+      const rect = innerRef.current.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+      
+      // Only scroll if not visible
+      if (!isVisible) {
+        innerRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+        return true; // Scrolled
+      }
+    }
+    return false; // No scroll needed
+  };
+
   return (
     <ScrollProvider className="flex flex-col w-full items-center relative overflow-x-hidden overflow-y-auto ml-0 h-screen rounded-0 bg-white transition-all duration-250">
       <Navbar
         onSearchChange={handleSearchChange}
+        onSearchFocus={handleSearchFocus}
         initialStartDate={initialStartDate}
         initialEndDate={initialEndDate}
         initialInterval={initialInterval}

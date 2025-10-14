@@ -9,16 +9,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useScrollContext } from "@/components/scroll/scroll-provider";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
+import { useHotkeys } from 'react-hotkeys-hook'
 
 export default function Navbar({
   isValidatorPage = false,
   onSearchChange,
+  onSearchFocus,
   initialStartDate,
   initialEndDate,
   initialInterval,
 }: {
   isValidatorPage?: boolean;
   onSearchChange?: (query: string) => void;
+  onSearchFocus?: () => boolean;
   initialStartDate?: Date;
   initialEndDate?: Date;
   initialInterval?: string;
@@ -32,8 +35,26 @@ export default function Navbar({
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const blurTimeoutRef = useRef<number | null>(null);
   const searchTimeoutRef = useRef<number | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const heightClass = "h-[80px]";
+  useHotkeys('meta+f, ctrl+f', (e) => {
+    // Only work on main page, not on validator page
+    if (isValidatorPage) return;
+    
+    e.preventDefault();
+    
+    // Check if scroll is needed and performed
+    const didScroll = onSearchFocus ? onSearchFocus() : false;
+    
+    // Focus the search input
+    // If scrolled, wait for animation to complete (500ms), otherwise focus immediately
+    setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, didScroll ? 500 : 0);
+  }, { 
+    preventDefault: true,
+    enabled: !isValidatorPage 
+  })
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -93,7 +114,7 @@ export default function Navbar({
 
   return (
     <div
-      className={`flex w-full px-6 ${backgroundClass} ${borderClass} ${heightClass} ${
+      className={`flex w-full px-6 ${backgroundClass} ${borderClass} ${
         pastIntro || isValidatorPage
           ? "justify-between py-4"
           : "justify-center sm:justify-between py-8"
@@ -150,6 +171,7 @@ export default function Navbar({
           } max-sm:flex-1 max-sm:min-w-0`}
         >
           <input
+            ref={searchInputRef}
             type="text"
             className={`text-xl font-[500] border-1 ml-auto ${
               showSearch ? "visible opacity-100" : "invisible opacity-0"
