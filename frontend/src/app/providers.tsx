@@ -18,8 +18,8 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
         }}
         showOnShallow
         startPosition={0.25}
-        stopDelayMs={250}
-        delay={120}
+        stopDelayMs={1000}
+        delay={200}
       />
     </>
   );
