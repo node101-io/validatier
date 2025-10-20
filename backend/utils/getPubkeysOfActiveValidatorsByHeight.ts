@@ -7,14 +7,14 @@ async function fetchActiveValidatorsRecursive(
   allValidators: string[] = [],
   total?: number
 ): Promise<string[]> {
-  
-  return fetch(`http://${base_url}/validators?height=${block_height}&page=${page}&per_page=100`)
+
+  return fetch(`${base_url}/validators?height=${block_height}&page=${page}&per_page=100`)
     .then(response => response.json())
     .then((response: any) => {
       const validators = response?.result.validators?.map((v: any) => v.pub_key.value) || [];
       allValidators.push(...validators);
 
-      if (total == undefined) total = response?.result.total ?? validators.length; 
+      if (total == undefined) total = response?.result.total ?? validators.length;
 
       if (allValidators.length < (total ? total : 0)) return fetchActiveValidatorsRecursive(base_url, block_height, page + 1, allValidators, total)
       return allValidators;

@@ -21,17 +21,17 @@ export interface DataInterface {
 const getTxsByHeight = (base_url: string, block_height: number, denom: string, bech32_prefix: string, retry_count: number, fetch_time: boolean, callback: (err: string | null, decodedTxs: any) => any) => {
 
   const promises = [
-    fetch(`http://${base_url}/block_results?height=${block_height}`, { signal: AbortSignal.timeout(15 * 1000) }).then((response: any) => response.json())
+    fetch(`${base_url}/block_results?height=${block_height}`, { signal: AbortSignal.timeout(15 * 1000) }).then((response: any) => response.json())
   ];
 
   if (fetch_time)
     promises.push(
-      fetch(`http://${base_url}/block?height=${block_height}`, { signal: AbortSignal.timeout(15 * 1000) }).then((response: any) => response.json())
+      fetch(`${base_url}/block?height=${block_height}`, { signal: AbortSignal.timeout(15 * 1000) }).then((response: any) => response.json())
     );
 
   Promise.allSettled(promises)
     .then(([block_results_promise_res, block_promise_res]) => {
-      
+
       if (retry_count >= RETRY_TOTAL) return callback(`max_retry_count exceeded`, { block_height: block_height })
       if (
         (block_promise_res && block_promise_res.status == 'rejected') ||
@@ -39,7 +39,7 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
         block_results_promise_res.status == 'rejected'
       )
         return getTxsByHeight(base_url, block_height, denom, bech32_prefix, retry_count + 1, fetch_time, callback);
-      
+
       const data = block_promise_res ? block_promise_res.value : '';
       const data_block_results = block_results_promise_res.value;
 
@@ -54,9 +54,9 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
         time = data.result?.block?.header?.time;
 
       if (
-        !data_block_results.result || 
+        !data_block_results.result ||
         (
-          !data_block_results.result.finalize_block_events && 
+          !data_block_results.result.finalize_block_events &&
           !data_block_results.result.begin_block_events &&
           !data_block_results.result.end_block_events
         )
@@ -65,17 +65,17 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
       if (!data_block_results.result.txs_results)
         data_block_results.result.txs_results = [];
       const defaultEvents = data_block_results.result.txs_results.flatMap((eachTx: any) => eachTx.events);
-      
+
       const finalizeBlockEvents = [
         ...data_block_results.result.begin_block_events || [],
         ...data_block_results.result.end_block_events || [],
         ...data_block_results.result.finalize_block_events || [],
         ...defaultEvents
       ];
-      
+
       const messages: DecodedMessage[] | null = convertEventsToMessageFormat({ height: block_height, chain_identifier: 'cosmoshub' }, finalizeBlockEvents, time, denom);
       const events: Event[][] = [];
-      
+
       let poppedIndices = [];
       for (let i = 0; i < data_block_results.result.txs_results.length; i++) {
         const tx = data_block_results.result.txs_results[i];
@@ -85,7 +85,7 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
         };
         events.push(tx.events);
       }
-        
+
       decodeTxsV2(
         {
           rpc_url: base_url,
@@ -100,7 +100,7 @@ const getTxsByHeight = (base_url: string, block_height: number, denom: string, b
           if (err)
             return callback(err, null);
           if (messages && messages.length > 0) decodedTxs.push({ messages: messages });
-      
+
           return callback(null, {
             time: time,
             decodedTxs: decodedTxs
