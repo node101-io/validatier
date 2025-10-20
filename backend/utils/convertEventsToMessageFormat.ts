@@ -6,10 +6,7 @@ const EVENTS_TO_SEARCH = {
     address_keys: ['address'],
     amount_key: 'burned_coins',
   },
-  transfer: {
-    address_keys: ['recipient', 'sender'],
-    amount_key: 'amount',
-  },
+  // transfer: handled via tx events with bank-gating in decodeTxs.ts
   complete_redelegation: {
     address_keys: ['delegator', 'source_validator', 'destination_validator'],
     amount_key: 'amount',
@@ -22,7 +19,7 @@ const EVENTS_TO_SEARCH = {
 
 const SENSITIVE_EVENTS = ['complete_redelegation', 'complete_unbonding'];
 const ignoreSensitiveEventsBlockThresholdMapping = {
-  cosmoshub: 5448069
+  cosmoshub: 5448069 // This is after 3 weeks of the first block
 }
 
 export const convertEventsToMessageFormat = (
@@ -41,7 +38,7 @@ export const convertEventsToMessageFormat = (
     const { type, attributes } = eachEvent;
     if (!Object.keys(EVENTS_TO_SEARCH).includes(type)) return;
     const ignoreSensitiveBlockThreshold = ignoreSensitiveEventsBlockThresholdMapping[chain_identifier as keyof typeof ignoreSensitiveEventsBlockThresholdMapping];
-    
+
     if (SENSITIVE_EVENTS.includes(type) && height <= ignoreSensitiveBlockThreshold) return;
 
     const { address_keys, amount_key } = EVENTS_TO_SEARCH[type as keyof typeof EVENTS_TO_SEARCH];
@@ -59,7 +56,7 @@ export const convertEventsToMessageFormat = (
         amount: ''
       }
     }
-    
+
     let gotValidatorAddress = false;
     let gotAmount = false;
 

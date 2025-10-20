@@ -4,14 +4,14 @@ import { defaultRegistryTypes } from '@cosmjs/stargate';
 import { getOnlyNativeTokenValueFromAmountString } from '../listeners/functions/getOnlyNativeTokenValueFromAmountString.js';
 import { convertOperatorAddressToBech32 } from './convertOperatorAddressToBech32.js';
 
-export interface EventAttribute { 
-  key: string; 
-  value: string; 
-  index: boolean 
+export interface EventAttribute {
+  key: string;
+  value: string;
+  index: boolean
 };
-export interface Event { 
-  type: string, 
-  attributes: EventAttribute[] 
+export interface Event {
+  type: string,
+  attributes: EventAttribute[]
 };
 
 export interface DecodedMessage {
@@ -73,7 +73,7 @@ const getAttributesAsMappingFromEventType = (
 
       const attributeEqualityPattern = attributeEqualityPatterns[k];
       const attributes = getAttributesAsMapping(eachEvent.attributes);
-      
+
       let flag = 1;
       let foundIn = '';
       attributeEqualityPattern.split(',').forEach(eachEquationGeneralPattern => {
@@ -123,7 +123,7 @@ const decodeTxsV2 = (
 
   let createValidatorPromises = [];
   const decodedTxs: { messages: { time: Date | null; typeUrl: string; value: Record<string, any>; }[] | DecodedMessage[]; }[] = [];
-  
+
   for (let i = 0; i < events.length; i++) {
     const eachTransactionEvents = events[i];
 
@@ -136,7 +136,7 @@ const decodeTxsV2 = (
       let value: Record<string, any> = {};
 
       const attributesMapping = getAttributesAsMapping(eachEvent.attributes);
-      
+
       if (
         ['redelegate', 'unbond'].includes(eachEvent.type) &&
         (new Date(attributesMapping.completion_time)).getTime() > 0
@@ -150,9 +150,9 @@ const decodeTxsV2 = (
         }
 
         if (value.amount == '0') continue;
-        
+
         if (
-          value.delegatorAddress || 
+          value.delegatorAddress ||
           (
             eachEvent.type == 'withdraw_commission' &&
             value.validatorAddress
@@ -190,7 +190,7 @@ const decodeTxsV2 = (
         if (!attributes) throw new Error(`${eachEvent.type}:delegator_not_found`);
         if (index >= 0)
           eachTransactionEvents[index].type = 'message_used';
-        
+
         if (attributes.sender.includes('valoper'))
           value.delegatorAddress = convertOperatorAddressToBech32(attributes.sender, ctx.bech32_prefix);
         else
@@ -213,11 +213,11 @@ const decodeTxsV2 = (
                       successfulTxs.push(eachTx);
                   });
                   const createValidatorTransactionBase64 = successfulTxs[i];
-                  
+
                   let createValidatorTx;
                   try { createValidatorTx = decodeTxRaw(Buffer.from(createValidatorTransactionBase64, 'base64')); }
                   catch (err) { reject('create_validator:tx_decode_error'); }
-                  
+
                   createValidatorTx?.body.messages.forEach(eachMessage => {
                     if (eachMessage.typeUrl == '/cosmos.staking.v1beta1.MsgCreateValidator')
                       return resolve({ time: time, typeUrl: 'create_validator', value: registry.decode(eachMessage) });
@@ -237,7 +237,7 @@ const decodeTxsV2 = (
           'sender:true',
           'sender:true',
         ]);
-        
+
         if (!attributes) throw new Error('withdraw_rewards:delegator_not_found');
         if (index >= 0)
           eachTransactionEvents[index].type = 'message_used';
@@ -280,7 +280,7 @@ const decodeTxsV2 = (
           'sender:true',
           'sender:true',
         ]);
-        
+
         if (!attributes) throw new Error('set_withdraw_address:delegator_not_found');
         if (index >= 0)
           eachTransactionEvents[index].type = 'message_used';
@@ -293,16 +293,60 @@ const decodeTxsV2 = (
       if (eachEvent.type != 'create_validator')
         messages.push({ time: time, typeUrl: eachEvent.type, value: value });
     }
- 
+
+    // Additionally, derive strict bank transfer messages: only when the tx
+    // contains a bank send and we can resolve both sender and recipient, and
+    // exclude transfers that are clearly distribution-initiated payouts.
+    try {
+      // Find a canonical transfer event in this tx
+      const attributesBank = getAttributesAsMappingFromEventType(
+        eachTransactionEvents,
+        'transfer',
+        ['recipient:true,sender:true,amount:true']
+      ).attributes;
+
+      if (attributesBank && attributesBank.sender && attributesBank.recipient) {
+        // Require that the same tx also contains a message event with module=bank or module=transfer (IBC send)
+        const messageAttrs = getAttributesAsMappingFromEventType(
+          eachTransactionEvents,
+          'message|message_used',
+          ['module:bank|module:transfer,sender:true', 'module:bank|module:transfer,sender:true']
+        ).attributes;
+
+        const sameModule = !!messageAttrs && messageAttrs.sender && messageAttrs.sender === attributesBank.sender;
+
+        // Avoid distribution-originated transfers in same tx
+        const hasDistribution = eachTransactionEvents.some(
+          (ev) => ev.type === 'withdraw_rewards' || ev.type === 'withdraw_commission'
+        );
+
+        if (sameModule && !hasDistribution) {
+          const native = getOnlyNativeTokenValueFromAmountString(attributesBank.amount, denom) || '0';
+          if (native !== '0') {
+            const transferMsg: DecodedMessage = {
+              time: time,
+              typeUrl: 'transfer',
+              value: {
+                validatorAddressSender: attributesBank.sender,
+                validatorAddressRecipient: attributesBank.recipient,
+                amount: native,
+              },
+            };
+            messages.push(transferMsg);
+          }
+        }
+      }
+    } catch (_) {}
+
     decodedTxs.push({ messages });
   }
-  
+
   if (!createValidatorPromises.length) {
     const filteredTxs = decodedTxs.filter((tx) => tx.messages.length > 0);
     return callback(null, filteredTxs);
   } else {
     const messagesFromCreateValidator: DecodedMessage[] = [];
-    
+
     Promise.allSettled(createValidatorPromises)
       .then(results => {
         results.forEach((eachResult, i) => {
