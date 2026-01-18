@@ -15,7 +15,7 @@
     "@types/react-datepicker": "^6.2.0",
     "apexcharts": "^5.3.5",
     "motion": "^12.23.21",
-    "next": "15.5.3",
+    "next": "15.5.9",
     "next13-progressbar": "^1.2.2",
     "radix-ui": "^1.4.3",
     "react": "19.1.0",
