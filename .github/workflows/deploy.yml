@@ -1,0 +1,60 @@
+name: Production Deployment
+
+on:
+  push:
+    branches: [ "main" ] # Branch adın 'master' ise burayı değiştir
+
+jobs:
+  deploy:
+    runs-on: self-hosted # Sunucundaki runner'ı tetikler
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+
+    # 1. TÜM BAĞIMLILIKLARI KUR (ROOT)
+    # package-lock.json root'ta olduğu için kurulumu en dışta yapıyoruz.
+    - name: Install Dependencies
+      run: npm ci
+
+    # 2. LINT KONTROLLERİ (Hata varsa durur)
+#    - name: Lint Backend
+#      working-directory: ./backend
+#      run: npm run lint
+#      continue-on-error: false # Hata varsa durdur
+
+###    - name: Lint Frontend 
+#      working-directory: ./frontend
+#      run: npm run lint
+#      continue-on-error: false
+
+    # 3. BUILD İŞLEMLERİ
+    - name: Build Backend
+      working-directory: ./backend
+      run: npm run build
+
+    - name: Build Frontend
+      working-directory: ./frontend
+      run: npm run build
+
+    # 4. DEPLOY (Dosyaları Taşıma)
+    # Runner _work klasöründe çalışır, biten işi canlı klasörüne taşırız.
+    - name: Deploy to Production Folder
+      run: |
+        echo "Dosyalar taşınıyor..."
+        # node_modules root'ta olduğu için onu ve app klasörlerini taşıyoruz
+        rsync -av --exclude '.git' --exclude '.github' --exclude '.env' ./ /root/apps/validatier/
+
+    # 5. PM2 RELOAD
+    - name: Restart PM2
+      run: |
+        cd /root/apps/validatier
+        # Yeni environment değişkenlerini de alması için update-env
+        pm2 reload ecosystem.config.js --update-env
+        pm2 save
