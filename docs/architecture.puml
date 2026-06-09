@@ -1,0 +1,88 @@
+@startuml Validatier_Architecture
+title Validatier Backend - Chain-to-Metrics Pipeline
+
+left to right direction
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Helvetica
+skinparam ArrowColor #44546A
+skinparam ArrowThickness 1.2
+skinparam roundCorner 10
+skinparam wrapWidth 145
+skinparam maxMessageSize 100
+
+skinparam package {
+  BorderColor #B8C4D8
+  FontColor #24324A
+  FontStyle bold
+}
+
+skinparam rectangle {
+  BorderColor #8DA2BF
+  BackgroundColor #F8FAFD
+  FontColor #1F2A3D
+}
+
+skinparam database {
+  BorderColor #7E9B78
+  BackgroundColor #F4FAF2
+  FontColor #243524
+}
+
+skinparam cloud {
+  BorderColor #8EA7CC
+  BackgroundColor #F3F7FF
+  FontColor #20324C
+}
+
+package "1. Chain Reads" #EDF5FF {
+  cloud "Genesis\nvalidators, genesis txs,\ninitial active set" as Genesis
+  cloud "Block Header\nblock time,\nraw tx bytes when needed" as BlockHeader
+  cloud "Block Results\ntx events,\nbegin/end/finalize events" as BlockResults
+  cloud "Active Set\nvalidator pubkeys by height" as ActiveSet
+}
+
+package "2. Event Interpretation" #FFF8EA {
+  rectangle "Baseline Import\noperator/delegator addresses,\ninitial stake" as Baseline
+  rectangle "Tx Action Decoder\ndelegate, unbond, redelegate,\nwithdraw, transfer, create validator" as TxDecoder
+  rectangle "Block Action Extractor\ncomplete unbonding,\ncomplete redelegation, slash" as BlockExtractor
+  rectangle "Transfer Attribution\nwithdraw-address map\nwallet -> validator" as Attribution
+}
+
+database "Working State\nsame-day validator deltas\nwithdraw-address ownership" as WorkingState
+
+package "4. Derived Outputs" #F7F2FF {
+  rectangle "Metrics and Cache\nsold amount,\npercentage sold,\nrankings, summaries,\ngraphs, exports" as Metrics
+}
+
+package "3. Stored Validator State" #F1FAF0 {
+  database "MongoDB\nvalidators\ndaily snapshots\nactive-set history" as Mongo
+}
+
+Genesis --> Baseline : baseline data
+Baseline --> Mongo : initial records
+
+BlockResults --> TxDecoder : successful tx events
+BlockHeader --> TxDecoder : time and tx detail
+BlockResults --> BlockExtractor : finalized block events
+
+TxDecoder --> Attribution : withdraw address changes\nand wallet transfers
+Attribution --> WorkingState : ownership map
+
+TxDecoder --> WorkingState : stake, reward,\ncommission, withdraw,\ntransfer deltas
+BlockExtractor --> WorkingState : finalized stake\nand slash deltas
+
+WorkingState --> Mongo : cumulative daily snapshots
+ActiveSet --> Mongo : active validator history
+
+Mongo --> Metrics : validator history
+Metrics --> Mongo : dashboard cache
+
+note bottom of Metrics
+  Sold amount is derived from attributed outbound transfers,
+  capped by reward and commission availability after self-stake changes.
+end note
+
+@enduml
