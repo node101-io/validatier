@@ -1,0 +1,25 @@
+{
+  "name": "validatier-backend",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Validatier backend — cosmoshub fund-flow (taint tracking) indexer",
+  "main": "dist/app.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/app.js"
+  },
+  "dependencies": {
+    "@cosmjs/crypto": "^0.39.0",
+    "@cosmjs/encoding": "^0.39.0",
+    "better-sqlite3": "^12.11.1",
+    "dotenv": "^17.4.2",
+    "mongoose": "^9.7.4",
+    "node-cron": "^4.6.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^26.1.1",
+    "@types/node-cron": "^3.0.11",
+    "typescript": "^7.0.2"
+  }
+}
