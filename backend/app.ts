@@ -1,7 +1,8 @@
 import { config } from './config';
+import { connectMongo, disconnectMongo } from './db/mongo';
+import { closeSqlite, openSqlite } from './db/sqlite';
 
-// Entrypoint. Wiring (connections -> block loop -> schedulers) is added task
-// by task; for now this only proves the scaffold builds and config loads.
+// Entrypoint. Wiring (SQLite -> block loop -> schedulers) is added task by task.
 async function main(): Promise<void> {
   // No secrets in logs (MONGO_URI stays out).
   console.log(
@@ -9,6 +10,18 @@ async function main(): Promise<void> {
       `rpc=${config.rpcUrls.length} url(s), lcd=${config.lcdUrls.length} url(s), ` +
       `max_depth=${config.maxDepth}, tier2_min_indegree=${config.tier2MinIndegree}`
   );
+
+  await connectMongo();
+  openSqlite();
+
+  const shutdown = async (signal: string): Promise<void> => {
+    console.log(`${signal} received, shutting down`);
+    await disconnectMongo();
+    closeSqlite();
+    process.exit(0);
+  };
+  process.on('SIGINT', () => void shutdown('SIGINT'));
+  process.on('SIGTERM', () => void shutdown('SIGTERM'));
 }
 
 main().catch((err) => {
