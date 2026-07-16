@@ -1,6 +1,7 @@
 import { MODULE_ACCOUNT_SET } from '../chain/moduleAccounts';
 import { isTainted } from '../store/edges';
 import { processSeedTransfer, type BlockCtx } from './seed';
+import { applyContraction } from './contraction';
 import type { RealTransfer } from '../chain/blockResults';
 
 // Per-transfer decision gate — docs/01 steps 1..3. Order matters:
@@ -26,6 +27,8 @@ export function processTransfer(t: RealTransfer, ctx: BlockCtx): TransferDisposi
   // 3. TAINTED? money leaving an address we never traced is not ours to follow.
   if (!isTainted(t.sender)) return 'untainted';
 
-  // 4. contraction (haircut + re-anchor) — task 6.3 plugs in here.
+  // 4. CONTRACTION: haircut across origins + re-anchor to the recipient.
+  // (classification of the recipient = task 6.4, plugs in after this.)
+  applyContraction(t.sender, t.recipient, t.amount, ctx);
   return 'propagate';
 }

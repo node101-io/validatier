@@ -83,9 +83,10 @@ Wallet holds from origins A=100, B=50 (total 150). 30 leaves:
 A gets 100/150 * 30 = 20
 B gets  50/150 * 30 = 10
 ```
-Use integer (BigInt) math. Distribute the rounding remainder deterministically (e.g. give
-leftover uatom to the largest-share origin) so that `Σ pay == amount` exactly. Never let
-rounding break weight conservation.
+Use integer (BigInt) math, floored. The rounding dust — at most (n-1) uatom per transfer —
+is deliberately IGNORED (lead dev decision): it stays on the sender's edges, so weight
+conservation still holds exactly and sold% errs on the conservative side. If dust ever
+becomes a problem, switch to 100x fixed-point internally (100 units = 1 uatom).
 
 ### Structural sink heuristic (Tier 2)
 
