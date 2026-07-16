@@ -2,10 +2,11 @@
 
 ## Endpoints
 
-Two APIs. **CometBFT RPC** (blocks/events/tx) and **Cosmos LCD** (`/cosmos/...` state).
-Pool from the registry: RPC via `chains.cosmos.directory`, LCD via `rest.cosmos.directory/cosmoshub`.
+Two APIs, exactly two URLs (fixed in `.env`): **CometBFT RPC** (`RPC_URL` — blocks/events/tx)
+and **Cosmos LCD** (`LCD_URL` — `/cosmos/...` state).
 All LCD state queries accept the `x-cosmos-block-height` header for historical reads (needs
-an **archive node**; public nodes are pruned).
+an **archive node**; public nodes are pruned — measured on the current endpoints:
+`block_results` reaches back ~100k blocks ≈ 1 week).
 
 ### Fund-flow ingest (per block)
 

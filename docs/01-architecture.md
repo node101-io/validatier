@@ -38,11 +38,15 @@ For each REAL transfer event `(sender, recipient, amount)` (uatom only; parsing 
 
 ```
 1. SEED?  if sender == distribution module AND recipient is a validator withdraw address:
-     origins = withdraw_map[recipient]            # commingled -> multiple
-     for each origin (split pro-rata if multiple):
-        seed[origin].reward|commission += pay     # tag from withdraw_rewards/commission event
-        edge(origin, recipient).weight += pay; depth = 1; status = in_flight
+     V = `validator` attribute of the withdraw_rewards|withdraw_commission event
+         at the SAME msg_index (the chain names the exact validator per claim)
+     if V not in withdraw_map[recipient]:
+        skip   # the wallet claimed rewards it earned as a DELEGATOR to another
+               # validator -> not this validator's income, not seed
+     seed[V].reward|commission += amount          # tag = event type
+     edge(V, recipient).weight += amount; depth = 1; status = in_flight
      # NOTE: no edge to the distribution module. This is inflow, not a hop.
+     # NOTE: commingled wallets need NO split — every claim names its validator.
      continue
 
 2. EXCLUDE?  if sender or recipient is a module account (other than the seed case above):

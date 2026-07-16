@@ -66,7 +66,9 @@ The money entering the traceable system: a `distribution → withdrawAddr` trans
 or commission **claim**). We **credit** the origin's inflow and open a depth-1 edge; we do NOT
 draw an edge back to the distribution module (it's not a wallet-to-wallet hop). Tagged
 `reward` or `commission` based on the accompanying `withdraw_rewards` / `withdraw_commission`
-event in the same tx.
+event in the same tx. The **origin** is that event's `validator` attribute — exact
+attribution, so commingled wallets need no split; claims the wallet earned as a delegator
+to OTHER validators are not seed.
 
 - `reward_withdrawn + commission_withdrawn` per origin = the **denominator** of sold%
   (published daily into `validator_stats` as `total_withdrawn_reward|commission`).

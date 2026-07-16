@@ -138,9 +138,11 @@ HOT-PATH OPERASYONLARI (prepared statement olarak cache'lenir)
 
 ## SEED (distribution -> withdrawAddr, amount A, tag=reward|commission)
 ```sql
--- 1) kim(ler)in ödülü?
+-- 1) origin V = withdraw event'inin `validator` attribute'u (kesin isabet).
+--    Guard: V bu withdraw adresine kayitli mi? (degilse: cuzdanin baska
+--    validatorden delegator olarak aldigi odul -> seed DEGIL, atla)
 SELECT operator_address FROM withdraw_map WHERE withdraw_address = @waddr;
--- 2) her origin için (ortaksa haircut ile böl):
+-- 2) V icin (bolusum YOK — her claim kendi validatorunu soyler):
 INSERT INTO seed(origin, reward_withdrawn, commission_withdrawn, last_height, last_ts)
 VALUES (@op, @rew, @com, @h, @ts)
 ON CONFLICT(origin) DO UPDATE SET
