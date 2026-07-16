@@ -52,11 +52,14 @@ test('block 32055440: real sends kept, reward claim tagged, fees skipped', () =>
   assert.equal(tx[0].withdraw_tag, null);
 
   // tx1: reward claim — distribution module pays out, withdraw_rewards at the
-  // same msg_index tags it 'reward'. This is the seed-inflow signal for 6.1.
+  // same msg_index tags it with kind + the exact validator. Seed-inflow signal for 6.1.
   assert.equal(tx[1].tx_index, 1);
   assert.equal(tx[1].sender, MODULE_ACCOUNTS.distribution);
   assert.equal(tx[1].amount, 209n);
-  assert.equal(tx[1].withdraw_tag, 'reward');
+  assert.deepEqual(tx[1].withdraw_tag, {
+    kind: 'reward',
+    validator: 'cosmosvaloper1k6e7l0lz497l8njqjxpd3g4wlkdfwe93uqf03k',
+  });
 
   // tx2: another plain send
   assert.equal(tx[2].tx_index, 2);
@@ -131,7 +134,7 @@ test('withdraw_commission tags its msg_index; other msgs in the tx untouched', (
       {
         code: 0,
         events: [
-          { type: 'withdraw_commission', attributes: [{ key: 'amount', value: '55uatom' }, { key: 'msg_index', value: '0' }] },
+          { type: 'withdraw_commission', attributes: [{ key: 'amount', value: '55uatom' }, { key: 'validator', value: 'cosmosvaloper1xyz' }, { key: 'msg_index', value: '0' }] },
           transferEvent('cosmos1distr', 'cosmos1val', '55uatom', '0'),
           transferEvent('cosmos1val', 'cosmos1other', '10uatom', '1'),
         ],
@@ -139,7 +142,7 @@ test('withdraw_commission tags its msg_index; other msgs in the tx untouched', (
     ],
   };
   const transfers = parseBlockResults(raw);
-  assert.equal(transfers[0].withdraw_tag, 'commission');
+  assert.deepEqual(transfers[0].withdraw_tag, { kind: 'commission', validator: 'cosmosvaloper1xyz' });
   assert.equal(transfers[1].withdraw_tag, null);
 });
 

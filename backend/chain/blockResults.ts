@@ -11,6 +11,13 @@ import { config } from '../config';
 //  - a withdraw_rewards/withdraw_commission event at the same msg_index tags the
 //    transfer as a reward|commission claim (seed detection input for the taint engine)
 
+// The withdraw event names the exact validator the claim belongs to — this is
+// what makes seed attribution exact (no pro-rata even for shared wallets).
+export interface WithdrawTag {
+  kind: 'reward' | 'commission';
+  validator: string; // cosmosvaloper1... from the event's `validator` attribute
+}
+
 export interface RealTransfer {
   sender: string;
   recipient: string;
@@ -18,7 +25,7 @@ export interface RealTransfer {
   msg_index: number | null; // null for finalize transfers
   source: 'tx' | 'finalize';
   tx_index: number | null; // position in txs_results; null for finalize
-  withdraw_tag: 'reward' | 'commission' | null;
+  withdraw_tag: WithdrawTag | null;
 }
 
 interface RawEvent {
@@ -58,12 +65,16 @@ export function parseBlockResults(raw: unknown): RealTransfer[] {
     const events = tx.events ?? [];
 
     // One msg is either a reward or a commission withdrawal, never both.
-    const tags = new Map<number, 'reward' | 'commission'>();
+    const tags = new Map<number, WithdrawTag>();
     for (const e of events) {
       if (e.type !== 'withdraw_rewards' && e.type !== 'withdraw_commission') continue;
       const mi = attr(e, 'msg_index');
-      if (mi !== undefined) {
-        tags.set(Number(mi), e.type === 'withdraw_rewards' ? 'reward' : 'commission');
+      const validator = attr(e, 'validator');
+      if (mi !== undefined && validator !== undefined) {
+        tags.set(Number(mi), {
+          kind: e.type === 'withdraw_rewards' ? 'reward' : 'commission',
+          validator,
+        });
       }
     }
 
