@@ -10,8 +10,8 @@ export interface Config {
   denom: string;
   decimals: number;
   bech32Prefix: string;
-  rpcUrls: string[];
-  lcdUrls: string[];
+  rpcUrl: string; // CometBFT RPC (/status, /block, /block_results)
+  lcdUrl: string; // Cosmos REST (/cosmos/...)
   mongoUri: string;
   sqlitePath: string;
   maxDepth: number;
@@ -37,23 +37,20 @@ function requireInt(name: string): number {
   return value;
 }
 
-function requireUrlList(name: string): string[] {
-  const urls = requireEnv(name)
-    .split(',')
-    .map((url) => url.trim())
-    .filter((url) => url.length > 0);
-  if (urls.length === 0) {
-    throw new Error(`Env var ${name} must contain at least one URL`);
+function requireUrl(name: string): string {
+  const value = requireEnv(name);
+  if (!/^https?:\/\//.test(value)) {
+    throw new Error(`Env var ${name} must be an http(s) URL, got "${value}"`);
   }
-  return urls;
+  return value.replace(/\/+$/, ''); // no trailing slash — paths are appended as-is
 }
 
 export const config: Config = {
   denom: requireEnv('DENOM'),
   decimals: requireInt('DECIMALS'),
   bech32Prefix: requireEnv('BECH32_PREFIX'),
-  rpcUrls: requireUrlList('RPC_URLS'),
-  lcdUrls: requireUrlList('LCD_URLS'),
+  rpcUrl: requireUrl('RPC_URL'),
+  lcdUrl: requireUrl('LCD_URL'),
   mongoUri: requireEnv('MONGO_URI'),
   sqlitePath: requireEnv('SQLITE_PATH'),
   maxDepth: requireInt('MAX_DEPTH'),

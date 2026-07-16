@@ -7,7 +7,6 @@ async function main(): Promise<void> {
   // No secrets in logs (MONGO_URI stays out).
   console.log(
     `validatier backend: config OK — denom=${config.denom}, decimals=${config.decimals}, ` +
-      `rpc=${config.rpcUrls.length} url(s), lcd=${config.lcdUrls.length} url(s), ` +
       `max_depth=${config.maxDepth}, tier2_min_indegree=${config.tier2MinIndegree}`
   );
 
