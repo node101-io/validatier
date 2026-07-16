@@ -15,12 +15,12 @@ export interface BlockCtx {
   ts: number; // unix seconds (block time)
 }
 
+// exactly one of reward|commission is non-zero; the edge weight is their sum
 interface SeedParams {
   origin: string;
   holder: string;
   reward: bigint;
   commission: bigint;
-  amount: bigint;
   height: number;
   ts: number;
 }
@@ -47,7 +47,8 @@ function s(): Stmts {
   const edgeUpsert: Statement = db.prepare(`
     INSERT INTO edges (origin, holder, weight, depth, status, sink_kind, weight_prefix_sum,
                        first_height, first_ts, last_height, last_ts)
-    VALUES (@origin, @holder, @amount, 1, 'in_flight', NULL, @amount, @height, @ts, @height, @ts)
+    VALUES (@origin, @holder, @reward + @commission, 1, 'in_flight', NULL,
+            @reward + @commission, @height, @ts, @height, @ts)
     ON CONFLICT(origin, holder) DO UPDATE SET
       weight            = weight + excluded.weight,
       weight_prefix_sum = weight_prefix_sum + excluded.weight_prefix_sum,
@@ -81,7 +82,6 @@ export function processSeedTransfer(t: RealTransfer, ctx: BlockCtx): boolean {
     holder: t.recipient,
     reward: tag.kind === 'reward' ? t.amount : 0n,
     commission: tag.kind === 'commission' ? t.amount : 0n,
-    amount: t.amount,
     height: ctx.height,
     ts: ctx.ts,
   });
