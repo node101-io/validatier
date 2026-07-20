@@ -69,6 +69,20 @@ test('block 32055440: real sends kept, reward claim tagged, fees skipped', () =>
   assert.equal(transfers.filter((t) => t.source === 'finalize').length, 2);
 });
 
+test('block 32116300 tx2: ibc_transfer event marks the transfer as IBC-out (Yöntem A)', () => {
+  const transfers = parseBlockResults(fixture(32116300));
+  const tx2 = transfers.filter((t) => t.source === 'tx' && t.tx_index === 2);
+  // one real transfer in that tx (to the channel escrow account), tagged IBC-out
+  assert.equal(tx2.length, 1);
+  assert.equal(tx2[0].is_ibc_out, true);
+  assert.equal(tx2[0].withdraw_tag, null); // IBC-out and reward-claim are independent signals
+
+  // no other tx in this block is IBC — flag must not leak across txs
+  const others = transfers.filter((t) => t.source === 'tx' && t.tx_index !== 2);
+  assert.ok(others.length > 0);
+  for (const t of others) assert.equal(t.is_ibc_out, false);
+});
+
 // ── Synthetic edge cases (shapes match the real event structure) ──────────
 
 function transferEvent(sender: string, recipient: string, amount: string, msgIndex?: string) {
@@ -144,6 +158,33 @@ test('withdraw_commission tags its msg_index; other msgs in the tx untouched', (
   const transfers = parseBlockResults(raw);
   assert.deepEqual(transfers[0].withdraw_tag, { kind: 'commission', validator: 'cosmosvaloper1xyz' });
   assert.equal(transfers[1].withdraw_tag, null);
+});
+
+test('synthetic: ibc_transfer at msg_index 0 tags only that msg, not msg_index 1', () => {
+  const raw = {
+    txs_results: [
+      {
+        code: 0,
+        events: [
+          transferEvent('cosmos1a', 'cosmos1escrow', '100uatom', '0'),
+          { type: 'ibc_transfer', attributes: [{ key: 'msg_index', value: '0' }] },
+          transferEvent('cosmos1a', 'cosmos1plain', '50uatom', '1'),
+        ],
+      },
+    ],
+  };
+  const transfers = parseBlockResults(raw);
+  assert.equal(transfers[0].is_ibc_out, true);
+  assert.equal(transfers[1].is_ibc_out, false);
+});
+
+test('finalize transfers are never IBC-out', () => {
+  const raw = {
+    finalize_block_events: [
+      { type: 'transfer', attributes: [{ key: 'sender', value: 'cosmos1a' }, { key: 'recipient', value: 'cosmos1b' }, { key: 'amount', value: '10uatom' }] },
+    ],
+  };
+  assert.equal(parseBlockResults(raw)[0].is_ibc_out, false);
 });
 
 test('null txs_results / missing finalize events tolerated', () => {

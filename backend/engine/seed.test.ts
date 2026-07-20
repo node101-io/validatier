@@ -15,7 +15,7 @@ function claim(
   tag: WithdrawTag | null,
   sender: string = MODULE_ACCOUNTS.distribution
 ): RealTransfer {
-  return { sender, recipient, amount, msg_index: 0, source: 'tx', tx_index: 0, withdraw_tag: tag };
+  return { sender, recipient, amount, msg_index: 0, source: 'tx', tx_index: 0, withdraw_tag: tag, is_ibc_out: false };
 }
 
 function seedRow(origin: string) {

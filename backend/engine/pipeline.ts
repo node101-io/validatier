@@ -2,6 +2,7 @@ import { MODULE_ACCOUNT_SET } from '../chain/moduleAccounts';
 import { isTainted } from '../store/edges';
 import { processSeedTransfer, type BlockCtx } from './seed';
 import { applyContraction } from './contraction';
+import { classifyRecipient } from './classify';
 import type { RealTransfer } from '../chain/blockResults';
 
 // Per-transfer decision gate — docs/01 steps 1..3. Order matters:
@@ -15,7 +16,16 @@ export type TransferDisposition =
 
 export function processTransfer(t: RealTransfer, ctx: BlockCtx): TransferDisposition {
   // 1. SEED? (distribution -> withdrawAddr with a matching validator tag)
-  if (processSeedTransfer(t, ctx)) return 'seeded';
+  if (processSeedTransfer(t, ctx)) {
+    // Classify the seed recipient too (deviates from docs/01's literal
+    // "continue" — confirmed with the user): a validator can withdraw
+    // DIRECTLY to a known sink (2 real validators withdraw straight to
+    // Kraken) with no further hop to trigger classification. Without this,
+    // that edge would sit at in_flight forever and sold% would show 0%
+    // for money that plainly already reached an exchange.
+    classifyRecipient(t);
+    return 'seeded';
+  }
 
   // 2. EXCLUDE? any other transfer touching a module account is protocol
   // machinery, not a wallet-to-wallet hop. This also drops foreign delegator
@@ -28,7 +38,9 @@ export function processTransfer(t: RealTransfer, ctx: BlockCtx): TransferDisposi
   if (!isTainted(t.sender)) return 'untainted';
 
   // 4. CONTRACTION: haircut across origins + re-anchor to the recipient.
-  // (classification of the recipient = task 6.4, plugs in after this.)
   applyContraction(t.sender, t.recipient, t.amount, ctx);
+
+  // 5. CLASSIFY: is the recipient a known/discovered sink, or IBC-out?
+  classifyRecipient(t);
   return 'propagate';
 }

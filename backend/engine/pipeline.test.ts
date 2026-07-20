@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { openSqlite, closeSqlite, getSqlite } from '../db/sqlite';
 import { setDefault } from '../store/withdrawMap';
 import { isTainted } from '../store/edges';
+import { upsertSinkRegistryRow } from '../store/sinkRegistry';
 import { processTransfer } from './pipeline';
 import { MODULE_ACCOUNTS } from '../chain/moduleAccounts';
 import type { RealTransfer, WithdrawTag } from '../chain/blockResults';
@@ -16,7 +17,7 @@ function transfer(
   amount: bigint,
   tag: WithdrawTag | null = null
 ): RealTransfer {
-  return { sender, recipient, amount, msg_index: 0, source: 'tx', tx_index: 0, withdraw_tag: tag };
+  return { sender, recipient, amount, msg_index: 0, source: 'tx', tx_index: 0, withdraw_tag: tag, is_ibc_out: false };
 }
 
 const cleanup = () => {
@@ -24,6 +25,7 @@ const cleanup = () => {
   db.prepare(`DELETE FROM edges WHERE origin LIKE '${P}%'`).run();
   db.prepare(`DELETE FROM seed WHERE origin LIKE '${P}%'`).run();
   db.prepare(`DELETE FROM withdraw_map WHERE operator_address LIKE '${P}%'`).run();
+  db.prepare(`DELETE FROM sink_registry WHERE address LIKE '${P}%'`).run();
 };
 
 before(() => {
@@ -91,6 +93,31 @@ test('seed -> taint -> propagate lifecycle', () => {
 
   // now its outgoing transfer must be followed (contraction = 6.3)
   assert.equal(processTransfer(transfer(`${P}waddr`, 'cosmos1somebody', 10n), CTX), 'propagate');
+});
+
+test('withdrawing DIRECTLY to a known sink is realized immediately (the Kraken case)', () => {
+  // 2 real validators withdraw straight to Kraken with no intermediate hop —
+  // classify must run on the SEED path too, or this edge would sit at
+  // in_flight forever (confirmed fix, deviates from docs/01's literal "continue").
+  upsertSinkRegistryRow({ address: `${P}kraken`, tier: 1, kind: 'cex' });
+  setDefault(`${P}op_direct`, `${P}kraken`);
+
+  const d = processTransfer(
+    transfer(MODULE_ACCOUNTS.distribution, `${P}kraken`, 999n, {
+      kind: 'reward',
+      validator: `${P}op_direct`,
+    }),
+    CTX
+  );
+  assert.equal(d, 'seeded');
+
+  const row = getSqlite()
+    .prepare('SELECT status, sink_kind FROM edges WHERE origin = ? AND holder = ?')
+    .get(`${P}op_direct`, `${P}kraken`) as { status: string; sink_kind: string };
+  assert.deepEqual(row, { status: 'realized', sink_kind: 'cex' });
+
+  // realized -> no longer tainted (terminal, matches the partial-index rule)
+  assert.equal(isTainted(`${P}kraken`), false);
 });
 
 test('realized edges do not count as taint; suspected edges do', () => {

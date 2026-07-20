@@ -87,12 +87,15 @@ timestamps = `Number` (unix sec). Model files: `models/<Name>/<Name>.ts` + `func
 {
   address: String,                 // unique
   tier: Number,                    // 1 | 2
-  kind: String,                    // cex | dex | ibc_out | structural
+  kind: String,                    // cex | dex | ibc_out | structural | validator
   label: String,                   // optional — "Binance hot wallet"
   source: String,                  // static | heuristic
   discovered_at_height: Number     // null (static) | discovery height
 }
 // index: {address} unique, {tier}
+// NOTE: `validator` kind = a validator's own wallet, explicitly curated onto the
+//   Tier 1 list (business decision — see docs/01 classify step). Money reaching
+//   it is `realized`, same as any other Tier 1 sink.
 ```
 
 ## prices — ATOM/USD history

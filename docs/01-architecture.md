@@ -47,6 +47,9 @@ For each REAL transfer event `(sender, recipient, amount)` (uatom only; parsing 
      edge(V, recipient).weight += amount; depth = 1; status = in_flight
      # NOTE: no edge to the distribution module. This is inflow, not a hop.
      # NOTE: commingled wallets need NO split — every claim names its validator.
+     CLASSIFY recipient (step 5, below) — a validator can withdraw DIRECTLY to
+        a known sink (no further hop to trigger classification otherwise);
+        skip steps 2..4 (exclude/taint/contraction do not apply to seed)
      continue
 
 2. EXCLUDE?  if sender or recipient is a module account (other than the seed case above):
