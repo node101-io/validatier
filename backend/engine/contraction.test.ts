@@ -1,6 +1,7 @@
 import { test, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { openSqlite, closeSqlite, getSqlite } from '../db/sqlite';
+import { config } from '../config';
 import { applyContraction, splitProRata } from './contraction';
 
 const P = 'testcontr';
@@ -124,6 +125,43 @@ test('self-transfer changes nothing', () => {
   const res = applyContraction(`${P}x`, `${P}x`, 40n, CTX);
   assert.deepEqual(res, { moved: 0n, origins: 0 });
   assert.equal(edge(`${P}A`, `${P}x`)!.weight, 100n);
+});
+
+// ── Termination: MAX_DEPTH (docs/01 step 6) ─────────────────────────────
+
+test('an edge already AT max depth is frozen: excluded from the next haircut', () => {
+  const maxed = config.maxDepth; // e.g. 8 — this edge already hit the cap
+  insertEdge(`${P}A`, `${P}x`, 100n, maxed);
+  const res = applyContraction(`${P}x`, `${P}y`, 40n, CTX);
+  assert.deepEqual(res, { moved: 0n, origins: 0 }); // nothing to move — only origin was frozen
+  assert.equal(edge(`${P}A`, `${P}x`)!.weight, 100n); // untouched, still parked
+  assert.equal(edge(`${P}A`, `${P}y`), undefined); // never reached the recipient
+});
+
+test('one origin frozen at max depth, another still active: only the active one moves', () => {
+  const maxed = config.maxDepth;
+  insertEdge(`${P}A`, `${P}x`, 100n, maxed); // frozen
+  insertEdge(`${P}B`, `${P}x`, 50n, 2); // active
+  const res = applyContraction(`${P}x`, `${P}y`, 30n, CTX);
+  assert.deepEqual(res, { moved: 30n, origins: 1 }); // only B counted
+  assert.equal(edge(`${P}A`, `${P}x`)!.weight, 100n); // A untouched
+  assert.equal(edge(`${P}A`, `${P}y`), undefined); // A never propagated
+  assert.equal(edge(`${P}B`, `${P}x`)!.weight, 20n); // B paid its full share (only holder)
+  assert.equal(edge(`${P}B`, `${P}y`)!.weight, 30n);
+});
+
+test('reaching exactly max depth is allowed; only propagating FROM it is blocked', () => {
+  const maxed = config.maxDepth;
+  insertEdge(`${P}A`, `${P}x`, 100n, maxed - 1); // one hop away from the cap
+  applyContraction(`${P}x`, `${P}y`, 40n, CTX);
+  const arrived = edge(`${P}A`, `${P}y`)!;
+  assert.equal(arrived.depth, BigInt(maxed)); // landed exactly at the cap — that's fine
+  assert.equal(arrived.weight, 40n);
+
+  // now try to move it further — this edge is AT the cap, must freeze
+  const res2 = applyContraction(`${P}y`, `${P}z`, 40n, CTX);
+  assert.deepEqual(res2, { moved: 0n, origins: 0 });
+  assert.equal(edge(`${P}A`, `${P}y`)!.weight, 40n); // stayed parked
 });
 
 test('splitProRata is deterministic; Σ pay never exceeds effective', () => {

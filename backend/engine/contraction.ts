@@ -1,5 +1,6 @@
 import type { Database, Statement } from 'better-sqlite3';
 import { getSqlite } from '../db/sqlite';
+import { config } from '../config';
 import type { BlockCtx } from './seed';
 
 // Contraction + haircut (docs/01 step 4, docs/04 CONTRACTION hot-path).
@@ -7,6 +8,13 @@ import type { BlockCtx } from './seed';
 // money the sender holds, reduce origin->sender, increase origin->recipient —
 // all inside ONE transaction (half-applied contraction breaks the
 // weight-conservation invariant: Σ weight per origin == money still in flight).
+//
+// Termination (docs/01 step 6):
+//  - inflow exhausted: handled below (deleteZeroed) — a zeroed edge is dropped.
+//  - MAX_DEPTH: an origin's edge already AT max depth is excluded from the
+//    haircut source (see selectHolders) — its money stays parked at that
+//    holder forever, even if the wallet keeps moving OTHER origins' money.
+//    Termination is per (origin, holder) edge, not per wallet.
 
 interface HolderEdge {
   origin: string;
@@ -46,8 +54,11 @@ function s(): Stmts {
   if (stmts) return stmts;
   const db: Database = getSqlite();
 
+  // depth < MAX_DEPTH: an edge already at the cap is frozen — excluded from
+  // future haircuts, so money never propagates past it (docs/01 termination).
   const selectHolders: Statement = db.prepare(
-    "SELECT origin, weight, depth FROM edges WHERE holder = ? AND status != 'realized'"
+    `SELECT origin, weight, depth FROM edges
+     WHERE holder = ? AND status != 'realized' AND depth < ${config.maxDepth}`
   );
   const reduce: Statement = db.prepare(`
     UPDATE edges SET weight = weight - @pay, last_height = @height, last_ts = @ts
