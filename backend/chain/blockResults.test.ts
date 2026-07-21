@@ -2,13 +2,16 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { parseBlockResults, type RealTransfer } from './blockResults';
+import { parseBlockResults, parseValidatorLifecycleEvents, type RealTransfer } from './blockResults';
 import { MODULE_ACCOUNTS } from './moduleAccounts';
 
 // Real cosmoshub blocks captured 2026-07-16 (finalize_block_events trimmed to a
 // representative sample — transfers + accrual examples kept).
 function fixture(height: number): unknown {
-  const p = path.resolve(__dirname, '..', '..', 'chain', '__fixtures__', `block_${height}.json`);
+  return namedFixture(`block_${height}`);
+}
+function namedFixture(name: string): unknown {
+  const p = path.resolve(__dirname, '..', '..', 'chain', '__fixtures__', `${name}.json`);
   return JSON.parse(fs.readFileSync(p, 'utf8'));
 }
 
@@ -185,6 +188,84 @@ test('finalize transfers are never IBC-out', () => {
     ],
   };
   assert.equal(parseBlockResults(raw)[0].is_ibc_out, false);
+});
+
+// ── Validator lifecycle events (task 10.1 follow-up) — real chain data ────
+
+test('create_validator: real event (height 31967543, via LCD tx-search — RPC is pruned there)', () => {
+  const { createValidator, setWithdrawAddress } = parseValidatorLifecycleEvents(
+    namedFixture('create_validator_31967543')
+  );
+  assert.equal(createValidator.length, 1);
+  assert.deepEqual(createValidator[0], {
+    operator: 'cosmosvaloper1tcu2fzygcssl8necq2mylm79tpsnl2kvl6e79x',
+    selfStakeAmount: 4_000_000n,
+    msg_index: 0,
+    tx_index: 0,
+  });
+  assert.equal(setWithdrawAddress.length, 0);
+});
+
+test('set_withdraw_address: real ICA-relayed event is unattributable (delegator: null)', () => {
+  // Real height 32133485: the inner MsgSetWithdrawAddress was executed via an
+  // Interchain Account — no standalone `message` action event exists for it,
+  // only the relayer's MsgRecvPacket message. We must NOT guess the delegator.
+  const { setWithdrawAddress } = parseValidatorLifecycleEvents(fixture(32133485));
+  assert.equal(setWithdrawAddress.length, 1);
+  assert.equal(
+    setWithdrawAddress[0].withdraw_address,
+    'cosmos1ud6u97gu39nwawn3092v2fflju2e2fa74wt3v8w22v0ys84g6zyq907yxl'
+  );
+  assert.equal(setWithdrawAddress[0].delegator, null);
+});
+
+test('set_withdraw_address: direct case resolves delegator from the sibling message event', () => {
+  const raw = {
+    txs_results: [
+      {
+        code: 0,
+        events: [
+          {
+            type: 'message',
+            attributes: [
+              { key: 'action', value: '/cosmos.distribution.v1beta1.MsgSetWithdrawAddress' },
+              { key: 'sender', value: 'cosmos1delegator' },
+              { key: 'msg_index', value: '0' },
+            ],
+          },
+          {
+            type: 'set_withdraw_address',
+            attributes: [
+              { key: 'withdraw_address', value: 'cosmos1newaddr' },
+              { key: 'msg_index', value: '0' },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  const { setWithdrawAddress } = parseValidatorLifecycleEvents(raw);
+  assert.deepEqual(setWithdrawAddress[0], {
+    withdraw_address: 'cosmos1newaddr',
+    delegator: 'cosmos1delegator',
+    msg_index: 0,
+    tx_index: 0,
+  });
+});
+
+test('lifecycle events respect failed-tx and msg_index isolation like transfers do', () => {
+  const raw = {
+    txs_results: [
+      {
+        code: 5, // failed — contributes nothing
+        events: [
+          { type: 'create_validator', attributes: [{ key: 'validator', value: 'cosmosvaloper1x' }, { key: 'amount', value: '1uatom' }, { key: 'msg_index', value: '0' }] },
+        ],
+      },
+    ],
+  };
+  const { createValidator } = parseValidatorLifecycleEvents(raw);
+  assert.equal(createValidator.length, 0);
 });
 
 test('null txs_results / missing finalize events tolerated', () => {

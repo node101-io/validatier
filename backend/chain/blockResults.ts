@@ -137,3 +137,85 @@ export function parseBlockResults(raw: unknown): RealTransfer[] {
 
     return out;
 }
+
+// ── Validator lifecycle events (task 10.1 follow-up) ───────────────────────
+// Live-tracked so a brand-new validator's or a redirected-withdraw-address
+// validator's very next reward claim resolves correctly, without waiting for
+// the next periodic full re-sync (docs/01 origin-set: "override: each
+// MsgSetWithdrawAddress updates withdraw_map").
+
+export interface CreateValidatorEvent {
+    operator: string; // cosmosvaloper1... from the event's `validator` attribute
+    selfStakeAmount: bigint; // uatom, from the event's `amount` attribute
+    msg_index: number;
+    tx_index: number;
+}
+
+export interface SetWithdrawAddressEvent {
+    withdraw_address: string;
+    // The event itself carries no delegator info — resolved from the sibling
+    // `message` event (action=MsgSetWithdrawAddress) at the same msg_index.
+    // null = unattributable (e.g. executed via an Interchain Account: the
+    // inner message has no standalone `message` event) — never guessed.
+    delegator: string | null;
+    msg_index: number;
+    tx_index: number;
+}
+
+const SET_WITHDRAW_ADDRESS_ACTION = "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress";
+
+export function parseValidatorLifecycleEvents(raw: unknown): {
+    createValidator: CreateValidatorEvent[];
+    setWithdrawAddress: SetWithdrawAddressEvent[];
+} {
+    const br = raw as RawBlockResults;
+    const createValidator: CreateValidatorEvent[] = [];
+    const setWithdrawAddress: SetWithdrawAddressEvent[] = [];
+
+    (br.txs_results ?? []).forEach((tx, txIndex) => {
+        if (tx.code !== 0) return;
+        const events = tx.events ?? [];
+
+        // sender per msg_index, only for the one action we need it for here
+        const setWithdrawSenderByMsgIndex = new Map<number, string>();
+        for (const e of events) {
+            if (e.type !== "message") continue;
+            if (attr(e, "action") !== SET_WITHDRAW_ADDRESS_ACTION) continue;
+            const mi = attr(e, "msg_index");
+            const sender = attr(e, "sender");
+            if (mi !== undefined && sender !== undefined) {
+                setWithdrawSenderByMsgIndex.set(Number(mi), sender);
+            }
+        }
+
+        for (const e of events) {
+            if (e.type === "create_validator") {
+                const operator = attr(e, "validator");
+                const amount = uatomAmount(attr(e, "amount"));
+                const mi = attr(e, "msg_index");
+                if (operator && amount !== null && mi !== undefined) {
+                    createValidator.push({
+                        operator,
+                        selfStakeAmount: amount,
+                        msg_index: Number(mi),
+                        tx_index: txIndex,
+                    });
+                }
+            } else if (e.type === "set_withdraw_address") {
+                const withdraw_address = attr(e, "withdraw_address");
+                const mi = attr(e, "msg_index");
+                if (withdraw_address && mi !== undefined) {
+                    const msg_index = Number(mi);
+                    setWithdrawAddress.push({
+                        withdraw_address,
+                        delegator: setWithdrawSenderByMsgIndex.get(msg_index) ?? null,
+                        msg_index,
+                        tx_index: txIndex,
+                    });
+                }
+            }
+        }
+    });
+
+    return { createValidator, setWithdrawAddress };
+}
