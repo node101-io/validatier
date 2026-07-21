@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { ChainClient } from './client';
+import { ChainClient, HttpError } from './client';
 
 function serve(handler: http.RequestListener): Promise<{ url: string; close: () => void }> {
   const server = http.createServer(handler);
@@ -49,6 +49,25 @@ test('an RPC-level error envelope throws even with HTTP 200', async () => {
   try {
     const client = new ChainClient(url, url);
     await assert.rejects(() => client.getBlock(1), /height not available/);
+  } finally {
+    close();
+  }
+});
+
+test('a persistent HTTP error preserves its status code after retries exhaust', async () => {
+  const { url, close } = await serve((_req, res) => {
+    res.writeHead(404).end('not found'); // fails on every attempt
+  });
+  try {
+    const client = new ChainClient(url, url);
+    await assert.rejects(
+      () => client.lcdGet('/cosmos/staking/v1beta1/validators/x/delegations/y'),
+      (err: unknown) => {
+        assert.ok(err instanceof HttpError);
+        assert.equal(err.status, 404); // callers rely on this to tell "not found" from "server broke"
+        return true;
+      }
+    );
   } finally {
     close();
   }

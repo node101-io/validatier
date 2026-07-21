@@ -10,7 +10,10 @@ function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-class HttpError extends Error {
+// Exported so callers can distinguish a real HTTP status (e.g. 404 meaning
+// "this resource doesn't exist" — sometimes a valid signal, not a failure)
+// from network-level errors (timeout, DNS, connection reset).
+export class HttpError extends Error {
     constructor(
         readonly status: number,
         message: string,
@@ -63,6 +66,14 @@ export class ChainClient {
                     );
                 }
             }
+        }
+        // Preserve the real HTTP status on the final error (so callers can
+        // e.g. treat a persistent 404 differently from a persistent 5xx).
+        if (lastError instanceof HttpError) {
+            throw new HttpError(
+                lastError.status,
+                `${RETRY_ATTEMPTS} attempts failed for ${base + path}: ${lastError.message}`,
+            );
         }
         throw new Error(
             `${RETRY_ATTEMPTS} attempts failed for ${base + path}: ${lastError}`,
