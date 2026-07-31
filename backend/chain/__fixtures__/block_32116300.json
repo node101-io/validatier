@@ -1,6 +1,6 @@
 {
  "height": "32116300",
- "txs_results": [
+ "results": [
   {
    "code": 0,
    "data": "EiUKIy9jb3Ntb3MuZ292LnYxYmV0YTEuTXNnVm90ZVJlc3BvbnNl",
@@ -2338,7 +2338,7 @@
    "codespace": ""
   }
  ],
- "finalize_block_events": [
+ "finalizeBlockEvents": [
   {
    "type": "transfer",
    "attributes": [

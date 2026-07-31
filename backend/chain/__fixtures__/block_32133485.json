@@ -1,6 +1,6 @@
 {
  "_source": "Real cosmoshub height 32133485 — an ICA-relayed MsgSetWithdrawAddress (no standalone message-action event for the inner msg, so delegator is unattributable by design).",
- "txs_results": [
+ "results": [
   {
    "code": 0,
    "data": "EjAKKi9pYmMuY29yZS5jaGFubmVsLnYxLk1zZ1JlY3ZQYWNrZXRSZXNwb25zZRICCAISMAoqL2liYy5jb3JlLmNoYW5uZWwudjEuTXNnUmVjdlBhY2tldFJlc3BvbnNlEgIIAg==",
@@ -853,5 +853,5 @@
    "codespace": ""
   }
  ],
- "finalize_block_events": []
+ "finalizeBlockEvents": []
 }

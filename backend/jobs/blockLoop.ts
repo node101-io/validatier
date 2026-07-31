@@ -55,7 +55,7 @@ function applyHeight(height: number, ts: number, transfers: RealTransfer[]): voi
 
 export async function runBlockLoop(): Promise<BlockLoopStats> {
   const cursor = getCursor();
-  const latest = Number((await chainClient.getStatus()).sync_info.latest_block_height);
+  const latest = (await chainClient.getStatus()).syncInfo.latestBlockHeight;
 
   // First-ever run (cursor never set): pruned public nodes can't serve
   // historical block_results (docs/02) — start at the current tip and go
@@ -73,7 +73,7 @@ export async function runBlockLoop(): Promise<BlockLoopStats> {
       chainClient.getBlockResults(height),
       chainClient.getBlock(height),
     ]);
-    const ts = Math.floor(new Date(block.block.header.time).getTime() / 1000);
+    const ts = Math.floor(block.block.header.time.getTime() / 1000);
     const transfers = parseBlockResults(blockResults);
     const lifecycle = parseValidatorLifecycleEvents(blockResults);
 

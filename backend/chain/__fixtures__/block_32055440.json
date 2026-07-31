@@ -1,6 +1,6 @@
 {
  "height": "32055440",
- "txs_results": [
+ "results": [
   {
    "code": 0,
    "data": "EiYKJC9jb3Ntb3MuYmFuay52MWJldGExLk1zZ1NlbmRSZXNwb25zZQ==",
@@ -940,7 +940,7 @@
    "codespace": ""
   }
  ],
- "finalize_block_events": [
+ "finalizeBlockEvents": [
   {
    "type": "coin_received",
    "attributes": [

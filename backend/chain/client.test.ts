@@ -14,45 +14,10 @@ function serve(handler: http.RequestListener): Promise<{ url: string; close: () 
   });
 }
 
-test('retries after a transient failure and unwraps the RPC envelope', async () => {
-  let calls = 0;
-  const { url, close } = await serve((_req, res) => {
-    calls++;
-    if (calls === 1) {
-      res.writeHead(500).end('boom'); // first attempt fails
-      return;
-    }
-    res.writeHead(200, { 'content-type': 'application/json' });
-    res.end(
-      JSON.stringify({
-        jsonrpc: '2.0',
-        id: -1,
-        result: { sync_info: { latest_block_height: '42', latest_block_time: 't', catching_up: false } },
-      })
-    );
-  });
-  try {
-    const client = new ChainClient(url, url);
-    const status = await client.getStatus();
-    assert.equal(status.sync_info.latest_block_height, '42');
-    assert.equal(calls, 2); // failed once, succeeded on retry
-  } finally {
-    close();
-  }
-});
-
-test('an RPC-level error envelope throws even with HTTP 200', async () => {
-  const { url, close } = await serve((_req, res) => {
-    res.writeHead(200, { 'content-type': 'application/json' });
-    res.end(JSON.stringify({ jsonrpc: '2.0', id: -1, error: { code: -32603, message: 'height not available' } }));
-  });
-  try {
-    const client = new ChainClient(url, url);
-    await assert.rejects(() => client.getBlock(1), /height not available/);
-  } finally {
-    close();
-  }
-});
+// getStatus/getBlock/getBlockResults now delegate to cosmjs's Comet38Client
+// (transport + JSON-RPC envelope handling live there, already tested upstream).
+// Only our own retry wrapper (rpcCall) and the still-custom LCD path are ours
+// to test here; ChainClient(url, url) below stays as the constructor shape.
 
 test('a persistent HTTP error preserves its status code after retries exhaust', async () => {
   const { url, close } = await serve((_req, res) => {

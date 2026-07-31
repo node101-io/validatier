@@ -5,7 +5,7 @@ import path from 'node:path';
 import { parseBlockResults, parseValidatorLifecycleEvents, type RealTransfer } from './blockResults';
 import { MODULE_ACCOUNTS } from './moduleAccounts';
 
-// Real cosmoshub blocks captured 2026-07-16 (finalize_block_events trimmed to a
+// Real cosmoshub blocks captured 2026-07-16 (finalizeBlockEvents trimmed to a
 // representative sample — transfers + accrual examples kept).
 function fixture(height: number): unknown {
   return namedFixture(`block_${height}`);
@@ -100,7 +100,7 @@ function transferEvent(sender: string, recipient: string, amount: string, msgInd
 
 test('multisend: multiple transfers under one msg_index -> one record per recipient', () => {
   const raw = {
-    txs_results: [
+    results: [
       {
         code: 0,
         events: [
@@ -122,14 +122,14 @@ test('multisend: multiple transfers under one msg_index -> one record per recipi
 
 test('failed tx (code != 0) contributes nothing', () => {
   const raw = {
-    txs_results: [{ code: 5, events: [transferEvent('cosmos1a', 'cosmos1b', '100uatom', '0')] }],
+    results: [{ code: 5, events: [transferEvent('cosmos1a', 'cosmos1b', '100uatom', '0')] }],
   };
   assert.equal(parseBlockResults(raw).length, 0);
 });
 
 test('multi-coin amount: only the uatom component counts; zero uatom skipped', () => {
   const raw = {
-    txs_results: [
+    results: [
       {
         code: 0,
         events: [
@@ -147,7 +147,7 @@ test('multi-coin amount: only the uatom component counts; zero uatom skipped', (
 
 test('withdraw_commission tags its msg_index; other msgs in the tx untouched', () => {
   const raw = {
-    txs_results: [
+    results: [
       {
         code: 0,
         events: [
@@ -165,7 +165,7 @@ test('withdraw_commission tags its msg_index; other msgs in the tx untouched', (
 
 test('synthetic: ibc_transfer at msg_index 0 tags only that msg, not msg_index 1', () => {
   const raw = {
-    txs_results: [
+    results: [
       {
         code: 0,
         events: [
@@ -183,7 +183,7 @@ test('synthetic: ibc_transfer at msg_index 0 tags only that msg, not msg_index 1
 
 test('finalize transfers are never IBC-out', () => {
   const raw = {
-    finalize_block_events: [
+    finalizeBlockEvents: [
       { type: 'transfer', attributes: [{ key: 'sender', value: 'cosmos1a' }, { key: 'recipient', value: 'cosmos1b' }, { key: 'amount', value: '10uatom' }] },
     ],
   };
@@ -221,7 +221,7 @@ test('set_withdraw_address: real ICA-relayed event is unattributable (delegator:
 
 test('set_withdraw_address: direct case resolves delegator from the sibling message event', () => {
   const raw = {
-    txs_results: [
+    results: [
       {
         code: 0,
         events: [
@@ -255,7 +255,7 @@ test('set_withdraw_address: direct case resolves delegator from the sibling mess
 
 test('lifecycle events respect failed-tx and msg_index isolation like transfers do', () => {
   const raw = {
-    txs_results: [
+    results: [
       {
         code: 5, // failed — contributes nothing
         events: [
@@ -268,7 +268,7 @@ test('lifecycle events respect failed-tx and msg_index isolation like transfers 
   assert.equal(createValidator.length, 0);
 });
 
-test('null txs_results / missing finalize events tolerated', () => {
-  assert.deepEqual(parseBlockResults({ txs_results: null }), []);
+test('null results / missing finalize events tolerated', () => {
+  assert.deepEqual(parseBlockResults({ results: null }), []);
   assert.deepEqual(parseBlockResults({}), []);
 });

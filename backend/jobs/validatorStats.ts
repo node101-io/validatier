@@ -67,9 +67,9 @@ export interface DailyStatsResult {
 // also what the eventual daily scheduler (task 10.2) will pass under the hood
 // (the latest height at the moment the cron fires).
 export async function runDailyValidatorStats(atHeight?: number): Promise<DailyStatsResult> {
-  const height = atHeight ?? Number((await chainClient.getStatus()).sync_info.latest_block_height);
+  const height = atHeight ?? (await chainClient.getStatus()).syncInfo.latestBlockHeight;
   const block = await chainClient.getBlock(height);
-  const ts = Math.floor(new Date(block.block.header.time).getTime() / 1000);
+  const ts = Math.floor(block.block.header.time.getTime() / 1000);
   const epoch = Math.floor(ts / 86400);
   const d = new Date(ts * 1000);
   const day = d.getUTCDate();

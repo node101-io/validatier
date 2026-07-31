@@ -1,7 +1,12 @@
+import { Comet38Client, comet38 } from "@cosmjs/tendermint-rpc";
 import { config } from "../config";
 
 // two endpoints (see .env): one CometBFT RPC + one Cosmos REST (LCD).
 // No URL pools — when the archive node arrives these values just change.
+// RPC (/status, /block, /block_results) goes through cosmjs's Comet38Client —
+// cosmoshub runs CometBFT 0.38's unified ABCI (finalize_block_events), which is
+// exactly what Comet38Client models. LCD stays a plain REST client below: cosmjs
+// has no generic LCD/REST client, only protobuf-based Stargate query clients.
 const REQUEST_TIMEOUT_MS = 15_000;
 const RETRY_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 300;
@@ -40,6 +45,10 @@ async function fetchJson(
 }
 
 export class ChainClient {
+    // Lazily connected + cached; cleared on failure so the next call reconnects
+    // instead of forever replaying a rejected promise.
+    private cometClient: Promise<Comet38Client> | null = null;
+
     constructor(
         private readonly rpcUrl: string,
         private readonly lcdUrl: string,
@@ -80,34 +89,50 @@ export class ChainClient {
         );
     }
 
-    // CometBFT RPC wraps every response in {jsonrpc, id, result | error}.
-    private async rpcGet<T>(path: string): Promise<T> {
-        const body = (await this.request(this.rpcUrl, path)) as {
-            result?: T;
-            error?: { code: number; message: string; data?: string };
-        };
-        if (body.error) {
-            throw new Error(
-                `rpc error for ${path}: ${body.error.message} ${body.error.data ?? ""}`,
+    private getCometClient(): Promise<Comet38Client> {
+        if (!this.cometClient) {
+            this.cometClient = Comet38Client.connect(this.rpcUrl).catch(
+                (err) => {
+                    this.cometClient = null;
+                    throw err;
+                },
             );
         }
-        if (body.result === undefined) {
-            throw new Error(`rpc: malformed response for ${path} (no result)`);
+        return this.cometClient;
+    }
+
+    // Retries the whole RPC call (connect + request) — cosmjs throws plain
+    // Errors, not HttpError, so there's no status code to branch on here.
+    private async rpcCall<T>(
+        fn: (client: Comet38Client) => Promise<T>,
+    ): Promise<T> {
+        let lastError: unknown;
+        for (let attempt = 1; attempt <= RETRY_ATTEMPTS; attempt++) {
+            try {
+                return await fn(await this.getCometClient());
+            } catch (err) {
+                lastError = err;
+                if (attempt < RETRY_ATTEMPTS) {
+                    await sleep(RETRY_BASE_DELAY_MS * attempt);
+                }
+            }
         }
-        return body.result;
+        throw new Error(
+            `${RETRY_ATTEMPTS} attempts failed for RPC call against ${this.rpcUrl}: ${lastError}`,
+        );
     }
 
-    getStatus(): Promise<RpcStatus> {
-        return this.rpcGet<RpcStatus>("/status");
+    getStatus(): Promise<comet38.StatusResponse> {
+        return this.rpcCall((c) => c.status());
     }
 
-    getBlock(height: number): Promise<RpcBlock> {
-        return this.rpcGet<RpcBlock>(`/block?height=${height}`);
+    getBlock(height: number): Promise<comet38.BlockResponse> {
+        return this.rpcCall((c) => c.block(height));
     }
 
-    // Raw shape; parsing rules live in the block_results parser (task 4.2).
-    getBlockResults(height: number): Promise<unknown> {
-        return this.rpcGet<unknown>(`/block_results?height=${height}`);
+    // Parsing rules live in the block_results parser (task 4.2).
+    getBlockResults(height: number): Promise<comet38.BlockResultsResponse> {
+        return this.rpcCall((c) => c.blockResults(height));
     }
 
     // LCD state query; pass height for historical reads (archive node needed
@@ -119,24 +144,6 @@ export class ChainClient {
                 : undefined;
         return this.request(this.lcdUrl, path, headers) as Promise<T>;
     }
-}
-
-// Only the fields we actually read are typed; both endpoints return much more.
-export interface RpcStatus {
-    sync_info: {
-        latest_block_height: string; // numbers arrive as strings in CometBFT JSON
-        latest_block_time: string;
-        catching_up: boolean;
-    };
-}
-
-export interface RpcBlock {
-    block: {
-        header: {
-            height: string;
-            time: string; // RFC3339 — the block timestamp we persist as unix sec
-        };
-    };
 }
 
 export const chainClient = new ChainClient(config.rpcUrl, config.lcdUrl);

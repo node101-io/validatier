@@ -12,6 +12,7 @@
   "dependencies": {
     "@cosmjs/crypto": "^0.39.0",
     "@cosmjs/encoding": "^0.39.0",
+    "@cosmjs/tendermint-rpc": "^0.39.0",
     "better-sqlite3": "^12.11.1",
     "dotenv": "^17.4.2",
     "mongoose": "^9.7.4",
