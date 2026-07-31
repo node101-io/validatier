@@ -25,7 +25,14 @@ async function tickBlockLoop(): Promise<void> {
   if (blockLoopRunning) return; // previous tick still catching up a backlog — don't overlap
   blockLoopRunning = true;
   try {
-    await runBlockLoop();
+    const stats = await runBlockLoop();
+    if (stats.heightsProcessed > 0) {
+      console.log(
+        `block loop: heights ${stats.from}-${stats.to} (${stats.heightsProcessed} processed), ` +
+          `${stats.transfersSeen} transfers, ${stats.validatorsCreated} validators created, ` +
+          `${stats.withdrawOverridesApplied} withdraw overrides`
+      );
+    }
   } catch (err) {
     console.error('block loop tick failed (will retry next tick):', err);
   } finally {
@@ -37,14 +44,22 @@ async function tickDailyJobs(): Promise<void> {
   const today = todayUtc();
   if (dailyRunning || today === lastDailyRunDay) return;
   dailyRunning = true;
+  console.log(`daily jobs: starting for UTC day ${today}`);
   try {
     // ORDER MATTERS (docs/01): the snapshot's height must be >= the
     // validator_stats height, so sold% (realized / withdrawn) never exceeds
     // 100% — withdrawn is read AFTER realized is already published.
-    await snapshotFundFlowToMongo();
-    await runDailyValidatorStats();
+    const snap = await snapshotFundFlowToMongo();
+    console.log('daily jobs: fund-flow snapshot done', snap);
+    const vstats = await runDailyValidatorStats();
+    console.log(
+      `daily jobs: validator_stats done — height=${vstats.height} attempted=${vstats.attempted} ` +
+        `succeeded=${vstats.succeeded} skipped=${vstats.skipped.length}`
+    );
     await syncPrices(3); // small daily top-up; the 365-day backfill was one-time (task 9.1)
+    console.log('daily jobs: price sync done');
     lastDailyRunDay = today; // only mark done on full success — a failure retries same-day
+    console.log(`daily jobs: all done for UTC day ${today}`);
   } catch (err) {
     console.error('daily jobs failed (will retry on the next check, same UTC day):', err);
   } finally {
