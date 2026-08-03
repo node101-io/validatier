@@ -28,25 +28,30 @@ timestamps = `Number` (unix sec). Model files: `models/<Name>/<Name>.ts` + `func
 //       pubkey can be reused across validators, so it is not a stable identity).
 ```
 
-## validator_stats — daily stake SNAPSHOT (for stake graphs)
+## validator_stats — monthly stake SNAPSHOT, one doc per validator per month (for stake graphs)
 ```
 {
   operator_address: String,     // index
-  timestamp: Number,            // unix sec of the snapshot
-  day: Number, month: Number, year: Number,
-  block_height: Number,         // height the snapshot was taken at
+  year: Number,
+  month: Number,                 // 1-12
 
-  self_stake: String,           // ABSOLUTE snapshot — /staking .../delegations/{self}.balance
-  total_stake: String,          // ABSOLUTE snapshot — /staking validator.tokens
+  timestamp: [Number],           // length 31, index = day-1, unix sec of that day's snapshot, null if unset
+  block_height: [Number],        // length 31, index = day-1, height the snapshot was taken at, null if unset
 
-  total_withdrawn_reward: String,     // CUMULATIVE to date — from SQLite seed (fund-flow)
-  total_withdrawn_commission: String  // CUMULATIVE to date — from SQLite seed (fund-flow)
+  self_stake: [String],          // length 31, index = day-1 — ABSOLUTE snapshot, /staking .../delegations/{self}.balance, null if unset
+  total_stake: [String],         // length 31, index = day-1 — ABSOLUTE snapshot, /staking validator.tokens, null if unset
+
+  total_withdrawn_reward: [String],     // length 31, index = day-1 — CUMULATIVE to date, from SQLite seed (fund-flow), null if unset
+  total_withdrawn_commission: [String]  // length 31, index = day-1 — CUMULATIVE to date, from SQLite seed (fund-flow), null if unset
 }
-// index: {operator_address, timestamp}, {timestamp, operator_address}
-// Pure snapshots: NO deltas, NO prefix_sum (absolute values need no summing; interval change
-//   = difference of two snapshots). Slashing is reflected automatically in the balance.
+// index: {operator_address, year, month} unique, {year, month, operator_address}
+// One document per validator per month. Arrays are FIXED length 31 regardless of the
+//   actual days in that month (short months just leave trailing slots null forever); this
+//   replaces one document per validator per day. Pure snapshots: NO deltas, NO prefix_sum
+//   (absolute values need no summing; interval change = difference of two populated array
+//   slots). Slashing is reflected automatically in the balance.
 // total_withdrawn_* are cumulative counters but still snapshot-semantics (interval = diff of
-//   two rows). Source = SQLite `seed` (fund-flow pipeline), written by the daily stats job,
+//   two slots). Source = SQLite `seed` (fund-flow pipeline), written by the daily stats job,
 //   as-of the block-scan cursor. sold% denominator = total_withdrawn_reward +
 //   total_withdrawn_commission. Outstanding reward/commission is intentionally not tracked
 //   (only withdrawn money matters).
