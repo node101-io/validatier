@@ -1,7 +1,7 @@
 import { chainClient, HttpError } from '../chain/client';
 import { getSqlite } from '../db/sqlite';
 import { Validator } from '../models/Validator/Validator';
-import { ValidatorStats } from '../models/ValidatorStats/ValidatorStats';
+import { DAYS_PER_MONTH_ARRAY_LENGTH, ValidatorStats } from '../models/ValidatorStats/ValidatorStats';
 
 // Daily stake snapshot (docs/02 validator_stats section, docs/04 validator_state
 // table). Pure ABSOLUTE snapshots — no deltas/prefix_sum. total_withdrawn_* are
@@ -63,6 +63,83 @@ export interface DailyStatsResult {
   skipped: Array<{ operator_address: string; reason: string }>;
 }
 
+type EnsureDocOp = {
+  updateOne: {
+    filter: { operator_address: string; year: number; month: number };
+    update: { $setOnInsert: Record<string, unknown> };
+    upsert: true;
+  };
+};
+type DayWriteOp = {
+  updateOne: {
+    filter: { operator_address: string; year: number; month: number };
+    update: { $set: Record<string, unknown> };
+  };
+};
+
+function emptyMonthArray(): Array<null> {
+  return Array(DAYS_PER_MONTH_ARRAY_LENGTH).fill(null);
+}
+
+// Pure — no I/O. Two separate ops are required (rather than one update) because
+// MongoDB rejects a single update that mixes $setOnInsert on a whole array field
+// with $set on one of that array's indices ("conflict at self_stake"). The ensure
+// op is a no-op once the month's doc already exists; the day-write op sets this
+// day's slot in each array.
+export function buildValidatorStatsOps(input: {
+  operator_address: string;
+  year: number;
+  month: number;
+  day: number;
+  ts: number;
+  height: number;
+  self_stake: bigint;
+  total_stake: bigint;
+  reward: bigint;
+  commission: bigint;
+}): { ensureOp: EnsureDocOp; dayWriteOp: DayWriteOp } {
+  const { operator_address, year, month, day, ts, height, self_stake, total_stake, reward, commission } =
+    input;
+  const dayIndex = day - 1;
+
+  return {
+    ensureOp: {
+      updateOne: {
+        filter: { operator_address, year, month },
+        update: {
+          $setOnInsert: {
+            operator_address,
+            year,
+            month,
+            timestamp: emptyMonthArray(),
+            block_height: emptyMonthArray(),
+            self_stake: emptyMonthArray(),
+            total_stake: emptyMonthArray(),
+            total_withdrawn_reward: emptyMonthArray(),
+            total_withdrawn_commission: emptyMonthArray(),
+          },
+        },
+        upsert: true,
+      },
+    },
+    dayWriteOp: {
+      updateOne: {
+        filter: { operator_address, year, month },
+        update: {
+          $set: {
+            [`timestamp.${dayIndex}`]: ts,
+            [`block_height.${dayIndex}`]: height,
+            [`self_stake.${dayIndex}`]: self_stake.toString(),
+            [`total_stake.${dayIndex}`]: total_stake.toString(),
+            [`total_withdrawn_reward.${dayIndex}`]: reward.toString(),
+            [`total_withdrawn_commission.${dayIndex}`]: commission.toString(),
+          },
+        },
+      },
+    },
+  };
+}
+
 // atHeight defaults to the current chain tip — the standalone/dev default and
 // also what the eventual daily scheduler (task 10.2) will pass under the hood
 // (the latest height at the moment the cron fires).
@@ -81,13 +158,9 @@ export async function runDailyValidatorStats(atHeight?: number): Promise<DailySt
     { operator_address: 1, delegator_address: 1 }
   ).lean<Array<{ operator_address: string; delegator_address?: string }>>();
 
-  const mongoOps: Array<{
-    updateOne: {
-      filter: { operator_address: string; day: number; month: number; year: number };
-      update: { $set: Record<string, unknown> };
-      upsert: true;
-    };
-  }> = [];
+  // Two bulkWrite passes across all validators (see buildValidatorStatsOps for why).
+  const ensureDocOps: EnsureDocOp[] = [];
+  const dayWriteOps: DayWriteOp[] = [];
   const skipped: DailyStatsResult['skipped'] = [];
   let cursor = 0;
 
@@ -136,26 +209,20 @@ export async function runDailyValidatorStats(atHeight?: number): Promise<DailySt
           ts,
         });
 
-        mongoOps.push({
-          updateOne: {
-            filter: { operator_address: v.operator_address, day, month, year },
-            update: {
-              $set: {
-                operator_address: v.operator_address,
-                timestamp: ts,
-                day,
-                month,
-                year,
-                block_height: height,
-                self_stake: self_stake.toString(),
-                total_stake: total_stake.toString(),
-                total_withdrawn_reward: seed.reward.toString(),
-                total_withdrawn_commission: seed.commission.toString(),
-              },
-            },
-            upsert: true,
-          },
+        const { ensureOp, dayWriteOp } = buildValidatorStatsOps({
+          operator_address: v.operator_address,
+          year,
+          month,
+          day,
+          ts,
+          height,
+          self_stake,
+          total_stake,
+          reward: seed.reward,
+          commission: seed.commission,
         });
+        ensureDocOps.push(ensureOp);
+        dayWriteOps.push(dayWriteOp);
       } catch (err) {
         // A validator can be fully removed from the staking module (not just
         // zero-staked) and 404 forever — skip it this cycle, don't fail the job.
@@ -170,15 +237,18 @@ export async function runDailyValidatorStats(atHeight?: number): Promise<DailySt
 
   await Promise.all(Array.from({ length: LCD_CONCURRENCY }, worker));
 
-  if (mongoOps.length > 0) {
-    await ValidatorStats.bulkWrite(mongoOps, { ordered: false });
+  if (ensureDocOps.length > 0) {
+    await ValidatorStats.bulkWrite(ensureDocOps, { ordered: false });
+  }
+  if (dayWriteOps.length > 0) {
+    await ValidatorStats.bulkWrite(dayWriteOps, { ordered: false });
   }
 
   return {
     height,
     epoch,
     attempted: validators.length,
-    succeeded: mongoOps.length,
+    succeeded: dayWriteOps.length,
     skipped,
   };
 }
