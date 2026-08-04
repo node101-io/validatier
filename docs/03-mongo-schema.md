@@ -3,8 +3,8 @@
 Conventions: cosmoshub-only (no `chain_identifier`). uatom = `String` (BigInt string).
 timestamps = `Number` (unix sec). Model files: `models/<Name>/<Name>.ts` + `functions/`.
 
-6 collections: `validators`, `validator_stats`, `fund_flow_edges`,
-`fund_flow_sink_registry`, `prices`, `meta`.
+7 collections: `validators`, `validator_stats`, `fund_flow_edges`,
+`fund_flow_sink_registry`, `validator_sink_sales`, `prices`, `meta`.
 (No `chains` → config in `.env`. No `activevalidators` → active set queried live. No `caches` → deferred.)
 
 ---
@@ -101,6 +101,39 @@ timestamps = `Number` (unix sec). Model files: `models/<Name>/<Name>.ts` + `func
 // NOTE: `validator` kind = a validator's own wallet, explicitly curated onto the
 //   Tier 1 list (business decision — see docs/01 classify step). Money reaching
 //   it is `realized`, same as any other Tier 1 sink.
+```
+
+## validator_sink_sales — sparse cumulative realized-sold per (validator, sink)
+```
+{
+  operator_address: String,   // index — origin validator
+  sink_address: String,       // index — specific sink/exchange address (fund_flow_sink_registry.address)
+  sink_kind: String,          // cex | dex | ibc_out (realized-only; never 'structural' — see note)
+
+  cumulative_sold: String,    // uatom BigInt-string — monotonic non-decreasing running total,
+                               // == SQLite edges.weight_prefix_sum for (origin=operator_address,
+                               // holder=sink_address, status='realized')
+
+  block_height: Number,       // height the daily job's SQLite read was taken at
+  timestamp: Number,          // unix sec of this entry (job run time)
+  day: Number, month: Number, year: Number   // derived from timestamp, for debugging/queries
+}
+// index: {operator_address, sink_address, timestamp: -1} unique  -> idempotency guard (job
+//   runs once/day) AND "latest entry at-or-before t" lookup (sort desc, filter timestamp<=t)
+//
+// SPARSE BY DESIGN: a doc is inserted ONLY when cumulative_sold actually changed since the
+// previous entry for that (operator_address, sink_address) pair. No zero-delta entries, no
+// daily no-op rows, no fixed-length arrays (unlike validator_stats). A pair with no realized
+// sales ever has NO documents at all.
+//
+// sink_kind is sourced from realized edges only, so it is always cex | dex | ibc_out —
+// 'structural' is a tier-2/suspected-only kind (see docs/01, backend/engine/classify.ts) and
+// never appears here since this collection only tracks status='realized' edges.
+//
+// Interval query (t1 -> t2), same logic for "total" and "per-exchange":
+//   valueAt(pair, t) = last doc with timestamp <= t, else 0 if none
+//   sold(pair, t1, t2) = valueAt(pair, t2) - valueAt(pair, t1)
+//   total_sold(operator, t1, t2) = Σ over distinct sink_address (for that operator) of sold(pair, t1, t2)
 ```
 
 ## prices — ATOM/USD history
