@@ -1,6 +1,7 @@
 import { runBlockLoop } from './blockLoop';
 import { snapshotFundFlowToMongo } from './snapshot';
 import { runDailyValidatorStats } from './validatorStats';
+import { runDailyValidatorSinkSales } from './validatorSinkSales';
 import { syncPrices } from './priceSync';
 
 // Top-level orchestration (task 10.2). Two independent timers on the SAME
@@ -51,6 +52,11 @@ async function tickDailyJobs(): Promise<void> {
     // 100% — withdrawn is read AFTER realized is already published.
     const snap = await snapshotFundFlowToMongo();
     console.log('daily jobs: fund-flow snapshot done', snap);
+    const sinkSales = await runDailyValidatorSinkSales();
+    console.log(
+      `daily jobs: validator_sink_sales done — height=${sinkSales.height} ` +
+        `checked=${sinkSales.checked} written=${sinkSales.written}`
+    );
     const vstats = await runDailyValidatorStats();
     console.log(
       `daily jobs: validator_stats done — height=${vstats.height} attempted=${vstats.attempted} ` +
