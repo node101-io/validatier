@@ -1,4 +1,4 @@
-import { chainClient, HttpError } from '../chain/client';
+import { chainClient } from '../chain/client';
 import { getSqlite } from '../db/sqlite';
 import { Validator } from '../models/Validator/Validator';
 import { DAYS_PER_MONTH_ARRAY_LENGTH, ValidatorStats } from '../models/ValidatorStats/ValidatorStats';
@@ -17,7 +17,10 @@ interface LcdValidatorResponse {
   validator: { tokens: string };
 }
 interface LcdDelegationResponse {
-  delegation_response: { balance: { amount: string } };
+  delegation_responses: Array<{
+    delegation: { validator_address: string };
+    balance: { amount: string };
+  }>;
 }
 
 interface SeedTotals {
@@ -179,24 +182,19 @@ export async function runDailyValidatorStats(atHeight?: number): Promise<DailySt
         );
         const total_stake = BigInt(totalRes.validator.tokens);
 
-        // self_stake: a 404 means the delegator fully undelegated — the
-        // Delegation object is DELETED (not zeroed) by the Cosmos SDK once
-        // shares hit 0. That's a valid "self_stake = 0" signal, not a failure.
-        // Any OTHER error (5xx, timeout) is a real failure -> skip like above.
-        let self_stake: bigint;
-        try {
-          const selfRes = await chainClient.lcdGet<LcdDelegationResponse>(
-            `/cosmos/staking/v1beta1/validators/${v.operator_address}/delegations/${v.delegator_address}`,
-            { height }
-          );
-          self_stake = BigInt(selfRes.delegation_response.balance.amount);
-        } catch (err) {
-          if (err instanceof HttpError && err.status === 404) {
-            self_stake = 0n;
-          } else {
-            throw err;
-          }
-        }
+        // self_stake: delegator-centric endpoint (all of this delegator's
+        // delegations, not the validator+delegator pair) so a fully
+        // undelegated self-stake just means no matching entry in the list —
+        // never a 404 (the Cosmos SDK DELETES the Delegation object once
+        // shares hit 0, but that's a state fact, not an HTTP-level failure).
+        const selfRes = await chainClient.lcdGet<LcdDelegationResponse>(
+          `/cosmos/staking/v1beta1/delegations/${v.delegator_address}`,
+          { height }
+        );
+        const selfDelegation = selfRes.delegation_responses.find(
+          (d) => d.delegation.validator_address === v.operator_address
+        );
+        const self_stake = selfDelegation ? BigInt(selfDelegation.balance.amount) : 0n;
 
         const seed = readSeedTotals(v.operator_address);
 
