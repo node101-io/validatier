@@ -13,6 +13,10 @@ import { getLastDailyRunDay, setLastDailyRunDay } from '../store/meta';
 
 const BLOCK_LOOP_INTERVAL_MS = 10_000; // ~ cosmoshub block time (~6s), with margin
 const DAILY_CHECK_INTERVAL_MS = 5 * 60_000; // how often we check "did a new UTC day start?"
+// Stagger the first-run daily kickoff so it doesn't hit the RPC/LCD endpoint
+// in the same instant as the first block-loop tick right after startup —
+// both go to the same host (see .env), no reason to burst them together.
+const DAILY_FIRST_RUN_DELAY_MS = 30_000;
 
 function todayUtc(): string {
   const d = new Date();
@@ -81,12 +85,13 @@ export function startScheduler(): Scheduler {
   const blockTimer = setInterval(() => void tickBlockLoop(), BLOCK_LOOP_INTERVAL_MS);
   const dailyTimer = setInterval(() => void tickDailyJobs(), DAILY_CHECK_INTERVAL_MS);
   void tickBlockLoop(); // don't wait a full interval for the first run
-  void tickDailyJobs();
+  const firstDailyTimeout = setTimeout(() => void tickDailyJobs(), DAILY_FIRST_RUN_DELAY_MS);
 
   return {
     stop: () => {
       clearInterval(blockTimer);
       clearInterval(dailyTimer);
+      clearTimeout(firstDailyTimeout);
     },
   };
 }
