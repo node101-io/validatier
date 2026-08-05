@@ -32,3 +32,28 @@ export function advanceCursor(height: number, ts: number): void {
   }
   setStmt.run(height, ts);
 }
+
+// Persisted "did the daily job already run today" marker (jobs/scheduler.ts).
+// Kept in SQLite, not a process-local variable — otherwise a restart mid-day
+// (common during dev, or any crash/redeploy) forgets the day already ran and
+// re-triggers the full validator_stats pass (625 validators x 2 LCD calls)
+// again for no reason.
+let getDailyRunStmt: Statement | null = null;
+let setDailyRunStmt: Statement | null = null;
+
+export function getLastDailyRunDay(): string | null {
+  if (!getDailyRunStmt) {
+    getDailyRunStmt = getSqlite().prepare('SELECT last_daily_run_day FROM meta WHERE id = 1');
+  }
+  const row = getDailyRunStmt.get() as { last_daily_run_day: string | null };
+  return row.last_daily_run_day;
+}
+
+export function setLastDailyRunDay(day: string): void {
+  if (!setDailyRunStmt) {
+    setDailyRunStmt = getSqlite().prepare(
+      'UPDATE meta SET last_daily_run_day = ?, updated_at = unixepoch() WHERE id = 1'
+    );
+  }
+  setDailyRunStmt.run(day);
+}

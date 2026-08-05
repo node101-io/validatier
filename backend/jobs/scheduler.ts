@@ -3,6 +3,7 @@ import { snapshotFundFlowToMongo } from './snapshot';
 import { runDailyValidatorStats } from './validatorStats';
 import { runDailyValidatorSinkSales } from './validatorSinkSales';
 import { syncPrices } from './priceSync';
+import { getLastDailyRunDay, setLastDailyRunDay } from '../store/meta';
 
 // Top-level orchestration (task 10.2). Two independent timers on the SAME
 // event loop — Node interleaves their awaited I/O, so a long-running daily
@@ -20,7 +21,6 @@ function todayUtc(): string {
 
 let blockLoopRunning = false;
 let dailyRunning = false;
-let lastDailyRunDay: string | null = null;
 
 async function tickBlockLoop(): Promise<void> {
   if (blockLoopRunning) return; // previous tick still catching up a backlog — don't overlap
@@ -43,7 +43,7 @@ async function tickBlockLoop(): Promise<void> {
 
 async function tickDailyJobs(): Promise<void> {
   const today = todayUtc();
-  if (dailyRunning || today === lastDailyRunDay) return;
+  if (dailyRunning || today === getLastDailyRunDay()) return;
   dailyRunning = true;
   console.log(`daily jobs: starting for UTC day ${today}`);
   try {
@@ -64,7 +64,7 @@ async function tickDailyJobs(): Promise<void> {
     );
     await syncPrices(3); // small daily top-up; the 365-day backfill was one-time (task 9.1)
     console.log('daily jobs: price sync done');
-    lastDailyRunDay = today; // only mark done on full success — a failure retries same-day
+    setLastDailyRunDay(today); // only mark done on full success — a failure retries same-day
     console.log(`daily jobs: all done for UTC day ${today}`);
   } catch (err) {
     console.error('daily jobs failed (will retry on the next check, same UTC day):', err);

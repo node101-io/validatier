@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS meta (
   scanned_up_to_height INTEGER NOT NULL DEFAULT 0,
   scanned_up_to_ts     INTEGER NOT NULL DEFAULT 0,
   fund_flow_version    INTEGER NOT NULL DEFAULT 0,
+  last_daily_run_day   TEXT,
   updated_at           INTEGER NOT NULL
 );
 
@@ -71,6 +72,18 @@ CREATE TABLE IF NOT EXISTS meta (
 -- read/update) never deal with "row missing".
 INSERT OR IGNORE INTO meta (id, updated_at) VALUES (1, unixepoch());
 `;
+
+// last_daily_run_day was added after the initial meta table shipped — on a
+// DB created before this change, CREATE TABLE IF NOT EXISTS above is a no-op
+// and the column is missing. ALTER TABLE has no "IF NOT EXISTS" for columns,
+// so make it idempotent by hand.
+function migrateAddLastDailyRunDay(database: Database.Database): void {
+  try {
+    database.exec('ALTER TABLE meta ADD COLUMN last_daily_run_day TEXT');
+  } catch (err) {
+    if (!(err instanceof Error) || !err.message.includes('duplicate column name')) throw err;
+  }
+}
 
 let db: Database.Database | null = null;
 
@@ -95,6 +108,7 @@ export function openSqlite(): Database.Database {
   db.defaultSafeIntegers(true); // INTEGER -> BigInt everywhere; uatom never touches float64
 
   db.exec(SCHEMA);
+  migrateAddLastDailyRunDay(db);
 
   console.log(`sqlite: opened ${dbPath} (WAL, BigInt mode)`);
   return db;
