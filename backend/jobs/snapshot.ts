@@ -1,6 +1,7 @@
 import { getSqlite } from '../db/sqlite';
 import { FundFlowEdge } from '../models/FundFlowEdge/FundFlowEdge';
 import { Meta } from '../models/Meta/Meta';
+import { getCursor } from '../store/meta';
 
 // Snapshot SQLite `edges` into a new versioned Mongo `fund_flow_edges` copy
 // (docs/01 "Snapshot to Mongo", docs/04 SNAPSHOT SQL). Sequence matters:
@@ -102,6 +103,9 @@ export async function snapshotFundFlowToMongo(): Promise<SnapshotStats> {
   }
 
   // ── 4. bump the pointer LAST — only now is version fully visible ─────
+  const cursor = getCursor(); // SQLite is the authority; mirror it for dashboard reads
+  meta.scanned_up_to_height = cursor.height;
+  meta.scanned_up_to_time = cursor.ts;
   meta.fund_flow_current_version = version;
   meta.fund_flow_edge_count = edgeRows.length;
   meta.fund_flow_totals = totals;
