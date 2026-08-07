@@ -1,20 +1,31 @@
+import mongoose from 'mongoose';
 import { getSqlite } from '../db/sqlite';
 import { FundFlowEdge } from '../models/FundFlowEdge/FundFlowEdge';
 import { Meta } from '../models/Meta/Meta';
+import { ValidatorSinkSale } from '../models/ValidatorSinkSale/ValidatorSinkSale';
 import { getCursor } from '../store/meta';
+import { buildValidatorSinkSaleDocs, readLastCumulativeByPair, RealizedEdgeRow } from './validatorSinkSales';
 
-// Snapshot SQLite `edges` into a new versioned Mongo `fund_flow_edges` copy
-// (docs/01 "Snapshot to Mongo", docs/04 SNAPSHOT SQL). Sequence matters:
+// Snapshot SQLite `edges` into a new versioned Mongo `fund_flow_edges` copy,
+// and — in the SAME Mongo transaction — append any `validator_sink_sales`
+// rows for edges that reached a sink (docs/01 "Snapshot to Mongo", docs/03
+// validator_sink_sales, docs/04 SNAPSHOT SQL). The two collections must never
+// drift apart: either both this version's edges AND its sink-sale deltas land,
+// or neither does. Sequence:
 //   1. read everything from SQLite FIRST, synchronously (better-sqlite3 is
 //      sync, so nothing can interleave mid-read — this alone gives us a
 //      consistent point-in-time snapshot without any extra locking).
-//   2. write edges with published=false (invisible to the dashboard).
-//   3. flip them to published=true (the commit switch).
-//   4. ONLY THEN bump meta.fund_flow_current_version — so a reader that
-//      trusts the meta pointer never observes a version before its edges
-//      are actually published.
+//   2. inside one Mongo transaction: write edges (published=false), flip them
+//      to published=true (the commit switch), and insert the sink-sale deltas.
+//   3. ONLY once that transaction commits, bump meta.fund_flow_current_version
+//      — so a reader that trusts the meta pointer never observes a version
+//      before its edges are actually published.
 // Rollback machinery (per-version snapshot_height) is deliberately deferred
 // (CLAUDE.md) — this just increments `version` + flips `published`.
+//
+// Mongo transactions require the target deployment to be a replica set
+// (Atlas — the prod .env target — always is; a local standalone `mongod`
+// is not, and needs `--replSet` + a one-time `rs.initiate()` to support this).
 
 interface EdgeRow {
   origin: string;
@@ -45,6 +56,8 @@ export interface SnapshotStats {
   version: number;
   edgeCount: number;
   totals: FundFlowTotals;
+  sinkSalesChecked: number;
+  sinkSalesWritten: number;
 }
 
 function toMongoEdge(row: EdgeRow, version: number) {
@@ -89,21 +102,54 @@ export async function snapshotFundFlowToMongo(): Promise<SnapshotStats> {
     if (r.status in totals) totals[r.status as keyof FundFlowTotals] = r.total.toString();
   }
 
+  const cursor = getCursor(); // SQLite is the authority; mirror it for dashboard reads + sink-sale stamp
+
   // ── 2. version number (next after whatever is currently published) ───
   const meta = await Meta.getSingleton();
   const version = meta.fund_flow_current_version + 1;
 
-  // ── 3. write edges (published=false), then flip the commit switch ────
-  if (edgeRows.length > 0) {
-    await FundFlowEdge.insertMany(
-      edgeRows.map((row) => toMongoEdge(row, version)),
-      { ordered: false }
-    );
-    await FundFlowEdge.updateMany({ version }, { $set: { published: true } });
+  // ── 3. read-only sink-sales prep (which realized edges changed since
+  //      their last stored cumulative_sold) — no SQLite re-read needed,
+  //      `edgeRows` already has everything `status='realized'` implies. ──
+  const realizedEdges: RealizedEdgeRow[] = edgeRows
+    .filter((row) => row.status === 'realized')
+    .map((row) => ({
+      origin: row.origin,
+      holder: row.holder,
+      sink_kind: row.sink_kind as 'cex' | 'dex' | 'ibc_out',
+      weight_prefix_sum: row.weight_prefix_sum,
+    }));
+  const lastCumulativeByPair = await readLastCumulativeByPair();
+  const d = new Date(cursor.ts * 1000);
+  const stamp = {
+    block_height: cursor.height,
+    timestamp: cursor.ts,
+    day: d.getUTCDate(),
+    month: d.getUTCMonth() + 1,
+    year: d.getUTCFullYear(),
+  };
+  const sinkSaleDocs = buildValidatorSinkSaleDocs(realizedEdges, lastCumulativeByPair, stamp);
+
+  // ── 4. one transaction: edges (published=false -> true) + sink-sales ─
+  const session = await mongoose.startSession();
+  try {
+    await session.withTransaction(async () => {
+      if (edgeRows.length > 0) {
+        await FundFlowEdge.insertMany(
+          edgeRows.map((row) => toMongoEdge(row, version)),
+          { session, ordered: false }
+        );
+        await FundFlowEdge.updateMany({ version }, { $set: { published: true } }, { session });
+      }
+      if (sinkSaleDocs.length > 0) {
+        await ValidatorSinkSale.insertMany(sinkSaleDocs, { session, ordered: false });
+      }
+    });
+  } finally {
+    await session.endSession();
   }
 
-  // ── 4. bump the pointer LAST — only now is version fully visible ─────
-  const cursor = getCursor(); // SQLite is the authority; mirror it for dashboard reads
+  // ── 5. bump the pointer LAST — only now is version fully visible ─────
   meta.scanned_up_to_height = cursor.height;
   meta.scanned_up_to_time = cursor.ts;
   meta.fund_flow_current_version = version;
@@ -112,5 +158,11 @@ export async function snapshotFundFlowToMongo(): Promise<SnapshotStats> {
   meta.updated_at = new Date();
   await meta.save();
 
-  return { version, edgeCount: edgeRows.length, totals };
+  return {
+    version,
+    edgeCount: edgeRows.length,
+    totals,
+    sinkSalesChecked: realizedEdges.length,
+    sinkSalesWritten: sinkSaleDocs.length,
+  };
 }

@@ -30,8 +30,8 @@ DEX/IBC-out) or the trail ends.
   the taint graph lives; periodically snapshotted to Mongo. (We evaluated LevelDB/RocksDB
   and chose SQLite — see `docs/04-sqlite-working-store.md` for why.)
 - **Chain data:** CometBFT RPC (`/block_results`, `/block`, `/status`) + Cosmos LCD
-  (`/cosmos/...`). Endpoint pool from the chain registry (`chains.cosmos.directory`,
-  `rest.cosmos.directory`). **Archive node required** for historical state/backfill.
+  (`/cosmos/...`). Exactly TWO endpoints, fixed in `.env` (`RPC_URL` + `LCD_URL`).
+  **Archive node required** for historical state/backfill (will be added later).
 - **Config:** in `.env` (denom, decimals, bech32 prefix, RPC/LCD URLs). NOT a DB collection.
 
 ---
@@ -74,7 +74,8 @@ published daily into `validator_stats` as `total_withdrawn_reward|commission`.
 
 Seed the taint set with validator withdraw addresses. When a `distribution → withdrawAddr`
 transfer is seen, credit that origin's inflow (this is a reward/commission claim, the
-"seed" — tag it reward or commission). When any tainted address sends money, follow it:
+"seed" — tag it reward or commission; the origin is the withdraw event's `validator`
+attribute, so attribution is exact even for shared wallets). When any tainted address sends money, follow it:
 record an edge from the **origin validator** to the **current holder** (path contraction:
 we always re-anchor to the origin, folding intermediate hops). If a wallet holds money
 from multiple origins (commingled), split outgoing amounts **pro-rata** (haircut). When

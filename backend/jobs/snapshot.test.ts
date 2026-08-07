@@ -5,6 +5,8 @@ import { openSqlite, closeSqlite, getSqlite } from '../db/sqlite';
 import { config } from '../config';
 import { FundFlowEdge } from '../models/FundFlowEdge/FundFlowEdge';
 import { Meta } from '../models/Meta/Meta';
+import { ValidatorSinkSale } from '../models/ValidatorSinkSale/ValidatorSinkSale';
+import { getCursor } from '../store/meta';
 import { snapshotFundFlowToMongo } from './snapshot';
 
 const P = 'testsnap';
@@ -39,6 +41,7 @@ after(async () => {
   if (versionsCreated.length > 0) {
     await FundFlowEdge.deleteMany({ version: { $in: versionsCreated } });
   }
+  await ValidatorSinkSale.deleteMany({ operator_address: { $regex: `^${P}` } });
   await mongoose.connection.close();
   closeSqlite();
 });
@@ -74,6 +77,16 @@ test('snapshot writes published edges, correct field mapping, and totals', async
   const plain = docs.find((d) => d.holder === `${P}inflight`)!;
   assert.equal(plain.sink_tier, null);
   assert.equal(plain.sink_kind, null);
+
+  // the one realized edge (origin A -> cex, weight_prefix_sum 500, never seen
+  // before) must have produced exactly one validator_sink_sales doc, written
+  // in the SAME job run as the fund_flow_edges snapshot above.
+  assert.equal(stats.sinkSalesChecked, 1);
+  assert.equal(stats.sinkSalesWritten, 1);
+  const sale = await ValidatorSinkSale.findOne({ operator_address: `${P}A`, sink_address: `${P}cex` }).lean();
+  assert.ok(sale);
+  assert.equal(sale!.cumulative_sold, '500');
+  assert.equal(sale!.sink_kind, 'cex');
 });
 
 test('meta pointer only advances to a version whose edges are already published', async () => {
@@ -105,6 +118,48 @@ test('version increments monotonically across successive snapshots', async () =>
   const v1count = await FundFlowEdge.countDocuments({ version: stats1.version });
   const v2count = await FundFlowEdge.countDocuments({ version: stats2.version });
   assert.ok(v2count > v1count); // v2 includes the previously-snapshotted edges too
+});
+
+test('atomicity: a sink-sales write failure rolls back the fund_flow_edges write too', async () => {
+  const cursor = getCursor();
+  const metaBefore = await Meta.getSingleton();
+  const attemptedVersion = metaBefore.fund_flow_current_version + 1;
+
+  // Pre-seed a validator_sink_sales doc that collides on the unique index
+  // ({operator_address, sink_address, timestamp}) with the doc the snapshot
+  // is about to try to insert for this same (origin, holder) pair at the
+  // current cursor timestamp — this forces insertMany to throw inside the
+  // transaction.
+  const conflict = {
+    operator_address: `${P}D`,
+    sink_address: `${P}sinkD`,
+    sink_kind: 'cex' as const,
+    cumulative_sold: '1',
+    block_height: cursor.height,
+    timestamp: cursor.ts,
+    day: 1,
+    month: 1,
+    year: 2000,
+  };
+  await ValidatorSinkSale.create(conflict);
+
+  try {
+    insertEdge(`${P}D`, `${P}sinkD`, 300n, 'realized', 'cex');
+    await assert.rejects(() => snapshotFundFlowToMongo());
+
+    // nothing from the aborted attempt should have landed anywhere
+    const metaAfter = await Meta.getSingleton();
+    assert.equal(metaAfter.fund_flow_current_version, metaBefore.fund_flow_current_version);
+    const edgeCount = await FundFlowEdge.countDocuments({ version: attemptedVersion });
+    assert.equal(edgeCount, 0);
+    const saleCount = await ValidatorSinkSale.countDocuments({
+      operator_address: `${P}D`,
+      sink_address: `${P}sinkD`,
+    });
+    assert.equal(saleCount, 1); // only our pre-seeded conflict doc, nothing new
+  } finally {
+    await ValidatorSinkSale.deleteMany({ operator_address: `${P}D` });
+  }
 });
 
 test('an empty edges table still produces a valid (empty) published version', async () => {

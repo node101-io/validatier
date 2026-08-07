@@ -231,6 +231,13 @@ SELECT origin, reward_withdrawn, commission_withdrawn FROM seed;
 ```
 Yazım bitince Mongo'da published=true (commit switch). Sonra meta.fund_flow_version++.
 
+Yukarıdaki `edges` okumasından `status='realized'` olan satırlar aynı zamanda
+`validator_sink_sales` için de kullanılır — SQLite'a ayrı bir `WHERE status='realized'`
+sorgusu ATILMAZ, tek okuma iki koleksiyonu da besler. fund_flow_edges yazımı (insert +
+published=true) ve validator_sink_sales yazımı (değişen (origin,holder) çiftleri için,
+docs/03'teki sparse mantıkla) TEK bir Mongo transaction'ı içinde yapılır
+(backend/jobs/snapshot.ts) — biri commit olmadan diğeri de olmaz.
+
 ═══════════════════════════════════════════════════════════════════════
 ROLLBACK — iki ayrı yol
 ═══════════════════════════════════════════════════════════════════════

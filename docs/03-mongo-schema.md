@@ -130,6 +130,14 @@ timestamps = `Number` (unix sec). Model files: `models/<Name>/<Name>.ts` + `func
 // 'structural' is a tier-2/suspected-only kind (see docs/01, backend/engine/classify.ts) and
 // never appears here since this collection only tracks status='realized' edges.
 //
+// WRITTEN ATOMICALLY WITH fund_flow_edges: this is NOT a separate scheduler step. The daily
+// snapshot job (backend/jobs/snapshot.ts, snapshotFundFlowToMongo) reads SQLite `edges` once,
+// and inside a SINGLE Mongo transaction writes that version's fund_flow_edges docs, flips
+// them published=true, AND inserts any validator_sink_sales deltas for edges that reached a
+// sink in the same commit. Either both land or neither does — the two collections can never
+// drift out of sync. block_height/timestamp/day/month/year all come from the same SQLite
+// meta cursor used for that run's fund_flow_edges snapshot.
+//
 // Interval query (t1 -> t2), same logic for "total" and "per-exchange":
 //   valueAt(pair, t) = last doc with timestamp <= t, else 0 if none
 //   sold(pair, t1, t2) = valueAt(pair, t2) - valueAt(pair, t1)

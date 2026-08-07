@@ -1,7 +1,6 @@
 import { runBlockLoop } from './blockLoop';
 import { snapshotFundFlowToMongo } from './snapshot';
 import { runDailyValidatorStats } from './validatorStats';
-import { runDailyValidatorSinkSales } from './validatorSinkSales';
 import { syncPrices } from './priceSync';
 import { getLastDailyRunDay, setLastDailyRunDay } from '../store/meta';
 
@@ -53,13 +52,14 @@ async function tickDailyJobs(): Promise<void> {
   try {
     // ORDER MATTERS (docs/01): the snapshot's height must be >= the
     // validator_stats height, so sold% (realized / withdrawn) never exceeds
-    // 100% — withdrawn is read AFTER realized is already published.
+    // 100% — withdrawn is read AFTER realized is already published. The
+    // snapshot itself now writes fund_flow_edges AND validator_sink_sales
+    // atomically in one Mongo transaction (snapshot.ts), so there's no
+    // separate sink-sales step to run or to fall out of sync with it.
     const snap = await snapshotFundFlowToMongo();
-    console.log('daily jobs: fund-flow snapshot done', snap);
-    const sinkSales = await runDailyValidatorSinkSales();
     console.log(
-      `daily jobs: validator_sink_sales done — height=${sinkSales.height} ` +
-        `checked=${sinkSales.checked} written=${sinkSales.written}`
+      `daily jobs: fund-flow snapshot done — version=${snap.version} edges=${snap.edgeCount} ` +
+        `sinkSalesChecked=${snap.sinkSalesChecked} sinkSalesWritten=${snap.sinkSalesWritten}`
     );
     const vstats = await runDailyValidatorStats();
     console.log(

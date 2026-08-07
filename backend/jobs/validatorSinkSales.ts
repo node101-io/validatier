@@ -1,39 +1,18 @@
-import { getSqlite } from '../db/sqlite';
 import { IValidatorSinkSale, ValidatorSinkSale } from '../models/ValidatorSinkSale/ValidatorSinkSale';
 
 // Sparse per-(validator, sink) cumulative-sold log (docs/03 validator_sink_sales).
-// Reads live from SQLite `edges` (status='realized') — independent of how often
-// fund_flow_edges gets published to Mongo. Writes a new doc ONLY when a pair's
-// cumulative_sold actually changed since its last stored entry; unchanged pairs
-// produce zero writes (no zero-delta entries, no daily no-op rows).
+// Written from snapshot.ts, in the same Mongo transaction as that day's
+// `fund_flow_edges` snapshot — it reuses the `status='realized'` rows already
+// read there rather than re-reading SQLite. Only pure/read-only helpers live
+// here: a new doc is produced ONLY when a pair's cumulative_sold actually
+// changed since its last stored entry; unchanged pairs produce zero writes
+// (no zero-delta entries, no daily no-op rows).
 
-interface RealizedEdgeRow {
+export interface RealizedEdgeRow {
   origin: string;
   holder: string;
   sink_kind: 'cex' | 'dex' | 'ibc_out';
   weight_prefix_sum: bigint;
-}
-
-interface MetaCursorRow {
-  scanned_up_to_height: bigint;
-  scanned_up_to_ts: bigint;
-}
-
-function readRealizedEdges(): RealizedEdgeRow[] {
-  return getSqlite()
-    .prepare(
-      `SELECT origin, holder, sink_kind, weight_prefix_sum
-       FROM edges
-       WHERE status = 'realized'`
-    )
-    .all() as RealizedEdgeRow[];
-}
-
-function readCursor(): { height: number; ts: number } {
-  const row = getSqlite()
-    .prepare('SELECT scanned_up_to_height, scanned_up_to_ts FROM meta WHERE id = 1')
-    .get() as MetaCursorRow;
-  return { height: Number(row.scanned_up_to_height), ts: Number(row.scanned_up_to_ts) };
 }
 
 export interface LatestSaleKey {
@@ -81,7 +60,7 @@ export function pairKey(operator_address: string, sink_address: string): string 
   return `${operator_address} ${sink_address}`;
 }
 
-async function readLastCumulativeByPair(): Promise<Map<string, string>> {
+export async function readLastCumulativeByPair(): Promise<Map<string, string>> {
   const latest = await ValidatorSinkSale.aggregate<{
     _id: { operator_address: string; sink_address: string };
     cumulative_sold: string;
@@ -100,33 +79,4 @@ async function readLastCumulativeByPair(): Promise<Map<string, string>> {
     map.set(pairKey(row._id.operator_address, row._id.sink_address), row.cumulative_sold);
   }
   return map;
-}
-
-export interface SinkSalesResult {
-  height: number;
-  checked: number;
-  written: number;
-}
-
-export async function runDailyValidatorSinkSales(): Promise<SinkSalesResult> {
-  const { height, ts } = readCursor();
-  const edges = readRealizedEdges();
-  const lastCumulativeByPair = await readLastCumulativeByPair();
-
-  const d = new Date(ts * 1000);
-  const stamp = {
-    block_height: height,
-    timestamp: ts,
-    day: d.getUTCDate(),
-    month: d.getUTCMonth() + 1,
-    year: d.getUTCFullYear(),
-  };
-
-  const docs = buildValidatorSinkSaleDocs(edges, lastCumulativeByPair, stamp);
-
-  if (docs.length > 0) {
-    await ValidatorSinkSale.insertMany(docs, { ordered: false });
-  }
-
-  return { height, checked: edges.length, written: docs.length };
 }
