@@ -171,6 +171,28 @@ Legend: `[ ]` todo · `[x]` done · `→` doc to read
       the real `app.ts` process end-to-end (cold-start priming → scheduler → cursor genuinely
       advancing in real time → clean SIGTERM shutdown).
 
+- [x] **10.3 Replace the two-timer scheduler with a block-time-driven recursive loop.**
+      User's explicit call: get rid of the wall-clock daily-jobs poll from 10.2. Now a single
+      self-rescheduling recursive loop (`jobs/scheduler.ts`) drives `runBlockLoop()` — no delay
+      while there's backlog to catch up on, ~10s wait once caught up to the tip. The daily
+      sequence trigger moved INSIDE `blockLoop.ts`: after each height's SQLite transaction
+      commits, that height's own timestamp's UTC day is compared to the `last_daily_run_day`
+      marker (now block-time-derived, not `Date.now()`); the moment they differ, the daily
+      sequence (`jobs/dailyJobs.ts`, extracted from the old `tickDailyJobs`) runs inline and is
+      awaited before the next height. A failed daily sequence leaves the marker unset and
+      retries on the very next height (no separate timer, no polling gap). Also: `from` in
+      10.1 is no longer always the tip — a fresh deploy now starts `BACKFILL_LOOKBACK_DAYS`
+      (`.env`, default 7 — matches the public RPC's measured pruning depth, no archive node
+      yet) behind the tip, and a restart whose cursor has fallen further behind the tip than
+      that same lookback (long downtime) jumps forward the same way instead of retrying
+      unfetchable pruned heights forever. `Scheduler.stop()` is now async and awaits the
+      in-flight height (+ any inline daily job) before returning, so `app.ts`'s shutdown
+      handler doesn't close Mongo/SQLite out from under an in-progress operation. Removed the
+      unused `node-cron`/`@types/node-cron` deps (never actually imported). → CLAUDE.md
+      *Accept:* `computeFromHeight`/`utcDayFromTs` unit-tested (`jobs/blockLoop.test.ts`); full
+      suite green; manual smoke test confirms idle/catch-up timing, inline daily-job retry on
+      failure, stale-cursor jump-forward warning, and graceful SIGTERM shutdown.
+
 ---
 
 ## Phase 11 — Archive backfill (DEFERRED — do not start until an archive node is actually
@@ -205,13 +227,15 @@ Design decided 2026-07-22 (user call), to be implemented once the archive node i
       tip (avoid snapshotting/publishing partial-history data mid-backfill). Add an "is caught up"
       check (e.g. cursor within some small delta of the current tip — normal live operation is
       always within one `runBlockLoop()` call of the tip, so a threshold like a few hundred blocks
-      cleanly distinguishes "still backfilling" from "live") and gate `tickDailyJobs()` in
-      `scheduler.ts` on it. Once caught up, daily jobs resume automatically (no separate flag to
-      flip back) — matches the deferred rollback/versioning items in not needing new persisted
-      state, only a threshold comparison against data we already have (cursor vs. tip). → CLAUDE.md
+      cleanly distinguishes "still backfilling" from "live") and gate the inline daily-jobs
+      trigger in `blockLoop.ts` on it (post-10.3: the trigger moved from `scheduler.ts`'s
+      `tickDailyJobs()` into `blockLoop.ts`'s per-height day-check, see task 10.3). Once caught
+      up, daily jobs resume automatically (no separate flag to flip back) — matches the deferred
+      rollback/versioning items in not needing new persisted state, only a threshold comparison
+      against data we already have (cursor vs. tip). → CLAUDE.md
       *Accept:* while `HAS_ARCHIVE_NODE=true` and cursor is far behind tip, daily jobs are skipped
       (logged, not silently dropped); once cursor catches up to near-tip, they resume on the next
-      scheduled check.
+      height.
 
 ---
 

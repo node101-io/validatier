@@ -33,11 +33,13 @@ export function advanceCursor(height: number, ts: number): void {
   setStmt.run(height, ts);
 }
 
-// Persisted "did the daily job already run today" marker (jobs/scheduler.ts).
-// Kept in SQLite, not a process-local variable — otherwise a restart mid-day
-// (common during dev, or any crash/redeploy) forgets the day already ran and
-// re-triggers the full validator_stats pass (625 validators x 2 LCD calls)
-// again for no reason.
+// Persisted "did the daily job already run for this day" marker
+// (jobs/blockLoop.ts / jobs/dailyJobs.ts). The day string is derived from
+// the PROCESSED BLOCK's timestamp, not wall-clock time — see
+// jobs/blockLoop.ts's utcDayFromTs(). Kept in SQLite, not a process-local
+// variable — otherwise a restart mid-day (common during dev, or any
+// crash/redeploy) forgets the day already ran and re-triggers the full
+// validator_stats pass (625 validators x 2 LCD calls) again for no reason.
 let getDailyRunStmt: Statement | null = null;
 let setDailyRunStmt: Statement | null = null;
 

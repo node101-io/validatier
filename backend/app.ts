@@ -21,7 +21,7 @@ async function main(): Promise<void> {
   let scheduler: Scheduler | null = null;
   const shutdown = async (signal: string): Promise<void> => {
     console.log(`${signal} received, shutting down`);
-    scheduler?.stop();
+    await scheduler?.stop();
     await disconnectMongo();
     closeSqlite();
     process.exit(0);

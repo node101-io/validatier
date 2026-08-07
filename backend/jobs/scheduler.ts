@@ -1,36 +1,29 @@
 import { runBlockLoop } from './blockLoop';
-import { snapshotFundFlowToMongo } from './snapshot';
-import { runDailyValidatorStats } from './validatorStats';
-import { syncPrices } from './priceSync';
-import { getLastDailyRunDay, setLastDailyRunDay } from '../store/meta';
 
-// Top-level orchestration (task 10.2). Two independent timers on the SAME
-// event loop — Node interleaves their awaited I/O, so a long-running daily
-// sequence does NOT block the block loop's own timer from firing and
-// advancing the cursor in between (snapshot.ts already reads all of SQLite
-// synchronously up front for exactly this reason — see its header comment).
+// Top-level orchestration. A single self-rescheduling recursive loop drives
+// the block scan — no fixed-interval timers, no separate wall-clock poll for
+// "daily jobs" (that trigger now lives inline in blockLoop.ts, driven by
+// each processed block's own timestamp — see its file header). Each
+// iteration only schedules the next one after the current one's await
+// resolves, so overlapping iterations are structurally impossible.
+//
+// When caught up to the chain tip (heightsProcessed === 0), wait
+// BLOCK_LOOP_INTERVAL_MS before checking again; when there's backlog to
+// catch up on (fresh deploy, restart after downtime, a slow block), loop
+// again immediately with no delay.
 
 const BLOCK_LOOP_INTERVAL_MS = 10_000; // ~ cosmoshub block time (~6s), with margin
-const DAILY_CHECK_INTERVAL_MS = 5 * 60_000; // how often we check "did a new UTC day start?"
-// Stagger the first-run daily kickoff so it doesn't hit the RPC/LCD endpoint
-// in the same instant as the first block-loop tick right after startup —
-// both go to the same host (see .env), no reason to burst them together.
-const DAILY_FIRST_RUN_DELAY_MS = 30_000;
 
-function todayUtc(): string {
-  const d = new Date();
-  return `${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`;
-}
+let stopped = false;
+let pending: NodeJS.Timeout | null = null;
+let inFlight: Promise<void> = Promise.resolve();
 
-let blockLoopRunning = false;
-let dailyRunning = false;
-
-async function tickBlockLoop(): Promise<void> {
-  if (blockLoopRunning) return; // previous tick still catching up a backlog — don't overlap
-  blockLoopRunning = true;
+async function tick(): Promise<boolean> {
+  let idle = true;
   try {
     const stats = await runBlockLoop();
-    if (stats.heightsProcessed > 0) {
+    idle = stats.heightsProcessed === 0;
+    if (!idle) {
       console.log(
         `block loop: heights ${stats.from}-${stats.to} (${stats.heightsProcessed} processed), ` +
           `${stats.transfersSeen} transfers, ${stats.validatorsCreated} validators created, ` +
@@ -38,60 +31,32 @@ async function tickBlockLoop(): Promise<void> {
       );
     }
   } catch (err) {
-    console.error('block loop tick failed (will retry next tick):', err);
-  } finally {
-    blockLoopRunning = false;
+    console.error('block loop tick failed (will retry):', err);
   }
+  return idle;
 }
 
-async function tickDailyJobs(): Promise<void> {
-  const today = todayUtc();
-  if (dailyRunning || today === getLastDailyRunDay()) return;
-  dailyRunning = true;
-  console.log(`daily jobs: starting for UTC day ${today}`);
-  try {
-    // ORDER MATTERS (docs/01): the snapshot's height must be >= the
-    // validator_stats height, so sold% (realized / withdrawn) never exceeds
-    // 100% — withdrawn is read AFTER realized is already published. The
-    // snapshot itself now writes fund_flow_edges AND validator_sink_sales
-    // atomically in one Mongo transaction (snapshot.ts), so there's no
-    // separate sink-sales step to run or to fall out of sync with it.
-    const snap = await snapshotFundFlowToMongo();
-    console.log(
-      `daily jobs: fund-flow snapshot done — version=${snap.version} edges=${snap.edgeCount} ` +
-        `sinkSalesChecked=${snap.sinkSalesChecked} sinkSalesWritten=${snap.sinkSalesWritten}`
-    );
-    const vstats = await runDailyValidatorStats();
-    console.log(
-      `daily jobs: validator_stats done — height=${vstats.height} attempted=${vstats.attempted} ` +
-        `succeeded=${vstats.succeeded} skipped=${vstats.skipped.length}`
-    );
-    await syncPrices(3); // small daily top-up; the 365-day backfill was one-time (task 9.1)
-    console.log('daily jobs: price sync done');
-    setLastDailyRunDay(today); // only mark done on full success — a failure retries same-day
-    console.log(`daily jobs: all done for UTC day ${today}`);
-  } catch (err) {
-    console.error('daily jobs failed (will retry on the next check, same UTC day):', err);
-  } finally {
-    dailyRunning = false;
-  }
+async function loop(): Promise<void> {
+  if (stopped) return;
+  const p = tick();
+  inFlight = p.then(() => {});
+  const idle = await p;
+  if (stopped) return;
+  pending = setTimeout(() => void loop(), idle ? BLOCK_LOOP_INTERVAL_MS : 0);
 }
 
 export interface Scheduler {
-  stop: () => void;
+  stop: () => Promise<void>;
 }
 
 export function startScheduler(): Scheduler {
-  const blockTimer = setInterval(() => void tickBlockLoop(), BLOCK_LOOP_INTERVAL_MS);
-  const dailyTimer = setInterval(() => void tickDailyJobs(), DAILY_CHECK_INTERVAL_MS);
-  void tickBlockLoop(); // don't wait a full interval for the first run
-  const firstDailyTimeout = setTimeout(() => void tickDailyJobs(), DAILY_FIRST_RUN_DELAY_MS);
+  void loop();
 
   return {
-    stop: () => {
-      clearInterval(blockTimer);
-      clearInterval(dailyTimer);
-      clearTimeout(firstDailyTimeout);
+    stop: async () => {
+      stopped = true;
+      if (pending) clearTimeout(pending);
+      await inFlight; // let the current height (+ any inline daily job) finish cleanly
     },
   };
 }

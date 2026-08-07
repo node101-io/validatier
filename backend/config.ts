@@ -16,6 +16,7 @@ export interface Config {
   sqlitePath: string;
   maxDepth: number;
   tier2MinIndegree: number;
+  backfillLookbackDays: number;
 }
 
 // Every var is required: a misconfigured indexer must die at startup, not
@@ -55,4 +56,5 @@ export const config: Config = {
   sqlitePath: requireEnv('SQLITE_PATH'),
   maxDepth: requireInt('MAX_DEPTH'),
   tier2MinIndegree: requireInt('TIER2_MIN_INDEGREE'),
+  backfillLookbackDays: requireInt('BACKFILL_LOOKBACK_DAYS'),
 };
