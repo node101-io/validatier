@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/app.js",
-    "test": "tsc && node --test \"dist/**/*.test.js\""
+    "test": "tsc && node --test \"dist/**/*.test.js\"",
+    "wipe-db": "tsc && node dist/scripts/wipeDb.js"
   },
   "dependencies": {
     "@cosmjs/crypto": "^0.39.0",

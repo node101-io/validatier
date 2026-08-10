@@ -55,7 +55,7 @@ const AVG_BLOCK_TIME_SECONDS = 6; // cosmoshub target block time
 
 export function utcDayFromTs(ts: number): string {
   const d = new Date(ts * 1000);
-  return `${d.getUTCFullYear()}-${d.getUTCMonth()}-${d.getUTCDate()}`;
+  return `${d.getUTCFullYear()}-${d.getUTCMonth() + 1}-${d.getUTCDate()}`;
 }
 
 // Pure decision logic for where to start scanning, extracted for direct unit
