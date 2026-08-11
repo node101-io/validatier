@@ -1,4 +1,5 @@
 import { config } from "../config";
+import { accountToOperator } from "./address";
 
 // Parses a raw /block_results response into the list of REAL value transfers.
 // Rules (docs/02, CLAUDE.md gotchas #1/#2):
@@ -10,6 +11,10 @@ import { config } from "../config";
 //  - uatom only, amount as BigInt; empty/zero/foreign denoms skipped
 //  - a withdraw_rewards/withdraw_commission event at the same msg_index tags the
 //    transfer as a reward|commission claim (seed detection input for the taint engine)
+//  - withdraw_commission events carry no `validator` attribute on this chain's SDK
+//    version (only withdraw_rewards does) -> fall back to the sibling `message`
+//    event's `sender` (MsgWithdrawValidatorCommission's signer = the validator's
+//    own account address; same 20 bytes as operator_address, docs/02 gotcha #4)
 //  - an ibc_transfer event at the same msg_index marks the transfer as IBC-out
 //    (docs/01 "Yöntem A" — the recipient is the channel's escrow account; this
 //    is the terminal-exit signal used by classification, task 6.4)
@@ -69,6 +74,19 @@ export function parseBlockResults(raw: unknown): RealTransfer[] {
         if (tx.code !== 0) return; // failed tx: msg events are discarded by the chain anyway
         const events = tx.events ?? [];
 
+        // sender per msg_index, only for MsgWithdrawValidatorCommission — the
+        // fallback source of `validator` when the withdraw_commission event omits it
+        const commissionSenderByMsgIndex = new Map<number, string>();
+        for (const e of events) {
+            if (e.type !== "message") continue;
+            if (attr(e, "action") !== WITHDRAW_COMMISSION_ACTION) continue;
+            const mi = attr(e, "msg_index");
+            const sender = attr(e, "sender");
+            if (mi !== undefined && sender !== undefined) {
+                commissionSenderByMsgIndex.set(Number(mi), sender);
+            }
+        }
+
         // One msg is either a reward or a commission withdrawal, never both.
         const tags = new Map<number, WithdrawTag>();
         // msg_indexes whose message emitted an ibc_transfer event (IBC-out signal)
@@ -85,9 +103,24 @@ export function parseBlockResults(raw: unknown): RealTransfer[] {
             )
                 continue;
             const mi = attr(e, "msg_index");
-            const validator = attr(e, "validator");
-            if (mi !== undefined && validator !== undefined) {
-                tags.set(Number(mi), {
+            if (mi === undefined) continue;
+            const msg_index = Number(mi);
+            let validator = attr(e, "validator");
+            if (
+                validator === undefined &&
+                e.type === "withdraw_commission"
+            ) {
+                const sender = commissionSenderByMsgIndex.get(msg_index);
+                if (sender !== undefined) {
+                    try {
+                        validator = accountToOperator(sender);
+                    } catch {
+                        validator = undefined; // malformed/foreign-prefix sender: skip, don't guess
+                    }
+                }
+            }
+            if (validator !== undefined) {
+                tags.set(msg_index, {
                     kind:
                         e.type === "withdraw_rewards" ? "reward" : "commission",
                     validator,
@@ -166,6 +199,7 @@ export interface SetWithdrawAddressEvent {
 }
 
 const SET_WITHDRAW_ADDRESS_ACTION = "/cosmos.distribution.v1beta1.MsgSetWithdrawAddress";
+const WITHDRAW_COMMISSION_ACTION = "/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission";
 
 export function parseValidatorLifecycleEvents(raw: unknown): {
     createValidator: CreateValidatorEvent[];

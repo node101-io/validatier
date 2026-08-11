@@ -11,3 +11,13 @@ export function operatorToAccount(operator: string): string {
     }
     return toBech32(config.bech32Prefix, data);
 }
+
+export function accountToOperator(account: string): string {
+    const { prefix, data } = fromBech32(account); // validates checksum too
+    if (prefix !== config.bech32Prefix) {
+        throw new Error(
+            `accountToOperator: expected ${config.bech32Prefix}1... address, got "${account}"`,
+        );
+    }
+    return toBech32(`${config.bech32Prefix}valoper`, data);
+}

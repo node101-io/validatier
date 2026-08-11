@@ -163,6 +163,62 @@ test('withdraw_commission tags its msg_index; other msgs in the tx untouched', (
   assert.equal(transfers[1].withdraw_tag, null);
 });
 
+test('withdraw_commission WITHOUT a validator attribute (real chain shape): falls back to the sibling MsgWithdrawValidatorCommission message event sender', () => {
+  // Real event, real tx (F28AF5EA19F46AA6DC96637BB53E41E6D3B6B729FA8C14CE75604E1A8853AFFD,
+  // height 32337872): this chain's withdraw_commission event carries only
+  // amount+msg_index, never `validator`. Without the fallback the commission
+  // transfer had no tag and processSeedTransfer() silently dropped it (bug).
+  const raw = {
+    results: [
+      {
+        code: 0,
+        events: [
+          {
+            type: 'message',
+            attributes: [
+              { key: 'action', value: '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission' },
+              { key: 'sender', value: 'cosmos18ruzecmqj9pv8ac0gvkgryuc7u004te9xr2mcr' },
+              { key: 'module', value: 'distribution' },
+              { key: 'msg_index', value: '1' },
+            ],
+          },
+          { type: 'withdraw_commission', attributes: [{ key: 'amount', value: '58973399uatom' }, { key: 'msg_index', value: '1' }] },
+          transferEvent('cosmos1jv65s3grqf6v6jl3dp4t6c9t9rk99cd88lyufl', 'cosmos18ruzecmqj9pv8ac0gvkgryuc7u004te9xr2mcr', '58973399uatom', '1'),
+        ],
+      },
+    ],
+  };
+  const transfers = parseBlockResults(raw);
+  assert.deepEqual(transfers[0].withdraw_tag, {
+    kind: 'commission',
+    validator: 'cosmosvaloper18ruzecmqj9pv8ac0gvkgryuc7u004te9rh7w5s',
+  });
+});
+
+test('withdraw_commission fallback: malformed/foreign-prefix sender is skipped, not guessed', () => {
+  const raw = {
+    results: [
+      {
+        code: 0,
+        events: [
+          {
+            type: 'message',
+            attributes: [
+              { key: 'action', value: '/cosmos.distribution.v1beta1.MsgWithdrawValidatorCommission' },
+              { key: 'sender', value: 'osmo1p8u47en82gmvgerz6ydc4rkkhysyvspap5t97r' },
+              { key: 'msg_index', value: '0' },
+            ],
+          },
+          { type: 'withdraw_commission', attributes: [{ key: 'amount', value: '10uatom' }, { key: 'msg_index', value: '0' }] },
+          transferEvent('cosmos1distr', 'cosmos1val', '10uatom', '0'),
+        ],
+      },
+    ],
+  };
+  const transfers = parseBlockResults(raw);
+  assert.equal(transfers[0].withdraw_tag, null);
+});
+
 test('synthetic: ibc_transfer at msg_index 0 tags only that msg, not msg_index 1', () => {
   const raw = {
     results: [
