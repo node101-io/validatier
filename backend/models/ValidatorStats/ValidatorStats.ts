@@ -15,7 +15,6 @@ export interface IValidatorStats {
   timestamp: Array<number | null>; // length 31 — unix sec of that day's snapshot
   block_height: Array<number | null>; // length 31 — height the snapshot was taken at
 
-  self_stake: Array<string | null>; // length 31 — ABSOLUTE — uatom BigInt-string
   total_stake: Array<string | null>; // length 31 — ABSOLUTE — uatom BigInt-string
 
   // CUMULATIVE to date, sourced from SQLite `seed` (fund-flow pipeline), written
@@ -37,7 +36,6 @@ const validatorStatsSchema = new Schema<IValidatorStats>(
     timestamp: { type: [Number], default: emptyMonthArray },
     block_height: { type: [Number], default: emptyMonthArray },
 
-    self_stake: { type: [String], default: emptyMonthArray },
     total_stake: { type: [String], default: emptyMonthArray },
 
     total_withdrawn_reward: { type: [String], default: emptyMonthArray },

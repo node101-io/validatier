@@ -38,7 +38,6 @@ timestamps = `Number` (unix sec). Model files: `models/<Name>/<Name>.ts` + `func
   timestamp: [Number],           // length 31, index = day-1, unix sec of that day's snapshot, null if unset
   block_height: [Number],        // length 31, index = day-1, height the snapshot was taken at, null if unset
 
-  self_stake: [String],          // length 31, index = day-1 — ABSOLUTE snapshot, /staking .../delegations/{self}.balance, null if unset
   total_stake: [String],         // length 31, index = day-1 — ABSOLUTE snapshot, /staking validator.tokens, null if unset
 
   total_withdrawn_reward: [String],     // length 31, index = day-1 — CUMULATIVE to date, from SQLite seed (fund-flow), null if unset

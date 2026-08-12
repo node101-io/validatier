@@ -124,7 +124,7 @@ Legend: `[ ]` todo · `[x]` done · `→` doc to read
 ## Phase 8 — validator_stats (separate daily job)
 
 - [x] **8.1 Daily stake snapshot.** Once/day at the day's height, for each validator query
-      total_stake + self_stake (staking REST, height header), read cumulative
+      total_stake (staking REST, height header), read cumulative
       total_withdrawn_reward/commission from SQLite `seed`, and upsert `validator_stats` + SQLite
       `validator_state` (epoch). → `docs/02`, `docs/03`, `docs/04`
       *Accept:* one absolute snapshot per validator per month (31-length day-indexed arrays,

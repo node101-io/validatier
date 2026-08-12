@@ -23,7 +23,6 @@ an **archive node**; public nodes are pruned — measured on the current endpoin
 | Field | Endpoint | Extract |
 |---|---|---|
 | `total_stake` | `/cosmos/staking/v1beta1/validators/{op}` | `.validator.tokens` |
-| `self_stake` | `/cosmos/staking/v1beta1/validators/{op}/delegations/{self}` | `.delegation_response.balance.amount` |
 | current withdraw addr | `/cosmos/distribution/v1beta1/delegators/{self}/withdraw_address` | `.withdraw_address` |
 
 All snapshot (absolute) with height header. The daily job ALSO writes

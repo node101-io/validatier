@@ -182,7 +182,6 @@ export function parseBlockResults(raw: unknown): RealTransfer[] {
 
 export interface CreateValidatorEvent {
     operator: string; // cosmosvaloper1... from the event's `validator` attribute
-    selfStakeAmount: bigint; // uatom, from the event's `amount` attribute
     msg_index: number;
     tx_index: number;
 }
@@ -228,12 +227,10 @@ export function parseValidatorLifecycleEvents(raw: unknown): {
         for (const e of events) {
             if (e.type === "create_validator") {
                 const operator = attr(e, "validator");
-                const amount = uatomAmount(attr(e, "amount"));
                 const mi = attr(e, "msg_index");
-                if (operator && amount !== null && mi !== undefined) {
+                if (operator && mi !== undefined) {
                     createValidator.push({
                         operator,
-                        selfStakeAmount: amount,
                         msg_index: Number(mi),
                         tx_index: txIndex,
                     });

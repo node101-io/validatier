@@ -61,7 +61,7 @@ SQLite → periodic versioned snapshot to Mongo `fund_flow_edges`. Produces "sol
 **Pipeline B — validator_stats (daily job):** once per day, query each validator's
 stake at that day's height via staking REST (`x-cosmos-block-height` header). Pure
 **snapshots** (absolute values) — NO delta accumulation, NO prefix sums. Produces the
-stake graphs. `self_stake`, `total_stake`. Also publishes the cumulative
+stake graphs. `total_stake`. Also publishes the cumulative
 `total_withdrawn_reward|commission` (read from SQLite `seed`) into `validator_stats`.
 
 **sold%** = `fund_flow.realized / (reward_withdrawn + commission_withdrawn)`.

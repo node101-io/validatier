@@ -92,7 +92,6 @@ CREATE INDEX idx_wmap_operator ON withdraw_map(operator_address);
 CREATE TABLE validator_state (
   epoch        INTEGER NOT NULL,   -- gün indexi: floor(ts/86400) (veya YYYYMMDD)
   operator     TEXT    NOT NULL,
-  self_stake   INTEGER NOT NULL,   -- snapshot (validator/{op}/delegations/{self} balance)
   total_stake  INTEGER NOT NULL,   -- snapshot (validator.tokens)
   block_height INTEGER NOT NULL,
   ts           INTEGER NOT NULL,

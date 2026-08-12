@@ -255,7 +255,6 @@ test('create_validator: real event (height 31967543, via LCD tx-search — RPC i
   assert.equal(createValidator.length, 1);
   assert.deepEqual(createValidator[0], {
     operator: 'cosmosvaloper1tcu2fzygcssl8necq2mylm79tpsnl2kvl6e79x',
-    selfStakeAmount: 4_000_000n,
     msg_index: 0,
     tx_index: 0,
   });

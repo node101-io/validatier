@@ -16,12 +16,6 @@ const LCD_DELAY_MS = 150;
 interface LcdValidatorResponse {
   validator: { tokens: string };
 }
-interface LcdDelegationResponse {
-  delegation_responses: Array<{
-    delegation: { validator_address: string };
-    balance: { amount: string };
-  }>;
-}
 
 interface SeedTotals {
   reward: bigint;
@@ -40,17 +34,15 @@ function readSeedTotals(operator: string): SeedTotals {
 function upsertValidatorState(row: {
   epoch: number;
   operator: string;
-  self_stake: bigint;
   total_stake: bigint;
   block_height: number;
   ts: number;
 }): void {
   getSqlite()
     .prepare(
-      `INSERT INTO validator_state (epoch, operator, self_stake, total_stake, block_height, ts)
-       VALUES (@epoch, @operator, @self_stake, @total_stake, @block_height, @ts)
+      `INSERT INTO validator_state (epoch, operator, total_stake, block_height, ts)
+       VALUES (@epoch, @operator, @total_stake, @block_height, @ts)
        ON CONFLICT(epoch, operator) DO UPDATE SET
-         self_stake   = excluded.self_stake,
          total_stake  = excluded.total_stake,
          block_height = excluded.block_height,
          ts           = excluded.ts`
@@ -86,7 +78,7 @@ function emptyMonthArray(): Array<null> {
 
 // Pure — no I/O. Two separate ops are required (rather than one update) because
 // MongoDB rejects a single update that mixes $setOnInsert on a whole array field
-// with $set on one of that array's indices ("conflict at self_stake"). The ensure
+// with $set on one of that array's indices ("conflict at total_stake"). The ensure
 // op is a no-op once the month's doc already exists; the day-write op sets this
 // day's slot in each array.
 export function buildValidatorStatsOps(input: {
@@ -96,12 +88,11 @@ export function buildValidatorStatsOps(input: {
   day: number;
   ts: number;
   height: number;
-  self_stake: bigint;
   total_stake: bigint;
   reward: bigint;
   commission: bigint;
 }): { ensureOp: EnsureDocOp; dayWriteOp: DayWriteOp } {
-  const { operator_address, year, month, day, ts, height, self_stake, total_stake, reward, commission } =
+  const { operator_address, year, month, day, ts, height, total_stake, reward, commission } =
     input;
   const dayIndex = day - 1;
 
@@ -116,7 +107,6 @@ export function buildValidatorStatsOps(input: {
             month,
             timestamp: emptyMonthArray(),
             block_height: emptyMonthArray(),
-            self_stake: emptyMonthArray(),
             total_stake: emptyMonthArray(),
             total_withdrawn_reward: emptyMonthArray(),
             total_withdrawn_commission: emptyMonthArray(),
@@ -132,7 +122,6 @@ export function buildValidatorStatsOps(input: {
           $set: {
             [`timestamp.${dayIndex}`]: ts,
             [`block_height.${dayIndex}`]: height,
-            [`self_stake.${dayIndex}`]: self_stake.toString(),
             [`total_stake.${dayIndex}`]: total_stake.toString(),
             [`total_withdrawn_reward.${dayIndex}`]: reward.toString(),
             [`total_withdrawn_commission.${dayIndex}`]: commission.toString(),
@@ -158,8 +147,8 @@ export async function runDailyValidatorStats(atHeight?: number): Promise<DailySt
 
   const validators = await Validator.find(
     {},
-    { operator_address: 1, delegator_address: 1 }
-  ).lean<Array<{ operator_address: string; delegator_address?: string }>>();
+    { operator_address: 1 }
+  ).lean<Array<{ operator_address: string }>>();
 
   // Two bulkWrite passes across all validators (see buildValidatorStatsOps for why).
   const ensureDocOps: EnsureDocOp[] = [];
@@ -170,10 +159,6 @@ export async function runDailyValidatorStats(atHeight?: number): Promise<DailySt
   async function worker(): Promise<void> {
     while (cursor < validators.length) {
       const v = validators[cursor++];
-      if (!v.delegator_address) {
-        skipped.push({ operator_address: v.operator_address, reason: 'no delegator_address' });
-        continue;
-      }
       try {
         // total_stake: any failure here is a real problem — skip the validator.
         const totalRes = await chainClient.lcdGet<LcdValidatorResponse>(
@@ -182,26 +167,11 @@ export async function runDailyValidatorStats(atHeight?: number): Promise<DailySt
         );
         const total_stake = BigInt(totalRes.validator.tokens);
 
-        // self_stake: delegator-centric endpoint (all of this delegator's
-        // delegations, not the validator+delegator pair) so a fully
-        // undelegated self-stake just means no matching entry in the list —
-        // never a 404 (the Cosmos SDK DELETES the Delegation object once
-        // shares hit 0, but that's a state fact, not an HTTP-level failure).
-        const selfRes = await chainClient.lcdGet<LcdDelegationResponse>(
-          `/cosmos/staking/v1beta1/delegations/${v.delegator_address}`,
-          { height }
-        );
-        const selfDelegation = selfRes.delegation_responses.find(
-          (d) => d.delegation.validator_address === v.operator_address
-        );
-        const self_stake = selfDelegation ? BigInt(selfDelegation.balance.amount) : 0n;
-
         const seed = readSeedTotals(v.operator_address);
 
         upsertValidatorState({
           epoch,
           operator: v.operator_address,
-          self_stake,
           total_stake,
           block_height: height,
           ts,
@@ -214,7 +184,6 @@ export async function runDailyValidatorStats(atHeight?: number): Promise<DailySt
           day,
           ts,
           height,
-          self_stake,
           total_stake,
           reward: seed.reward,
           commission: seed.commission,
