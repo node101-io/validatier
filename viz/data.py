@@ -15,6 +15,7 @@ from pymongo import MongoClient
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 BACKEND_ENV = REPO_ROOT / "backend" / ".env"
+VIZ_ENV = REPO_ROOT / "viz" / ".env"
 
 
 def _load_config() -> dict:
@@ -24,6 +25,10 @@ def _load_config() -> dict:
             "MONGO_URI from the backend's own env file."
         )
     values = dotenv_values(BACKEND_ENV)
+    if VIZ_ENV.exists():
+        # viz/.env overrides backend/.env — lets you point the dashboard at a
+        # separate copy DB without touching the live backend's config.
+        values.update(dotenv_values(VIZ_ENV))
     mongo_uri = values.get("MONGO_URI") or os.environ.get("MONGO_URI")
     if not mongo_uri:
         raise ValueError(f"MONGO_URI not set in {BACKEND_ENV}")

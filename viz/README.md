@@ -23,6 +23,21 @@ Tarayıcıda açılan sayfada sol menüden "Tümü" ya da tek bir validator
 seçebilirsin — seçim tüm sekmeleri (Validator Stats, Fund Flow Edges, Sink
 Sales, Sağlama) o validator'a filtreler.
 
+## Farklı bir DB'ye bağlanmak (örn. sunum için kopya DB)
+
+Varsayılan olarak `backend/.env` içindeki `MONGO_URI`'ye bağlanır (live DB).
+Bunu değiştirmeden ayrı bir DB'ye bakmak istersen (canlıyı bozmadan sunum
+falan yapmak için), `viz/.env` diye bir dosya oluştur:
+
+```bash
+# viz/.env
+MONGO_URI=mongodb://.../validatier-2
+```
+
+`viz/.env` varsa `backend/.env`'in üstüne yazar (override), yoksa backend'in
+`MONGO_URI`'si kullanılır. Bitince `viz/.env`'i silip `pm2 restart
+validatier-viz` yaparsan live DB'ye geri döner.
+
 ## Notlar
 
 - `backend/.env` dosyası mevcut olmalı (MONGO_URI orada okunuyor).
