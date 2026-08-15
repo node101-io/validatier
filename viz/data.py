@@ -60,6 +60,24 @@ def uatom_to_atom(value) -> float:
     return int(value) / (10**DECIMALS)
 
 
+def format_number(value, prefix: str = "") -> str:
+    """Format a number for display: 1.23B / 1.23M / 12.3K, else comma-separated."""
+    if value is None or pd.isna(value):
+        return "n/a"
+    value = float(value)
+    sign = "-" if value < 0 else ""
+    value = abs(value)
+    if value >= 1e9:
+        text = f"{value / 1e9:.2f}B"
+    elif value >= 1e6:
+        text = f"{value / 1e6:.2f}M"
+    elif value >= 1e3:
+        text = f"{value / 1e3:.1f}K"
+    else:
+        text = f"{value:,.2f}" if value % 1 else f"{value:,.0f}"
+    return f"{sign}{prefix}{text}"
+
+
 def _to_df(cursor) -> pd.DataFrame:
     docs = list(cursor)
     for d in docs:
@@ -172,6 +190,42 @@ def load_sink_sales(operator_address: Optional[str] = None) -> pd.DataFrame:
         df["sink_name"] = None
 
     return df.sort_values(["operator_address", "sink_address", "date"])
+
+
+def load_exchange_summary() -> pd.DataFrame:
+    """Network-wide: latest cumulative sold amount per (validator, exchange) pair,
+    restricted to the curated Tier 1 registry (the known/registered exchange
+    list) — excludes Tier 2 (discovered/structural, unverified) addresses.
+    cumulative_sold is a running total, so the latest row per pair is the
+    current total sold to that exchange — not a sum across the time series.
+    """
+    sales_df = load_sink_sales()
+    if sales_df.empty:
+        return sales_df
+
+    registry_df = load_sink_registry()
+    tier1_addresses = set(registry_df.loc[registry_df["tier"] == 1, "address"]) if not registry_df.empty else set()
+    sales_df = sales_df[sales_df["sink_address"].isin(tier1_addresses)]
+    if sales_df.empty:
+        return sales_df
+
+    latest_idx = sales_df.groupby(["operator_address", "sink_address"])["date"].idxmax()
+    latest_df = sales_df.loc[latest_idx].copy()
+
+    validators_df = load_validators()
+    if not validators_df.empty:
+        moniker_map = validators_df.set_index("operator_address")["moniker"]
+        latest_df["moniker"] = latest_df["operator_address"].map(moniker_map)
+    else:
+        latest_df["moniker"] = None
+
+    latest_df["sink_name"] = latest_df["sink_name"].fillna(latest_df["sink_address"])
+
+    return latest_df[
+        ["sink_address", "sink_name", "operator_address", "moniker", "cumulative_sold_atom"]
+    ].rename(columns={"cumulative_sold_atom": "sold_atom"}).sort_values(
+        "sold_atom", ascending=False
+    )
 
 
 def load_prices() -> pd.DataFrame:
