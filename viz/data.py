@@ -229,6 +229,12 @@ def load_validator_summary() -> pd.DataFrame:
         df[col] = df[col].apply(lambda v: int(v) if pd.notna(v) else 0)
 
     df["total_withdrawn_uatom"] = df["total_withdrawn_reward"] + df["total_withdrawn_commission"]
+
+    # Drop validators that never withdrew a reward or commission in the
+    # scanned range — otherwise the dashboard is dominated by empty rows
+    # (sold_pct/sold_atom all None) for validators with no activity yet.
+    df = df[df["total_withdrawn_uatom"] > 0]
+
     df["sold_pct"] = df.apply(
         lambda r: min(max(r["sold_uatom"] / r["total_withdrawn_uatom"] * 100, 0), 100)
         if r["total_withdrawn_uatom"] > 0
