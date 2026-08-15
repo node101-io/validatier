@@ -51,11 +51,6 @@ def cached_sink_sales(operator_address):
 
 
 @st.cache_data(ttl=30)
-def cached_prices():
-    return data.load_prices()
-
-
-@st.cache_data(ttl=30)
 def cached_latest_price():
     return data.latest_price()
 
@@ -94,7 +89,6 @@ tabs = st.tabs(
         "Fund Flow Edges",
         "Sink Sales",
         "Sanity Checks",
-        "Prices",
     ]
 )
 
@@ -388,15 +382,3 @@ with tabs[5]:
                     )
                 else:
                     st.success("cumulative_sold ≤ total_withdrawn. ✓")
-
-# ---------------------------------------------------------------- Prices
-with tabs[6]:
-    st.header("Prices (ATOM/USD)")
-    prices_df = cached_prices()
-    if prices_df.empty:
-        st.info("No prices data.")
-    else:
-        fig = px.line(prices_df, x="date", y="price", title="ATOM/USD")
-        fig.update_traces(mode="lines+markers")
-        st.plotly_chart(fig, use_container_width=True)
-        st.dataframe(prices_df, width="stretch")
