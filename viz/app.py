@@ -12,7 +12,7 @@ import streamlit as st
 
 import data
 
-st.set_page_config(page_title="Validatier DB Viz", layout="wide")
+st.set_page_config(page_title="Validatier Demo", layout="wide")
 
 
 def fmt_amount_columns(df, cols):
@@ -83,20 +83,23 @@ except Exception as e:
     st.error(f"Could not connect to MongoDB: {e}")
     st.stop()
 
-st.sidebar.title("Validatier DB Viz")
+st.sidebar.title("Validatier Demo")
 
 validator_options = ["All"] + [
     f"{row.moniker} ({row.operator_address})"
     for row in validators_df.sort_values("moniker").itertuples()
 ]
-selected = st.sidebar.selectbox("Validator", validator_options)
 
-selected_operator_address = None
-selected_moniker = None
-if selected != "All":
-    selected_operator_address = selected.split("(")[-1].rstrip(")")
-    selected_moniker = selected.split(" (")[0]
-    st.sidebar.caption(f"operator_address: `{selected_operator_address}`")
+
+def validator_selector(key):
+    """Local validator picker for a single tab — returns (operator_address, moniker)."""
+    selected = st.selectbox("Validator", validator_options, key=key)
+    if selected == "All":
+        return None, None
+    operator_address = selected.split("(")[-1].rstrip(")")
+    moniker = selected.split(" (")[0]
+    return operator_address, moniker
+
 
 price = cached_latest_price()
 if price:
@@ -179,11 +182,9 @@ with tabs[0]:
 
 # ---------------------------------------------------------------- Validator Detail
 with tabs[1]:
+    selected_operator_address, selected_moniker = validator_selector(key="validator_detail_select")
     if not selected_operator_address:
-        st.info(
-            "Select a validator from the sidebar to see its detail page, like the "
-            "old dashboard."
-        )
+        st.info("Select a validator above to see its detail page.")
     else:
         row = summary_df[summary_df["operator_address"] == selected_operator_address]
         if row.empty:
@@ -246,10 +247,7 @@ with tabs[1]:
 with tabs[2]:
     st.header("Validators — Sortable Table")
     st.caption("Click column headers to sort (like the sortable table in the old dashboard).")
-    display_df = summary_df.copy()
-    if selected_operator_address:
-        display_df = display_df[display_df["operator_address"] == selected_operator_address]
-    display_df = display_df.sort_values("sold_pct_rank")
+    display_df = summary_df.sort_values("sold_pct_rank")
     table_df = fmt_amount_columns(
         display_df,
         [
@@ -274,10 +272,7 @@ with tabs[2]:
     st.dataframe(table_df, width="stretch")
 
     with st.expander("Raw validators collection (all fields)"):
-        raw_df = validators_df
-        if selected_operator_address:
-            raw_df = raw_df[raw_df["operator_address"] == selected_operator_address]
-        st.dataframe(raw_df, width="stretch")
+        st.dataframe(validators_df, width="stretch")
 
 # ---------------------------------------------------------------- Exchanges
 with tabs[3]:
@@ -311,7 +306,8 @@ if debug:
     # ---------------------------------------------------------------- Fund Flow Edges
     with tabs[4]:
         st.header("Fund Flow Edges (latest published version)")
-        edges_df = cached_edges(selected_operator_address)
+        edges_operator_address, _ = validator_selector(key="fund_flow_edges_select")
+        edges_df = cached_edges(edges_operator_address)
         if edges_df.empty:
             st.info("No published fund_flow_edges data for this filter.")
         else:
@@ -377,8 +373,9 @@ if debug:
     # ---------------------------------------------------------------- Sanity Checks
     with tabs[5]:
         st.header("Sanity Checks")
+        selected_operator_address, _ = validator_selector(key="sanity_checks_select")
         if not selected_operator_address:
-            st.info("Select a validator from the sidebar to run sanity checks.")
+            st.info("Select a validator above to run sanity checks.")
         else:
             row = summary_df[summary_df["operator_address"] == selected_operator_address]
             stats_df = cached_validator_stats(selected_operator_address)
