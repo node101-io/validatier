@@ -12,7 +12,7 @@ import streamlit as st
 
 import data
 
-st.set_page_config(page_title="Validatier Demo", layout="wide")
+st.set_page_config(page_title="Validatier Demo", layout="wide", initial_sidebar_state="collapsed")
 
 
 def fmt_amount_columns(df, cols):
@@ -83,7 +83,7 @@ except Exception as e:
     st.error(f"Could not connect to MongoDB: {e}")
     st.stop()
 
-st.sidebar.title("Validatier Demo")
+st.title("Validatier Demo")
 
 validator_options = ["All"] + [
     f"{row.moniker} ({row.operator_address})"
@@ -103,7 +103,7 @@ def validator_selector(key):
 
 price = cached_latest_price()
 if price:
-    st.sidebar.caption(f"Latest ATOM price: ${price:.4f}")
+    st.caption(f"Latest ATOM price: ${price:.4f}")
 
 debug = st.query_params.get("debug") == "1"
 
