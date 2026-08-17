@@ -1,0 +1,233 @@
+:root {
+  --intro-main-wrapper-height: 600px;
+  --intro-transition-duration: 1.5s;
+  --intro-main-wrapper-background: radial-gradient(
+    148.09% 147.99% at 52.57% 116.34%,
+    #ffffff 0%,
+    #c0c0f2 18.92%,
+    #609aff 54.65%,
+    #000000 100%
+  );
+  --intro-main-wrapper-gap: 32px;
+
+  --intro-main-wrapper-title-description-color: rgba(245, 245, 255, 1);
+  --intro-main-wrapper-title-description-z-index: 30;
+
+  --intro-main-wrapper-title-font-size: 96px;
+  --intro-main-wrapper-title-font-weight: 800;
+  --intro-main-wrapper-title-line-height: 82px;
+
+  --intro-main-wrapper-description-font-size: 24px;
+  --intro-main-wrapper-description-font-weight: 500;
+  --intro-main-wrapper-description-line-height: 22px;
+
+  --intro-main-wrapper-background-content-top: 20px;
+}
+
+.intro-main-wrapper {
+  width: 100%;
+  min-height: var(--intro-main-wrapper-height);
+  max-height: var(--intro-main-wrapper-height);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--intro-main-wrapper-background);
+  gap: var(--intro-main-wrapper-gap);
+  margin-bottom: calc(-100px - var(--header-main-wrapper-height));
+  position: relative;
+  overflow: hidden;
+  /* Create a new paint layer and hint upcoming transforms from Framer Motion */
+  contain: paint;
+  will-change: transform;
+  transition: min-height var(--intro-transition-duration) ease, max-height var(--intro-transition-duration) ease;
+}
+
+/* Mobile full-height mode (100dvh) */
+@media only screen and (max-width: 640px) {
+  /* Default to full height on mobile to avoid initial JS-triggered animation */
+  .intro-main-wrapper {
+    min-height: 100dvh;
+    max-height: 100dvh;
+    transition: min-height var(--intro-transition-duration) ease, max-height var(--intro-transition-duration) ease, padding-top var(--intro-transition-duration) ease;
+  }
+
+  /* When toggled to normal, restore configured height */
+  .intro-main-wrapper.intro-mobile-normal {
+    min-height: var(--intro-main-wrapper-height);
+    max-height: var(--intro-main-wrapper-height);
+    padding-top: 0px;
+  }
+
+  /* Before pressing the button, add top padding */
+  .intro-main-wrapper:not(.intro-mobile-normal) {
+    padding-top: 40dvh;
+  }
+
+  /* While intro is full-height (no .intro-mobile-normal), push down inner content */
+  .intro-main-wrapper:not(.intro-mobile-normal) ~ #inner-main-wrapper {
+    margin-top: 100dvh !important;
+    opacity: 0;
+  }
+
+  /* Smooth transition for the inner section margin change */
+  #inner-main-wrapper {
+    transition: margin-top var(--intro-transition-duration) ease, opacity var(--intro-transition-duration) ease var(--intro-transition-duration);
+    opacity: 1;
+    /* Anticipate margin-top/opacity changes during mobile toggle */
+    will-change: margin-top, opacity;
+  }
+
+  .intro-continue-button {
+    position: relative;
+    z-index: var(--intro-main-wrapper-title-description-z-index);
+    margin-top: 4px;
+    padding: 10px 30px;
+    padding-top: 8px;
+    border-radius: 10px;
+    background: #250054;
+    color: #EFEFFF;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    /* AnimatePresence toggles opacity/height; hint compositor */
+    will-change: opacity, height, margin-top;
+  }
+
+  /* Visual container for orbits + SVG - Base mobile rules */
+  .intro-visual {
+    position: relative;
+    /* scale relative to original 1440x545 design */
+    --intro-scale: calc(35dvh / 545);
+    width: calc(1440px * var(--intro-scale));
+    height: calc(545px * var(--intro-scale));
+    aspect-ratio: 1440 / 545;
+    margin: 0 auto;
+  }
+
+  /* Full-height mode (before Start button pressed) */
+  .intro-main-wrapper:not(.intro-mobile-normal) .intro-visual {
+    top: 6dvh;
+  }
+
+  /* Normal mode (after Start button pressed) */
+  .intro-main-wrapper.intro-mobile-normal .intro-visual {
+    top: 0;
+  }
+
+  /* Control inline SVG gradient stops' opacity via class for smooth animation */
+  /* Fade only middle stops; keep edge stops visible */
+  .intro-main-wrapper:not(.intro-mobile-normal) #intro-svg .intro-stop-fade {
+    stop-opacity: 1;
+    transition: stop-opacity var(--intro-transition-duration) ease;
+  }
+  .intro-main-wrapper.intro-mobile-normal #intro-svg .intro-stop-fade {
+    stop-opacity: 0;
+    transition: stop-opacity var(--intro-transition-duration) ease;
+  }
+  .intro-main-wrapper #intro-svg .intro-stop-fixed {
+    stop-opacity: 1;
+  }
+}
+
+.intro-main-wrapper-title-wrapper,
+.intro-main-wrapper-description-wrapper {
+  color: var(--intro-main-wrapper-title-description-color);
+  text-align: center;
+  position: relative;
+  z-index: var(--intro-main-wrapper-title-description-z-index);
+}
+
+.intro-main-wrapper-title-wrapper {
+  font-size: var(--intro-main-wrapper-title-font-size);
+  font-weight: var(--intro-main-wrapper-title-font-weight);
+  line-height: var(--intro-main-wrapper-title-line-height);
+}
+
+.intro-main-wrapper-description-wrapper {
+  font-size: var(--intro-main-wrapper-description-font-size);
+  font-weight: var(--intro-main-wrapper-description-font-weight);
+  line-height: var(--intro-main-wrapper-description-line-height);
+}
+
+/* Hide the continue button on desktop */
+@media only screen and (min-width: 641px) {
+  .intro-continue-button {
+    display: none !important;
+  }
+}
+
+.intro-main-background-content {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  /* Isolate background painting/layout from page */
+  contain: layout paint;
+}
+
+#intro-svg {
+  height: 90%;
+  display: block;
+  object-fit: cover;
+  justify-self: center;
+  margin-top: 40px;
+  overflow: visible;
+  /* Hint that transforms/opacities may change during intro sequence */
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+@media only screen and (max-width: 640px) {
+  #intro-svg {
+    height: 40dvh;
+    margin-top: 10dvh;
+    transition: height var(--intro-transition-duration) ease, margin-top var(--intro-transition-duration) ease;
+  }
+  /* After pressing Start on mobile, restore desktop-like sizing */
+  .intro-main-wrapper.intro-mobile-normal #intro-svg {
+    height: 90%;
+    margin-top: 20px;
+  }
+}
+
+@media only screen and (max-width: 950px) {
+  :root {
+    --intro-main-wrapper-title-font-size: 80px;
+    --intro-main-wrapper-description-font-size: 20px;
+
+    --intro-main-wrapper-title-line-height: 64px;
+    --intro-main-wrapper-description-line-height: 22px;
+  }
+}
+
+@media only screen and (max-width: 700px) {
+  :root {
+    --intro-main-wrapper-title-font-size: 72px;
+    --intro-main-wrapper-description-font-size: 20px;
+
+    --intro-main-wrapper-title-line-height: 60px;
+    --intro-main-wrapper-description-line-height: 22px;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  :root {
+    --intro-main-wrapper-height: 360px;
+
+    --intro-main-wrapper-title-font-size: 44px;
+    --intro-main-wrapper-description-font-size: 14px;
+
+    --intro-main-wrapper-title-line-height: 36px;
+    --intro-main-wrapper-description-line-height: 16px;
+
+    --intro-main-wrapper-gap: 12px;
+  }
+}
+
