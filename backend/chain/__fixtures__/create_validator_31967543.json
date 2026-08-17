@@ -1,0 +1,28 @@
+{
+  "_source": "Real attributes from cosmoshub height 31967543, fetched via LCD /cosmos/tx/v1beta1/txs (RPC block_results is pruned that far back — see docs/02 tx_search note). Wrapped in the txs_results/events shape our parser expects; the event contents themselves are real, unmodified chain data.",
+  "results": [
+    {
+      "code": 0,
+      "events": [
+        {
+          "type": "message",
+          "attributes": [
+            { "key": "action", "value": "/cosmos.staking.v1beta1.MsgCreateValidator", "index": true },
+            { "key": "sender", "value": "cosmos1tcu2fzygcssl8necq2mylm79tpsnl2kv6wdtf4", "index": true },
+            { "key": "module", "value": "staking", "index": true },
+            { "key": "msg_index", "value": "0", "index": true }
+          ]
+        },
+        {
+          "type": "create_validator",
+          "attributes": [
+            { "key": "validator", "value": "cosmosvaloper1tcu2fzygcssl8necq2mylm79tpsnl2kvl6e79x", "index": true },
+            { "key": "amount", "value": "4000000uatom", "index": true },
+            { "key": "msg_index", "value": "0", "index": true }
+          ]
+        }
+      ]
+    }
+  ],
+  "finalizeBlockEvents": []
+}

@@ -1,0 +1,221 @@
+import { chainClient } from '../chain/client';
+import { getSqlite } from '../db/sqlite';
+import { Validator } from '../models/Validator/Validator';
+import { DAYS_PER_MONTH_ARRAY_LENGTH, ValidatorStats } from '../models/ValidatorStats/ValidatorStats';
+
+// Daily stake snapshot (docs/02 validator_stats section, docs/04 validator_state
+// table). Pure ABSOLUTE snapshots — no deltas/prefix_sum. total_withdrawn_* are
+// cumulative but still snapshot-semantics (interval = diff of two rows), sourced
+// from SQLite `seed` (fund-flow pipeline), NOT from these REST endpoints.
+
+// polkachu rate-limits aggressively at higher concurrency (429s seen at 8 in
+// task 5.2) — same gentle profile that worked for the 625-validator withdraw_map build.
+const LCD_CONCURRENCY = 2;
+const LCD_DELAY_MS = 150;
+
+interface LcdValidatorResponse {
+  validator: { tokens: string };
+}
+
+interface SeedTotals {
+  reward: bigint;
+  commission: bigint;
+}
+
+function readSeedTotals(operator: string): SeedTotals {
+  const row = getSqlite()
+    .prepare('SELECT reward_withdrawn, commission_withdrawn FROM seed WHERE origin = ?')
+    .get(operator) as { reward_withdrawn: bigint; commission_withdrawn: bigint } | undefined;
+  return row
+    ? { reward: row.reward_withdrawn, commission: row.commission_withdrawn }
+    : { reward: 0n, commission: 0n };
+}
+
+function upsertValidatorState(row: {
+  epoch: number;
+  operator: string;
+  total_stake: bigint;
+  block_height: number;
+  ts: number;
+}): void {
+  getSqlite()
+    .prepare(
+      `INSERT INTO validator_state (epoch, operator, total_stake, block_height, ts)
+       VALUES (@epoch, @operator, @total_stake, @block_height, @ts)
+       ON CONFLICT(epoch, operator) DO UPDATE SET
+         total_stake  = excluded.total_stake,
+         block_height = excluded.block_height,
+         ts           = excluded.ts`
+    )
+    .run(row);
+}
+
+export interface DailyStatsResult {
+  height: number;
+  epoch: number;
+  attempted: number;
+  succeeded: number;
+  skipped: Array<{ operator_address: string; reason: string }>;
+}
+
+type EnsureDocOp = {
+  updateOne: {
+    filter: { operator_address: string; year: number; month: number };
+    update: { $setOnInsert: Record<string, unknown> };
+    upsert: true;
+  };
+};
+type DayWriteOp = {
+  updateOne: {
+    filter: { operator_address: string; year: number; month: number };
+    update: { $set: Record<string, unknown> };
+  };
+};
+
+function emptyMonthArray(): Array<null> {
+  return Array(DAYS_PER_MONTH_ARRAY_LENGTH).fill(null);
+}
+
+// Pure — no I/O. Two separate ops are required (rather than one update) because
+// MongoDB rejects a single update that mixes $setOnInsert on a whole array field
+// with $set on one of that array's indices ("conflict at total_stake"). The ensure
+// op is a no-op once the month's doc already exists; the day-write op sets this
+// day's slot in each array.
+export function buildValidatorStatsOps(input: {
+  operator_address: string;
+  year: number;
+  month: number;
+  day: number;
+  ts: number;
+  height: number;
+  total_stake: bigint;
+  reward: bigint;
+  commission: bigint;
+}): { ensureOp: EnsureDocOp; dayWriteOp: DayWriteOp } {
+  const { operator_address, year, month, day, ts, height, total_stake, reward, commission } =
+    input;
+  const dayIndex = day - 1;
+
+  return {
+    ensureOp: {
+      updateOne: {
+        filter: { operator_address, year, month },
+        update: {
+          $setOnInsert: {
+            operator_address,
+            year,
+            month,
+            timestamp: emptyMonthArray(),
+            block_height: emptyMonthArray(),
+            total_stake: emptyMonthArray(),
+            total_withdrawn_reward: emptyMonthArray(),
+            total_withdrawn_commission: emptyMonthArray(),
+          },
+        },
+        upsert: true,
+      },
+    },
+    dayWriteOp: {
+      updateOne: {
+        filter: { operator_address, year, month },
+        update: {
+          $set: {
+            [`timestamp.${dayIndex}`]: ts,
+            [`block_height.${dayIndex}`]: height,
+            [`total_stake.${dayIndex}`]: total_stake.toString(),
+            [`total_withdrawn_reward.${dayIndex}`]: reward.toString(),
+            [`total_withdrawn_commission.${dayIndex}`]: commission.toString(),
+          },
+        },
+      },
+    },
+  };
+}
+
+// atHeight defaults to the current chain tip — the standalone/dev default and
+// also what the eventual daily scheduler (task 10.2) will pass under the hood
+// (the latest height at the moment the cron fires).
+export async function runDailyValidatorStats(atHeight?: number): Promise<DailyStatsResult> {
+  const height = atHeight ?? (await chainClient.getStatus()).syncInfo.latestBlockHeight;
+  const block = await chainClient.getBlock(height);
+  const ts = Math.floor(block.block.header.time.getTime() / 1000);
+  const epoch = Math.floor(ts / 86400);
+  const d = new Date(ts * 1000);
+  const day = d.getUTCDate();
+  const month = d.getUTCMonth() + 1;
+  const year = d.getUTCFullYear();
+
+  const validators = await Validator.find(
+    {},
+    { operator_address: 1 }
+  ).lean<Array<{ operator_address: string }>>();
+
+  // Two bulkWrite passes across all validators (see buildValidatorStatsOps for why).
+  const ensureDocOps: EnsureDocOp[] = [];
+  const dayWriteOps: DayWriteOp[] = [];
+  const skipped: DailyStatsResult['skipped'] = [];
+  let cursor = 0;
+
+  async function worker(): Promise<void> {
+    while (cursor < validators.length) {
+      const v = validators[cursor++];
+      try {
+        // total_stake: any failure here is a real problem — skip the validator.
+        const totalRes = await chainClient.lcdGet<LcdValidatorResponse>(
+          `/cosmos/staking/v1beta1/validators/${v.operator_address}`,
+          { height }
+        );
+        const total_stake = BigInt(totalRes.validator.tokens);
+
+        const seed = readSeedTotals(v.operator_address);
+
+        upsertValidatorState({
+          epoch,
+          operator: v.operator_address,
+          total_stake,
+          block_height: height,
+          ts,
+        });
+
+        const { ensureOp, dayWriteOp } = buildValidatorStatsOps({
+          operator_address: v.operator_address,
+          year,
+          month,
+          day,
+          ts,
+          height,
+          total_stake,
+          reward: seed.reward,
+          commission: seed.commission,
+        });
+        ensureDocOps.push(ensureOp);
+        dayWriteOps.push(dayWriteOp);
+      } catch (err) {
+        // A validator can be fully removed from the staking module (not just
+        // zero-staked) and 404 forever — skip it this cycle, don't fail the job.
+        skipped.push({
+          operator_address: v.operator_address,
+          reason: err instanceof Error ? err.message : String(err),
+        });
+      }
+      await new Promise((r) => setTimeout(r, LCD_DELAY_MS));
+    }
+  }
+
+  await Promise.all(Array.from({ length: LCD_CONCURRENCY }, worker));
+
+  if (ensureDocOps.length > 0) {
+    await ValidatorStats.bulkWrite(ensureDocOps, { ordered: false });
+  }
+  if (dayWriteOps.length > 0) {
+    await ValidatorStats.bulkWrite(dayWriteOps, { ordered: false });
+  }
+
+  return {
+    height,
+    epoch,
+    attempted: validators.length,
+    succeeded: dayWriteOps.length,
+    skipped,
+  };
+}
