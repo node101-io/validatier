@@ -1,0 +1,80 @@
+@startuml Validatier_FundFlow_Sequence
+title Validatier - Multi-Hop Fund-Flow Tracking (Forward Taint Propagation)
+
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Helvetica
+skinparam sequenceMessageAlign center
+skinparam maxMessageSize 240
+skinparam ParticipantBorderColor #8DA2BF
+skinparam ParticipantBackgroundColor #F8FAFD
+skinparam ParticipantFontColor #1F2A3D
+skinparam ActorBorderColor #8DA2BF
+skinparam DatabaseBorderColor #7E9B78
+skinparam DatabaseBackgroundColor #F4FAF2
+skinparam CollectionsBorderColor #8EA7CC
+skinparam CollectionsBackgroundColor #F3F7FF
+skinparam ArrowColor #44546A
+skinparam NoteBackgroundColor #FFF8EA
+skinparam NoteBorderColor #D8C48D
+
+actor       "Cron / Block Loop"                    as Cron
+collections "Public RPC / LCD\n(own archive node later)" as Node
+participant "Block Scanner\n(listenForEvents)"      as Scanner
+participant "Taint Engine\n(frontier + rules)"      as Taint
+database    "LevelDB\nworking state:\nfrontier + in-flight balances" as Level
+participant "Sink Detector\nstatic CEX/DEX + IBC-out + heuristics" as Sink
+database    "MongoDB\nversioned edge graph"         as Mongo
+participant "Dashboard\n(Next.js)"                  as UI
+
+== Seed ==
+Scanner -> Level : init frontier = validator withdraw addresses
+note right of Level : origins from withdrawAddressMapping\neach origin tracks its own in-flight balance
+
+== Ingest loop (per 100-block interval) ==
+Cron -> Node : fetch blocks [N, N+100)
+note right of Node : public node = recent history only;\nolder ranges backfilled after own node is up
+Node --> Scanner : txs + block time
+Scanner -> Scanner : decode -> extract raw transfer events\n(sender, recipient, amount, denom)
+
+group Event-level filtering (per transfer event, not per tx)
+  Scanner -> Scanner : drop module-account noise\n(fee_collector, bonded/not-bonded pools)
+  Scanner -> Scanner : split MsgMultiSend into one edge per recipient
+  alt sender = distribution module and recipient = a validator withdraw addr
+    Scanner -> Level : credit origin in-flight (reward/commission inflow = seed)
+    note right of Level : this is money ENTERING the system,\nnot a traceable hop -> no edge
+  end
+end
+
+loop for each real transfer (sender potentially tainted)
+  Scanner -> Taint : isTainted(sender)?
+  Taint -> Level : lookup frontier / in-flight
+  alt sender in frontier
+    Taint -> Mongo : applyTransfer(origin, sender, receiver, amount)
+    note right of Mongo : path contraction (per origin):\n  origin->sender.weight -= amount\n  origin->receiver.weight += amount\n  edge.depth = sender.depth + 1\ncommingled wallet -> pro-rata haircut\nacross origins by weight share
+    Taint -> Sink : classify(receiver)
+    alt receiver in static CEX/DEX list  OR  IBC transfer out
+      Sink -> Mongo : mark edge REALIZED (Tier 1 = sold / left chain)
+      Sink -> Level : terminal -> stop propagating this branch
+    else structural match\n(high in-degree from distinct origins / high fan-out / pass-through)
+      Sink -> Mongo : flag SUSPECTED (Tier 2 = maybe sold)
+      Taint -> Level : add receiver to frontier (still follow)
+    else ordinary node
+      Taint -> Level : add receiver to frontier
+    end
+    Taint -> Level : termination 1 - inflow of node fully forwarded -> close node
+    Taint -> Level : termination 2 - edge.depth >= MAX_DEPTH -> stop
+  else sender not tainted
+    Scanner -> Scanner : skip (not reachable from any validator origin)
+  end
+end
+
+== Versioning (periodic job) ==
+Cron -> Mongo : snapshot current graph, version++
+note right of Mongo : downstream always reads MAX(version)\nolder versions pruned later
+
+== Read path (dashboard) ==
+UI -> Mongo : fetch latest version for chain
+UI -> UI : per validator ->\n  sold      = sum(REALIZED weights)\n  suspected = sum(SUSPECTED weights)
+
+@enduml
