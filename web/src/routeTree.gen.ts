@@ -10,33 +10,44 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ValidatorOperatorAddressRouteImport } from './routes/validator.$operatorAddress'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ValidatorOperatorAddressRoute =
+  ValidatorOperatorAddressRouteImport.update({
+    id: '/validator/$operatorAddress',
+    path: '/validator/$operatorAddress',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/validator/$operatorAddress': typeof ValidatorOperatorAddressRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/validator/$operatorAddress': typeof ValidatorOperatorAddressRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/validator/$operatorAddress': typeof ValidatorOperatorAddressRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/validator/$operatorAddress'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/validator/$operatorAddress'
+  id: '__root__' | '/' | '/validator/$operatorAddress'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ValidatorOperatorAddressRoute: typeof ValidatorOperatorAddressRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +59,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/validator/$operatorAddress': {
+      id: '/validator/$operatorAddress'
+      path: '/validator/$operatorAddress'
+      fullPath: '/validator/$operatorAddress'
+      preLoaderRoute: typeof ValidatorOperatorAddressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ValidatorOperatorAddressRoute: ValidatorOperatorAddressRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

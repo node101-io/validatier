@@ -1,27 +1,41 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { Tooltip } from 'radix-ui'
 
 import appCss from '../styles.css?url'
+
+const title = 'Validatier'
+const description =
+  "Your validators' guide to the galaxy - showcasing behaviors, contributions, and impact within the Cosmos ecosystem"
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title },
+      { name: 'description', content: description },
       {
-        charSet: 'utf-8',
+        name: 'keywords',
+        content: 'Cosmos, validator, staking, ATOM, blockchain, delegation, rewards, analytics',
       },
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
-      },
-      {
-        title: 'TanStack Start Starter',
-      },
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: description },
+      { property: 'og:image', content: '/res/images/meta/meta.webp' },
+      { property: 'og:type', content: 'website' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: title },
+      { name: 'twitter:description', content: description },
+      { name: 'twitter:image', content: '/res/images/meta/meta.webp' },
     ],
     links: [
+      { rel: 'stylesheet', href: appCss },
+      { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+      { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: '' },
       {
         rel: 'stylesheet',
-        href: appCss,
+        href: 'https://fonts.googleapis.com/css2?family=Darker+Grotesque:wght@300..900&family=VT323&display=swap',
       },
     ],
   }),
@@ -35,7 +49,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <Tooltip.Provider delayDuration={0} skipDelayDuration={0}>
+          {children}
+        </Tooltip.Provider>
         <TanStackDevtools
           config={{
             position: 'bottom-right',
