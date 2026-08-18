@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import Navbar from '@/components/navbar/navbar'
 import NetworkSummary from '@/components/network-summary/network-summary'
 import GraphMetrics from '@/components/graph-metrics/graph-metrics'
@@ -6,51 +6,32 @@ import StakeWithUs from '@/components/stake-with-us/stake-with-us'
 import Footer from '@/components/footer/footer'
 import CopyableOperatorAddress from '@/components/copyable-operator-address/copyable-operator-address'
 import { formatPercentage } from '@/utils/format-numbers'
-import type Validator from '@/types/validator'
-import type Metric from '@/types/metric'
+import { getValidatorDetail } from '@/lib/data'
+import type { MonthlyBucket } from '@/types/data'
 
-export const Route = createFileRoute('/validator/$operatorAddress')({ component: ValidatorPage })
+export const Route = createFileRoute('/validator/$operatorAddress')({
+  loader: async ({ params }) => {
+    const detail = await getValidatorDetail({ data: params.operatorAddress })
+    if (!detail) throw redirect({ to: '/' })
+    return detail
+  },
+  component: ValidatorPage,
+})
 
-// TEMP: hand-written placeholder data for the component-port step (Faz B).
-// Real data wiring (reading public/data/validator/<address>.json) happens in Faz C.
-function loadPlaceholderValidator(operatorAddress: string): {
-  validator: Validator & { description: string | null; delegator_address: string | null; commission_rate: string }
-  metrics: Metric[]
-  validatorGraphData: { total_stake: number[]; total_sold: number[] }
-  priceData: number[]
-  ranks: { percentageSoldRank: number; totalValidators: number }
-} {
-  const validator = {
-    moniker: 'Node101',
-    temporary_image_uri: null,
-    operator_address: operatorAddress,
-    website: 'https://node101.io',
-    commission: 5,
-    average_total_stake: 1_250_000,
-    total_withdraw: 42_000,
-    sold: 18_000,
-    percentage_sold: 42.86,
-    description: 'Public goods validator for the Cosmos ecosystem.',
-    delegator_address: null,
-    commission_rate: '0.050000000000000000',
+function flattenGraphSeries(stats: MonthlyBucket[]) {
+  const total_stake: number[] = []
+  const total_sold: number[] = []
+  const priceData: number[] = []
+  for (const bucket of stats) {
+    const { timestamp, total_stake: stake, total_sold: sold, price } = bucket.data
+    for (let i = 0; i < timestamp.length; i++) {
+      if (timestamp[i] === null) continue
+      total_stake.push(stake[i] ?? 0)
+      total_sold.push(sold[i] ?? 0)
+      priceData.push(price[i] ?? 0)
+    }
   }
-
-  const metrics: Metric[] = [
-    { id: 'total_stake_sum', color: '#FF9404', title: 'Average Delegation', valueNative: validator.average_total_stake },
-    { id: 'total_sold', color: '#5856D7', title: 'Total Sold Amount', valueNative: validator.sold },
-    { id: 'price', color: '#31ADE6', title: 'Average ATOM Price', valueNative: 1.45 },
-  ]
-
-  return {
-    validator,
-    metrics,
-    validatorGraphData: {
-      total_stake: [1_100_000, 1_180_000, 1_220_000, 1_250_000],
-      total_sold: [12_000, 14_500, 16_800, 18_000],
-    },
-    priceData: [1.3, 1.35, 1.4, 1.45],
-    ranks: { percentageSoldRank: 12, totalValidators: 115 },
-  }
+  return { total_stake, total_sold, priceData }
 }
 
 const formatOrdinal = (rank: number) => {
@@ -61,10 +42,9 @@ const formatOrdinal = (rank: number) => {
 }
 
 function ValidatorPage() {
-  const { operatorAddress } = Route.useParams()
-  const price = 1.45
-  const { validator, metrics, validatorGraphData, priceData, ranks } =
-    loadPlaceholderValidator(operatorAddress)
+  const { validator, metrics, stats, ranks } = Route.useLoaderData()
+  const price = metrics.find((m) => m.id === 'price')?.valueNative ?? 0
+  const { total_stake, total_sold, priceData } = flattenGraphSeries(stats)
 
   return (
     <div className="flex flex-col items-center relative overflow-hidden h-screen w-full">
@@ -178,13 +158,13 @@ function ValidatorPage() {
               firstSeries={[
                 {
                   name: 'Average Delegation',
-                  data: validatorGraphData.total_stake,
+                  data: total_stake,
                 },
               ]}
               secondSeries={[
                 {
                   name: 'Total Sold Amount',
-                  data: validatorGraphData.total_sold,
+                  data: total_sold,
                 },
               ]}
               thirdSeries={[

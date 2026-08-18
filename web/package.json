@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
-    "build": "vite build",
+    "sync-data": "mkdir -p public/data && rsync -a --delete --exclude='*.db*' ../backend/data/ public/data/",
+    "build": "npm run sync-data && vite build",
     "preview": "vite preview",
     "lint": "eslint",
     "format": "prettier --write . && eslint --fix",
