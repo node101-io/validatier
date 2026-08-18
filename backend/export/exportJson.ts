@@ -125,6 +125,18 @@ export async function exportStaticJson(outDir: string): Promise<ExportResult> {
 
   for (const row of rows) {
     const validator = validatorByOperator.get(row.operator_address)!;
+    // Per-validator metrics — NOT the network-wide `metrics` above. A
+    // validator's own detail page must show its own average stake / sold,
+    // not the sum across every validator (docs/05: ValidatorRow fields).
+    const validatorMetrics = buildMetrics(
+      {
+        total_stake_sum: row.average_total_stake,
+        total_withdraw_sum: row.total_withdraw,
+        total_sold: row.sold,
+        percentage_sold: row.percentage_sold,
+      },
+      averagePrice
+    );
     await writeJson(path.join(outDir, 'validator', `${row.operator_address}.json`), {
       validator: {
         ...row,
@@ -133,7 +145,7 @@ export async function exportStaticJson(outDir: string): Promise<ExportResult> {
         delegator_address: validator.delegator_address ?? null,
         commission_rate: validator.commission_rate ?? '0',
       },
-      metrics,
+      metrics: validatorMetrics,
       stats: bucketsByOperator.get(row.operator_address) ?? [],
       ranks: {
         percentageSoldRank: ranks.get(row.operator_address) ?? rows.length,
