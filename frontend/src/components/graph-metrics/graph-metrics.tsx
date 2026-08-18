@@ -31,10 +31,17 @@ const formatAtomAmount = (value: number): string => {
   }
 };
 
-const baseOptions = (group: string): ApexOptions => ({
+const baseOptions = (id: string): ApexOptions => ({
   chart: {
-    id: `${group}`,
-    group,
+    id,
+    // deliberately NOT setting `group` here — ApexCharts' cross-chart
+    // sync-group feature has a known first-mount race when several grouped
+    // charts render in the same React commit (which is exactly what our 3
+    // mini-charts do, sharing one lazy-loaded Chart component under one
+    // Suspense boundary): on some page loads one chart's axis/series bleed
+    // into the others until something forces a remount (e.g. a refresh).
+    // Losing the synced hover-tooltip across the 3 charts is an acceptable
+    // trade for never rendering wrong data.
     type: "area",
     toolbar: { show: false },
     animations: { enabled: true },
@@ -126,7 +133,6 @@ const optionsDelegation = {
   chart: {
     ...baseOptions("ns-shared").chart,
     id: "chart-delegation",
-    group: "ns-shared",
   },
   fill: {
     type: "gradient",
@@ -174,7 +180,6 @@ const optionsSold = {
   chart: {
     ...baseOptions("ns-shared").chart,
     id: "chart-sold",
-    group: "ns-shared",
   },
   fill: {
     type: "gradient",
@@ -221,7 +226,6 @@ const optionsPrice = {
   chart: {
     ...baseOptions("ns-shared").chart,
     id: "chart-price",
-    group: "ns-shared",
   },
   fill: {
     type: "gradient",
@@ -364,7 +368,6 @@ export default function GraphMetrics({
       ...optionsDelegation,
       chart: {
         ...optionsDelegation.chart,
-        group: chartGroupId,
       },
       xaxis: {
         ...optionsDelegation.xaxis,
@@ -386,7 +389,6 @@ export default function GraphMetrics({
       ...optionsSold,
       chart: {
         ...optionsSold.chart,
-        group: chartGroupId,
       },
       xaxis: {
         ...optionsSold.xaxis,
@@ -408,7 +410,6 @@ export default function GraphMetrics({
       ...optionsPrice,
       chart: {
         ...optionsPrice.chart,
-        group: chartGroupId,
       },
       xaxis: {
         ...optionsPrice.xaxis,
