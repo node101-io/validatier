@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import PageWrapper from '@/components/page-wrapper/page-wrapper'
 import { getSummary, getValidators } from '@/lib/data'
+import type { MonthlyBucket } from '@/types/data'
 
 export const Route = createFileRoute('/')({
   loader: async () => {
@@ -10,25 +11,28 @@ export const Route = createFileRoute('/')({
   component: Home,
 })
 
-function toDailySeries(stats: { data: { timestamp: (number | null)[]; total_stake: (number | null)[]; total_sold: (number | null)[]; price: (number | null)[] } }[]) {
+function toDailySeries(stats: MonthlyBucket[]) {
   const delegationData: number[] = []
   const soldData: number[] = []
   const priceData: number[] = []
+  const timestamps: number[] = []
   for (const bucket of stats) {
     const { timestamp, total_stake, total_sold, price } = bucket.data
     for (let i = 0; i < timestamp.length; i++) {
-      if (timestamp[i] === null) continue
+      const ts = timestamp[i]
+      if (ts === null) continue
+      timestamps.push(ts)
       delegationData.push(total_stake[i] ?? 0)
       soldData.push(total_sold[i] ?? 0)
       priceData.push(price[i] ?? 0)
     }
   }
-  return { delegationData, soldData, priceData }
+  return { delegationData, soldData, priceData, timestamps }
 }
 
 function Home() {
   const { summary, validators } = Route.useLoaderData()
-  const { delegationData, soldData, priceData } = toDailySeries(summary.stats)
+  const { delegationData, soldData, priceData, timestamps } = toDailySeries(summary.stats)
   const price = summary.metrics.find((m) => m.id === 'price')?.valueNative ?? 0
 
   return (
@@ -40,6 +44,7 @@ function Home() {
       delegationData={delegationData}
       soldData={soldData}
       priceData={priceData}
+      timestamps={timestamps}
     />
   )
 }

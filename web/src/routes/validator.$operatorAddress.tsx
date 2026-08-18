@@ -22,16 +22,19 @@ function flattenGraphSeries(stats: MonthlyBucket[]) {
   const total_stake: number[] = []
   const total_sold: number[] = []
   const priceData: number[] = []
+  const timestamps: number[] = []
   for (const bucket of stats) {
     const { timestamp, total_stake: stake, total_sold: sold, price } = bucket.data
     for (let i = 0; i < timestamp.length; i++) {
-      if (timestamp[i] === null) continue
+      const ts = timestamp[i]
+      if (ts === null) continue
+      timestamps.push(ts)
       total_stake.push(stake[i] ?? 0)
       total_sold.push(sold[i] ?? 0)
       priceData.push(price[i] ?? 0)
     }
   }
-  return { total_stake, total_sold, priceData }
+  return { total_stake, total_sold, priceData, timestamps }
 }
 
 const formatOrdinal = (rank: number) => {
@@ -44,7 +47,7 @@ const formatOrdinal = (rank: number) => {
 function ValidatorPage() {
   const { validator, metrics, stats, ranks } = Route.useLoaderData()
   const price = metrics.find((m) => m.id === 'price')?.valueNative ?? 0
-  const { total_stake, total_sold, priceData } = flattenGraphSeries(stats)
+  const { total_stake, total_sold, priceData, timestamps } = flattenGraphSeries(stats)
 
   return (
     <div className="flex flex-col items-center relative overflow-hidden h-screen w-full">
@@ -173,6 +176,7 @@ function ValidatorPage() {
                   data: priceData,
                 },
               ]}
+              timestamps={timestamps}
             />
           </div>
         </div>

@@ -17,6 +17,7 @@ export default function Inner({
   delegationData,
   soldData,
   priceData,
+  timestamps,
   searchQuery = "",
   ref,
 }: {
@@ -27,6 +28,7 @@ export default function Inner({
   delegationData: number[];
   soldData: number[];
   priceData: number[];
+  timestamps: number[];
   searchQuery?: string;
   ref?: React.RefObject<HTMLDivElement | null>;
 }) {
@@ -101,6 +103,7 @@ export default function Inner({
             data: priceData,
           },
         ]}
+        timestamps={timestamps}
         metrics={metrics}
         price={price}
       />

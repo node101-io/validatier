@@ -269,12 +269,14 @@ export default function GraphMetrics({
   firstSeries,
   secondSeries,
   thirdSeries,
+  timestamps,
   price,
 }: {
   metrics: Metric[];
   firstSeries: ApexOptions["series"];
   secondSeries: ApexOptions["series"];
   thirdSeries: ApexOptions["series"];
+  timestamps: number[]; // unix sec, one per data point, same order/length as the series above
   price: number;
 }) {
   const [mounted, setMounted] = useState(false);
@@ -282,22 +284,19 @@ export default function GraphMetrics({
     setMounted(true);
   }, []);
 
+  // x-axis labels come straight from the export's own timestamps (docs/05) —
+  // no cookie/date-range derivation anymore (all_time only, no filtering).
   const dynamicCategories = useMemo(() => {
-    const primaryLen =
-      typeof firstSeries?.[0] === "number"
-        ? 0
-        : (firstSeries?.[0]?.data?.length ?? 0);
-    const secondaryLen =
-      typeof secondSeries?.[0] === "number"
-        ? 0
-        : (secondSeries?.[0]?.data?.length ?? 0);
-    const tertiaryLen =
-      typeof thirdSeries?.[0] === "number"
-        ? 0
-        : (thirdSeries?.[0]?.data?.length ?? 0);
-    const seriesLen = Math.max(primaryLen, secondaryLen, tertiaryLen);
-    return new Array(seriesLen).fill(0).map((_, i) => `Day ${i + 1}`);
-  }, [firstSeries, secondSeries, thirdSeries]);
+    if (timestamps.length === 0) return [] as string[];
+    const spanMs = (timestamps[timestamps.length - 1] - timestamps[0]) * 1000;
+    const spanDays = spanMs / (1000 * 60 * 60 * 24);
+    return timestamps.map((ts) => {
+      const d = new Date(ts * 1000);
+      return spanDays > 400
+        ? d.toLocaleDateString("en-GB", { month: "short", year: "numeric" })
+        : d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    });
+  }, [timestamps]);
   const delegationMax = useMemo(
     () =>
       computeYAxisMax(

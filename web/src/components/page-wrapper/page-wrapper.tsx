@@ -19,6 +19,7 @@ interface PageWrapperProps {
   delegationData: number[];
   soldData: number[];
   priceData: number[];
+  timestamps: number[];
 }
 
 export default function PageWrapper({
@@ -29,6 +30,7 @@ export default function PageWrapper({
   delegationData,
   soldData,
   priceData,
+  timestamps,
 }: PageWrapperProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const innerRef = useRef<HTMLDivElement>(null);
@@ -74,6 +76,7 @@ export default function PageWrapper({
         delegationData={delegationData}
         soldData={soldData}
         priceData={priceData}
+        timestamps={timestamps}
         searchQuery={searchQuery}
         ref={innerRef}
       />
