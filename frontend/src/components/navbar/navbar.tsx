@@ -10,6 +10,46 @@ import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useHotkeys } from "react-hotkeys-hook";
 
+// DATE RANGE PICKER — removed on purpose (docs/05-static-json-contract.md:
+// all_time only, no interval/date filtering). Kept here as a dead comment,
+// not deleted, so a future "bring back filtering" task doesn't have to
+// reconstruct this from scratch or dig through git history.
+//
+// Removed import:
+//   import DateRangePicker from "@/components/date-picker/date-picker";
+//
+// Removed props (were passed down from page-wrapper.tsx / the route loaders):
+//   initialStartDate?: Date;
+//   initialEndDate?: Date;
+//   initialInterval?: string;
+//
+// Removed render, right after the search <motion.div> below, inside its own
+// wrapper:
+//   <div
+//     role="table"
+//     className={`flex items-start transition-all duration-1000 ${
+//       !pastIntro && !isValidatorPage ? "hidden sm:flex" : "flex"
+//     }`}
+//   >
+//     <DateRangePicker
+//       variant={pastIntro || isValidatorPage ? "light" : "dark"}
+//       initialStartDate={initialStartDate}
+//       initialEndDate={initialEndDate}
+//       initialInterval={initialInterval}
+//     />
+//   </div>
+//
+// The component itself (frontend/src/components/date-picker/date-picker.tsx,
+// ~267 lines, + date-picker.css + style/{arrow-down-svg,calendar-svg}.tsx) is
+// recoverable verbatim from git history at commit 79db787^ (last commit
+// before the Next.js -> TanStack Start rewrite deleted the old frontend/).
+// Re-porting it needs: next/navigation's useRouter().refresh() ->
+// TanStack Router's router.invalidate(), the cookie-write mechanism kept as
+// is, and genesisDate (was imported from the now-deleted backend Cache
+// model) redefined locally as `new Date("2021-02-18")`. It would also need
+// a real interval query param on the JSON export (docs/05 is all_time-only
+// today), not just a frontend change.
+
 export default function Navbar({
   isValidatorPage = false,
   onSearchChange,
