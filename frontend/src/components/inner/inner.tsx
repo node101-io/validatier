@@ -1,5 +1,6 @@
 "use client";
 
+import { lazy } from "react";
 import NetworkSummary from "@/components/network-summary/network-summary";
 import GraphMetrics from "@/components/graph-metrics/graph-metrics";
 import ValidatorLeaderboards from "@/components/validator-leaderboards/validator-leaderboards";
@@ -7,7 +8,45 @@ import type Validator from "@/types/validator";
 import ValidatorTable from "../validator-table/validator-table";
 import type SummaryData from "@/types/summary";
 import type Metric from "@/types/metric";
-import { formatPercentage } from "@/utils/format-numbers";
+import { formatPercentage, formatAtom, formatAtomUSD } from "@/utils/format-numbers";
+import type { ApexOptions } from "apexcharts";
+
+const MiniChart = lazy(() => import("react-apexcharts"));
+
+const miniOptions: ApexOptions = {
+  chart: {
+    type: "area",
+    animations: { enabled: false },
+    toolbar: { show: false },
+    sparkline: { enabled: true },
+    zoom: { enabled: false },
+    parentHeightOffset: 0,
+    foreColor: "#7E77B8",
+    fontFamily: "Darker Grotesque, sans-serif",
+  },
+  stroke: { curve: "smooth", width: 2 },
+  dataLabels: { enabled: false },
+  markers: { size: 0 },
+  grid: { show: false },
+  xaxis: {
+    labels: { show: false },
+    axisBorder: { show: false },
+    axisTicks: { show: false },
+    tooltip: { enabled: false },
+  },
+  yaxis: { show: false },
+  tooltip: { enabled: false },
+  fill: {
+    type: "gradient",
+    gradient: {
+      shadeIntensity: 0,
+      opacityFrom: 0.18,
+      opacityTo: 0.04,
+      stops: [0, 90, 100],
+    },
+  },
+  colors: ["#5856D7"],
+};
 
 export default function Inner({
   validators,
@@ -80,6 +119,94 @@ export default function Inner({
                   </div>
                 </div>
               </>
+            }
+          />
+          <NetworkSummary
+            leftColumn={
+              <>
+                <div className="flex text-xl font-normal text-[#7c70c3] text-nowrap items-center">
+                  Average Delegation
+                </div>
+                <div
+                  className="text-[28px] font-bold text-[#49306f] leading-3 mb-0.5 text-nowrap"
+                  id="summary-average-delegation-native"
+                >
+                  {formatAtom(summaryData.total_stake_sum / (validators.length || 1))} ATOM
+                </div>
+                <div
+                  className="font-medium text-[20px] text-[#7c70c3]"
+                  id="summary-average-delegation-usd"
+                >
+                  $
+                  {formatAtomUSD(
+                    summaryData.total_stake_sum / (validators.length || 1),
+                    price
+                  )}
+                </div>
+              </>
+            }
+            rightColumn={
+              <div className="flex items-center h-full w-32 justify-end">
+                <MiniChart
+                  type="area"
+                  height={80}
+                  width={80}
+                  options={{
+                    ...miniOptions,
+                    colors: ["#31ADE6"],
+                  }}
+                  series={
+                    [
+                      {
+                        name: "Average Delegation",
+                        data: delegationData,
+                      },
+                    ] as ApexOptions["series"]
+                  }
+                />
+              </div>
+            }
+          />
+          <NetworkSummary
+            leftColumn={
+              <>
+                <div className="flex text-xl font-normal text-[#7c70c3] text-nowrap items-center">
+                  Total Sold Amount
+                </div>
+                <div
+                  className="text-[28px] font-bold text-[#49306f] leading-3 mb-0.5 text-nowrap"
+                  id="summary-total-sold-native"
+                >
+                  {formatAtom(summaryData.total_sold)} ATOM
+                </div>
+                <div
+                  className="font-medium text-[20px] text-[#7c70c3]"
+                  id="summary-total-sold-usd"
+                >
+                  ${formatAtomUSD(summaryData.total_sold, price)}
+                </div>
+              </>
+            }
+            rightColumn={
+              <div className="flex items-center h-full w-32 justify-end">
+                <MiniChart
+                  type="area"
+                  height={80}
+                  width={80}
+                  options={{
+                    ...miniOptions,
+                    colors: ["#FF9404"],
+                  }}
+                  series={
+                    [
+                      {
+                        name: "Total Sold Amount",
+                        data: soldData,
+                      },
+                    ] as ApexOptions["series"]
+                  }
+                />
+              </div>
             }
           />
         </div>
