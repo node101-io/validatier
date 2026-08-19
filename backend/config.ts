@@ -17,6 +17,7 @@ export interface Config {
   maxDepth: number;
   tier2MinIndegree: number;
   backfillLookbackDays: number;
+  apiPort: number; // backend/api/server.ts — the dashboard HTTP API frontend reads from
 }
 
 // Every var is required: a misconfigured indexer must die at startup, not
@@ -57,4 +58,5 @@ export const config: Config = {
   maxDepth: requireInt('MAX_DEPTH'),
   tier2MinIndegree: requireInt('TIER2_MIN_INDEGREE'),
   backfillLookbackDays: requireInt('BACKFILL_LOOKBACK_DAYS'),
+  apiPort: requireInt('API_PORT'),
 };

@@ -39,8 +39,20 @@ export const Route = createRootRoute({
       },
     ],
   }),
+  // Fallback for any route without its own notFoundComponent (routes with a
+  // more specific one, e.g. /validator/$operatorAddress, override this).
+  notFoundComponent: RootNotFound,
   shellComponent: RootDocument,
 })
+
+function RootNotFound() {
+  return (
+    <div className="flex flex-col items-center justify-center h-screen w-full gap-3 text-[#7c70c3]">
+      <div className="text-2xl font-semibold text-[#250054]">Page not found</div>
+      <a href="/" className="underline">Back to dashboard</a>
+    </div>
+  )
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (

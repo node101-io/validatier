@@ -1,22 +1,36 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, notFound, Await, Link } from '@tanstack/react-router'
 import Navbar from '@/components/navbar/navbar'
 import NetworkSummary from '@/components/network-summary/network-summary'
 import GraphMetrics from '@/components/graph-metrics/graph-metrics'
 import StakeWithUs from '@/components/stake-with-us/stake-with-us'
 import Footer from '@/components/footer/footer'
 import CopyableOperatorAddress from '@/components/copyable-operator-address/copyable-operator-address'
+import { GraphSkeleton } from '@/components/loading/loading-veil'
 import { formatPercentage } from '@/utils/format-numbers'
-import { getValidatorDetail } from '@/lib/data'
+import { getValidatorSummary, getValidatorSeries } from '@/lib/data'
 import type { MonthlyBucket } from '@/types/data'
 
 export const Route = createFileRoute('/validator/$operatorAddress')({
   loader: async ({ params }) => {
-    const detail = await getValidatorDetail({ data: params.operatorAddress })
-    if (!detail) throw redirect({ to: '/' })
-    return detail
+    // Identity/rank is cheap and decides 404 before anything streams — the
+    // graph series is deferred (not awaited) so the header card renders
+    // immediately and the chart data streams in after.
+    const summary = await getValidatorSummary({ data: params.operatorAddress })
+    if (!summary) throw notFound()
+    return { ...summary, seriesPromise: getValidatorSeries({ data: params.operatorAddress }) }
   },
   component: ValidatorPage,
+  notFoundComponent: ValidatorNotFound,
 })
+
+function ValidatorNotFound() {
+  return (
+    <div className="flex flex-col items-center justify-center h-screen w-full gap-3 text-[#7c70c3]">
+      <div className="text-2xl font-semibold text-[#250054]">Validator not found</div>
+      <Link to="/" className="underline">Back to dashboard</Link>
+    </div>
+  )
+}
 
 function flattenGraphSeries(stats: MonthlyBucket[]) {
   const total_stake: number[] = []
@@ -45,9 +59,8 @@ const formatOrdinal = (rank: number) => {
 }
 
 function ValidatorPage() {
-  const { validator, metrics, stats, ranks } = Route.useLoaderData()
+  const { validator, metrics, ranks, seriesPromise } = Route.useLoaderData()
   const price = metrics.find((m) => m.id === 'price')?.valueNative ?? 0
-  const { total_stake, total_sold, priceData, timestamps } = flattenGraphSeries(stats)
 
   return (
     <div className="flex flex-col items-center relative overflow-hidden h-screen w-full">
@@ -155,29 +168,36 @@ function ValidatorPage() {
                 />
               </div>
             </div>
-            <GraphMetrics
-              price={price}
-              metrics={metrics}
-              firstSeries={[
-                {
-                  name: 'Average Delegation',
-                  data: total_stake,
-                },
-              ]}
-              secondSeries={[
-                {
-                  name: 'Total Sold Amount',
-                  data: total_sold,
-                },
-              ]}
-              thirdSeries={[
-                {
-                  name: 'ATOM Price',
-                  data: priceData,
-                },
-              ]}
-              timestamps={timestamps}
-            />
+            <Await promise={seriesPromise} fallback={<GraphSkeleton />}>
+              {(stats) => {
+                const { total_stake, total_sold, priceData, timestamps } = flattenGraphSeries(stats)
+                return (
+                  <GraphMetrics
+                    price={price}
+                    metrics={metrics}
+                    firstSeries={[
+                      {
+                        name: 'Average Delegation',
+                        data: total_stake,
+                      },
+                    ]}
+                    secondSeries={[
+                      {
+                        name: 'Total Sold Amount',
+                        data: total_sold,
+                      },
+                    ]}
+                    thirdSeries={[
+                      {
+                        name: 'ATOM Price',
+                        data: priceData,
+                      },
+                    ]}
+                    timestamps={timestamps}
+                  />
+                )
+              }}
+            </Await>
           </div>
         </div>
         <StakeWithUs />

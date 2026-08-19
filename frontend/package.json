@@ -8,8 +8,7 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "generate-routes": "tsr generate",
-    "sync-data": "mkdir -p public/data && rsync -a --delete --exclude='*.db*' ../backend/data/ public/data/",
-    "build": "npm run sync-data && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint",
     "format": "prettier --write . && eslint --fix",
@@ -22,6 +21,7 @@
     "@tanstack/react-router-devtools": "latest",
     "@tanstack/react-start": "latest",
     "apexcharts": "^6.10.0",
+    "dotenv": "^17.4.2",
     "motion": "^13.1.0",
     "radix-ui": "^1.6.7",
     "react": "^19.2.0",

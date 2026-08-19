@@ -1,5 +1,8 @@
-// Mirrors docs/05-static-json-contract.md — the shape of everything under
-// public/data/**, produced by backend/export/exportJson.ts.
+// Mirrors docs/05-frontend-data-layer.md — the JSON shapes served by
+// backend/api/server.ts (an API contract boundary, not shared code: the
+// backend has its own copy of these shapes in backend/api/types.ts).
+// Fetched via src/server/api.ts, exposed through the server functions in
+// src/lib/data.ts.
 import type Validator from "@/types/validator";
 import type Metric from "@/types/metric";
 import type SummaryData from "@/types/summary";
@@ -39,10 +42,13 @@ export interface ValidatorDetail extends Validator {
   commission_rate: string;
 }
 
-export interface ValidatorDetailJson {
+// GET /api/validators/:operatorAddress/summary — no `stats` here: the graph
+// series is a separate endpoint (/series) fetched independently and deferred
+// (see routes/validator.$operatorAddress.tsx), so the header card can render
+// before the series is even requested.
+export interface ValidatorSummaryJson {
   validator: ValidatorDetail;
   metrics: Metric[];
-  stats: MonthlyBucket[];
   ranks: {
     percentageSoldRank: number;
     totalValidators: number;

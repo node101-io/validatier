@@ -1,33 +1,43 @@
-# docs/05-static-json-contract.md — Static JSON export contract
+# docs/05-frontend-data-layer.md — Dashboard HTTP API contract
 
-Backend produces these files once (via `backend/export/exportJson.ts`), the frontend
-reads them as static assets — no live API. `all_time` only; no interval/date filtering.
+Backend serves this data live from Mongo via a small HTTP API
+(`backend/api/server.ts`), computed by `backend/api/dashboard.ts` (`loadDashboard`,
+60s TTL in-memory cache) using pure aggregation helpers in `backend/api/lib/*`. The
+frontend fetches it during SSR only (`frontend/src/server/api.ts` — Node-to-Node
+fetch, never exposed to the browser) — no static export, no direct Mongo access from
+the frontend. `all_time` only; no interval/date filtering (yet — see "Future: time
+interval" below).
 
-All uatom BigInt-strings from Mongo are converted to **ATOM `number`** at export time
-(`uatomToAtom`, see `docs/03-mongo-schema.md` conventions). The frontend never sees a
-uatom string or does its own division by `10**decimals`.
+All uatom BigInt-strings from Mongo are converted to **ATOM `number`** before leaving
+the backend (`uatomToAtom`, see `docs/03-mongo-schema.md` conventions). The frontend
+never sees a uatom string or does its own division by `10**decimals`.
 
 Conversion reference: `viz/data.py` (`uatom_to_atom`, `load_validator_summary`,
 `load_sink_sales`, `_flatten_validator_stats`) — the Python dashboard computes the same
-numbers today; export output is checked against it (see plan doc, step A4).
+numbers today; API output was checked against it during development.
 
 ---
 
-## File layout
+## Endpoints
 
 ```
-data/
-  meta.json
-  summary.json
-  validators.json
-  validator/<operator_address>.json     (one file per validator with total_withdraw > 0)
+GET /api/meta
+GET /api/summary
+GET /api/validators
+GET /api/validators/:operatorAddress/summary   (404 if unknown or total_withdraw == 0)
+GET /api/validators/:operatorAddress/series    (200 with [] if the validator has no rows)
 ```
+
+The validator detail page fetches `summary` and `series` as two separate requests
+deliberately: `summary` is cheap and decides the 404 before the response starts
+streaming; `series` (the graph data) is deferred and streamed in after
+(`routes/validator.$operatorAddress.tsx`, TanStack Router's `<Await>`).
 
 ---
 
 ## Shared building blocks
 
-### Validator row (used in `validators.json` and embedded in `validator/<addr>.json`)
+### Validator row (used in `GET /api/validators` and embedded in `GET /api/validators/:operatorAddress/summary`)
 
 ```ts
 {
@@ -64,13 +74,13 @@ by the new backend — `total_withdraw` is the combined reward+commission figure
 Exactly 3 metrics, always in this order, ids/colors/titles fixed (existing frontend
 components key off these).
 
-### Monthly bucket (used in `summary.json` and `validator/<addr>.json`)
+### Monthly bucket (used in `GET /api/summary` and `GET /api/validators/:operatorAddress/series`)
 
 Every time series in this export — network-wide or per-validator — is stored **bucketed by
 year/month, one bucket per `validator_stats`-shaped month**, never as a flat array. This is
 deliberate: the network only grows (more months, more validators), flat arrays would need
-re-slicing on every export and make network vs. per-validator series look inconsistent side
-by side. One shape everywhere keeps the frontend's reading code identical for both files.
+re-slicing on every request and make network vs. per-validator series look inconsistent side
+by side. One shape everywhere keeps the frontend's reading code identical for both endpoints.
 
 ```ts
 {
@@ -86,23 +96,23 @@ by side. One shape everywhere keeps the frontend's reading code identical for bo
 ```
 
 Array of buckets is sorted `(year, month)` ascending and contains ONLY months that actually
-have data for that scope (network-wide for `summary.json`, this validator for
-`validator/<addr>.json`) — no synthetic empty months, no padding to a fixed window.
+have data for that scope (network-wide for `/api/summary`, this validator for
+`/api/validators/:operatorAddress/series`) — no synthetic empty months, no padding to a fixed window.
 
 ---
 
-## `meta.json`
+## `GET /api/meta`
 
 ```ts
 {
-  generated_at: number;            // unix sec, export run time
+  generated_at: number;            // unix sec, time this snapshot was computed
   scanned_up_to_height: number;    // from Mongo `meta` singleton
   fund_flow_version: number;       // from Mongo `meta.fund_flow_current_version`
   price: number;                   // latest ATOM/USD from `prices`, 0 if none
 }
 ```
 
-## `summary.json`
+## `GET /api/summary`
 
 ```ts
 {
@@ -122,7 +132,7 @@ Within each bucket, `data.timestamp`/`total_stake`/`total_sold`/`price` stay ali
 from these `timestamp` values directly (replacing the old array-length/index derivation in
 `graph-metrics.tsx:293-334`, which assumed one flat array per series).
 
-## `validators.json`
+## `GET /api/validators`
 
 ```ts
 {
@@ -131,20 +141,10 @@ from these `timestamp` values directly (replacing the old array-length/index der
 }
 ```
 
-## `validator/<operator_address>.json`
+## `GET /api/validators/:operatorAddress/summary`
 
-One file per validator row in `validators.json`, filename = `operator_address` (URL-safe,
-`cosmosvaloper1...`, no encoding needed).
-
-**Per-validator date range varies and is NOT padded to a fixed window.** Validators are
-created (and start being indexed) at different heights, so one validator's `validator_stats`
-history can span close to a year while another (created recently) has only a few weeks —
-confirmed against the live DB: as of this writing, populated-day counts per validator range
-from 5 to 19 days across 632 validators, all bounded by how long the indexer has run plus
-each validator's own creation date.
-
-Graph data uses the same `MonthlyBucket` shape as `summary.json` (see above) — one bucket
-per `validator_stats` document this validator actually has:
+404 if `operatorAddress` isn't bech32-shaped, unknown, or excluded (`total_withdraw == 0`
+— same filter as `/api/validators`).
 
 ```ts
 {
@@ -154,8 +154,7 @@ per `validator_stats` document this validator actually has:
     delegator_address: string | null;
     commission_rate: string;        // raw decimal string, kept for display formatting
   };
-  metrics: Metric[];
-  stats: MonthlyBucket[];           // per-validator: data.total_stake / total_sold / price are THIS validator's own values, not network sums
+  metrics: Metric[];                 // this validator's own average stake / sold — NOT the network-wide metrics above
   ranks: {
     percentageSoldRank: number;     // 1-based, among included (total_withdraw>0) validators
     totalValidators: number;        // count of included validators
@@ -165,12 +164,39 @@ per `validator_stats` document this validator actually has:
 
 No `selfStakeRank` (no self-stake data). No `ranks.selfStakeRank`.
 
+## `GET /api/validators/:operatorAddress/series`
+
+`MonthlyBucket[]` — same shape as `summary.stats` above, but `data.total_stake` /
+`total_sold` / `price` are THIS validator's own values, not network sums. Returns `[]`
+for an address that would 404 on `/summary` too; the frontend only calls this after
+`/summary` already succeeded, so it never needs to distinguish "empty" from "not found"
+here.
+
+**Per-validator date range varies and is NOT padded to a fixed window.** Validators are
+created (and start being indexed) at different heights, so one validator's `validator_stats`
+history can span close to a year while another (created recently) has only a few weeks —
+confirmed against the live DB: as of this writing, populated-day counts per validator range
+from 5 to 19 days across 632 validators, all bounded by how long the indexer has run plus
+each validator's own creation date.
+
 ---
 
 ## Explicitly removed (no longer produced anywhere)
 
-`pubkey`, `chain_identifier`, `usd_exchange_rate` (chain-level; use `meta.json.price` /
-`summary.json.metrics[price]` instead), `self_stake`, `initial_self_stake_prefix_sum`,
+`pubkey`, `chain_identifier`, `usd_exchange_rate` (chain-level; use `meta.price` /
+`summary.metrics[price]` instead), `self_stake`, `initial_self_stake_prefix_sum`,
 `average_self_stake_ratio`, `smallSelfStakeAmountGraphData`, `smallSelfStakeRatioGraphData`,
 `cummulativeActiveSet`, per-interval variants (`last_30/90/180/365_days`, custom range) —
 everything is `all_time` only.
+
+---
+
+## Future: time interval
+
+When a date-range selector is added, `loadDashboard` (`backend/api/dashboard.ts`) is the
+single function whose signature grows a `range` parameter (and whose cache key includes
+it) — the aggregation call sequence stays the same, only the Mongo queries and the
+`buildValidatorRow`/`buildNetworkMonthlyBuckets` inputs get a range filter. The endpoints
+above would grow an optional `?from=&to=` query string. Not built yet — `frontend/src/
+components/navbar/navbar.tsx` keeps the old date-picker's removed code as a dead comment
+for exactly this.

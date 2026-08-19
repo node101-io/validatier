@@ -133,6 +133,8 @@ export default function ValidatorTable({
   const [sortField, setSortField] = useState<SortField>("percentageSold");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [isMobile, setIsMobile] = useState(false);
+  const PAGE_SIZE = 50;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -199,6 +201,18 @@ export default function ValidatorTable({
       : sortedValidators;
   }, [sortedValidators, searchQuery]);
 
+  // Search/sort changing the result set invalidates how far we've paged in —
+  // start back at the first page rather than showing a stale offset.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [searchQuery, sortField, sortDirection]);
+
+  const visibleValidators = useMemo(
+    () => filteredAndSortedValidators.slice(0, visibleCount),
+    [filteredAndSortedValidators, visibleCount]
+  );
+  const remainingCount = filteredAndSortedValidators.length - visibleValidators.length;
+
   useEffect(() => {
     const update = () => {
       const wrappers = document.querySelectorAll<HTMLElement>(
@@ -258,7 +272,7 @@ export default function ValidatorTable({
               </div>
             </div>
             <div role="rowgroup" className="w-full">
-              {filteredAndSortedValidators.map((validator) => {
+              {visibleValidators.map((validator) => {
                 const avatarSrc = validator.temporary_image_uri ?? DEFAULT_AVATAR;
                 return (
                   <Link
@@ -415,6 +429,17 @@ export default function ValidatorTable({
             </div>
           </div>
         </div>
+        {remainingCount > 0 && (
+          <div className="flex justify-center pb-4">
+            <button
+              type="button"
+              onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+              className="text-base font-medium text-[#7c70c3] bg-[#f5f5ff] border-[0.5px] border-[#bebee7] rounded-xl px-4 py-2 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
+            >
+              Load more ({remainingCount} remaining)
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

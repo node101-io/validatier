@@ -11,16 +11,10 @@ const config = defineConfig({
   plugins: [
     devtools(),
     tailwindcss(),
-    tanstackStart({
-      // docs/05-static-json-contract.md: all_time only, no live API — every
-      // route (home + one per validator, crawled from the home page's own
-      // table/leaderboard links) is baked to static HTML at build time.
-      prerender: {
-        enabled: true,
-        crawlLinks: true,
-        failOnError: true,
-      },
-    }),
+    // docs/05-frontend-data-layer.md: no static export anymore — every route
+    // is rendered server-side per request straight from MongoDB (via
+    // loadDashboard), so there's nothing to prerender at build time.
+    tanstackStart(),
     viteReact(),
   ],
 })
