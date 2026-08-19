@@ -7,6 +7,8 @@ import { useState } from "react";
 
 type SortDirection = "asc" | "desc";
 
+const DEFAULT_AVATAR = "/res/images/default_validator_photo.svg";
+
 // Sibling of validator-leaderboard.tsx, sharing its card chrome/header/summary
 // classes so the three leaderboard cards read as one set — but a separate
 // component rather than a branch in that file: an exchange entry has no
@@ -79,6 +81,13 @@ export default function ExchangeLeaderboard({
             <div className="flex items-center gap-2 lg:gap-3 min-w-0">
               <div className="w-3 text-right text-[#7c70c3] select-none shrink-0">
                 {index + 1}
+              </div>
+              <div className="flex items-center min-w-7.5 max-w-7.5 aspect-square rounded-none overflow-hidden shrink-0">
+                <img
+                  src={DEFAULT_AVATAR}
+                  alt={entry.name}
+                  className="w-full h-full object-cover rounded-none"
+                />
               </div>
               <div className="flex-1 min-w-0 text-base sm:text-lg text-[#49306f] overflow-hidden text-ellipsis text-nowrap">
                 {entry.name}

@@ -7,9 +7,9 @@ import {
 import type { SinkSaleDoc } from './sinkSales'
 
 const sales: SinkSaleDoc[] = [
-  { sink_address: 'binance', cumulative_sold: '100', timestamp: 10 },
-  { sink_address: 'binance', cumulative_sold: '300', timestamp: 30 },
-  { sink_address: 'osmosis-dex', cumulative_sold: '50', timestamp: 20 },
+  { sink_address: 'binance', sink_kind: 'cex', cumulative_sold: '100', timestamp: 10 },
+  { sink_address: 'binance', sink_kind: 'cex', cumulative_sold: '300', timestamp: 30 },
+  { sink_address: 'osmosis-dex', sink_kind: 'dex', cumulative_sold: '50', timestamp: 20 },
 ]
 
 test('latestCumulativeByPair sums the most recent entry per sink_address', () => {
@@ -35,8 +35,8 @@ test('buildCumulativeSoldTimeline produces a running total across sinks', () => 
 
 test('buildCumulativeSoldTimeline merges same-timestamp events into one point', () => {
   const timeline = buildCumulativeSoldTimeline([
-    { sink_address: 'a', cumulative_sold: '10', timestamp: 5 },
-    { sink_address: 'b', cumulative_sold: '20', timestamp: 5 },
+    { sink_address: 'a', sink_kind: 'cex', cumulative_sold: '10', timestamp: 5 },
+    { sink_address: 'b', sink_kind: 'cex', cumulative_sold: '20', timestamp: 5 },
   ])
   assert.deepEqual(timeline, [{ timestamp: 5, value: 30n }])
 })

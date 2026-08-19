@@ -1,9 +1,12 @@
 import type { TimedValue } from './lookup'
 
 // Mirrors the fields of Mongo `validator_sink_sales` docs (docs/03) actually
-// needed here — sink_kind/block_height/day/month/year are irrelevant to export.
+// needed here — block_height/day/month/year are irrelevant to export. sink_kind
+// is kept (unlike the fields dropped above) because sinkBreakdown.ts uses it to
+// label ibc_out sinks distinctly from a genuinely-unidentified cex/dex address.
 export interface SinkSaleDoc {
   sink_address: string
+  sink_kind: 'cex' | 'dex' | 'ibc_out'
   cumulative_sold: string // uatom BigInt-string, monotonic per (operator, sink)
   timestamp: number
 }

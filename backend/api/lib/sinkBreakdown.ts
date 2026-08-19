@@ -24,8 +24,17 @@ export interface SinkBreakdownEntry {
 // Examples (see defined_accounts.csv): "Upbit #18 (Staking)" -> "Upbit",
 // "Binance #03 (Withdraw)" -> "Binance", "cex / Bybit Reserves 68" -> "Bybit
 // Reserves 68", "cex-cosmoshub-3" -> "cosmoshub-3".
-export function normalizeSinkLabel(label: string | null | undefined): string {
-  if (!label) return 'Unknown'
+//
+// `kind` disambiguates the fallback when there's no registry label: an
+// ibc_out sink is a known terminal (money left the chain via IBC), not an
+// unidentified exchange, so it gets its own bucket instead of "Unknown" —
+// "Unknown" is reserved for a cex/dex sink address that isn't in the
+// curated registry yet (genuinely unidentified).
+export function normalizeSinkLabel(
+  label: string | null | undefined,
+  kind?: 'cex' | 'dex' | 'ibc_out',
+): string {
+  if (!label) return kind === 'ibc_out' ? 'IBC Transfers' : 'Unknown'
 
   let name = label
     .replace(/\s*\[conf:[^\]]*\]\s*$/, '') // trailing " [conf:medium]"
@@ -36,7 +45,7 @@ export function normalizeSinkLabel(label: string | null | undefined): string {
     .replace(/\s+/g, ' ')
     .trim()
 
-  return name.length > 0 ? name : 'Unknown'
+  return name.length > 0 ? name : kind === 'ibc_out' ? 'IBC Transfers' : 'Unknown'
 }
 
 // All_time sold per exchange: for each (operator, sink) pair, take its latest
@@ -48,13 +57,17 @@ export function buildSinkBreakdown(
   labelByAddress: ReadonlyMap<string, string | null | undefined>,
   decimals: number,
 ): SinkBreakdownEntry[] {
-  const latestByPair = new Map<string, { address: string; timestamp: number; value: bigint }>()
+  const latestByPair = new Map<
+    string,
+    { address: string; kind: 'cex' | 'dex' | 'ibc_out'; timestamp: number; value: bigint }
+  >()
   for (const doc of sales) {
     const key = `${doc.operator_address}:${doc.sink_address}`
     const existing = latestByPair.get(key)
     if (!existing || doc.timestamp > existing.timestamp) {
       latestByPair.set(key, {
         address: doc.sink_address,
+        kind: doc.sink_kind,
         timestamp: doc.timestamp,
         value: BigInt(doc.cumulative_sold),
       })
@@ -63,7 +76,7 @@ export function buildSinkBreakdown(
 
   const totalsByName = new Map<string, bigint>()
   for (const entry of latestByPair.values()) {
-    const name = normalizeSinkLabel(labelByAddress.get(entry.address))
+    const name = normalizeSinkLabel(labelByAddress.get(entry.address), entry.kind)
     totalsByName.set(name, (totalsByName.get(name) ?? 0n) + entry.value)
   }
 

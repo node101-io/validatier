@@ -55,7 +55,7 @@ function statsDoc(
 
 test('buildValidatorRow: average stake, latest cumulative withdraw, sold%, commission', () => {
   const sinkSales: SinkSaleDoc[] = [
-    { sink_address: 'binance', cumulative_sold: '3000000', timestamp: 2000 },
+    { sink_address: 'binance', sink_kind: 'cex', cumulative_sold: '3000000', timestamp: 2000 },
   ]
   const row = buildValidatorRow(validator, [statsDoc()], sinkSales, 6)
 
@@ -97,7 +97,7 @@ test('buildValidatorRow returns null when latest total_withdraw is 0 (filtered o
 
 test('buildValidatorRow clamps percentage_sold to 100 even if sold overshoots (e.g. price appreciation edge case)', () => {
   const sinkSales: SinkSaleDoc[] = [
-    { sink_address: 'binance', cumulative_sold: '99000000', timestamp: 2000 },
+    { sink_address: 'binance', sink_kind: 'cex', cumulative_sold: '99000000', timestamp: 2000 },
   ]
   const row = buildValidatorRow(validator, [statsDoc()], sinkSales, 6)
   assert.equal(row!.percentage_sold, 100)
