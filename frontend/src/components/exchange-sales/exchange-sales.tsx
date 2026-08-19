@@ -5,6 +5,7 @@ import { lazy, Suspense } from "react";
 import type { ApexOptions } from "apexcharts";
 import type { SinkBreakdownEntry } from "@/types/data";
 import { formatAtom, formatAtomUSD } from "@/utils/format-numbers";
+import { computeYAxisMax } from "@/utils/chart-axis";
 
 const Chart = lazy(() => import("react-apexcharts"));
 
@@ -39,7 +40,7 @@ export default function ExchangeSales({
   if (entries.length === 0) {
     return (
       <div className="flex flex-col gap-2.5 mt-2 w-full">
-        <div className="text-xl font-[500] text-[#7c70c3] px-5 lg:px-0">Exchange Sales</div>
+        <div className="text-xl font-[500] text-[#7c70c3] px-5 lg:px-0">Exchange Data</div>
         <div className="flex px-5 lg:px-0">
           <div className="flex items-center justify-center w-full h-[220px] p-5 bg-[#f5f5ff] rounded-[20px] border-[0.5px] border-[#bebee7] text-[#7c70c3]">
             No exchange sales recorded yet
@@ -93,32 +94,41 @@ export default function ExchangeSales({
     plotOptions: {
       bar: {
         distributed: true,
-        borderRadius: 6,
-        columnWidth: "55%",
+        borderRadius: 0,
+        columnWidth: "50%",
         dataLabels: { position: "top" },
       },
     },
     colors,
     dataLabels: {
       enabled: true,
-      offsetY: -20,
-      style: { colors: ["#49306f"], fontFamily, fontSize: "14px", fontWeight: 600 },
+      offsetY: -22,
+      style: { colors: ["#361661"], fontFamily, fontSize: "15px", fontWeight: 600 },
       formatter: (v: number) => formatAtom(v, 1),
     },
     grid: {
-      borderColor: "#C9C4EE55",
+      borderColor: "#9F97D1",
+      strokeDashArray: 4,
       yaxis: { lines: { show: true } },
       xaxis: { lines: { show: false } },
+      padding: { top: 20, left: 10, right: 10 },
     },
     xaxis: {
       categories: names,
-      labels: { style: { colors: labelColor, fontFamily } },
+      labels: {
+        rotate: 0,
+        trim: true,
+        style: { colors: labelColor, fontFamily, fontSize: "13px" },
+      },
       axisBorder: { show: false },
       axisTicks: { show: false },
     },
     yaxis: {
+      min: 0,
+      max: computeYAxisMax([{ data: values }], 0.25, 1),
+      tickAmount: 5,
       labels: {
-        style: { colors: [labelColor] },
+        style: { colors: [labelColor], fontSize: "18px" },
         formatter: (v: number) => formatAtom(v, 1),
       },
     },
@@ -133,7 +143,7 @@ export default function ExchangeSales({
 
   return (
     <div className="flex flex-col gap-2.5 mt-2 w-full">
-      <div className="text-xl font-[500] text-[#7c70c3] px-5 lg:px-0">Exchange Sales</div>
+      <div className="text-xl font-[500] text-[#7c70c3] px-5 lg:px-0">Exchange Data</div>
       <div className="flex flex-col md:flex-row flex-nowrap justify-start gap-5 overflow-x-scroll md:overflow-x-visible no-scrollbar px-5 lg:px-0">
         <div className="flex flex-col w-full md:w-1/2 min-w-[320px] p-5 bg-[#f5f5ff] rounded-[20px] border-[0.5px] border-[#bebee7]">
           <div className="text-lg font-normal text-[#7c70c3] mb-2">Sales Distribution</div>
@@ -158,6 +168,17 @@ export default function ExchangeSales({
                 />
               </Suspense>
             </ClientOnly>
+          </div>
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-4">
+            {entries.map((e, i) => (
+              <div key={e.name + i} className="flex items-center gap-1.5">
+                <span
+                  className="size-2 rounded-[2px] shrink-0"
+                  style={{ backgroundColor: colors[i] }}
+                />
+                <span className="text-sm text-[#7c70c3]">{e.name}</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
