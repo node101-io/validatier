@@ -123,13 +123,12 @@ const SortableHeader = ({
 
 export default function ValidatorTable({
   validators,
-  searchQuery = "",
   price,
 }: {
   validators: Validator[];
-  searchQuery?: string;
   price: number;
 }) {
+  const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<SortField>("percentageSold");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [isMobile, setIsMobile] = useState(false);
@@ -245,6 +244,17 @@ export default function ValidatorTable({
         <div className="text-xl font-[500] text-[#7c70c3] my-2">Validators</div>
       </div>
       <div className="flex flex-col relative rounded-[30px] bg-[#f5f5ff] border-[0.5px] border-[#bebee7] overflow-hidden">
+        <div className="flex items-center gap-2.5 px-6 py-5">
+          <img src="/res/images/search.svg" alt="" width={20} height={20} className="shrink-0" />
+          <input
+            type="text"
+            className="w-full bg-transparent text-xl font-[500] text-[#49306f] placeholder:text-[#7c70c3] focus:outline-none"
+            placeholder="Search Validator"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <img src="/res/images/export.svg" alt="" width={20} height={20} className="shrink-0" />
+        </div>
         <div className="pt-3 pb-4 overflow-x-auto lg:overflow-visible">
           <div role="table" className="w-full min-w-[900px]">
             <div role="rowgroup">

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useRef } from "react";
 import { Await } from "@tanstack/react-router";
 import ScrollProvider from "@/components/scroll/scroll-provider";
 import Intro from "@/components/intro/intro";
@@ -36,41 +35,9 @@ interface PageWrapperProps {
 }
 
 export default function PageWrapper({ summaryPromise, validatorsPromise }: PageWrapperProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const innerRef = useRef<HTMLDivElement>(null);
-
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-    innerRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-    });
-  };
-
-  const handleSearchFocus = (): boolean => {
-    // Check if validator table is in viewport
-    if (innerRef.current) {
-      const rect = innerRef.current.getBoundingClientRect();
-      const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
-
-      // Only scroll if not visible
-      if (!isVisible) {
-        innerRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-        });
-        return true; // Scrolled
-      }
-    }
-    return false; // No scroll needed
-  };
-
   return (
     <ScrollProvider className="flex flex-col w-full items-center relative overflow-x-hidden overflow-y-auto ml-0 h-screen rounded-0 bg-white transition-all duration-250">
-      <Navbar
-        onSearchChange={handleSearchChange}
-        onSearchFocus={handleSearchFocus}
-      />
+      <Navbar />
       <Intro />
       {/* Shell above renders immediately; only this data-dependent section
           suspends while summary/validators stream in from Mongo. */}
@@ -91,8 +58,6 @@ export default function PageWrapper({ summaryPromise, validatorsPromise }: PageW
                   priceData={priceData}
                   timestamps={timestamps}
                   sinkBreakdown={summary.sinkBreakdown}
-                  searchQuery={searchQuery}
-                  ref={innerRef}
                 />
               );
             }}

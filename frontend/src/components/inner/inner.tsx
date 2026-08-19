@@ -60,8 +60,6 @@ export default function Inner({
   priceData,
   timestamps,
   sinkBreakdown,
-  searchQuery = "",
-  ref,
 }: {
   validators: Validator[];
   summaryData: SummaryData;
@@ -72,8 +70,6 @@ export default function Inner({
   priceData: number[];
   timestamps: number[];
   sinkBreakdown: SinkBreakdownEntry[];
-  searchQuery?: string;
-  ref?: React.RefObject<HTMLDivElement | null>;
 }) {
   return (
     <div
@@ -246,13 +242,7 @@ export default function Inner({
         sinkBreakdown={sinkBreakdown}
         price={price}
       />
-      <div ref={ref} className="scroll-m-20">
-        <ValidatorTable
-          validators={validators}
-          searchQuery={searchQuery}
-          price={price}
-        />
-      </div>
+      <ValidatorTable validators={validators} price={price} />
     </div>
   );
 }

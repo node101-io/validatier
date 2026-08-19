@@ -4,11 +4,10 @@ import "@/styles/index/header.css";
 import "@/styles/index/navbar.css";
 import { LogoSVG } from "@/style/logo-svg";
 import { LogoMobileSVG } from "@/style/logo-mobile-svg";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useScrollContext } from "@/components/scroll/scroll-provider";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useHotkeys } from "react-hotkeys-hook";
 
 // DATE RANGE PICKER — removed on purpose (docs/05-static-json-contract.md:
 // all_time only, no interval/date filtering). Kept here as a dead comment,
@@ -23,8 +22,9 @@ import { useHotkeys } from "react-hotkeys-hook";
 //   initialEndDate?: Date;
 //   initialInterval?: string;
 //
-// Removed render, right after the search <motion.div> below, inside its own
-// wrapper:
+// Removed render, right after the logo <Link> below, inside its own
+// wrapper (the search input that used to sit alongside it has since moved
+// into validator-table.tsx):
 //   <div
 //     role="table"
 //     className={`flex items-start transition-all duration-1000 ${
@@ -52,42 +52,12 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 export default function Navbar({
   isValidatorPage = false,
-  onSearchChange,
-  onSearchFocus,
 }: {
   isValidatorPage?: boolean;
-  onSearchChange?: (query: string) => void;
-  onSearchFocus?: () => boolean;
 }) {
   const { scrollY } = useScrollContext();
   const [introHeight, setIntroHeight] = useState<number>(300);
   const [pastIntro, setPastIntro] = useState<boolean>(false);
-  const [searchValue, setSearchValue] = useState<string>("");
-  const [searchFocused, setSearchFocused] = useState<boolean>(false);
-  const [mobileLogoActive, setMobileLogoActive] = useState<boolean>(false);
-  const [isSearching, setIsSearching] = useState<boolean>(false);
-  const blurTimeoutRef = useRef<number | null>(null);
-  const searchTimeoutRef = useRef<number | null>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  useHotkeys('meta+f, ctrl+f', (e) => {
-    // Only work on main page, not on validator page
-    if (isValidatorPage) return;
-
-    e.preventDefault();
-
-    // Check if scroll is needed and performed
-    const didScroll = onSearchFocus ? onSearchFocus() : false;
-
-    // Focus the search input
-    // If scrolled, wait for animation to complete (500ms), otherwise focus immediately
-    setTimeout(() => {
-      searchInputRef.current?.focus();
-    }, didScroll ? 500 : 0);
-  }, {
-    preventDefault: true,
-    enabled: !isValidatorPage
-  })
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -116,18 +86,6 @@ export default function Navbar({
     }
   }, [scrollY, introHeight]);
 
-  // Cleanup timeouts on unmount
-  useEffect(() => {
-    return () => {
-      if (blurTimeoutRef.current) {
-        window.clearTimeout(blurTimeoutRef.current);
-      }
-      if (searchTimeoutRef.current) {
-        window.clearTimeout(searchTimeoutRef.current);
-      }
-    };
-  }, []);
-
   const backgroundClass = useMemo(() => {
     if (isValidatorPage) return "after:bg-white";
     return pastIntro
@@ -141,9 +99,7 @@ export default function Navbar({
   }, [isValidatorPage, pastIntro]);
 
   const brandFill = isValidatorPage || pastIntro ? "#250754" : "#f5f5ff";
-  const showSearch = !isValidatorPage && pastIntro;
-  const mobileShowsSmallLogo =
-    isValidatorPage || (showSearch && mobileLogoActive && !isSearching);
+  const mobileShowsSmallLogo = isValidatorPage;
 
   return (
     <div
@@ -195,75 +151,6 @@ export default function Navbar({
           </AnimatePresence>
         </div>
       </Link>
-      {!isValidatorPage && (
-        <motion.div
-          layout
-          transition={{ duration: 0.25, type: "spring", bounce: 0.2 }}
-          className={`transition-all duration-1000 overflow-visible ml-auto ${
-            pastIntro ? "flex" : "hidden sm:flex"
-          } max-sm:flex-1 max-sm:min-w-0`}
-        >
-          <input
-            ref={searchInputRef}
-            type="text"
-            className={`text-xl font-[500] border-1 ml-auto ${
-              showSearch ? "visible opacity-100" : "invisible opacity-0"
-            } border-[#bebee7] text-[#7c70c3] !bg-[#f5f5ff] bg-[url(/res/images/search.svg)] bg-no-repeat transition-all duration-500 ease-in-out relative ${
-              isSearching ? "animate-pulse" : ""
-            } ${
-              pastIntro
-                ? `${searchFocused ? "max-sm:w-full sm:w-[250px] max-sm:pl-10" : "max-sm:w-8 sm:w-[200px] max-sm:pl-8"} bg-position-[6px_5px] sm:bg-position-[13px_13px] max-sm:h-8 sm:h-11.5 rounded-xl sm:pl-10`
-                : "w-[200px] bg-position-[13px_13px] h-11.5 rounded-2xl pl-11.5 pb-1"
-            }`}
-            placeholder="Search Validator"
-            value={searchValue}
-            onChange={(e) => {
-              const newValue = e.target.value;
-              setSearchValue(newValue);
-
-              // Clear existing timeout
-              if (searchTimeoutRef.current) {
-                window.clearTimeout(searchTimeoutRef.current);
-              }
-
-              // Add bounce-back effect and debounced search
-              setIsSearching(true);
-
-              searchTimeoutRef.current = window.setTimeout(() => {
-                if (onSearchChange) {
-                  onSearchChange(newValue);
-                }
-                setIsSearching(false);
-                searchTimeoutRef.current = null;
-              }, 300); // 300ms debounce
-            }}
-            onFocus={() => {
-              setSearchFocused(true);
-              if (blurTimeoutRef.current) {
-                window.clearTimeout(blurTimeoutRef.current);
-                blurTimeoutRef.current = null;
-              }
-              // Only activate mobile logo if not currently searching
-              if (!isSearching) {
-                setMobileLogoActive(true);
-              }
-            }}
-            onBlur={() => {
-              setSearchFocused(false);
-              if (blurTimeoutRef.current) {
-                window.clearTimeout(blurTimeoutRef.current);
-              }
-              blurTimeoutRef.current = window.setTimeout(() => {
-                // Only deactivate mobile logo if not currently searching
-                if (!isSearching) {
-                  setMobileLogoActive(false);
-                }
-                blurTimeoutRef.current = null;
-              }, 250);
-            }}
-          />
-        </motion.div>
-      )}
     </div>
   );
 }
