@@ -1,6 +1,6 @@
 export default function StakeWithUs() {
   return (
-    <div className="flex flex-col w-full max-w-[1100px] mx-auto gap-5 sm:gap-7 items-center justify-center pt-16 sm:pt-24 lg:pt-30 px-4 sm:px-6 relative">
+    <div className="flex flex-col w-full max-w-[1400px] mx-auto gap-5 sm:gap-7 items-center justify-center pt-16 sm:pt-24 lg:pt-30 px-4 sm:px-6 relative">
       <div className="text-xl sm:text-3xl lg:text-4xl leading-[1.15] font-[500] text-[#361661] uppercase text-center">
         STAKE WITH US TO SUPPORT OUR PUBLIC
         <br />

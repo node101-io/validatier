@@ -90,6 +90,7 @@ export default function PageWrapper({ summaryPromise, validatorsPromise }: PageW
                   soldData={soldData}
                   priceData={priceData}
                   timestamps={timestamps}
+                  sinkBreakdown={summary.sinkBreakdown}
                   searchQuery={searchQuery}
                   ref={innerRef}
                 />

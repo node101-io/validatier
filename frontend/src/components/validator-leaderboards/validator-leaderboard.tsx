@@ -36,7 +36,7 @@ export default function ValidatorLeaderboard({
       ? validators.slice(0, 10)
       : validators.slice(10, 20);
   return (
-    <div className="flex flex-col pt-4 pb-2 overflow-hidden min-w-[320px] sm:min-w-[420px] lg:min-w-[500px] w-full h-full p-0 bg-[#f5f5ff] border-[0.5px] border-[#bebee7] rounded-[20px] gap-1">
+    <div className="flex flex-col pt-4 pb-2 overflow-hidden min-w-[320px] sm:min-w-[420px] lg:min-w-0 w-full h-full p-0 bg-[#f5f5ff] border-[0.5px] border-[#bebee7] rounded-[20px] gap-1">
       <div className="flex items-center justify-between w-full px-4">
         {/* Each Leaderboard Header */}
         <div
@@ -100,7 +100,7 @@ export default function ValidatorLeaderboard({
                     className={`w-full h-full object-cover ${avatarSrc === DEFAULT_AVATAR ? "rounded-none" : "rounded-full"}`}
                   />
                 </div>
-                <div className="flex-1 min-w-0 w-auto sm:w-[150px] text-base sm:text-lg text-[#49306f] overflow-hidden text-ellipsis text-nowrap">
+                <div className="flex-1 min-w-0 text-base sm:text-lg text-[#49306f] overflow-hidden text-ellipsis text-nowrap">
                   {/* Each Leaderboard Validator Name */}
                   <span className="sm:hidden">
                     {validator.moniker.length > 9
@@ -139,10 +139,10 @@ export default function ValidatorLeaderboard({
                   </div>
                 ) : (
                   <div className="flex flex-row items-center gap-2 sm:gap-3 w-full justify-end">
-                    <div className="flex items-center !justify-end text-end text-sm sm:text-lg w-[130px] sm:w-[160px] whitespace-nowrap tabular-nums truncate">
+                    <div className="flex items-center !justify-end text-end text-sm sm:text-lg w-[110px] sm:w-[120px] whitespace-nowrap tabular-nums truncate">
                       {formatAtom(validator.sold, 1)} ATOM
                     </div>
-                    <div className="flex items-center !justify-end text-end text-sm sm:text-lg w-[70px] whitespace-nowrap tabular-nums truncate">
+                    <div className="flex items-center !justify-end text-end text-sm sm:text-lg w-[64px] whitespace-nowrap tabular-nums truncate">
                       {validator.sold
                         ? `$${formatAtomUSD(validator.sold, price, 1)}`
                         : "0 ATOM"}

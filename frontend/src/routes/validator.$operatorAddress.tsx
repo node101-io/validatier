@@ -2,6 +2,7 @@ import { createFileRoute, notFound, Await, Link } from '@tanstack/react-router'
 import Navbar from '@/components/navbar/navbar'
 import NetworkSummary from '@/components/network-summary/network-summary'
 import GraphMetrics from '@/components/graph-metrics/graph-metrics'
+import ExchangeSales from '@/components/exchange-sales/exchange-sales'
 import StakeWithUs from '@/components/stake-with-us/stake-with-us'
 import Footer from '@/components/footer/footer'
 import CopyableOperatorAddress from '@/components/copyable-operator-address/copyable-operator-address'
@@ -59,14 +60,14 @@ const formatOrdinal = (rank: number) => {
 }
 
 function ValidatorPage() {
-  const { validator, metrics, ranks, seriesPromise } = Route.useLoaderData()
+  const { validator, metrics, ranks, sinkBreakdown, seriesPromise } = Route.useLoaderData()
   const price = metrics.find((m) => m.id === 'price')?.valueNative ?? 0
 
   return (
     <div className="flex flex-col items-center relative overflow-hidden h-screen w-full">
       <div className="flex flex-col w-full items-center relative overflow-x-hidden overflow-y-auto ml-0 h-screen rounded-0 bg-white transition-all duration-250">
         <Navbar isValidatorPage={true} />
-        <div className="mt-19 w-full lg:w-[1100px] h-fit lg:px-10">
+        <div className="mt-19 w-full lg:max-w-[1400px] h-fit lg:px-5">
           <div className="flex flex-col w-full gap-5 mt-5">
             <div className="px-5 lg:px-0">
               <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row items-center justify-between w-full rounded-3xl px-6 py-7.5 border-[0.5px] border-[#bebee7] bg-[#f5f5ff]">
@@ -198,6 +199,7 @@ function ValidatorPage() {
                 )
               }}
             </Await>
+            <ExchangeSales breakdown={sinkBreakdown} price={price} />
           </div>
         </div>
         <StakeWithUs />

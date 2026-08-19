@@ -25,10 +25,16 @@ export interface MetaJson {
   price: number;
 }
 
+export interface SinkBreakdownEntry {
+  name: string;
+  sold: number;
+}
+
 export interface SummaryJson {
   summaryData: SummaryData;
   metrics: Metric[];
   stats: MonthlyBucket[];
+  sinkBreakdown: SinkBreakdownEntry[];
 }
 
 export interface ValidatorsJson {
@@ -53,4 +59,5 @@ export interface ValidatorSummaryJson {
     percentageSoldRank: number;
     totalValidators: number;
   };
+  sinkBreakdown: SinkBreakdownEntry[];
 }

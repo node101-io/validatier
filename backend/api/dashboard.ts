@@ -2,11 +2,13 @@ import { config } from '../config';
 import { Validator } from '../models/Validator/Validator';
 import { ValidatorStats } from '../models/ValidatorStats/ValidatorStats';
 import { ValidatorSinkSale } from '../models/ValidatorSinkSale/ValidatorSinkSale';
+import { FundFlowSinkRegistry } from '../models/FundFlowSinkRegistry/FundFlowSinkRegistry';
 import { Price } from '../models/Price/Price';
 import { Meta } from '../models/Meta/Meta';
 import { memoizeWithTtl } from './cache';
 import { buildCumulativeSoldTimeline } from './lib/sinkSales';
 import type { SinkSaleDoc } from './lib/sinkSales';
+import { buildSinkBreakdown } from './lib/sinkBreakdown';
 import { buildMonthlyBucket } from './lib/statsSeries';
 import type { MonthlyBucket, ValidatorStatsMonthDoc } from './lib/statsSeries';
 import {
@@ -45,10 +47,11 @@ function groupBy<T, TKey>(items: T[], key: (item: T) => TKey): Map<TKey, T[]> {
 async function computeDashboard(): Promise<DashboardSnapshot> {
   const decimals = config.decimals;
 
-  const [validators, statsDocsRaw, sinkSalesRaw, priceDocs, meta] = await Promise.all([
+  const [validators, statsDocsRaw, sinkSalesRaw, sinkRegistryDocs, priceDocs, meta] = await Promise.all([
     Validator.find({}).lean(),
     ValidatorStats.find({}).lean(),
     ValidatorSinkSale.find({}).lean(),
+    FundFlowSinkRegistry.find({}).lean(),
     Price.find({}).sort({ timestamp: 1 }).lean(),
     Meta.getSingleton(),
   ]);
@@ -58,6 +61,8 @@ async function computeDashboard(): Promise<DashboardSnapshot> {
 
   const sinkSales = sinkSalesRaw as unknown as Array<SinkSaleDoc & { operator_address: string }>;
   const sinkSalesByOperator = groupBy(sinkSales, (d) => d.operator_address);
+
+  const labelByAddress = new Map(sinkRegistryDocs.map((d) => [d.address, d.label ?? null]));
 
   const priceTimeline: TimedValue<number>[] = priceDocs.map((p) => ({ timestamp: p.timestamp, value: p.price }));
   const latestPrice = priceTimeline.length > 0 ? priceTimeline[priceTimeline.length - 1]!.value : 0;
@@ -95,6 +100,11 @@ async function computeDashboard(): Promise<DashboardSnapshot> {
   const summaryData = buildSummaryData(rows);
   const metrics = buildMetrics(summaryData, averagePrice);
   const networkBuckets = buildNetworkMonthlyBuckets([...bucketsByOperator.values()], priceTimeline);
+  // Network-wide breakdown runs over every sink sale directly (not a sum of
+  // the per-validator breakdowns below): buildSinkBreakdown's "latest per
+  // pair" rule must see the whole set, and summing per-validator results
+  // would silently drop validators filtered out of `rows` by total_withdraw > 0.
+  const sinkBreakdown = buildSinkBreakdown(sinkSales, labelByAddress, decimals);
 
   const validatorByOperator = new Map(validators.map((v) => [v.operator_address, v]));
   const summaryByOperator = new Map<string, ValidatorSummaryJson>();
@@ -113,6 +123,7 @@ async function computeDashboard(): Promise<DashboardSnapshot> {
       },
       averagePrice
     );
+    const ownSales = sinkSalesByOperator.get(row.operator_address) ?? [];
     summaryByOperator.set(row.operator_address, {
       validator: {
         ...row,
@@ -126,6 +137,7 @@ async function computeDashboard(): Promise<DashboardSnapshot> {
         percentageSoldRank: ranks.get(row.operator_address) ?? rows.length,
         totalValidators: rows.length,
       },
+      sinkBreakdown: buildSinkBreakdown(ownSales, labelByAddress, decimals),
     });
   }
 
@@ -140,6 +152,7 @@ async function computeDashboard(): Promise<DashboardSnapshot> {
       summaryData,
       metrics,
       stats: networkBuckets,
+      sinkBreakdown,
     },
     validators: rows,
     summaryByOperator,

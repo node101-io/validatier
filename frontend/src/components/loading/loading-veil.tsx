@@ -42,9 +42,35 @@ export function GraphSkeleton() {
   );
 }
 
+export function ExchangeSalesSkeleton() {
+  return (
+    <div className="flex flex-col md:flex-row gap-5 px-5 lg:px-0">
+      <div
+        className={`flex flex-col w-full md:w-1/2 min-w-[320px] h-[280px] p-5 bg-[#f5f5ff] rounded-[20px] border-[0.5px] border-[#bebee7] ${veil}`}
+      >
+        <div className="h-6 w-40 rounded bg-[#e8e8ff]" />
+        <div className="flex-1 rounded-full bg-[#e8e8ff]/60 mt-4 self-center aspect-square h-full" />
+      </div>
+      <div
+        className={`flex flex-col w-full md:w-1/2 min-w-[320px] h-[280px] p-5 bg-[#f5f5ff] rounded-[20px] border-[0.5px] border-[#bebee7] ${veil}`}
+      >
+        <div className="h-6 w-40 rounded bg-[#e8e8ff]" />
+        <div className="flex-1 rounded-2xl bg-[#e8e8ff]/60 mt-4" />
+      </div>
+    </div>
+  );
+}
+
 export function LeaderboardSkeleton() {
   return (
-    <div className={`flex flex-col gap-2.5 rounded-[30px] bg-[#f5f5ff] border-[0.5px] border-[#bebee7] h-[220px] w-full px-6 py-5 ${veil}`} />
+    <div className="flex flex-row lg:grid lg:grid-cols-3 gap-5 px-5 lg:px-0">
+      {Array.from({ length: 3 }, (_, i) => (
+        <div
+          key={i}
+          className={`rounded-[30px] bg-[#f5f5ff] border-[0.5px] border-[#bebee7] h-[220px] min-w-[320px] sm:min-w-[420px] lg:min-w-0 w-full px-6 py-5 ${veil}`}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -65,9 +91,10 @@ export function TableSkeleton({ rows = 10 }: { rows?: number }) {
 
 export function HomeSkeleton() {
   return (
-    <div className="flex flex-col w-full lg:w-[1100px] gap-5 h-fit py-0 lg:px-10 mt-37.5 mb-1">
+    <div className="flex flex-col w-full lg:max-w-[1400px] gap-5 h-fit py-0 lg:px-5 mt-37.5 mb-1">
       <NetworkSummarySkeleton />
       <GraphSkeleton />
+      <ExchangeSalesSkeleton />
       <LeaderboardSkeleton />
       <TableSkeleton />
     </div>

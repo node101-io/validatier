@@ -3,8 +3,9 @@
 // this is a normal API contract boundary, not shared runtime code.
 import type { ValidatorRow, Metric, SummaryData } from './lib/aggregate';
 import type { MonthlyBucket } from './lib/statsSeries';
+import type { SinkBreakdownEntry } from './lib/sinkBreakdown';
 
-export type { MonthlyBucket, ValidatorRow, Metric, SummaryData };
+export type { MonthlyBucket, ValidatorRow, Metric, SummaryData, SinkBreakdownEntry };
 
 export interface MetaJson {
   generated_at: number;
@@ -17,6 +18,7 @@ export interface SummaryJson {
   summaryData: SummaryData;
   metrics: Metric[];
   stats: MonthlyBucket[];
+  sinkBreakdown: SinkBreakdownEntry[];
 }
 
 export interface ValidatorDetail extends ValidatorRow {
@@ -33,6 +35,7 @@ export interface ValidatorSummaryJson {
     percentageSoldRank: number;
     totalValidators: number;
   };
+  sinkBreakdown: SinkBreakdownEntry[];
 }
 
 export interface DashboardSnapshot {

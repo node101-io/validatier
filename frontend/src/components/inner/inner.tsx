@@ -3,11 +3,13 @@
 import { lazy } from "react";
 import NetworkSummary from "@/components/network-summary/network-summary";
 import GraphMetrics from "@/components/graph-metrics/graph-metrics";
+import ExchangeSales from "@/components/exchange-sales/exchange-sales";
 import ValidatorLeaderboards from "@/components/validator-leaderboards/validator-leaderboards";
 import type Validator from "@/types/validator";
 import ValidatorTable from "../validator-table/validator-table";
 import type SummaryData from "@/types/summary";
 import type Metric from "@/types/metric";
+import type { SinkBreakdownEntry } from "@/types/data";
 import { formatPercentage, formatAtom, formatAtomUSD } from "@/utils/format-numbers";
 import type { ApexOptions } from "apexcharts";
 
@@ -57,6 +59,7 @@ export default function Inner({
   soldData,
   priceData,
   timestamps,
+  sinkBreakdown,
   searchQuery = "",
   ref,
 }: {
@@ -68,12 +71,13 @@ export default function Inner({
   soldData: number[];
   priceData: number[];
   timestamps: number[];
+  sinkBreakdown: SinkBreakdownEntry[];
   searchQuery?: string;
   ref?: React.RefObject<HTMLDivElement | null>;
 }) {
   return (
     <div
-      className="flex flex-col w-full lg:w-[1100px] gap-5 h-fit py-0 lg:px-10 mt-37.5 mb-1"
+      className="flex flex-col w-full lg:max-w-[1400px] gap-5 h-fit py-0 lg:px-5 mt-37.5 mb-1"
       id="inner-main-wrapper"
     >
       <div
@@ -83,7 +87,7 @@ export default function Inner({
         <div className="text-xl font-normal text-[#7c70c3] px-5 lg:px-0 max-sm:!opacity-0">
           Network Summary
         </div>
-        <div className="flex flex-row flex-nowrap justify-start gap-5 overflow-y-hidden overflow-x-scroll md:overflow-x-visible no-scrollbar px-5 lg:px-0 ml-0">
+        <div className="flex flex-row flex-nowrap justify-start gap-5 overflow-y-hidden overflow-x-scroll lg:overflow-x-visible no-scrollbar px-5 lg:px-0 ml-0">
           <NetworkSummary
             leftColumn={
               <>
@@ -234,10 +238,12 @@ export default function Inner({
         metrics={metrics}
         price={price}
       />
+      <ExchangeSales breakdown={sinkBreakdown} price={price} />
       <ValidatorLeaderboards
         validators={validators}
         percentageSold={summaryData.percentage_sold}
         totalSold={summaryData.total_sold}
+        sinkBreakdown={sinkBreakdown}
         price={price}
       />
       <div ref={ref} className="scroll-m-20">

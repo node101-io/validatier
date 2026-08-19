@@ -124,7 +124,15 @@ have data for that scope (network-wide for `/api/summary`, this validator for
   };
   metrics: Metric[];                // total_stake_sum -> total_stake_sum (avg), total_sold -> total_sold, price -> price average over prices series
   stats: MonthlyBucket[];           // network-wide: data.total_stake = daily Σ total_stake across all validators, data.total_sold = daily Σ cumulative_sold across all validators, data.price = network daily ATOM/USD (not summed)
+  sinkBreakdown: SinkBreakdownEntry[]; // all_time, every validator_sink_sale network-wide, grouped by exchange name and sorted sold desc
 }
+
+type SinkBreakdownEntry = {
+  name: string;   // fund_flow_sink_registry label normalized to the exchange name (address-specific
+                   // suffixes like "#18 (Staking)" stripped — see backend/api/lib/sinkBreakdown.ts);
+                   // "Unknown" for a sink address with no registry label
+  sold: number;    // ATOM, Σ latest cumulative_sold across every address belonging to that exchange
+};
 ```
 
 Within each bucket, `data.timestamp`/`total_stake`/`total_sold`/`price` stay aligned by index
@@ -159,6 +167,7 @@ from these `timestamp` values directly (replacing the old array-length/index der
     percentageSoldRank: number;     // 1-based, among included (total_withdraw>0) validators
     totalValidators: number;        // count of included validators
   };
+  sinkBreakdown: SinkBreakdownEntry[]; // all_time, THIS validator's own validator_sink_sales only — same shape as summary.sinkBreakdown
 }
 ```
 
