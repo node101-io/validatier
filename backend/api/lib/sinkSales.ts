@@ -1,4 +1,6 @@
+import { valueAtOrBefore } from './lookup'
 import type { TimedValue } from './lookup'
+import type { ResolvedRange } from './dateRange'
 
 // Mirrors the fields of Mongo `validator_sink_sales` docs (docs/03) actually
 // needed here — block_height/day/month/year are irrelevant to export. sink_kind
@@ -56,4 +58,19 @@ export function buildCumulativeSoldTimeline(
   }
 
   return timeline
+}
+
+// Sold within [range.from, range.to] for one validator: Σ over pairs of
+// valueAt(pair,to) - valueAt(pair,from) (docs/03's interval formula). Because
+// buildCumulativeSoldTimeline already merges every sink into a single "total
+// as-of t" series, the per-pair sum and the delta-of-two-lookups on that
+// merged series are the same number — no need to redo the per-sink work.
+export function soldInRange(
+  sales: ReadonlyArray<SinkSaleDoc>,
+  range: ResolvedRange,
+): bigint {
+  const timeline = buildCumulativeSoldTimeline(sales)
+  const atTo = valueAtOrBefore(timeline, range.to) ?? 0n
+  const atFrom = valueAtOrBefore(timeline, range.from) ?? 0n
+  return atTo - atFrom
 }

@@ -1,5 +1,6 @@
 import { uatomToAtom } from './amounts'
 import type { SinkSaleDoc } from './sinkSales'
+import type { ResolvedRange } from './dateRange'
 
 // cumulative_sold is monotonic per (operator_address, sink_address) pair, not
 // per sink_address alone — a network-wide call mixes docs from every
@@ -48,24 +49,27 @@ export function normalizeSinkLabel(
   return name.length > 0 ? name : kind === 'ibc_out' ? 'IBC Transfers' : 'Unknown'
 }
 
-// All_time sold per exchange: for each (operator, sink) pair, take its latest
-// cumulative_sold (same "latest per pair" rule as latestCumulativeByPair),
-// then group those pair totals by normalized exchange name. Sorted by sold
-// desc; zero-amount entries dropped.
-export function buildSinkBreakdown(
+interface PairWinner {
+  address: string
+  kind: 'cex' | 'dex' | 'ibc_out'
+  timestamp: number
+  value: bigint
+}
+
+// The latest doc at-or-before `cutoff`, per (operator, sink) pair — the same
+// "latest per pair" rule as latestCumulativeByPair (sinkSales.ts), just
+// bounded by a timestamp instead of always taking the newest doc ever.
+function latestByPairAtOrBefore(
   sales: ReadonlyArray<SinkSaleWithOperator>,
-  labelByAddress: ReadonlyMap<string, string | null | undefined>,
-  decimals: number,
-): SinkBreakdownEntry[] {
-  const latestByPair = new Map<
-    string,
-    { address: string; kind: 'cex' | 'dex' | 'ibc_out'; timestamp: number; value: bigint }
-  >()
+  cutoff: number,
+): Map<string, PairWinner> {
+  const winners = new Map<string, PairWinner>()
   for (const doc of sales) {
+    if (doc.timestamp > cutoff) continue
     const key = `${doc.operator_address}:${doc.sink_address}`
-    const existing = latestByPair.get(key)
+    const existing = winners.get(key)
     if (!existing || doc.timestamp > existing.timestamp) {
-      latestByPair.set(key, {
+      winners.set(key, {
         address: doc.sink_address,
         kind: doc.sink_kind,
         timestamp: doc.timestamp,
@@ -73,11 +77,32 @@ export function buildSinkBreakdown(
       })
     }
   }
+  return winners
+}
+
+// Sold per exchange within [range.from, range.to]: for each (operator, sink)
+// pair, `valueAt(pair, to) - valueAt(pair, from)` (docs/03's interval
+// formula), then group those pair deltas by normalized exchange name. Sorted
+// by sold desc; zero/negative-amount entries dropped. Filtering the *input*
+// array to the range instead of this two-cutoff approach would be wrong per
+// docs/03's sparse-by-design note: a pair whose last sale predates
+// range.from must still contribute its carried-forward value at `from`, not
+// silently disappear.
+export function buildSinkBreakdown(
+  sales: ReadonlyArray<SinkSaleWithOperator>,
+  labelByAddress: ReadonlyMap<string, string | null | undefined>,
+  decimals: number,
+  range: ResolvedRange,
+): SinkBreakdownEntry[] {
+  const atTo = latestByPairAtOrBefore(sales, range.to)
+  const atFrom = latestByPairAtOrBefore(sales, range.from)
 
   const totalsByName = new Map<string, bigint>()
-  for (const entry of latestByPair.values()) {
-    const name = normalizeSinkLabel(labelByAddress.get(entry.address), entry.kind)
-    totalsByName.set(name, (totalsByName.get(name) ?? 0n) + entry.value)
+  for (const [key, winner] of atTo) {
+    const baseline = atFrom.get(key)?.value ?? 0n
+    const delta = winner.value - baseline
+    const name = normalizeSinkLabel(labelByAddress.get(winner.address), winner.kind)
+    totalsByName.set(name, (totalsByName.get(name) ?? 0n) + delta)
   }
 
   const result: SinkBreakdownEntry[] = []

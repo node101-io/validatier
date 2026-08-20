@@ -289,6 +289,7 @@ export default function ValidatorTable({
                     key={validator.operator_address}
                     to="/validator/$operatorAddress"
                     params={{ operatorAddress: validator.operator_address }}
+                    search={(prev) => prev}
                     role="row"
                     className="grid grid-cols-[20fr_14fr_14fr_10fr_12fr] items-center w-full pr-2 gap-3 py-0 my-2.5 lg:my-0 lg:py-1.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
                     aria-label={`Open details for ${validator.moniker}`}

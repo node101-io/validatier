@@ -20,6 +20,7 @@ import {
 } from './lib/aggregate';
 import type { ValidatorIdentity, ValidatorRow } from './lib/aggregate';
 import type { TimedValue } from './lib/lookup';
+import type { ResolvedRange } from './lib/dateRange';
 import type { DashboardSnapshot, ValidatorSummaryJson } from './types';
 
 // This is the ONLY place that turns the live Mongo collections into the
@@ -28,10 +29,10 @@ import type { DashboardSnapshot, ValidatorSummaryJson } from './types';
 // export/exportJson.ts equivalent from the (now removed) static-JSON build,
 // just serving requests instead of writing files.
 //
-// When a time-interval selector is added, this is the single function whose
-// signature grows a `range` parameter (and whose cache key includes it) — the
-// aggregation call sequence below stays the same, only the Mongo queries and
-// the `buildValidatorRow`/`buildNetworkMonthlyBuckets` inputs get a range filter.
+// Split in two so the (expensive, range-independent) Mongo round-trip stays
+// on one 60s-TTL zero-arg cache while the (cheap, in-memory) range-aware
+// aggregation runs fresh per request — every route already loads every doc
+// into memory today, so filtering happens in JS, not in the Mongo query.
 
 function groupBy<T, TKey>(items: T[], key: (item: T) => TKey): Map<TKey, T[]> {
   const groups = new Map<TKey, T[]>();
@@ -44,9 +45,7 @@ function groupBy<T, TKey>(items: T[], key: (item: T) => TKey): Map<TKey, T[]> {
   return groups;
 }
 
-async function computeDashboard(): Promise<DashboardSnapshot> {
-  const decimals = config.decimals;
-
+async function fetchRawSnapshot() {
   const [validators, statsDocsRaw, sinkSalesRaw, sinkRegistryDocs, priceDocs, meta] = await Promise.all([
     Validator.find({}).lean(),
     ValidatorStats.find({}).lean(),
@@ -57,17 +56,35 @@ async function computeDashboard(): Promise<DashboardSnapshot> {
   ]);
 
   const statsDocs = statsDocsRaw as unknown as Array<ValidatorStatsMonthDoc & { operator_address: string }>;
-  const statsByOperator = groupBy(statsDocs, (d) => d.operator_address);
-
   const sinkSales = sinkSalesRaw as unknown as Array<SinkSaleDoc & { operator_address: string }>;
-  const sinkSalesByOperator = groupBy(sinkSales, (d) => d.operator_address);
-
   const labelByAddress = new Map(sinkRegistryDocs.map((d) => [d.address, d.label ?? null]));
+
+  return { validators, statsDocs, sinkSales, labelByAddress, priceDocs, meta };
+}
+
+// 60s TTL: validator_stats/validator_sink_sales/prices only change via the
+// once-a-day backend job, so this just bounds how stale a running server can
+// get after a write — not a correctness requirement. This cache is
+// range-independent (every route loads the same unfiltered docs), so it
+// stays a single zero-arg slot even though the aggregation below now takes a
+// range — no per-range cache key needed.
+const loadRawSnapshot = memoizeWithTtl(fetchRawSnapshot, 60_000);
+
+function computeDashboardForRange(
+  raw: Awaited<ReturnType<typeof fetchRawSnapshot>>,
+  range: ResolvedRange,
+): DashboardSnapshot {
+  const decimals = config.decimals;
+  const { validators, statsDocs, sinkSales, labelByAddress, priceDocs, meta } = raw;
+
+  const statsByOperator = groupBy(statsDocs, (d) => d.operator_address);
+  const sinkSalesByOperator = groupBy(sinkSales, (d) => d.operator_address);
 
   const priceTimeline: TimedValue<number>[] = priceDocs.map((p) => ({ timestamp: p.timestamp, value: p.price }));
   const latestPrice = priceTimeline.length > 0 ? priceTimeline[priceTimeline.length - 1]!.value : 0;
+  const pricesInRange = priceDocs.filter((p) => p.timestamp >= range.from && p.timestamp <= range.to);
   const averagePrice =
-    priceDocs.length > 0 ? priceDocs.reduce((sum, p) => sum + p.price, 0) / priceDocs.length : 0;
+    pricesInRange.length > 0 ? pricesInRange.reduce((sum, p) => sum + p.price, 0) / pricesInRange.length : 0;
 
   const rows: ValidatorRow[] = [];
   const bucketsByOperator = new Map<string, MonthlyBucket[]>();
@@ -84,12 +101,12 @@ async function computeDashboard(): Promise<DashboardSnapshot> {
     const ownStats = statsByOperator.get(validator.operator_address) ?? [];
     const ownSales = sinkSalesByOperator.get(validator.operator_address) ?? [];
 
-    const row = buildValidatorRow(identity, ownStats, ownSales, decimals);
+    const row = buildValidatorRow(identity, ownStats, ownSales, decimals, range);
     if (!row) continue;
 
     const cumulativeSoldTimeline = buildCumulativeSoldTimeline(ownSales);
     const buckets = ownStats
-      .map((doc) => buildMonthlyBucket(doc, decimals, cumulativeSoldTimeline, priceTimeline))
+      .map((doc) => buildMonthlyBucket(doc, decimals, cumulativeSoldTimeline, priceTimeline, range))
       .sort((a, b) => a.year - b.year || a.month - b.month);
 
     rows.push(row);
@@ -104,7 +121,7 @@ async function computeDashboard(): Promise<DashboardSnapshot> {
   // the per-validator breakdowns below): buildSinkBreakdown's "latest per
   // pair" rule must see the whole set, and summing per-validator results
   // would silently drop validators filtered out of `rows` by total_withdraw > 0.
-  const sinkBreakdown = buildSinkBreakdown(sinkSales, labelByAddress, decimals);
+  const sinkBreakdown = buildSinkBreakdown(sinkSales, labelByAddress, decimals, range);
 
   const validatorByOperator = new Map(validators.map((v) => [v.operator_address, v]));
   const summaryByOperator = new Map<string, ValidatorSummaryJson>();
@@ -137,7 +154,7 @@ async function computeDashboard(): Promise<DashboardSnapshot> {
         percentageSoldRank: ranks.get(row.operator_address) ?? rows.length,
         totalValidators: rows.length,
       },
-      sinkBreakdown: buildSinkBreakdown(ownSales, labelByAddress, decimals),
+      sinkBreakdown: buildSinkBreakdown(ownSales, labelByAddress, decimals, range),
     });
   }
 
@@ -160,7 +177,7 @@ async function computeDashboard(): Promise<DashboardSnapshot> {
   };
 }
 
-// 60s TTL: validator_stats/validator_sink_sales/prices only change via the
-// once-a-day backend job, so this just bounds how stale a running server can
-// get after a write — not a correctness requirement.
-export const loadDashboard = memoizeWithTtl(computeDashboard, 60_000);
+export async function loadDashboard(range: ResolvedRange): Promise<DashboardSnapshot> {
+  const raw = await loadRawSnapshot();
+  return computeDashboardForRange(raw, range);
+}

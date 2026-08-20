@@ -195,17 +195,34 @@ each validator's own creation date.
 `pubkey`, `chain_identifier`, `usd_exchange_rate` (chain-level; use `meta.price` /
 `summary.metrics[price]` instead), `self_stake`, `initial_self_stake_prefix_sum`,
 `average_self_stake_ratio`, `smallSelfStakeAmountGraphData`, `smallSelfStakeRatioGraphData`,
-`cummulativeActiveSet`, per-interval variants (`last_30/90/180/365_days`, custom range) —
-everything is `all_time` only.
+`cummulativeActiveSet`.
 
 ---
 
-## Future: time interval
+## Time interval (`?range=&until=`)
 
-When a date-range selector is added, `loadDashboard` (`backend/api/dashboard.ts`) is the
-single function whose signature grows a `range` parameter (and whose cache key includes
-it) — the aggregation call sequence stays the same, only the Mongo queries and the
-`buildValidatorRow`/`buildNetworkMonthlyBuckets` inputs get a range filter. The endpoints
-above would grow an optional `?from=&to=` query string. Not built yet — `frontend/src/
-components/navbar/navbar.tsx` keeps the old date-picker's removed code as a dead comment
-for exactly this.
+All four endpoints above accept two optional query params, resolved by
+`backend/api/lib/dateRange.ts`:
+
+- `range` — one of `last_3_months` | `last_6_months` | `last_year` | `all_time`. Missing or
+  unrecognized → `all_time`.
+- `until` — `YYYY-MM-DD`, the inclusive end of the window (end-of-day UTC). Missing,
+  malformed, or out of `[2021-02-18, today]` → clamped to today.
+
+The two combine into `[from, to]`: `all_time` sets `from` to cosmoshub-4 genesis
+(2021-02-18); the month-based presets subtract that many *calendar* months from `until`
+(not a fixed day count), clamped to genesis on the low end. `to` is always `until`.
+
+Every number in the response shapes above is computed against this window — the shapes
+themselves are unchanged (`SummaryJson`, `ValidatorSummaryJson`, `MonthlyBucket`,
+`SinkBreakdownEntry` all stay exactly as documented above). The interval formula is
+`docs/03-mongo-schema.md`'s: `valueAt(t) = last doc with timestamp <= t, else 0`;
+`delta(t1,t2) = valueAt(t2) - valueAt(t1)`. Concretely: `total_withdraw`,
+`sinkBreakdown[].sold`, `MonthlyBucket.data.total_sold`, and `average_total_stake` are all
+windowed to `[from, to]`; the `price` metric averages only `prices` docs inside the window
+(point-in-time chart prices were already `valueAt`-correct and are unaffected).
+
+No params at all → identical to the all-time behavior before this was added (`range`
+defaults to `all_time`, `until` defaults to today).
+
+Example: `GET /api/summary?range=last_3_months&until=2026-08-01`.

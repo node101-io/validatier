@@ -1,8 +1,13 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { buildMonthlyBucket, flattenPopulatedDays } from './statsSeries'
-import type { ValidatorStatsMonthDoc } from './statsSeries'
+import { buildMonthlyBucket, flattenPopulatedDays, valueAtOrBeforeField } from './statsSeries'
+import type { ValidatorStatsMonthDoc, PopulatedDay } from './statsSeries'
 import type { TimedValue } from './lookup'
+import type { ResolvedRange } from './dateRange'
+
+// Wide enough to cover every timestamp in this file (50-200) — stands in for
+// "all_time" so the pre-existing tests read the same as before ranges existed.
+const ALL: ResolvedRange = { from: 0, to: 1_000 }
 
 function emptyMonth(): Array<number | null> {
   return new Array(31).fill(null)
@@ -64,7 +69,7 @@ test('buildMonthlyBucket fills only populated days, converts to ATOM, and looks 
   ]
   const priceTimeline: TimedValue<number>[] = [{ timestamp: 50, value: 4.2 }]
 
-  const bucket = buildMonthlyBucket(doc, 6, soldTimeline, priceTimeline)
+  const bucket = buildMonthlyBucket(doc, 6, soldTimeline, priceTimeline, ALL)
 
   assert.equal(bucket.year, 2026)
   assert.equal(bucket.month, 1)
@@ -98,7 +103,58 @@ test('buildMonthlyBucket defaults total_sold to 0 when no sale predates the day'
     total_withdrawn_commission: emptyMonthStr(),
   }
 
-  const bucket = buildMonthlyBucket(doc, 6, [], [])
+  const bucket = buildMonthlyBucket(doc, 6, [], [], ALL)
   assert.equal(bucket.data.total_sold[0], 0)
   assert.equal(bucket.data.price[0], null)
+})
+
+test('buildMonthlyBucket windows total_sold to a delta from range.from and skips days outside the range', () => {
+  const timestamp = emptyMonth()
+  const total_stake = emptyMonthStr()
+  timestamp[0] = 100 // day 1
+  total_stake[0] = '1000000'
+  timestamp[1] = 200 // day 2
+  total_stake[1] = '2000000'
+  timestamp[2] = 300 // day 3, outside the range below
+  total_stake[2] = '3000000'
+
+  const doc: ValidatorStatsMonthDoc = {
+    year: 2026,
+    month: 1,
+    timestamp,
+    total_stake,
+    total_withdrawn_reward: emptyMonthStr(),
+    total_withdrawn_commission: emptyMonthStr(),
+  }
+
+  // cumulative sold: 500_000 as of day 1, 900_000 as of day 2.
+  const soldTimeline: TimedValue<bigint>[] = [
+    { timestamp: 100, value: 500_000n },
+    { timestamp: 200, value: 900_000n },
+  ]
+
+  // Window [150, 250]: day 1 (ts=100) falls before it, day 3 (ts=300) falls
+  // after — only day 2 is populated. Its total_sold is the delta from the
+  // range's baseline (valueAt(150) = 500_000, the day-1 value carried
+  // forward), not the raw cumulative 900_000.
+  const bucket = buildMonthlyBucket(doc, 6, soldTimeline, [], { from: 150, to: 250 })
+
+  assert.equal(bucket.data.timestamp[0], null)
+  assert.equal(bucket.data.total_sold[0], null)
+  assert.equal(bucket.data.timestamp[1], 200)
+  assert.equal(bucket.data.total_sold[1], 0.4) // (900_000 - 500_000) / 1e6
+  assert.equal(bucket.data.timestamp[2], null)
+  assert.equal(bucket.data.total_sold[2], null)
+})
+
+test('valueAtOrBeforeField reads the cumulative field as-of a timestamp, carrying the last known value forward', () => {
+  const days: PopulatedDay[] = [
+    { timestamp: 100, total_stake: null, total_withdrawn_reward: '5000000', total_withdrawn_commission: null },
+    { timestamp: 200, total_stake: null, total_withdrawn_reward: '8000000', total_withdrawn_commission: null },
+  ]
+
+  assert.equal(valueAtOrBeforeField(days, 50, 'total_withdrawn_reward'), 0n) // before any doc
+  assert.equal(valueAtOrBeforeField(days, 100, 'total_withdrawn_reward'), 5_000_000n)
+  assert.equal(valueAtOrBeforeField(days, 150, 'total_withdrawn_reward'), 5_000_000n) // carried forward
+  assert.equal(valueAtOrBeforeField(days, 200, 'total_withdrawn_reward'), 8_000_000n)
 })

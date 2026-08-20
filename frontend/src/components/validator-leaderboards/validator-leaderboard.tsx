@@ -83,6 +83,7 @@ export default function ValidatorLeaderboard({
               key={index + leaderboard.type}
               to="/validator/$operatorAddress"
               params={{ operatorAddress: validator.operator_address }}
+              search={(prev) => prev}
               className="flex items-center justify-between cursor-[var(--pointer-hand-dark)] py-2 px-3 lg:px-4 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out"
             >
               <div className="flex items-center gap-2 lg:gap-3 min-w-0">

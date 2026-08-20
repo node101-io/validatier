@@ -2,6 +2,8 @@ import http from 'http';
 import { config } from '../config';
 import { connectMongo, disconnectMongo } from '../db/mongo';
 import { loadDashboard } from './dashboard';
+import { isRangePreset, parseUntil, resolveRange } from './lib/dateRange';
+import type { RangePreset, ResolvedRange } from './lib/dateRange';
 
 // The HTTP API the frontend's server functions fetch from (frontend/src/lib/data.ts).
 // A separate process from the indexer (backend/app.ts) — this only reads Mongo, it
@@ -15,6 +17,19 @@ function sendJson(res: http.ServerResponse, status: number, body: unknown): void
   const payload = JSON.stringify(body);
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(payload);
+}
+
+// `?range=last_3_months|last_6_months|last_year|all_time` (default all_time)
+// and `?until=YYYY-MM-DD` (default today) — every route resolves the same
+// way so the whole dashboard windows consistently. Never errors on a bad
+// value: missing/invalid range falls back to all_time, missing/invalid/
+// out-of-bounds until falls back to today (see parseUntil), matching the
+// "clamp, don't error" rule from the plan.
+function parseRangeParams(url: URL): ResolvedRange {
+  const rangeParam = url.searchParams.get('range');
+  const preset: RangePreset = isRangePreset(rangeParam) ? rangeParam : 'all_time';
+  const until = parseUntil(url.searchParams.get('until'));
+  return resolveRange(preset, until);
 }
 
 async function handleRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
@@ -31,7 +46,8 @@ async function handleRequest(req: http.IncomingMessage, res: http.ServerResponse
     return;
   }
 
-  const snapshot = await loadDashboard();
+  const range = parseRangeParams(url);
+  const snapshot = await loadDashboard(range);
 
   if (parts.length === 2 && parts[1] === 'meta') {
     sendJson(res, 200, snapshot.meta);

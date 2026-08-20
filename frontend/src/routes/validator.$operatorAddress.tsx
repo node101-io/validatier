@@ -9,16 +9,30 @@ import CopyableOperatorAddress from '@/components/copyable-operator-address/copy
 import { GraphSkeleton } from '@/components/loading/loading-veil'
 import { formatPercentage } from '@/utils/format-numbers'
 import { getValidatorSummary, getValidatorSeries } from '@/lib/data'
+import { isRangePreset } from '@/types/range'
 import type { MonthlyBucket } from '@/types/data'
+import type { RangeSearch } from '@/types/range'
 
 export const Route = createFileRoute('/validator/$operatorAddress')({
-  loader: async ({ params }) => {
+  validateSearch: (search: Record<string, unknown>): RangeSearch => ({
+    range: isRangePreset(search.range) ? search.range : undefined,
+    until: typeof search.until === 'string' ? search.until : undefined,
+  }),
+  loaderDeps: ({ search }) => ({ range: search.range, until: search.until }),
+  loader: async ({ params, deps }) => {
     // Identity/rank is cheap and decides 404 before anything streams — the
     // graph series is deferred (not awaited) so the header card renders
     // immediately and the chart data streams in after.
-    const summary = await getValidatorSummary({ data: params.operatorAddress })
+    const summary = await getValidatorSummary({
+      data: { operatorAddress: params.operatorAddress, range: deps },
+    })
     if (!summary) throw notFound()
-    return { ...summary, seriesPromise: getValidatorSeries({ data: params.operatorAddress }) }
+    return {
+      ...summary,
+      seriesPromise: getValidatorSeries({
+        data: { operatorAddress: params.operatorAddress, range: deps },
+      }),
+    }
   },
   component: ValidatorPage,
   notFoundComponent: ValidatorNotFound,

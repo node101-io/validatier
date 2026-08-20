@@ -1,10 +1,11 @@
 import { uatomToAtom } from './amounts'
 import { valueAtOrBefore } from './lookup'
 import type { TimedValue } from './lookup'
-import { flattenPopulatedDays } from './statsSeries'
+import { flattenPopulatedDays, valueAtOrBeforeField } from './statsSeries'
 import type { MonthlyBucket, ValidatorStatsMonthDoc } from './statsSeries'
-import { latestCumulativeByPair } from './sinkSales'
+import { soldInRange } from './sinkSales'
 import type { SinkSaleDoc } from './sinkSales'
+import type { ResolvedRange } from './dateRange'
 
 // docs/05 "Validator row" — identity fields as read straight from Mongo `validators`.
 export interface ValidatorIdentity {
@@ -49,16 +50,28 @@ function clampPercent(value: number): number {
 // "drop this validator" rather than a zeroed-out row (viz/data.py:load_validator_summary
 // applies the same filter for the same reason: otherwise the dashboard is dominated
 // by empty rows for validators with no withdrawal activity yet).
+//
+// `range` windows every number below to [range.from, range.to] — for
+// all_time, range.from is genesis, so this reduces to "every day ever" /
+// "the latest day" exactly like before ranges existed; range is never
+// optional so callers can't accidentally fall back to unwindowed all-time
+// math (docs/03: total_withdrawn_* are cumulative snapshots, so a window
+// means valueAt(to) - valueAt(from), not "the latest value").
 export function buildValidatorRow(
   validator: ValidatorIdentity,
   statsMonthDocs: ReadonlyArray<ValidatorStatsMonthDoc>,
   sinkSales: ReadonlyArray<SinkSaleDoc>,
   decimals: number,
+  range: ResolvedRange,
 ): ValidatorRow | null {
   const days = flattenPopulatedDays(statsMonthDocs)
   if (days.length === 0) return null
 
-  const stakeSamples = days
+  const daysInRange = days.filter(
+    (d) => d.timestamp >= range.from && d.timestamp <= range.to,
+  )
+
+  const stakeSamples = daysInRange
     .filter((d) => d.total_stake !== null)
     .map((d) => uatomToAtom(d.total_stake, decimals))
   const average_total_stake =
@@ -66,15 +79,20 @@ export function buildValidatorRow(
       ? stakeSamples.reduce((a, b) => a + b, 0) / stakeSamples.length
       : 0
 
-  // total_withdrawn_reward/commission are cumulative-to-date snapshots (docs/03), so
-  // all_time = the most recent populated day's values, not a sum across days.
-  const latest = days[days.length - 1]
+  // total_withdrawn_reward/commission are cumulative-to-date snapshots
+  // (docs/03) — windowed total_withdraw is the delta between the last
+  // snapshot at-or-before each end of the range, not a sum across days.
+  const rewardDelta =
+    valueAtOrBeforeField(days, range.to, 'total_withdrawn_reward') -
+    valueAtOrBeforeField(days, range.from, 'total_withdrawn_reward')
+  const commissionDelta =
+    valueAtOrBeforeField(days, range.to, 'total_withdrawn_commission') -
+    valueAtOrBeforeField(days, range.from, 'total_withdrawn_commission')
   const total_withdraw =
-    uatomToAtom(latest.total_withdrawn_reward, decimals) +
-    uatomToAtom(latest.total_withdrawn_commission, decimals)
+    uatomToAtom(rewardDelta, decimals) + uatomToAtom(commissionDelta, decimals)
   if (total_withdraw <= 0) return null
 
-  const sold = uatomToAtom(latestCumulativeByPair(sinkSales), decimals)
+  const sold = uatomToAtom(soldInRange(sinkSales, range), decimals)
   const percentage_sold = clampPercent((sold / total_withdraw) * 100)
   const commission = validator.commission_rate
     ? Number(validator.commission_rate) * 100

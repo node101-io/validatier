@@ -11,6 +11,12 @@ import type { ValidatorIdentity, ValidatorRow } from './aggregate'
 import type { ValidatorStatsMonthDoc, MonthlyBucket } from './statsSeries'
 import type { SinkSaleDoc } from './sinkSales'
 import type { TimedValue } from './lookup'
+import type { ResolvedRange } from './dateRange'
+
+// Wide enough to cover every timestamp used in this file (1000, 2000) —
+// stands in for "all_time" so these tests read the same as before ranges
+// existed.
+const ALL: ResolvedRange = { from: 0, to: 10_000 }
 
 function emptyMonth(): Array<number | null> {
   return new Array(31).fill(null)
@@ -57,7 +63,7 @@ test('buildValidatorRow: average stake, latest cumulative withdraw, sold%, commi
   const sinkSales: SinkSaleDoc[] = [
     { sink_address: 'binance', sink_kind: 'cex', cumulative_sold: '3000000', timestamp: 2000 },
   ]
-  const row = buildValidatorRow(validator, [statsDoc()], sinkSales, 6)
+  const row = buildValidatorRow(validator, [statsDoc()], sinkSales, 6, ALL)
 
   assert.ok(row)
   assert.equal(row.moniker, 'Node101')
@@ -72,7 +78,7 @@ test('buildValidatorRow: average stake, latest cumulative withdraw, sold%, commi
 test('buildValidatorRow returns null when there is no populated day at all', () => {
   const doc = statsDoc()
   ;(doc.timestamp as (number | null)[]).fill(null)
-  const row = buildValidatorRow(validator, [doc], [], 6)
+  const row = buildValidatorRow(validator, [doc], [], 6, ALL)
   assert.equal(row, null)
 })
 
@@ -91,7 +97,7 @@ test('buildValidatorRow returns null when latest total_withdraw is 0 (filtered o
     total_withdrawn_reward: emptyMonthStr(),
     total_withdrawn_commission: emptyMonthStr(),
   })
-  const row = buildValidatorRow(validator, [doc], [], 6)
+  const row = buildValidatorRow(validator, [doc], [], 6, ALL)
   assert.equal(row, null)
 })
 
@@ -99,7 +105,7 @@ test('buildValidatorRow clamps percentage_sold to 100 even if sold overshoots (e
   const sinkSales: SinkSaleDoc[] = [
     { sink_address: 'binance', sink_kind: 'cex', cumulative_sold: '99000000', timestamp: 2000 },
   ]
-  const row = buildValidatorRow(validator, [statsDoc()], sinkSales, 6)
+  const row = buildValidatorRow(validator, [statsDoc()], sinkSales, 6, ALL)
   assert.equal(row!.percentage_sold, 100)
 })
 
