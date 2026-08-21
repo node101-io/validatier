@@ -50,6 +50,7 @@ streaming; `series` (the graph data) is deferred and streamed in after
   total_withdraw: number;               // ATOM, reward + commission withdrawn, all_time
   sold: number;                         // ATOM, Σ latest cumulative_sold across all sink pairs for this validator
   percentage_sold: number;              // sold / total_withdraw * 100, clamped [0,100]
+  leading_exchange: string | null;      // this validator's top entry in its own sinkBreakdown (normalized exchange name); null if it has no sink sales in the window
 }
 ```
 

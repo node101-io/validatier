@@ -26,6 +26,7 @@ export interface ValidatorRow {
   total_withdraw: number
   sold: number
   percentage_sold: number
+  leading_exchange: string | null
 }
 
 export interface Metric {
@@ -57,12 +58,19 @@ function clampPercent(value: number): number {
 // optional so callers can't accidentally fall back to unwindowed all-time
 // math (docs/03: total_withdrawn_* are cumulative snapshots, so a window
 // means valueAt(to) - valueAt(from), not "the latest value").
+//
+// `leadingExchange` is precomputed by the caller (dashboard.ts, via
+// buildSinkBreakdown) rather than derived in here — the caller already runs
+// that same breakdown for ValidatorSummaryJson.sinkBreakdown, and doing it a
+// second time per validator per request would double that O(n) work for no
+// reason.
 export function buildValidatorRow(
   validator: ValidatorIdentity,
   statsMonthDocs: ReadonlyArray<ValidatorStatsMonthDoc>,
   sinkSales: ReadonlyArray<SinkSaleDoc>,
   decimals: number,
   range: ResolvedRange,
+  leadingExchange: string | null,
 ): ValidatorRow | null {
   const days = flattenPopulatedDays(statsMonthDocs)
   if (days.length === 0) return null
@@ -108,6 +116,7 @@ export function buildValidatorRow(
     total_withdraw,
     sold,
     percentage_sold,
+    leading_exchange: leadingExchange,
   }
 }
 

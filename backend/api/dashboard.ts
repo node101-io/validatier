@@ -88,6 +88,7 @@ function computeDashboardForRange(
 
   const rows: ValidatorRow[] = [];
   const bucketsByOperator = new Map<string, MonthlyBucket[]>();
+  const breakdownByOperator = new Map<string, ReturnType<typeof buildSinkBreakdown>>();
 
   for (const validator of validators) {
     const identity: ValidatorIdentity = {
@@ -101,7 +102,12 @@ function computeDashboardForRange(
     const ownStats = statsByOperator.get(validator.operator_address) ?? [];
     const ownSales = sinkSalesByOperator.get(validator.operator_address) ?? [];
 
-    const row = buildValidatorRow(identity, ownStats, ownSales, decimals, range);
+    // Computed once and reused below for both the row's leading_exchange and
+    // ValidatorSummaryJson.sinkBreakdown — same breakdown, two call sites.
+    const ownBreakdown = buildSinkBreakdown(ownSales, labelByAddress, decimals, range);
+    const leadingExchange = ownBreakdown[0]?.name ?? null;
+
+    const row = buildValidatorRow(identity, ownStats, ownSales, decimals, range, leadingExchange);
     if (!row) continue;
 
     const cumulativeSoldTimeline = buildCumulativeSoldTimeline(ownSales);
@@ -111,6 +117,7 @@ function computeDashboardForRange(
 
     rows.push(row);
     bucketsByOperator.set(validator.operator_address, buckets);
+    breakdownByOperator.set(validator.operator_address, ownBreakdown);
   }
 
   const ranks = rankByPercentageSold(rows);
@@ -140,7 +147,6 @@ function computeDashboardForRange(
       },
       averagePrice
     );
-    const ownSales = sinkSalesByOperator.get(row.operator_address) ?? [];
     summaryByOperator.set(row.operator_address, {
       validator: {
         ...row,
@@ -154,7 +160,7 @@ function computeDashboardForRange(
         percentageSoldRank: ranks.get(row.operator_address) ?? rows.length,
         totalValidators: rows.length,
       },
-      sinkBreakdown: buildSinkBreakdown(ownSales, labelByAddress, decimals, range),
+      sinkBreakdown: breakdownByOperator.get(row.operator_address) ?? [],
     });
   }
 

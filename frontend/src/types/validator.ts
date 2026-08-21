@@ -10,4 +10,5 @@ export default interface Validator {
   total_withdraw: number;
   sold: number;
   percentage_sold: number;
+  leading_exchange: string | null;
 }

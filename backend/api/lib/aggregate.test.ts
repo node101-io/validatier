@@ -59,11 +59,14 @@ function statsDoc(
   }
 }
 
-test('buildValidatorRow: average stake, latest cumulative withdraw, sold%, commission', () => {
+test('buildValidatorRow: average stake, latest cumulative withdraw, sold%, commission, carries through leading_exchange as-is', () => {
   const sinkSales: SinkSaleDoc[] = [
-    { sink_address: 'binance', sink_kind: 'cex', cumulative_sold: '3000000', timestamp: 2000 },
+    { sink_address: 'binance-addr', sink_kind: 'cex', cumulative_sold: '3000000', timestamp: 2000 },
   ]
-  const row = buildValidatorRow(validator, [statsDoc()], sinkSales, 6, ALL)
+  // leading_exchange is precomputed by the caller (dashboard.ts, via
+  // buildSinkBreakdown) and just carried through here — buildValidatorRow
+  // no longer derives it itself, to avoid running that breakdown twice.
+  const row = buildValidatorRow(validator, [statsDoc()], sinkSales, 6, ALL, 'Binance')
 
   assert.ok(row)
   assert.equal(row.moniker, 'Node101')
@@ -73,12 +76,18 @@ test('buildValidatorRow: average stake, latest cumulative withdraw, sold%, commi
   assert.equal(row.total_withdraw, 10) // latest day: 8 + 2
   assert.equal(row.sold, 3) // 3_000_000 uatom
   assert.equal(row.percentage_sold, 30) // 3 / 10 * 100
+  assert.equal(row.leading_exchange, 'Binance')
+})
+
+test('buildValidatorRow: leading_exchange null passes through as null', () => {
+  const row = buildValidatorRow(validator, [statsDoc()], [], 6, ALL, null)
+  assert.equal(row!.leading_exchange, null)
 })
 
 test('buildValidatorRow returns null when there is no populated day at all', () => {
   const doc = statsDoc()
   ;(doc.timestamp as (number | null)[]).fill(null)
-  const row = buildValidatorRow(validator, [doc], [], 6, ALL)
+  const row = buildValidatorRow(validator, [doc], [], 6, ALL, null)
   assert.equal(row, null)
 })
 
@@ -97,7 +106,7 @@ test('buildValidatorRow returns null when latest total_withdraw is 0 (filtered o
     total_withdrawn_reward: emptyMonthStr(),
     total_withdrawn_commission: emptyMonthStr(),
   })
-  const row = buildValidatorRow(validator, [doc], [], 6, ALL)
+  const row = buildValidatorRow(validator, [doc], [], 6, ALL, null)
   assert.equal(row, null)
 })
 
@@ -105,7 +114,7 @@ test('buildValidatorRow clamps percentage_sold to 100 even if sold overshoots (e
   const sinkSales: SinkSaleDoc[] = [
     { sink_address: 'binance', sink_kind: 'cex', cumulative_sold: '99000000', timestamp: 2000 },
   ]
-  const row = buildValidatorRow(validator, [statsDoc()], sinkSales, 6, ALL)
+  const row = buildValidatorRow(validator, [statsDoc()], sinkSales, 6, ALL, null)
   assert.equal(row!.percentage_sold, 100)
 })
 
@@ -120,6 +129,7 @@ const rows: ValidatorRow[] = [
     total_withdraw: 10,
     sold: 5,
     percentage_sold: 50,
+    leading_exchange: 'Binance',
   },
   {
     moniker: 'B',
@@ -131,6 +141,7 @@ const rows: ValidatorRow[] = [
     total_withdraw: 20,
     sold: 4,
     percentage_sold: 20,
+    leading_exchange: 'Upbit',
   },
   {
     moniker: 'C (tied with A)',
@@ -142,6 +153,7 @@ const rows: ValidatorRow[] = [
     total_withdraw: 5,
     sold: 2.5,
     percentage_sold: 50,
+    leading_exchange: null,
   },
 ]
 

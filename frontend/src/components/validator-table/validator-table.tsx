@@ -21,7 +21,8 @@ type SortField =
   | "percentageSold"
   | "avgDelegation"
   | "totalRewards"
-  | "totalSold";
+  | "totalSold"
+  | "leadingExchange";
 type SortDirection = "asc" | "desc";
 
 interface SortableHeaderProps {
@@ -53,6 +54,11 @@ const sortableHeaders = [
     field: "totalSold" as const,
     label: "Sold Amount",
     tooltip: "Total transferred out from wallet (cummulative)",
+  },
+  {
+    field: "leadingExchange" as const,
+    label: "Leading Exchange",
+    tooltip: "The exchange this validator sold the most to",
   },
 ];
 
@@ -171,6 +177,14 @@ export default function ValidatorTable({
           aValue = a.sold;
           bValue = b.sold;
           break;
+        case "leadingExchange":
+          // Nulls (no sink sales) always sort last, regardless of direction.
+          if (!a.leading_exchange && !b.leading_exchange) return 0;
+          if (!a.leading_exchange) return 1;
+          if (!b.leading_exchange) return -1;
+          aValue = a.leading_exchange.toLowerCase();
+          bValue = b.leading_exchange.toLowerCase();
+          break;
         default:
           return 0;
       }
@@ -256,11 +270,11 @@ export default function ValidatorTable({
           <img src="/res/images/export.svg" alt="" width={20} height={20} className="shrink-0" />
         </div>
         <div className="pt-3 pb-4 overflow-x-auto lg:overflow-visible">
-          <div role="table" className="w-full min-w-[900px]">
+          <div role="table" className="w-full min-w-[1050px]">
             <div role="rowgroup">
               <div
                 role="row"
-                className="grid grid-cols-[20fr_14fr_14fr_10fr_12fr] items-center w-full pl-6 pr-2 gap-3 mb-3"
+                className="grid grid-cols-[18fr_10fr_12fr_12fr_12fr_10fr] items-center w-full pl-6 pr-2 gap-3 mb-3"
               >
                 <div
                   role="columnheader"
@@ -291,7 +305,7 @@ export default function ValidatorTable({
                     params={{ operatorAddress: validator.operator_address }}
                     search={(prev) => prev}
                     role="row"
-                    className="grid grid-cols-[20fr_14fr_14fr_10fr_12fr] items-center w-full pr-2 gap-3 py-0 my-2.5 lg:my-0 lg:py-1.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
+                    className="grid grid-cols-[18fr_10fr_12fr_12fr_12fr_10fr] items-center w-full pr-2 gap-3 py-0 my-2.5 lg:my-0 lg:py-1.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
                     aria-label={`Open details for ${validator.moniker}`}
                   >
                     <div
@@ -433,6 +447,12 @@ export default function ValidatorTable({
                       <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
                         {`$${validator.sold && validator.sold > 0 ? formatAtomUSD(validator.sold, price, 1) : 0}`}
                       </div>
+                    </div>
+                    <div
+                      role="cell"
+                      className="text-center text-nowrap text-lg relative justify-self-center flex items-center justify-center overflow-hidden text-ellipsis text-[#633f9a] font-semibold"
+                    >
+                      {validator.leading_exchange ?? "—"}
                     </div>
                   </Link>
                 );
