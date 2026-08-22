@@ -1,7 +1,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { openSqlite, closeSqlite, getSqlite } from '../db/sqlite';
-import { getCursor, advanceCursor } from './meta';
+import { getCursor, advanceCursor, getLastValidatorSyncTs, setLastValidatorSyncTs } from './meta';
 
 before(() => openSqlite());
 after(() => closeSqlite());
@@ -24,4 +24,17 @@ test('advanceCursor updates height/ts and updated_at, without creating a second 
 
   // restore, so this test doesn't permanently shift the real cursor
   advanceCursor(before.height, before.ts);
+});
+
+test('getLastValidatorSyncTs is null until set, then round-trips', () => {
+  const original = getLastValidatorSyncTs();
+  setLastValidatorSyncTs(1700000000);
+  assert.equal(getLastValidatorSyncTs(), 1700000000);
+
+  // restore
+  if (original === null) {
+    getSqlite().prepare('UPDATE meta SET last_validator_sync_ts = NULL WHERE id = 1').run();
+  } else {
+    setLastValidatorSyncTs(original);
+  }
 });

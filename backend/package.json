@@ -10,7 +10,8 @@
     "api": "tsc && node dist/api/server.js",
     "test": "tsc && node --test \"dist/**/*.test.js\"",
     "wipe-db": "tsc && node dist/scripts/wipeDb.js",
-    "inspect-tx": "tsc && node dist/scripts/inspectValidatorTx.js"
+    "inspect-tx": "tsc && node dist/scripts/inspectValidatorTx.js",
+    "sync-keybase-avatars": "tsc && node dist/scripts/syncKeybaseAvatars.js"
   },
   "dependencies": {
     "@cosmjs/crypto": "^0.39.0",
