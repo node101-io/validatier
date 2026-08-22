@@ -102,7 +102,7 @@ export default function ExchangeSales({
     colors,
     dataLabels: {
       enabled: true,
-      offsetY: -22,
+      offsetY: -30,
       style: { colors: ["#361661"], fontFamily, fontSize: "15px", fontWeight: 600 },
       formatter: (v: number) => formatAtom(v, 1),
     },
@@ -173,10 +173,10 @@ export default function ExchangeSales({
             {entries.map((e, i) => (
               <div key={e.name + i} className="flex items-center gap-1.5">
                 <span
-                  className="size-2 rounded-[2px] shrink-0"
+                  className="size-2 rounded-full shrink-0"
                   style={{ backgroundColor: colors[i] }}
                 />
-                <span className="text-sm text-[#7c70c3]">{e.name}</span>
+                <span className="text-sm text-[#7c70c3] relative -top-px">{e.name}</span>
               </div>
             ))}
           </div>

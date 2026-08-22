@@ -106,6 +106,30 @@ input {
   );
 }
 
+/* ApexCharts pie legend: marker and label default to mismatched baselines */
+.apexcharts-legend-series {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.apexcharts-legend-marker {
+  vertical-align: middle !important;
+  top: 0 !important;
+  height: 14px !important;
+  width: 14px !important;
+}
+
+.apexcharts-legend-text {
+  vertical-align: middle !important;
+  line-height: 1 !important;
+  position: relative !important;
+  top: -1px !important;
+}
+
+.apexcharts-legend {
+  margin-top: 1.875rem !important;
+}
+
 /* Validators Table */
 @keyframes scrollText {
   0% {
