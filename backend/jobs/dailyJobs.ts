@@ -2,6 +2,7 @@ import { snapshotFundFlowToMongo } from './snapshot';
 import { runDailyValidatorStats } from './validatorStats';
 import { syncPrices } from './priceSync';
 import { getCursor, setLastDailyRunDay } from '../store/meta';
+import { config } from '../config';
 
 // The once-per-block-day sequence, extracted so blockLoop.ts can call it
 // inline without importing scheduler.ts (which imports blockLoop.ts —
@@ -35,7 +36,11 @@ export async function runDailyJobsForDay(day: string): Promise<void> {
     `daily jobs: validator_stats done — height=${vstats.height} attempted=${vstats.attempted} ` +
       `succeeded=${vstats.succeeded} skipped=${vstats.skipped.length}`
   );
-  await syncPrices(3); // small daily top-up; the 365-day backfill was one-time (task 9.1)
+  // Cover the same window the block loop actually has data for
+  // (config.backfillLookbackDays), not a fixed short top-up — otherwise
+  // days the dashboard has fund-flow/validator data for can have no price
+  // point, and the frontend's `?? 0` fallback draws a fake jump from $0.
+  await syncPrices(config.backfillLookbackDays);
   console.log('daily jobs: price sync done');
   setLastDailyRunDay(day); // only mark done on full success — a failure retries same day
   console.log(`daily jobs: all done for day ${day}`);
