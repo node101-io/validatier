@@ -36,14 +36,14 @@ interface SortableHeaderProps {
 
 const sortableHeaders = [
   {
-    field: "percentageSold" as const,
-    label: "Percentage Sold",
-    tooltip: "(Total sold / Total rewards) * 100",
-  },
-  {
     field: "avgDelegation" as const,
     label: "Avg. Delegation",
     tooltip: "Average total stake of the validator",
+  },
+  {
+    field: "percentageSold" as const,
+    label: "Percentage Sold",
+    tooltip: "(Total sold / Total rewards) * 100",
   },
   {
     field: "totalRewards" as const,
@@ -135,8 +135,8 @@ export default function ValidatorTable({
   price: number;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState<SortField>("percentageSold");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [sortField, setSortField] = useState<SortField>("avgDelegation");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [isMobile, setIsMobile] = useState(false);
   const PAGE_SIZE = 50;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -274,7 +274,7 @@ export default function ValidatorTable({
             <div role="rowgroup">
               <div
                 role="row"
-                className="grid grid-cols-[18fr_10fr_12fr_12fr_12fr_10fr] items-center w-full pl-6 pr-2 gap-3 mb-3"
+                className="grid grid-cols-[18fr_12fr_10fr_12fr_12fr_10fr] items-center w-full pl-6 pr-2 gap-3 mb-3"
               >
                 <div
                   role="columnheader"
@@ -305,7 +305,7 @@ export default function ValidatorTable({
                     params={{ operatorAddress: validator.operator_address }}
                     search={(prev) => prev}
                     role="row"
-                    className="grid grid-cols-[18fr_10fr_12fr_12fr_12fr_10fr] items-center w-full pr-2 gap-3 py-0 my-2.5 lg:my-0 lg:py-1.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
+                    className="grid grid-cols-[18fr_12fr_10fr_12fr_12fr_10fr] items-center w-full pr-2 gap-3 py-0 my-2.5 lg:my-0 lg:py-1.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
                     aria-label={`Open details for ${validator.moniker}`}
                   >
                     <div
@@ -353,6 +353,22 @@ export default function ValidatorTable({
                     </div>
                     <div
                       role="cell"
+                      className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1"
+                    >
+                      {/* Avg Delegation */}
+                      <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
+                        {validator.average_total_stake &&
+                        validator.average_total_stake > 0
+                          ? formatAtom(validator.average_total_stake, 1)
+                          : "0"}{" "}
+                        ATOM
+                      </div>
+                      <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
+                        {`$${validator.average_total_stake && validator.average_total_stake > 0 ? formatAtomUSD(validator.average_total_stake, price, 1) : 0}`}
+                      </div>
+                    </div>
+                    <div
+                      role="cell"
                       className="flex items-center justify-center font-bold gap-1.25 justify-self-center"
                     >
                       {/* Percentage Sold */}
@@ -377,22 +393,6 @@ export default function ValidatorTable({
                             height={14}
                           />
                         )}
-                      </div>
-                    </div>
-                    <div
-                      role="cell"
-                      className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1"
-                    >
-                      {/* Avg Delegation */}
-                      <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
-                        {validator.average_total_stake &&
-                        validator.average_total_stake > 0
-                          ? formatAtom(validator.average_total_stake, 1)
-                          : "0"}{" "}
-                        ATOM
-                      </div>
-                      <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
-                        {`$${validator.average_total_stake && validator.average_total_stake > 0 ? formatAtomUSD(validator.average_total_stake, price, 1) : 0}`}
                       </div>
                     </div>
                     <div
