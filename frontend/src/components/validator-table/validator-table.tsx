@@ -138,7 +138,7 @@ export default function ValidatorTable({
   const [sortField, setSortField] = useState<SortField>("avgDelegation");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [isMobile, setIsMobile] = useState(false);
-  const PAGE_SIZE = 50;
+  const PAGE_SIZE = 20;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const handleSort = (field: SortField) => {
