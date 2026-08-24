@@ -1,9 +1,22 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
+import http from 'node:http';
+import type { AddressInfo } from 'node:net';
 import mongoose from 'mongoose';
 import { config } from '../config';
 import { ValidatorStats } from '../models/ValidatorStats/ValidatorStats';
-import { buildValidatorStatsOps } from './validatorStats';
+import { ChainClient } from '../chain/client';
+import { buildValidatorStatsOps, fetchStakeAtHeight } from './validatorStats';
+
+function serve(handler: http.RequestListener): Promise<{ url: string; close: () => void }> {
+  const server = http.createServer(handler);
+  return new Promise((resolve) => {
+    server.listen(0, '127.0.0.1', () => {
+      const { port } = server.address() as AddressInfo;
+      resolve({ url: `http://127.0.0.1:${port}`, close: () => server.close() });
+    });
+  });
+}
 
 const P = 'cosmosvaloper1teststats';
 
@@ -93,4 +106,62 @@ test('a different month for the same validator creates a separate document', asy
   assert.equal(docs[0].month, 3);
   assert.equal(docs[1].month, 4);
   assert.equal(docs[1].total_stake[0], '666');
+});
+
+test('fetchStakeAtHeight merges paginated pages and sends the height on every request', async () => {
+  const seenHeights: Array<string | undefined> = [];
+  const seenKeys: Array<string | null> = [];
+  const { url, close } = await serve((req, res) => {
+    seenHeights.push(req.headers['x-cosmos-block-height'] as string | undefined);
+    const params = new URL(req.url ?? '', 'http://x').searchParams;
+    const key = params.get('pagination.key');
+    seenKeys.push(key);
+    res.writeHead(200, { 'content-type': 'application/json' });
+    if (key === null) {
+      res.end(
+        JSON.stringify({
+          validators: [{ operator_address: 'cosmosvaloper1a', tokens: '111' }],
+          pagination: { next_key: 'nextpage' },
+        })
+      );
+    } else {
+      assert.equal(key, 'nextpage');
+      res.end(
+        JSON.stringify({
+          validators: [{ operator_address: 'cosmosvaloper1b', tokens: '222' }],
+          pagination: { next_key: null },
+        })
+      );
+    }
+  });
+  try {
+    const client = new ChainClient(url, url);
+    const result = await fetchStakeAtHeight(999, client);
+    assert.equal(result.size, 2);
+    assert.equal(result.get('cosmosvaloper1a'), 111n);
+    assert.equal(result.get('cosmosvaloper1b'), 222n);
+    assert.equal(seenHeights.length, 2);
+    assert.ok(seenHeights.every((h) => h === '999'));
+    assert.deepEqual(seenKeys, [null, 'nextpage']);
+  } finally {
+    close();
+  }
+});
+
+test('fetchStakeAtHeight throws instead of looping forever on a non-advancing next_key', async () => {
+  const { url, close } = await serve((_req, res) => {
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(
+      JSON.stringify({
+        validators: [{ operator_address: 'cosmosvaloper1a', tokens: '111' }],
+        pagination: { next_key: 'stuck' },
+      })
+    );
+  });
+  try {
+    const client = new ChainClient(url, url);
+    await assert.rejects(() => fetchStakeAtHeight(999, client), /did not advance/);
+  } finally {
+    close();
+  }
 });

@@ -1,4 +1,5 @@
-import { chainClient } from '../chain/client';
+import { chainClient, ChainClient } from '../chain/client';
+import { fetchAllStakingValidators } from '../chain/stakingValidators';
 import { getSqlite } from '../db/sqlite';
 import { Validator } from '../models/Validator/Validator';
 import { DAYS_PER_MONTH_ARRAY_LENGTH, ValidatorStats } from '../models/ValidatorStats/ValidatorStats';
@@ -8,13 +9,26 @@ import { DAYS_PER_MONTH_ARRAY_LENGTH, ValidatorStats } from '../models/Validator
 // cumulative but still snapshot-semantics (interval = diff of two rows), sourced
 // from SQLite `seed` (fund-flow pipeline), NOT from these REST endpoints.
 
-// polkachu rate-limits aggressively at higher concurrency (429s seen at 8 in
-// task 5.2) — same gentle profile that worked for the 625-validator withdraw_map build.
-const LCD_CONCURRENCY = 2;
-const LCD_DELAY_MS = 150;
-
-interface LcdValidatorResponse {
-  validator: { tokens: string };
+// Bulk stake fetch: one paginated LCD list call (~2 pages for 628 validators)
+// instead of one call per validator. Deliberately unfiltered by status — the
+// staking module's list endpoint returns bonded/unbonding/unbonded together,
+// and Mongo `validators` (synced by ingest/validators.ts) holds all of them
+// too, so filtering here would silently drop validator_stats rows for anyone
+// currently out of the active set even though they may have withdrawn heavily
+// while they were in it.
+export async function fetchStakeAtHeight(
+  height: number,
+  client?: ChainClient
+): Promise<Map<string, bigint>> {
+  const validators = await fetchAllStakingValidators<{ operator_address: string; tokens: string }>({
+    height,
+    client,
+  });
+  const out = new Map<string, bigint>();
+  for (const v of validators) {
+    out.set(v.operator_address, BigInt(v.tokens));
+  }
+  return out;
 }
 
 interface SeedTotals {
@@ -154,55 +168,50 @@ export async function runDailyValidatorStats(atHeight?: number): Promise<DailySt
   const ensureDocOps: EnsureDocOp[] = [];
   const dayWriteOps: DayWriteOp[] = [];
   const skipped: DailyStatsResult['skipped'] = [];
-  let cursor = 0;
 
-  async function worker(): Promise<void> {
-    while (cursor < validators.length) {
-      const v = validators[cursor++];
-      try {
-        // total_stake: any failure here is a real problem — skip the validator.
-        const totalRes = await chainClient.lcdGet<LcdValidatorResponse>(
-          `/cosmos/staking/v1beta1/validators/${v.operator_address}`,
-          { height }
-        );
-        const total_stake = BigInt(totalRes.validator.tokens);
-
-        const seed = readSeedTotals(v.operator_address);
-
-        upsertValidatorState({
-          epoch,
-          operator: v.operator_address,
-          total_stake,
-          block_height: height,
-          ts,
-        });
-
-        const { ensureOp, dayWriteOp } = buildValidatorStatsOps({
-          operator_address: v.operator_address,
-          year,
-          month,
-          day,
-          ts,
-          height,
-          total_stake,
-          reward: seed.reward,
-          commission: seed.commission,
-        });
-        ensureDocOps.push(ensureOp);
-        dayWriteOps.push(dayWriteOp);
-      } catch (err) {
-        // A validator can be fully removed from the staking module (not just
-        // zero-staked) and 404 forever — skip it this cycle, don't fail the job.
-        skipped.push({
-          operator_address: v.operator_address,
-          reason: err instanceof Error ? err.message : String(err),
-        });
-      }
-      await new Promise((r) => setTimeout(r, LCD_DELAY_MS));
-    }
+  const stakeByOperator = await fetchStakeAtHeight(height);
+  if (stakeByOperator.size === 0) {
+    // An empty staking module means the endpoint is broken, not that the
+    // chain has no validators — fail loudly instead of skipping everyone.
+    throw new Error(`staking validators list returned 0 entries at height ${height}`);
   }
 
-  await Promise.all(Array.from({ length: LCD_CONCURRENCY }, worker));
+  for (const v of validators) {
+    const total_stake = stakeByOperator.get(v.operator_address);
+    if (total_stake === undefined) {
+      // A validator can be fully removed from the staking module (not just
+      // zero-staked) — skip it this cycle, don't fail the job.
+      skipped.push({
+        operator_address: v.operator_address,
+        reason: `not present in staking module at height ${height}`,
+      });
+      continue;
+    }
+
+    const seed = readSeedTotals(v.operator_address);
+
+    upsertValidatorState({
+      epoch,
+      operator: v.operator_address,
+      total_stake,
+      block_height: height,
+      ts,
+    });
+
+    const { ensureOp, dayWriteOp } = buildValidatorStatsOps({
+      operator_address: v.operator_address,
+      year,
+      month,
+      day,
+      ts,
+      height,
+      total_stake,
+      reward: seed.reward,
+      commission: seed.commission,
+    });
+    ensureDocOps.push(ensureOp);
+    dayWriteOps.push(dayWriteOp);
+  }
 
   if (ensureDocOps.length > 0) {
     await ValidatorStats.bulkWrite(ensureDocOps, { ordered: false });
