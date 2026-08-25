@@ -10,8 +10,12 @@ export interface Config {
   denom: string;
   decimals: number;
   bech32Prefix: string;
-  rpcUrl: string; // CometBFT RPC (/status, /block, /block_results)
-  lcdUrl: string; // Cosmos REST (/cosmos/...)
+  rpcUrl: string; // CometBFT RPC (/status, /block, /block_results) — used only by the
+  // archive ingester (backend/archive/ingest.ts), which talks to the live chain directly.
+  lcdUrl: string; // Cosmos REST (/cosmos/...) — same, ingester-only.
+  archiveUrl: string; // archive wrapper (backend/archive/server.ts) — what chain/client.ts's
+  // `chainClient` singleton actually calls; the running dashboard backend never touches
+  // rpcUrl/lcdUrl above.
   mongoUri: string;
   sqlitePath: string;
   maxDepth: number;
@@ -53,6 +57,7 @@ export const config: Config = {
   bech32Prefix: requireEnv('BECH32_PREFIX'),
   rpcUrl: requireUrl('RPC_URL'),
   lcdUrl: requireUrl('LCD_URL'),
+  archiveUrl: requireUrl('ARCHIVE_URL'),
   mongoUri: requireEnv('MONGO_URI'),
   sqlitePath: requireEnv('SQLITE_PATH'),
   maxDepth: requireInt('MAX_DEPTH'),

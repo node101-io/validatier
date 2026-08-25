@@ -195,47 +195,121 @@ Legend: `[ ]` todo · `[x]` done · `→` doc to read
 
 ---
 
-## Phase 11 — Archive backfill (DEFERRED — do not start until an archive node is actually
-## provisioned; real chain testing against 32M+ historical blocks is required, can't be
-## meaningfully validated on a pruned public node)
+## Phase 11 — R2 archive layer (replaces the old archive-node plan below; decided
+## 2026-08-24, see `.claude/plans/archive-node-yerine-gerekli-luminous-zephyr.md`)
 
-Design decided 2026-07-22 (user call), to be implemented once the archive node is live:
+Archive node judged too expensive/slow (TB-scale disk, weeks to sync, no cosmoshub
+snapshot available). Instead: an **ingester** (new `backend/archive/` code, reuses the
+existing live `ChainClient`) walks the live chain once, strips `block_results` and writes
+it to **local disk as the primary store**, with a zstd-compressed copy mirrored to
+Cloudflare R2 as a backup (measured ~23-28 GB for the chosen 2-year window — see the plan
+for the full byte-level measurement). Local-first was a later call (lead dev, 2026-08-25):
+the whole archive is trivial for any server's disk, and every R2 request costs something
+even though egress is free, so normal operation shouldn't touch R2 at all — R2 only gets
+read when local disk is empty (a fresh server, or a wiped cache dir; see
+`archive/localArchive.ts`'s header). A **wrapper** (`backend/archive/server.ts`) serves the
+local copy back over plain HTTP. The dashboard backend's `chain/client.ts` `chainClient`
+singleton now always points at the wrapper — it never talks to the live chain directly.
+The ingester is the one process that still does; it constructs its own `ChainClient`
+independent of the singleton (no `CHAIN_SOURCE` flag — see client.ts's comments for why).
+Operational consequence of local-first: the ingester and the wrapper MUST share the same
+disk/volume (`ARCHIVE_CACHE_DIR`) — this traded away "ingester can run from any machine
+with just the R2 credentials" for the cost win, on purpose.
 
-- [ ] **11.1 `HAS_ARCHIVE_NODE` config flag + genesis-start in the SAME block loop.** New required
-      `.env` var (manual, same convention as `RPC_URL`/`LCD_URL` — NOT auto-detected;
-      `/status`'s `earliest_block_height` is known-unreliable, see task 4.1 findings). In
-      `blockLoop.ts`, when `cursor.height === 0` (never scanned): if `HAS_ARCHIVE_NODE=true`,
-      `from = 1` (genesis) instead of `from = latest`. Deliberately the SAME sequential per-height
-      loop as live scanning (user's explicit choice over a separate parallel-fetch pipeline) — same
-      crash-safety/resumability guarantees apply unchanged. Accepted tradeoff: at current
-      sequential throughput this will take a long time (weeks-scale on 32M+ blocks) — that's fine,
-      it's a one-time background catch-up, not a latency-sensitive path. → `docs/01`, `docs/02`
-      *Accept:* with the flag true and RPC_URL/LCD_URL pointed at a real archive node, a fresh
-      (cursor=0) run starts at height 1, not the tip; with the flag false (or omitted on a
-      pre-existing deployment), behavior is byte-for-byte unchanged from today (starts at tip).
-      NOTE (user's explicit concern, already satisfied — no new work needed): mid-backfill crash
-      recovery comes FOR FREE from task 10.1's existing per-height atomic transaction + cursor
-      mechanism (already proven live: nested-transaction rollback test, and two-consecutive-runs
-      resuming at exactly `to + 1`). Backfill is just the SAME loop starting from height 1 instead
-      of the tip — a crash at height 15,000,000 leaves the cursor at the last fully-committed
-      height, and the next run resumes from there, no special-casing required. `to` is also
-      recomputed fresh on every `runBlockLoop()` call (every scheduler tick), so backfill
-      self-corrects as the live tip keeps moving during the weeks it takes to catch up.
+Scope is 2 years, not all-time: start height **21,870,000**, chosen because it's the first
+height where every tx `transfer` event reliably carries `msg_index` (measured SDK v0.47
+boundary between 21,830,000–21,870,000) — below it, `parseBlockResults`'s fee/tip
+disambiguation (gotcha #1) would need a synthesis fallback that was deliberately rejected
+(no guessing in money math, per this file's own rule). Extending further back is a future
+decision, not this phase's.
 
-- [ ] **11.2 Pause daily jobs while backfill is still catching up.** User's explicit call: snapshot
-      / validator_stats / price sync must NOT run while the cursor is still far behind the chain
-      tip (avoid snapshotting/publishing partial-history data mid-backfill). Add an "is caught up"
-      check (e.g. cursor within some small delta of the current tip — normal live operation is
-      always within one `runBlockLoop()` call of the tip, so a threshold like a few hundred blocks
-      cleanly distinguishes "still backfilling" from "live") and gate the inline daily-jobs
-      trigger in `blockLoop.ts` on it (post-10.3: the trigger moved from `scheduler.ts`'s
-      `tickDailyJobs()` into `blockLoop.ts`'s per-height day-check, see task 10.3). Once caught
-      up, daily jobs resume automatically (no separate flag to flip back) — matches the deferred
-      rollback/versioning items in not needing new persisted state, only a threshold comparison
-      against data we already have (cursor vs. tip). → CLAUDE.md
-      *Accept:* while `HAS_ARCHIVE_NODE=true` and cursor is far behind tip, daily jobs are skipped
-      (logged, not silently dropped); once cursor catches up to near-tip, they resume on the next
-      height.
+- [x] **11.1 Strip rules (`archive/lib/strip.ts`) + parity test.** Drop `coin_spent`/
+      `coin_received`/`update_client` events and tx `data`/`log`/`info` fields — measured
+      ~73% of raw bytes, none read by the parser. `archive/strip.test.ts` runs every real
+      fixture in `chain/__fixtures__/` through both the untouched and stripped shape and
+      asserts `parseBlockResults`/`parseValidatorLifecycleEvents` output is byte-identical.
+      *Accept:* 11/11 tests pass (done).
+
+- [x] **11.2 `ChainSource` interface split (`chain/client.ts`) + `ArchiveChainClient`
+      (`chain/archiveClient.ts`, new).** `ChainClient` now `implements ChainSource`
+      unchanged in body; the `chainClient` singleton is `ArchiveChainClient` talking to
+      `ARCHIVE_URL`. Shared `HttpError`/`fetchJson` pulled into `chain/http.ts` so neither
+      client.ts nor archiveClient.ts has a runtime circular import on the other (a real
+      load-order-dependent bug this surfaced and fixed — see `chain/archiveClient.test.ts`).
+      *Accept:* all call sites (`blockLoop.ts`, `validatorStats.ts`, `stakingValidators.ts`,
+      `withdrawMap.ts`, `inspectValidatorTx.ts`) unchanged; parity test (fake wrapper +
+      fixtures) confirms identical parser output through the archive path (done).
+
+- [x] **11.3 R2 client (`archive/lib/r2.ts`), chunking (`archive/lib/chunk.ts`), R2-side manifest
+      primitives (`archive/lib/manifest.ts`), local-first layer (`archive/localArchive.ts`).**
+      Hand-rolled SigV4 (no AWS SDK dependency) — signing logic unit-tested for
+      determinism/shape, NOT against a live bucket yet. 1000-block chunks, zstd-19 for the
+      R2 backup copy (measured sweet spot); local disk keeps the decompressed jsonl
+      directly (no decompression cost on repeated reads). `localArchive.ts`'s
+      `loadManifest`/`saveManifest`/`readChunk`/`writeChunk` are local-disk-first with R2
+      as a write-through backup — `manifest.ts`/`r2.ts`'s R2 functions are no longer called
+      from anywhere except `localArchive.ts`. Unit-tested against a fake in-memory R2 (fetch
+      monkey-patched) asserting the actual GET-call counts: a local hit makes zero R2 calls,
+      a local miss makes exactly one R2 GET and then caches it for every subsequent read.
+      *Accept:* `localArchive.test.ts` (7 tests) passes; signing itself still needs a
+      live-credential round-trip before first real use (blocked on Bekleyen girdiler #1).
+
+- [x] **11.4 Ingester (`archive/ingest.ts`) + entrypoint (`npm run archive-sync`).**
+      `nextChunkToIngest` (pure, unit-tested) only ever ingests a chunk once ALL its heights
+      are behind the live tip — no partial trailing chunks. Concurrency via
+      `archive/lib/parallelMap.ts` (measured 63 blocks/sec @ concurrency 48 against a single
+      RPC in the plan's probes). Writes go through `localArchive.ts`'s `writeChunk`/
+      `saveManifest` — local disk first, R2 backup second, manifest advance last.
+      *Accept:* boundary-condition unit tests pass; full backfill run is blocked on real R2
+      creds + a ~2-day archive RPC window (Bekleyen girdiler below) — not yet executed.
+
+- [x] **11.5 Wrapper (`archive/server.ts`) + entrypoint (`npm run archive-server`).**
+      Plain JSON over HTTP (NOT a CometBFT JSON-RPC mock — cosmjs's decoder is too strict
+      about the full `/block` shape we deliberately don't store). `/status`,
+      `/block_results/:height`, `/header/:height`, `/lcd/*` (live passthrough only so far —
+      height-scoped LCD via archived staking snapshots is the still-open item below). Reads
+      go through `localArchive.ts`'s `readChunk`/`loadManifest` — in normal operation
+      (wrapper sharing `ARCHIVE_CACHE_DIR` with the ingester) every request is served off
+      local disk, R2 is never touched.
+      *Accept:* served correctly against fixture data in-process (`archiveClient.test.ts`);
+      not yet run against a live R2 bucket or alongside a real ingester.
+
+- [ ] **11.6 Staking snapshot backfill ("Adım A").** For each of the ~730 days in the
+      2-year window, binary-search the live chain for that day's height (mirroring the
+      probe done during planning), pull the full validator list via
+      `chain/stakingValidators.ts`'s `fetchAllStakingValidators`, write through
+      `localArchive.ts`'s local-first pattern (new `staking/{day}.jsonl` kind, same as
+      block_results/block_headers) keyed by day. Wrapper's
+      `/lcd/cosmos/staking/v1beta1/validators?height=N` should then serve from local disk
+      when the height matches an archived day instead of always live-passthrough. Cheapest,
+      highest-value step (validator_stats opens to 2 years of history) — do this first once
+      R2 creds land, even before 11.4's full block_results backfill finishes. → the plan doc
+
+- [ ] **11.7 LCD height-header trust bug (separate from the archive work, surfaced while
+      measuring for it).** The current `LCD_URL` silently ignores
+      `x-cosmos-block-height` — a request for height 20,000,000 and one for height
+      99,999,999 both return today's latest state, no error. `validatorStats.ts`'s
+      `fetchStakeAtHeight` has been writing today's stake into every "historical" day since
+      it started using this endpoint. Being handled with devops (a correct archive LCD
+      returns a `grpc-metadata-x-cosmos-block-height` response header matching the request —
+      verified against `rest.cosmos.directory` when it happens to route to a real archive
+      backend). Once a trustworthy LCD exists: add the header-echo check to
+      `ArchiveChainClient.lcdGet`/wherever the height-scoped LCD call ends up, so a mismatch
+      throws instead of silently writing wrong data — this must land before 11.6 backfills
+      any staking snapshot data using height-scoped LCD calls.
+      *Accept:* a height-scoped LCD call against a non-echoing endpoint throws; against a
+      correct one, succeeds and the returned data actually differs by height.
+
+## Deferred — old archive-node design (superseded by Phase 11 above, kept for history)
+
+Design decided 2026-07-22 (user call). No longer the plan — an archive node is not being
+provisioned; R2 replaces it. Left here only so the reasoning isn't lost:
+
+- [ ] ~~`HAS_ARCHIVE_NODE` config flag + genesis-start in the SAME block loop.~~ Superseded.
+- [ ] ~~Pause daily jobs while backfill is still catching up.~~ Superseded — the R2 design's
+      wrapper only ever reports `latestBlockHeight` as far as the archive is actually
+      filled (`archive/server.ts`'s `/status`), so the live block loop naturally can't get
+      ahead of the archive in the first place; no separate pause logic needed.
 
 ---
 
