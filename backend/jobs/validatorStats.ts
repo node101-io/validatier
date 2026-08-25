@@ -31,6 +31,45 @@ export async function fetchStakeAtHeight(
   return out;
 }
 
+// The old per-validator loop isolated one flaky LCD call from the rest —
+// losing a single validator for a day, not the whole day. The bulk fetch
+// above traded that away on purpose (one paginated call instead of ~628):
+// there's no per-validator granularity left to preserve, a failed page is
+// a failed fetch, period. What we CAN still do is retry the whole bulk
+// fetch a few times before letting it propagate — a transient blip (one
+// dropped page out of ~2) shouldn't force blockLoop.ts's day-check to redo
+// the whole day's job (including re-running the fund-flow snapshot) just
+// to get another attempt ~6 seconds later. Each attempt already retries
+// its own HTTP calls internally (chain/http.ts's fetchJsonWithRetry, via
+// ChainClient/ArchiveChainClient.lcdGet) — this is a second, coarser layer
+// on top for the bulk call as a whole.
+const FETCH_STAKE_RETRY_ATTEMPTS = 3;
+const FETCH_STAKE_RETRY_DELAY_MS = 1000;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function fetchStakeAtHeightWithRetry(
+  height: number,
+  client?: ChainClient
+): Promise<Map<string, bigint>> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= FETCH_STAKE_RETRY_ATTEMPTS; attempt++) {
+    try {
+      return await fetchStakeAtHeight(height, client);
+    } catch (err) {
+      lastError = err;
+      if (attempt < FETCH_STAKE_RETRY_ATTEMPTS) {
+        await sleep(FETCH_STAKE_RETRY_DELAY_MS * attempt);
+      }
+    }
+  }
+  throw new Error(
+    `fetchStakeAtHeight failed after ${FETCH_STAKE_RETRY_ATTEMPTS} attempts at height ${height}: ${lastError}`
+  );
+}
+
 interface SeedTotals {
   reward: bigint;
   commission: bigint;
@@ -169,7 +208,7 @@ export async function runDailyValidatorStats(atHeight?: number): Promise<DailySt
   const dayWriteOps: DayWriteOp[] = [];
   const skipped: DailyStatsResult['skipped'] = [];
 
-  const stakeByOperator = await fetchStakeAtHeight(height);
+  const stakeByOperator = await fetchStakeAtHeightWithRetry(height);
   if (stakeByOperator.size === 0) {
     // An empty staking module means the endpoint is broken, not that the
     // chain has no validators — fail loudly instead of skipping everyone.

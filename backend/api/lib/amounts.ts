@@ -1,5 +1,5 @@
 // uatom BigInt-strings -> ATOM `number`, for the static JSON export boundary only
-// (docs/05-static-json-contract.md: "the frontend never sees a uatom string").
+// (docs/05-frontend-data-layer.md: "the frontend never sees a uatom string").
 
 export function uatomToAtom(
   value: string | bigint | null | undefined,

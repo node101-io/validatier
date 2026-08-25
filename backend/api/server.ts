@@ -1,7 +1,7 @@
 import http from 'http';
 import { config } from '../config';
 import { connectMongo, disconnectMongo } from '../db/mongo';
-import { loadDashboard } from './dashboard';
+import { loadDashboard, loadMeta } from './dashboard';
 import { isRangePreset, parseUntil, resolveRange } from './lib/dateRange';
 import type { RangePreset, ResolvedRange } from './lib/dateRange';
 
@@ -46,13 +46,16 @@ async function handleRequest(req: http.IncomingMessage, res: http.ServerResponse
     return;
   }
 
-  const range = parseRangeParams(url);
-  const snapshot = await loadDashboard(range);
-
+  // meta is range-independent and cheap (Meta singleton + latest price) —
+  // answered without the full per-validator aggregation every other route
+  // below needs (loadDashboard/computeDashboardForRange).
   if (parts.length === 2 && parts[1] === 'meta') {
-    sendJson(res, 200, snapshot.meta);
+    sendJson(res, 200, await loadMeta());
     return;
   }
+
+  const range = parseRangeParams(url);
+  const snapshot = await loadDashboard(range);
 
   if (parts.length === 2 && parts[1] === 'summary') {
     sendJson(res, 200, snapshot.summary);

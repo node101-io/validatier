@@ -18,7 +18,7 @@ export function formatPercentage(
   }).format(value);
 }
 
-// value is already ATOM (docs/05-static-json-contract.md — the export boundary
+// value is already ATOM (docs/05-frontend-data-layer.md — the export boundary
 // converts every uatom BigInt-string to ATOM `number`; nothing downstream of
 // that divides by 10**decimals again).
 export function formatAtom(value: number, maximumFractionDigits = 0): string {

@@ -70,18 +70,36 @@ async function fetchRawSnapshot() {
 // range — no per-range cache key needed.
 const loadRawSnapshot = memoizeWithTtl(fetchRawSnapshot, 60_000);
 
+// meta only needs the Meta singleton + the latest price — neither depends
+// on `range` nor on the per-validator aggregation below (buildValidatorRow/
+// buildSinkBreakdown/buildMonthlyBucket over every validator). Split out so
+// GET /api/meta (server.ts) doesn't pay for work it never uses.
+function buildMeta(raw: Awaited<ReturnType<typeof fetchRawSnapshot>>): DashboardSnapshot['meta'] {
+  const { priceDocs, meta } = raw;
+  const latestPrice = priceDocs.length > 0 ? priceDocs[priceDocs.length - 1]!.price : 0;
+  return {
+    generated_at: Math.floor(Date.now() / 1000),
+    scanned_up_to_height: meta.scanned_up_to_height,
+    fund_flow_version: meta.fund_flow_current_version,
+    price: latestPrice,
+  };
+}
+
+export async function loadMeta(): Promise<DashboardSnapshot['meta']> {
+  return buildMeta(await loadRawSnapshot());
+}
+
 function computeDashboardForRange(
   raw: Awaited<ReturnType<typeof fetchRawSnapshot>>,
   range: ResolvedRange,
 ): DashboardSnapshot {
   const decimals = config.decimals;
-  const { validators, statsDocs, sinkSales, labelByAddress, priceDocs, meta } = raw;
+  const { validators, statsDocs, sinkSales, labelByAddress, priceDocs } = raw;
 
   const statsByOperator = groupBy(statsDocs, (d) => d.operator_address);
   const sinkSalesByOperator = groupBy(sinkSales, (d) => d.operator_address);
 
   const priceTimeline: TimedValue<number>[] = priceDocs.map((p) => ({ timestamp: p.timestamp, value: p.price }));
-  const latestPrice = priceTimeline.length > 0 ? priceTimeline[priceTimeline.length - 1]!.value : 0;
   const pricesInRange = priceDocs.filter((p) => p.timestamp >= range.from && p.timestamp <= range.to);
   const averagePrice =
     pricesInRange.length > 0 ? pricesInRange.reduce((sum, p) => sum + p.price, 0) / pricesInRange.length : 0;
@@ -165,12 +183,7 @@ function computeDashboardForRange(
   }
 
   return {
-    meta: {
-      generated_at: Math.floor(Date.now() / 1000),
-      scanned_up_to_height: meta.scanned_up_to_height,
-      fund_flow_version: meta.fund_flow_current_version,
-      price: latestPrice,
-    },
+    meta: buildMeta(raw),
     summary: {
       summaryData,
       metrics,
@@ -183,7 +196,31 @@ function computeDashboardForRange(
   };
 }
 
+// In-flight coalescing, keyed by the resolved range: a page load fires
+// several requests for the SAME range concurrently (index.tsx's
+// getSummary+getValidators, the validator page's summary+series) — each one
+// independently re-ran the whole O(validators) aggregation for identical
+// input. This is deliberately NOT a time-based cache (no TTL, no staleness
+// risk beyond loadRawSnapshot's existing 60s window): an entry lives only as
+// long as its computation is in flight and is removed the instant it
+// settles, so the map never grows unbounded and a later, non-concurrent
+// request for the same range still recomputes fresh.
+const inFlightByRangeKey = new Map<string, Promise<DashboardSnapshot>>();
+
+function rangeKey(range: ResolvedRange): string {
+  return `${range.from}:${range.to}`;
+}
+
 export async function loadDashboard(range: ResolvedRange): Promise<DashboardSnapshot> {
-  const raw = await loadRawSnapshot();
-  return computeDashboardForRange(raw, range);
+  const key = rangeKey(range);
+  const inFlight = inFlightByRangeKey.get(key);
+  if (inFlight) return inFlight;
+
+  const promise = loadRawSnapshot().then((raw) => computeDashboardForRange(raw, range));
+  inFlightByRangeKey.set(key, promise);
+  try {
+    return await promise;
+  } finally {
+    inFlightByRangeKey.delete(key);
+  }
 }

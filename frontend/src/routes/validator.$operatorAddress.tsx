@@ -145,7 +145,7 @@ function ValidatorPage() {
                       >
                         {validator.percentage_sold
                           ? `${formatPercentage(validator.percentage_sold, 1)}%`
-                          : '%0'}
+                          : '0%'}
                       </div>
                       <div className="font-medium text-[20px] text-[#7c70c3]"></div>
                     </>

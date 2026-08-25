@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 import { config } from '../config';
 import { ValidatorStats } from '../models/ValidatorStats/ValidatorStats';
 import { ChainClient } from '../chain/client';
-import { buildValidatorStatsOps, fetchStakeAtHeight } from './validatorStats';
+import { buildValidatorStatsOps, fetchStakeAtHeight, fetchStakeAtHeightWithRetry } from './validatorStats';
 
 function serve(handler: http.RequestListener): Promise<{ url: string; close: () => void }> {
   const server = http.createServer(handler);
@@ -161,6 +161,56 @@ test('fetchStakeAtHeight throws instead of looping forever on a non-advancing ne
   try {
     const client = new ChainClient(url, url);
     await assert.rejects(() => fetchStakeAtHeight(999, client), /did not advance/);
+  } finally {
+    close();
+  }
+});
+
+// Regression coverage for the code-review finding: the bulk fetch replaced
+// per-validator LCD calls (each individually retried/skippable) with one
+// paginated call — a single flaky page used to abort just one validator,
+// now it aborts the whole day's job. fetchStakeAtHeightWithRetry adds a
+// coarse retry around the whole bulk fetch so a transient outage (server
+// recovers before all attempts, both the inner per-HTTP-call retries in
+// chain/http.ts AND these outer ones, are exhausted) doesn't force
+// blockLoop.ts to redo the entire day (including the fund-flow snapshot)
+// on the very next block.
+test('fetchStakeAtHeightWithRetry recovers once the endpoint starts responding again', async () => {
+  let requestCount = 0;
+  const { url, close } = await serve((_req, res) => {
+    requestCount++;
+    // Fail the first 3 real HTTP attempts (fully exhausts fetchJsonWithRetry's
+    // own inner 3-attempt retry, forcing fetchStakeAtHeightWithRetry's OUTER
+    // loop to actually kick in for its 2nd attempt) — succeed from the 4th on.
+    if (requestCount <= 3) {
+      res.writeHead(500).end('transient');
+      return;
+    }
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(
+      JSON.stringify({
+        validators: [{ operator_address: 'cosmosvaloper1a', tokens: '111' }],
+        pagination: { next_key: null },
+      })
+    );
+  });
+  try {
+    const client = new ChainClient(url, url);
+    const result = await fetchStakeAtHeightWithRetry(999, client);
+    assert.equal(result.get('cosmosvaloper1a'), 111n);
+    assert.ok(requestCount >= 4, 'the outer retry must have kicked in after the inner retry exhausted');
+  } finally {
+    close();
+  }
+});
+
+test('fetchStakeAtHeightWithRetry gives up and throws after exhausting all outer attempts', async () => {
+  const { url, close } = await serve((_req, res) => {
+    res.writeHead(500).end('permanently broken');
+  });
+  try {
+    const client = new ChainClient(url, url);
+    await assert.rejects(() => fetchStakeAtHeightWithRetry(999, client), /failed after 3 attempts/);
   } finally {
     close();
   }

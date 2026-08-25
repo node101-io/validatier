@@ -164,6 +164,56 @@ test('rankByPercentageSold gives ties the same rank and skips the next one', () 
   assert.equal(ranks.get('op-b'), 3)
 })
 
+// Regression coverage for the code-review finding: rankByPercentageSold used
+// to be O(n^2) (a filter().length per row). Rewritten as a single descending
+// sort + one pass — this locks in the same competition-ranking semantics
+// (ties share a rank, the next distinct rank skips past them) on a bigger,
+// multi-tie-group input than the 3-row fixture above catches.
+function rowWithPct(operator_address: string, percentage_sold: number): ValidatorRow {
+  return {
+    moniker: operator_address,
+    temporary_image_uri: null,
+    operator_address,
+    website: null,
+    commission: 0,
+    average_total_stake: 0,
+    total_withdraw: 0,
+    sold: 0,
+    percentage_sold,
+    leading_exchange: null,
+  }
+}
+
+test('rankByPercentageSold: multiple tie groups rank correctly regardless of input order', () => {
+  const scrambled = [
+    rowWithPct('d', 10),
+    rowWithPct('a', 90),
+    rowWithPct('e', 10),
+    rowWithPct('b', 90),
+    rowWithPct('f', 0),
+    rowWithPct('c', 50),
+  ]
+  const ranks = rankByPercentageSold(scrambled)
+  assert.equal(ranks.get('a'), 1) // tied for 1st (90)
+  assert.equal(ranks.get('b'), 1)
+  assert.equal(ranks.get('c'), 3) // next distinct rank skips past the tie
+  assert.equal(ranks.get('d'), 4) // tied for 4th (10)
+  assert.equal(ranks.get('e'), 4)
+  assert.equal(ranks.get('f'), 6) // last, alone
+})
+
+test('rankByPercentageSold: empty input returns an empty map', () => {
+  assert.equal(rankByPercentageSold([]).size, 0)
+})
+
+test('rankByPercentageSold: every row tied gives everyone rank 1', () => {
+  const allTied = [rowWithPct('a', 25), rowWithPct('b', 25), rowWithPct('c', 25)]
+  const ranks = rankByPercentageSold(allTied)
+  assert.equal(ranks.get('a'), 1)
+  assert.equal(ranks.get('b'), 1)
+  assert.equal(ranks.get('c'), 1)
+})
+
 test('buildSummaryData sums rows and derives clamped percentage_sold', () => {
   const summary = buildSummaryData(rows)
   assert.equal(summary.total_stake_sum, 350)

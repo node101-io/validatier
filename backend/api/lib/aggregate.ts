@@ -121,16 +121,25 @@ export function buildValidatorRow(
 }
 
 // Competition ranking (ties share a rank, next rank skips) — matches the old
-// getFormattedValidatorPageData rank semantics: 1 + count of strictly-better rows.
+// getFormattedValidatorPageData rank semantics: 1 + count of strictly-better
+// rows. Computed via a single descending sort instead of an O(n) filter per
+// row (O(n^2) overall) — after sorting, "count of strictly-better rows" for
+// any row equals the 0-based index of the first row sharing its value, so a
+// single pass assigns every row's rank in one sweep.
 export function rankByPercentageSold(
   rows: ReadonlyArray<ValidatorRow>,
 ): Map<string, number> {
+  const sorted = [...rows].sort((a, b) => b.percentage_sold - a.percentage_sold)
   const ranks = new Map<string, number>()
-  for (const row of rows) {
-    const rank =
-      1 + rows.filter((r) => r.percentage_sold > row.percentage_sold).length
+  let rank = 0
+  let previousValue: number | null = null
+  sorted.forEach((row, index) => {
+    if (previousValue === null || row.percentage_sold !== previousValue) {
+      rank = index + 1
+      previousValue = row.percentage_sold
+    }
     ranks.set(row.operator_address, rank)
-  }
+  })
   return ranks
 }
 
