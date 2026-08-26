@@ -38,6 +38,48 @@ function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export interface RetryAsyncOptions {
+    attempts?: number; // default 3
+    // delay before the NEXT attempt, given the attempt number just made (1-based)
+    // and the error it threw — receiving the error lets a caller special-case
+    // e.g. an HTTP 429 without retryAsync itself knowing anything about HTTP.
+    delayMs?: (attempt: number, err: unknown) => number;
+    errorContext?: string; // included in the final thrown error message
+}
+
+// Generic retry-N-times-with-backoff loop — the single place this bookkeeping
+// (attempt counting, delay-before-retry, wrapping the final error while
+// preserving HttpError's status code) lives. `fetchJsonWithRetry` below wraps
+// a single fetchJson call; `jobs/validatorStats.ts`'s
+// `fetchStakeAtHeightWithRetry` wraps an entire multi-request bulk operation
+// on top of it — different granularity, same loop, extracted here after that
+// exact loop was found hand-duplicated in both places (caught by code
+// review, twice: fetchJsonWithRetry itself was already an earlier
+// deduplication of client.ts/archiveClient.ts).
+export async function retryAsync<T>(fn: () => Promise<T>, opts: RetryAsyncOptions = {}): Promise<T> {
+    const attempts = opts.attempts ?? 3;
+    const delayMs = opts.delayMs ?? ((attempt) => 300 * attempt);
+
+    let lastError: unknown;
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+        try {
+            return await fn();
+        } catch (err) {
+            lastError = err;
+            if (attempt < attempts) {
+                await sleep(delayMs(attempt, err));
+            }
+        }
+    }
+    const suffix = opts.errorContext ? ` (${opts.errorContext})` : '';
+    // Preserve the real HTTP status on the final error (so callers can e.g.
+    // treat a persistent 404 differently from a persistent 5xx).
+    if (lastError instanceof HttpError) {
+        throw new HttpError(lastError.status, `${attempts} attempts failed${suffix}: ${lastError.message}`);
+    }
+    throw new Error(`${attempts} attempts failed${suffix}: ${lastError}`);
+}
+
 export interface RetryOptions {
     attempts?: number; // default 3
     baseDelayMs?: number; // default 300 — backoff for a transient (non-429) failure
@@ -47,10 +89,7 @@ export interface RetryOptions {
 
 // The retry+backoff wrapper around fetchJson — shared by chain/client.ts's
 // ChainClient (talks to the live chain) and chain/archiveClient.ts's
-// ArchiveChainClient (talks to the archive wrapper). Previously duplicated
-// near-identically in both (caught by code review); one copy here means a
-// future change to backoff behavior (e.g. jitter) can't land in one client
-// and silently miss the other.
+// ArchiveChainClient (talks to the archive wrapper).
 export async function fetchJsonWithRetry(
     url: string,
     headers: Record<string, string> | undefined,
@@ -61,23 +100,11 @@ export async function fetchJsonWithRetry(
     const rateLimitDelayMs = opts.rateLimitDelayMs ?? 2000;
     const timeoutMs = opts.timeoutMs ?? 15_000;
 
-    let lastError: unknown;
-    for (let attempt = 1; attempt <= attempts; attempt++) {
-        try {
-            return await fetchJson(url, headers, timeoutMs);
-        } catch (err) {
-            lastError = err;
-            if (attempt < attempts) {
-                // 429 = rate limit: back off much longer than a transient 5xx/timeout.
-                const rateLimited = err instanceof HttpError && err.status === 429;
-                await sleep((rateLimited ? rateLimitDelayMs : baseDelayMs) * attempt);
-            }
-        }
-    }
-    // Preserve the real HTTP status on the final error (so callers can e.g.
-    // treat a persistent 404 differently from a persistent 5xx).
-    if (lastError instanceof HttpError) {
-        throw new HttpError(lastError.status, `${attempts} attempts failed for ${url}: ${lastError.message}`);
-    }
-    throw new Error(`${attempts} attempts failed for ${url}: ${lastError}`);
+    return retryAsync(() => fetchJson(url, headers, timeoutMs), {
+        attempts,
+        // 429 = rate limit: back off much longer than a transient 5xx/timeout.
+        delayMs: (attempt, err) =>
+            (err instanceof HttpError && err.status === 429 ? rateLimitDelayMs : baseDelayMs) * attempt,
+        errorContext: url,
+    });
 }

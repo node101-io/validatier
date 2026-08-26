@@ -28,6 +28,33 @@ test('resolveRange: last_year subtracts 12 calendar months from until', () => {
   assert.equal(range.from, Date.UTC(2025, 7, 15) / 1000)
 })
 
+// Regression coverage for a real bug caught by code review: subtractMonths
+// used to rely on Date#setUTCMonth alone, which silently overflows into the
+// NEXT month when the target month is shorter than the source day-of-month.
+test('resolveRange: last_3_months from May 31 clamps to Feb 28 (non-leap year), not an overflowed March date', () => {
+  const until = Date.UTC(2026, 4, 31) / 1000 // May 31 2026 (2026 is not a leap year)
+  const range = resolveRange('last_3_months', until)
+  assert.equal(range.from, Date.UTC(2026, 1, 28) / 1000) // Feb 28 2026
+})
+
+test('resolveRange: last_3_months from May 31 in a leap year clamps to Feb 29', () => {
+  const until = Date.UTC(2024, 4, 31) / 1000 // May 31 2024 (2024 IS a leap year)
+  const range = resolveRange('last_3_months', until)
+  assert.equal(range.from, Date.UTC(2024, 1, 29) / 1000) // Feb 29 2024
+})
+
+test('resolveRange: last_6_months from Aug 31 clamps to Feb 28 (non-leap February)', () => {
+  const until = Date.UTC(2025, 7, 31) / 1000 // Aug 31 2025
+  const range = resolveRange('last_6_months', until)
+  assert.equal(range.from, Date.UTC(2025, 1, 28) / 1000) // Feb 28 2025
+})
+
+test('resolveRange: a source day that fits the target month is unaffected (no spurious clamping)', () => {
+  const until = Date.UTC(2026, 7, 15) / 1000 // Aug 15 2026 — day 15 fits every month
+  const range = resolveRange('last_3_months', until)
+  assert.equal(range.from, Date.UTC(2026, 4, 15) / 1000) // May 15 2026, exact
+})
+
 test('resolveRange: a computed from earlier than genesis clamps to genesis', () => {
   const until = Date.UTC(2021, 3, 1) / 1000 // Apr 1 2021 — genesis is Feb 18 2021
   const range = resolveRange('last_year', until)

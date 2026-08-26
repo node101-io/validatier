@@ -1,4 +1,5 @@
 import { chainClient, ChainClient } from '../chain/client';
+import { retryAsync } from '../chain/http';
 import { fetchAllStakingValidators } from '../chain/stakingValidators';
 import { getSqlite } from '../db/sqlite';
 import { Validator } from '../models/Validator/Validator';
@@ -42,32 +43,20 @@ export async function fetchStakeAtHeight(
 // to get another attempt ~6 seconds later. Each attempt already retries
 // its own HTTP calls internally (chain/http.ts's fetchJsonWithRetry, via
 // ChainClient/ArchiveChainClient.lcdGet) — this is a second, coarser layer
-// on top for the bulk call as a whole.
+// on top for the bulk call as a whole, built on the SAME retryAsync loop
+// (a hand-rolled duplicate of it here was caught by code review).
 const FETCH_STAKE_RETRY_ATTEMPTS = 3;
 const FETCH_STAKE_RETRY_DELAY_MS = 1000;
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 export async function fetchStakeAtHeightWithRetry(
   height: number,
   client?: ChainClient
 ): Promise<Map<string, bigint>> {
-  let lastError: unknown;
-  for (let attempt = 1; attempt <= FETCH_STAKE_RETRY_ATTEMPTS; attempt++) {
-    try {
-      return await fetchStakeAtHeight(height, client);
-    } catch (err) {
-      lastError = err;
-      if (attempt < FETCH_STAKE_RETRY_ATTEMPTS) {
-        await sleep(FETCH_STAKE_RETRY_DELAY_MS * attempt);
-      }
-    }
-  }
-  throw new Error(
-    `fetchStakeAtHeight failed after ${FETCH_STAKE_RETRY_ATTEMPTS} attempts at height ${height}: ${lastError}`
-  );
+  return retryAsync(() => fetchStakeAtHeight(height, client), {
+    attempts: FETCH_STAKE_RETRY_ATTEMPTS,
+    delayMs: (attempt) => FETCH_STAKE_RETRY_DELAY_MS * attempt,
+    errorContext: `fetchStakeAtHeight at height ${height}`,
+  });
 }
 
 interface SeedTotals {

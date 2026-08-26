@@ -118,14 +118,27 @@ async function handleRequest(
         }
 
         if (parts[0] === 'lcd') {
+            // A malformed `height` (non-integer, negative, empty) can only
+            // originate from a bug — every real caller is
+            // ArchiveChainClient.lcdGet, which always builds this from a
+            // `number` — but forwarding it unchecked used to reach the real
+            // upstream LCD as-is, which returns a generic 400/500 with no
+            // trace back to "the wrapper forwarded a bad height" (caught by
+            // code review). Reject at the boundary where the bad input is
+            // actually known instead.
+            const heightParam = url.searchParams.get('height');
+            if (heightParam !== null && !/^\d+$/.test(heightParam)) {
+                sendJson(res, 400, { error: `invalid height query param: ${JSON.stringify(heightParam)}` });
+                return;
+            }
+
             // Non-height LCD calls (ingest/withdrawMap.ts's withdraw_address
             // lookup) always fall through to live passthrough below — only
             // the staking validators LIST, height-scoped, is ever served
             // from the archive (TASKS.md 11.6).
-            const heightParamForArchive = url.searchParams.get('height');
             if (
                 isStakingValidatorsListPath(parts) &&
-                heightParamForArchive !== null &&
+                heightParam !== null &&
                 !url.searchParams.has('pagination.key')
             ) {
                 // pagination.key absent = first page. The archive always
@@ -136,7 +149,7 @@ async function handleRequest(
                 // from the LIVE endpoint's own pagination, not ours; if one
                 // somehow arrives, falling through to live passthrough is
                 // the only response that could possibly be correct for it.
-                const archived = await tryServeArchivedStaking(Number(heightParamForArchive));
+                const archived = await tryServeArchivedStaking(Number(heightParam));
                 if (archived !== null) {
                     sendJson(res, 200, { validators: archived.validators, pagination: { next_key: null } });
                     return;
@@ -156,7 +169,6 @@ async function handleRequest(
             // caught by code review, was previously untested. Must
             // translate here, and must NOT forward the synthetic `height`
             // param itself (it isn't a real LCD query param).
-            const heightParam = url.searchParams.get('height');
             const forwardedParams = new URLSearchParams(url.search);
             forwardedParams.delete('height');
             const qs = forwardedParams.toString();

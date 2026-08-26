@@ -102,6 +102,45 @@ test('ArchiveChainClient.getBlock wraps the wrapper ISO string in a Date usable 
     }
 });
 
+// Regression coverage for a real bug caught by code review: a missing
+// `time` field (server.ts's /header/:height returns `{}` when the
+// archived header row has none — JSON.stringify drops an undefined value
+// entirely) used to become `new Date(undefined)` — a silent Invalid Date
+// whose `.getTime()` is NaN, instead of a loud error at the point where
+// the bad data is known.
+function serveWrapperWithBadHeader(body: string): Promise<{ url: string; close: () => void }> {
+    const server = http.createServer((_req, res) => {
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(body);
+    });
+    return new Promise((resolve) => {
+        server.listen(0, '127.0.0.1', () => {
+            const { port } = server.address() as AddressInfo;
+            resolve({ url: `http://127.0.0.1:${port}`, close: () => server.close() });
+        });
+    });
+}
+
+test('ArchiveChainClient.getBlock throws instead of silently producing an Invalid Date when time is missing', async () => {
+    const { url, close } = await serveWrapperWithBadHeader('{}');
+    try {
+        const client = new ArchiveChainClient(url);
+        await assert.rejects(() => client.getBlock(1), /no header time/);
+    } finally {
+        close();
+    }
+});
+
+test('ArchiveChainClient.getBlock throws instead of silently producing an Invalid Date when time is unparseable', async () => {
+    const { url, close } = await serveWrapperWithBadHeader('{"time":"not-a-real-date"}');
+    try {
+        const client = new ArchiveChainClient(url);
+        await assert.rejects(() => client.getBlock(1), /unparseable header time/);
+    } finally {
+        close();
+    }
+});
+
 test('ArchiveChainClient.getStatus maps the wrapper shape to ChainSource shape', async () => {
     const { url, close } = await serveFakeWrapper(new Map());
     try {

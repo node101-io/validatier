@@ -331,6 +331,21 @@ decision, not this phase's.
       *Accept:* a height-scoped LCD call against a non-echoing endpoint throws; against a
       correct one, succeeds and the returned data actually differs by height.
 
+- [ ] **11.8 Known limitation, not fixed (lead dev call, 2026-08-26): a daily job that
+      exhausts all retries permanently skips that day's validator_stats/price sync.**
+      `jobs/blockLoop.ts`'s day-check (`if (blockDay !== getLastDailyRunDay())`) only
+      retries `runDailyJobsForDay` on every block WITHIN the same still-current chain-day —
+      `applyHeight`/the cursor already advanced past the failing height before the day-check
+      even runs, so nothing blocks chain-scan progress. But once the chain-day itself rolls
+      over, the failed day's marker is simply never revisited — `last_daily_run_day` is a
+      single forward-only scalar, not a queue. Mitigated, not fixed, by
+      `jobs/validatorStats.ts`'s `fetchStakeAtHeightWithRetry` (outer retry around the whole
+      bulk stake fetch, on top of `chain/http.ts`'s existing per-HTTP-call retry) — makes
+      exhausting all retries in one day much less likely, doesn't add a backfill path for
+      when it still happens. A real fix (block cursor progress on daily-job failure, or a
+      separate `failed_daily_jobs` retry queue) is a deliberate design decision, not
+      something to bolt on unilaterally — deferred until it's actually needed.
+
 ## Deferred — old archive-node design (superseded by Phase 11 above, kept for history)
 
 Design decided 2026-07-22 (user call). No longer the plan — an archive node is not being

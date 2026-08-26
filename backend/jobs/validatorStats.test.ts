@@ -210,7 +210,7 @@ test('fetchStakeAtHeightWithRetry gives up and throws after exhausting all outer
   });
   try {
     const client = new ChainClient(url, url);
-    await assert.rejects(() => fetchStakeAtHeightWithRetry(999, client), /failed after 3 attempts/);
+    await assert.rejects(() => fetchStakeAtHeightWithRetry(999, client), /3 attempts failed/);
   } finally {
     close();
   }

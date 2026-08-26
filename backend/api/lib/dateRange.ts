@@ -19,10 +19,34 @@ export const GENESIS_UNIX_SECONDS = Math.floor(
 // "3 months back" means a calendar-month subtraction (matches the old
 // pre-rewrite picker's `start.setMonth(today.getMonth() - months)`), not a
 // fixed day count — so "3 months" from Mar 31 lands on ~Dec 31, not Jan 1.
+//
+// `Date#setUTCMonth` alone silently OVERFLOWS into the next month when the
+// target month is shorter than the source day-of-month — e.g. May 31 minus
+// 3 months naively becomes "Feb 31", which JS normalizes to Mar 2/3, not
+// Feb 28/29 (caught by code review; confirmed reproducible, was untested —
+// the existing test fixtures all use day=15, which never hits this edge).
+// Clamp the day to the target month's actual last day instead, matching
+// how every real calendar-month picker handles this case.
+function daysInUtcMonth(year: number, monthIndex0: number): number {
+  return new Date(Date.UTC(year, monthIndex0 + 1, 0)).getUTCDate()
+}
+
 function subtractMonths(unixSeconds: number, months: number): number {
   const d = new Date(unixSeconds * 1000)
-  d.setUTCMonth(d.getUTCMonth() - months)
-  return Math.floor(d.getTime() / 1000)
+  const totalMonths = d.getUTCFullYear() * 12 + d.getUTCMonth() - months
+  const targetYear = Math.floor(totalMonths / 12)
+  const targetMonthIndex0 = ((totalMonths % 12) + 12) % 12
+  const clampedDay = Math.min(d.getUTCDate(), daysInUtcMonth(targetYear, targetMonthIndex0))
+  return Math.floor(
+    Date.UTC(
+      targetYear,
+      targetMonthIndex0,
+      clampedDay,
+      d.getUTCHours(),
+      d.getUTCMinutes(),
+      d.getUTCSeconds(),
+    ) / 1000,
+  )
 }
 
 // `until` must already be clamped to [GENESIS_UNIX_SECONDS, now] by the

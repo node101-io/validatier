@@ -87,6 +87,42 @@ test('/lcd passthrough with no height sends no x-cosmos-block-height header', as
     }
 });
 
+// Regression coverage for a real bug caught by code review: a malformed
+// `height` query param used to be forwarded straight into the
+// x-cosmos-block-height header unchecked, reaching the real upstream LCD
+// as garbage instead of being rejected where the bad input is known.
+test('/lcd rejects a malformed height with 400 and never calls upstream', async () => {
+    const upstream = await serveFakeUpstreamLcd();
+    const wrapper = startArchiveServer(0, upstream.url);
+    try {
+        const { port } = wrapper.address() as AddressInfo;
+        for (const badHeight of ['abc', '-5', '', '12.5', '1e10']) {
+            const res = await fetch(
+                `http://127.0.0.1:${port}/lcd/cosmos/staking/v1beta1/validators?height=${badHeight}`,
+            );
+            assert.equal(res.status, 400, `height=${badHeight} should be rejected`);
+        }
+        assert.equal(upstream.lastRequest(), null, 'upstream must never see a malformed height');
+    } finally {
+        wrapper.close();
+        upstream.close();
+    }
+});
+
+test('/lcd accepts a well-formed non-negative integer height', async () => {
+    const upstream = await serveFakeUpstreamLcd();
+    const wrapper = startArchiveServer(0, upstream.url);
+    try {
+        const { port } = wrapper.address() as AddressInfo;
+        const res = await fetch(`http://127.0.0.1:${port}/lcd/cosmos/staking/v1beta1/validators?height=0`);
+        assert.equal(res.status, 200);
+        assert.equal(upstream.lastRequest()!.heightHeader, '0');
+    } finally {
+        wrapper.close();
+        upstream.close();
+    }
+});
+
 // --- staking archive day-approximate serving (TASKS.md 11.6) -------------
 //
 // Fakes ONLY the R2 host at the fetch layer (real Cloudflare host derived

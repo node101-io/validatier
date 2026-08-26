@@ -94,7 +94,16 @@ export function buildMonthlyBucket(
   const total_sold: Array<number | null> = new Array(len).fill(null)
   const price: Array<number | null> = new Array(len).fill(null)
 
-  const soldAtRangeStart = valueAtOrBefore(cumulativeSoldTimeline, range.from) ?? 0n
+  // `range.from` itself is inclusive (dateRange.ts's ResolvedRange comment),
+  // so the pre-window baseline must be STRICTLY before it — otherwise a sale
+  // landing exactly at range.from gets read into both `soldAtRangeStart` and
+  // that same day's `soldAsOfDay` (valueAtOrBefore is `<=` on both ends),
+  // subtracting it away to 0 instead of counting it (caught by code review;
+  // confirmed reproducible, real chain timestamps just never happened to
+  // land exactly on a range boundary in prior testing). Timestamps are
+  // whole unix seconds, so `range.from - 1` is an exact, gap-free
+  // "everything up to but not including range.from".
+  const soldAtRangeStart = valueAtOrBefore(cumulativeSoldTimeline, range.from - 1) ?? 0n
 
   for (let i = 0; i < len; i++) {
     const ts = doc.timestamp[i]

@@ -147,6 +147,38 @@ test('buildMonthlyBucket windows total_sold to a delta from range.from and skips
   assert.equal(bucket.data.total_sold[2], null)
 })
 
+// Regression coverage for a real bug caught by code review: the pre-window
+// baseline used to be valueAtOrBefore(cumulativeSoldTimeline, range.from) —
+// an inclusive `<=` lookup at the SAME timestamp used for a day landing
+// exactly on range.from, so that day's own sale got subtracted from itself
+// (0 instead of the real amount), even though ResolvedRange.from is
+// documented as inclusive.
+test('buildMonthlyBucket counts a sale that lands exactly on range.from, not zeroing it against itself', () => {
+  const timestamp = emptyMonth()
+  const total_stake = emptyMonthStr()
+  timestamp[0] = 100 // day 1, exactly at range.from below
+  total_stake[0] = '1000000'
+
+  const doc: ValidatorStatsMonthDoc = {
+    year: 2026,
+    month: 1,
+    timestamp,
+    total_stake,
+    total_withdrawn_reward: emptyMonthStr(),
+    total_withdrawn_commission: emptyMonthStr(),
+  }
+
+  // A sale of 500_000 lands EXACTLY at ts=100, and the window also starts
+  // exactly at from=100 — before the fix, both the baseline lookup and the
+  // day-1 lookup resolved to the same 500_000n entry, zeroing the delta.
+  const soldTimeline: TimedValue<bigint>[] = [{ timestamp: 100, value: 500_000n }]
+
+  const bucket = buildMonthlyBucket(doc, 6, soldTimeline, [], { from: 100, to: 200 })
+
+  assert.equal(bucket.data.timestamp[0], 100)
+  assert.equal(bucket.data.total_sold[0], 0.5) // the full 500_000 sale must be counted, not zeroed
+})
+
 test('valueAtOrBeforeField reads the cumulative field as-of a timestamp, carrying the last known value forward', () => {
   const days: PopulatedDay[] = [
     { timestamp: 100, total_stake: null, total_withdrawn_reward: '5000000', total_withdrawn_commission: null },

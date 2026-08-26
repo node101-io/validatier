@@ -42,7 +42,23 @@ export class ArchiveChainClient implements ChainSource {
         height: number,
     ): Promise<{ block: { header: { time: { getTime(): number } } } }> {
         const h = (await this.get(`/header/${height}`)) as WrapperHeader;
-        return { block: { header: { time: new Date(h.time) } } };
+        // The wrapper's /header/:height omits `time` from its JSON response
+        // when the archived header row has none (JSON.stringify drops an
+        // undefined value entirely — see archive/server.ts's handler) —
+        // without this check, `new Date(undefined)` silently produces an
+        // Invalid Date, and every caller's `.getTime()` (day-boundary
+        // detection in jobs/blockLoop.ts / jobs/validatorStats.ts) then
+        // silently gets NaN, which compares false against everything
+        // instead of erroring at the point where the bad data is actually
+        // known (caught by code review).
+        if (typeof h.time !== 'string') {
+            throw new Error(`archive wrapper returned no header time for height ${height}`);
+        }
+        const time = new Date(h.time);
+        if (Number.isNaN(time.getTime())) {
+            throw new Error(`archive wrapper returned an unparseable header time for height ${height}: ${h.time}`);
+        }
+        return { block: { header: { time } } };
     }
 
     getBlockResults(height: number): Promise<unknown> {

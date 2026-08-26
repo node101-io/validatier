@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import { getObject, putObject, type R2Config } from './lib/r2';
 import { readManifest as r2ReadManifest, writeManifest as r2WriteManifest, type Manifest } from './lib/manifest';
@@ -18,6 +18,11 @@ import { encodeJsonl, decodeJsonl, zstdCompress, zstdDecompress } from './lib/ch
 // MUST share the same ARCHIVE_CACHE_DIR (same machine or same mounted
 // volume) for "local is primary" to mean anything; if they don't, the
 // wrapper falls back to R2 on every read, which defeats the whole point.
+//
+// Uses node:fs/promises throughout, not the sync fs API — this backs every
+// wrapper HTTP request (archive/server.ts), and a sync disk read/write
+// would block Node's single event loop for its duration, serializing
+// otherwise-independent concurrent requests (caught by code review).
 
 function pad(chunkId: number): string {
     return String(chunkId).padStart(8, '0');
@@ -35,6 +40,24 @@ function stakingPath(cacheDir: string, day: string): string {
     return path.join(cacheDir, 'staking', `${day}.json`);
 }
 
+// Reads a local file's contents, or null if it doesn't exist — a single
+// read+catch instead of a separate existence check (fs/promises has no
+// direct `existsSync` equivalent, and a check-then-read would be a TOCTOU
+// race anyway). Rethrows any error other than "file doesn't exist".
+async function readIfExists(p: string): Promise<string | null> {
+    try {
+        return await fs.readFile(p, 'utf8');
+    } catch (err) {
+        if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null;
+        throw err;
+    }
+}
+
+async function writeLocal(p: string, text: string): Promise<void> {
+    await fs.mkdir(path.dirname(p), { recursive: true });
+    await fs.writeFile(p, text);
+}
+
 // Local first. Only touches R2 when nothing local exists yet — a fresh
 // server, or a wiped cache dir. Restoring writes the local copy so the NEXT
 // call never hits R2 again.
@@ -44,8 +67,9 @@ export async function loadManifest(
     startHeight: number,
 ): Promise<Manifest> {
     const p = manifestPath(cacheDir);
-    if (fs.existsSync(p)) {
-        const m = JSON.parse(fs.readFileSync(p, 'utf8')) as Manifest;
+    const local = await readIfExists(p);
+    if (local !== null) {
+        const m = JSON.parse(local) as Manifest;
         if (m.startHeight !== startHeight) {
             throw new Error(
                 `local manifest startHeight mismatch: disk has ${m.startHeight}, config says ${startHeight}`,
@@ -57,8 +81,7 @@ export async function loadManifest(
     // itself returns a fresh empty manifest if even that doesn't exist —
     // true first-ever run).
     const restored = await r2ReadManifest(r2, startHeight);
-    fs.mkdirSync(path.dirname(p), { recursive: true });
-    fs.writeFileSync(p, JSON.stringify(restored, null, 2));
+    await writeLocal(p, JSON.stringify(restored, null, 2));
     return restored;
 }
 
@@ -68,8 +91,7 @@ export async function loadManifest(
 // chunk during backfill, never on a read path.
 export async function saveManifest(r2: R2Config, cacheDir: string, manifest: Manifest): Promise<void> {
     const withTs: Manifest = { ...manifest, updatedAt: new Date().toISOString() };
-    fs.mkdirSync(cacheDir, { recursive: true });
-    fs.writeFileSync(manifestPath(cacheDir), JSON.stringify(withTs, null, 2));
+    await writeLocal(manifestPath(cacheDir), JSON.stringify(withTs, null, 2));
     await r2WriteManifest(r2, withTs);
 }
 
@@ -84,14 +106,13 @@ export async function readChunk(
     chunkId: number,
 ): Promise<unknown[] | null> {
     const p = chunkPath(cacheDir, kind, chunkId);
-    if (fs.existsSync(p)) {
-        return decodeJsonl(fs.readFileSync(p, 'utf8'));
-    }
+    const local = await readIfExists(p);
+    if (local !== null) return decodeJsonl(local);
+
     const compressed = await getObject(r2, `${kind}/${pad(chunkId)}.jsonl.zst`);
     if (compressed === null) return null;
     const text = zstdDecompress(compressed);
-    fs.mkdirSync(path.dirname(p), { recursive: true });
-    fs.writeFileSync(p, text);
+    await writeLocal(p, text);
     return decodeJsonl(text);
 }
 
@@ -107,9 +128,7 @@ export async function writeChunk(
     rows: unknown[],
 ): Promise<void> {
     const text = encodeJsonl(rows);
-    const p = chunkPath(cacheDir, kind, chunkId);
-    fs.mkdirSync(path.dirname(p), { recursive: true });
-    fs.writeFileSync(p, text);
+    await writeLocal(chunkPath(cacheDir, kind, chunkId), text);
     await putObject(r2, `${kind}/${pad(chunkId)}.jsonl.zst`, zstdCompress(text));
 }
 
@@ -124,21 +143,18 @@ export async function readStakingSnapshot(
     day: string,
 ): Promise<unknown | null> {
     const p = stakingPath(cacheDir, day);
-    if (fs.existsSync(p)) {
-        return JSON.parse(fs.readFileSync(p, 'utf8'));
-    }
+    const local = await readIfExists(p);
+    if (local !== null) return JSON.parse(local);
+
     const compressed = await getObject(r2, `staking/${day}.json.zst`);
     if (compressed === null) return null;
     const text = zstdDecompress(compressed);
-    fs.mkdirSync(path.dirname(p), { recursive: true });
-    fs.writeFileSync(p, text);
+    await writeLocal(p, text);
     return JSON.parse(text);
 }
 
 export async function writeStakingSnapshot(r2: R2Config, cacheDir: string, day: string, snapshot: unknown): Promise<void> {
     const text = JSON.stringify(snapshot);
-    const p = stakingPath(cacheDir, day);
-    fs.mkdirSync(path.dirname(p), { recursive: true });
-    fs.writeFileSync(p, text);
+    await writeLocal(stakingPath(cacheDir, day), text);
     await putObject(r2, `staking/${day}.json.zst`, zstdCompress(text));
 }
