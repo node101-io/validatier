@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { loadManifest, saveManifest, readChunk, writeChunk } from './localArchive';
+import { loadManifest, saveManifest, readChunk, writeChunk, readStakingSnapshot, writeStakingSnapshot } from './localArchive';
 import type { R2Config } from './lib/r2';
 import type { Manifest } from './lib/manifest';
 
@@ -150,6 +150,54 @@ test('loadManifest throws on a startHeight mismatch against the local file', asy
             updatedAt: new Date(0).toISOString(),
         });
         await assert.rejects(() => loadManifest(cfg, dir, 22_000_000));
+    } finally {
+        restore();
+    }
+});
+
+// --- staking snapshots (TASKS.md 11.6) ------------------------------------
+
+test('writeStakingSnapshot then readStakingSnapshot round-trips purely from local disk (zero GET calls)', async () => {
+    const { cfg, calls, restore } = fakeR2();
+    const dir = tmpDir();
+    try {
+        const snapshot = { day: '2024-08-25', height: 21_870_003, ts: 1724544003, validators: [{ operator_address: 'cosmosvaloper1a', tokens: '111' }] };
+        await writeStakingSnapshot(cfg, dir, '2024-08-25', snapshot);
+        assert.equal(calls.put, 1, 'one backup PUT on write');
+
+        const read = await readStakingSnapshot(cfg, dir, '2024-08-25');
+        assert.deepEqual(read, snapshot);
+        assert.equal(calls.get, 0, 'read must be served from local disk, not R2');
+    } finally {
+        restore();
+    }
+});
+
+test('readStakingSnapshot on a genuine miss (day never archived) returns null', async () => {
+    const { cfg, restore } = fakeR2();
+    const dir = tmpDir();
+    try {
+        assert.equal(await readStakingSnapshot(cfg, dir, '2020-01-01'), null);
+    } finally {
+        restore();
+    }
+});
+
+test('readStakingSnapshot restores from the R2 backup on a local miss, and caches it locally', async () => {
+    const { cfg, calls, restore } = fakeR2();
+    const writerDir = tmpDir();
+    const readerDir = tmpDir(); // simulates a fresh server with an empty local cache
+    try {
+        const snapshot = { day: '2024-09-01', height: 21_884_500, ts: 1725148800, validators: [] };
+        await writeStakingSnapshot(cfg, writerDir, '2024-09-01', snapshot);
+
+        const first = await readStakingSnapshot(cfg, readerDir, '2024-09-01');
+        assert.deepEqual(first, snapshot);
+        assert.equal(calls.get, 1, 'first read on this fresh dir must hit R2 once');
+
+        const second = await readStakingSnapshot(cfg, readerDir, '2024-09-01');
+        assert.deepEqual(second, snapshot);
+        assert.equal(calls.get, 1, 'second read must be served locally — no further R2 calls');
     } finally {
         restore();
     }

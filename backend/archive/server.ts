@@ -1,7 +1,8 @@
 import http from 'node:http';
 import { archiveConfig, liveChainUrls } from './config';
-import { loadManifest, readChunk } from './localArchive';
+import { loadManifest, readChunk, readStakingSnapshot } from './localArchive';
 import { chunkIdOf } from './lib/chunk';
+import { formatUtcDay } from './lib/stakingDay';
 
 // The wrapper: plain JSON over HTTP in front of the local archive
 // (localArchive.ts) — NOT a CometBFT JSON-RPC mock (plan §5) —
@@ -29,6 +30,41 @@ async function readRowByHeight(
     if (rows === null) return null;
     const row = rows.find((r) => (r as { height?: unknown }).height === height);
     return (row as Record<string, unknown> | undefined) ?? null;
+}
+
+// Detects the one LCD call the staking archive (TASKS.md 11.6) backs:
+// the paginated staking validators LIST, first page only (a second-page
+// request never arises here — see the comment at the call site below).
+// Pure/exported so the routing decision itself is unit-testable without
+// spinning up an HTTP server.
+export function isStakingValidatorsListPath(parts: string[]): boolean {
+    return (
+        parts.length === 5 &&
+        parts[1] === 'cosmos' &&
+        parts[2] === 'staking' &&
+        parts[3] === 'v1beta1' &&
+        parts[4] === 'validators'
+    );
+}
+
+// Day-approximate serving (lead dev's explicit choice, 2026-08-26 — see
+// stakingIngest.ts's header for the accepted-risk rationale): resolves the
+// requested height to its UTC day via the archived block header, then
+// serves that WHOLE day's staking snapshot regardless of whether the
+// snapshot's own recorded height exactly matches the requested one. Returns
+// null on any miss (header not archived yet, or that day has no staking
+// snapshot yet) so the caller falls back to live passthrough.
+async function tryServeArchivedStaking(height: number): Promise<{ validators: unknown[] } | null> {
+    const headerRow = await readRowByHeight('block_headers', height);
+    if (headerRow === null) return null;
+    const time = (headerRow.header as { time?: string } | undefined)?.time;
+    if (!time) return null;
+
+    const day = formatUtcDay(Math.floor(Date.parse(time) / 1000));
+    const snapshot = await readStakingSnapshot(archiveConfig.r2, archiveConfig.cacheDir, day);
+    if (snapshot === null) return null;
+
+    return { validators: (snapshot as { validators: unknown[] }).validators };
 }
 
 // lcdUrl threaded through as a parameter (default: the live chain's real
@@ -82,13 +118,33 @@ async function handleRequest(
         }
 
         if (parts[0] === 'lcd') {
-            // Live passthrough only for now — non-height LCD calls
-            // (ingest/withdrawMap.ts's withdraw_address lookup) work as-is.
-            // Height-scoped staking snapshots (validator_stats' daily job)
-            // need the archived staking/ data from backfill step A, not yet
-            // wired up here — see the plan's Adım A / open follow-up
-            // (TASKS.md 11.6).
-            //
+            // Non-height LCD calls (ingest/withdrawMap.ts's withdraw_address
+            // lookup) always fall through to live passthrough below — only
+            // the staking validators LIST, height-scoped, is ever served
+            // from the archive (TASKS.md 11.6).
+            const heightParamForArchive = url.searchParams.get('height');
+            if (
+                isStakingValidatorsListPath(parts) &&
+                heightParamForArchive !== null &&
+                !url.searchParams.has('pagination.key')
+            ) {
+                // pagination.key absent = first page. The archive always
+                // answers with the FULL validator list and `next_key: null`
+                // in one response (see below) — a real second-page request
+                // can only follow a non-null next_key, which we never
+                // return, so a pagination.key here would only ever come
+                // from the LIVE endpoint's own pagination, not ours; if one
+                // somehow arrives, falling through to live passthrough is
+                // the only response that could possibly be correct for it.
+                const archived = await tryServeArchivedStaking(Number(heightParamForArchive));
+                if (archived !== null) {
+                    sendJson(res, 200, { validators: archived.validators, pagination: { next_key: null } });
+                    return;
+                }
+                // miss (header not archived, or that day has no staking
+                // snapshot yet) — fall through to live passthrough.
+            }
+
             // ArchiveChainClient.lcdGet encodes the requested height as a
             // `?height=N` query param (there's no other way to get it from
             // a plain GET across the wrapper boundary — see

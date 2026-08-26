@@ -31,6 +31,10 @@ function chunkPath(cacheDir: string, kind: 'block_results' | 'block_headers', ch
     return path.join(cacheDir, kind, `${pad(chunkId)}.jsonl`);
 }
 
+function stakingPath(cacheDir: string, day: string): string {
+    return path.join(cacheDir, 'staking', `${day}.json`);
+}
+
 // Local first. Only touches R2 when nothing local exists yet — a fresh
 // server, or a wiped cache dir. Restoring writes the local copy so the NEXT
 // call never hits R2 again.
@@ -107,4 +111,34 @@ export async function writeChunk(
     fs.mkdirSync(path.dirname(p), { recursive: true });
     fs.writeFileSync(p, text);
     await putObject(r2, `${kind}/${pad(chunkId)}.jsonl.zst`, zstdCompress(text));
+}
+
+// One JSON object per UTC day, not chunked (a day's full validator list is
+// a single small object, unlike the 1000-block block_results/block_headers
+// batches) — see archive/stakingIngest.ts (TASKS.md 11.6). Same local-first
+// pattern as everything else in this file: local disk is what the wrapper
+// reads, R2 is the backup copy.
+export async function readStakingSnapshot(
+    r2: R2Config,
+    cacheDir: string,
+    day: string,
+): Promise<unknown | null> {
+    const p = stakingPath(cacheDir, day);
+    if (fs.existsSync(p)) {
+        return JSON.parse(fs.readFileSync(p, 'utf8'));
+    }
+    const compressed = await getObject(r2, `staking/${day}.json.zst`);
+    if (compressed === null) return null;
+    const text = zstdDecompress(compressed);
+    fs.mkdirSync(path.dirname(p), { recursive: true });
+    fs.writeFileSync(p, text);
+    return JSON.parse(text);
+}
+
+export async function writeStakingSnapshot(r2: R2Config, cacheDir: string, day: string, snapshot: unknown): Promise<void> {
+    const text = JSON.stringify(snapshot);
+    const p = stakingPath(cacheDir, day);
+    fs.mkdirSync(path.dirname(p), { recursive: true });
+    fs.writeFileSync(p, text);
+    await putObject(r2, `staking/${day}.json.zst`, zstdCompress(text));
 }

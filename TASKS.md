@@ -274,16 +274,47 @@ decision, not this phase's.
       *Accept:* served correctly against fixture data in-process (`archiveClient.test.ts`);
       not yet run against a live R2 bucket or alongside a real ingester.
 
-- [ ] **11.6 Staking snapshot backfill ("Adım A").** For each of the ~730 days in the
-      2-year window, binary-search the live chain for that day's height (mirroring the
-      probe done during planning), pull the full validator list via
-      `chain/stakingValidators.ts`'s `fetchAllStakingValidators`, write through
-      `localArchive.ts`'s local-first pattern (new `staking/{day}.jsonl` kind, same as
-      block_results/block_headers) keyed by day. Wrapper's
-      `/lcd/cosmos/staking/v1beta1/validators?height=N` should then serve from local disk
-      when the height matches an archived day instead of always live-passthrough. Cheapest,
-      highest-value step (validator_stats opens to 2 years of history) — do this first once
-      R2 creds land, even before 11.4's full block_results backfill finishes. → the plan doc
+- [x] **11.6 Staking snapshot backfill ("Adım A").** `archive/lib/stakingDay.ts`:
+      day↔height binary search (`findFirstHeightOfDay`) + day-window walk decision
+      (`nextStakingDayToBackfill`), both pure/unit-tested against a fake in-memory chain
+      (13 tests). `archive/localArchive.ts`: `readStakingSnapshot`/`writeStakingSnapshot`,
+      one JSON object per UTC day (not chunked — a day's validator list is small), same
+      local-first/R2-backup pattern as block_results (10 tests incl. R2-restore-on-miss).
+      `archive/stakingIngest.ts`'s `runStakingBackfill()` walks day by day from the archive's
+      startDay to the chain's current tip day (inclusive — "today" counts, unlike a partial
+      block_results chunk, since a day's snapshot only needs ONE block on that day to exist).
+      Wired into `entrySync.ts`, runs before each block_results ingest pass (its own
+      manifest field `stakingCompleteThroughDay` tracks progress independently).
+
+      **Serving-side decision (lead dev's explicit call, 2026-08-26, overriding the
+      reviewer-recommended default):** `archive/server.ts`'s `/lcd` handler serves a day's
+      staking snapshot for ANY height-scoped request landing on that UTC day (resolved via
+      the archived block header), not only a request for the exact height the snapshot was
+      taken at — day-approximate matching (Seçenek B), not exact-height-only (Seçenek A).
+      Accepted risk: a same-day request for a height AFTER a delegation/undelegation event
+      gets the EARLIER (first-of-day) stake figure. Judged acceptable because
+      `validator_stats` already only takes ONE data point per day everywhere else in this
+      system (`jobs/validatorStats.ts`'s `runDailyValidatorStats` is called once per day,
+      at the day's first block) — the existing design's precision unit is already "a day,"
+      not "a block." 7 tests in `server.test.ts` cover both the day-approximate hit and the
+      fallback-to-live-passthrough misses (no header archived, header archived but no
+      staking snapshot for that day, and a pagination.key second-page request, which the
+      archive never serves since it always answers in one page).
+
+      **Verified, and a real (separate, already-tracked) bug reconfirmed along the way:**
+      live E2E against the real chain + real R2 (temporary test window, cleaned up after —
+      see the plan's verification log) proved the day/height-finding algorithm finds the
+      objectively correct heights (cross-checked against real RPC block timestamps,
+      unaffected by 11.7's bug — that bug lives in the LCD, not the RPC) and that the
+      wrapper's day-approximate serving does what it's designed to do. It could NOT verify
+      that the archived `tokens` VALUES are historically accurate, because the current
+      `LCD_URL` — independently reconfirmed live during this same test — returns byte-
+      identical validator data for a height 10,000 blocks in the past as for the current
+      tip, i.e. it ignores the height header entirely (this is 11.7, not a new issue).
+      Real, value-accurate staking backfill is still blocked on 11.7's fix landing, exactly
+      as this task already said below before 11.6 was implemented.
+      *Accept:* pure logic + wiring unit-tested (30 new tests total); real historical VALUE
+      accuracy blocked on 11.7.
 
 - [ ] **11.7 LCD height-header trust bug (separate from the archive work, surfaced while
       measuring for it).** The current `LCD_URL` silently ignores
