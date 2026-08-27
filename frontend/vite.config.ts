@@ -8,6 +8,10 @@ import tailwindcss from '@tailwindcss/vite'
 
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
+  // `vite preview` (how the app is served in prod, see ecosystem.config.cjs)
+  // rejects requests whose Host header it doesn't recognise. nginx proxies the
+  // public domain to it, so that domain has to be whitelisted here.
+  preview: { allowedHosts: ['validatier-demo.node101.io'] },
   plugins: [
     devtools(),
     tailwindcss(),
