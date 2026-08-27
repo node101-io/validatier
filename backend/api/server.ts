@@ -96,7 +96,9 @@ async function handleRequest(req: http.IncomingMessage, res: http.ServerResponse
 }
 
 async function main(): Promise<void> {
-  await connectMongo();
+  // config.apiMongoUri === MONGO_URI unless API_MONGO_URI is set — lets this
+  // read-only API serve a demo/copy DB while app.ts keeps writing to the live one.
+  await connectMongo(config.apiMongoUri);
 
   const server = http.createServer((req, res) => {
     handleRequest(req, res).catch((err: unknown) => {

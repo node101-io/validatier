@@ -1,13 +1,13 @@
 import mongoose from 'mongoose';
 import { config } from '../config';
 
-export async function connectMongo(): Promise<void> {
+export async function connectMongo(uri: string = config.mongoUri): Promise<void> {
   // Errors AFTER the initial connect surface here (initial failures reject below).
   mongoose.connection.on('error', (err) => {
     console.error('mongo: connection error', err);
   });
 
-  await mongoose.connect(config.mongoUri);
+  await mongoose.connect(uri);
   // Log the db name, never the URI (it may carry credentials).
   console.log(`mongo: connected (db=${mongoose.connection.name})`);
 }

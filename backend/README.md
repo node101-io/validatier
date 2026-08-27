@@ -9,6 +9,39 @@ guide.
 | Wrapper | `npm run archive-server` | Serves the local/R2 archive to the dashboard backend over plain HTTP (`ARCHIVE_URL`). |
 | Ingester | `npm run archive-sync` | One-time backfill + ongoing tip-follow: walks the live chain (`RPC_URL`/`LCD_URL`), fills the archive. |
 | Dashboard backend | `npm start` | The actual indexer (block loop, fund-flow engine, validator_stats). Talks ONLY to the wrapper, never to `RPC_URL`/`LCD_URL` directly. |
+| HTTP API | `npm run api` | Read-only HTTP API the frontend fetches from (`backend/api/server.ts`). Only reads Mongo, never writes — restarts/scales independently of the indexer. |
+
+## Pointing the HTTP API at a different database (demos)
+
+The new frontend never touches Mongo — it only fetches from `npm run api`
+(`BACKEND_API_URL` in `frontend/.env`). So "run the demo against the old
+DB" means "point the HTTP API at that DB", not the frontend.
+
+Set `API_MONGO_URI` in `.env` (or inline). It is read **only** by
+`backend/api/server.ts`; when unset it falls back to `MONGO_URI`, so
+existing setups are unchanged. Nothing else is affected:
+
+- `npm start` (indexer) keeps writing to `MONGO_URI`.
+- `npm run archive-sync` (ingester) never touches Mongo at all.
+
+Recipe for a demo alongside the live stack:
+
+```bash
+# a second API process on its own port, reading a copy/old DB
+API_MONGO_URI='mongodb://.../validatier-demo' API_PORT=4001 npm run api
+
+# frontend/.env
+BACKEND_API_URL=http://localhost:4001
+```
+
+The API's startup log line (`mongo: connected (db=...)`) names the DB it
+actually connected to — check it. Remove `API_MONGO_URI` to go back to
+`MONGO_URI`.
+
+Schema caveat: `backend/api` expects the current collections
+(`validators`, `validator_stats`, `fund_flow_edges`, `validator_sink_sales`,
+`fund_flow_sink_registry`, `prices`, `meta`). A pre-rewrite database won't
+serve — this only works with a database that already has the new schema.
 
 ## Cold-start order (first run, or after `npm run wipe-db`)
 

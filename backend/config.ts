@@ -17,6 +17,9 @@ export interface Config {
   // `chainClient` singleton actually calls; the running dashboard backend never touches
   // rpcUrl/lcdUrl above.
   mongoUri: string;
+  apiMongoUri: string; // backend/api/server.ts only — lets the read-only HTTP API serve a
+  // different DB (e.g. a demo/copy) while the indexer (app.ts) keeps writing to mongoUri.
+  // Falls back to mongoUri when API_MONGO_URI is unset.
   sqlitePath: string;
   maxDepth: number;
   tier2MinIndegree: number;
@@ -59,6 +62,7 @@ export const config: Config = {
   lcdUrl: requireUrl('LCD_URL'),
   archiveUrl: requireUrl('ARCHIVE_URL'),
   mongoUri: requireEnv('MONGO_URI'),
+  apiMongoUri: process.env.API_MONGO_URI?.trim() || requireEnv('MONGO_URI'),
   sqlitePath: requireEnv('SQLITE_PATH'),
   maxDepth: requireInt('MAX_DEPTH'),
   tier2MinIndegree: requireInt('TIER2_MIN_INDEGREE'),
