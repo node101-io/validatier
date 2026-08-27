@@ -27,10 +27,11 @@ module.exports = {
   apps: [
     {
       name: 'validatier-frontend',
+      namespace: 'validatier',
       cwd: __dirname,
       script: 'node_modules/vite/bin/vite.js',
       // --host binds 0.0.0.0 (needed for remote access); --port sets the port.
-      args: 'preview --port 3000 --host',
+      args: 'preview --port 3001 --host',
       exec_mode: 'fork',
       autorestart: true,
       env: { NODE_ENV: 'production' },
