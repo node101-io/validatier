@@ -71,5 +71,12 @@ export async function runStakingBackfill(): Promise<StakingBackfillStats> {
 
         lo = height;
         stats.daysWritten++;
+        // Logged per-day, not just once the whole backfill finishes —
+        // the outer loop (entrySync.ts) only prints a summary AFTER this
+        // function returns, which for a ~730-day cold-start backfill can
+        // be a long time; an operator tailing the process log needs to
+        // see it's actually moving, not just alive/dead (raised after a
+        // real run where the terminal sat silent for the entire backfill).
+        console.log(`staking backfill: day ${day} -> height ${height} (${validators.length} validators)`);
     }
 }

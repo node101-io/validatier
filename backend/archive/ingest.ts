@@ -73,6 +73,14 @@ export async function runArchiveIngest(): Promise<IngestStats> {
         await ingestChunk(live, manifest, next.from, next.to);
         stats.chunksWritten++;
         stats.heightsWritten += next.to - next.from + 1;
+
+        // Logged per-chunk, not just once the whole pass finishes — a
+        // cold-start backfill can cover ~10,000+ chunks and take a long
+        // time; an operator tailing the process log needs visible
+        // progress, not a silent terminal until it's all done (raised
+        // after a real run where nothing printed for the entire backfill).
+        const percent = (((next.to - archiveConfig.startHeight + 1) / (tip - archiveConfig.startHeight + 1)) * 100).toFixed(2);
+        console.log(`block_results backfill: heights ${next.from}-${next.to} written (${percent}% of startHeight..tip)`);
     }
 }
 

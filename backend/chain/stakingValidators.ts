@@ -5,6 +5,21 @@ interface LcdValidatorsPage<T> {
   pagination?: { next_key: string | null };
 }
 
+// The current LCD provider (rest.cosmoshub-main.ccvalidators.com — see
+// backend/.env's LCD_URL) rate-limits aggressively: measured 2026-08-27,
+// even a single caller issuing back-to-back requests with no gap 429s
+// intermittently, while 300-400ms between requests was reliable. This
+// function is the single chokepoint for EVERY staking-validators LCD call
+// in the app (daily job, weekly sync, and — the actual volume driver —
+// archive/stakingIngest.ts's ~730-day backfill, which used to fire pages
+// and successive days back-to-back with zero pacing of its own). One delay
+// here, paid once per request, throttles all three uniformly.
+const LCD_DELAY_MS = 400;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // Shared pagination over /cosmos/staking/v1beta1/validators — used both for
 // the weekly full validator-metadata sync (ingest/validators.ts) and the
 // daily bulk stake fetch (jobs/validatorStats.ts). `T` is left generic since
@@ -36,6 +51,7 @@ export async function fetchAllStakingValidators<T>(
       );
     }
     nextKey = next;
+    await sleep(LCD_DELAY_MS);
   } while (nextKey);
   return out;
 }

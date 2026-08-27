@@ -8,5 +8,4 @@ __pycache__/
 *.db-wal
 *.db-shm
 .DS_Store
-backend/data/*.json
-backend/data/validator/
+backend/data/

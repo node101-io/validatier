@@ -198,6 +198,14 @@ export function startArchiveServer(
     lcdUrl: string = liveChainUrls.lcdUrl,
 ): http.Server {
     const server = http.createServer((req, res) => {
+        // One line per request, once it's actually answered — this process
+        // otherwise prints NOTHING while idle (unlike the ingester, it has
+        // no periodic work of its own), which made it look dead/silent to
+        // an operator even while correctly serving traffic.
+        const start = Date.now();
+        res.on('finish', () => {
+            console.log(`${req.method} ${req.url} -> ${res.statusCode} (${Date.now() - start}ms)`);
+        });
         void handleRequest(req, res, lcdUrl);
     });
     server.listen(port, () => {

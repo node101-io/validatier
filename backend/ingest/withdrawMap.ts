@@ -9,9 +9,14 @@ import { setDefault, applyOverride } from '../store/withdrawMap';
 // Going forward, the block loop applies set_withdraw_address events through
 // the same applyOverride().
 
-// polkachu rate-limits aggressively (429 at concurrency 8) — stay gentle
-const LCD_CONCURRENCY = 2;
-const LCD_DELAY_MS = 150;
+// The current LCD provider (rest.cosmoshub-main.ccvalidators.com, the
+// archive-depth endpoint — see backend/.env's LCD_URL) rate-limits far more
+// aggressively than the old polkachu public endpoint this was originally
+// tuned for: measured 2026-08-27, even CONCURRENCY=2 intermittently 429s,
+// while sequential (concurrency 1) requests 300ms apart succeeded 15/15.
+// Stay fully sequential with margin above that measured floor.
+const LCD_CONCURRENCY = 1;
+const LCD_DELAY_MS = 400;
 
 export interface WithdrawMapStats {
   validators: number;
