@@ -33,9 +33,9 @@ export class ArchiveChainClient implements ChainSource {
         return fetchJsonWithRetry(this.archiveUrl + path, headers);
     }
 
-    async getStatus(): Promise<{ syncInfo: { latestBlockHeight: number } }> {
+    async getStatus(): Promise<{ syncInfo: { latestBlockHeight: number; earliestBlockHeight?: number } }> {
         const s = (await this.get('/status')) as WrapperStatus;
-        return { syncInfo: { latestBlockHeight: s.latestBlockHeight } };
+        return { syncInfo: { latestBlockHeight: s.latestBlockHeight, earliestBlockHeight: s.earliestBlockHeight } };
     }
 
     async getBlock(

@@ -40,7 +40,16 @@ export { HttpError };
 // `new ChainClient(config.rpcUrl, config.lcdUrl)` — it does not import or
 // touch this singleton. See the plan's "why no CHAIN_SOURCE flag" note.
 export interface ChainSource {
-    getStatus(): Promise<{ syncInfo: { latestBlockHeight: number } }>;
+    // `earliestBlockHeight` is the lowest height this source can actually
+    // serve — for the live chain (ChainClient) that's whatever a pruned
+    // node happens to retain (cosmjs's SyncInfo already marks it optional
+    // for exactly that reason); for the archive wrapper
+    // (ArchiveChainClient) it's `ARCHIVE_START_HEIGHT`, the hard floor the
+    // archive backfill never goes below (see archive/config.ts). Optional
+    // so a source that genuinely doesn't know its own floor doesn't force
+    // callers to fake one — jobs/blockLoop.ts's computeFromHeight falls
+    // back to its old tip-relative behavior when it's undefined.
+    getStatus(): Promise<{ syncInfo: { latestBlockHeight: number; earliestBlockHeight?: number } }>;
     // `time` only needs `.getTime()` downstream (jobs/blockLoop.ts,
     // jobs/validatorStats.ts) — loosened from `Date` because cosmjs's
     // BlockResponse actually returns a readonly Date subtype that a plain

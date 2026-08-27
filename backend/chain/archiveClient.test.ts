@@ -147,6 +147,11 @@ test('ArchiveChainClient.getStatus maps the wrapper shape to ChainSource shape',
         const client = new ArchiveChainClient(url);
         const status = await client.getStatus();
         assert.equal(status.syncInfo.latestBlockHeight, 999999999);
+        // earliestBlockHeight must be forwarded, not dropped — jobs/blockLoop.ts's
+        // computeFromHeight relies on it to scan the full archive from its
+        // real floor on a fresh deploy instead of skipping the first
+        // lookbackBlocks heights (caught by code review).
+        assert.equal(status.syncInfo.earliestBlockHeight, 1);
     } finally {
         close();
     }
