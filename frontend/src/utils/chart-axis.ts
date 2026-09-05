@@ -33,8 +33,8 @@ export function computeYAxisMax(
 ): number {
   try {
     const flatValues: number[] = [];
-    for (const s of series || []) {
-      if (!s || !Array.isArray(s.data)) continue;
+    for (const s of series) {
+      if (!Array.isArray(s.data)) continue;
       for (const v of s.data)
         if (typeof v === "number" && isFinite(v)) flatValues.push(v);
     }

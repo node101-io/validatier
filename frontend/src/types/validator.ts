@@ -1,15 +1,14 @@
+// Mirrors the ValidatorRow shape from docs/05-frontend-data-layer.md — the
+// object embedded in validators.json and validator/<address>.json.
 export default interface Validator {
-  id: number;
   moniker: string;
-  temporary_image_uri: string;
+  temporary_image_uri: string | null;
   operator_address: string;
-  percentage_sold?: number;
-  sold?: number;
-  total_withdraw?: number;
-  average_total_stake?: number;
-  reward?: number;
-  self_stake?: number;
-  initial_self_stake_prefix_sum?: number;
-  commission?: number;
-  pubkey: string;
+  website: string | null;
+  commission: number;
+  average_total_stake: number;
+  total_withdraw: number;
+  sold: number;
+  percentage_sold: number;
+  leading_exchange: string | null;
 }

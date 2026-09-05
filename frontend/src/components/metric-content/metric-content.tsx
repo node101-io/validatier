@@ -1,4 +1,4 @@
-import Metric from "@/types/metric";
+import type Metric from "@/types/metric";
 import { formatAtom, formatAtomUSD } from "@/utils/format-numbers";
 
 export default function MetricContent({

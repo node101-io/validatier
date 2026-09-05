@@ -30,8 +30,14 @@ DEX/IBC-out) or the trail ends.
   the taint graph lives; periodically snapshotted to Mongo. (We evaluated LevelDB/RocksDB
   and chose SQLite — see `docs/04-sqlite-working-store.md` for why.)
 - **Chain data:** CometBFT RPC (`/block_results`, `/block`, `/status`) + Cosmos LCD
-  (`/cosmos/...`). Exactly TWO endpoints, fixed in `.env` (`RPC_URL` + `LCD_URL`).
-  **Archive node required** for historical state/backfill (will be added later).
+  (`/cosmos/...`). `RPC_URL` + `LCD_URL` in `.env` name the live chain — but the running
+  dashboard backend never calls them directly; it only talks to `ARCHIVE_URL` (the archive
+  wrapper, `backend/archive/server.ts`), via `chain/client.ts`'s `chainClient` singleton
+  (`ArchiveChainClient`). `RPC_URL`/`LCD_URL` are used by exactly one process: the archive
+  ingester (`backend/archive/ingest.ts`, `npm run archive-sync`), which walks the live
+  chain once and fills a local-disk-primary / R2-backup archive (TASKS.md Phase 11,
+  decided 2026-08-24/25 — this replaced the earlier "archive node, deferred" plan below).
+  Ingester and wrapper must share the same disk (`ARCHIVE_CACHE_DIR`).
 - **Config:** in `.env` (denom, decimals, bech32 prefix, RPC/LCD URLs). NOT a DB collection.
 
 ---
@@ -155,7 +161,10 @@ fields** — use exactly what the schema docs specify.
    (`Σ weight per origin = that origin's still-in-flight money`).
 
 8. **Public RPC nodes are pruned** — historical `/block_results` and historical state queries
-   need the **archive node**. Going-forward (recent heights) works on public; backfill needs archive.
+   need archive-depth access. Going-forward (recent heights) works on public RPC. Historical
+   backfill is handled by the archive layer (see Tech stack above, TASKS.md Phase 11) — not
+   a dedicated archive node we operate; a temporary archive-capable RPC is used once to fill
+   the archive, which then serves everything going forward.
 
 ---
 
@@ -172,7 +181,8 @@ fields** — use exactly what the schema docs specify.
 - Versioning/rollback details (epoch↔version sync) — parked. Use a simple incrementing `version`
   for `fund_flow_edges` and `published` flag; don't build rollback machinery yet.
 - Dashboard read layer / cache design — deferred.
-- Own archive node ops — using public RPC first; backfill comes after the node is up.
+- ~~Own archive node ops~~ — superseded: see the archive layer (Tech stack above, TASKS.md
+  Phase 11) instead of a dedicated archive node.
 
 ---
 

@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS meta (
   scanned_up_to_ts     INTEGER NOT NULL DEFAULT 0,
   fund_flow_version    INTEGER NOT NULL DEFAULT 0,
   last_daily_run_day   TEXT,
+  last_validator_sync_ts INTEGER,
   updated_at           INTEGER NOT NULL
 );
 
@@ -79,6 +80,18 @@ INSERT OR IGNORE INTO meta (id, updated_at) VALUES (1, unixepoch());
 function migrateAddLastDailyRunDay(database: Database.Database): void {
   try {
     database.exec('ALTER TABLE meta ADD COLUMN last_daily_run_day TEXT');
+  } catch (err) {
+    if (!(err instanceof Error) || !err.message.includes('duplicate column name')) throw err;
+  }
+}
+
+// same idempotent-ALTER pattern as migrateAddLastDailyRunDay — added after
+// the initial meta table shipped, so older DBs need the column bolted on.
+// Tracks the CHAIN time (cursor.ts, not wall-clock) of the last weekly
+// validator-set LCD sync — see jobs/dailyJobs.ts.
+function migrateAddLastValidatorSyncTs(database: Database.Database): void {
+  try {
+    database.exec('ALTER TABLE meta ADD COLUMN last_validator_sync_ts INTEGER');
   } catch (err) {
     if (!(err instanceof Error) || !err.message.includes('duplicate column name')) throw err;
   }
@@ -108,6 +121,7 @@ export function openSqlite(): Database.Database {
 
   db.exec(SCHEMA);
   migrateAddLastDailyRunDay(db);
+  migrateAddLastValidatorSyncTs(db);
 
   console.log(`sqlite: opened ${dbPath} (WAL, BigInt mode)`);
   return db;

@@ -1,42 +1,52 @@
 {
-  "name": "validatier-frontend",
-  "version": "0.1.0",
+  "name": "web",
   "private": true,
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*"
+  },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start -p 4000",
+    "dev": "vite dev --port 3000",
+    "generate-routes": "tsr generate",
+    "build": "vite build",
+    "preview": "vite preview",
     "lint": "eslint",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "clean": "rm -rf .next"
+    "format": "prettier --write . && eslint --fix",
+    "check": "prettier --check ."
   },
   "dependencies": {
-    "@types/react-datepicker": "^6.2.0",
-    "apexcharts": "^5.3.5",
-    "motion": "^12.23.21",
-    "next": "^15.5.16",
-    "next13-progressbar": "^1.2.2",
-    "radix-ui": "^1.4.3",
-    "react": "^19.1.7",
-    "react-apexcharts": "^1.7.0",
-    "react-datepicker": "^8.7.0",
-    "react-dom": "^19.1.7",
-    "react-hotkeys-hook": "^5.2.1"
+    "@tailwindcss/vite": "^4.1.18",
+    "@tanstack/react-devtools": "latest",
+    "@tanstack/react-router": "latest",
+    "@tanstack/react-router-devtools": "latest",
+    "@tanstack/react-start": "latest",
+    "apexcharts": "^6.10.0",
+    "dotenv": "^17.4.2",
+    "motion": "^13.1.0",
+    "radix-ui": "^1.6.7",
+    "react": "^19.2.0",
+    "react-apexcharts": "^2.1.1",
+    "react-dom": "^19.2.0",
+    "react-hotkeys-hook": "^5.3.3",
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "15.5.3",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4",
-    "prettier": "^3.6.2",
-    "tailwindcss": "^4",
-    "typescript": "^5",
-    "webpack": "^5.102.0"
+    "@tanstack/devtools-vite": "latest",
+    "@tanstack/eslint-config": "latest",
+    "@tanstack/router-cli": "^1.132.0",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "eslint": "^9.20.0",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "lightningcss"
+    ]
   }
 }

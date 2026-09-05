@@ -1,8 +1,5 @@
-"use client";
-
 import truncateAddress from "@/utils/truncate-address";
 import { useState } from "react";
-import Image from "next/image";
 
 interface CopyableOperatorAddressProps {
   operatorAddress: string;
@@ -28,7 +25,7 @@ export default function CopyableOperatorAddress({
         {truncateAddress(operatorAddress)}
       </span>
       {isCopied ? (
-        <Image
+        <img
           src="/res/images/check.svg"
           alt="copied"
           className="shrink-0 self-end mb-0.5"
@@ -36,7 +33,7 @@ export default function CopyableOperatorAddress({
           height={18}
         />
       ) : (
-        <Image
+        <img
           src="/res/images/clipboard.svg"
           alt="copy"
           className="shrink-0 self-end mb-0.5"

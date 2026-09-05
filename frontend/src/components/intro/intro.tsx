@@ -1,6 +1,6 @@
 "use client";
 
-import "@/../public/css/index/intro.css";
+import "@/styles/index/intro.css";
 import { motion, useTransform, MotionValue, AnimatePresence } from "motion/react";
 import { useScrollContext } from "@/components/scroll/scroll-provider";
 import { useState, useEffect } from "react";
@@ -30,7 +30,7 @@ export default function Intro() {
     if (!mobileNormal) {
       container.scrollTo({ top: 0 });
       const prevOverflow = container.style.overflow;
-      const prevTouchAction = container.style.touchAction as string;
+      const prevTouchAction = container.style.touchAction;
       container.style.overflowY = "hidden";
       container.style.touchAction = "none";
       return () => {

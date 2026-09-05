@@ -1,13 +1,12 @@
 "use client";
 
-import Validator from "@/types/validator";
+import type Validator from "@/types/validator";
 import {
   formatAtom,
   formatAtomUSD,
   formatPercentage,
 } from "@/utils/format-numbers";
-import Link from "next/link";
-import Image from "next/image";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState, useMemo } from "react";
 import {
   Tooltip,
@@ -15,13 +14,15 @@ import {
   TooltipTrigger,
 } from "@radix-ui/react-tooltip";
 
+const DEFAULT_AVATAR = "/res/images/default_validator_photo.svg";
+
 type SortField =
   | "name"
   | "percentageSold"
   | "avgDelegation"
   | "totalRewards"
   | "totalSold"
-  | "selfStake";
+  | "leadingExchange";
 type SortDirection = "asc" | "desc";
 
 interface SortableHeaderProps {
@@ -35,14 +36,14 @@ interface SortableHeaderProps {
 
 const sortableHeaders = [
   {
-    field: "percentageSold" as const,
-    label: "Percentage Sold",
-    tooltip: "(Total sold / Total rewards) * 100",
-  },
-  {
     field: "avgDelegation" as const,
     label: "Avg. Delegation",
     tooltip: "Average total stake of the validator",
+  },
+  {
+    field: "percentageSold" as const,
+    label: "Percentage Sold",
+    tooltip: "(Total sold / Total rewards) * 100",
   },
   {
     field: "totalRewards" as const,
@@ -55,9 +56,9 @@ const sortableHeaders = [
     tooltip: "Total transferred out from wallet (cummulative)",
   },
   {
-    field: "selfStake" as const,
-    label: "Self Stake",
-    tooltip: "Validator's own stake on itself (initial + delta)",
+    field: "leadingExchange" as const,
+    label: "Leading Exchange",
+    tooltip: "The exchange this validator sold the most to",
   },
 ];
 
@@ -89,7 +90,7 @@ const SortableHeader = ({
             className="flex items-center gap-1 cursor-pointer"
             onClick={() => onSort(field)}
           >
-            <Image src="/res/images/info.svg" alt="Info" width={14} height={14} className="mb-px"/>
+            <img src="/res/images/info.svg" alt="Info" width={14} height={14} className="mb-px"/>
             <span className="whitespace-nowrap mb-1 font-medium">{label}</span>
           </button>
         </TooltipTrigger>
@@ -128,16 +129,17 @@ const SortableHeader = ({
 
 export default function ValidatorTable({
   validators,
-  searchQuery = "",
   price,
 }: {
   validators: Validator[];
-  searchQuery?: string;
   price: number;
 }) {
-  const [sortField, setSortField] = useState<SortField>("percentageSold");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortField, setSortField] = useState<SortField>("avgDelegation");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [isMobile, setIsMobile] = useState(false);
+  const PAGE_SIZE = 20;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -160,28 +162,29 @@ export default function ValidatorTable({
           bValue = b.moniker.toLowerCase();
           break;
         case "percentageSold":
-          aValue = a.percentage_sold ?? 0;
-          bValue = b.percentage_sold ?? 0;
+          aValue = a.percentage_sold;
+          bValue = b.percentage_sold;
           break;
         case "avgDelegation":
-          aValue = a.average_total_stake ?? 0;
-          bValue = b.average_total_stake ?? 0;
+          aValue = a.average_total_stake;
+          bValue = b.average_total_stake;
           break;
         case "totalRewards":
-          aValue = a.total_withdraw ?? 0;
-          bValue = b.total_withdraw ?? 0;
+          aValue = a.total_withdraw;
+          bValue = b.total_withdraw;
           break;
         case "totalSold":
-          aValue = a.sold ?? 0;
-          bValue = b.sold ?? 0;
+          aValue = a.sold;
+          bValue = b.sold;
           break;
-        case "selfStake": {
-          const aInitial = a.initial_self_stake_prefix_sum ?? 0;
-          const bInitial = b.initial_self_stake_prefix_sum ?? 0;
-          aValue = (a.self_stake ?? 0) + aInitial;
-          bValue = (b.self_stake ?? 0) + bInitial;
+        case "leadingExchange":
+          // Nulls (no sink sales) always sort last, regardless of direction.
+          if (!a.leading_exchange && !b.leading_exchange) return 0;
+          if (!a.leading_exchange) return 1;
+          if (!b.leading_exchange) return -1;
+          aValue = a.leading_exchange.toLowerCase();
+          bValue = b.leading_exchange.toLowerCase();
           break;
-        }
         default:
           return 0;
       }
@@ -210,6 +213,18 @@ export default function ValidatorTable({
         )
       : sortedValidators;
   }, [sortedValidators, searchQuery]);
+
+  // Search/sort changing the result set invalidates how far we've paged in —
+  // start back at the first page rather than showing a stale offset.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [searchQuery, sortField, sortDirection]);
+
+  const visibleValidators = useMemo(
+    () => filteredAndSortedValidators.slice(0, visibleCount),
+    [filteredAndSortedValidators, visibleCount]
+  );
+  const remainingCount = filteredAndSortedValidators.length - visibleValidators.length;
 
   useEffect(() => {
     const update = () => {
@@ -243,12 +258,23 @@ export default function ValidatorTable({
         <div className="text-xl font-[500] text-[#7c70c3] my-2">Validators</div>
       </div>
       <div className="flex flex-col relative rounded-[30px] bg-[#f5f5ff] border-[0.5px] border-[#bebee7] overflow-hidden">
+        <div className="flex items-center gap-2.5 px-6 py-5">
+          <img src="/res/images/search.svg" alt="" width={20} height={20} className="shrink-0" />
+          <input
+            type="text"
+            className="w-full bg-transparent text-xl font-[500] text-[#49306f] placeholder:text-[#7c70c3] focus:outline-none"
+            placeholder="Search Validator"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <img src="/res/images/export.svg" alt="" width={20} height={20} className="shrink-0" />
+        </div>
         <div className="pt-3 pb-4 overflow-x-auto lg:overflow-visible">
-          <div role="table" className="w-full min-w-[900px]">
+          <div role="table" className="w-full min-w-[1050px]">
             <div role="rowgroup">
               <div
                 role="row"
-                className="grid grid-cols-[20fr_14fr_14fr_10fr_12fr_11fr] items-center w-full pl-6 pr-2 gap-3 mb-3"
+                className="grid grid-cols-[18fr_12fr_10fr_12fr_12fr_10fr] items-center w-full pl-6 pr-2 gap-3 mb-3"
               >
                 <div
                   role="columnheader"
@@ -270,66 +296,82 @@ export default function ValidatorTable({
               </div>
             </div>
             <div role="rowgroup" className="w-full">
-              {filteredAndSortedValidators.map((validator) => (
-                <Link
-                  key={validator.operator_address}
-                  href={`/validator/${validator.operator_address}`}
-                  role="row"
-                  className="grid grid-cols-[20fr_14fr_14fr_10fr_12fr_11fr] items-center w-full pr-2 gap-3 py-0 my-2.5 lg:my-0 lg:py-1.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
-                  aria-label={`Open details for ${validator.moniker}`}
-                >
-                  <div
-                    role="cell"
-                    className="flex w-full items-center justify-start gap-4.5 h-full lg:h-full sticky left-0 pl-6 z-10 bg-[#f5f5ff] lg:bg-transparent overflow-hidden"
+              {visibleValidators.map((validator) => {
+                const avatarSrc = validator.temporary_image_uri ?? DEFAULT_AVATAR;
+                return (
+                  <Link
+                    key={validator.operator_address}
+                    to="/validator/$operatorAddress"
+                    params={{ operatorAddress: validator.operator_address }}
+                    search={(prev) => prev}
+                    role="row"
+                    className="grid grid-cols-[18fr_12fr_10fr_12fr_12fr_10fr] items-center w-full pr-2 gap-3 py-0 my-2.5 lg:my-0 lg:py-1.5 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
+                    aria-label={`Open details for ${validator.moniker}`}
                   >
-                    {/* Name */}
                     <div
-                      className={`flex items-center relative ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"} gap-2.5 aspect-square size-7.5 shrink-0`}
+                      role="cell"
+                      className="flex w-full items-center justify-start gap-4.5 h-full lg:h-full sticky left-0 pl-6 z-10 bg-[#f5f5ff] lg:bg-transparent overflow-hidden"
                     >
-                      <img
-                        src={validator.temporary_image_uri}
-                        alt={validator.moniker}
-                        className={`w-full h-full ${validator.temporary_image_uri === "/res/images/default_validator_photo.svg" ? "rounded-none" : "rounded-full"}`}
-                      />
-                      {(() => {
-                        const rank =
-                          validatorRankMap.get(validator.operator_address) || 0;
-                        const fontSize =
-                          rank < 10
-                            ? "text-[12px]"
-                            : rank < 100
-                              ? "text-[10px]"
-                              : "text-[9px]";
-                        return (
-                          <div
-                            className={`absolute -bottom-1.5 -left-1.5 bg-[#250055] text-white font-medium rounded-full flex items-center justify-center border-1 border-white w-5 h-5 pb-px ${fontSize}`}
-                          >
-                            {rank}
+                      {/* Name */}
+                      <div
+                        className={`flex items-center relative ${avatarSrc === DEFAULT_AVATAR ? "rounded-none" : "rounded-full"} gap-2.5 aspect-square size-7.5 shrink-0`}
+                      >
+                        <img
+                          src={avatarSrc}
+                          alt={validator.moniker}
+                          className={`w-full h-full ${avatarSrc === DEFAULT_AVATAR ? "rounded-none" : "rounded-full"}`}
+                        />
+                        {(() => {
+                          const rank =
+                            validatorRankMap.get(validator.operator_address) || 0;
+                          const fontSize =
+                            rank < 10
+                              ? "text-[12px]"
+                              : rank < 100
+                                ? "text-[10px]"
+                                : "text-[9px]";
+                          return (
+                            <div
+                              className={`absolute -bottom-1.5 -left-1.5 bg-[#250055] text-white font-medium rounded-full flex items-center justify-center border-1 border-white w-5 h-5 pb-px ${fontSize}`}
+                            >
+                              {rank}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                      <div className="text-nowrap -mt-0.5 w-fit overflow-hidden">
+                        <div className="flex text-base md:text-xl gap-2.5 text-[#49306f] group">
+                          <div className="relative overflow-hidden whitespace-nowrap flex-1 validators-table-validator-name-wrapper">
+                            <span className="validators-table-validator-name whitespace-nowrap inline-block will-change-transform mb-1 [:is(.can-scroll)&]:group-hover:animate-[scrollText_10s_linear_infinite]">
+                              {isMobile && validator.moniker.length > 13
+                                ? `${validator.moniker.slice(0, 13)}...`
+                                : validator.moniker}
+                            </span>
                           </div>
-                        );
-                      })()}
-                    </div>
-                    <div className="text-nowrap -mt-0.5 w-fit overflow-hidden">
-                      <div className="flex text-base md:text-xl gap-2.5 text-[#49306f] group">
-                        <div className="relative overflow-hidden whitespace-nowrap flex-1 validators-table-validator-name-wrapper">
-                          <span className="validators-table-validator-name whitespace-nowrap inline-block will-change-transform mb-1 [:is(.can-scroll)&]:group-hover:animate-[scrollText_10s_linear_infinite]">
-                            {isMobile && validator.moniker.length > 13
-                              ? `${validator.moniker.slice(0, 13)}...`
-                              : validator.moniker}
-                          </span>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div
-                    role="cell"
-                    className="flex items-center justify-center font-bold gap-1.25 justify-self-center"
-                  >
-                    {/* Percentage Sold */}
-                    {validator.percentage_sold === undefined ||
-                    validator.percentage_sold === null ? (
-                      <span className="text-current">-</span>
-                    ) : (
+                    <div
+                      role="cell"
+                      className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1"
+                    >
+                      {/* Avg Delegation */}
+                      <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
+                        {validator.average_total_stake &&
+                        validator.average_total_stake > 0
+                          ? formatAtom(validator.average_total_stake, 1)
+                          : "0"}{" "}
+                        ATOM
+                      </div>
+                      <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
+                        {`$${validator.average_total_stake && validator.average_total_stake > 0 ? formatAtomUSD(validator.average_total_stake, price, 1) : 0}`}
+                      </div>
+                    </div>
+                    <div
+                      role="cell"
+                      className="flex items-center justify-center font-bold gap-1.25 justify-self-center"
+                    >
+                      {/* Percentage Sold */}
                       <div className="flex items-center text-xl gap-1.5">
                         <span
                           className={`mb-1 ${
@@ -343,7 +385,7 @@ export default function ValidatorTable({
                           {formatPercentage(validator.percentage_sold, 2)}%
                         </span>
                         {validator.percentage_sold < 25 && (
-                          <Image
+                          <img
                             className="flex items-center justify-center"
                             src="/res/images/check_green.svg"
                             alt="check"
@@ -352,105 +394,83 @@ export default function ValidatorTable({
                           />
                         )}
                       </div>
-                    )}
-                  </div>
-                  <div
-                    role="cell"
-                    className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1"
-                  >
-                    {/* Avg Delegation */}
-                    <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
-                      {validator.average_total_stake &&
-                      validator.average_total_stake > 0
-                        ? formatAtom(validator.average_total_stake, 1)
-                        : "0"}{" "}
-                      ATOM
                     </div>
-                    <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
-                      {`$${validator.average_total_stake && validator.average_total_stake > 0 ? formatAtomUSD(validator.average_total_stake, price, 1) : 0}`}
+                    <div
+                      role="cell"
+                      className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1"
+                    >
+                      {/* Total Rewards */}
+                      <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
+                        {validator.total_withdraw && validator.total_withdraw > 0
+                          ? formatAtom(validator.total_withdraw, 1)
+                          : "0"}{" "}
+                        ATOM
+                      </div>
+                      <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
+                        {`$${validator.total_withdraw && validator.total_withdraw > 0 ? formatAtomUSD(validator.total_withdraw, price, 1) : 0}`}
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    role="cell"
-                    className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1"
-                  >
-                    {/* Total Rewards */}
-                    <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
-                      {validator.total_withdraw && validator.total_withdraw > 0
-                        ? formatAtom(validator.total_withdraw, 1)
-                        : "0"}{" "}
-                      ATOM
+                    <div
+                      role="cell"
+                      className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1"
+                    >
+                      {/* Total Sold Amount */}
+                      <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5 items-center">
+                        {validator.sold && validator.sold > 0
+                          ? formatAtom(validator.sold, 1)
+                          : "0"}{" "}
+                        ATOM
+                        {validator.total_withdraw < validator.sold && (
+                            <Tooltip>
+                              <TooltipTrigger className="flex items-center cursor-pointer ml-1">
+                                <img
+                                  src="/res/images/warning.svg"
+                                  alt="Warning"
+                                  width={14}
+                                  height={14}
+                                  className="mt-0.5"
+                                />
+                              </TooltipTrigger>
+                              <TooltipContent
+                                className="bg-[#2C2749] text-white text-base pt-1 pb-2 px-2 rounded-md cursor-default mb-1"
+                                side="top"
+                              >
+                                The amount sold exceeds the total rewards
+                                <br />
+                                because the validator also sold tokens received
+                                <br />
+                                before the queried time interval.
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                      </div>
+                      <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
+                        {`$${validator.sold && validator.sold > 0 ? formatAtomUSD(validator.sold, price, 1) : 0}`}
+                      </div>
                     </div>
-                    <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
-                      {`$${validator.total_withdraw && validator.total_withdraw > 0 ? formatAtomUSD(validator.total_withdraw, price, 1) : 0}`}
+                    <div
+                      role="cell"
+                      className="text-center text-nowrap text-lg relative justify-self-center flex items-center justify-center overflow-hidden text-ellipsis text-[#633f9a] font-semibold"
+                    >
+                      {validator.leading_exchange ?? "—"}
                     </div>
-                  </div>
-                  <div
-                    role="cell"
-                    className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1"
-                  >
-                    {/* Total Sold Amount */}
-                    <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5 items-center">
-                      {validator.sold && validator.sold > 0
-                        ? formatAtom(validator.sold, 1)
-                        : "0"}{" "}
-                      ATOM
-                      {validator.total_withdraw !== undefined &&
-                        validator.sold !== undefined &&
-                        validator.total_withdraw < validator.sold && (
-                          <Tooltip>
-                            <TooltipTrigger className="flex items-center cursor-pointer ml-1">
-                              <Image
-                                src="/res/images/warning.svg"
-                                alt="Warning"
-                                width={14}
-                                height={14}
-                                className="mt-0.5"
-                              />
-                            </TooltipTrigger>
-                            <TooltipContent
-                              className="bg-[#2C2749] text-white text-base pt-1 pb-2 px-2 rounded-md cursor-default mb-1"
-                              side="top"
-                            >
-                              The amount sold exceeds the total rewards
-                              <br />
-                              because the validator also sold tokens received
-                              <br />
-                              before the queried time interval.
-                            </TooltipContent>
-                          </Tooltip>
-                        )}
-                    </div>
-                    <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
-                      {`$${validator.sold && validator.sold > 0 ? formatAtomUSD(validator.sold, price, 1) : 0}`}
-                    </div>
-                  </div>
-                  <div
-                    role="cell"
-                    className="text-center text-nowrap text-xl relative justify-self-center flex items-center justify-center flex-col gap-1"
-                  >
-                    {/* Self Stake */}
-                    <div className="inline-flex gap-1 text-lg font-semibold text-[#633f9a] leading-5">
-                      {(() => {
-                        const initial = validator.initial_self_stake_prefix_sum ?? 0;
-                        const total = (validator.self_stake ?? 0) + initial;
-                        return total > 0 ? formatAtom(total, 1) : "0";
-                      })()}{" "}
-                      ATOM
-                    </div>
-                    <div className="text-base font-medium text-[#633f9a] leading-4 mb-1">
-                      {(() => {
-                        const initial = validator.initial_self_stake_prefix_sum ?? 0;
-                        const total = (validator.self_stake ?? 0) + initial;
-                        return `$${total > 0 ? formatAtomUSD(total, price, 1) : 0}`;
-                      })()}
-                    </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>
+        {remainingCount > 0 && (
+          <div className="flex justify-center pb-4">
+            <button
+              type="button"
+              onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+              className="text-base font-medium text-[#7c70c3] bg-[#f5f5ff] border-[0.5px] border-[#bebee7] rounded-xl px-4 py-2 hover:bg-[#e8e8ff] transition-colors duration-250 ease-in-out cursor-[var(--pointer-hand-dark)]"
+            >
+              Load more ({remainingCount} remaining)
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

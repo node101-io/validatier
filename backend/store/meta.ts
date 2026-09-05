@@ -59,3 +59,31 @@ export function setLastDailyRunDay(day: string): void {
   }
   setDailyRunStmt.run(day);
 }
+
+// Global "did we already re-pull the validator set from LCD recently"
+// marker (ingest/validators.ts, jobs/dailyJobs.ts). Chain-time based (the
+// value stored is a block timestamp, not wall-clock now()) — moniker/
+// website/commission/keybase_id rarely change, so a weekly re-pull tied to
+// how far the block loop has progressed is enough. One row for the whole
+// app, not per-validator.
+let getValidatorSyncStmt: Statement | null = null;
+let setValidatorSyncStmt: Statement | null = null;
+
+export function getLastValidatorSyncTs(): number | null {
+  if (!getValidatorSyncStmt) {
+    getValidatorSyncStmt = getSqlite().prepare(
+      'SELECT last_validator_sync_ts FROM meta WHERE id = 1'
+    );
+  }
+  const row = getValidatorSyncStmt.get() as { last_validator_sync_ts: bigint | null };
+  return row.last_validator_sync_ts === null ? null : Number(row.last_validator_sync_ts);
+}
+
+export function setLastValidatorSyncTs(ts: number): void {
+  if (!setValidatorSyncStmt) {
+    setValidatorSyncStmt = getSqlite().prepare(
+      'UPDATE meta SET last_validator_sync_ts = ?, updated_at = unixepoch() WHERE id = 1'
+    );
+  }
+  setValidatorSyncStmt.run(ts);
+}

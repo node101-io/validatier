@@ -60,12 +60,26 @@ export function utcDayFromTs(ts: number): string {
 
 // Pure decision logic for where to start scanning, extracted for direct unit
 // testing (see blockLoop.test.ts) without needing to mock chainClient/RPC:
-//   - cursor.height === 0 (fresh deploy): start `lookbackBlocks` behind the tip.
+//   - cursor.height === 0 (fresh deploy): start at the source's earliest
+//     known height, if it reports one (the archive wrapper always does —
+//     ARCHIVE_START_HEIGHT — so the FULL archived history gets scanned in
+//     order, not just the last `lookbackBlocks` of it; a source that
+//     doesn't know its own floor, e.g. a live pruned RPC, falls back to
+//     the old "lookbackBlocks behind the tip" behavior). Lead dev call,
+//     2026-08-27: without this, a fresh deploy against the archive would
+//     silently and PERMANENTLY skip the first `lookbackBlocks` heights of
+//     the 2-year backfill — see the plan doc.
 //   - cursor stale (gap beyond lookbackBlocks, e.g. long downtime, node pruned
 //     those heights): jump forward the same way, logging a warning.
 //   - otherwise: normal resume at cursor.height + 1.
-export function computeFromHeight(cursor: Cursor, latest: number, lookbackBlocks: number): number {
+export function computeFromHeight(
+  cursor: Cursor,
+  latest: number,
+  lookbackBlocks: number,
+  earliest?: number
+): number {
   if (cursor.height === 0) {
+    if (earliest !== undefined) return Math.max(1, earliest);
     return Math.max(1, latest - lookbackBlocks);
   }
   if (latest - cursor.height > lookbackBlocks) {
@@ -92,13 +106,16 @@ function applyHeight(height: number, ts: number, transfers: RealTransfer[]): voi
 
 export async function runBlockLoop(): Promise<BlockLoopStats> {
   const cursor = getCursor();
-  const latest = (await chainClient.getStatus()).syncInfo.latestBlockHeight;
+  const { latestBlockHeight: latest, earliestBlockHeight: earliest } = (await chainClient.getStatus()).syncInfo;
 
-  // How far back we can realistically go: no archive node yet (CLAUDE.md
-  // deferred item), so this should stay at/under the public RPC's measured
-  // pruning depth (docs/02) — see config.backfillLookbackDays / .env.example.
+  // Fallback for a source with no known floor (a live pruned RPC): how far
+  // back we can realistically go without an archive is bounded by the
+  // node's actual pruning depth — see config.backfillLookbackDays /
+  // .env.example. The archive wrapper reports its own floor
+  // (earliestBlockHeight = ARCHIVE_START_HEIGHT) instead, which
+  // computeFromHeight prefers when present — see its own comment.
   const lookbackBlocks = Math.floor((config.backfillLookbackDays * 86400) / AVG_BLOCK_TIME_SECONDS);
-  const from = computeFromHeight(cursor, latest, lookbackBlocks);
+  const from = computeFromHeight(cursor, latest, lookbackBlocks, earliest);
   const to = latest;
 
   let heightsProcessed = 0;

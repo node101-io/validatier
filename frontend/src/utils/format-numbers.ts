@@ -18,12 +18,15 @@ export function formatPercentage(
   }).format(value);
 }
 
+// value is already ATOM (docs/05-frontend-data-layer.md — the export boundary
+// converts every uatom BigInt-string to ATOM `number`; nothing downstream of
+// that divides by 10**decimals again).
 export function formatAtom(value: number, maximumFractionDigits = 0): string {
   return new Intl.NumberFormat("en-US", {
     notation: "compact",
     compactDisplay: "short",
     maximumFractionDigits,
-  }).format(value / 1_000_000);
+  }).format(value);
 }
 
 export function formatAtomUSD(
@@ -35,5 +38,5 @@ export function formatAtomUSD(
     notation: "compact",
     compactDisplay: "short",
     maximumFractionDigits,
-  }).format((value / 1_000_000) * price);
+  }).format(value * price);
 }

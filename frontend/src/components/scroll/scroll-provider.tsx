@@ -1,7 +1,8 @@
 "use client";
-import { createContext, PropsWithChildren, useContext, useRef } from "react";
-import { MotionValue } from "motion/react";
-import { useScroll } from "motion/react";
+import { createContext, useContext, useRef } from "react";
+import type { PropsWithChildren } from "react";
+import { useScroll  } from "motion/react";
+import type {MotionValue} from "motion/react";
 
 export type ScrollContextValue = {
   scrollY: MotionValue<number> | null;

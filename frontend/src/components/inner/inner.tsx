@@ -1,21 +1,19 @@
 "use client";
 
+import { lazy } from "react";
 import NetworkSummary from "@/components/network-summary/network-summary";
 import GraphMetrics from "@/components/graph-metrics/graph-metrics";
+import ExchangeSales from "@/components/exchange-sales/exchange-sales";
 import ValidatorLeaderboards from "@/components/validator-leaderboards/validator-leaderboards";
-import Validator from "@/types/validator";
+import type Validator from "@/types/validator";
 import ValidatorTable from "../validator-table/validator-table";
-import { ValidatorsSummaryDataInterface } from "../../../../backend/models/Validator/Validator";
-import Metric from "@/types/metric";
-import {
-  formatPercentage,
-  formatAtom,
-  formatAtomUSD,
-} from "@/utils/format-numbers";
-import dynamic from "next/dynamic";
-import { ApexOptions } from "apexcharts";
+import type SummaryData from "@/types/summary";
+import type Metric from "@/types/metric";
+import type { SinkBreakdownEntry } from "@/types/data";
+import { formatPercentage, formatAtom, formatAtomUSD } from "@/utils/format-numbers";
+import type { ApexOptions } from "apexcharts";
 
-const MiniChart = dynamic(() => import("react-apexcharts"), { ssr: false });
+const MiniChart = lazy(() => import("react-apexcharts"));
 
 const miniOptions: ApexOptions = {
   chart: {
@@ -43,10 +41,10 @@ const miniOptions: ApexOptions = {
   fill: {
     type: "gradient",
     gradient: {
-      shadeIntensity: 1,
-      opacityFrom: 0,
-      opacityTo: 0,
-      stops: [0, 100],
+      shadeIntensity: 0,
+      opacityFrom: 0.18,
+      opacityTo: 0.04,
+      stops: [0, 90, 100],
     },
   },
   colors: ["#5856D7"],
@@ -60,32 +58,22 @@ export default function Inner({
   delegationData,
   soldData,
   priceData,
-  smallSelfStakeAmountGraphData,
-  smallSelfStakeRatioGraphData,
-  searchQuery = "",
-  ref,
+  timestamps,
+  sinkBreakdown,
 }: {
   validators: Validator[];
-  summaryData: ValidatorsSummaryDataInterface;
+  summaryData: SummaryData;
   price: number;
   metrics: Metric[];
   delegationData: number[];
   soldData: number[];
   priceData: number[];
-  smallSelfStakeAmountGraphData: number[];
-  smallSelfStakeRatioGraphData: number[];
-  searchQuery?: string;
-  ref?: React.RefObject<HTMLDivElement | null>;
+  timestamps: number[];
+  sinkBreakdown: SinkBreakdownEntry[];
 }) {
-  const selfStakeAmountMax =
-    smallSelfStakeAmountGraphData && smallSelfStakeAmountGraphData.length > 0
-      ? Math.max(...smallSelfStakeAmountGraphData)
-      : 0;
-  const selfStakeRatioMax = 100;
-
   return (
     <div
-      className="flex flex-col w-full lg:w-[1100px] gap-5 h-fit py-0 lg:px-10 mt-37.5 mb-1"
+      className="flex flex-col w-full lg:max-w-[1400px] gap-5 h-fit py-0 lg:px-5 mt-37.5 mb-1"
       id="inner-main-wrapper"
     >
       <div
@@ -95,54 +83,7 @@ export default function Inner({
         <div className="text-xl font-normal text-[#7c70c3] px-5 lg:px-0 max-sm:!opacity-0">
           Network Summary
         </div>
-        <div className="flex flex-row flex-nowrap justify-between gap-5 overflow-y-hidden overflow-x-scroll md:overflow-x-visible no-scrollbar px-5 lg:px-0 ml-0">
-          <NetworkSummary
-            leftColumn={
-              <>
-                <div className="flex text-xl font-normal text-[#7c70c3] text-nowrap items-center">
-                  Self Stake Amount
-                </div>
-                <div
-                  className="text-[28px] font-bold text-[#49306f] leading-3 mb-0.5 text-nowrap"
-                  id="summary-self-stake-amount-native"
-                >
-                  {formatAtom(summaryData.self_stake_sum + summaryData.initial_self_stake_sum, 1)} ATOM
-                </div>
-                <div
-                  className="font-medium text-[20px] text-[#7c70c3]"
-                  id="summary-self-stake-amount-usd"
-                >
-                  ${formatAtomUSD(summaryData.self_stake_sum + summaryData.initial_self_stake_sum, price, 1)}
-                </div>
-              </>
-            }
-            rightColumn={
-              <div className="flex items-center h-full w-32 justify-end">
-                <MiniChart
-                  type="area"
-                  height={80}
-                  width={80}
-                  options={{
-                    ...miniOptions,
-                    colors: ["#5856D7"],
-                    yaxis: {
-                      show: false,
-                      min: 0,
-                      max: selfStakeAmountMax,
-                    },
-                  }}
-                  series={
-                    [
-                      {
-                        name: "Self Stake Amount",
-                        data: smallSelfStakeAmountGraphData,
-                      },
-                    ] as ApexOptions["series"]
-                  }
-                />
-              </div>
-            }
-          />
+        <div className="flex flex-row flex-nowrap justify-start gap-5 overflow-y-hidden overflow-x-scroll lg:overflow-x-visible no-scrollbar px-5 lg:px-0 ml-0">
           <NetworkSummary
             leftColumn={
               <>
@@ -184,15 +125,24 @@ export default function Inner({
             leftColumn={
               <>
                 <div className="flex text-xl font-normal text-[#7c70c3] text-nowrap items-center">
-                  Avg. Self/Total Stake
+                  Average Delegation
                 </div>
                 <div
-                  className="text-[36px] leading-[22px] font-bold text-[#49306f] text-nowrap mb-0.5"
-                  id="summary-average-self-stake-ratio-native"
+                  className="text-[28px] font-bold text-[#49306f] leading-3 mb-0.5 text-nowrap"
+                  id="summary-average-delegation-native"
                 >
-                  {formatPercentage(summaryData.average_self_stake_ratio)}%
+                  {formatAtom(summaryData.total_stake_sum / (validators.length || 1))} ATOM
                 </div>
-                <div className="font-medium text-[20px] text-[#7c70c3]"></div>
+                <div
+                  className="font-medium text-[20px] text-[#7c70c3]"
+                  id="summary-average-delegation-usd"
+                >
+                  $
+                  {formatAtomUSD(
+                    summaryData.total_stake_sum / (validators.length || 1),
+                    price
+                  )}
+                </div>
               </>
             }
             rightColumn={
@@ -203,18 +153,55 @@ export default function Inner({
                   width={80}
                   options={{
                     ...miniOptions,
-                    colors: ["#5856D7"],
-                    yaxis: {
-                      show: false,
-                      min: 0,
-                      max: selfStakeRatioMax,
-                    },
+                    colors: ["#31ADE6"],
                   }}
                   series={
                     [
                       {
-                        name: "Avg Self/Total Stake",
-                        data: smallSelfStakeRatioGraphData,
+                        name: "Average Delegation",
+                        data: delegationData,
+                      },
+                    ] as ApexOptions["series"]
+                  }
+                />
+              </div>
+            }
+          />
+          <NetworkSummary
+            leftColumn={
+              <>
+                <div className="flex text-xl font-normal text-[#7c70c3] text-nowrap items-center">
+                  Total Sold Amount
+                </div>
+                <div
+                  className="text-[28px] font-bold text-[#49306f] leading-3 mb-0.5 text-nowrap"
+                  id="summary-total-sold-native"
+                >
+                  {formatAtom(summaryData.total_sold)} ATOM
+                </div>
+                <div
+                  className="font-medium text-[20px] text-[#7c70c3]"
+                  id="summary-total-sold-usd"
+                >
+                  ${formatAtomUSD(summaryData.total_sold, price)}
+                </div>
+              </>
+            }
+            rightColumn={
+              <div className="flex items-center h-full w-32 justify-end">
+                <MiniChart
+                  type="area"
+                  height={80}
+                  width={80}
+                  options={{
+                    ...miniOptions,
+                    colors: ["#FF9404"],
+                  }}
+                  series={
+                    [
+                      {
+                        name: "Total Sold Amount",
+                        data: soldData,
                       },
                     ] as ApexOptions["series"]
                   }
@@ -243,22 +230,19 @@ export default function Inner({
             data: priceData,
           },
         ]}
+        timestamps={timestamps}
         metrics={metrics}
         price={price}
       />
+      <ExchangeSales breakdown={sinkBreakdown} price={price} />
       <ValidatorLeaderboards
         validators={validators}
         percentageSold={summaryData.percentage_sold}
         totalSold={summaryData.total_sold}
+        sinkBreakdown={sinkBreakdown}
         price={price}
       />
-      <div ref={ref} className="scroll-m-20">
-        <ValidatorTable
-          validators={validators}
-          searchQuery={searchQuery}
-          price={price}
-        />
-      </div>
+      <ValidatorTable validators={validators} price={price} />
     </div>
   );
 }
