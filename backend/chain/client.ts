@@ -1,7 +1,7 @@
 import { Comet38Client, comet38 } from "@cosmjs/tendermint-rpc";
 import { config } from "../config";
 import { ArchiveChainClient } from "./archiveClient";
-import { HttpError, fetchJsonWithRetry } from "./http";
+import { HttpError, fetchJsonWithRetry, retryAsync } from "./http";
 
 // two endpoints (see .env): one CometBFT RPC + one Cosmos REST (LCD), used
 // only by the archive ingester (see the ChainSource comment below) — the
@@ -14,9 +14,19 @@ const REQUEST_TIMEOUT_MS = 15_000;
 const RETRY_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 300;
 
-function sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
+// RPC-side retry needs its own, more patient budget than the LCD side:
+// archive/ingest.ts hammers RPC continuously (12 concurrent requests,
+// chunk after chunk, for days) — a transient 429 mid-run used to abort the
+// ENTIRE 1000-height chunk (one failed height rejects parallelMap's whole
+// Promise.all) instead of just that one request recovering. Measured
+// 2026-09-07: the same endpoint that 429s under sustained real ingestion
+// passes a quick isolated burst test cleanly — consistent with a token-
+// bucket limiter whose burst allowance the ingester's continuous demand
+// depletes, not a hard "N concurrent" ceiling. More attempts + a real
+// rate-limit-aware backoff gives the bucket room to refill instead of
+// giving up in ~1 second (300ms + 600ms, the old budget).
+const RPC_RETRY_ATTEMPTS = 5;
+const RPC_RATE_LIMIT_DELAY_MS = 2000;
 
 // Re-exported for callers that already do `import { HttpError } from
 // './client'` (chain/client.test.ts) — the class itself now lives in
@@ -97,25 +107,21 @@ export class ChainClient implements ChainSource {
         return this.cometClient;
     }
 
-    // Retries the whole RPC call (connect + request) — cosmjs throws plain
-    // Errors, not HttpError, so there's no status code to branch on here.
-    private async rpcCall<T>(
-        fn: (client: Comet38Client) => Promise<T>,
-    ): Promise<T> {
-        let lastError: unknown;
-        for (let attempt = 1; attempt <= RETRY_ATTEMPTS; attempt++) {
-            try {
-                return await fn(await this.getCometClient());
-            } catch (err) {
-                lastError = err;
-                if (attempt < RETRY_ATTEMPTS) {
-                    await sleep(RETRY_BASE_DELAY_MS * attempt);
-                }
-            }
-        }
-        throw new Error(
-            `${RETRY_ATTEMPTS} attempts failed for RPC call against ${this.rpcUrl}: ${lastError}`,
-        );
+    // Retries the whole RPC call (connect + request). cosmjs's http
+    // transport (rpcclients/http.js) throws a plain `Error`, but sets
+    // `{ cause: { status, body } }` on it — the real HTTP status IS there,
+    // just not on a typed HttpError the way fetchJsonWithRetry's errors
+    // are (a previous version of this comment said there was no status to
+    // branch on here; that was wrong, see the 429-detection below).
+    private rpcCall<T>(fn: (client: Comet38Client) => Promise<T>): Promise<T> {
+        return retryAsync(async () => fn(await this.getCometClient()), {
+            attempts: RPC_RETRY_ATTEMPTS,
+            delayMs: (attempt, err) => {
+                const status = (err as { cause?: { status?: number } } | undefined)?.cause?.status;
+                return (status === 429 ? RPC_RATE_LIMIT_DELAY_MS : RETRY_BASE_DELAY_MS) * attempt;
+            },
+            errorContext: `RPC call against ${this.rpcUrl}`,
+        });
     }
 
     getStatus(): Promise<comet38.StatusResponse> {
