@@ -131,6 +131,21 @@ export class ChainClient implements ChainSource {
         return this.rpcCall((c) => c.blockResults(height));
     }
 
+    // ChainClient-only (not on ChainSource — this is an ingester-side
+    // optimization, archive/ingest.ts's only caller). CometBFT's
+    // /blockchain returns per-block METADATA (header + blockId, no
+    // transactions/signatures) for a HEIGHT RANGE in one call — measured
+    // 2026-09-07: ~1.3 KB/block vs. a full getBlock's ~45 KB/block, and
+    // the server caps the range at 20 blocks regardless of what's
+    // requested. Since archive/ingest.ts only ever needs `header.time` +
+    // `blockId` per height (see its headerRow shape), this replaces 20
+    // individual getBlock calls with 1 — the single biggest lever on
+    // request volume during backfill (getBlockResults has no bulk
+    // equivalent, so it stays 1:1 per height regardless).
+    getBlockchain(minHeight: number, maxHeight: number): Promise<comet38.BlockchainResponse> {
+        return this.rpcCall((c) => c.blockchain(minHeight, maxHeight));
+    }
+
     // LCD state query; pass height for historical reads (this ChainClient
     // is only ever the LIVE chain — see this file's ChainSource comment —
     // so historical reads here need an archive-depth LCD; the running

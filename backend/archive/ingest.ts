@@ -84,6 +84,12 @@ export async function runArchiveIngest(): Promise<IngestStats> {
     }
 }
 
+// CometBFT server-side cap on /blockchain's range — measured 2026-09-07:
+// requesting maxHeight = minHeight+999 still only returns 20 entries. Chunk
+// size (lib/chunk.ts's CHUNK_SIZE = 1000) is evenly divisible by this, so
+// every chunk splits into whole batches with no short last batch to special-case.
+const BLOCKCHAIN_BATCH_SIZE = 20;
+
 async function ingestChunk(
     live: ChainClient,
     manifest: Manifest,
@@ -91,29 +97,33 @@ async function ingestChunk(
     to: number,
 ): Promise<void> {
     const heights = range(from, to);
-    const results = await parallelMap(heights, archiveConfig.concurrency, async (h) => {
-        const [blockResults, block] = await Promise.all([live.getBlockResults(h), live.getBlock(h)]);
-        return {
-            blockResultsRow: toJsonSafe(stripBlockResults(blockResults)),
-            headerRow: toJsonSafe({ height: h, blockId: block.blockId, header: block.block.header }),
-        };
+
+    // block_results has no bulk equivalent — stays 1:1 per height.
+    const blockResultsRows = await parallelMap(heights, archiveConfig.concurrency, async (h) => {
+        const blockResults = await live.getBlockResults(h);
+        return toJsonSafe(stripBlockResults(blockResults));
     });
 
+    // Headers via /blockchain in batches of BLOCKCHAIN_BATCH_SIZE instead of
+    // one getBlock call per height — 20x fewer requests for the same data
+    // (we only ever needed header.time + blockId; see chain/client.ts's
+    // getBlockchain comment for the measured request-volume win this was
+    // added for, caught after the ingester's real request rate against the
+    // live RPC was much higher than expected).
+    const batchStarts: number[] = [];
+    for (let h = from; h <= to; h += BLOCKCHAIN_BATCH_SIZE) batchStarts.push(h);
+    const batchedHeaderRows = await parallelMap(batchStarts, archiveConfig.concurrency, async (batchStart) => {
+        const batchEnd = Math.min(batchStart + BLOCKCHAIN_BATCH_SIZE - 1, to);
+        const { blockMetas } = await live.getBlockchain(batchStart, batchEnd);
+        return blockMetas.map((meta) =>
+            toJsonSafe({ height: meta.header.height, blockId: meta.blockId, header: meta.header }),
+        );
+    });
+    const headerRows = batchedHeaderRows.flat();
+
     const chunkId = chunkIdOf(from);
-    await writeChunk(
-        archiveConfig.r2,
-        archiveConfig.cacheDir,
-        'block_results',
-        chunkId,
-        results.map((r) => r.blockResultsRow),
-    );
-    await writeChunk(
-        archiveConfig.r2,
-        archiveConfig.cacheDir,
-        'block_headers',
-        chunkId,
-        results.map((r) => r.headerRow),
-    );
+    await writeChunk(archiveConfig.r2, archiveConfig.cacheDir, 'block_results', chunkId, blockResultsRows);
+    await writeChunk(archiveConfig.r2, archiveConfig.cacheDir, 'block_headers', chunkId, headerRows);
 
     // Manifest write is LAST and deliberately sequenced after both chunk
     // writes land (local + R2 backup) — "completeThroughHeight advanced"
