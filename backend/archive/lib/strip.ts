@@ -18,6 +18,16 @@
 //    the SAME tx's `events` array (SDK 0.45-era duplication); `data` is a
 //    base64 protobuf msg response; `info` is unused ABCI metadata. None of
 //    the three are read by the parser.
+//  - IBC packet-relay events (`recv_packet`, `write_acknowledgement`,
+//    `acknowledge_packet`, `timeout_packet`, `send_packet`, and the
+//    `ibccallbackerror-*` family): carry the full packet payload
+//    (`packet_data`/`packet_data_hex`, tens of KB per event) plus proof
+//    bytes. None of it is read by the parser — only `ibc_transfer` (a
+//    separate, small event) matters for money-flow. Measured 2026-09-11 on
+//    height 26,728,930: a relayer batching dozens of `MsgRecvPacket`s in one
+//    tx made this ONE block 9.68MB, 99.2% of it these events —
+//    `encodeJsonl` crashed on the surrounding 1000-height chunk (~30
+//    consecutive blocks this size) with `RangeError: Invalid string length`.
 //
 // Nothing else is touched — everything not listed here is kept as-is.
 
@@ -25,7 +35,18 @@ export const STRIPPED_EVENT_TYPES: ReadonlySet<string> = new Set([
     'coin_spent',
     'coin_received',
     'update_client',
+    'recv_packet',
+    'write_acknowledgement',
+    'acknowledge_packet',
+    'timeout_packet',
+    'send_packet',
 ]);
+
+// Prefix match: the `ibccallbackerror-*` family is emitted per-packet-type
+// (`ibccallbackerror-fungible_token_packet`, `ibccallbackerror-message`,
+// possibly others for interchain-accounts/other IBC apps) and none of them
+// carry money-flow data the parser reads.
+const STRIPPED_EVENT_PREFIXES: readonly string[] = ['ibccallbackerror-'];
 
 interface RawEvent {
     type: string;
@@ -48,7 +69,11 @@ interface RawBlockResults {
 }
 
 function stripEvents(events: RawEvent[] | null | undefined): RawEvent[] {
-    return (events ?? []).filter((e) => !STRIPPED_EVENT_TYPES.has(e.type));
+    return (events ?? []).filter(
+        (e) =>
+            !STRIPPED_EVENT_TYPES.has(e.type) &&
+            !STRIPPED_EVENT_PREFIXES.some((p) => e.type.startsWith(p)),
+    );
 }
 
 // Pure function: input is whatever chainClient.getBlockResults(height) or a
