@@ -12,6 +12,16 @@ import { encodeJsonl, decodeJsonl, zstdCompress, zstdDecompress } from './lib/ch
 // wiped local disk) can restore instead of re-running the multi-day live
 // backfill.
 //
+// Local chunk/staking files are stored zstd-compressed (same bytes as the
+// R2 backup, written once and reused for both — not compressed twice).
+// Originally local was written as plain JSONL; measured 2026-09-14 on a
+// live server this hit 664GB (heading for ~1.1TB at full backfill) against
+// a ~53x measured compression ratio on this data (repetitive JSON keys /
+// bech32 addresses) — the "~23-28GB" estimate above was the R2 (compressed)
+// size, never the uncompressed local size. Switched local to compressed too
+// (~20-25GB total) at the cost of a decompress on every read — cheap
+// relative to a disk that would otherwise blow past what most servers have.
+//
 // This is the layer both the ingester (archive/ingest.ts, writer) and the
 // wrapper (archive/server.ts, reader) go through — NEVER call r2.ts /
 // manifest.ts's R2 functions directly from either of those. Both processes
@@ -32,12 +42,14 @@ function manifestPath(cacheDir: string): string {
     return path.join(cacheDir, 'manifest.json');
 }
 
+// .jsonl.zst / .json.zst — same extension as the R2 keys, since local now
+// stores the identical compressed bytes.
 function chunkPath(cacheDir: string, kind: 'block_results' | 'block_headers', chunkId: number): string {
-    return path.join(cacheDir, kind, `${pad(chunkId)}.jsonl`);
+    return path.join(cacheDir, kind, `${pad(chunkId)}.jsonl.zst`);
 }
 
 function stakingPath(cacheDir: string, day: string): string {
-    return path.join(cacheDir, 'staking', `${day}.json`);
+    return path.join(cacheDir, 'staking', `${day}.json.zst`);
 }
 
 // Reads a local file's contents, or null if it doesn't exist — a single
@@ -53,9 +65,26 @@ async function readIfExists(p: string): Promise<string | null> {
     }
 }
 
+// The manifest stays plain JSON (tiny, and worth being human-readable for
+// a quick `cat` during troubleshooting) — only chunk/staking payloads below
+// switch to compressed bytes.
 async function writeLocal(p: string, text: string): Promise<void> {
     await fs.mkdir(path.dirname(p), { recursive: true });
     await fs.writeFile(p, text);
+}
+
+async function readLocalCompressed(p: string): Promise<Buffer | null> {
+    try {
+        return await fs.readFile(p);
+    } catch (err) {
+        if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null;
+        throw err;
+    }
+}
+
+async function writeLocalCompressed(p: string, buf: Buffer): Promise<void> {
+    await fs.mkdir(path.dirname(p), { recursive: true });
+    await fs.writeFile(p, buf);
 }
 
 // Local first. Only touches R2 when nothing local exists yet — a fresh
@@ -106,20 +135,20 @@ export async function readChunk(
     chunkId: number,
 ): Promise<unknown[] | null> {
     const p = chunkPath(cacheDir, kind, chunkId);
-    const local = await readIfExists(p);
-    if (local !== null) return decodeJsonl(local);
+    const local = await readLocalCompressed(p);
+    if (local !== null) return decodeJsonl(zstdDecompress(local));
 
     const compressed = await getObject(r2, `${kind}/${pad(chunkId)}.jsonl.zst`);
     if (compressed === null) return null;
-    const text = zstdDecompress(compressed);
-    await writeLocal(p, text);
-    return decodeJsonl(text);
+    await writeLocalCompressed(p, compressed);
+    return decodeJsonl(zstdDecompress(compressed));
 }
 
-// Writes local (primary — this IS what the wrapper will read, uncompressed,
-// no R2 round-trip ever needed for it) and uploads a zstd-compressed backup
-// copy to R2. Called once per chunk, ever (chunks are immutable once
-// ingested — see ingest.ts's "only ingest a chunk once fully behind tip").
+// Writes local (primary — this IS what the wrapper will read, decompressing
+// on the way out) and uploads the SAME zstd-compressed bytes to R2 as a
+// backup — compressed once, used for both, not compressed twice. Called
+// once per chunk, ever (chunks are immutable once ingested — see
+// ingest.ts's "only ingest a chunk once fully behind tip").
 export async function writeChunk(
     r2: R2Config,
     cacheDir: string,
@@ -127,9 +156,9 @@ export async function writeChunk(
     chunkId: number,
     rows: unknown[],
 ): Promise<void> {
-    const text = encodeJsonl(rows);
-    await writeLocal(chunkPath(cacheDir, kind, chunkId), text);
-    await putObject(r2, `${kind}/${pad(chunkId)}.jsonl.zst`, zstdCompress(text));
+    const compressed = zstdCompress(encodeJsonl(rows));
+    await writeLocalCompressed(chunkPath(cacheDir, kind, chunkId), compressed);
+    await putObject(r2, `${kind}/${pad(chunkId)}.jsonl.zst`, compressed);
 }
 
 // One JSON object per UTC day, not chunked (a day's full validator list is
@@ -143,18 +172,17 @@ export async function readStakingSnapshot(
     day: string,
 ): Promise<unknown | null> {
     const p = stakingPath(cacheDir, day);
-    const local = await readIfExists(p);
-    if (local !== null) return JSON.parse(local);
+    const local = await readLocalCompressed(p);
+    if (local !== null) return JSON.parse(zstdDecompress(local));
 
     const compressed = await getObject(r2, `staking/${day}.json.zst`);
     if (compressed === null) return null;
-    const text = zstdDecompress(compressed);
-    await writeLocal(p, text);
-    return JSON.parse(text);
+    await writeLocalCompressed(p, compressed);
+    return JSON.parse(zstdDecompress(compressed));
 }
 
 export async function writeStakingSnapshot(r2: R2Config, cacheDir: string, day: string, snapshot: unknown): Promise<void> {
-    const text = JSON.stringify(snapshot);
-    await writeLocal(stakingPath(cacheDir, day), text);
-    await putObject(r2, `staking/${day}.json.zst`, zstdCompress(text));
+    const compressed = zstdCompress(JSON.stringify(snapshot));
+    await writeLocalCompressed(stakingPath(cacheDir, day), compressed);
+    await putObject(r2, `staking/${day}.json.zst`, compressed);
 }
