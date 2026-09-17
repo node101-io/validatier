@@ -27,7 +27,6 @@ module.exports = {
   apps: [
     {
       name: 'validatier-frontend',
-      namespace: 'validatier',
       cwd: __dirname,
       script: 'node_modules/vite/bin/vite.js',
       // --host binds 0.0.0.0 (needed for remote access); --port sets the port.
