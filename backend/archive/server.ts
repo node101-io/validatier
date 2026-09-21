@@ -22,14 +22,56 @@ function sendJson(res: http.ServerResponse, status: number, body: unknown): void
     res.end(payload);
 }
 
+// blockLoop.ts (jobs/blockLoop.ts) requests one height at a time, strictly
+// sequentially, two calls per height (block_results + block_headers) — so
+// 999 out of every 1000 requests per kind are for a chunk already fetched
+// one height ago. Without this cache, every single request re-read +
+// zstd-decompressed + JSON-parsed the WHOLE 1000-height chunk (measured:
+// block_results chunks decompress to ~100MB) just to pull out one row —
+// caught 2026-09-21 when a from-scratch backfill barely moved in 5+ minutes.
+// Small LRU (keyed by kind+chunkId): sequential access means a cache of a
+// couple of chunks per kind gives a near-100% hit rate; kept tiny since each
+// entry holds a full chunk's parsed rows in memory.
+const CHUNK_CACHE_MAX_ENTRIES = 4;
+const chunkRowsByHeightCache = new Map<string, Map<number, Record<string, unknown>>>();
+
+async function getChunkRowsByHeight(
+    kind: 'block_results' | 'block_headers',
+    chunkId: number,
+): Promise<Map<number, Record<string, unknown>> | null> {
+    const key = `${kind}:${chunkId}`;
+    const cached = chunkRowsByHeightCache.get(key);
+    if (cached !== undefined) {
+        // touch: move to the end (most-recently-used) for the LRU eviction below
+        chunkRowsByHeightCache.delete(key);
+        chunkRowsByHeightCache.set(key, cached);
+        return cached;
+    }
+
+    const rows = await readChunk(archiveConfig.r2, archiveConfig.cacheDir, kind, chunkId);
+    if (rows === null) return null;
+
+    const byHeight = new Map<number, Record<string, unknown>>();
+    for (const r of rows) {
+        const h = (r as { height?: unknown }).height;
+        if (typeof h === 'number') byHeight.set(h, r as Record<string, unknown>);
+    }
+
+    chunkRowsByHeightCache.set(key, byHeight);
+    if (chunkRowsByHeightCache.size > CHUNK_CACHE_MAX_ENTRIES) {
+        const oldestKey = chunkRowsByHeightCache.keys().next().value;
+        if (oldestKey !== undefined) chunkRowsByHeightCache.delete(oldestKey);
+    }
+    return byHeight;
+}
+
 async function readRowByHeight(
     kind: 'block_results' | 'block_headers',
     height: number,
 ): Promise<Record<string, unknown> | null> {
-    const rows = await readChunk(archiveConfig.r2, archiveConfig.cacheDir, kind, chunkIdOf(height));
-    if (rows === null) return null;
-    const row = rows.find((r) => (r as { height?: unknown }).height === height);
-    return (row as Record<string, unknown> | undefined) ?? null;
+    const byHeight = await getChunkRowsByHeight(kind, chunkIdOf(height));
+    if (byHeight === null) return null;
+    return byHeight.get(height) ?? null;
 }
 
 // Detects the one LCD call the staking archive (TASKS.md 11.6) backs:
