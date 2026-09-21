@@ -63,6 +63,20 @@ test('computeFromHeight: without earliest (a source that does not report one), f
   assert.equal(from, 900_000);
 });
 
+// Regression coverage for a real bug found 2026-09-21: with an archive-backed
+// source (earliest defined), a resuming cursor far behind tip — the normal
+// state for WEEKS during an active multi-year backfill, since the live tip
+// keeps moving the whole time — must never jump forward and skip blocks.
+// Every validatier-backend restart mid-backfill used to hit the old
+// unconditional "gap > lookback -> jump" branch here, silently discarding
+// real transfers for the skipped range (confirmed: a validator's real
+// reward-to-CEX transfer with zero trace anywhere in SQLite, traced back to
+// exactly this).
+test('computeFromHeight: archive-backed resume never jumps forward, even far behind tip', () => {
+  const from = computeFromHeight({ height: 100_000, ts: 0 }, 1_000_000, 100_000, 50_000);
+  assert.equal(from, 100_001);
+});
+
 test('utcDayFromTs: same UTC calendar day maps to the same string', () => {
   const dayStart = utcDayFromTs(Date.UTC(2026, 2, 5, 0, 0, 1) / 1000);
   const dayEnd = utcDayFromTs(Date.UTC(2026, 2, 5, 23, 59, 59) / 1000);

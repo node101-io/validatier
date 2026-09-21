@@ -82,7 +82,21 @@ export function computeFromHeight(
     if (earliest !== undefined) return Math.max(1, earliest);
     return Math.max(1, latest - lookbackBlocks);
   }
-  if (latest - cursor.height > lookbackBlocks) {
+  // The "stale cursor, jump forward" heuristic below only makes sense for a
+  // source with NO known floor (a plain pruned live RPC — see this file's
+  // earlier comment): being far behind tip genuinely meant "unreachable,
+  // might as well skip". An archive-backed source (`earliest` defined) has
+  // no such limit — every height back to the archive floor is always
+  // fetchable — so "far behind tip" just means "still backfilling", never
+  // a reason to skip. Confirmed as a real bug (not just theoretical): every
+  // `validatier-backend` restart during the 2024-08..now archive backfill
+  // hit this branch (backfill takes weeks; the live tip moves the whole
+  // time, so cursor is essentially always >lookbackBlocks behind mid-run),
+  // silently discarding cursor progress and skipping millions of blocks'
+  // worth of real transfers each time — the cause of the sparse/missing
+  // fund-flow data found 2026-09-21 (e.g. a validator's real reward-to-CEX
+  // transfer with zero trace anywhere in SQLite).
+  if (earliest === undefined && latest - cursor.height > lookbackBlocks) {
     console.warn(
       `cursor stale: height=${cursor.height} tip=${latest} gap=${latest - cursor.height} ` +
         `exceeds lookback=${lookbackBlocks} blocks — jumping forward, accepting the gap`
