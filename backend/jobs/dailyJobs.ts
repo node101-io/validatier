@@ -7,6 +7,22 @@ import { config } from '../config';
 
 const VALIDATOR_SYNC_INTERVAL_SECONDS = 7 * 86400; // weekly, tracked in CHAIN time (cursor.ts)
 
+// syncPrices always fetches CoinGecko's last N days from REAL wall-clock now
+// — it has no notion of "the historical day blockLoop is currently
+// backfilling". During an active backfill (cursor.ts far in the past),
+// calling it is pure waste: it just re-fetches/re-upserts TODAY's real price
+// over and over, doing nothing for the historical day actually being
+// processed. Worse, once the archive-backed backfill got fast (measured
+// 2026-09-21: ~230 blocks/sec after the chunk-cache fix — a calendar day of
+// chain time now passes in under a minute), this fired on almost every
+// block, hammering CoinGecko into sustained 429s — which, via this
+// function's all-or-nothing design, ALSO discarded the same day's already-
+// successful fund-flow snapshot + validator_stats on every retry (the same
+// stuck-day failure mode as TASKS.md 11.8, just freshly reproduced here).
+// Only call it once the cursor is near real time — a backfill day is by
+// definition older than that, and a live day needs today's actual price.
+const PRICE_SYNC_MAX_STALENESS_SECONDS = 2 * 86400;
+
 // The once-per-block-day sequence, extracted so blockLoop.ts can call it
 // inline without importing scheduler.ts (which imports blockLoop.ts —
 // runBlockLoop() — and would otherwise create a circular import).
@@ -39,12 +55,20 @@ export async function runDailyJobsForDay(day: string): Promise<void> {
     `daily jobs: validator_stats done — height=${vstats.height} attempted=${vstats.attempted} ` +
       `succeeded=${vstats.succeeded} skipped=${vstats.skipped.length}`
   );
-  // Cover the same window the block loop actually has data for
-  // (config.backfillLookbackDays), not a fixed short top-up — otherwise
-  // days the dashboard has fund-flow/validator data for can have no price
-  // point, and the frontend's `?? 0` fallback draws a fake jump from $0.
-  await syncPrices(config.backfillLookbackDays);
-  console.log('daily jobs: price sync done');
+  // Skip entirely while backfilling old chain history (see this file's
+  // header comment) — syncPrices only has real work to do once the cursor
+  // is near actual wall-clock time.
+  const cursorAgeSeconds = Date.now() / 1000 - getCursor().ts;
+  if (cursorAgeSeconds <= PRICE_SYNC_MAX_STALENESS_SECONDS) {
+    // Cover the same window the block loop actually has data for
+    // (config.backfillLookbackDays), not a fixed short top-up — otherwise
+    // days the dashboard has fund-flow/validator data for can have no price
+    // point, and the frontend's `?? 0` fallback draws a fake jump from $0.
+    await syncPrices(config.backfillLookbackDays);
+    console.log('daily jobs: price sync done');
+  } else {
+    console.log(`daily jobs: price sync skipped (backfilling — cursor is ${Math.round(cursorAgeSeconds / 86400)}d behind real time)`);
+  }
   // Weekly, gated on CHAIN time (the cursor's block timestamp), not
   // wall-clock — this runs inside the daily job so no separate process
   // restart is needed to make the gate fire, but only actually re-pulls
