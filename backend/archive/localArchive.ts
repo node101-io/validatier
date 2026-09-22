@@ -65,12 +65,29 @@ async function readIfExists(p: string): Promise<string | null> {
     }
 }
 
+// fs.writeFile is NOT atomic — a process killed mid-write (Ctrl-C, a crash,
+// pm2 restart) while it's writing to an EXISTING path can leave a file
+// that's part old content + part new content, silently. Confirmed as a
+// real, not just theoretical, failure mode 2026-09-21: a corrupted
+// block_results chunk on the server decompressed cleanly (so the .zst
+// framing itself was intact) but had a JSON syntax error partway through —
+// consistent with an interrupted overwrite mixing two different-length
+// writes, not a compression-level truncation. Write to a temp path in the
+// same directory, then rename() — atomic on POSIX (the target is either
+// the fully-old or fully-new file, never a mix), so an interrupted write
+// only ever orphans the harmless temp file.
+async function atomicWriteFile(p: string, data: string | Buffer): Promise<void> {
+    await fs.mkdir(path.dirname(p), { recursive: true });
+    const tmp = `${p}.tmp-${process.pid}-${Date.now()}`;
+    await fs.writeFile(tmp, data);
+    await fs.rename(tmp, p);
+}
+
 // The manifest stays plain JSON (tiny, and worth being human-readable for
 // a quick `cat` during troubleshooting) — only chunk/staking payloads below
 // switch to compressed bytes.
 async function writeLocal(p: string, text: string): Promise<void> {
-    await fs.mkdir(path.dirname(p), { recursive: true });
-    await fs.writeFile(p, text);
+    await atomicWriteFile(p, text);
 }
 
 async function readLocalCompressed(p: string): Promise<Buffer | null> {
@@ -83,8 +100,7 @@ async function readLocalCompressed(p: string): Promise<Buffer | null> {
 }
 
 async function writeLocalCompressed(p: string, buf: Buffer): Promise<void> {
-    await fs.mkdir(path.dirname(p), { recursive: true });
-    await fs.writeFile(p, buf);
+    await atomicWriteFile(p, buf);
 }
 
 // Local first. Only touches R2 when nothing local exists yet — a fresh
