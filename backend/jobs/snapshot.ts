@@ -1,31 +1,24 @@
-import mongoose from 'mongoose';
 import { getSqlite } from '../db/sqlite';
-import { FundFlowEdge } from '../models/FundFlowEdge/FundFlowEdge';
 import { Meta } from '../models/Meta/Meta';
 import { ValidatorSinkSale } from '../models/ValidatorSinkSale/ValidatorSinkSale';
 import { getCursor } from '../store/meta';
 import { buildValidatorSinkSaleDocs, readLastCumulativeByPair, RealizedEdgeRow } from './validatorSinkSales';
 
-// Snapshot SQLite `edges` into a new versioned Mongo `fund_flow_edges` copy,
-// and — in the SAME Mongo transaction — append any `validator_sink_sales`
-// rows for edges that reached a sink (docs/01 "Snapshot to Mongo", docs/03
-// validator_sink_sales, docs/04 SNAPSHOT SQL). The two collections must never
-// drift apart: either both this version's edges AND its sink-sale deltas land,
-// or neither does. Sequence:
-//   1. read everything from SQLite FIRST, synchronously (better-sqlite3 is
-//      sync, so nothing can interleave mid-read — this alone gives us a
-//      consistent point-in-time snapshot without any extra locking).
-//   2. inside one Mongo transaction: write edges (published=false), flip them
-//      to published=true (the commit switch), and insert the sink-sale deltas.
-//   3. ONLY once that transaction commits, bump meta.fund_flow_current_version
-//      — so a reader that trusts the meta pointer never observes a version
-//      before its edges are actually published.
-// Rollback machinery (per-version snapshot_height) is deliberately deferred
-// (CLAUDE.md) — this just increments `version` + flips `published`.
+// Reads SQLite `edges` and appends any `validator_sink_sales` rows for
+// edges that reached a sink (docs/01 "Snapshot to Mongo", docs/03
+// validator_sink_sales, docs/04 SNAPSHOT SQL).
 //
-// Mongo transactions require the target deployment to be a replica set
-// (Atlas — the prod .env target — always is; a local standalone `mongod`
-// is not, and needs `--replSet` + a one-time `rs.initiate()` to support this).
+// Used to ALSO write a full versioned copy of every edge into a Mongo
+// `fund_flow_edges` collection, every single day, forever (no pruning) —
+// removed 2026-09-23: confirmed nothing reads that collection (the API only
+// reads `meta.fund_flow_current_version`, a number; the dashboard's actual
+// fund-flow data comes from `validator_sink_sales`, written below, which is
+// already sparse/delta-only). 578 days of full daily copies had reached
+// 8.2M documents for zero consumers. `meta.fund_flow_current_version` stays
+// as a harmless monotonic counter (still exposed in the API type, unused by
+// the frontend) — only the wasteful full-copy write is gone. See
+// scripts/pruneFundFlowEdges.ts for the one-time cleanup of what already
+// accumulated.
 
 interface EdgeRow {
   origin: string;
@@ -58,27 +51,6 @@ export interface SnapshotStats {
   totals: FundFlowTotals;
   sinkSalesChecked: number;
   sinkSalesWritten: number;
-}
-
-function toMongoEdge(row: EdgeRow, version: number) {
-  // sink_tier is NOT a SQLite column — derived from status (docs/03 note).
-  const sink_tier = row.status === 'realized' ? 1 : row.status === 'suspected' ? 2 : null;
-  return {
-    version,
-    published: false,
-    origin: row.origin,
-    holder: row.holder,
-    depth: Number(row.depth),
-    weight: row.weight.toString(),
-    weight_prefix_sum: row.weight_prefix_sum.toString(),
-    status: row.status,
-    sink_tier,
-    sink_kind: row.sink_kind,
-    first_seen_height: Number(row.first_height),
-    first_seen_timestamp: Number(row.first_ts),
-    last_update_height: Number(row.last_height),
-    last_update_timestamp: Number(row.last_ts),
-  };
 }
 
 export async function snapshotFundFlowToMongo(): Promise<SnapshotStats> {
@@ -130,26 +102,12 @@ export async function snapshotFundFlowToMongo(): Promise<SnapshotStats> {
   };
   const sinkSaleDocs = buildValidatorSinkSaleDocs(realizedEdges, lastCumulativeByPair, stamp);
 
-  // ── 4. one transaction: edges (published=false -> true) + sink-sales ─
-  const session = await mongoose.startSession();
-  try {
-    await session.withTransaction(async () => {
-      if (edgeRows.length > 0) {
-        await FundFlowEdge.insertMany(
-          edgeRows.map((row) => toMongoEdge(row, version)),
-          { session, ordered: false }
-        );
-        await FundFlowEdge.updateMany({ version }, { $set: { published: true } }, { session });
-      }
-      if (sinkSaleDocs.length > 0) {
-        await ValidatorSinkSale.insertMany(sinkSaleDocs, { session, ordered: false });
-      }
-    });
-  } finally {
-    await session.endSession();
+  // ── 4. write the sink-sale deltas ─────────────────────────────────────
+  if (sinkSaleDocs.length > 0) {
+    await ValidatorSinkSale.insertMany(sinkSaleDocs, { ordered: false });
   }
 
-  // ── 5. bump the pointer LAST — only now is version fully visible ─────
+  // ── 5. bump the pointer ────────────────────────────────────────────────
   meta.scanned_up_to_height = cursor.height;
   meta.scanned_up_to_time = cursor.ts;
   meta.fund_flow_current_version = version;
