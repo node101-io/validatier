@@ -41,8 +41,8 @@ export async function runDailyJobsForDay(day: string): Promise<void> {
   console.log(`daily jobs: starting for day ${day}`);
   const snap = await snapshotFundFlowToMongo();
   console.log(
-    `daily jobs: fund-flow snapshot done — version=${snap.version} edges=${snap.edgeCount} ` +
-      `sinkSalesChecked=${snap.sinkSalesChecked} sinkSalesWritten=${snap.sinkSalesWritten}`
+    `daily jobs: fund-flow snapshot done — edges=${snap.edgeCount} edgesUpserted=${snap.edgesUpserted} ` +
+      `edgesDeleted=${snap.edgesDeleted} sinkSalesChecked=${snap.sinkSalesChecked} sinkSalesWritten=${snap.sinkSalesWritten}`
   );
   // Height must be the cursor's (the block that actually triggered this day's
   // job), NOT the live chain tip — during backfill catch-up the block loop can

@@ -38,15 +38,30 @@ export function inDegreeOf(holder: string): number {
 // suspected re-check running after the address already hit the static list).
 // (sink_tier is NOT a SQLite column — it's derived from `status` at Mongo
 // snapshot time: realized -> 1, suspected -> 2, in_flight -> null.)
+//
+// Also bumps last_height/last_ts to the CURRENT height — found missing
+// 2026-09-23 while building a delta-based Mongo snapshot (jobs/snapshot.ts):
+// this UPDATE flips ALL of a holder's non-realized edges at once (every
+// origin commingled there), but only the origin whose transfer just
+// triggered contraction had its edge's last_height bumped (by
+// contraction.ts's upsertReceiver, for that hop only) — every OTHER
+// origin's edge at the same holder had its status/sink_kind change silently
+// with a stale last_height. A delta snapshot filtering on "changed since
+// last_height > X" would miss those origins' status flips entirely. Since
+// last_update_height/last_update_timestamp are the documented "this edge
+// last changed" fields (docs/03), any write path that changes a row must
+// bump them — this was the one that didn't.
 export function markHolderStatus(
   holder: string,
   status: 'realized' | 'suspected',
-  sinkKind: string
+  sinkKind: string,
+  height: number,
+  ts: number
 ): void {
   if (!markStatusStmt) {
     markStatusStmt = getSqlite().prepare(`
-      UPDATE edges SET status = @status, sink_kind = @sinkKind
+      UPDATE edges SET status = @status, sink_kind = @sinkKind, last_height = @height, last_ts = @ts
       WHERE holder = @holder AND status != 'realized'`);
   }
-  markStatusStmt.run({ holder, status, sinkKind });
+  markStatusStmt.run({ holder, status, sinkKind, height, ts });
 }

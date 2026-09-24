@@ -1,13 +1,17 @@
 import { Schema, model } from 'mongoose';
 
-// Schema mirrors docs/03-mongo-schema.md `fund_flow_edges` exactly — the
-// versioned snapshot of the SQLite taint graph. Dashboard reads the max
-// published version only; `published` is the commit switch that keeps a
-// half-written snapshot invisible.
+// Mirrors the SQLite `edges` table's current state, one Mongo doc per
+// (origin, holder) pair — NOT a versioned/dated snapshot. Every daily
+// snapshot job (jobs/snapshot.ts) upserts only the edges that actually
+// changed (via SQLite's own last_update_height/last_update_timestamp as the
+// change signal) and deletes any edge that no longer exists in SQLite
+// (contraction zeroes an edge out and removes the row — see
+// engine/contraction.ts's deleteZeroed). No version/published fields: this
+// collection previously wrote a FULL new copy of every edge, every day,
+// forever (removed 2026-09-23 — 578 days of that had reached 8.2M documents
+// for a collection nothing read). This design keeps exactly one row per
+// edge, updated in place.
 export interface IFundFlowEdge {
-  version: number;
-  published: boolean;
-
   origin: string; // operator_address (source validator)
   holder: string; // address currently holding the money
   depth: number; // origin -> holder hop count
@@ -27,9 +31,6 @@ export interface IFundFlowEdge {
 
 const fundFlowEdgeSchema = new Schema<IFundFlowEdge>(
   {
-    version: { type: Number, required: true },
-    published: { type: Boolean, required: true, default: false },
-
     origin: { type: String, required: true },
     holder: { type: String, required: true },
     depth: { type: Number, required: true },
@@ -50,11 +51,10 @@ const fundFlowEdgeSchema = new Schema<IFundFlowEdge>(
   { versionKey: false }
 );
 
-fundFlowEdgeSchema.index({ version: 1, origin: 1, holder: 1 }, { unique: true });
-fundFlowEdgeSchema.index({ version: 1, origin: 1, last_update_timestamp: 1 }); // per-validator interval
-fundFlowEdgeSchema.index({ version: 1, holder: 1 }); // Tier 2 in-degree
-fundFlowEdgeSchema.index({ version: 1, status: 1 });
-fundFlowEdgeSchema.index({ published: 1, version: -1 }); // latest published version
+fundFlowEdgeSchema.index({ origin: 1, holder: 1 }, { unique: true });
+fundFlowEdgeSchema.index({ origin: 1, last_update_timestamp: 1 }); // per-validator interval
+fundFlowEdgeSchema.index({ holder: 1 }); // Tier 2 in-degree
+fundFlowEdgeSchema.index({ status: 1 });
 
 export const FundFlowEdge = model<IFundFlowEdge>(
   'FundFlowEdge',

@@ -23,7 +23,7 @@ export function processTransfer(t: RealTransfer, ctx: BlockCtx): TransferDisposi
     // Kraken) with no further hop to trigger classification. Without this,
     // that edge would sit at in_flight forever and sold% would show 0%
     // for money that plainly already reached an exchange.
-    classifyRecipient(t);
+    classifyRecipient(t, ctx);
     return 'seeded';
   }
 
@@ -41,6 +41,6 @@ export function processTransfer(t: RealTransfer, ctx: BlockCtx): TransferDisposi
   applyContraction(t.sender, t.recipient, t.amount, ctx);
 
   // 5. CLASSIFY: is the recipient a known/discovered sink, or IBC-out?
-  classifyRecipient(t);
+  classifyRecipient(t, ctx);
   return 'propagate';
 }

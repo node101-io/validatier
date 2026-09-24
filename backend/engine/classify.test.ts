@@ -52,21 +52,21 @@ after(() => {
 
 test('IBC-out wins regardless of registry or in-degree', () => {
   insertEdge(`${P}A`, `${P}escrow`, 100n);
-  classifyRecipient(transfer(`${P}escrow`, { is_ibc_out: true }));
+  classifyRecipient(transfer(`${P}escrow`, { is_ibc_out: true }), { height: 999, ts: 9999 });
   assert.deepEqual(statusOf(`${P}A`, `${P}escrow`), { status: 'realized', sink_kind: 'ibc_out' });
 });
 
 test('Tier 1 registry hit -> realized with the registered kind', () => {
   insertEdge(`${P}A`, `${P}binance`, 500n);
   upsertSinkRegistryRow({ address: `${P}binance`, tier: 1, kind: 'cex' });
-  classifyRecipient(transfer(`${P}binance`));
+  classifyRecipient(transfer(`${P}binance`), { height: 999, ts: 9999 });
   assert.deepEqual(statusOf(`${P}A`, `${P}binance`), { status: 'realized', sink_kind: 'cex' });
 });
 
 test('Tier 2 registry hit (previously discovered) stays suspected, not realized', () => {
   insertEdge(`${P}A`, `${P}discovered`, 500n);
   upsertSinkRegistryRow({ address: `${P}discovered`, tier: 2, kind: 'structural' });
-  classifyRecipient(transfer(`${P}discovered`));
+  classifyRecipient(transfer(`${P}discovered`), { height: 999, ts: 9999 });
   assert.deepEqual(statusOf(`${P}A`, `${P}discovered`), {
     status: 'suspected',
     sink_kind: 'structural',
@@ -75,7 +75,7 @@ test('Tier 2 registry hit (previously discovered) stays suspected, not realized'
 
 test('below in-degree threshold and no registry entry: stays in_flight, untouched', () => {
   insertEdge(`${P}A`, `${P}plain`, 500n);
-  classifyRecipient(transfer(`${P}plain`));
+  classifyRecipient(transfer(`${P}plain`), { height: 999, ts: 9999 });
   assert.deepEqual(statusOf(`${P}A`, `${P}plain`), { status: 'in_flight', sink_kind: null });
 });
 
@@ -84,7 +84,7 @@ test('in-degree at/above threshold (no registry entry) -> suspected/structural',
   for (const letter of ['A', 'B', 'C', 'D', 'E']) {
     insertEdge(`${P}${letter}`, `${P}pool`, 10n);
   }
-  classifyRecipient(transfer(`${P}pool`));
+  classifyRecipient(transfer(`${P}pool`), { height: 999, ts: 9999 });
   for (const letter of ['A', 'B', 'C', 'D', 'E']) {
     assert.deepEqual(statusOf(`${P}${letter}`, `${P}pool`), {
       status: 'suspected',
@@ -97,7 +97,7 @@ test('classification marks ALL origins present at the recipient, not just one', 
   insertEdge(`${P}X`, `${P}multi`, 10n);
   insertEdge(`${P}Y`, `${P}multi`, 20n);
   upsertSinkRegistryRow({ address: `${P}multi`, tier: 1, kind: 'dex' });
-  classifyRecipient(transfer(`${P}multi`));
+  classifyRecipient(transfer(`${P}multi`), { height: 999, ts: 9999 });
   assert.equal(statusOf(`${P}X`, `${P}multi`)!.status, 'realized');
   assert.equal(statusOf(`${P}Y`, `${P}multi`)!.status, 'realized');
 });
