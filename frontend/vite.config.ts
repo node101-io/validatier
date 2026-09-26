@@ -11,7 +11,7 @@ const config = defineConfig({
   // `vite preview` (how the app is served in prod, see ecosystem.config.cjs)
   // rejects requests whose Host header it doesn't recognise. nginx proxies the
   // public domain to it, so that domain has to be whitelisted here.
-  preview: { allowedHosts: ['validatier-demo.node101.io'] },
+  preview: { allowedHosts: ['validatier.node101.io', 'validatier-demo.node101.io'] },
   plugins: [
     devtools(),
     tailwindcss(),
