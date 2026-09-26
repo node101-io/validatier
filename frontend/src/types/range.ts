@@ -1,6 +1,6 @@
 // Mirrors backend/api/lib/dateRange.ts — the date-range selector's URL state.
 // `until` is 'YYYY-MM-DD'; both are optional route search params (missing ==
-// all_time / today, same default the backend resolves to).
+// last_3_months / today, same default the backend resolves to).
 export type RangePreset = "last_3_months" | "last_6_months" | "last_year" | "all_time";
 
 export interface RangeSearch {

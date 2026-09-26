@@ -19,15 +19,15 @@ function sendJson(res: http.ServerResponse, status: number, body: unknown): void
   res.end(payload);
 }
 
-// `?range=last_3_months|last_6_months|last_year|all_time` (default all_time)
+// `?range=last_3_months|last_6_months|last_year|all_time` (default last_3_months)
 // and `?until=YYYY-MM-DD` (default today) — every route resolves the same
 // way so the whole dashboard windows consistently. Never errors on a bad
-// value: missing/invalid range falls back to all_time, missing/invalid/
+// value: missing/invalid range falls back to last_3_months, missing/invalid/
 // out-of-bounds until falls back to today (see parseUntil), matching the
 // "clamp, don't error" rule from the plan.
 function parseRangeParams(url: URL): ResolvedRange {
   const rangeParam = url.searchParams.get('range');
-  const preset: RangePreset = isRangePreset(rangeParam) ? rangeParam : 'all_time';
+  const preset: RangePreset = isRangePreset(rangeParam) ? rangeParam : 'last_3_months';
   const until = parseUntil(url.searchParams.get('until'));
   return resolveRange(preset, until);
 }

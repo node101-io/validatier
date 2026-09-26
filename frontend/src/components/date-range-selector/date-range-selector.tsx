@@ -80,7 +80,7 @@ export default function DateRangeSelector({ variant = "light" }: { variant?: "li
   const [openPanel, setOpenPanel] = useState<"range" | "until" | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const selectedPreset: RangePreset = search.range ?? "all_time";
+  const selectedPreset: RangePreset = search.range ?? "last_3_months";
   const selectedUntil = toDateOnly(search.until) ?? startOfUtcDay(new Date());
   const [calendarMonth, setCalendarMonth] = useState(
     () => new Date(Date.UTC(selectedUntil.getUTCFullYear(), selectedUntil.getUTCMonth(), 1)),
@@ -106,7 +106,7 @@ export default function DateRangeSelector({ variant = "light" }: { variant?: "li
   };
 
   const handlePresetSelect = (preset: RangePreset) => {
-    updateSearch({ range: preset === "all_time" ? undefined : preset });
+    updateSearch({ range: preset === "last_3_months" ? undefined : preset });
     setOpenPanel(null);
   };
 
