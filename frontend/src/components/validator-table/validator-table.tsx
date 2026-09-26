@@ -374,13 +374,16 @@ export default function ValidatorTable({
                       {/* Percentage Sold */}
                       <div className="flex items-center text-xl gap-1.5">
                         <span
-                          className={`mb-1 ${
-                            validator.percentage_sold > 50
-                              ? "text-[#b82200]"
-                              : validator.percentage_sold > 25
-                                ? "text-[#ff6f43]"
-                                : "text-[#13a719]"
-                          }`}
+                          // single color for now — may bring back the
+                          // >50/>25 red/orange/green thresholds later
+                          // className={`mb-1 ${
+                          //   validator.percentage_sold > 50
+                          //     ? "text-[#b82200]"
+                          //     : validator.percentage_sold > 25
+                          //       ? "text-[#ff6f43]"
+                          //       : "text-[#13a719]"
+                          // }`}
+                          className="mb-1 text-[#633f9a]"
                         >
                           {formatPercentage(validator.percentage_sold, 2)}%
                         </span>

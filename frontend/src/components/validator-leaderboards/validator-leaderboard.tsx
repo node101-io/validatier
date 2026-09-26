@@ -117,13 +117,16 @@ export default function ValidatorLeaderboard({
                   <div className="flex items-center font-bold gap-1">
                     <div className="flex items-center text-xl gap-1.5">
                       <span
-                        className={`${
-                          validator.percentage_sold > 50
-                            ? "text-[#b82200]"
-                            : validator.percentage_sold > 25
-                              ? "text-[#ff6f43]"
-                              : "text-[#13a719]"
-                        }`}
+                        // single color for now — may bring back the
+                        // >50/>25 red/orange/green thresholds later
+                        // className={`${
+                        //   validator.percentage_sold > 50
+                        //     ? "text-[#b82200]"
+                        //     : validator.percentage_sold > 25
+                        //       ? "text-[#ff6f43]"
+                        //       : "text-[#13a719]"
+                        // }`}
+                        className="text-[#633f9a]"
                       >
                         {formatPercentage(validator.percentage_sold, 2)}%
                       </span>
