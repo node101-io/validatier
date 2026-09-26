@@ -64,8 +64,23 @@ export async function runDailyJobsForDay(day: string): Promise<void> {
     // (config.backfillLookbackDays), not a fixed short top-up — otherwise
     // days the dashboard has fund-flow/validator data for can have no price
     // point, and the frontend's `?? 0` fallback draws a fake jump from $0.
-    await syncPrices(config.backfillLookbackDays);
-    console.log('daily jobs: price sync done');
+    //
+    // Own try/catch, separate from the rest of this function: syncPrices is
+    // the only step here that calls an external API (CoinGecko) and can hit
+    // sustained 429s. Before this fix, a syncPrices throw failed this WHOLE
+    // function, so setLastDailyRunDay (bottom) never ran, and blockLoop.ts
+    // retried this day from scratch on the next block — redoing the already-
+    // successful snapshotFundFlowToMongo + runDailyValidatorStats above for
+    // nothing, AND hammering CoinGecko again immediately (the exact
+    // stuck-day loop this file's header comment describes). A price-sync
+    // failure now just skips today's price point; syncPrices is retried
+    // next daily-job run same as any other day.
+    try {
+      await syncPrices(config.backfillLookbackDays);
+      console.log('daily jobs: price sync done');
+    } catch (err) {
+      console.error('daily jobs: price sync failed (will retry next daily run, day still marked done):', err);
+    }
   } else {
     console.log(`daily jobs: price sync skipped (backfilling — cursor is ${Math.round(cursorAgeSeconds / 86400)}d behind real time)`);
   }

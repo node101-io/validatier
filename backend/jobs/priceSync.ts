@@ -14,18 +14,35 @@ const REQUEST_TIMEOUT_MS = 15_000;
 const RETRY_ATTEMPTS = 3;
 const RETRY_BASE_DELAY_MS = 500;
 
+// 429 needs a much longer backoff than a transient network/5xx blip — the
+// free CoinGecko tier's rate-limit window is on the order of a minute, and
+// retrying it at the same RETRY_BASE_DELAY_MS as a normal error just burns
+// all RETRY_ATTEMPTS while still inside the same rate-limit window (every
+// retry gets another 429). Respect `Retry-After` when CoinGecko sends one;
+// otherwise fall back to a fixed cooldown long enough to clear the window.
+const RATE_LIMIT_FALLBACK_DELAY_MS = 20_000;
+
+function retryDelayMs(res: Response | undefined, attempt: number): number {
+  if (res?.status === 429) {
+    const retryAfter = Number(res.headers.get('retry-after'));
+    return Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : RATE_LIMIT_FALLBACK_DELAY_MS;
+  }
+  return RETRY_BASE_DELAY_MS * attempt;
+}
+
 async function fetchMarketChart(days: number): Promise<Array<[number, number]>> {
   const url = `${COINGECKO_URL}?vs_currency=usd&days=${days}`;
   let lastError: unknown;
   for (let attempt = 1; attempt <= RETRY_ATTEMPTS; attempt++) {
+    let res: Response | undefined;
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
+      res = await fetch(url, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
       if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
       const body = (await res.json()) as { prices: Array<[number, number]> };
       return body.prices;
     } catch (err) {
       lastError = err;
-      if (attempt < RETRY_ATTEMPTS) await new Promise((r) => setTimeout(r, RETRY_BASE_DELAY_MS * attempt));
+      if (attempt < RETRY_ATTEMPTS) await new Promise((r) => setTimeout(r, retryDelayMs(res, attempt)));
     }
   }
   throw new Error(`CoinGecko market_chart failed after ${RETRY_ATTEMPTS} attempts: ${lastError}`);
