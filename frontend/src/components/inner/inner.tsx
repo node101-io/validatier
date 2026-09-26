@@ -108,9 +108,14 @@ export default function Inner({
                   <div
                     className="flex items-center justify-center relative right-0 aspect-square border-[0.5px] border-[#bebee7] text-[#e5e5ff] bg-[#7c70c3] rounded-full leading-[22px] font-bold overflow-hidden"
                     style={{
-                      width: `max(calc(80px * ${
+                      // Diameter, not area, is what CSS width controls — scaling it
+                      // linearly with percentage makes the circle's visible AREA grow
+                      // with the square of the percentage (74% width -> ~55% area),
+                      // so it reads as much smaller than the number says. sqrt() here
+                      // makes area (not diameter) proportional to percentage instead.
+                      width: `max(calc(80px * ${Math.sqrt(
                         summaryData.percentage_sold / 100
-                      }), 50%)`,
+                      )}), 50%)`,
                     }}
                   >
                     <span className="absolute inset-0 flex items-center justify-center z-10 font-normal leading-none mb-1">
